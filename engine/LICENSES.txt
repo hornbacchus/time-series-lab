@@ -1,0 +1,43 @@
+Time Series Lab - Third Party Licenses
+=======================================
+
+This file documents the licenses of all third-party packages bundled with the
+Time Series Lab engine. All packages are used under their respective open-source
+licenses.
+
+Package             Version     License
+-------             -------     -------
+numpy               1.26.4      BSD-3-Clause
+scipy               1.13.1      BSD-3-Clause
+pandas              2.2.2       BSD-3-Clause
+statsmodels         0.14.2      BSD-3-Clause
+pmdarima            2.0.4       MIT
+arch                7.0.0       NCSA (BSD-like)
+ruptures            1.1.9       BSD-2-Clause
+PyWavelets          1.6.0       MIT
+hmmlearn            0.3.2       BSD-3-Clause
+scikit-learn        1.5.1       BSD-3-Clause
+python-docx         1.1.2       MIT
+Newtonsoft.Json      13.0.3      MIT (used in C# add-in)
+ExcelDna.AddIn       1.7.0       zlib (ExcelDna license)
+
+Optional (if installed):
+torch               2.3.0       BSD-3-Clause
+darts               0.29.0      Apache-2.0
+
+All packages are available from PyPI (https://pypi.org/) and are redistributed
+in compliance with their licenses. No modifications have been made to any
+third-party source code.
+
+For full license texts, see the individual package distributions or visit:
+- NumPy: https://numpy.org/doc/stable/license.html
+- SciPy: https://scipy.org/scipylib/license.html
+- pandas: https://pandas.pydata.org/pandas-docs/stable/getting_started/overview.html#license
+- statsmodels: https://www.statsmodels.org/stable/about.html#license
+- pmdarima: https://github.com/alkaline-ml/pmdarima/blob/master/LICENSE
+- arch: https://github.com/bashtage/arch/blob/main/LICENSE.md
+- ruptures: https://github.com/deepcharles/ruptures/blob/master/LICENSE
+- PyWavelets: https://github.com/PyWavelets/pywt/blob/main/LICENSE
+- hmmlearn: https://github.com/hmmlearn/hmmlearn/blob/main/LICENSE
+- scikit-learn: https://github.com/scikit-learn/scikit-learn/blob/main/COPYING
+- python-docx: https://github.com/python-openxml/python-docx/blob/master/LICENSE

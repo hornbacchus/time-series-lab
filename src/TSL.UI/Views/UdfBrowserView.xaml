@@ -1,0 +1,330 @@
+<UserControl x:Class="TSL.UI.Views.UdfBrowserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="260" d:DesignHeight="650"
+             Background="#FFFFFF">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <SolidColorBrush x:Key="AccentBrush" Color="#2196F3" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#1976D2" />
+        <SolidColorBrush x:Key="SubtleTextBrush" Color="#757575" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="CategoryBgBrush" Color="#F8F9FA" />
+        <SolidColorBrush x:Key="SelectedItemBrush" Color="#E3F2FD" />
+        <SolidColorBrush x:Key="CodeBgBrush" Color="#F5F5F5" />
+
+        <Style x:Key="AccentButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Background" Value="#BDBDBD" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OutlineButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E3F2FD" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#BDBDBD" />
+                                <Setter Property="BorderBrush" Value="#BDBDBD" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UdfListItem" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd" Background="Transparent"
+                                Padding="{TemplateBinding Padding}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SelectedItemBrush}" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="3,0,0,1" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FAFAFA" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ── Search ─────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Padding="8" Background="{StaticResource CategoryBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Padding="8,5" FontSize="12" BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1" VerticalContentAlignment="Center">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <VisualBrush Stretch="None" AlignmentX="Left">
+                                                <VisualBrush.Visual>
+                                                    <TextBlock Text="  Search UDFs..." Foreground="#BDBDBD"
+                                                               FontSize="12" Margin="6,0,0,0" />
+                                                </VisualBrush.Visual>
+                                            </VisualBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <Button Grid.Column="1" Content="X" FontSize="10" Padding="6,4"
+                        Margin="4,0,0,0" Background="Transparent" BorderThickness="0"
+                        Cursor="Hand" Command="{Binding ClearSearchCommand}" />
+            </Grid>
+        </Border>
+
+        <!-- ── Category filter ────────────────────────────────────── -->
+        <Border Grid.Row="1" Background="{StaticResource CategoryBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                Padding="8,4">
+            <StackPanel Orientation="Horizontal">
+                <ItemsControl ItemsSource="{Binding Categories}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton GroupName="UdfCategory" Margin="0,2,6,2"
+                                         Cursor="Hand" FontSize="11"
+                                         Command="{Binding DataContext.SelectCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                         CommandParameter="{Binding}"
+                                         IsChecked="False">
+                                <RadioButton.Template>
+                                    <ControlTemplate TargetType="RadioButton">
+                                        <Border x:Name="Bd" CornerRadius="10" Padding="8,3"
+                                                Background="Transparent"
+                                                BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1">
+                                            <TextBlock x:Name="Txt" Text="{Binding}"
+                                                       FontSize="11" Foreground="{StaticResource SubtleTextBrush}" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentBrush}" />
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                                <Setter TargetName="Txt" Property="Foreground" Value="White" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#E3F2FD" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </RadioButton.Template>
+                            </RadioButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Main area: UDF list + detail ───────────────────────── -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" MinHeight="80" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1.4*" MinHeight="120" />
+            </Grid.RowDefinitions>
+
+            <!-- UDF list -->
+            <ListBox Grid.Row="0"
+                     ItemsSource="{Binding FilteredUdfs}"
+                     SelectedItem="{Binding SelectedUdf}"
+                     ItemContainerStyle="{StaticResource UdfListItem}"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#212121">
+                                <Run Text="{Binding Name, Mode=OneWay}" />
+                            </TextBlock>
+                            <TextBlock Text="{Binding Signature}" FontFamily="Consolas"
+                                       FontSize="10" Foreground="{StaticResource SubtleTextBrush}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch"
+                          Background="{StaticResource BorderBrush}" />
+
+            <!-- UDF detail -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="10,8"
+                            Visibility="{Binding HasSelectedUdf, Converter={StaticResource BoolToVis}}">
+
+                    <!-- Name -->
+                    <TextBlock Text="{Binding SelectedUdf.Name}" FontSize="15" FontWeight="Bold"
+                               Foreground="#212121" Margin="0,0,0,2" />
+
+                    <!-- Category badge -->
+                    <Border Background="{StaticResource SelectedItemBrush}" CornerRadius="3"
+                            Padding="6,2" HorizontalAlignment="Left" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding SelectedUdf.Category}" FontSize="10"
+                                   Foreground="{StaticResource AccentBrush}" />
+                    </Border>
+
+                    <!-- Signature -->
+                    <Border Background="{StaticResource CodeBgBrush}" CornerRadius="4"
+                            Padding="8,6" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding SelectedUdfSignature}" FontFamily="Consolas"
+                                   FontSize="11" Foreground="#424242" TextWrapping="Wrap" />
+                    </Border>
+
+                    <!-- Return type -->
+                    <DockPanel Margin="0,0,0,8">
+                        <TextBlock Text="Returns: " FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#424242" />
+                        <TextBlock Text="{Binding SelectedUdf.ReturnType}" FontSize="11"
+                                   Foreground="{StaticResource SubtleTextBrush}" />
+                    </DockPanel>
+
+                    <!-- Description -->
+                    <TextBlock Text="{Binding SelectedUdfDescription}" FontSize="12"
+                               Foreground="#424242" TextWrapping="Wrap" LineHeight="20"
+                               Margin="0,0,0,12" />
+
+                    <!-- Parameters -->
+                    <TextBlock Text="Parameters" FontSize="11" FontWeight="Bold"
+                               Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,4" />
+                    <ItemsControl ItemsSource="{Binding SelectedUdf.Parameters}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="0,0,0,1" Padding="0,4,0,4">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Left" FontFamily="Consolas"
+                                                   FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="#424242" MinWidth="70">
+                                            <Run Text="{Binding Name, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock DockPanel.Dock="Right" FontSize="10"
+                                                   Foreground="{StaticResource SubtleTextBrush}"
+                                                   HorizontalAlignment="Right">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="required" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Optional}" Value="True">
+                                                            <Setter Property="Text" Value="optional" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Description}" FontSize="10"
+                                                   Foreground="{StaticResource SubtleTextBrush}"
+                                                   Margin="8,0" TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Example -->
+                    <TextBlock Text="Example" FontSize="11" FontWeight="Bold"
+                               Foreground="{StaticResource SubtleTextBrush}" Margin="0,12,0,4" />
+                    <Border Background="{StaticResource CodeBgBrush}" CornerRadius="4"
+                            Padding="8,6">
+                        <TextBlock Text="{Binding SelectedUdfExample}" FontFamily="Consolas"
+                                   FontSize="12" Foreground="#1B5E20" TextWrapping="Wrap" />
+                    </Border>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ── Action buttons ─────────────────────────────────────── -->
+        <Border Grid.Row="3" Background="{StaticResource CategoryBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                Padding="8">
+            <UniformGrid Columns="2">
+                <Button Content="Insert Formula" Style="{StaticResource AccentButton}"
+                        Command="{Binding InsertFormulaCommand}" Margin="0,0,3,0" />
+                <Button Content="Copy Formula" Style="{StaticResource OutlineButton}"
+                        Command="{Binding CopyFormulaCommand}" Margin="3,0,0,0" />
+            </UniformGrid>
+        </Border>
+
+    </Grid>
+</UserControl>

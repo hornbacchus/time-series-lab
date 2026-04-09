@@ -1,0 +1,363 @@
+<UserControl x:Class="TSL.UI.Views.TechniqueExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="260" d:DesignHeight="650"
+             Background="#FFFFFF">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <SolidColorBrush x:Key="AccentBrush" Color="#2196F3" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#1976D2" />
+        <SolidColorBrush x:Key="HeaderBrush" Color="#1B3A5C" />
+        <SolidColorBrush x:Key="SubtleTextBrush" Color="#757575" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="CategoryBgBrush" Color="#F8F9FA" />
+        <SolidColorBrush x:Key="SelectedItemBrush" Color="#E3F2FD" />
+        <SolidColorBrush x:Key="InfoBgBrush" Color="#E8F5E9" />
+        <SolidColorBrush x:Key="WarningBgBrush" Color="#FFF3E0" />
+
+        <!-- Accent button style -->
+        <Style x:Key="AccentButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Background" Value="#BDBDBD" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Outline button style -->
+        <Style x:Key="OutlineButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E3F2FD" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#BDBDBD" />
+                                <Setter Property="BorderBrush" Value="#BDBDBD" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Category item style -->
+        <Style x:Key="CategoryItem" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd" Background="Transparent"
+                                Padding="{TemplateBinding Padding}" CornerRadius="3">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SelectedItemBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F5F5F5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Technique list item style -->
+        <Style x:Key="TechniqueListItem" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd" Background="Transparent"
+                                Padding="{TemplateBinding Padding}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SelectedItemBrush}" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="3,0,0,1" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FAFAFA" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ── Search bar ─────────────────────────────────────────── -->
+        <Border Grid.Row="0" Padding="8" Background="{StaticResource CategoryBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Padding="8,5" FontSize="12" BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1" VerticalContentAlignment="Center">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <VisualBrush Stretch="None" AlignmentX="Left">
+                                                <VisualBrush.Visual>
+                                                    <TextBlock Text="  Search techniques..." Foreground="#BDBDBD"
+                                                               FontSize="12" Margin="6,0,0,0" />
+                                                </VisualBrush.Visual>
+                                            </VisualBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <Button Grid.Column="1" Content="X" FontSize="10" Padding="6,4"
+                        Margin="4,0,0,0" Background="Transparent" BorderThickness="0"
+                        Cursor="Hand" Command="{Binding ClearSearchCommand}" />
+            </Grid>
+        </Border>
+
+        <!-- ── Category filter ────────────────────────────────────── -->
+        <Border Grid.Row="1" MaxHeight="120" Background="{StaticResource CategoryBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="8,6,8,2">
+                    <TextBlock Text="Categories" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{StaticResource SubtleTextBrush}"
+                               DockPanel.Dock="Left" VerticalAlignment="Center" />
+                    <Button Content="Show All" FontSize="10" Background="Transparent"
+                            BorderThickness="0" Foreground="{StaticResource AccentBrush}"
+                            Cursor="Hand" HorizontalAlignment="Right"
+                            Command="{Binding ShowAllCategoriesCommand}" />
+                </DockPanel>
+                <ListBox ItemsSource="{Binding Categories}"
+                         SelectedItem="{Binding SelectedCategory}"
+                         ItemContainerStyle="{StaticResource CategoryItem}"
+                         BorderThickness="0" Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Margin="4,0,4,4">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding Count}"
+                                           Foreground="{StaticResource SubtleTextBrush}"
+                                           FontSize="10" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Name}" FontSize="12"
+                                           TextTrimming="CharacterEllipsis" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <!-- ── Main content: technique list + detail ──────────────── -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" MinHeight="100" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1.3*" MinHeight="150" />
+            </Grid.RowDefinitions>
+
+            <!-- Technique list -->
+            <ListBox Grid.Row="0"
+                     ItemsSource="{Binding FilteredTechniques}"
+                     SelectedItem="{Binding SelectedTechnique}"
+                     ItemContainerStyle="{StaticResource TechniqueListItem}"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="#212121" />
+                            <TextBlock Text="{Binding Summary}" FontSize="11"
+                                       Foreground="{StaticResource SubtleTextBrush}"
+                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                       MaxHeight="36" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Splitter -->
+            <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch"
+                          Background="{StaticResource BorderBrush}" />
+
+            <!-- Technique detail -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="10,8"
+                            Visibility="{Binding HasSelectedTechnique, Converter={StaticResource BoolToVis}}">
+
+                    <!-- Title -->
+                    <TextBlock Text="{Binding SelectedTechnique.Name}"
+                               FontSize="15" FontWeight="Bold" Foreground="#212121"
+                               Margin="0,0,0,4" />
+
+                    <!-- Category badge -->
+                    <Border Background="{StaticResource SelectedItemBrush}" CornerRadius="3"
+                            Padding="6,2" HorizontalAlignment="Left" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding SelectedTechnique.Category}"
+                                   FontSize="10" Foreground="{StaticResource AccentBrush}" />
+                    </Border>
+
+                    <!-- Series info -->
+                    <TextBlock Text="{Binding SelectedTechniqueSeriesInfo}"
+                               FontSize="11" Foreground="{StaticResource SubtleTextBrush}"
+                               Margin="0,0,0,8" />
+
+                    <!-- Description -->
+                    <TextBlock Text="{Binding SelectedTechniqueDescription}"
+                               FontSize="12" Foreground="#424242"
+                               TextWrapping="Wrap" LineHeight="20"
+                               Margin="0,0,0,12" />
+
+                    <!-- AUTO vs THOROUGH explanation -->
+                    <Border Background="{StaticResource InfoBgBrush}" CornerRadius="4"
+                            Padding="10,8" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="AUTO vs THOROUGH" FontSize="11"
+                                       FontWeight="Bold" Foreground="#2E7D32" Margin="0,0,0,4" />
+                            <TextBlock FontSize="11" Foreground="#424242" TextWrapping="Wrap" LineHeight="18">
+                                <Run FontWeight="SemiBold">AUTO:</Run>
+                                <Run Text=" Fast, sensible defaults. Use for quick exploration and formula-driven workflows." />
+                            </TextBlock>
+                            <TextBlock FontSize="11" Foreground="#424242" TextWrapping="Wrap"
+                                       LineHeight="18" Margin="0,4,0,0">
+                                <Run FontWeight="SemiBold">THOROUGH:</Run>
+                                <Run Text=" Exhaustive search, cross-validation, more diagnostics. Use for final analysis." />
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- UDF examples -->
+                    <StackPanel Visibility="{Binding CanInsertAuto, Converter={StaticResource BoolToVis}}"
+                                Margin="0,0,0,8">
+                        <TextBlock Text="Formula examples:" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,4" />
+                        <Border Background="#F5F5F5" CornerRadius="3" Padding="8,4" Margin="0,0,0,4">
+                            <TextBlock Text="{Binding AutoUdfExample}" FontFamily="Consolas"
+                                       FontSize="11" Foreground="#424242" TextWrapping="Wrap" />
+                        </Border>
+                        <Border Background="#F5F5F5" CornerRadius="3" Padding="8,4">
+                            <TextBlock Text="{Binding ThoroughUdfExample}" FontFamily="Consolas"
+                                       FontSize="11" Foreground="#424242" TextWrapping="Wrap" />
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Output tables info -->
+                    <TextBlock Text="{Binding SelectedTechniqueOutputInfo}"
+                               FontSize="11" Foreground="{StaticResource SubtleTextBrush}"
+                               Margin="0,0,0,4"
+                               Visibility="{Binding HasSelectedTechnique, Converter={StaticResource BoolToVis}}" />
+
+                    <!-- Parameters -->
+                    <ItemsControl ItemsSource="{Binding SelectedTechnique.Parameters}" Margin="0,4,0,8">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="0,0,0,1" Padding="0,4">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Left" FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="#424242" MinWidth="80">
+                                            <Run Text="{Binding Label, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock DockPanel.Dock="Right" FontSize="10"
+                                                   Foreground="{StaticResource SubtleTextBrush}"
+                                                   HorizontalAlignment="Right"
+                                                   Text="{Binding Default, StringFormat='Default: {0}'}" />
+                                        <TextBlock FontSize="10" Foreground="{StaticResource SubtleTextBrush}"
+                                                   Margin="8,0" TextTrimming="CharacterEllipsis"
+                                                   Text="{Binding Description}" />
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ── Action buttons ─────────────────────────────────────── -->
+        <Border Grid.Row="3" Background="{StaticResource CategoryBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                Padding="8,8">
+            <StackPanel>
+                <UniformGrid Columns="2" Margin="0,0,0,6">
+                    <Button Content="Run (Task Pane)" Style="{StaticResource AccentButton}"
+                            Command="{Binding OpenRunViewCommand}" Margin="0,0,3,0" />
+                    <Button Content="Insert AUTO" Style="{StaticResource OutlineButton}"
+                            Command="{Binding InsertAutoFormulaCommand}" Margin="3,0,0,0" />
+                </UniformGrid>
+                <Button Content="Insert THOROUGH Formula" Style="{StaticResource OutlineButton}"
+                        Command="{Binding InsertThoroughFormulaCommand}"
+                        HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</UserControl>

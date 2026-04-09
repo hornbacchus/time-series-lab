@@ -1,0 +1,1327 @@
+{
+  "version": "1.0.0",
+  "techniques": [
+    {
+      "id": "stl_decompose",
+      "name": "STL Decomposition",
+      "category": "Decomposition & Seasonal Adjustment",
+      "summary": "Decompose a time series into trend, seasonal, and remainder components using STL.",
+      "description_file": "stl_decompose.md",
+      "min_series": 1,
+      "max_series": 1,
+      "supports_auto_udf": true,
+      "auto_udf_name": "TSL_SEASONAL_ADJUST",
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "period", "label": "Seasonal Period", "type": "int", "default": null, "required": false, "advanced": false, "description": "Seasonal period (auto-detected if null)", "options": null},
+        {"name": "seasonal_window", "label": "Seasonal Window", "type": "int", "default": 7, "required": false, "advanced": true, "description": "LOESS window for seasonal extraction", "options": null},
+        {"name": "robust", "label": "Robust", "type": "bool", "default": true, "required": false, "advanced": true, "description": "Use robust fitting to reduce outlier influence", "options": null}
+      ],
+      "output_tables": ["decomposition", "seasonally_adjusted", "diagnostics"],
+      "tags": ["decomposition", "seasonal", "trend", "stl"]
+    },
+    {
+      "id": "classical_decompose",
+      "name": "Classical Decomposition",
+      "category": "Decomposition & Seasonal Adjustment",
+      "summary": "Classical additive or multiplicative decomposition using moving averages.",
+      "description_file": "classical_decompose.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "model", "label": "Model Type", "type": "string", "default": "additive", "required": false, "advanced": false, "description": "Additive or multiplicative decomposition", "options": ["additive", "multiplicative"]},
+        {"name": "period", "label": "Seasonal Period", "type": "int", "default": null, "required": false, "advanced": false, "description": "Seasonal period (auto-detected if null)", "options": null}
+      ],
+      "output_tables": ["decomposition", "diagnostics"],
+      "tags": ["decomposition", "seasonal", "classical"]
+    },
+    {
+      "id": "mstl_decompose",
+      "name": "MSTL Decomposition",
+      "category": "Decomposition & Seasonal Adjustment",
+      "summary": "Multiple Seasonal-Trend decomposition using LOESS for complex seasonality.",
+      "description_file": "mstl_decompose.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "periods", "label": "Seasonal Periods", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Comma-separated periods or 'auto'", "options": null}
+      ],
+      "output_tables": ["decomposition", "diagnostics"],
+      "tags": ["decomposition", "seasonal", "multiple-seasonality", "mstl"]
+    },
+    {
+      "id": "x13_seasonal_adjust",
+      "name": "X-13 ARIMA-SEATS",
+      "category": "Decomposition & Seasonal Adjustment",
+      "summary": "Census Bureau X-13 ARIMA-SEATS seasonal adjustment (requires X-13 binary).",
+      "description_file": "x13_seasonal_adjust.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "method", "label": "Method", "type": "string", "default": "seats", "required": false, "advanced": false, "description": "SEATS or X11", "options": ["seats", "x11"]}
+      ],
+      "output_tables": ["seasonal_adjustment", "diagnostics"],
+      "tags": ["decomposition", "seasonal", "x13", "census"]
+    },
+    {
+      "id": "ets_hw",
+      "name": "ETS / Holt-Winters",
+      "category": "Forecasting (Classical)",
+      "summary": "Exponential smoothing state-space models including Holt-Winters seasonal variants.",
+      "description_file": "ets_hw.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Number of periods to forecast", "options": null},
+        {"name": "trend", "label": "Trend", "type": "string", "default": "add", "required": false, "advanced": false, "description": "Trend component type", "options": ["add", "mul", "none"]},
+        {"name": "seasonal", "label": "Seasonal", "type": "string", "default": "add", "required": false, "advanced": false, "description": "Seasonal component type", "options": ["add", "mul", "none"]},
+        {"name": "damped_trend", "label": "Damped Trend", "type": "bool", "default": false, "required": false, "advanced": true, "description": "Use damped trend", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary", "diagnostics"],
+      "tags": ["forecasting", "ets", "holt-winters", "exponential-smoothing"]
+    },
+    {
+      "id": "theta_forecast",
+      "name": "Theta Method",
+      "category": "Forecasting (Classical)",
+      "summary": "The Theta method: a simple but competitive forecasting approach.",
+      "description_file": "theta_forecast.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "diagnostics"],
+      "tags": ["forecasting", "theta"]
+    },
+    {
+      "id": "arima",
+      "name": "ARIMA",
+      "category": "Forecasting (Classical)",
+      "summary": "AutoRegressive Integrated Moving Average model with specified orders.",
+      "description_file": "arima.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "order", "label": "ARIMA Order (p,d,q)", "type": "string", "default": "1,1,1", "required": false, "advanced": false, "description": "ARIMA order as p,d,q", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary", "residual_diagnostics"],
+      "tags": ["forecasting", "arima"]
+    },
+    {
+      "id": "sarima",
+      "name": "SARIMA",
+      "category": "Forecasting (Classical)",
+      "summary": "Seasonal ARIMA with specified seasonal and non-seasonal orders.",
+      "description_file": "sarima.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "order", "label": "ARIMA Order (p,d,q)", "type": "string", "default": "1,1,1", "required": false, "advanced": false, "description": "Non-seasonal order", "options": null},
+        {"name": "seasonal_order", "label": "Seasonal Order (P,D,Q,s)", "type": "string", "default": "1,1,1,12", "required": false, "advanced": false, "description": "Seasonal order", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary", "residual_diagnostics"],
+      "tags": ["forecasting", "sarima", "seasonal"]
+    },
+    {
+      "id": "auto_arima",
+      "name": "Auto ARIMA",
+      "category": "Forecasting (Classical)",
+      "summary": "Automatic ARIMA model selection using AICc/BIC with optional seasonal terms.",
+      "description_file": "auto_arima.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": true, "auto_udf_name": "TSL_FORECAST",
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null},
+        {"name": "seasonal", "label": "Seasonal", "type": "bool", "default": true, "required": false, "advanced": false, "description": "Include seasonal terms", "options": null},
+        {"name": "ic", "label": "Information Criterion", "type": "string", "default": "aicc", "required": false, "advanced": true, "description": "Model selection criterion", "options": ["aicc", "aic", "bic"]}
+      ],
+      "output_tables": ["forecasts", "model_summary", "cv_results", "residual_diagnostics"],
+      "tags": ["forecasting", "arima", "auto", "model-selection"]
+    },
+    {
+      "id": "arimax_sarimax",
+      "name": "ARIMAX / SARIMAX",
+      "category": "Forecasting (Classical)",
+      "summary": "ARIMA with exogenous regressors (dynamic regression).",
+      "description_file": "arimax_sarimax.md",
+      "min_series": 2, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "order", "label": "ARIMA Order", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "ARIMA order or 'auto'", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary", "residual_diagnostics"],
+      "tags": ["forecasting", "arimax", "sarimax", "exogenous", "regression"]
+    },
+    {
+      "id": "transfer_function",
+      "name": "Transfer Function Model",
+      "category": "Forecasting (Classical)",
+      "summary": "Distributed lag and impulse response transfer function models.",
+      "description_file": "transfer_function.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Maximum lag for transfer function", "options": null}
+      ],
+      "output_tables": ["impulse_response", "model_summary"],
+      "tags": ["forecasting", "transfer-function", "impulse-response"]
+    },
+    {
+      "id": "intermittent_demand",
+      "name": "Intermittent Demand Forecasting",
+      "category": "Forecasting (Classical)",
+      "summary": "Croston, SBA, and TSB methods for intermittent/lumpy demand series.",
+      "description_file": "intermittent_demand.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "method", "label": "Method", "type": "string", "default": "sba", "required": false, "advanced": false, "description": "Intermittent demand method", "options": ["croston", "sba", "tsb"]},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null},
+        {"name": "alpha", "label": "Smoothing Alpha", "type": "float", "default": 0.1, "required": false, "advanced": true, "description": "Smoothing parameter", "options": null}
+      ],
+      "output_tables": ["forecasts", "demand_analysis"],
+      "tags": ["forecasting", "intermittent", "croston", "demand"]
+    },
+    {
+      "id": "adf_test",
+      "name": "Augmented Dickey-Fuller Test",
+      "category": "Stationarity / Tests",
+      "summary": "Test for unit root (non-stationarity) using the Augmented Dickey-Fuller test.",
+      "description_file": "adf_test.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": true, "auto_udf_name": "TSL_ADF",
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "regression", "label": "Regression", "type": "string", "default": "c", "required": false, "advanced": true, "description": "Regression type", "options": ["c", "ct", "ctt", "n"]},
+        {"name": "max_lags", "label": "Max Lags", "type": "string", "default": "auto", "required": false, "advanced": true, "description": "Max lags for ADF or 'auto'", "options": null}
+      ],
+      "output_tables": ["adf_results"],
+      "tags": ["test", "stationarity", "unit-root", "adf"]
+    },
+    {
+      "id": "kpss_test",
+      "name": "KPSS Test",
+      "category": "Stationarity / Tests",
+      "summary": "Test for stationarity using the KPSS test (null = stationary).",
+      "description_file": "kpss_test.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": true, "auto_udf_name": "TSL_KPSS",
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "regression", "label": "Regression", "type": "string", "default": "c", "required": false, "advanced": true, "description": "Test type: c (level) or ct (trend)", "options": ["c", "ct"]}
+      ],
+      "output_tables": ["kpss_results"],
+      "tags": ["test", "stationarity", "kpss"]
+    },
+    {
+      "id": "pp_test",
+      "name": "Phillips-Perron Test",
+      "category": "Stationarity / Tests",
+      "summary": "Phillips-Perron unit root test with non-parametric correction for serial correlation.",
+      "description_file": "pp_test.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "regression", "label": "Regression", "type": "string", "default": "c", "required": false, "advanced": true, "description": "Regression type", "options": ["c", "ct", "n"]}
+      ],
+      "output_tables": ["pp_results"],
+      "tags": ["test", "stationarity", "unit-root", "phillips-perron"]
+    },
+    {
+      "id": "var",
+      "name": "Vector Autoregression (VAR)",
+      "category": "Multivariate Systems",
+      "summary": "Fit a VAR model to multiple time series for joint forecasting and impulse responses.",
+      "description_file": "var.md",
+      "min_series": 2, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lags", "label": "Max Lags", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Maximum VAR lag order", "options": null},
+        {"name": "ic", "label": "Info Criterion", "type": "string", "default": "aic", "required": false, "advanced": true, "description": "Lag selection criterion", "options": ["aic", "bic", "hqic"]},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "irf", "fevd", "model_summary"],
+      "tags": ["multivariate", "var", "impulse-response", "forecasting"]
+    },
+    {
+      "id": "vecm",
+      "name": "Vector Error Correction Model (VECM)",
+      "category": "Multivariate Systems",
+      "summary": "VECM for cointegrated multivariate time series with long-run equilibrium relationships.",
+      "description_file": "vecm.md",
+      "min_series": 2, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "coint_rank", "label": "Cointegration Rank", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Cointegration rank or 'auto' (Johansen test)", "options": null},
+        {"name": "k_ar_diff", "label": "AR Lags (diff)", "type": "int", "default": 2, "required": false, "advanced": false, "description": "Number of lagged differences", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "cointegration_vectors", "model_summary"],
+      "tags": ["multivariate", "vecm", "cointegration"]
+    },
+    {
+      "id": "johansen_cointegration",
+      "name": "Johansen Cointegration Test",
+      "category": "Multivariate Systems",
+      "summary": "Test for cointegration among multiple time series using the Johansen procedure.",
+      "description_file": "johansen_cointegration.md",
+      "min_series": 2, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "det_order", "label": "Deterministic Order", "type": "int", "default": 0, "required": false, "advanced": true, "description": "Deterministic term order (-1, 0, 1)", "options": null},
+        {"name": "k_ar_diff", "label": "AR Lags", "type": "int", "default": 2, "required": false, "advanced": false, "description": "Number of lagged differences", "options": null}
+      ],
+      "output_tables": ["johansen_results", "eigenvalues", "cointegration_vectors"],
+      "tags": ["test", "cointegration", "johansen", "multivariate"]
+    },
+    {
+      "id": "bvar",
+      "name": "Bayesian VAR",
+      "category": "Multivariate Systems",
+      "summary": "Bayesian VAR with Minnesota/shrinkage priors for regularized multivariate forecasting.",
+      "description_file": "bvar.md",
+      "min_series": 2, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "lags", "label": "Lags", "type": "int", "default": 4, "required": false, "advanced": false, "description": "Number of VAR lags", "options": null},
+        {"name": "lambda_shrinkage", "label": "Shrinkage", "type": "float", "default": 0.1, "required": false, "advanced": true, "description": "Minnesota prior shrinkage parameter", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary"],
+      "tags": ["multivariate", "bayesian", "var", "shrinkage"]
+    },
+    {
+      "id": "dynamic_factor_model",
+      "name": "Dynamic Factor Model",
+      "category": "Multivariate Systems",
+      "summary": "Extract common latent factors from multiple time series using dynamic factor models.",
+      "description_file": "dynamic_factor_model.md",
+      "min_series": 3, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "n_factors", "label": "Number of Factors", "type": "int", "default": 1, "required": false, "advanced": false, "description": "Number of latent factors", "options": null},
+        {"name": "factor_order", "label": "Factor AR Order", "type": "int", "default": 2, "required": false, "advanced": true, "description": "Autoregressive order for factors", "options": null}
+      ],
+      "output_tables": ["factors", "loadings", "model_summary"],
+      "tags": ["multivariate", "factor-model", "latent"]
+    },
+    {
+      "id": "pca_analysis",
+      "name": "Principal Component Analysis",
+      "category": "Multivariate Systems",
+      "summary": "PCA on multiple time series to extract principal components, loadings, and explained variance.",
+      "description_file": "pca_analysis.md",
+      "min_series": 2, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "n_components", "label": "Components", "type": "int", "default": null, "required": false, "advanced": false, "description": "Number of components to retain (null = all)", "options": null},
+        {"name": "standardize", "label": "Standardize", "type": "bool", "default": true, "required": false, "advanced": false, "description": "Standardize series to zero mean and unit variance before PCA", "options": null},
+        {"name": "rotation", "label": "Rotation", "type": "string", "default": null, "required": false, "advanced": true, "description": "Rotation method for loadings", "options": [null, "varimax"]}
+      ],
+      "output_tables": ["explained_variance", "loadings", "component_scores", "reconstruction_error", "model_summary"],
+      "tags": ["multivariate", "pca", "dimensionality-reduction", "factor-analysis"]
+    },
+    {
+      "id": "forecast_reconciliation",
+      "name": "Hierarchical Forecast Reconciliation",
+      "category": "Multivariate Systems",
+      "summary": "Reconcile forecasts across a hierarchy (requires TSL_HIERARCHY mapping table).",
+      "description_file": "forecast_reconciliation.md",
+      "min_series": 2, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "method", "label": "Reconciliation Method", "type": "string", "default": "ols", "required": false, "advanced": false, "description": "Reconciliation approach", "options": ["bottom_up", "top_down", "ols", "wls"]},
+        {"name": "hierarchy_table", "label": "Hierarchy Table", "type": "string", "default": "TSL_HIERARCHY", "required": false, "advanced": false, "description": "Name of hierarchy mapping table", "options": null}
+      ],
+      "output_tables": ["reconciled_forecasts", "reconciliation_summary"],
+      "tags": ["multivariate", "hierarchical", "reconciliation"]
+    },
+    {
+      "id": "kalman_filter",
+      "name": "Kalman Filter",
+      "category": "State Space / Filtering",
+      "summary": "Apply Kalman filtering for state estimation in linear Gaussian state-space models.",
+      "description_file": "kalman_filter.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "model_type", "label": "Model Type", "type": "string", "default": "local_level", "required": false, "advanced": false, "description": "State-space model type", "options": ["local_level", "local_linear_trend", "random_walk"]}
+      ],
+      "output_tables": ["filtered_states", "model_summary"],
+      "tags": ["state-space", "kalman", "filtering"]
+    },
+    {
+      "id": "kalman_smoother",
+      "name": "Kalman Smoother",
+      "category": "State Space / Filtering",
+      "summary": "Kalman smoother for optimal state estimation using all available observations.",
+      "description_file": "kalman_smoother.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "model_type", "label": "Model Type", "type": "string", "default": "local_linear_trend", "required": false, "advanced": false, "description": "State-space model type", "options": ["local_level", "local_linear_trend"]}
+      ],
+      "output_tables": ["smoothed_states", "model_summary"],
+      "tags": ["state-space", "kalman", "smoothing"]
+    },
+    {
+      "id": "local_level",
+      "name": "Local Level Model",
+      "category": "State Space / Filtering",
+      "summary": "Simple structural model with a stochastic level component.",
+      "description_file": "local_level.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["smoothed_states", "forecasts", "model_summary"],
+      "tags": ["state-space", "structural", "local-level"]
+    },
+    {
+      "id": "local_linear_trend",
+      "name": "Local Linear Trend",
+      "category": "State Space / Filtering",
+      "summary": "Structural model with stochastic level and slope components.",
+      "description_file": "local_linear_trend.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["smoothed_states", "forecasts", "model_summary"],
+      "tags": ["state-space", "structural", "local-linear-trend"]
+    },
+    {
+      "id": "structural_ts",
+      "name": "Structural Time Series (UCM)",
+      "category": "State Space / Filtering",
+      "summary": "Unobserved Components Model with level, trend, seasonal, and cycle components.",
+      "description_file": "structural_ts.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "level", "label": "Level", "type": "bool", "default": true, "required": false, "advanced": false, "description": "Include stochastic level", "options": null},
+        {"name": "trend", "label": "Trend", "type": "bool", "default": true, "required": false, "advanced": false, "description": "Include stochastic trend/slope", "options": null},
+        {"name": "seasonal", "label": "Seasonal Period", "type": "int", "default": null, "required": false, "advanced": false, "description": "Seasonal period (null = none)", "options": null},
+        {"name": "cycle", "label": "Cycle", "type": "bool", "default": false, "required": false, "advanced": true, "description": "Include stochastic cycle", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["smoothed_states", "forecasts", "model_summary"],
+      "tags": ["state-space", "structural", "ucm", "unobserved-components"]
+    },
+    {
+      "id": "particle_filter",
+      "name": "Particle Filter",
+      "category": "State Space / Filtering",
+      "summary": "Bootstrap particle filter for nonlinear or non-Gaussian state-space models.",
+      "description_file": "particle_filter.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "n_particles", "label": "Particles", "type": "int", "default": 500, "required": false, "advanced": false, "description": "Number of particles", "options": null},
+        {"name": "model", "label": "Model", "type": "string", "default": "stochastic_volatility", "required": false, "advanced": false, "description": "Nonlinear model to filter", "options": ["stochastic_volatility", "local_level"]}
+      ],
+      "output_tables": ["filtered_states", "diagnostics"],
+      "tags": ["state-space", "particle-filter", "nonlinear", "monte-carlo"]
+    },
+    {
+      "id": "markov_switching",
+      "name": "Markov Switching Model",
+      "category": "Regimes / Nonlinear",
+      "summary": "Regime-switching model with Markov-driven state transitions.",
+      "description_file": "markov_switching.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "k_regimes", "label": "Number of Regimes", "type": "int", "default": 2, "required": false, "advanced": false, "description": "Number of hidden regimes", "options": null},
+        {"name": "order", "label": "AR Order", "type": "int", "default": 1, "required": false, "advanced": false, "description": "Autoregressive order within each regime", "options": null},
+        {"name": "switching_variance", "label": "Switching Variance", "type": "bool", "default": true, "required": false, "advanced": true, "description": "Allow variance to switch between regimes", "options": null}
+      ],
+      "output_tables": ["regime_probabilities", "transition_matrix", "model_summary"],
+      "tags": ["regime", "markov-switching", "nonlinear"]
+    },
+    {
+      "id": "hmm",
+      "name": "Hidden Markov Model",
+      "category": "Regimes / Nonlinear",
+      "summary": "Gaussian HMM for discovering hidden states in time series data.",
+      "description_file": "hmm.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "n_components", "label": "Hidden States", "type": "int", "default": 2, "required": false, "advanced": false, "description": "Number of hidden states", "options": null},
+        {"name": "covariance_type", "label": "Covariance Type", "type": "string", "default": "full", "required": false, "advanced": true, "description": "Covariance matrix type", "options": ["full", "diag", "spherical"]}
+      ],
+      "output_tables": ["state_sequence", "state_probabilities", "model_summary"],
+      "tags": ["regime", "hmm", "hidden-markov", "latent"]
+    },
+    {
+      "id": "tar_setar",
+      "name": "TAR / SETAR",
+      "category": "Regimes / Nonlinear",
+      "summary": "Threshold autoregressive model with regime-dependent dynamics.",
+      "description_file": "tar_setar.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 4, "required": false, "advanced": false, "description": "Maximum AR lag", "options": null},
+        {"name": "n_regimes", "label": "Regimes", "type": "int", "default": 2, "required": false, "advanced": false, "description": "Number of threshold regimes", "options": null},
+        {"name": "delay", "label": "Delay", "type": "int", "default": 1, "required": false, "advanced": true, "description": "Threshold delay parameter", "options": null}
+      ],
+      "output_tables": ["regime_coefficients", "threshold_values", "model_summary"],
+      "tags": ["regime", "threshold", "nonlinear", "tar", "setar"]
+    },
+    {
+      "id": "star",
+      "name": "STAR Model",
+      "category": "Regimes / Nonlinear",
+      "summary": "Smooth Transition Autoregressive model with gradual regime changes.",
+      "description_file": "star.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 4, "required": false, "advanced": false, "description": "Maximum AR lag", "options": null},
+        {"name": "transition", "label": "Transition Function", "type": "string", "default": "logistic", "required": false, "advanced": false, "description": "Transition function type", "options": ["logistic", "exponential"]}
+      ],
+      "output_tables": ["model_summary", "transition_function"],
+      "tags": ["regime", "smooth-transition", "nonlinear", "star"]
+    },
+    {
+      "id": "nar_narx",
+      "name": "NAR / NARX",
+      "category": "Regimes / Nonlinear",
+      "summary": "Nonlinear autoregressive model using neural network (MLP) approximation.",
+      "description_file": "nar_narx.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 6, "required": false, "advanced": false, "description": "Maximum AR lag", "options": null},
+        {"name": "hidden_size", "label": "Hidden Units", "type": "int", "default": 10, "required": false, "advanced": true, "description": "Hidden layer size", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary"],
+      "tags": ["nonlinear", "neural-network", "nar", "narx"]
+    },
+    {
+      "id": "garch",
+      "name": "GARCH",
+      "category": "Volatility / Risk / Tails",
+      "summary": "Generalized Autoregressive Conditional Heteroskedasticity with Student-t innovations.",
+      "description_file": "garch.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "p", "label": "GARCH p", "type": "int", "default": 1, "required": false, "advanced": false, "description": "GARCH lag order", "options": null},
+        {"name": "q", "label": "ARCH q", "type": "int", "default": 1, "required": false, "advanced": false, "description": "ARCH lag order", "options": null},
+        {"name": "dist", "label": "Distribution", "type": "string", "default": "t", "required": false, "advanced": false, "description": "Innovation distribution", "options": ["normal", "t", "skewt", "ged"]},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 10, "required": false, "advanced": false, "description": "Volatility forecast periods", "options": null}
+      ],
+      "output_tables": ["conditional_volatility", "var_es", "model_summary"],
+      "tags": ["volatility", "garch", "risk", "var"]
+    },
+    {
+      "id": "gjr_garch",
+      "name": "GJR-GARCH",
+      "category": "Volatility / Risk / Tails",
+      "summary": "GJR-GARCH model capturing asymmetric volatility (leverage effect).",
+      "description_file": "gjr_garch.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "p", "label": "GARCH p", "type": "int", "default": 1, "required": false, "advanced": false, "description": "GARCH lag order", "options": null},
+        {"name": "o", "label": "GJR o", "type": "int", "default": 1, "required": false, "advanced": false, "description": "Asymmetric lag order", "options": null},
+        {"name": "q", "label": "ARCH q", "type": "int", "default": 1, "required": false, "advanced": false, "description": "ARCH lag order", "options": null},
+        {"name": "dist", "label": "Distribution", "type": "string", "default": "t", "required": false, "advanced": false, "description": "Innovation distribution", "options": ["normal", "t", "skewt"]}
+      ],
+      "output_tables": ["conditional_volatility", "var_es", "model_summary"],
+      "tags": ["volatility", "garch", "gjr", "leverage", "asymmetric"]
+    },
+    {
+      "id": "egarch",
+      "name": "EGARCH",
+      "category": "Volatility / Risk / Tails",
+      "summary": "Exponential GARCH for asymmetric volatility without positivity constraints.",
+      "description_file": "egarch.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "p", "label": "EGARCH p", "type": "int", "default": 1, "required": false, "advanced": false, "description": "GARCH lag order", "options": null},
+        {"name": "q", "label": "ARCH q", "type": "int", "default": 1, "required": false, "advanced": false, "description": "ARCH lag order", "options": null},
+        {"name": "dist", "label": "Distribution", "type": "string", "default": "t", "required": false, "advanced": false, "description": "Innovation distribution", "options": ["normal", "t", "skewt"]}
+      ],
+      "output_tables": ["conditional_volatility", "var_es", "model_summary"],
+      "tags": ["volatility", "egarch", "asymmetric"]
+    },
+    {
+      "id": "stochastic_volatility",
+      "name": "Stochastic Volatility",
+      "category": "Volatility / Risk / Tails",
+      "summary": "Stochastic volatility model where log-variance follows a latent AR(1) process.",
+      "description_file": "stochastic_volatility.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [],
+      "output_tables": ["volatility_estimates", "model_summary"],
+      "tags": ["volatility", "stochastic-volatility", "latent"]
+    },
+    {
+      "id": "har_rv",
+      "name": "HAR-RV",
+      "category": "Volatility / Risk / Tails",
+      "summary": "Heterogeneous Autoregressive model for Realized Volatility forecasting.",
+      "description_file": "har_rv.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 10, "required": false, "advanced": false, "description": "Periods to forecast", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary"],
+      "tags": ["volatility", "har", "realized-volatility"]
+    },
+    {
+      "id": "evt_pot_gpd",
+      "name": "EVT: POT / GPD",
+      "category": "Volatility / Risk / Tails",
+      "summary": "Extreme Value Theory using Peaks-Over-Threshold with Generalized Pareto Distribution.",
+      "description_file": "evt_pot_gpd.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "threshold_quantile", "label": "Threshold Quantile", "type": "float", "default": 0.975, "required": false, "advanced": false, "description": "Quantile for threshold (default p97.5)", "options": null},
+        {"name": "confidence_levels", "label": "VaR Levels", "type": "string", "default": "0.95,0.99", "required": false, "advanced": false, "description": "Comma-separated VaR confidence levels", "options": null}
+      ],
+      "output_tables": ["gpd_fit", "var_es_estimates", "diagnostics"],
+      "tags": ["risk", "extreme-value", "pot", "gpd", "tail"]
+    },
+    {
+      "id": "caviar_quantile_dynamics",
+      "name": "CAViaR Quantile Dynamics",
+      "category": "Volatility / Risk / Tails",
+      "summary": "Conditional Autoregressive Value at Risk: direct quantile dynamics model.",
+      "description_file": "caviar_quantile_dynamics.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "quantile", "label": "Quantile", "type": "float", "default": 0.05, "required": false, "advanced": false, "description": "Target quantile (e.g., 0.05 for 5% VaR)", "options": null},
+        {"name": "model_type", "label": "CAViaR Type", "type": "string", "default": "symmetric_abs", "required": false, "advanced": true, "description": "CAViaR specification", "options": ["symmetric_abs", "asymmetric_slope", "adaptive"]}
+      ],
+      "output_tables": ["var_series", "model_summary"],
+      "tags": ["risk", "var", "caviar", "quantile"]
+    },
+    {
+      "id": "fft_spectrum",
+      "name": "FFT Spectrum",
+      "category": "Frequency Domain / Signal",
+      "summary": "Fast Fourier Transform to identify dominant frequency components.",
+      "description_file": "fft_spectrum.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "top_n", "label": "Top N Frequencies", "type": "int", "default": 10, "required": false, "advanced": false, "description": "Number of top frequencies to report", "options": null}
+      ],
+      "output_tables": ["spectrum", "dominant_frequencies"],
+      "tags": ["frequency", "fft", "spectral"]
+    },
+    {
+      "id": "periodogram_spectral_density",
+      "name": "Periodogram Spectral Density",
+      "category": "Frequency Domain / Signal",
+      "summary": "Spectral density estimation using the periodogram method.",
+      "description_file": "periodogram_spectral_density.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "window", "label": "Window", "type": "string", "default": "hann", "required": false, "advanced": true, "description": "Tapering window", "options": ["hann", "hamming", "blackman", "none"]}
+      ],
+      "output_tables": ["spectral_density", "dominant_periods"],
+      "tags": ["frequency", "periodogram", "spectral-density"]
+    },
+    {
+      "id": "lomb_scargle",
+      "name": "Lomb-Scargle Periodogram",
+      "category": "Frequency Domain / Signal",
+      "summary": "Spectral analysis for irregularly sampled time series.",
+      "description_file": "lomb_scargle.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "min_period", "label": "Min Period", "type": "float", "default": 2.0, "required": false, "advanced": true, "description": "Minimum period to search", "options": null},
+        {"name": "max_period", "label": "Max Period", "type": "float", "default": null, "required": false, "advanced": true, "description": "Maximum period (default: N/2)", "options": null}
+      ],
+      "output_tables": ["periodogram", "dominant_periods"],
+      "tags": ["frequency", "lomb-scargle", "irregular"]
+    },
+    {
+      "id": "wavelet_transform",
+      "name": "Wavelet Transform",
+      "category": "Frequency Domain / Signal",
+      "summary": "Discrete wavelet decomposition into approximation and detail coefficients.",
+      "description_file": "wavelet_transform.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "wavelet", "label": "Wavelet", "type": "string", "default": "db4", "required": false, "advanced": false, "description": "Wavelet family", "options": ["db4", "db8", "haar", "sym4", "coif2"]},
+        {"name": "level", "label": "Decomposition Level", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Number of levels or 'auto'", "options": null}
+      ],
+      "output_tables": ["coefficients", "reconstructed_components", "energy_by_level"],
+      "tags": ["frequency", "wavelet", "multiresolution"]
+    },
+    {
+      "id": "wavelet_coherence_phase_lag",
+      "name": "Wavelet Coherence & Phase-Lag",
+      "category": "Frequency Domain / Signal",
+      "summary": "Wavelet coherence between two series with phase/lag analysis across scales.",
+      "description_file": "wavelet_coherence_phase_lag.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "wavelet", "label": "Wavelet", "type": "string", "default": "cmor1.5-1.0", "required": false, "advanced": true, "description": "Complex wavelet for coherence", "options": null}
+      ],
+      "output_tables": ["coherence_matrix", "phase_lag_by_scale"],
+      "tags": ["frequency", "wavelet", "coherence", "phase-lag", "bivariate"]
+    },
+    {
+      "id": "ssa",
+      "name": "Singular Spectrum Analysis",
+      "category": "Frequency Domain / Signal",
+      "summary": "SSA decomposes a series using embedding and SVD to extract oscillatory components.",
+      "description_file": "ssa.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "window_length", "label": "Window Length", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Embedding window length or 'auto'", "options": null},
+        {"name": "n_components", "label": "Components", "type": "int", "default": 5, "required": false, "advanced": false, "description": "Number of SSA components to extract", "options": null}
+      ],
+      "output_tables": ["components", "eigenvalues", "reconstructed"],
+      "tags": ["frequency", "ssa", "svd", "embedding"]
+    },
+    {
+      "id": "pelt_change_points",
+      "name": "PELT Change Points",
+      "category": "Change Points / Anomalies / Interventions",
+      "summary": "Detect change points using the PELT algorithm (optimal partitioning).",
+      "description_file": "pelt_change_points.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "model", "label": "Cost Model", "type": "string", "default": "rbf", "required": false, "advanced": false, "description": "Cost function model", "options": ["l1", "l2", "rbf", "normal", "clinear"]},
+        {"name": "penalty", "label": "Penalty", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Penalty value or 'auto' (BIC-based)", "options": null}
+      ],
+      "output_tables": ["change_points", "segment_statistics"],
+      "tags": ["change-point", "pelt", "segmentation"]
+    },
+    {
+      "id": "bocpd",
+      "name": "Bayesian Online Change Point Detection",
+      "category": "Change Points / Anomalies / Interventions",
+      "summary": "Online Bayesian change point detection (Adams-MacKay algorithm).",
+      "description_file": "bocpd.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "hazard_rate", "label": "Hazard Rate", "type": "float", "default": 250.0, "required": false, "advanced": false, "description": "Expected run length (1/hazard)", "options": null}
+      ],
+      "output_tables": ["run_length_probs", "change_points"],
+      "tags": ["change-point", "bayesian", "online"]
+    },
+    {
+      "id": "cusum_page_hinkley",
+      "name": "CUSUM / Page-Hinkley",
+      "category": "Change Points / Anomalies / Interventions",
+      "summary": "Cumulative sum and Page-Hinkley tests for detecting mean shifts.",
+      "description_file": "cusum_page_hinkley.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "threshold", "label": "Threshold", "type": "float", "default": null, "required": false, "advanced": true, "description": "Detection threshold (auto if null)", "options": null},
+        {"name": "drift", "label": "Drift", "type": "float", "default": null, "required": false, "advanced": true, "description": "Allowance/drift parameter", "options": null}
+      ],
+      "output_tables": ["cusum_stats", "change_points"],
+      "tags": ["change-point", "cusum", "page-hinkley"]
+    },
+    {
+      "id": "stl_esd_anomaly",
+      "name": "STL + ESD Anomaly Detection",
+      "category": "Change Points / Anomalies / Interventions",
+      "summary": "Detect anomalies using STL decomposition followed by Generalized ESD test on residuals.",
+      "description_file": "stl_esd_anomaly.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_anomalies_pct", "label": "Max Anomalies %", "type": "float", "default": 10.0, "required": false, "advanced": false, "description": "Maximum percentage of points that can be anomalies", "options": null},
+        {"name": "alpha", "label": "Significance Level", "type": "float", "default": 0.05, "required": false, "advanced": true, "description": "ESD significance level", "options": null}
+      ],
+      "output_tables": ["anomalies", "scores"],
+      "tags": ["anomaly", "outlier", "stl", "esd"]
+    },
+    {
+      "id": "intervention_analysis",
+      "name": "Intervention Analysis",
+      "category": "Change Points / Anomalies / Interventions",
+      "summary": "ARIMA-based intervention analysis to quantify effects of known events.",
+      "description_file": "intervention_analysis.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "intervention_dates", "label": "Intervention Dates", "type": "string", "default": "", "required": true, "advanced": false, "description": "Comma-separated intervention dates (YYYY-MM-DD)", "options": null},
+        {"name": "intervention_type", "label": "Intervention Type", "type": "string", "default": "step", "required": false, "advanced": false, "description": "Type of intervention effect", "options": ["step", "pulse", "ramp"]}
+      ],
+      "output_tables": ["intervention_effects", "model_summary"],
+      "tags": ["intervention", "event-study", "arima"]
+    },
+    {
+      "id": "granger_causality",
+      "name": "Granger Causality Test",
+      "category": "Causality / Relationships / Lead-Lag",
+      "summary": "Test whether one time series helps predict another using Granger causality.",
+      "description_file": "granger_causality.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": true, "auto_udf_name": "TSL_GRANGER",
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Maximum number of lags to test", "options": null}
+      ],
+      "output_tables": ["granger_results"],
+      "tags": ["causality", "granger", "predictive"]
+    },
+    {
+      "id": "cross_correlation_lag",
+      "name": "Cross-Correlation Lag",
+      "category": "Causality / Relationships / Lead-Lag",
+      "summary": "Raw cross-correlation function to find the lag of maximum correlation.",
+      "description_file": "cross_correlation_lag.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 30, "required": false, "advanced": false, "description": "Maximum lag to compute", "options": null}
+      ],
+      "output_tables": ["ccf_values", "lag_results"],
+      "tags": ["correlation", "cross-correlation", "lag", "lead-lag"]
+    },
+    {
+      "id": "prewhitened_ccf_lag",
+      "name": "Prewhitened CCF Lag",
+      "category": "Causality / Relationships / Lead-Lag",
+      "summary": "Prewhitened cross-correlation for unbiased lead-lag estimation.",
+      "description_file": "prewhitened_ccf_lag.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": true, "auto_udf_name": "TSL_LAG_FIND",
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 30, "required": false, "advanced": false, "description": "Maximum lag to search", "options": null}
+      ],
+      "output_tables": ["ccf_values", "lag_results"],
+      "tags": ["correlation", "prewhitened", "lag", "lead-lag"]
+    },
+    {
+      "id": "gcc_phat_delay",
+      "name": "GCC-PHAT Delay Estimation",
+      "category": "Causality / Relationships / Lead-Lag",
+      "summary": "Generalized Cross-Correlation with Phase Transform for robust delay estimation.",
+      "description_file": "gcc_phat_delay.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 30, "required": false, "advanced": false, "description": "Maximum lag to search", "options": null}
+      ],
+      "output_tables": ["gcc_values", "delay_results"],
+      "tags": ["correlation", "gcc-phat", "delay", "lead-lag"]
+    },
+    {
+      "id": "rolling_ccf_lag",
+      "name": "Rolling CCF Lag (Time-Varying)",
+      "category": "Causality / Relationships / Lead-Lag",
+      "summary": "Rolling-window cross-correlation to track how lead-lag changes over time.",
+      "description_file": "rolling_ccf_lag.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "window", "label": "Window Size", "type": "int", "default": 60, "required": false, "advanced": false, "description": "Rolling window size", "options": null},
+        {"name": "max_lag", "label": "Max Lag", "type": "int", "default": 20, "required": false, "advanced": false, "description": "Maximum lag per window", "options": null}
+      ],
+      "output_tables": ["time_varying_lag", "lag_series"],
+      "tags": ["correlation", "rolling", "time-varying", "lead-lag"]
+    },
+    {
+      "id": "dtw_alignment_lag",
+      "name": "DTW Alignment Lag (Time-Varying)",
+      "category": "Causality / Relationships / Lead-Lag",
+      "summary": "Dynamic Time Warping for time-varying alignment and lag estimation.",
+      "description_file": "dtw_alignment_lag.md",
+      "min_series": 2, "max_series": 2,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_warp", "label": "Max Warp", "type": "int", "default": 20, "required": false, "advanced": false, "description": "Maximum warping distance", "options": null}
+      ],
+      "output_tables": ["alignment_path", "time_varying_lag"],
+      "tags": ["dtw", "alignment", "time-varying", "lead-lag"]
+    },
+    {
+      "id": "rolling_origin_cv",
+      "name": "Rolling Origin Cross-Validation",
+      "category": "Evaluation / Uncertainty",
+      "summary": "Evaluate forecast accuracy using expanding or sliding window cross-validation.",
+      "description_file": "rolling_origin_cv.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "n_folds", "label": "Folds", "type": "int", "default": 3, "required": false, "advanced": false, "description": "Number of CV folds", "options": null},
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon per fold", "options": null},
+        {"name": "model", "label": "Model", "type": "string", "default": "auto_arima", "required": false, "advanced": false, "description": "Base model to evaluate", "options": ["auto_arima", "ets", "theta"]}
+      ],
+      "output_tables": ["cv_results", "fold_details", "scorecard"],
+      "tags": ["evaluation", "cross-validation", "rolling-origin"]
+    },
+    {
+      "id": "block_bootstrap",
+      "name": "Block Bootstrap",
+      "category": "Evaluation / Uncertainty",
+      "summary": "Generate bootstrap confidence intervals preserving temporal dependence.",
+      "description_file": "block_bootstrap.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "n_bootstrap", "label": "Bootstrap Samples", "type": "int", "default": 500, "required": false, "advanced": false, "description": "Number of bootstrap replications", "options": null},
+        {"name": "block_length", "label": "Block Length", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Block length or 'auto'", "options": null},
+        {"name": "statistic", "label": "Statistic", "type": "string", "default": "mean", "required": false, "advanced": false, "description": "Statistic to bootstrap", "options": ["mean", "variance", "acf1", "trend_slope"]}
+      ],
+      "output_tables": ["bootstrap_ci", "bootstrap_distribution"],
+      "tags": ["evaluation", "bootstrap", "confidence-interval"]
+    },
+    {
+      "id": "conformal_intervals",
+      "name": "Conformal Prediction Intervals",
+      "category": "Evaluation / Uncertainty",
+      "summary": "Distribution-free prediction intervals using split conformal inference.",
+      "description_file": "conformal_intervals.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "coverage", "label": "Coverage", "type": "float", "default": 0.95, "required": false, "advanced": false, "description": "Target coverage probability", "options": null},
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null}
+      ],
+      "output_tables": ["forecasts_with_intervals", "coverage_check"],
+      "tags": ["evaluation", "conformal", "prediction-interval"]
+    },
+    {
+      "id": "forecast_combination",
+      "name": "Forecast Combination",
+      "category": "Evaluation / Uncertainty",
+      "summary": "Combine forecasts from multiple models for improved accuracy.",
+      "description_file": "forecast_combination.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "models", "label": "Models", "type": "string", "default": "auto_arima,ets,theta", "required": false, "advanced": false, "description": "Comma-separated model list", "options": null},
+        {"name": "combination_method", "label": "Method", "type": "string", "default": "inverse_mse", "required": false, "advanced": false, "description": "Combination method", "options": ["simple_average", "inverse_mse", "ols"]},
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null}
+      ],
+      "output_tables": ["combined_forecasts", "individual_forecasts", "weights"],
+      "tags": ["evaluation", "combination", "ensemble"]
+    },
+    {
+      "id": "robust_estimators",
+      "name": "Robust Estimators",
+      "category": "Evaluation / Uncertainty",
+      "summary": "Robust location and scale estimators resistant to outliers.",
+      "description_file": "robust_estimators.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "trim_pct", "label": "Trim %", "type": "float", "default": 10.0, "required": false, "advanced": true, "description": "Trimming percentage for trimmed/Winsorized mean", "options": null}
+      ],
+      "output_tables": ["robust_statistics"],
+      "tags": ["evaluation", "robust", "outlier-resistant"]
+    },
+    {
+      "id": "kalman_imputation",
+      "name": "Kalman Imputation",
+      "category": "Missing Data / Temporal Disaggregation",
+      "summary": "Fill missing values using Kalman smoother on a state-space model.",
+      "description_file": "kalman_imputation.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [],
+      "output_tables": ["imputed_series", "fill_flags", "diagnostics"],
+      "tags": ["missing-data", "imputation", "kalman"]
+    },
+    {
+      "id": "loess_interpolation",
+      "name": "LOESS Interpolation",
+      "category": "Missing Data / Temporal Disaggregation",
+      "summary": "Fill missing values using LOESS (locally weighted scatterplot smoothing).",
+      "description_file": "loess_interpolation.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "frac", "label": "Smoothing Fraction", "type": "float", "default": 0.3, "required": false, "advanced": false, "description": "Fraction of data for local regression", "options": null}
+      ],
+      "output_tables": ["imputed_series", "fill_flags"],
+      "tags": ["missing-data", "interpolation", "loess"]
+    },
+    {
+      "id": "denton_chowlin_disaggregation",
+      "name": "Denton / Chow-Lin Disaggregation",
+      "category": "Missing Data / Temporal Disaggregation",
+      "summary": "Temporal disaggregation from low to high frequency using Denton or Chow-Lin methods.",
+      "description_file": "denton_chowlin_disaggregation.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "method", "label": "Method", "type": "string", "default": "chow_lin", "required": false, "advanced": false, "description": "Disaggregation method", "options": ["denton", "chow_lin"]},
+        {"name": "target_frequency", "label": "Target Frequency", "type": "string", "default": "Monthly", "required": false, "advanced": false, "description": "Target high-frequency", "options": ["Monthly", "Weekly", "Daily"]}
+      ],
+      "output_tables": ["disaggregated_series", "diagnostics"],
+      "tags": ["missing-data", "disaggregation", "temporal"]
+    },
+    {
+      "id": "gradient_boosting_forecast",
+      "name": "Gradient Boosting Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Gradient boosting with auto-generated lag features for time series forecasting.",
+      "description_file": "gradient_boosting_forecast.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "max_lag", "label": "Max Lag Features", "type": "int", "default": 24, "required": false, "advanced": false, "description": "Maximum lag features to create", "options": null},
+        {"name": "n_estimators", "label": "Trees", "type": "int", "default": 200, "required": false, "advanced": true, "description": "Number of boosting trees", "options": null}
+      ],
+      "output_tables": ["forecasts", "feature_importance", "model_summary"],
+      "tags": ["ml", "gradient-boosting", "forecasting"]
+    },
+    {
+      "id": "quantile_regression",
+      "name": "Quantile Regression Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Quantile regression for probabilistic forecasts at multiple quantile levels.",
+      "description_file": "quantile_regression.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "quantiles", "label": "Quantiles", "type": "string", "default": "0.1,0.25,0.5,0.75,0.9", "required": false, "advanced": false, "description": "Comma-separated quantile levels", "options": null}
+      ],
+      "output_tables": ["quantile_forecasts", "model_summary"],
+      "tags": ["ml", "quantile", "probabilistic", "forecasting"]
+    },
+    {
+      "id": "gaussian_process_forecast",
+      "name": "Gaussian Process Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Gaussian Process regression with RBF kernel for forecasting with uncertainty.",
+      "description_file": "gaussian_process_forecast.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "max_lag", "label": "Max Lag Features", "type": "int", "default": 12, "required": false, "advanced": true, "description": "Lag features for GP input", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary"],
+      "tags": ["ml", "gaussian-process", "bayesian", "forecasting"]
+    },
+    {
+      "id": "lstm_gru_forecast",
+      "name": "LSTM / GRU Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "LSTM or GRU recurrent neural network for time series forecasting (Thorough only for training).",
+      "description_file": "lstm_gru_forecast.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "cell_type", "label": "Cell Type", "type": "string", "default": "LSTM", "required": false, "advanced": false, "description": "RNN cell type", "options": ["LSTM", "GRU"]},
+        {"name": "hidden_size", "label": "Hidden Size", "type": "int", "default": 32, "required": false, "advanced": true, "description": "Hidden state dimension", "options": null},
+        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null}
+      ],
+      "output_tables": ["forecasts", "training_log", "model_summary"],
+      "tags": ["deep-learning", "lstm", "gru", "rnn", "forecasting"]
+    },
+    {
+      "id": "tcn_forecast",
+      "name": "TCN Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Temporal Convolutional Network for sequence-to-sequence forecasting (Thorough only).",
+      "description_file": "tcn_forecast.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "n_channels", "label": "Channels", "type": "int", "default": 32, "required": false, "advanced": true, "description": "TCN channel width", "options": null},
+        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null}
+      ],
+      "output_tables": ["forecasts", "training_log", "model_summary"],
+      "tags": ["deep-learning", "tcn", "convolutional", "forecasting"]
+    },
+    {
+      "id": "nbeats_forecast",
+      "name": "N-BEATS Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Neural Basis Expansion Analysis for Time Series forecasting (Thorough only).",
+      "description_file": "nbeats_forecast.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "stack_types", "label": "Stack Types", "type": "string", "default": "trend,seasonality,generic", "required": false, "advanced": true, "description": "N-BEATS stack configuration", "options": null},
+        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null}
+      ],
+      "output_tables": ["forecasts", "training_log", "model_summary"],
+      "tags": ["deep-learning", "nbeats", "forecasting"]
+    },
+    {
+      "id": "transformer_forecast",
+      "name": "Transformer Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Transformer-based model for time series forecasting with attention (Thorough only).",
+      "description_file": "transformer_forecast.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "d_model", "label": "Model Dimension", "type": "int", "default": 32, "required": false, "advanced": true, "description": "Transformer model dimension", "options": null},
+        {"name": "n_heads", "label": "Attention Heads", "type": "int", "default": 4, "required": false, "advanced": true, "description": "Number of attention heads", "options": null},
+        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null}
+      ],
+      "output_tables": ["forecasts", "attention_weights", "training_log", "model_summary"],
+      "tags": ["deep-learning", "transformer", "attention", "forecasting"]
+    },
+    {
+      "id": "prophet_forecast",
+      "name": "Prophet Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Facebook Prophet model for time series forecasting with automatic seasonality and holiday effects.",
+      "description_file": "prophet_forecast.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "yearly_seasonality", "label": "Yearly Seasonality", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Yearly seasonality mode", "options": ["auto", "true", "false"]},
+        {"name": "weekly_seasonality", "label": "Weekly Seasonality", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "Weekly seasonality mode", "options": ["auto", "true", "false"]},
+        {"name": "changepoint_prior_scale", "label": "Changepoint Flexibility", "type": "float", "default": 0.05, "required": false, "advanced": true, "description": "Flexibility of trend changepoints (higher = more flexible)", "options": null}
+      ],
+      "output_tables": ["forecasts", "components", "changepoints", "model_summary"],
+      "tags": ["ml", "prophet", "forecasting", "seasonality"]
+    },
+    {
+      "id": "random_forest_forecast",
+      "name": "Random Forest Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Random Forest regression with auto-generated lag features for time series forecasting.",
+      "description_file": "random_forest_forecast.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "max_lag", "label": "Max Lag Features", "type": "int", "default": 24, "required": false, "advanced": false, "description": "Maximum lag features to create", "options": null},
+        {"name": "n_estimators", "label": "Trees", "type": "int", "default": 200, "required": false, "advanced": true, "description": "Number of trees in the forest", "options": null},
+        {"name": "max_depth", "label": "Max Depth", "type": "int", "default": null, "required": false, "advanced": true, "description": "Maximum tree depth (null for unlimited)", "options": null}
+      ],
+      "output_tables": ["forecasts", "feature_importance", "model_summary"],
+      "tags": ["ml", "random-forest", "ensemble", "forecasting"]
+    },
+    {
+      "id": "xgboost_forecast",
+      "name": "XGBoost Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "XGBoost gradient boosting with lag features for time series forecasting.",
+      "description_file": "xgboost_forecast.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "max_lag", "label": "Max Lag Features", "type": "int", "default": 24, "required": false, "advanced": false, "description": "Maximum lag features to create", "options": null},
+        {"name": "n_estimators", "label": "Trees", "type": "int", "default": 200, "required": false, "advanced": true, "description": "Number of boosting rounds", "options": null},
+        {"name": "learning_rate", "label": "Learning Rate", "type": "float", "default": 0.1, "required": false, "advanced": true, "description": "Step size shrinkage", "options": null},
+        {"name": "max_depth", "label": "Max Depth", "type": "int", "default": 6, "required": false, "advanced": true, "description": "Maximum tree depth", "options": null}
+      ],
+      "output_tables": ["forecasts", "feature_importance", "model_summary"],
+      "tags": ["ml", "xgboost", "gradient-boosting", "forecasting"]
+    },
+    {
+      "id": "svr_forecast",
+      "name": "SVR Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "Support Vector Regression with RBF kernel and lag features for time series forecasting.",
+      "description_file": "svr_forecast.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "max_lag", "label": "Max Lag Features", "type": "int", "default": 24, "required": false, "advanced": false, "description": "Maximum lag features to create", "options": null},
+        {"name": "kernel", "label": "Kernel", "type": "string", "default": "rbf", "required": false, "advanced": true, "description": "SVM kernel function", "options": ["rbf", "linear", "poly"]},
+        {"name": "C", "label": "Regularization (C)", "type": "float", "default": 1.0, "required": false, "advanced": true, "description": "Regularization parameter", "options": null}
+      ],
+      "output_tables": ["forecasts", "model_summary"],
+      "tags": ["ml", "svr", "svm", "forecasting"]
+    },
+    {
+      "id": "autoencoder_anomaly",
+      "name": "Autoencoder Anomaly Detection",
+      "category": "ML / Deep Learning",
+      "summary": "Autoencoder-based anomaly detection using reconstruction error to identify unusual patterns.",
+      "description_file": "autoencoder_anomaly.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "window_size", "label": "Window Size", "type": "int", "default": 20, "required": false, "advanced": false, "description": "Sliding window size for input segments", "options": null},
+        {"name": "threshold_sigma", "label": "Threshold (sigma)", "type": "float", "default": 3.0, "required": false, "advanced": false, "description": "Number of standard deviations for anomaly threshold", "options": null},
+        {"name": "encoding_dim", "label": "Encoding Dimension", "type": "int", "default": 8, "required": false, "advanced": true, "description": "Bottleneck dimension", "options": null},
+        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null}
+      ],
+      "output_tables": ["anomalies", "reconstruction_error", "model_summary"],
+      "tags": ["deep-learning", "autoencoder", "anomaly-detection"]
+    },
+    {
+      "id": "nhits_forecast",
+      "name": "N-HiTS Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "N-HiTS (Neural Hierarchical Interpolation for Time Series) deep learning forecasting model.",
+      "description_file": "nhits_forecast.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "n_stacks", "label": "Stacks", "type": "int", "default": 3, "required": false, "advanced": true, "description": "Number of hierarchical stacks", "options": null},
+        {"name": "n_blocks", "label": "Blocks per Stack", "type": "int", "default": 1, "required": false, "advanced": true, "description": "Blocks per stack", "options": null},
+        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null}
+      ],
+      "output_tables": ["forecasts", "training_log", "model_summary"],
+      "tags": ["deep-learning", "nhits", "hierarchical", "forecasting"]
+    },
+    {
+      "id": "echo_state_network",
+      "name": "Echo State Network",
+      "category": "ML / Deep Learning",
+      "summary": "Echo State Network (reservoir computing) for time series forecasting with a fixed random reservoir.",
+      "description_file": "echo_state_network.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "reservoir_size", "label": "Reservoir Size", "type": "int", "default": 200, "required": false, "advanced": false, "description": "Number of reservoir neurons", "options": null},
+        {"name": "spectral_radius", "label": "Spectral Radius", "type": "float", "default": 0.9, "required": false, "advanced": true, "description": "Spectral radius of reservoir weight matrix", "options": null},
+        {"name": "leak_rate", "label": "Leak Rate", "type": "float", "default": 0.3, "required": false, "advanced": true, "description": "Leaking rate for reservoir updates", "options": null}
+      ],
+      "output_tables": ["forecasts", "reservoir_states", "model_summary"],
+      "tags": ["ml", "reservoir-computing", "esn", "forecasting"]
+    },
+    {
+      "id": "lightgbm_forecast",
+      "name": "LightGBM Forecast",
+      "category": "ML / Deep Learning",
+      "summary": "LightGBM gradient boosting with lag features for fast, accurate time series forecasting.",
+      "description_file": "lightgbm_forecast.md",
+      "min_series": 1, "max_series": null,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
+        {"name": "max_lag", "label": "Max Lag Features", "type": "int", "default": 24, "required": false, "advanced": false, "description": "Maximum lag features to create", "options": null},
+        {"name": "n_estimators", "label": "Trees", "type": "int", "default": 300, "required": false, "advanced": true, "description": "Number of boosting rounds", "options": null},
+        {"name": "learning_rate", "label": "Learning Rate", "type": "float", "default": 0.05, "required": false, "advanced": true, "description": "Step size shrinkage", "options": null},
+        {"name": "max_depth", "label": "Max Depth", "type": "int", "default": 6, "required": false, "advanced": true, "description": "Maximum tree depth", "options": null},
+        {"name": "num_leaves", "label": "Max Leaves", "type": "int", "default": 31, "required": false, "advanced": true, "description": "Maximum number of leaves per tree (LightGBM-specific)", "options": null}
+      ],
+      "output_tables": ["forecasts", "feature_importance", "model_summary"],
+      "tags": ["ml", "lightgbm", "gradient-boosting", "forecasting"]
+    },
+    {
+      "id": "emd_hht",
+      "name": "EMD / Hilbert-Huang Transform",
+      "category": "Frequency Domain / Signal",
+      "summary": "Empirical Mode Decomposition with Hilbert-Huang Transform for adaptive, data-driven spectral analysis.",
+      "description_file": "emd_hht.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "max_imfs", "label": "Max IMFs", "type": "int", "default": 8, "required": false, "advanced": false, "description": "Maximum Intrinsic Mode Functions to extract", "options": null},
+        {"name": "method", "label": "Method", "type": "string", "default": "emd", "required": false, "advanced": false, "description": "Decomposition method", "options": ["emd", "eemd"]},
+        {"name": "ensemble_size", "label": "Ensemble Size", "type": "int", "default": 100, "required": false, "advanced": true, "description": "Number of ensemble trials for EEMD", "options": null},
+        {"name": "noise_width", "label": "Noise Width", "type": "float", "default": 0.05, "required": false, "advanced": true, "description": "Noise amplitude for EEMD (fraction of signal std)", "options": null}
+      ],
+      "output_tables": ["imf_summary", "imf_components", "instantaneous_frequency", "configuration"],
+      "tags": ["frequency", "emd", "hilbert-huang", "spectral", "nonlinear", "adaptive"]
+    }
+  ]
+}

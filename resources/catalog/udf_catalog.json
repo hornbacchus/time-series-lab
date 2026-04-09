@@ -1,0 +1,333 @@
+﻿{
+    "generated":  "2026-03-28 13:32:33",
+    "version":  "1.0.0",
+    "udfs":  [
+                 {
+                     "arguments":  [
+
+                                   ],
+                     "category":  "Time Series Lab",
+                     "name":  "TSL_VERSION",
+                     "description":  "Returns the Time Series Lab add-in version string.",
+                     "lane":  "AUTO"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Range of date values",
+                                           "name":  "time_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Range of numeric values",
+                                           "name":  "value_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Method: STL (default), Classical, MSTL",
+                                           "name":  "method",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Frequency: Auto (default), BusinessDaily, Weekly, Monthly, etc.",
+                                           "name":  "frequency",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Preset: Fast or Balanced (default). Use Task Pane for Thorough.",
+                                           "name":  "preset",
+                                           "type":  "object"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ AUTO (recomputes)",
+                     "name":  "TSL_SEASONAL_ADJUST",
+                     "description":  "AUTO: Decompose a time series and return the seasonally adjusted values. Spills results.",
+                     "lane":  "AUTO"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Range of potential cause series",
+                                           "name":  "x_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Range of potential effect series",
+                                           "name":  "y_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Maximum lags to test (default 12)",
+                                           "name":  "max_lag",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Preset: Fast or Balanced (default)",
+                                           "name":  "preset",
+                                           "type":  "object"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ AUTO (recomputes)",
+                     "name":  "TSL_GRANGER",
+                     "description":  "AUTO: Granger causality test. Returns F-statistic, p-value, and decision. Spills results.",
+                     "lane":  "AUTO"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Range of first series",
+                                           "name":  "x_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Range of second series",
+                                           "name":  "y_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Maximum lags to search (default 30)",
+                                           "name":  "max_lag",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Method: PrewhitenedCCF (default), RawCCF, GCC_PHAT",
+                                           "name":  "method",
+                                           "type":  "object"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ AUTO (recomputes)",
+                     "name":  "TSL_LAG_FIND",
+                     "description":  "AUTO: Find the lead-lag relationship between two series. Returns best lag and correlation.",
+                     "lane":  "AUTO"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Range of numeric values",
+                                           "name":  "value_range",
+                                           "type":  "object[,]"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ AUTO (recomputes)",
+                     "name":  "TSL_ADF",
+                     "description":  "AUTO: Augmented Dickey-Fuller stationarity test. Returns test statistic and p-value.",
+                     "lane":  "AUTO"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Range of numeric values",
+                                           "name":  "value_range",
+                                           "type":  "object[,]"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ AUTO (recomputes)",
+                     "name":  "TSL_KPSS",
+                     "description":  "AUTO: KPSS stationarity test. Returns test statistic and p-value.",
+                     "lane":  "AUTO"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Range of date values",
+                                           "name":  "time_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Range of numeric values",
+                                           "name":  "value_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Number of periods to forecast",
+                                           "name":  "horizon",
+                                           "type":  "int"
+                                       },
+                                       {
+                                           "description":  "Preset: Fast or Balanced (default)",
+                                           "name":  "preset",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Model: Auto (default), ARIMA, ETS, Theta",
+                                           "name":  "model",
+                                           "type":  "object"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ AUTO (recomputes)",
+                     "name":  "TSL_FORECAST",
+                     "description":  "AUTO: Forecast a time series. Returns forecasted values with prediction intervals. Spills.",
+                     "lane":  "AUTO"
+                 },
+                 {
+                     "arguments":  [
+
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_TRIGGER",
+                     "description":  "Returns the current THOROUGH trigger token. Use in THOROUGH formulas.",
+                     "lane":  "THOROUGH"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Technique ID from catalog (e.g., \u0027auto_arima\u0027)",
+                                           "name":  "technique_id",
+                                           "type":  "string"
+                                       },
+                                       {
+                                           "description":  "Range of date values",
+                                           "name":  "time_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Range of data values (single or multi-column)",
+                                           "name":  "data_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "REQUIRED: Use TSL_TRIGGER() to control manual recompute",
+                                           "name":  "trigger",
+                                           "type":  "int"
+                                       },
+                                       {
+                                           "description":  "Optional JSON string of parameters",
+                                           "name":  "options_json",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Optional: additional non-adjacent data columns",
+                                           "name":  "data_range_2",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Optional: additional non-adjacent data columns",
+                                           "name":  "data_range_3",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Optional: additional non-adjacent data columns",
+                                           "name":  "data_range_4",
+                                           "type":  "object"
+                                       },
+                                       {
+                                           "description":  "Optional: additional non-adjacent data columns",
+                                           "name":  "data_range_5",
+                                           "type":  "object"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_RUN_THR",
+                     "description":  "THOROUGH: Run any technique manually. Returns a handle string (TSL.THR.*). Recomputes only when trigger changes. Use data_range_2..5 for non-adjacent columns.",
+                     "lane":  "THOROUGH"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Range of date values",
+                                           "name":  "time_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Range of numeric values",
+                                           "name":  "value_range",
+                                           "type":  "object[,]"
+                                       },
+                                       {
+                                           "description":  "Forecast horizon (periods)",
+                                           "name":  "horizon",
+                                           "type":  "int"
+                                       },
+                                       {
+                                           "description":  "REQUIRED: Use TSL_TRIGGER()",
+                                           "name":  "trigger",
+                                           "type":  "int"
+                                       },
+                                       {
+                                           "description":  "Model: Auto (default)",
+                                           "name":  "model",
+                                           "type":  "object"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_FORECAST_THR",
+                     "description":  "THOROUGH: Forecast with full model search. Returns a handle. Use TSL_TABLE() to extract results.",
+                     "lane":  "THOROUGH"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Handle from TSL_RUN_THR or TSL_FORECAST_THR",
+                                           "name":  "handle",
+                                           "type":  "string"
+                                       },
+                                       {
+                                           "description":  "Name of the output table to extract",
+                                           "name":  "table_name",
+                                           "type":  "string"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_TABLE",
+                     "description":  "THOROUGH: Extract a named table from a handle result. Spills.",
+                     "lane":  "THOROUGH"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Handle string",
+                                           "name":  "handle",
+                                           "type":  "string"
+                                       },
+                                       {
+                                           "description":  "Artifact key",
+                                           "name":  "key",
+                                           "type":  "string"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_VALUE",
+                     "description":  "THOROUGH: Extract a single value from a handle result\u0027s artifacts.",
+                     "lane":  "THOROUGH"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Handle string",
+                                           "name":  "handle",
+                                           "type":  "string"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_STATUS",
+                     "description":  "THOROUGH: Check status of a handle. Returns OK/STALE/MISSING/ERROR with timestamp.",
+                     "lane":  "THOROUGH"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Handle string",
+                                           "name":  "handle",
+                                           "type":  "string"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_WARNINGS",
+                     "description":  "THOROUGH: Get warnings from a handle result. Spills vertically.",
+                     "lane":  "THOROUGH"
+                 },
+                 {
+                     "arguments":  [
+                                       {
+                                           "description":  "Handle string",
+                                           "name":  "handle",
+                                           "type":  "string"
+                                       }
+                                   ],
+                     "category":  "Time Series Lab â€“ THOROUGH (manual handles)",
+                     "name":  "TSL_RUNINFO",
+                     "description":  "THOROUGH: Get run metadata from a handle (technique, preset, seed, versions). Spills.",
+                     "lane":  "THOROUGH"
+                 }
+             ]
+}

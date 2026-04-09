@@ -1,0 +1,193 @@
+<UserControl x:Class="TSL.UI.Views.DataReadinessView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="260" d:DesignHeight="650"
+             Background="#FFFFFF">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <SolidColorBrush x:Key="AccentBrush" Color="#2196F3" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#1976D2" />
+        <SolidColorBrush x:Key="SubtleTextBrush" Color="#757575" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="CategoryBgBrush" Color="#F8F9FA" />
+        <SolidColorBrush x:Key="PassBrush" Color="#4CAF50" />
+        <SolidColorBrush x:Key="WarnBrush" Color="#FF9800" />
+        <SolidColorBrush x:Key="FailBrush" Color="#F44336" />
+
+        <Style x:Key="AccentButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Background" Value="#BDBDBD" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- ── Analyse button bar ─────────────────────────────────── -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource CategoryBgBrush}"
+                Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Analyse Selection"
+                        Style="{StaticResource AccentButton}"
+                        Command="{Binding RunChecksCommand}" />
+                <TextBlock Text="Select data in Excel, then click Analyse."
+                           FontSize="11" Foreground="{StaticResource SubtleTextBrush}"
+                           VerticalAlignment="Center" TextWrapping="Wrap" />
+            </DockPanel>
+        </Border>
+
+        <!-- ── Placeholder when no analysis has been run ──────────── -->
+        <StackPanel Visibility="{Binding ShowPlaceholder, Converter={StaticResource BoolToVis}}"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+            <TextBlock Text="No analysis yet" FontSize="16" FontWeight="SemiBold"
+                       Foreground="#BDBDBD" HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock Text="Select your data range in Excel and click 'Analyse Selection' to run a data quality assessment."
+                       FontSize="12" Foreground="{StaticResource SubtleTextBrush}"
+                       TextWrapping="Wrap" TextAlignment="Center" />
+        </StackPanel>
+
+        <!-- ── Results ────────────────────────────────────────────── -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Visibility="{Binding HasRun, Converter={StaticResource BoolToVis}}">
+            <StackPanel Margin="12,10">
+
+                <!-- Score display -->
+                <Border Background="{StaticResource CategoryBgBrush}" CornerRadius="8"
+                        Padding="16" Margin="0,0,0,16" HorizontalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="Data Readiness Score" FontSize="11"
+                                   Foreground="{StaticResource SubtleTextBrush}"
+                                   HorizontalAlignment="Center" Margin="0,0,0,6" />
+
+                        <!-- Large score number -->
+                        <Grid HorizontalAlignment="Center" Width="100" Height="100" Margin="0,0,0,6">
+                            <!-- Background circle -->
+                            <Ellipse Width="100" Height="100" Stroke="#E0E0E0" StrokeThickness="6"
+                                     Fill="Transparent" />
+                            <!-- Score circle -->
+                            <Ellipse Width="100" Height="100" StrokeThickness="6"
+                                     Fill="Transparent" Stroke="{StaticResource AccentBrush}" />
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding OverallScore}" FontSize="28" FontWeight="Bold"
+                                           Foreground="#212121" HorizontalAlignment="Center" />
+                                <TextBlock Text="/100" FontSize="12"
+                                           Foreground="{StaticResource SubtleTextBrush}"
+                                           HorizontalAlignment="Center" Margin="0,-4,0,0" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{Binding ScoreGrade}" FontSize="14" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" Margin="0,0,0,4"
+                                   Foreground="{StaticResource AccentBrush}" />
+
+                        <TextBlock Text="{Binding SummaryText}" FontSize="11"
+                                   Foreground="{StaticResource SubtleTextBrush}"
+                                   HorizontalAlignment="Center" TextWrapping="Wrap"
+                                   TextAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Check details -->
+                <TextBlock Text="CHECKS" FontSize="10" FontWeight="Bold"
+                           Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,8" />
+
+                <ItemsControl ItemsSource="{Binding Checks}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,8" CornerRadius="4"
+                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                    Padding="10,8">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,4">
+                                        <!-- Status indicator -->
+                                        <Border DockPanel.Dock="Left" Width="24" Height="24"
+                                                CornerRadius="12" Margin="0,0,8,0"
+                                                VerticalAlignment="Top">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#E0E0E0" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Pass">
+                                                            <Setter Property="Background" Value="{StaticResource PassBrush}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Warning">
+                                                            <Setter Property="Background" Value="{StaticResource WarnBrush}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Fail">
+                                                            <Setter Property="Background" Value="{StaticResource FailBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding StatusIcon}" Foreground="White"
+                                                       FontSize="10" FontWeight="Bold"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding CheckName}" FontSize="12"
+                                                       FontWeight="SemiBold" Foreground="#424242" />
+                                            <TextBlock Text="{Binding Detail}" FontSize="11"
+                                                       Foreground="{StaticResource SubtleTextBrush}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DockPanel>
+
+                                    <!-- Suggestion -->
+                                    <TextBlock Text="{Binding Suggestion}" FontSize="11"
+                                               Foreground="#1565C0" FontStyle="Italic"
+                                               TextWrapping="Wrap" Margin="32,0,0,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Suggestion}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Refresh button -->
+                <Button Content="Refresh" Style="{StaticResource AccentButton}"
+                        Command="{Binding RefreshCommand}"
+                        HorizontalAlignment="Center" Margin="0,12" />
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </DockPanel>
+</UserControl>

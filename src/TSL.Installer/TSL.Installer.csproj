@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>TSL.Installer</RootNamespace>
+    <AssemblyName>TSL.Installer</AssemblyName>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" Generator="MSBuild:Compile" SubType="Designer" />
+    <Compile Update="App.xaml.cs" DependentUpon="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="MainWindow.xaml" Generator="MSBuild:Compile" SubType="Designer" />
+    <Compile Update="MainWindow.xaml.cs" DependentUpon="MainWindow.xaml" />
+  </ItemGroup>
+
+  <!--
+    SDK-style projects targeting net48 do NOT automatically import the WPF
+    XAML build tasks. Import the WinFX targets explicitly.
+  -->
+  <PropertyGroup>
+    <_WPFTargetPath>$(MSBuildExtensionsPath)\Microsoft\WinFX\v3.0\</_WPFTargetPath>
+  </PropertyGroup>
+  <Import Project="$(_WPFTargetPath)Windows.Presentation.Foundation.targets"
+          Condition="Exists('$(_WPFTargetPath)Windows.Presentation.Foundation.targets')" />
+
+</Project>

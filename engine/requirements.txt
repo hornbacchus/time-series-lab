@@ -1,0 +1,17 @@
+numpy>=1.26
+scipy>=1.13
+pandas>=2.2
+statsmodels>=0.14
+pmdarima>=2.0
+arch>=7.0
+ruptures>=1.1
+PyWavelets>=1.6
+hmmlearn>=0.3
+scikit-learn>=1.5
+python-docx>=1.1
+
+# Optional ML/Deep Learning (graceful fallback if not installed)
+# prophet>=1.1
+# xgboost>=2.0
+# reservoirpy>=0.3
+# torch>=2.0

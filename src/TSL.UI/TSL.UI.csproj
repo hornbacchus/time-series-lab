@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TSL.UI</RootNamespace>
+    <AssemblyName>TSL.UI</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <!-- Required to enable XAML compilation for .NET Framework targets -->
+    <EnableDefaultPageItems>false</EnableDefaultPageItems>
+  </PropertyGroup>
+
+  <!-- WPF and WinForms framework references -->
+  <ItemGroup>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
+
+  <!-- XAML files as Page items for MSBuild XAML compilation -->
+  <ItemGroup>
+    <Page Include="Views\MainView.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Page Include="Views\TechniqueExplorerView.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Page Include="Views\RunView.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Page Include="Views\RecommenderView.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Page Include="Views\DataReadinessView.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Page Include="Views\UdfBrowserView.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+    <Page Include="Views\SettingsView.xaml" SubType="Designer" Generator="MSBuild:Compile" />
+  </ItemGroup>
+
+  <!-- Link code-behind to XAML -->
+  <ItemGroup>
+    <Compile Update="Views\MainView.xaml.cs" DependentUpon="MainView.xaml" />
+    <Compile Update="Views\TechniqueExplorerView.xaml.cs" DependentUpon="TechniqueExplorerView.xaml" />
+    <Compile Update="Views\RunView.xaml.cs" DependentUpon="RunView.xaml" />
+    <Compile Update="Views\RecommenderView.xaml.cs" DependentUpon="RecommenderView.xaml" />
+    <Compile Update="Views\DataReadinessView.xaml.cs" DependentUpon="DataReadinessView.xaml" />
+    <Compile Update="Views\UdfBrowserView.xaml.cs" DependentUpon="UdfBrowserView.xaml" />
+    <Compile Update="Views\SettingsView.xaml.cs" DependentUpon="SettingsView.xaml" />
+  </ItemGroup>
+
+  <!--
+    SDK-style projects targeting net48 do NOT automatically import the WPF
+    XAML build tasks (XamlBuildTask). We must import the WinFX targets
+    explicitly so that <Page> items are compiled to BAML and InitializeComponent() is generated.
+  -->
+  <PropertyGroup>
+    <_WPFTargetPath>$(MSBuildExtensionsPath)\Microsoft\WinFX\v3.0\</_WPFTargetPath>
+  </PropertyGroup>
+  <Import Project="$(_WPFTargetPath)Windows.Presentation.Foundation.targets"
+          Condition="Exists('$(_WPFTargetPath)Windows.Presentation.Foundation.targets')" />
+
+</Project>

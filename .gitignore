@@ -1,0 +1,37 @@
+# Build outputs
+build/
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.cache
+*.sln.iml
+
+# NuGet
+packages/
+*.nupkg
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+venv/
+.venv/
+
+# Claude Code local config
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated docs (rebuild from source)
+docs/TimeSeriesLab_UserGuide.docx
+docs/TimeSeriesLab_UserGuide.html
+docs/UserGuide_Source.md
