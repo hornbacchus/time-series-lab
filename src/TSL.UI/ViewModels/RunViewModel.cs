@@ -82,8 +82,39 @@ namespace TSL.UI.ViewModels
             }
         }
 
-        public string TechniqueDisplayName =>
-            string.IsNullOrEmpty(_techniqueId) ? "No technique selected" : _techniqueId.Replace("_", " ");
+        private string _techniqueName;
+        /// <summary>
+        /// Human-readable technique name (e.g. "Principal Component Analysis").
+        /// Set by the AddIn layer from the catalog. Falls back to prettified ID
+        /// when not set.
+        /// </summary>
+        public string TechniqueName
+        {
+            get => _techniqueName;
+            set
+            {
+                if (SetProperty(ref _techniqueName, value))
+                    OnPropertyChanged(nameof(TechniqueDisplayName));
+            }
+        }
+
+        public string TechniqueDisplayName
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_techniqueName)) return _techniqueName;
+                if (string.IsNullOrEmpty(_techniqueId)) return "No technique selected";
+                // Fallback: prettify the ID (e.g. "pca_analysis" -> "Pca Analysis")
+                var spaced = _techniqueId.Replace("_", " ");
+                var parts = spaced.Split(' ');
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    if (parts[i].Length > 0)
+                        parts[i] = char.ToUpper(parts[i][0]) + parts[i].Substring(1);
+                }
+                return string.Join(" ", parts);
+            }
+        }
 
         private string _preset = "Balanced";
         public string Preset

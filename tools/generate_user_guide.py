@@ -59,6 +59,41 @@ def load_technique_md(technique_id):
     return "(No detailed description available.)"
 
 
+def _embed_csv_tail(lines, csv_path, n):
+    """Embed the last n rows of a CSV as a markdown table."""
+    import csv as csvmod
+    if not csv_path.exists():
+        lines.append("*(CSV file not found)*\n")
+        return
+    with open(csv_path, "r", encoding="utf-8") as f:
+        rows = list(csvmod.reader(f))
+    if len(rows) < 2:
+        return
+    header = rows[0]
+    data = rows[-n:]
+    lines.append("| " + " | ".join(header) + " |\n")
+    lines.append("| " + " | ".join(["---"] * len(header)) + " |\n")
+    for row in data:
+        lines.append("| " + " | ".join(row) + " |\n")
+
+
+def _embed_csv_full(lines, csv_path):
+    """Embed an entire CSV as a markdown table."""
+    import csv as csvmod
+    if not csv_path.exists():
+        lines.append("*(CSV file not found)*\n")
+        return
+    with open(csv_path, "r", encoding="utf-8") as f:
+        rows = list(csvmod.reader(f))
+    if len(rows) < 2:
+        return
+    header = rows[0]
+    lines.append("| " + " | ".join(header) + " |\n")
+    lines.append("| " + " | ".join(["---"] * len(header)) + " |\n")
+    for row in rows[1:]:
+        lines.append("| " + " | ".join(row) + " |\n")
+
+
 def generate_markdown(catalog, udf_catalog):
     """Generate the full UserGuide_Source.md."""
     lines = []
@@ -87,7 +122,8 @@ def generate_markdown(catalog, udf_catalog):
     p("9. Audit Log and Reproducibility")
     p("10. Technique Catalog")
     p("11. UDF Reference")
-    p("12. Troubleshooting")
+    p("12. Sample Data")
+    p("13. Troubleshooting")
     blank()
 
     # Quick Start
@@ -370,8 +406,60 @@ def generate_markdown(catalog, udf_catalog):
         p("*(UDF catalog not yet generated. Run `generate_udf_catalog.ps1` first.)*")
     blank()
 
+    # Sample Data
+    h2("12. Sample Data")
+    p("The following datasets are included with Time Series Lab for testing and exploration. "
+      "Each is provided as a CSV file in `resources/sample_data/` and can be copy-pasted "
+      "directly into Excel.")
+    blank()
+
+    h3("Treasury Constant Maturity Yields (Daily)")
+    p("Daily 2-year, 5-year, 10-year, and 30-year U.S. Treasury constant maturity yields "
+      "from the Federal Reserve (FRED series DGS2, DGS5, DGS10, DGS30). "
+      "Date range depends on tenor: 10Y and 5Y begin January 1962; 2Y begins June 1976; "
+      "30Y begins February 1977.")
+    blank()
+    p("**File:** `resources/sample_data/treasury_yields.csv`")
+    p("**Rows:** ~16,000 (business days)")
+    p("**Suggested techniques:** Forecasting (Auto ARIMA, ETS), Cointegration (Johansen, VECM), "
+      "PCA, Granger Causality, Lead-Lag, Volatility (GARCH)")
+    blank()
+
+    # Embed a small preview of the Treasury data
+    p("**Preview (last 10 rows):**")
+    blank()
+    _embed_csv_tail(lines, REPO / "resources" / "sample_data" / "treasury_yields.csv", 10)
+    blank()
+
+    h3("U.S. Real GDP Growth (Quarterly, SAAR)")
+    p("Quarter-over-quarter annualized growth rate of real U.S. GDP from the Bureau of "
+      "Economic Analysis (FRED series A191RL1Q225SBEA). Begins Q1 1950.")
+    blank()
+    p("**File:** `resources/sample_data/real_gdp.csv`")
+    p("**Suggested techniques:** Forecasting, Regime Switching (Markov, SETAR), "
+      "Change Point Detection, Decomposition (STL)")
+    blank()
+    p("**Full dataset:**")
+    blank()
+    _embed_csv_full(lines, REPO / "resources" / "sample_data" / "real_gdp.csv")
+    blank()
+
+    h3("Core PCE Inflation (Quarterly, SAAR)")
+    p("Quarter-over-quarter annualized percent change in the core Personal Consumption "
+      "Expenditures price index (excluding food and energy) from the Bureau of Economic "
+      "Analysis (FRED series JCXFE). Begins Q1 1959.")
+    blank()
+    p("**File:** `resources/sample_data/core_pce.csv`")
+    p("**Suggested techniques:** Forecasting, Granger Causality (with GDP or yields), "
+      "Structural Breaks (Zivot-Andrews), Stationarity Tests (ADF, KPSS)")
+    blank()
+    p("**Full dataset:**")
+    blank()
+    _embed_csv_full(lines, REPO / "resources" / "sample_data" / "core_pce.csv")
+    blank()
+
     # Troubleshooting
-    h2("12. Troubleshooting")
+    h2("13. Troubleshooting")
     p("Time Series Lab follows a **fail loudly** policy. Errors include plain-English "
       "explanations and suggested fixes.")
     blank()

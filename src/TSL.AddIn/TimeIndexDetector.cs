@@ -118,14 +118,17 @@ namespace TSL.AddIn
 
             double parseableRatio = (double)dates.Count / values.Count;
 
-            // Monotonicity
-            double monotonicCount = 0;
+            // Monotonicity — accept either ascending OR descending (reverse-chron is
+            // common in finance where most-recent dates are placed at the top).
+            double ascendingCount = 0;
+            double descendingCount = 0;
             for (int i = 1; i < rawDoubles.Count; i++)
             {
-                if (rawDoubles[i] >= rawDoubles[i - 1]) monotonicCount++;
+                if (rawDoubles[i] >= rawDoubles[i - 1]) ascendingCount++;
+                if (rawDoubles[i] <= rawDoubles[i - 1]) descendingCount++;
             }
             double monotonicRatio = rawDoubles.Count > 1
-                ? monotonicCount / (rawDoubles.Count - 1)
+                ? Math.Max(ascendingCount, descendingCount) / (rawDoubles.Count - 1)
                 : 1.0;
 
             // Uniqueness
@@ -214,9 +217,13 @@ namespace TSL.AddIn
             var deltas = new List<double>();
             for (int i = 1; i < dates.Count; i++)
             {
-                var delta = (dates[i] - dates[i - 1]).TotalDays;
-                // Normalize: treat 3-day gaps (Fri-Mon) as 1-day for business daily
-                if (delta == 3 && dates[i - 1].DayOfWeek == DayOfWeek.Friday)
+                // Use absolute delta so reverse-chronological order (most-recent-first)
+                // scores the same as ascending order.
+                var delta = Math.Abs((dates[i] - dates[i - 1]).TotalDays);
+                // Normalize: treat 3-day gaps (Fri-Mon or Mon-Fri) as 1-day for business daily
+                if (delta == 3 &&
+                    (dates[i - 1].DayOfWeek == DayOfWeek.Friday ||
+                     dates[i - 1].DayOfWeek == DayOfWeek.Monday))
                     delta = 1;
                 if (delta > 0)
                     deltas.Add(delta);
@@ -240,7 +247,8 @@ namespace TSL.AddIn
             var deltas = new List<double>();
             for (int i = 1; i < dates.Count; i++)
             {
-                deltas.Add((dates[i] - dates[i - 1]).TotalDays);
+                // Use absolute delta to handle reverse-chronological data.
+                deltas.Add(Math.Abs((dates[i] - dates[i - 1]).TotalDays));
             }
 
             var median = Median(deltas);

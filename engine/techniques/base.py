@@ -8,6 +8,31 @@ import datetime
 import numpy as np
 
 
+# Map human-readable frequency labels emitted by the C# TimeIndexDetector
+# to the pandas-style short codes that every technique's _infer_period
+# already understands. Unknown values pass through unchanged so that callers
+# can still supply raw short codes like "M", "MS", "Q", "QS", "D", etc.
+_FREQUENCY_ALIASES = {
+    "calendardaily": "D",
+    "businessdaily": "B",
+    "daily": "D",
+    "weekly": "W",
+    "monthly": "M",
+    "quarterly": "Q",
+    "annual": "Y",
+    "annually": "Y",
+    "yearly": "Y",
+}
+
+
+def _normalize_frequency(raw: str) -> str:
+    """Translate detector labels to pandas-style frequency codes."""
+    if not raw:
+        return ""
+    key = str(raw).strip().lower()
+    return _FREQUENCY_ALIASES.get(key, str(raw).strip())
+
+
 class RunContext:
     """
     Encapsulates everything a technique needs to execute.
@@ -20,7 +45,11 @@ class RunContext:
         self.technique_id: str = raw.get("technique_id", "")
         self.preset: str = raw.get("preset", "Balanced")
         self.seed: int = raw.get("seed", 42)
-        self.frequency: str = raw.get("frequency", "")
+        # Normalize frequency: the C# TimeIndexDetector emits human-readable
+        # labels ("Monthly", "Quarterly", "CalendarDaily", ...) but every
+        # technique's _infer_period maps pandas-style short codes ("M", "Q",
+        # "D", ...). Translate once here so all techniques work uniformly.
+        self.frequency: str = _normalize_frequency(raw.get("frequency", ""))
         self.time: list = raw.get("time", [])
         self.series: list = raw.get("series", [])  # list of {name, values}
         self.exog: list = raw.get("exog", [])       # list of {name, values}

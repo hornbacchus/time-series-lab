@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ExcelDna.Integration;
 using Newtonsoft.Json;
 using TSL.AddIn.Models;
 
@@ -79,7 +80,9 @@ namespace TSL.AddIn
             var paths = GetCatalogSearchPaths();
             foreach (var basePath in paths)
             {
-                var mdPath = Path.Combine(Path.GetDirectoryName(basePath), "..", "techniques_md", $"{techniqueId}.md");
+                var dir = Path.GetDirectoryName(basePath);
+                if (string.IsNullOrEmpty(dir)) continue;
+                var mdPath = Path.Combine(dir, "..", "techniques_md", $"{techniqueId}.md");
                 if (File.Exists(mdPath))
                     return File.ReadAllText(mdPath);
             }
@@ -119,13 +122,42 @@ namespace TSL.AddIn
             // Installed location
             paths.Add(Path.Combine(AddIn.AppDataPath, "resources", "catalog", "techniques_catalog.json"));
 
-            // Dev location (relative to assembly)
-            var asmDir = Path.GetDirectoryName(typeof(TechniqueCatalogService).Assembly.Location);
-            if (asmDir != null)
+            // Relative to the loaded XLL (most reliable when running packed).
+            try
             {
-                paths.Add(Path.Combine(asmDir, "..", "..", "..", "..", "resources", "catalog", "techniques_catalog.json"));
-                paths.Add(Path.Combine(asmDir, "resources", "catalog", "techniques_catalog.json"));
+                var xllPath = ExcelDnaUtil.XllPath;
+                if (!string.IsNullOrEmpty(xllPath))
+                {
+                    var xllDir = Path.GetDirectoryName(xllPath);
+                    if (!string.IsNullOrEmpty(xllDir))
+                    {
+                        // Co-located
+                        paths.Add(Path.Combine(xllDir, "resources", "catalog", "techniques_catalog.json"));
+                        // Dev build: src\TSL.AddIn\bin\x64\Release\net48\publish\ -> project root
+                        paths.Add(Path.Combine(xllDir, "..", "..", "..", "..", "..", "..", "resources", "catalog", "techniques_catalog.json"));
+                        // Dev build: src\TSL.AddIn\bin\x64\Release\net48\ -> project root
+                        paths.Add(Path.Combine(xllDir, "..", "..", "..", "..", "..", "resources", "catalog", "techniques_catalog.json"));
+                    }
+                }
             }
+            catch { /* ExcelDnaUtil unavailable at design-time */ }
+
+            // Dev location (relative to assembly). Assembly.Location can be empty
+            // or an invalid path string when loaded from a packed XLL — wrap defensively.
+            try
+            {
+                var asmLoc = typeof(TechniqueCatalogService).Assembly.Location;
+                if (!string.IsNullOrEmpty(asmLoc))
+                {
+                    var asmDir = Path.GetDirectoryName(asmLoc);
+                    if (!string.IsNullOrEmpty(asmDir))
+                    {
+                        paths.Add(Path.Combine(asmDir, "..", "..", "..", "..", "resources", "catalog", "techniques_catalog.json"));
+                        paths.Add(Path.Combine(asmDir, "resources", "catalog", "techniques_catalog.json"));
+                    }
+                }
+            }
+            catch { /* Assembly.Location may throw for embedded assemblies */ }
 
             return paths;
         }

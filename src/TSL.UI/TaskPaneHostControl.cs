@@ -130,6 +130,15 @@ namespace TSL.UI
         }
 
         /// <summary>
+        /// Replace the built-in stub catalog with the real catalog.
+        /// </summary>
+        public void LoadTechniqueCatalog(System.Collections.Generic.IEnumerable<TSL.UI.ViewModels.TechniqueItem> techniques)
+        {
+            if (techniques == null) return;
+            InvokeOnUIThread(() => _viewModel.LoadTechniqueCatalog(techniques));
+        }
+
+        /// <summary>
         /// Update the global preset from the ribbon.
         /// </summary>
         public void SetPreset(string preset)

@@ -112,6 +112,13 @@ namespace TSL.UI.ViewModels
         /// </summary>
         public event Action<string> InsertThoroughFormulaRequested; // techniqueId
 
+        /// <summary>
+        /// Raised when the user clicks "Analyse Selection" in the Data Readiness view.
+        /// The AddIn layer subscribes to this, extracts the current Excel selection,
+        /// runs the quality checks, and calls ShowResults on the passed VM.
+        /// </summary>
+        public event Action<DataReadinessViewModel> DataReadinessChecksRequested;
+
         // ── Constructor ─────────────────────────────────────────────────
 
         public MainViewModel()
@@ -213,6 +220,18 @@ namespace TSL.UI.ViewModels
         }
 
         /// <summary>
+        /// Called by the AddIn layer to replace the built-in stub catalog with the
+        /// real catalog loaded from techniques_catalog.json. Creates the explorer
+        /// VM if it doesn't exist yet so the data is ready on first navigation.
+        /// </summary>
+        public void LoadTechniqueCatalog(System.Collections.Generic.IEnumerable<TechniqueItem> techniques)
+        {
+            if (techniques == null) return;
+            var vm = GetOrCreateExplorer();
+            vm.LoadTechniques(techniques);
+        }
+
+        /// <summary>
         /// Called by the AddIn layer when the Excel selection changes.
         /// </summary>
         public void UpdateSelectionStatus(int seriesCount, int pointCount, string frequency)
@@ -252,6 +271,14 @@ namespace TSL.UI.ViewModels
             if (_runVm == null)
             {
                 _runVm = new RunViewModel();
+                // When the user clicks the "Run" button inside the Run view itself,
+                // re-trigger the main run pipeline (selection extraction + engine call)
+                // using the current technique.
+                _runVm.RunExecuteRequested += () =>
+                {
+                    if (!string.IsNullOrEmpty(_runVm.TechniqueId))
+                        RunRequested?.Invoke(_runVm.TechniqueId, Preset);
+                };
             }
             return _runVm;
         }
@@ -271,6 +298,8 @@ namespace TSL.UI.ViewModels
             if (_dataReadinessVm == null)
             {
                 _dataReadinessVm = new DataReadinessViewModel();
+                _dataReadinessVm.RunChecksRequested += () =>
+                    DataReadinessChecksRequested?.Invoke(_dataReadinessVm);
             }
             return _dataReadinessVm;
         }

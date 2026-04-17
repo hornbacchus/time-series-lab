@@ -43,7 +43,10 @@ def _prepare_matrix(ctx):
     """
     Build an (n_obs x n_series) matrix from input series.
     Drops rows where any series has NaN after interpolation.
-    Returns: data matrix, series names, warning list.
+    Returns: data matrix, series names, warning list, kept_indices
+    where kept_indices maps each surviving row back to its position in the
+    original (trimmed-to-min-len) series. Used by the caller to align any
+    user-supplied time index (ctx.time) with the cleaned data rows.
     """
     all_series = ctx.get_all_series()
     if len(all_series) < 2:
@@ -85,13 +88,14 @@ def _prepare_matrix(ctx):
 
     # Drop any rows still containing NaN
     row_valid = ~np.any(np.isnan(data), axis=1)
+    kept_indices = np.where(row_valid)[0]
     if not row_valid.all():
         data = data[row_valid]
         warnings.append(
             f"{int((~row_valid).sum())} rows dropped due to remaining NaN."
         )
 
-    return data, names, warnings
+    return data, names, warnings, kept_indices
 
 
 def _varimax_rotation(loadings, max_iter=100, tol=1e-6):
@@ -155,8 +159,65 @@ def run(ctx: RunContext, progress_callback) -> dict:
         progress_callback("Validating inputs", 5)
         np.random.seed(ctx.seed)
 
-        data, series_names, warn_list = _prepare_matrix(ctx)
+        # Handle the common "user selected the header row too" pattern: if the
+        # detected time array has empty leading entries (header text that
+        # couldn't be parsed as a date), strip those rows from BOTH the time
+        # array AND every input series before they reach _prepare_matrix.
+        # Without this trim, the matching data row gets interpolated and kept,
+        # and the empty time entry forces us to fall back to "Observation"
+        # numbers — exactly the bug users hit when they shift-select the
+        # full table including the header row.
+        raw_time_in = list(getattr(ctx, "time", None) or [])
+        if len(raw_time_in) > 0:
+            strip_leading = 0
+            while (strip_leading < len(raw_time_in)
+                   and (raw_time_in[strip_leading] is None
+                        or raw_time_in[strip_leading] == "")):
+                strip_leading += 1
+            # Symmetric trim of trailing empties (footer rows etc.)
+            strip_trailing = 0
+            while (strip_trailing < len(raw_time_in) - strip_leading
+                   and (raw_time_in[len(raw_time_in) - 1 - strip_trailing] is None
+                        or raw_time_in[len(raw_time_in) - 1 - strip_trailing] == "")):
+                strip_trailing += 1
+            if strip_leading > 0 or strip_trailing > 0:
+                end = len(raw_time_in) - strip_trailing
+                ctx.time = raw_time_in[strip_leading:end]
+                for s in ctx.series:
+                    vals = s.get("values", [])
+                    if len(vals) >= end:
+                        s["values"] = vals[strip_leading:end]
+
+        data, series_names, warn_list, kept_indices = _prepare_matrix(ctx)
         n_obs, n_series = data.shape
+
+        # Align an optional time index (provided by the C# add-in's
+        # TimeIndexDetector when the user's selection includes a date column)
+        # with the rows that survived cleaning. Falls back to sequential
+        # observation numbers when no usable time index is available.
+        # We accept partial coverage: if at least half of the kept rows have a
+        # valid date, we use dates and substitute missing ones with the obs
+        # number. This is more forgiving than the previous strict all-or-nothing
+        # check, which broke whenever a single row had no parsable date.
+        time_labels = None
+        raw_time = getattr(ctx, "time", None) or []
+        if len(raw_time) > 0 and len(kept_indices) > 0:
+            max_needed = int(kept_indices.max()) + 1
+            if len(raw_time) >= max_needed:
+                try:
+                    labels = [raw_time[i] for i in kept_indices.tolist()]
+                    valid_count = sum(
+                        1 for lbl in labels
+                        if lbl is not None and lbl != "")
+                    if valid_count >= 0.5 * len(labels):
+                        # Substitute any remaining empties with the obs number
+                        # so the column is never sparse in Excel.
+                        time_labels = [
+                            lbl if (lbl is not None and lbl != "") else f"#{i + 1}"
+                            for i, lbl in enumerate(labels)
+                        ]
+                except Exception:
+                    time_labels = None
 
         if n_obs < 3:
             return make_error_response(
@@ -276,15 +337,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
             loading_rows,
         )
 
-        # --- Table 3: Component Scores (first 200 rows max) ---
-        score_cols = ["Observation"] + [f"PC{i + 1}" for i in range(n_components)]
-        max_score_rows = min(n_obs, 200)
+        # --- Table 3: Component Scores (the principal-component time series) ---
+        # Return all observations up to a generous safety cap so users get the
+        # full time series of the PCs, which is typically the whole point of
+        # running PCA on time-series data. The 100k cap keeps JSON payloads
+        # well inside the 100MB pipe limit even with many components.
+        first_col = "Date" if time_labels is not None else "Observation"
+        score_cols = [first_col] + [f"PC{i + 1}" for i in range(n_components)]
+        MAX_SCORE_ROWS = 100_000
+        max_score_rows = min(n_obs, MAX_SCORE_ROWS)
         score_rows = []
         for t in range(max_score_rows):
-            row = [t + 1]
+            label = time_labels[t] if time_labels is not None else (t + 1)
+            row = [label]
             for i in range(n_components):
                 row.append(round(float(scores[t, i]), 6))
             score_rows.append(row)
+        if n_obs > MAX_SCORE_ROWS:
+            warn_list.append(
+                f"Component Scores truncated to first {MAX_SCORE_ROWS:,} of {n_obs:,} "
+                f"observations. Reduce the selection if you need the full series."
+            )
         scores_table = make_table("Component Scores", score_cols, score_rows)
 
         tables = [eig_table, loadings_table, scores_table]

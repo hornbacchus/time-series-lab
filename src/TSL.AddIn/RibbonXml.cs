@@ -52,6 +52,21 @@ namespace TSL.AddIn
                   onAction='OnAnomalyScan'
                   screentip='Anomaly Detection'
                   supertip='Scan a time series for outliers and anomalous observations.' />
+          <separator id='sepQA2' />
+          <button id='btnPca'
+                  label='PCA'
+                  size='large'
+                  imageMso='ChartTrendline'
+                  onAction='OnPcaAnalysis'
+                  screentip='Principal Component Analysis (PCA)'
+                  supertip='Reduce a set of correlated time series into a smaller number of uncorrelated principal components, with loadings and explained variance.' />
+          <button id='btnDfm'
+                  label='DFM'
+                  size='large'
+                  imageMso='ChartLines'
+                  onAction='OnDynamicFactorModel'
+                  screentip='Dynamic Factor Model (DFM)'
+                  supertip='Extract common latent factors that drive multiple time series jointly using a dynamic factor model.' />
         </group>
 
         <group id='grpExplore' label='Explore'>
@@ -177,6 +192,46 @@ namespace TSL.AddIn
                       onAction='OnOpenUserGuide'
                       screentip='Word Document'
                       supertip='Open the User Guide as a Word document (.docx).' />
+            </menu>
+          </splitButton>
+          <splitButton id='sbSampleData' size='large'>
+            <button id='btnSampleData'
+                    label='Sample Data'
+                    imageMso='TableInsertExcel'
+                    onAction='OnSampleDataTreasury'
+                    screentip='Sample Data'
+                    supertip='Open an example dataset in a new worksheet.' />
+            <menu id='menuSampleData'>
+              <button id='btnSampleTreasury'
+                      label='Treasury Yields (Daily)'
+                      imageMso='TableInsertExcel'
+                      onAction='OnSampleDataTreasury'
+                      screentip='Treasury Yields'
+                      supertip='Daily 2Y, 5Y, 10Y, and 30Y U.S. Treasury constant maturity yields from the Federal Reserve.' />
+              <button id='btnSampleGdp'
+                      label='Real GDP (Quarterly)'
+                      imageMso='TableInsertExcel'
+                      onAction='OnSampleDataGdp'
+                      screentip='Real GDP'
+                      supertip='U.S. real GDP growth Q/Q SAAR from the Bureau of Economic Analysis.' />
+              <button id='btnSamplePce'
+                      label='Core PCE (Quarterly)'
+                      imageMso='TableInsertExcel'
+                      onAction='OnSampleDataPce'
+                      screentip='Core PCE Inflation'
+                      supertip='Core PCE inflation Q/Q SAAR from the Bureau of Economic Analysis.' />
+              <button id='btnSamplePayrollSa'
+                      label='Nonfarm Payroll Job Gains, SA (Monthly)'
+                      imageMso='TableInsertExcel'
+                      onAction='OnSampleDataPayrollSa'
+                      screentip='Nonfarm Payroll Job Gains (Seasonally Adjusted)'
+                      supertip='Monthly change in U.S. total nonfarm payroll employment, seasonally adjusted (BLS series CES0000000001), in thousands of jobs. Goes back to February 1939.' />
+              <button id='btnSamplePayrollNsa'
+                      label='Nonfarm Payroll Job Gains, NSA (Monthly)'
+                      imageMso='TableInsertExcel'
+                      onAction='OnSampleDataPayrollNsa'
+                      screentip='Nonfarm Payroll Job Gains (Not Seasonally Adjusted)'
+                      supertip='Monthly change in U.S. total nonfarm payroll employment, not seasonally adjusted (BLS series CEU0000000001), in thousands of jobs. Goes back to February 1939.' />
             </menu>
           </splitButton>
           <button id='btnSaveInstaller'

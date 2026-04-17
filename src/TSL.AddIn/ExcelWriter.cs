@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using ExcelDna.Integration;
 using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
@@ -49,6 +50,25 @@ namespace TSL.AddIn
                     // 3) Embedded JSON
                     EmbedJsonRunRecord(wb, request, response);
 
+                    // 4) Activate the Results sheet so the user lands on the
+                    // tables, not on the Audit sheet (which is the last one
+                    // created and would otherwise become active by default).
+                    if (!string.IsNullOrEmpty(writeResult.ResultSheetName))
+                    {
+                        try
+                        {
+                            var resultsSheet = (Worksheet)wb.Worksheets[writeResult.ResultSheetName];
+                            resultsSheet.Activate();
+                            // Park the cursor at A1 so the user sees the
+                            // Summary block first when the sheet opens.
+                            ((Range)resultsSheet.Cells[1, 1]).Select();
+                        }
+                        catch (Exception activateEx)
+                        {
+                            Logger.Info($"Could not activate results sheet: {activateEx.Message}");
+                        }
+                    }
+
                     writeResult.Success = true;
                 }
                 finally
@@ -67,8 +87,8 @@ namespace TSL.AddIn
 
         private static string WriteResultsSheet(Workbook wb, RunRequest request, RunResponse response)
         {
-            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var sheetName = TruncateSheetName($"TSL_{request.TechniqueId}_{timestamp}");
+            var techShortName = GetTechniqueShortName(request.TechniqueId);
+            var sheetName = MakeUniqueSheetName(wb, TruncateSheetName($"{techShortName} Results"));
 
             var ws = (Worksheet)wb.Worksheets.Add(After: wb.Worksheets[wb.Worksheets.Count]);
             ws.Name = sheetName;
@@ -173,7 +193,8 @@ namespace TSL.AddIn
 
         private static string WriteAuditSheet(Workbook wb, RunRequest request, RunResponse response)
         {
-            var sheetName = TruncateSheetName($"AUDIT_{request.RunId}");
+            var techShortName = GetTechniqueShortName(request.TechniqueId);
+            var sheetName = MakeUniqueSheetName(wb, TruncateSheetName($"{techShortName} Audit"));
             var ws = (Worksheet)wb.Worksheets.Add(After: wb.Worksheets[wb.Worksheets.Count]);
             ws.Name = sheetName;
 
@@ -355,6 +376,90 @@ namespace TSL.AddIn
                 .Replace("?", "").Replace("*", "").Replace("[", "").Replace("]", "");
             if (name.Length > 31) name = name.Substring(0, 31);
             return name;
+        }
+
+        /// <summary>
+        /// Get a concise, user-readable short name for the technique, suitable for
+        /// use as a sheet name prefix (e.g. "PCA", "VAR", "Seasonal Adjust").
+        /// Falls back to a title-cased variant of the technique_id.
+        /// </summary>
+        private static string GetTechniqueShortName(string techniqueId)
+        {
+            const string suffixReserve = " Results"; // 8 chars; also fits " Audit" (6)
+            try
+            {
+                var entry = TechniqueCatalogService.GetTechnique(techniqueId);
+                var name = entry?.Name;
+                if (!string.IsNullOrEmpty(name))
+                {
+                    // If the full name plus suffix fits within Excel's 31-char cap, use it
+                    if (name.Length + suffixReserve.Length <= 31) return name;
+
+                    // Otherwise derive an acronym from capitalised word initials
+                    var words = name.Split(new[] { ' ', '-', '_' },
+                        StringSplitOptions.RemoveEmptyEntries);
+                    if (words.Length >= 2)
+                    {
+                        var sb = new StringBuilder();
+                        foreach (var w in words)
+                            if (w.Length > 0 && char.IsLetter(w[0]))
+                                sb.Append(char.ToUpper(w[0]));
+                        if (sb.Length >= 2 && sb.Length + suffixReserve.Length <= 31)
+                            return sb.ToString();
+                    }
+
+                    // Final fallback: truncate
+                    return name.Substring(0, Math.Min(31 - suffixReserve.Length, name.Length));
+                }
+            }
+            catch { /* catalog unavailable; fall through */ }
+
+            return ToTitleCase(techniqueId ?? "Run");
+        }
+
+        private static string ToTitleCase(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "Run";
+            var parts = s.Replace("_", " ").Split(' ');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (parts[i].Length > 0)
+                    parts[i] = char.ToUpper(parts[i][0]) + parts[i].Substring(1);
+            }
+            return string.Join(" ", parts);
+        }
+
+        /// <summary>
+        /// Return a sheet name that is unique within the workbook, appending
+        /// " (2)", " (3)" etc. if the base name already exists. Respects the
+        /// 31-char Excel sheet-name limit.
+        /// </summary>
+        private static string MakeUniqueSheetName(Workbook wb, string baseName)
+        {
+            bool Exists(string n)
+            {
+                foreach (Worksheet s in wb.Worksheets)
+                {
+                    if (string.Equals(s.Name, n, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+                return false;
+            }
+
+            if (!Exists(baseName)) return baseName;
+
+            for (int i = 2; i < 1000; i++)
+            {
+                var suffix = $" ({i})";
+                var trunc = baseName;
+                if (trunc.Length + suffix.Length > 31)
+                    trunc = trunc.Substring(0, 31 - suffix.Length);
+                var candidate = trunc + suffix;
+                if (!Exists(candidate)) return candidate;
+            }
+
+            // Ultimate fallback: stamp with time
+            return TruncateSheetName(baseName + "_" + DateTime.Now.ToString("HHmmss"));
         }
 
         public class WriteResult

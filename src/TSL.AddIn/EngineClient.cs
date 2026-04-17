@@ -6,7 +6,9 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ExcelDna.Integration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TSL.AddIn.Models;
 
 namespace TSL.AddIn
@@ -33,6 +35,67 @@ namespace TSL.AddIn
         private string EnginePath => Path.Combine(AddIn.AppDataPath, "engine");
         private string PythonExePath => Path.Combine(EnginePath, "runtime", "python.exe");
         private string WorkerScriptPath => Path.Combine(EnginePath, "engine_worker.py");
+        private string PidFilePath => Path.Combine(AddIn.AppDataPath, "engine.pid");
+
+        /// <summary>
+        /// Kill any engine process left over from a prior session (e.g. Excel
+        /// crashed before AutoClose could fire, or a developer rebuilt the
+        /// engine while Excel was open).
+        ///
+        /// This is critical for development iteration: the Python engine
+        /// caches imported technique modules in-process, so updates to
+        /// pca_analysis.py / etc. are NOT picked up unless the engine
+        /// process restarts. Calling this from AddIn.AutoOpen guarantees
+        /// every Excel session starts with a fresh engine that re-imports
+        /// the latest code on first request.
+        /// </summary>
+        public void KillStaleEngineProcess()
+        {
+            try
+            {
+                if (!File.Exists(PidFilePath)) return;
+
+                var pidStr = File.ReadAllText(PidFilePath).Trim();
+                if (!int.TryParse(pidStr, out var pid))
+                {
+                    SafeDeletePidFile();
+                    return;
+                }
+
+                try
+                {
+                    var proc = Process.GetProcessById(pid);
+                    // Defensive: only kill if it's actually a Python process,
+                    // never a random PID that's been reused by Windows.
+                    if (proc.ProcessName.StartsWith("python", StringComparison.OrdinalIgnoreCase))
+                    {
+                        proc.Kill();
+                        proc.WaitForExit(2000);
+                        Logger.Info($"Killed stale engine process PID={pid} (so the engine reloads updated Python modules).");
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // PID is not a running process — already gone, nothing to do.
+                }
+                catch (InvalidOperationException)
+                {
+                    // Process exited between the lookup and the Kill call.
+                }
+
+                SafeDeletePidFile();
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Stale engine cleanup skipped: {ex.Message}");
+            }
+        }
+
+        private void SafeDeletePidFile()
+        {
+            try { if (File.Exists(PidFilePath)) File.Delete(PidFilePath); }
+            catch { /* best-effort */ }
+        }
 
         /// <summary>
         /// Ensures the engine process is running. Starts it if not.
@@ -52,16 +115,13 @@ namespace TSL.AddIn
         {
             // For development: try system Python if embedded runtime not yet installed
             var pythonExe = File.Exists(PythonExePath) ? PythonExePath : "python";
-            var workerScript = File.Exists(WorkerScriptPath)
-                ? WorkerScriptPath
-                : Path.Combine(
-                    Path.GetDirectoryName(typeof(EngineClient).Assembly.Location) ?? "",
-                    "..", "..", "..", "..", "engine", "engine_worker.py");
+            var workerScript = ResolveWorkerScript();
 
-            if (!File.Exists(workerScript))
+            if (string.IsNullOrEmpty(workerScript) || !File.Exists(workerScript))
             {
                 throw new FileNotFoundException(
-                    $"Engine worker script not found. Expected at:\n{WorkerScriptPath}\nor\n{workerScript}\n\n" +
+                    $"Engine worker script not found. Searched:\n" +
+                    string.Join("\n", GetWorkerScriptSearchPaths()) + "\n\n" +
                     "Please ensure the engine is installed correctly.");
             }
 
@@ -86,10 +146,82 @@ namespace TSL.AddIn
 
             _engineProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
 
+            // Persist the PID so KillStaleEngineProcess() on a future
+            // AutoOpen can clean up if Excel crashes before AutoClose fires.
+            try
+            {
+                File.WriteAllText(PidFilePath, _engineProcess.Id.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Could not write engine PID file: {ex.Message}");
+            }
+
             // Give engine a moment to create pipe server
             Thread.Sleep(500);
 
             Logger.Info($"Engine process started (PID={_engineProcess.Id}), pipe={_pipeName}");
+        }
+
+        /// <summary>
+        /// Resolve the path to engine_worker.py, trying several candidate locations.
+        /// Returns the first one that exists, or null if none found.
+        /// </summary>
+        private string ResolveWorkerScript()
+        {
+            foreach (var candidate in GetWorkerScriptSearchPaths())
+            {
+                if (!string.IsNullOrEmpty(candidate) && File.Exists(candidate))
+                    return candidate;
+            }
+            return null;
+        }
+
+        private System.Collections.Generic.List<string> GetWorkerScriptSearchPaths()
+        {
+            var paths = new System.Collections.Generic.List<string>();
+
+            // Installed location (%LOCALAPPDATA%\TimeSeriesLab\engine\engine_worker.py)
+            paths.Add(WorkerScriptPath);
+
+            // Relative to the loaded XLL (most reliable when running packed).
+            try
+            {
+                var xllPath = ExcelDnaUtil.XllPath;
+                if (!string.IsNullOrEmpty(xllPath))
+                {
+                    var xllDir = Path.GetDirectoryName(xllPath);
+                    if (!string.IsNullOrEmpty(xllDir))
+                    {
+                        // Co-located engine
+                        paths.Add(Path.Combine(xllDir, "engine", "engine_worker.py"));
+                        // Dev build: src\TSL.AddIn\bin\x64\Release\net48\publish\ -> project root
+                        paths.Add(Path.Combine(xllDir, "..", "..", "..", "..", "..", "..", "engine", "engine_worker.py"));
+                        // Dev build: src\TSL.AddIn\bin\x64\Release\net48\ -> project root
+                        paths.Add(Path.Combine(xllDir, "..", "..", "..", "..", "..", "engine", "engine_worker.py"));
+                    }
+                }
+            }
+            catch { /* ExcelDnaUtil unavailable at design-time */ }
+
+            // Dev location (relative to assembly). Assembly.Location can throw
+            // "The path is not of a legal form" when loaded from a packed XLL.
+            try
+            {
+                var asmLoc = typeof(EngineClient).Assembly.Location;
+                if (!string.IsNullOrEmpty(asmLoc))
+                {
+                    var asmDir = Path.GetDirectoryName(asmLoc);
+                    if (!string.IsNullOrEmpty(asmDir))
+                    {
+                        paths.Add(Path.Combine(asmDir, "..", "..", "..", "..", "engine", "engine_worker.py"));
+                        paths.Add(Path.Combine(asmDir, "engine", "engine_worker.py"));
+                    }
+                }
+            }
+            catch { /* Assembly.Location may throw for embedded assemblies */ }
+
+            return paths;
         }
 
         /// <summary>
@@ -158,19 +290,41 @@ namespace TSL.AddIn
 
                     var msg = Encoding.UTF8.GetString(msgBuf);
 
-                    // Try to parse as progress event first
-                    if (msg.Contains("\"type\":\"progress\""))
+                    // Robustly distinguish progress events from the final response
+                    // by parsing the JSON and inspecting the "type" field. The old
+                    // substring check (msg.Contains("\"type\":\"progress\"")) was
+                    // whitespace-sensitive and misfired against Python's default
+                    // json.dumps output ("type": "progress" with a space), causing
+                    // the first progress event to be mistaken for the final
+                    // RunResponse (yielding empty Tables + null summary).
+                    JObject parsed = null;
+                    try
+                    {
+                        parsed = JObject.Parse(msg);
+                    }
+                    catch (JsonException)
+                    {
+                        // Malformed JSON — treat as final response to surface the error
+                        finalResponse = msg;
+                        break;
+                    }
+
+                    var msgType = (string)parsed["type"];
+                    if (string.Equals(msgType, "progress", StringComparison.OrdinalIgnoreCase))
                     {
                         try
                         {
-                            var evt = JsonConvert.DeserializeObject<ProgressEvent>(msg);
+                            var evt = parsed.ToObject<ProgressEvent>();
                             ProgressReceived?.Invoke(evt);
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            Logger.Info($"Failed to parse progress event: {ex.Message}");
+                        }
                     }
                     else
                     {
-                        // Final response
+                        // Final RunResponse frame
                         finalResponse = msg;
                         break;
                     }
@@ -220,6 +374,9 @@ namespace TSL.AddIn
         public void Shutdown()
         {
             CancelCurrentRun();
+            // Clean up PID file on graceful shutdown so the next AutoOpen
+            // doesn't try to kill a PID that's already been recycled.
+            SafeDeletePidFile();
         }
 
         public void Dispose()

@@ -73,6 +73,16 @@ namespace TSL.AddIn
             TaskPaneManager.ShowAndSelect("stl_esd_anomaly");
         }
 
+        public void OnPcaAnalysis(IRibbonControl control)
+        {
+            TaskPaneManager.ShowAndSelect("pca_analysis");
+        }
+
+        public void OnDynamicFactorModel(IRibbonControl control)
+        {
+            TaskPaneManager.ShowAndSelect("dynamic_factor_model");
+        }
+
         // ── Explore ────────────────────────────────────────────────────
 
         public void OnTechniqueExplorer(IRibbonControl control)
@@ -270,6 +280,102 @@ namespace TSL.AddIn
                     "Time Series Lab",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
+            }
+        }
+
+        public void OnSampleDataTreasury(IRibbonControl control)
+        {
+            LoadSampleData("treasury_yields.csv", "Treasury Yields");
+        }
+
+        public void OnSampleDataGdp(IRibbonControl control)
+        {
+            LoadSampleData("real_gdp.csv", "Real GDP");
+        }
+
+        public void OnSampleDataPce(IRibbonControl control)
+        {
+            LoadSampleData("core_pce.csv", "Core PCE");
+        }
+
+        public void OnSampleDataPayrollSa(IRibbonControl control)
+        {
+            // Total nonfarm payrolls, seasonally adjusted (BLS CES0000000001),
+            // converted to monthly job gains. Coverage: Feb 1939 -> latest.
+            LoadSampleData("nonfarm_payroll_sa.csv", "Payroll Gains SA");
+        }
+
+        public void OnSampleDataPayrollNsa(IRibbonControl control)
+        {
+            // Total nonfarm payrolls, not seasonally adjusted (BLS CEU0000000001),
+            // converted to monthly job gains. Coverage: Feb 1939 -> latest.
+            LoadSampleData("nonfarm_payroll_nsa.csv", "Payroll Gains NSA");
+        }
+
+        private void LoadSampleData(string fileName, string sheetName)
+        {
+            try
+            {
+                // Locate the CSV file
+                string csvPath = null;
+
+                // Try dev/project location
+                var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+                var projectRoot = Path.GetFullPath(Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
+                var devPath = Path.Combine(projectRoot, "resources", "sample_data", fileName);
+                if (File.Exists(devPath))
+                    csvPath = devPath;
+
+                // Fallback: installed location
+                if (csvPath == null)
+                {
+                    var installedPath = Path.Combine(AddIn.AppDataPath, "sample_data", fileName);
+                    if (File.Exists(installedPath))
+                        csvPath = installedPath;
+                }
+
+                if (csvPath == null)
+                {
+                    MessageBox.Show(
+                        $"Sample data file not found: {fileName}\n\n" +
+                        "Reinstall Time Series Lab to restore the sample data files.",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Read CSV and write to a new worksheet
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                    var wb = app.ActiveWorkbook ?? app.Workbooks.Add();
+                    var ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.Add();
+                    ws.Name = sheetName;
+
+                    var lines = File.ReadAllLines(csvPath);
+                    for (int r = 0; r < lines.Length; r++)
+                    {
+                        var cells = lines[r].Split(',');
+                        for (int c = 0; c < cells.Length; c++)
+                        {
+                            var val = cells[c].Trim();
+                            ((Range)ws.Cells[r + 1, c + 1]).Value2 = val;
+                        }
+                    }
+
+                    // Auto-fit columns
+                    ws.Columns.AutoFit();
+                    ws.Activate();
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error loading sample data: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
