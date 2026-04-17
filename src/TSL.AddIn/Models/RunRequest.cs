@@ -46,6 +46,26 @@ namespace TSL.AddIn.Models
 
         [JsonProperty("values")]
         public double?[] Values { get; set; }
+
+        /// <summary>
+        /// Excel NumberFormat string of the source cells (e.g. "#,##0.00",
+        /// "General", "0.00%"). Captured from the first data cell of the
+        /// source column and applied to every numeric output column whose
+        /// units match the input (raw series, Seasonally Adjusted, Trend,
+        /// Seasonal, Irregular, etc.). Not round-tripped through Python —
+        /// carried on the request so ExcelWriter can read it back.
+        /// </summary>
+        [JsonIgnore]
+        public string NumberFormat { get; set; }
+
+        /// <summary>
+        /// Excel NumberFormat string of the source time column's first
+        /// data cell (e.g. "m/d/yyyy", "dd-mmm-yyyy"). Applied to the
+        /// Time column of output tables so the user's chosen date format
+        /// is preserved. [JsonIgnore] because Python doesn't use it.
+        /// </summary>
+        [JsonIgnore]
+        public string TimeNumberFormat { get; set; }
     }
 
     public class FillConfig

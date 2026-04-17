@@ -421,6 +421,26 @@ def handle_request(handle, raw_request: dict):
             response["audit_fields"] = {}
         response["audit_fields"]["elapsed_seconds"] = round(elapsed, 3)
 
+        # If we flipped the input to chronological order, flip the output
+        # table rows back so the user's original orientation (typically
+        # newest-first from the CSVs we ship) is preserved. Techniques
+        # all produce rows in internal chronological order; this undoes
+        # that at the display boundary.
+        if getattr(ctx, "input_was_reversed", False):
+            for tbl in response.get("tables") or []:
+                # Only reverse time-ordered tables — identified by a "Time"
+                # (or "Date") column among the first two positions. Non-
+                # time tables (e.g. "Diagnostics", "Coefficients") should
+                # keep their natural ordering.
+                cols = tbl.get("columns") or []
+                if not cols:
+                    continue
+                first_two = [str(c).lower() for c in cols[:2]]
+                if any(c in ("time", "date", "timestamp") for c in first_two):
+                    rows = tbl.get("rows")
+                    if isinstance(rows, list):
+                        tbl["rows"] = list(reversed(rows))
+
     except ValueError as e:
         log.warning(f"Run {run_id}: ValueError: {e}")
         response = make_error_response(

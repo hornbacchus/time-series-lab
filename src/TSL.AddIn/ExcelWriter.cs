@@ -39,13 +39,26 @@ namespace TSL.AddIn
 
                 app.ScreenUpdating = false;
 
+                // Capture the sheet the user was on when they kicked off the
+                // run. The results and audit sheets are inserted immediately
+                // BEFORE this sheet so they land near the source data in the
+                // tab strip (instead of being pushed to the far right at the
+                // end of a long workbook). If the active sheet can't be
+                // resolved, fall back to appending at the end.
+                Worksheet sourceSheet = null;
+                try { sourceSheet = app.ActiveSheet as Worksheet; }
+                catch (Exception sheetEx)
+                {
+                    Logger.Info($"Could not resolve source sheet for insertion: {sheetEx.Message}");
+                }
+
                 try
                 {
-                    // 1) Results sheet
-                    writeResult.ResultSheetName = WriteResultsSheet(wb, request, response);
-
-                    // 2) Audit sheet
-                    writeResult.AuditSheetName = WriteAuditSheet(wb, request, response);
+                    // Order matters: insert Audit FIRST (Before source), then
+                    // Results FIRST (Before source). This leaves the tab
+                    // strip as: ... | Results | Audit | Source | ...
+                    writeResult.AuditSheetName = WriteAuditSheet(wb, request, response, sourceSheet);
+                    writeResult.ResultSheetName = WriteResultsSheet(wb, request, response, sourceSheet);
 
                     // 3) Embedded JSON
                     EmbedJsonRunRecord(wb, request, response);
@@ -85,12 +98,17 @@ namespace TSL.AddIn
             return writeResult;
         }
 
-        private static string WriteResultsSheet(Workbook wb, RunRequest request, RunResponse response)
+        private static string WriteResultsSheet(Workbook wb, RunRequest request, RunResponse response,
+            Worksheet sourceSheet = null)
         {
             var techShortName = GetTechniqueShortName(request.TechniqueId);
             var sheetName = MakeUniqueSheetName(wb, TruncateSheetName($"{techShortName} Results"));
 
-            var ws = (Worksheet)wb.Worksheets.Add(After: wb.Worksheets[wb.Worksheets.Count]);
+            Worksheet ws;
+            if (sourceSheet != null)
+                ws = (Worksheet)wb.Worksheets.Add(Before: sourceSheet);
+            else
+                ws = (Worksheet)wb.Worksheets.Add(After: wb.Worksheets[wb.Worksheets.Count]);
             ws.Name = sheetName;
 
             int row = 1;
@@ -142,13 +160,28 @@ namespace TSL.AddIn
                 row++;
             }
 
-            // 4) Output tables
+            // 4) Output tables. Capture input NumberFormat once so we can
+            // apply it to the numeric columns of every time-series table
+            // (raw series, Seasonally Adjusted, Trend, Seasonal, Irregular
+            // etc. all share the source's units and therefore format).
+            string seriesFormat = null;
+            string timeFormat = null;
+            var primarySeriesName = "";
+            if (request?.Series != null && request.Series.Count > 0)
+            {
+                seriesFormat = request.Series[0].NumberFormat;
+                timeFormat = request.Series[0].TimeNumberFormat;
+                primarySeriesName = request.Series[0].Name ?? "";
+            }
+
             foreach (var table in response.Tables)
             {
                 C(ws, row, 1).Value2 = table.Name;
                 C(ws, row, 1).Font.Bold = true;
                 C(ws, row, 1).Font.Size = 12;
                 row++;
+
+                int headerRow = row;
 
                 // Headers
                 for (int c = 0; c < table.Columns.Length; c++)
@@ -158,6 +191,8 @@ namespace TSL.AddIn
                     C(ws, row, c + 1).Interior.Color = 0xD9E1F2; // Light blue
                 }
                 row++;
+
+                int firstDataRow = row;
 
                 // Data rows
                 if (table.Rows != null)
@@ -169,6 +204,46 @@ namespace TSL.AddIn
                             C(ws, row, c + 1).Value2 = dataRow[c];
                         }
                         row++;
+                    }
+                }
+                int lastDataRow = row - 1;
+
+                // Apply NumberFormat to the body of each column, based on
+                // column name + captured source formats. "Time" / "Date" /
+                // "Timestamp" columns get the source time format. Columns
+                // whose name matches the input series OR is one of the
+                // standard decomposition components get the source series
+                // format. Everything else (ratios, lags, coefficients) is
+                // left at Excel's default — they do not share the source
+                // series' units.
+                if (lastDataRow >= firstDataRow)
+                {
+                    var sharedUnitsColumns = new HashSet<string>(
+                        new[] {
+                            primarySeriesName, "Seasonally Adjusted", "Trend",
+                            "Seasonal", "Irregular", "Fitted", "Forecast",
+                            "Level", "Lower", "Upper", "Residual",
+                        },
+                        StringComparer.OrdinalIgnoreCase);
+                    sharedUnitsColumns.Remove(""); // just in case name is blank
+
+                    for (int c = 0; c < table.Columns.Length; c++)
+                    {
+                        var colName = (table.Columns[c] ?? "").Trim();
+                        var bodyRange = ws.Range[C(ws, firstDataRow, c + 1),
+                                                 C(ws, lastDataRow, c + 1)];
+                        try
+                        {
+                            bool isTime = string.Equals(colName, "Time", StringComparison.OrdinalIgnoreCase)
+                                       || string.Equals(colName, "Date", StringComparison.OrdinalIgnoreCase)
+                                       || string.Equals(colName, "Timestamp", StringComparison.OrdinalIgnoreCase);
+                            if (isTime && !string.IsNullOrEmpty(timeFormat))
+                                bodyRange.NumberFormat = timeFormat;
+                            else if (sharedUnitsColumns.Contains(colName)
+                                     && !string.IsNullOrEmpty(seriesFormat))
+                                bodyRange.NumberFormat = seriesFormat;
+                        }
+                        catch { /* best-effort formatting */ }
                     }
                 }
                 row++;
@@ -210,11 +285,16 @@ namespace TSL.AddIn
             return sheetName;
         }
 
-        private static string WriteAuditSheet(Workbook wb, RunRequest request, RunResponse response)
+        private static string WriteAuditSheet(Workbook wb, RunRequest request, RunResponse response,
+            Worksheet sourceSheet = null)
         {
             var techShortName = GetTechniqueShortName(request.TechniqueId);
             var sheetName = MakeUniqueSheetName(wb, TruncateSheetName($"{techShortName} Audit"));
-            var ws = (Worksheet)wb.Worksheets.Add(After: wb.Worksheets[wb.Worksheets.Count]);
+            Worksheet ws;
+            if (sourceSheet != null)
+                ws = (Worksheet)wb.Worksheets.Add(Before: sourceSheet);
+            else
+                ws = (Worksheet)wb.Worksheets.Add(After: wb.Worksheets[wb.Worksheets.Count]);
             ws.Name = sheetName;
 
             int row = 1;

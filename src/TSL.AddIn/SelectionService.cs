@@ -21,6 +21,13 @@ namespace TSL.AddIn
             public int MissingCount { get; set; }
             public int Length => Values?.Length ?? 0;
             public double MissingPct => Length == 0 ? 0 : (double)MissingCount / Length * 100;
+
+            /// <summary>
+            /// Excel NumberFormat string of the column's first numeric cell
+            /// (e.g. "#,##0.00"). Used later to format the output cells so
+            /// they match the user's chosen input formatting.
+            /// </summary>
+            public string NumberFormat { get; set; }
         }
 
         public class SelectionResult
@@ -101,6 +108,8 @@ namespace TSL.AddIn
                 int col = startCol + c;
                 var values = new List<double?>();
                 int missingCount = 0;
+                string numberFormat = null;
+                int firstNumericRow = -1;
 
                 for (int r = 0; r < numRows; r++)
                 {
@@ -108,10 +117,44 @@ namespace TSL.AddIn
                     var cellValue = ((Range)sheet.Cells[row, col]).Value2;
                     var parsed = ParseNumeric(cellValue);
                     values.Add(parsed);
-                    if (!parsed.HasValue) missingCount++;
+                    if (!parsed.HasValue)
+                    {
+                        missingCount++;
+                    }
+                    else if (firstNumericRow < 0)
+                    {
+                        firstNumericRow = row;
+                    }
                 }
 
-                // Determine header: check the cell directly above the first selected row
+                // Grab the Excel number format from the first numeric cell.
+                // The header row often has format "General" or different from
+                // the data, so sniff from real data. "General" is treated as
+                // "no opinion" so we leave NumberFormat null in that case
+                // and let the writer fall through to its own defaults.
+                if (firstNumericRow > 0)
+                {
+                    try
+                    {
+                        var nf = ((Range)sheet.Cells[firstNumericRow, col]).NumberFormat as string;
+                        if (!string.IsNullOrEmpty(nf) && !string.Equals(nf, "General",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            numberFormat = nf;
+                        }
+                    }
+                    catch { /* NumberFormat can throw on merged ranges */ }
+                }
+
+                // Determine header name. Three sources, tried in order:
+                //   1. The cell directly above the first selected row (the
+                //      user selected just the data and the header sits above).
+                //   2. The first cell of the selection itself, if it's a
+                //      non-numeric string (the user selected the column
+                //      including its header row — common when you Ctrl-Space
+                //      or click the column letter).
+                //   3. "Col_<letter>" fallback, preserved as a last resort
+                //      so we never end up with an empty name in outputs.
                 string header = null;
                 if (startRow > 1)
                 {
@@ -122,6 +165,19 @@ namespace TSL.AddIn
                         if (!string.IsNullOrEmpty(headerStr) && !IsNumericLike(headerStr))
                         {
                             header = headerStr;
+                        }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(header) && numRows > 0)
+                {
+                    var firstCell = ((Range)sheet.Cells[startRow, col]).Value2;
+                    if (firstCell != null)
+                    {
+                        var firstStr = firstCell.ToString().Trim();
+                        if (!string.IsNullOrEmpty(firstStr) && !IsNumericLike(firstStr))
+                        {
+                            header = firstStr;
                         }
                     }
                 }
@@ -139,6 +195,7 @@ namespace TSL.AddIn
                     Address = colAddress,
                     Values = values.ToArray(),
                     MissingCount = missingCount,
+                    NumberFormat = numberFormat,
                 });
             }
         }

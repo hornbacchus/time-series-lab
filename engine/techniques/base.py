@@ -63,34 +63,68 @@ class RunContext:
         # oldest-first order — so if we detect the input is descending
         # in time, flip both `time` and every series/exog values array
         # once up-front. Downstream code then never has to think about it.
+        self.input_was_reversed: bool = False
         self._normalize_chronological_order()
 
     def _normalize_chronological_order(self) -> None:
         """If `self.time` is strictly descending, reverse it and every
         parallel series/exog values array in place. Leaves things alone
-        if the order is already ascending, mixed, or unparseable."""
+        if the order is already ascending, mixed, or mostly unparseable.
+
+        Tolerates unparseable entries (header rows, blanks, garbage cells)
+        by recording their index position as None and making the direction
+        decision only from pairs of adjacent parseable dates.
+        """
         if not self.time or len(self.time) < 2:
             return
-        try:
-            import datetime as _dt
-            parsed = []
-            for t in self.time:
-                s = str(t)
-                if "T" in s:
-                    s = s.split("T", 1)[0]
-                # Accept YYYY-MM-DD, YYYY/MM/DD, and common ISO variants
-                s = s.replace("/", "-").replace("Z", "").strip()
-                parsed.append(_dt.date.fromisoformat(s[:10]))
-        except Exception:
-            return  # unparseable — leave as-is
-        n = len(parsed)
-        # Count how many consecutive steps are ascending vs descending.
-        asc = sum(1 for i in range(n - 1) if parsed[i] < parsed[i + 1])
-        desc = sum(1 for i in range(n - 1) if parsed[i] > parsed[i + 1])
-        # Only reverse if strictly / overwhelmingly descending. A few ties
-        # or out-of-order rows are fine; we don't try to fully sort here.
-        if desc > asc and desc >= 0.9 * (n - 1):
+        import datetime as _dt
+
+        parsed = [None] * len(self.time)
+        for i, t in enumerate(self.time):
+            if t is None:
+                continue
+            s = str(t).strip()
+            if not s:
+                continue
+            if "T" in s:
+                s = s.split("T", 1)[0]
+            s = s.replace("/", "-").replace("Z", "").strip()
+            try:
+                parsed[i] = _dt.date.fromisoformat(s[:10])
+            except (ValueError, TypeError):
+                # Unparseable (e.g. the literal string "Date" from a
+                # header row). Leave as None and move on.
+                continue
+
+        # Require at least a handful of parseable dates to make any call.
+        parseable_count = sum(1 for p in parsed if p is not None)
+        if parseable_count < 3:
+            return
+
+        # Walk consecutive pairs where BOTH sides parsed. Count ascending
+        # vs descending. Unparseable positions don't vote.
+        asc = desc = tied = 0
+        for i in range(len(parsed) - 1):
+            a, b = parsed[i], parsed[i + 1]
+            if a is None or b is None:
+                continue
+            if a < b:
+                asc += 1
+            elif a > b:
+                desc += 1
+            else:
+                tied += 1
+
+        pairs_considered = asc + desc + tied
+        if pairs_considered == 0:
+            return
+
+        # Reverse only if overwhelmingly descending. A single out-of-order
+        # row or tie shouldn't flip the series.
+        if desc > asc and desc >= 0.9 * pairs_considered:
+            self.input_was_reversed = True
             self.time = list(reversed(self.time))
+            parsed = list(reversed(parsed))
             for s in self.series or []:
                 vals = s.get("values")
                 if isinstance(vals, list):
@@ -99,6 +133,35 @@ class RunContext:
                 vals = s.get("values")
                 if isinstance(vals, list):
                     s["values"] = list(reversed(vals))
+
+        # After ordering is normalized, trim unparseable entries from the
+        # ends. These are almost always header rows that got swept into
+        # the C# selection (e.g. cell A1 containing the literal "Date"
+        # becomes an empty string). Leaving them in place would mean the
+        # last row of the output table shows a blank date, and any
+        # downstream truncation (fit_window_obs, 85-year X-13 cap) would
+        # treat the header position as a real observation.
+        def _first_parseable(idx_range):
+            for i in idx_range:
+                if parsed[i] is not None:
+                    return i
+            return None
+
+        n_orig = len(self.time)
+        head = _first_parseable(range(n_orig)) or 0
+        tail = _first_parseable(range(n_orig - 1, -1, -1))
+        tail = (tail + 1) if tail is not None else n_orig
+
+        if head > 0 or tail < n_orig:
+            self.time = self.time[head:tail]
+            for s in self.series or []:
+                vals = s.get("values")
+                if isinstance(vals, list) and len(vals) == n_orig:
+                    s["values"] = vals[head:tail]
+            for s in self.exog or []:
+                vals = s.get("values")
+                if isinstance(vals, list) and len(vals) == n_orig:
+                    s["values"] = vals[head:tail]
 
     # ------------------------------------------------------------------
     # Series helpers

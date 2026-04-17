@@ -332,10 +332,42 @@ namespace TSL.AddIn
                 {
                     Name = s.Name,
                     Values = s.Values,
+                    NumberFormat = s.NumberFormat,
                 }).ToList(),
                 Params = paramsDict,
                 FillConfig = new FillConfig(),
             };
+
+            // Capture the time column's cell NumberFormat (e.g. "dd-mmm-yyyy",
+            // "m/d/yyyy"), if available, so the Time column in output tables
+            // uses the same format as the source.
+            try
+            {
+                if (!string.IsNullOrEmpty(timeColumnAddress) && request.Series.Count > 0)
+                {
+                    var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                    var src = app.ActiveSheet as Worksheet;
+                    var timeRange = src?.Range[timeColumnAddress];
+                    if (timeRange != null)
+                    {
+                        // Pick the second cell (skip a likely header row).
+                        var probeRow = timeRange.Row + (timeRange.Rows.Count > 1 ? 1 : 0);
+                        var probe = (Range)src.Cells[probeRow, timeRange.Column];
+                        var tf = probe.NumberFormat as string;
+                        if (!string.IsNullOrEmpty(tf) && !string.Equals(tf, "General",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Stash on the first series so the writer can
+                            // find it without a separate plumbing channel.
+                            request.Series[0].TimeNumberFormat = tf;
+                        }
+                    }
+                }
+            }
+            catch (Exception nfEx)
+            {
+                Logger.Info($"Could not capture time column NumberFormat: {nfEx.Message}");
+            }
 
             // Run async on background thread
             Task.Run(async () =>
