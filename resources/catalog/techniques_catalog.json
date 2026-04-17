@@ -61,7 +61,8 @@
       "supports_auto_udf": false, "auto_udf_name": null,
       "presets": ["Balanced", "Thorough"],
       "parameters": [
-        {"name": "method", "label": "Method", "type": "string", "default": "seats", "required": false, "advanced": false, "description": "SEATS or X11", "options": ["seats", "x11"]}
+        {"name": "method", "label": "Method", "type": "string", "default": "seats", "required": false, "advanced": false, "description": "SEATS or X11", "options": ["seats", "x11"]},
+        {"name": "fit_window_obs", "label": "Fit Window (observations)", "type": "int", "default": 120, "required": false, "advanced": false, "description": "Most recent N observations to fit on. BLS uses ~120 months (10 yrs) for payrolls. Set to 0 to use all data (capped at X-13's 85-year program limit).", "options": null}
       ],
       "output_tables": ["seasonal_adjustment", "diagnostics"],
       "tags": ["decomposition", "seasonal", "x13", "census"]

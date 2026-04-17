@@ -300,16 +300,20 @@ namespace TSL.AddIn
 
         public void OnSampleDataPayrollSa(IRibbonControl control)
         {
-            // Total nonfarm payrolls, seasonally adjusted (BLS CES0000000001),
-            // converted to monthly job gains. Coverage: Feb 1939 -> latest.
-            LoadSampleData("nonfarm_payroll_sa.csv", "Payroll Gains SA");
+            // Total nonfarm payroll employment levels, seasonally adjusted
+            // (FRED PAYEMS, in thousands of jobs). Coverage: Jan 1939 -> latest.
+            // Levels — not differences — so X-13/STL seasonal decomposition
+            // produces the textbook SA series; compute job gains downstream
+            // as first differences of the SA column if desired.
+            LoadSampleData("nonfarm_payroll_sa.csv", "Payrolls SA");
         }
 
         public void OnSampleDataPayrollNsa(IRibbonControl control)
         {
-            // Total nonfarm payrolls, not seasonally adjusted (BLS CEU0000000001),
-            // converted to monthly job gains. Coverage: Feb 1939 -> latest.
-            LoadSampleData("nonfarm_payroll_nsa.csv", "Payroll Gains NSA");
+            // Total nonfarm payroll employment levels, not seasonally adjusted
+            // (FRED PAYNSA, in thousands of jobs). Coverage: Jan 1939 -> latest.
+            // Levels series suitable as direct X-13 / STL input.
+            LoadSampleData("nonfarm_payroll_nsa.csv", "Payrolls NSA");
         }
 
         private void LoadSampleData(string fileName, string sheetName)

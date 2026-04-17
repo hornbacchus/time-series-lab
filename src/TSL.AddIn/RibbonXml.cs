@@ -221,17 +221,17 @@ namespace TSL.AddIn
                       screentip='Core PCE Inflation'
                       supertip='Core PCE inflation Q/Q SAAR from the Bureau of Economic Analysis.' />
               <button id='btnSamplePayrollSa'
-                      label='Nonfarm Payroll Job Gains, SA (Monthly)'
+                      label='Total Nonfarm Payrolls, SA (Monthly)'
                       imageMso='TableInsertExcel'
                       onAction='OnSampleDataPayrollSa'
-                      screentip='Nonfarm Payroll Job Gains (Seasonally Adjusted)'
-                      supertip='Monthly change in U.S. total nonfarm payroll employment, seasonally adjusted (BLS series CES0000000001), in thousands of jobs. Goes back to February 1939.' />
+                      screentip='Total Nonfarm Payrolls (Seasonally Adjusted)'
+                      supertip='U.S. total nonfarm payroll employment levels, seasonally adjusted (FRED series PAYEMS), in thousands of jobs. Monthly, January 1939 to present.' />
               <button id='btnSamplePayrollNsa'
-                      label='Nonfarm Payroll Job Gains, NSA (Monthly)'
+                      label='Total Nonfarm Payrolls, NSA (Monthly)'
                       imageMso='TableInsertExcel'
                       onAction='OnSampleDataPayrollNsa'
-                      screentip='Nonfarm Payroll Job Gains (Not Seasonally Adjusted)'
-                      supertip='Monthly change in U.S. total nonfarm payroll employment, not seasonally adjusted (BLS series CEU0000000001), in thousands of jobs. Goes back to February 1939.' />
+                      screentip='Total Nonfarm Payrolls (Not Seasonally Adjusted)'
+                      supertip='U.S. total nonfarm payroll employment levels, not seasonally adjusted (FRED series PAYNSA), in thousands of jobs. Monthly, January 1939 to present.' />
             </menu>
           </splitButton>
           <button id='btnSaveInstaller'

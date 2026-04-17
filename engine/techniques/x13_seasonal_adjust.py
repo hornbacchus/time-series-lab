@@ -44,11 +44,19 @@ def _find_x13_binary():
         os.path.join(project_dir, "x13"),
     ]
 
-    # Binary names to look for
+    # Binary names to look for. Census ships builds named "x13as_html.exe"
+    # / "x13as_ascii.exe" (current, e.g. v1-1-b62, 2024-07) and older
+    # builds sometimes named "x13as.exe" / "x13ashtml.exe".
     if sys.platform == "win32":
-        binary_names = ["x13as.exe", "x13ashtml.exe"]
+        binary_names = [
+            "x13as_html.exe", "x13as_ascii.exe",
+            "x13ashtml.exe", "x13as.exe",
+        ]
     else:
-        binary_names = ["x13as", "x13ashtml"]
+        binary_names = [
+            "x13as_html", "x13as_ascii",
+            "x13ashtml", "x13as",
+        ]
 
     for search_dir in search_paths:
         if os.path.isdir(search_dir):
@@ -84,8 +92,15 @@ def _infer_period(ctx):
     return freq_map.get(f, None)
 
 
-def _write_x13_spec(spec_path, data_path, period, transform, outlier, start_year, start_period):
-    """Write an X-13 spec file."""
+def _write_x13_spec(spec_path, data_path, period, transform, outlier,
+                    start_year, start_period, arima_model=None):
+    """Write an X-13 spec file.
+
+    If ``arima_model`` is None, use automdl (automatic model selection).
+    Otherwise supply the model as a tuple/string (e.g. "(0 1 1)(0 1 1)") to
+    use a fixed ARIMA specification — useful as a fallback when automdl
+    fails to converge on long or difficult series.
+    """
     spec_lines = []
     spec_lines.append("series{")
     spec_lines.append(f'  file = "{data_path}"')
@@ -107,8 +122,22 @@ def _write_x13_spec(spec_path, data_path, period, transform, outlier, start_year
 
     spec_lines.append("")
 
-    # automdl for ARIMA model selection
-    spec_lines.append("automdl{}")
+    if arima_model is None:
+        # Automatic model selection
+        spec_lines.append("automdl{")
+        spec_lines.append("  savelog = amd")
+        spec_lines.append("}")
+    else:
+        # Fixed ARIMA model with liberal iteration limits to help
+        # convergence on long or outlier-heavy series.
+        spec_lines.append("arima{")
+        spec_lines.append(f"  model = {arima_model}")
+        spec_lines.append("}")
+        spec_lines.append("")
+        spec_lines.append("estimate{")
+        spec_lines.append("  maxiter = 1500")
+        spec_lines.append("  tol = 1.0e-4")
+        spec_lines.append("}")
     spec_lines.append("")
 
     # Outlier detection
@@ -116,8 +145,13 @@ def _write_x13_spec(spec_path, data_path, period, transform, outlier, start_year
         spec_lines.append("outlier{}")
         spec_lines.append("")
 
-    # X-11 decomposition
+    # X-11 decomposition. Default X-11 mode is "mult" (multiplicative),
+    # which requires strictly positive values. When the caller chose no
+    # transform (typical for change/flow series with negatives), force
+    # additive decomposition instead.
     spec_lines.append("x11{")
+    if transform == "none":
+        spec_lines.append("  mode = add")
     spec_lines.append("  save = (d10 d11 d12 d13)")
     spec_lines.append("}")
 
@@ -168,6 +202,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
         Start year of the series. Default 2000.
     start_period : int, optional
         Start period (month or quarter). Default 1.
+    fit_window_obs : int, optional
+        Number of most recent observations to fit on (rolling window). Default
+        120 for monthly, 40 for quarterly — matches BLS CES concurrent
+        seasonal adjustment practice. Set to 0 (or negative) to use all
+        available data, subject to X-13's 85-year program limit.
     """
     try:
         progress_callback("Validating inputs", 5)
@@ -224,17 +263,79 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Provide a longer time series."],
             )
 
+        # Determine the effective fit window. Two caps apply:
+        #   1. Hard cap of 83 years (997 months / 332 quarters) to stay under
+        #      X-13's 85-year program limit after forecast augmentation.
+        #   2. User-specified rolling window via fit_window_obs (default 120
+        #      months / 40 quarters, matching BLS CES practice). Pass 0 or
+        #      a negative value to disable and use all data up to the hard cap.
+        hard_cap_years = 83
+        hard_cap_obs = hard_cap_years * period
+
+        default_window = 10 * period  # 120 months / 40 quarters
+        user_window_raw = ctx.get_param("fit_window_obs", default_window)
+        try:
+            user_window = int(user_window_raw) if user_window_raw is not None else 0
+        except (TypeError, ValueError):
+            user_window = default_window
+
+        if user_window and user_window > 0:
+            effective_cap = min(user_window, hard_cap_obs)
+        else:
+            effective_cap = hard_cap_obs
+
+        truncated_time = ctx.time
+        if n > effective_cap:
+            dropped = n - effective_cap
+            years_kept = effective_cap / period
+            if user_window and user_window > 0 and effective_cap == user_window:
+                # Truncation driven by the user's rolling-window choice.
+                warn_list.append(
+                    f"Fit window set to {effective_cap} observations "
+                    f"(~{years_kept:.0f} years); dropped {dropped} older "
+                    f"observation(s). BLS-style concurrent adjustment uses "
+                    f"~{default_window} observations. "
+                    f"Set fit_window_obs=0 to use all data."
+                )
+            else:
+                # Truncation driven by X-13's 85-year hard limit.
+                warn_list.append(
+                    f"Series spans {n/period:.1f} years, exceeds X-13's "
+                    f"85-year program limit. Using most recent {effective_cap} "
+                    f"observations ({years_kept:.0f} years); dropped {dropped} "
+                    f"oldest observation(s)."
+                )
+            values = values[-effective_cap:]
+            nan_mask = nan_mask[-effective_cap:]
+            if ctx.time and len(ctx.time) >= effective_cap:
+                truncated_time = list(ctx.time)[-effective_cap:]
+            n = len(values)
+
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         transform = ctx.get_param("transform", preset_cfg["transform"])
         outlier = ctx.get_param("outlier", preset_cfg["outlier"])
         start_year = int(ctx.get_param("start_year", 2000))
         start_period = int(ctx.get_param("start_period", 1))
 
-        # Try to infer start date from time column
-        if ctx.time and len(ctx.time) > 0:
+        # Auto / log transform require strictly positive values. Payroll job
+        # gains, trade balances, and other change/flow series routinely have
+        # zeros or negatives, so fall back to no transform with a warning if
+        # the user didn't explicitly pick one.
+        user_supplied_transform = ctx.get_param("transform") is not None
+        has_nonpositive = bool(np.any((~nan_mask) & (values <= 0)))
+        if transform in ("auto", "log") and has_nonpositive and not user_supplied_transform:
+            warn_list.append(
+                f"Series contains zero or negative values, which are incompatible "
+                f"with transform='{transform}'. Running without a transform."
+            )
+            transform = "none"
+
+        # Try to infer start date from time column (use the truncated time
+        # array so the start date matches the truncated values).
+        if truncated_time and len(truncated_time) > 0:
             try:
                 from datetime import datetime
-                first_time = str(ctx.time[0])
+                first_time = str(truncated_time[0])
                 # Try ISO format
                 dt = datetime.fromisoformat(first_time.replace("Z", ""))
                 start_year = dt.year
@@ -266,8 +367,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
                         "https://www.census.gov/data/software/x13as.html",
                         "Place the x13as executable in the 'resources/x13/' folder "
                         "relative to the project root.",
-                        "On Windows: resources/x13/x13as.exe",
-                        "On macOS/Linux: resources/x13/x13as (ensure it is executable).",
+                        "On Windows: resources/x13/x13as_html.exe "
+                        "(or x13as_ascii.exe).",
+                        "On macOS/Linux: resources/x13/x13as_html "
+                        "(or x13as_ascii) — make it executable with chmod +x.",
                         "Alternatively, install via conda: conda install -c conda-forge x13as",
                         "As a workaround, use the STL Decomposition technique instead.",
                     ],
@@ -297,19 +400,64 @@ def run(ctx: RunContext, progress_callback) -> dict:
                         else:
                             f.write(f"{v}\n")
 
-                _write_x13_spec(spec_path, data_path, period, transform, outlier,
-                               start_year, start_period)
+                # X-13 requires the spec filename *without* the .spc extension.
+                # Passing "input.spc" makes X-13 look for "input.spc.spc" and
+                # fail — but it still returns exit code 0, so the outer
+                # returncode check below won't catch it.
+                spec_stem = os.path.splitext(spec_path)[0]
+
+                def _invoke_x13(arima_model):
+                    """Write the spec and invoke X-13. Returns (result, hard_fail, combined)."""
+                    # Remove any output files from a prior attempt so we
+                    # don't pick up stale .d11 etc. from the earlier run.
+                    for fname in list(os.listdir(tmpdir)):
+                        if fname.startswith(os.path.basename(spec_stem) + ".") \
+                                and not fname.endswith(".dat") \
+                                and not fname.endswith(".spc"):
+                            try:
+                                os.remove(os.path.join(tmpdir, fname))
+                            except OSError:
+                                pass
+                    _write_x13_spec(
+                        spec_path, data_path, period, transform, outlier,
+                        start_year, start_period, arima_model=arima_model,
+                    )
+                    r = subprocess.run(
+                        [x13_binary, spec_stem],
+                        capture_output=True, text=True, timeout=120, cwd=tmpdir,
+                    )
+                    combined = (r.stdout or "") + "\n" + (r.stderr or "")
+                    # X-13 frequently writes the real error text to
+                    # input_err.html while stdout shows only a generic
+                    # "program halted" line. Append the stripped HTML body
+                    # so downstream marker detection (and error message
+                    # extraction) can see it.
+                    err_file = os.path.join(tmpdir, "input_err.html")
+                    if os.path.exists(err_file):
+                        try:
+                            import re as _re
+                            with open(err_file, "r", errors="replace") as _f:
+                                _html = _f.read()
+                            _html = _re.sub(r"<style[^>]*>.*?</style>", " ",
+                                            _html, flags=_re.DOTALL | _re.IGNORECASE)
+                            _html = _re.sub(r"<script[^>]*>.*?</script>", " ",
+                                            _html, flags=_re.DOTALL | _re.IGNORECASE)
+                            _html = _re.sub(r"<[^>]+>", " ", _html)
+                            _html = _re.sub(r"&nbsp;", " ", _html)
+                            _html = _re.sub(r"\s+", " ", _html).strip()
+                            combined += "\n" + _html
+                        except Exception:
+                            pass
+                    hf = (
+                        r.returncode != 0
+                        or "Program error(s) halt execution" in combined
+                        or "ERROR:" in combined
+                    )
+                    return r, hf, combined
 
                 progress_callback("Executing X-13", 40)
-
                 try:
-                    result = subprocess.run(
-                        [x13_binary, spec_path],
-                        capture_output=True,
-                        text=True,
-                        timeout=120,
-                        cwd=tmpdir,
-                    )
+                    result, hard_fail, combined_output = _invoke_x13(arima_model=None)
                 except subprocess.TimeoutExpired:
                     return make_error_response(
                         ctx,
@@ -317,14 +465,91 @@ def run(ctx: RunContext, progress_callback) -> dict:
                         error_fixes=["Try a shorter series.", "Try Fast preset."],
                     )
 
-                if result.returncode != 0:
-                    error_msg = result.stderr[:500] if result.stderr else "Unknown error"
+                # Chain of fallbacks for convergence failures. Each retry
+                # uses a progressively simpler ARIMA specification:
+                #   1. automdl (already tried above) — flexible but can fail
+                #      on long, noisy, or pre-differenced series.
+                #   2. (0 1 1)(0 1 1) — classical airline model; X-11 default.
+                #   3. (0 0 1)(0 1 1) — MA-only non-seasonal; suits
+                #      already-differenced series (e.g. "job gains").
+                #   4. (0 0 0)(0 1 1) — pure seasonal MA; simplest stable model.
+                def _is_convergence_failure(combined):
+                    return (
+                        "failed to converge" in combined
+                        or "maximum iterations" in combined
+                        or "automdl" in combined.lower()
+                    )
+
+                fallback_models = [
+                    ("(0 1 1)(0 1 1)", "classical airline model"),
+                    ("(0 0 1)(0 1 1)", "MA-only non-seasonal model "
+                                       "(suits pre-differenced series)"),
+                    ("(0 0 0)(0 1 1)", "seasonal-MA-only model"),
+                ]
+
+                for model_spec, model_desc in fallback_models:
+                    if not hard_fail or not _is_convergence_failure(combined_output):
+                        break
+                    progress_callback(f"Retrying with {model_desc}", 50)
+                    warn_list.append(
+                        f"ARIMA estimation did not converge with previous "
+                        f"model; retrying with {model_desc} {model_spec}."
+                    )
+                    try:
+                        result, hard_fail, combined_output = _invoke_x13(
+                            arima_model=model_spec
+                        )
+                    except subprocess.TimeoutExpired:
+                        return make_error_response(
+                            ctx,
+                            f"X-13 {model_desc} retry timed out after 120 seconds.",
+                            error_fixes=["Try a shorter series.", "Try Fast preset."],
+                        )
+                if hard_fail:
+                    # Prefer clean ERROR: lines from stdout/stderr — they are
+                    # far more readable than the HTML error file, which is
+                    # mostly boilerplate styling.
+                    import re as _re
+                    err_lines = []
+                    for line in combined_output.splitlines():
+                        s = line.rstrip()
+                        if not s:
+                            continue
+                        if "ERROR:" in s or "error in " in s.lower():
+                            err_lines.append(s.strip())
+                            continue
+                        # Continuation lines from a multi-line ERROR block
+                        # (X-13 typically indents continuation with spaces)
+                        if err_lines and line.startswith(" " * 6):
+                            err_lines.append(s.strip())
+                    err_msg = " ".join(err_lines)[:500] if err_lines else ""
+
+                    # Fall back to the HTML error file with style/script
+                    # blocks stripped.
+                    if not err_msg:
+                        err_file = os.path.join(tmpdir, "input_err.html")
+                        if os.path.exists(err_file):
+                            try:
+                                with open(err_file, "r", errors="replace") as _f:
+                                    html = _f.read()
+                                html = _re.sub(r"<style[^>]*>.*?</style>", " ",
+                                               html, flags=_re.DOTALL | _re.IGNORECASE)
+                                html = _re.sub(r"<script[^>]*>.*?</script>", " ",
+                                               html, flags=_re.DOTALL | _re.IGNORECASE)
+                                html = _re.sub(r"<[^>]+>", " ", html)
+                                html = _re.sub(r"\s+", " ", html).strip()
+                                err_msg = html[:500]
+                            except Exception:
+                                pass
+
+                    error_msg = err_msg or (combined_output[-500:] if combined_output else "Unknown error")
                     return make_error_response(
                         ctx,
-                        f"X-13 returned error code {result.returncode}: {error_msg}",
+                        f"X-13 halted execution (code {result.returncode}): {error_msg}",
                         error_fixes=[
                             "Check that your data is appropriate for X-13 (monthly or quarterly).",
                             "Ensure no extreme outliers or structural breaks.",
+                            "Try transform=none if the series contains zeros or negatives.",
                         ],
                     )
 
@@ -348,20 +573,32 @@ def run(ctx: RunContext, progress_callback) -> dict:
                                     continue
                     return np.array(vals) if vals else None
 
-                # Try standard X-13 output file names
-                base = os.path.splitext(spec_path)[0]
-                sa = _read_x13_output(base + ".d11")  # seasonally adjusted
-                trend = _read_x13_output(base + ".d12")  # trend
-                seasonal = _read_x13_output(base + ".d10")  # seasonal factors
-                irregular = _read_x13_output(base + ".d13")  # irregular
+                # Try standard X-13 output file names. Files are created
+                # in the cwd (tmpdir) using the spec stem as the base.
+                sa = _read_x13_output(spec_stem + ".d11")  # seasonally adjusted
+                trend = _read_x13_output(spec_stem + ".d12")  # trend
+                seasonal = _read_x13_output(spec_stem + ".d10")  # seasonal factors
+                irregular = _read_x13_output(spec_stem + ".d13")  # irregular
 
                 if sa is None:
-                    # Fallback: try using the stdout
-                    warn_list.append("Could not parse X-13 output files. Using simplified output.")
-                    sa = values.copy()
-                    trend = np.full(n, np.nan)
-                    seasonal = np.zeros(n)
-                    irregular = np.zeros(n)
+                    # X-13 finished but produced no d11 table — surface this
+                    # instead of silently returning the raw input. List any
+                    # files we did see so the user can diagnose.
+                    present = sorted(
+                        f for f in os.listdir(tmpdir)
+                        if f.startswith(os.path.basename(spec_stem))
+                    )
+                    return make_error_response(
+                        ctx,
+                        "X-13 did not produce a seasonally-adjusted series "
+                        "(.d11 file missing). "
+                        f"Files present: {', '.join(present) or '(none)'}",
+                        error_fixes=[
+                            "Check that the series has clear seasonality (12 or 4 periods).",
+                            "Try transform=none if the series contains zeros or negatives.",
+                            "Try period=4 for quarterly data if period=12 was inferred wrongly.",
+                        ],
+                    )
 
             backend_note = f"X-13 binary ({x13_binary})"
             clean_values = values
@@ -381,8 +618,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
         seasonal = _pad_or_trim(seasonal, n)
         irregular = _pad_or_trim(irregular, n)
 
-        # Build output tables
-        time_col = ctx.time if ctx.time and len(ctx.time) == n else list(range(1, n + 1))
+        # Build output tables — use the (possibly truncated) time array,
+        # falling back to a 1..n integer index only if no time column is
+        # available.
+        if truncated_time and len(truncated_time) == n:
+            time_col = truncated_time
+        elif ctx.time and len(ctx.time) == n:
+            time_col = ctx.time
+        else:
+            time_col = list(range(1, n + 1))
         decomp_rows = []
         for i in range(n):
             decomp_rows.append([

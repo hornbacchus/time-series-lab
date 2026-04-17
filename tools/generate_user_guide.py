@@ -123,7 +123,8 @@ def generate_markdown(catalog, udf_catalog):
     p("10. Technique Catalog")
     p("11. UDF Reference")
     p("12. Sample Data")
-    p("13. Troubleshooting")
+    p("13. External Dependencies")
+    p("14. Troubleshooting")
     blank()
 
     # Quick Start
@@ -458,8 +459,153 @@ def generate_markdown(catalog, udf_catalog):
     _embed_csv_full(lines, REPO / "resources" / "sample_data" / "core_pce.csv")
     blank()
 
+    h3("Total Nonfarm Payrolls - Seasonally Adjusted (Monthly)")
+    p("U.S. total nonfarm payroll employment, seasonally adjusted levels, in thousands "
+      "of jobs. From the Bureau of Labor Statistics Current Employment Statistics (CES) "
+      "program (FRED series PAYEMS). Monthly, January 1939 to present.")
+    blank()
+    p("**File:** `resources/sample_data/nonfarm_payroll_sa.csv`")
+    p("**Rows:** ~1,047 months")
+    p("**Suggested techniques:** Forecasting (Auto ARIMA, ETS), Change Point Detection, "
+      "Regime Switching, Structural Breaks")
+    blank()
+    p("**Preview (last 10 rows):**")
+    blank()
+    _embed_csv_tail(lines, REPO / "resources" / "sample_data" / "nonfarm_payroll_sa.csv", 10)
+    blank()
+
+    h3("Total Nonfarm Payrolls - Not Seasonally Adjusted (Monthly)")
+    p("Same series as above, but without seasonal adjustment (FRED series PAYNSA). This "
+      "is the ideal input for seasonal-adjustment techniques (X-13 ARIMA-SEATS, STL): "
+      "run the decomposition on this NSA series and compare the resulting SA column "
+      "against the official PAYEMS series above.")
+    blank()
+    p("**File:** `resources/sample_data/nonfarm_payroll_nsa.csv`")
+    p("**Rows:** ~1,047 months")
+    p("**Suggested techniques:** Seasonal Adjustment (X-13 ARIMA-SEATS, STL, Classical), "
+      "Decomposition, Frequency Domain (spectral peaks at period 12)")
+    blank()
+    p("**Note:** This is a *levels* series (total employment in thousands), not a "
+      "month-over-month change series. Apply seasonal adjustment to levels first, "
+      "then compute job gains as first differences of the SA column if needed.")
+    blank()
+    p("**Preview (last 10 rows):**")
+    blank()
+    _embed_csv_tail(lines, REPO / "resources" / "sample_data" / "nonfarm_payroll_nsa.csv", 10)
+    blank()
+
+    # External Dependencies
+    h2("13. External Dependencies")
+    p("Time Series Lab bundles its own Python runtime and most required libraries. "
+      "However, one external binary and four optional Python packages may need to be "
+      "installed separately depending on which techniques you plan to use. The "
+      "**Help -> About** dialog reports what is currently detected on your machine.")
+    blank()
+
+    h3("X-13 ARIMA-SEATS Binary (required for Seasonal Adjustment)")
+    p("X-13 ARIMA-SEATS is the U.S. Census Bureau's seasonal adjustment program. "
+      "It is the statistical backend for the **Seasonal Adjustment** Quick Action when "
+      "the technique **X-13 ARIMA-SEATS** is selected. Because the binary has its own "
+      "license, it is not bundled with the installer - you must download it separately "
+      "from Census and drop it into the project's `resources/x13/` folder.")
+    blank()
+    p("**Download:** https://www.census.gov/data/software/x13as.html")
+    p("**Direct archive:** "
+      "https://www2.census.gov/software/x-13arima-seats/x13as/windows/program-archives/")
+    blank()
+    p("**Installation (Windows):**")
+    p("1. Download `x13as_html-v1-1-b62.zip` (HTML-output build) or the ASCII-output "
+      "equivalent.")
+    p("2. Extract the archive. You will get a folder named `x13as/` containing "
+      "`x13as_html.exe` (or `x13as_ascii.exe`).")
+    p("3. Copy the `.exe` directly into `resources/x13/` under your Time Series Lab "
+      "project root (the `x13as/` wrapper folder is not needed - the engine searches "
+      "for the executable one level down).")
+    p("4. Restart Excel. The **Help -> About** dialog will confirm that the X-13 binary "
+      "is detected.")
+    blank()
+    p("**Accepted filenames** (the engine searches for any of these, in order): "
+      "`x13as_html.exe`, `x13as_ascii.exe`, `x13ashtml.exe`, `x13as.exe`. On macOS "
+      "and Linux, drop the filename extension and make the file executable with "
+      "`chmod +x`.")
+    blank()
+    p("**Without the X-13 binary:** the X-13 ARIMA-SEATS technique returns a clear "
+      "error with download instructions. All other seasonal decomposition techniques "
+      "(STL, Classical, MSTL) work without any external binary and are reasonable "
+      "substitutes for exploratory work.")
+    blank()
+
+    h3("Core Python Packages (bundled, always installed)")
+    p("These ten packages ship with the installer and cover 58 of the 67 techniques. "
+      "You should never need to install them manually:")
+    blank()
+    p("| Package | Used by |")
+    p("| --- | --- |")
+    p("| `numpy`, `scipy`, `pandas` | Core numeric and data structures |")
+    p("| `statsmodels` | ARIMA, VAR, VECM, GARCH, X-13 wrapper, unit root tests |")
+    p("| `pmdarima` | Auto ARIMA |")
+    p("| `arch` | GARCH, EGARCH, GJR-GARCH volatility models |")
+    p("| `ruptures` | Change point detection (Pelt, BinSeg, Window) |")
+    p("| `PyWavelets` | Wavelet decomposition, wavelet coherence |")
+    p("| `hmmlearn` | Hidden Markov regime-switching models |")
+    p("| `scikit-learn` | Isolation Forest, PCA, clustering, MLPRegressor |")
+    blank()
+
+    h3("Optional Python Packages (install for full ML/DL fidelity)")
+    p("Nine of the 67 techniques use deep learning or specialized ML libraries. "
+      "These are marked optional - if not installed, each technique **gracefully "
+      "falls back** to a simpler backend and returns a warning explaining what "
+      "was substituted, so the tool always produces a result.")
+    blank()
+    p("| Package | Techniques | Fallback when missing |")
+    p("| --- | --- | --- |")
+    p("| `prophet` | `prophet_forecast` | Seasonal naive |")
+    p("| `xgboost` | `xgboost_forecast` | `sklearn.GradientBoostingRegressor` |")
+    p("| `reservoirpy` | `echo_state_network` | Minimal numpy reservoir |")
+    p("| `torch` (CPU) | `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, "
+      "`tcn_forecast`, `transformer_forecast`, `autoencoder_anomaly` | `sklearn.MLPRegressor` "
+      "or `IsolationForest` |")
+    blank()
+    p("**To install all four** (open a Command Prompt or PowerShell):")
+    blank()
+    p("```")
+    p("pip install prophet xgboost reservoirpy")
+    p("pip install torch --index-url https://download.pytorch.org/whl/cpu")
+    p("```")
+    blank()
+    p("Notes:")
+    p("- **`torch`** is the largest (~200 MB for the CPU-only wheel, ~2.5 GB with CUDA). "
+      "Use the CPU-only index URL above unless you have a CUDA GPU you want to use.")
+    p("- **`prophet`** installs `cmdstanpy` and compiles a small C++ Stan backend on "
+      "first import (~80 MB). A one-time cost.")
+    p("- **`reservoirpy`** and **`xgboost`** are small (~50 MB each) and install without "
+      "compilation.")
+    p("- The installer offers a post-install **Install Optional ML/DL Packages** check "
+      "box that runs these commands for you.")
+    blank()
+
+    h3("What Does NOT Need To Be Installed Separately")
+    p("Time Series Lab does not require R, TRAMO/SEATS, JDemetra+, EViews, SAS, MATLAB, "
+      "or any cloud service. Everything runs locally. The only external components "
+      "are the X-13 binary (optional, for one technique) and the four optional Python "
+      "packages listed above.")
+    blank()
+
+    h3("Checking What Is Installed")
+    p("**Help -> About** in the ribbon reports:")
+    p("- Add-in version and engine version")
+    p("- Python runtime version")
+    p("- Engine process status (running / not running)")
+    p("- Technique library size (techniques x categories)")
+    p("- Engine pipe status")
+    blank()
+    p("Planned for a future release: a **Dependency Doctor** panel that inventories "
+      "every required and optional package, flags what is missing, and generates the "
+      "exact install commands for your system.")
+    blank()
+
     # Troubleshooting
-    h2("13. Troubleshooting")
+    h2("14. Troubleshooting")
     p("Time Series Lab follows a **fail loudly** policy. Errors include plain-English "
       "explanations and suggested fixes.")
     blank()
@@ -472,6 +618,24 @@ def generate_markdown(catalog, udf_catalog):
     p("- **\"MISSING (Click Re-run Thorough)\"**: The handle result is not in cache. "
       "Click Re-run Thorough in the ribbon.")
     p("- **Missing data warning**: If >15% missing or gap >10 periods, confirm before proceeding.")
+    p("- **\"X-13 ARIMA-SEATS binary not found\"**: Download the Census X-13 executable "
+      "and place it in `resources/x13/`. See **Section 13: External Dependencies** for "
+      "step-by-step instructions.")
+    p("- **X-13 returned \"Number of years spanned exceeds program limit (85)\"**: Your "
+      "series is longer than 85 years, which is X-13's hard cap. The engine truncates "
+      "automatically to satisfy the limit; the warning in the result tells you how many "
+      "observations were dropped. You can also set `fit_window_obs` in the Run panel "
+      "to use a shorter window (BLS-style concurrent adjustment uses ~120 months).")
+    p("- **X-13 \"Estimation failed to converge\"**: Automatic model selection could not "
+      "fit your series. The engine automatically retries with progressively simpler "
+      "ARIMA specifications (airline, MA-only, seasonal-MA-only) and reports which one "
+      "succeeded in the warnings. If all fail, the series is likely pre-differenced or "
+      "too structurally variable - try a shorter `fit_window_obs` or use STL Decomposition "
+      "as an alternative.")
+    p("- **Optional ML technique says \"Falling back to ...\"**: Install the matching "
+      "optional package (see **Section 13: External Dependencies**) to use the full "
+      "model backend. The fallback result is statistically valid but typically less "
+      "accurate than the native backend.")
     blank()
 
     return "\n".join(lines)

@@ -35,3 +35,8 @@ desktop.ini
 docs/TimeSeriesLab_UserGuide.docx
 docs/TimeSeriesLab_UserGuide.html
 docs/UserGuide_Source.md
+
+# X-13 ARIMA-SEATS binary — download separately from the U.S. Census
+# Bureau (own license) per instructions in the User Guide, Section 13.
+# See: https://www.census.gov/data/software/x13as.html
+resources/x13/
