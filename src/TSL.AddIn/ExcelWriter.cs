@@ -185,8 +185,27 @@ namespace TSL.AddIn
                 C(ws, row, 1).WrapText = true;
             }
 
-            // Auto-fit columns
+            // Auto-fit columns, then cap width. Columns.AutoFit() on a sheet
+            // that contains merged cells (our Summary / Charting Suggestions
+            // rows span A:F) will widen column A to fit the entire merged
+            // text — producing a single gigantic column that hides the data
+            // table columns offscreen. Cap each used column at a sensible
+            // maximum so the table stays readable. Excel column-width units
+            // are ~ the width of one "0" character in the default font.
             ws.Columns.AutoFit();
+            const double maxWidth = 22.0;
+            for (int c = 1; c <= 8; c++)
+            {
+                var col = (Range)ws.Columns[c];
+                try
+                {
+                    // ColumnWidth can be DBNull after AutoFit on a merged
+                    // range; guard with a default of 10.
+                    double w = col.ColumnWidth is double d ? d : 10.0;
+                    if (w > maxWidth) col.ColumnWidth = maxWidth;
+                }
+                catch { /* best-effort */ }
+            }
 
             return sheetName;
         }

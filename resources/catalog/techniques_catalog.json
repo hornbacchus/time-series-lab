@@ -62,7 +62,8 @@
       "presets": ["Balanced", "Thorough"],
       "parameters": [
         {"name": "method", "label": "Method", "type": "string", "default": "seats", "required": false, "advanced": false, "description": "SEATS or X11", "options": ["seats", "x11"]},
-        {"name": "fit_window_obs", "label": "Fit Window (observations)", "type": "int", "default": 120, "required": false, "advanced": false, "description": "Most recent N observations to fit on. BLS uses ~120 months (10 yrs) for payrolls. Set to 0 to use all data (capped at X-13's 85-year program limit).", "options": null}
+        {"name": "fit_window_obs", "label": "Fit Window (observations)", "type": "int", "default": 120, "required": false, "advanced": false, "description": "Most recent N observations to fit on. BLS uses ~120 months (10 yrs) for payrolls. Set to 0 to use all data (capped at X-13's 85-year program limit).", "options": null},
+        {"name": "covid_outliers", "label": "BLS-style COVID outlier adjustments", "type": "bool", "default": false, "required": false, "advanced": false, "description": "Add a March 2020 additive outlier and an April 2020 level shift to the X-13 regARIMA specification, matching how BLS treats pandemic months in the CES payrolls series (PAYEMS/PAYNSA). Has no effect if your selected range does not span March-April 2020.", "options": null}
       ],
       "output_tables": ["seasonal_adjustment", "diagnostics"],
       "tags": ["decomposition", "seasonal", "x13", "census"]

@@ -249,16 +249,38 @@ namespace TSL.AddIn
             if (runVm == null) return;
 
             // Populate the real display name from the catalog (avoids "pca analysis"
-            // fallback rendering of the raw ID).
+            // fallback rendering of the raw ID). Also populate the
+            // technique-specific parameter list so the Run pane renders
+            // controls (checkboxes / dropdowns / text inputs) for each param
+            // declared in the catalog. Only re-populate when the technique
+            // changed — otherwise we'd clobber user edits between runs.
             try
             {
                 var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
                 if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
                     runVm.TechniqueName = techEntry.Name;
+
+                bool techniqueChanged = !string.Equals(runVm.TechniqueId, techniqueId,
+                    StringComparison.OrdinalIgnoreCase);
+                runVm.TechniqueId = techniqueId;
+
+                if (techniqueChanged && techEntry?.Parameters != null)
+                {
+                    var specs = techEntry.Parameters.Select(p =>
+                        (
+                            Name: p.Name,
+                            Label: p.Label,
+                            Type: p.Type,
+                            Description: p.Description,
+                            Options: p.Options?.ToList(),
+                            Default: p.Default
+                        )).ToList();
+                    runVm.SetParameters(specs);
+                }
             }
             catch (Exception ex)
             {
-                Logger.Info($"Could not resolve technique name for {techniqueId}: {ex.Message}");
+                Logger.Info($"Could not resolve technique metadata for {techniqueId}: {ex.Message}");
             }
 
             runVm.SetSeriesPreviews(selectionResult.Series.Select(s => new SeriesPreviewItem
@@ -290,7 +312,11 @@ namespace TSL.AddIn
 
             runVm.IsRunning = true;
 
-            // Build the RunRequest
+            // Build the RunRequest. Pull per-technique parameter values from
+            // the Run pane so the engine sees the user's current settings
+            // (e.g. covid_outliers checkbox, fit_window_obs text box) instead
+            // of running with nothing but defaults.
+            var paramsDict = runVm.GetParametersDict() ?? new Dictionary<string, object>();
             var request = new RunRequest
             {
                 RunId = $"pane_{Guid.NewGuid():N}",
@@ -307,7 +333,7 @@ namespace TSL.AddIn
                     Name = s.Name,
                     Values = s.Values,
                 }).ToList(),
-                Params = new Dictionary<string, object>(),
+                Params = paramsDict,
                 FillConfig = new FillConfig(),
             };
 

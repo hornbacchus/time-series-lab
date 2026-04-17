@@ -93,13 +93,19 @@ def _infer_period(ctx):
 
 
 def _write_x13_spec(spec_path, data_path, period, transform, outlier,
-                    start_year, start_period, arima_model=None):
+                    start_year, start_period, arima_model=None,
+                    covid_outliers=False, n_obs=0):
     """Write an X-13 spec file.
 
     If ``arima_model`` is None, use automdl (automatic model selection).
     Otherwise supply the model as a tuple/string (e.g. "(0 1 1)(0 1 1)") to
     use a fixed ARIMA specification — useful as a fallback when automdl
     fails to converge on long or difficult series.
+
+    If ``covid_outliers`` is True AND the series covers March/April 2020
+    AND the frequency is monthly (period=12), add BLS-style pandemic
+    outlier regressors: AO at March 2020, LS at April 2020. This matches
+    how BLS treats the CES payroll series during the pandemic.
     """
     spec_lines = []
     spec_lines.append("series{")
@@ -121,6 +127,25 @@ def _write_x13_spec(spec_path, data_path, period, transform, outlier,
     # else: no transform
 
     spec_lines.append("")
+
+    # Pandemic outlier regressors (BLS-style). Only add if the series is
+    # monthly and actually spans March/April 2020.
+    covid_regressors = []
+    if covid_outliers and period == 12 and n_obs > 0:
+        # Compute [start, end] as (year, month) of the truncated series.
+        total_start_idx = (start_year * 12 + (start_period - 1))
+        total_end_idx = total_start_idx + n_obs - 1
+        mar20_idx = 2020 * 12 + 2   # March (0-based month = 2)
+        apr20_idx = 2020 * 12 + 3
+        if total_start_idx <= mar20_idx <= total_end_idx:
+            covid_regressors.append("ao2020.mar")
+        if total_start_idx <= apr20_idx <= total_end_idx:
+            covid_regressors.append("ls2020.apr")
+        if covid_regressors:
+            spec_lines.append("regression{")
+            spec_lines.append("  variables = (" + " ".join(covid_regressors) + ")")
+            spec_lines.append("}")
+            spec_lines.append("")
 
     if arima_model is None:
         # Automatic model selection
@@ -207,6 +232,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
         120 for monthly, 40 for quarterly — matches BLS CES concurrent
         seasonal adjustment practice. Set to 0 (or negative) to use all
         available data, subject to X-13's 85-year program limit.
+    covid_outliers : bool, optional
+        When True, add BLS-style pandemic outlier regressors to the regARIMA
+        specification: an additive outlier at March 2020 (ao2020.mar) and a
+        level shift at April 2020 (ls2020.apr). Matches the intervention
+        analysis BLS uses for the CES payroll series (PAYEMS/PAYNSA).
+        No-op if the fit window does not cover March-April 2020 or if the
+        data is not monthly. Default False.
     """
     try:
         progress_callback("Validating inputs", 5)
@@ -330,8 +362,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
             transform = "none"
 
+        # BLS-style pandemic outlier regressors. Accept booleans and common
+        # string forms ("true", "yes", "1"). Only meaningful for monthly data.
+        _raw_covid = ctx.get_param("covid_outliers", False)
+        if isinstance(_raw_covid, str):
+            covid_outliers = _raw_covid.strip().lower() in ("1", "true", "yes", "on")
+        else:
+            covid_outliers = bool(_raw_covid)
+
         # Try to infer start date from time column (use the truncated time
-        # array so the start date matches the truncated values).
+        # array so the start date matches the truncated values). This must
+        # happen BEFORE the COVID-range pre-flight below, which reads
+        # start_year / start_period.
         if truncated_time and len(truncated_time) > 0:
             try:
                 from datetime import datetime
@@ -342,6 +384,39 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 start_period = dt.month if period == 12 else ((dt.month - 1) // 3 + 1)
             except (ValueError, TypeError):
                 pass
+
+        # Predict which COVID regressors will actually be added so we can
+        # surface a clear warning if the user asked for them. The spec
+        # writer computes the same condition from start_year, start_period,
+        # and n.
+        if covid_outliers:
+            if period != 12:
+                warn_list.append(
+                    "BLS-style COVID outlier adjustments were requested but "
+                    "only apply to monthly data; skipped."
+                )
+                covid_outliers = False
+            else:
+                total_start_idx = start_year * 12 + (start_period - 1)
+                total_end_idx = total_start_idx + n - 1
+                mar20 = 2020 * 12 + 2
+                apr20 = 2020 * 12 + 3
+                applied = []
+                if total_start_idx <= mar20 <= total_end_idx:
+                    applied.append("AO March 2020")
+                if total_start_idx <= apr20 <= total_end_idx:
+                    applied.append("LS April 2020")
+                if applied:
+                    warn_list.append(
+                        "BLS-style COVID outlier adjustments applied: "
+                        + ", ".join(applied) + "."
+                    )
+                else:
+                    warn_list.append(
+                        "BLS-style COVID outlier adjustments were requested "
+                        "but the series does not cover March-April 2020; "
+                        "no regressors added."
+                    )
 
         progress_callback("Searching for X-13 binary", 15)
 
@@ -421,6 +496,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     _write_x13_spec(
                         spec_path, data_path, period, transform, outlier,
                         start_year, start_period, arima_model=arima_model,
+                        covid_outliers=covid_outliers, n_obs=n,
                     )
                     r = subprocess.run(
                         [x13_binary, spec_stem],

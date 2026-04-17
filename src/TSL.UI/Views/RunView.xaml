@@ -180,6 +180,65 @@
                       SelectedItem="{Binding SelectedFrequency}"
                       FontSize="12" Padding="6,4" Margin="0,0,0,16" />
 
+            <!-- ── Technique-specific parameters ──────────────────── -->
+            <StackPanel Visibility="{Binding HasParameters, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="PARAMETERS" FontSize="10" FontWeight="Bold"
+                           Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
+                <ItemsControl ItemsSource="{Binding Parameters}" Margin="0,0,0,12">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,10">
+                                <!-- Bool: checkbox with label as content -->
+                                <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                          Content="{Binding Label}"
+                                          ToolTip="{Binding Description}"
+                                          FontSize="12"
+                                          Visibility="{Binding IsBool, Converter={StaticResource BoolToVis}}" />
+
+                                <!-- Dropdown (string with options): label above, combo below -->
+                                <StackPanel Visibility="{Binding IsDropdown, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold"
+                                               Margin="0,0,0,3" ToolTip="{Binding Description}" />
+                                    <ComboBox ItemsSource="{Binding Options}"
+                                              SelectedItem="{Binding StringValue, Mode=TwoWay}"
+                                              FontSize="12" Padding="6,4"
+                                              ToolTip="{Binding Description}" />
+                                </StackPanel>
+
+                                <!-- Text input (int / string without options): label above, textbox below -->
+                                <StackPanel Visibility="{Binding IsTextInput, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold"
+                                               Margin="0,0,0,3" ToolTip="{Binding Description}" />
+                                    <TextBox Text="{Binding StringValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             FontSize="12" Padding="6,4"
+                                             BorderBrush="{StaticResource BorderBrush}"
+                                             ToolTip="{Binding Description}" />
+                                </StackPanel>
+
+                                <!-- Helper text (description) under non-bool params -->
+                                <TextBlock Text="{Binding Description}"
+                                           FontSize="10" Foreground="{StaticResource SubtleTextBrush}"
+                                           TextWrapping="Wrap" Margin="0,3,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsBool}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Description}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
             <!-- ── Run / Cancel buttons ───────────────────────────── -->
             <UniformGrid Columns="2" Margin="0,0,0,12">
                 <Button Content="Run" Style="{StaticResource AccentButton}"

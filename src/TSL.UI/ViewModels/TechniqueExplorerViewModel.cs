@@ -32,7 +32,7 @@ namespace TSL.UI.ViewModels
         public List<string> OutputTables { get; set; } = new List<string>();
     }
 
-    public class TechniqueParameterItem
+    public class TechniqueParameterItem : ViewModelBase
     {
         public string Name { get; set; }
         public string Label { get; set; }
@@ -48,6 +48,56 @@ namespace TSL.UI.ViewModels
         {
             get => _currentValue ?? Default;
             set => _currentValue = value;
+        }
+
+        // ── Typed accessors used by the Run pane XAML ───────────────────
+        // The RunView binds BoolValue / StringValue to its CheckBox /
+        // ComboBox / TextBox controls, and selects which control to show
+        // based on IsBool / IsDropdown / IsTextInput.
+
+        private bool _boolValue;
+        public bool BoolValue
+        {
+            get => _boolValue;
+            set => SetProperty(ref _boolValue, value);
+        }
+
+        private string _stringValue = "";
+        public string StringValue
+        {
+            get => _stringValue;
+            set => SetProperty(ref _stringValue, value);
+        }
+
+        public bool IsBool =>
+            string.Equals(Type, "bool", StringComparison.OrdinalIgnoreCase);
+        public bool IsDropdown =>
+            Options != null && Options.Count > 0 && !IsBool;
+        public bool IsTextInput =>
+            !IsBool && (Options == null || Options.Count == 0);
+
+        /// <summary>
+        /// Current parameter value packed into the object the engine's
+        /// RunRequest.Params dictionary expects.
+        /// </summary>
+        public object OutputValue
+        {
+            get
+            {
+                if (IsBool) return _boolValue;
+                if (string.Equals(Type, "int", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(_stringValue, out var i)) return i;
+                    return _stringValue;
+                }
+                if (string.Equals(Type, "float", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Type, "double", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (double.TryParse(_stringValue, out var d)) return d;
+                    return _stringValue;
+                }
+                return _stringValue;
+            }
         }
     }
 

@@ -57,6 +57,49 @@ class RunContext:
         self.fill_config: dict = raw.get("fill_config", {})
         self.resample_config: dict = raw.get("resample_config", {})
 
+        # Normalize chronological order. Many of our sample CSVs and a
+        # common Excel convention are "newest-first" (most recent row at
+        # the top of the selection). Every technique's math assumes an
+        # oldest-first order — so if we detect the input is descending
+        # in time, flip both `time` and every series/exog values array
+        # once up-front. Downstream code then never has to think about it.
+        self._normalize_chronological_order()
+
+    def _normalize_chronological_order(self) -> None:
+        """If `self.time` is strictly descending, reverse it and every
+        parallel series/exog values array in place. Leaves things alone
+        if the order is already ascending, mixed, or unparseable."""
+        if not self.time or len(self.time) < 2:
+            return
+        try:
+            import datetime as _dt
+            parsed = []
+            for t in self.time:
+                s = str(t)
+                if "T" in s:
+                    s = s.split("T", 1)[0]
+                # Accept YYYY-MM-DD, YYYY/MM/DD, and common ISO variants
+                s = s.replace("/", "-").replace("Z", "").strip()
+                parsed.append(_dt.date.fromisoformat(s[:10]))
+        except Exception:
+            return  # unparseable — leave as-is
+        n = len(parsed)
+        # Count how many consecutive steps are ascending vs descending.
+        asc = sum(1 for i in range(n - 1) if parsed[i] < parsed[i + 1])
+        desc = sum(1 for i in range(n - 1) if parsed[i] > parsed[i + 1])
+        # Only reverse if strictly / overwhelmingly descending. A few ties
+        # or out-of-order rows are fine; we don't try to fully sort here.
+        if desc > asc and desc >= 0.9 * (n - 1):
+            self.time = list(reversed(self.time))
+            for s in self.series or []:
+                vals = s.get("values")
+                if isinstance(vals, list):
+                    s["values"] = list(reversed(vals))
+            for s in self.exog or []:
+                vals = s.get("values")
+                if isinstance(vals, list):
+                    s["values"] = list(reversed(vals))
+
     # ------------------------------------------------------------------
     # Series helpers
     # ------------------------------------------------------------------

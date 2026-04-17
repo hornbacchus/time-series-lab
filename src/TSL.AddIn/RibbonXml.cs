@@ -122,17 +122,35 @@ namespace TSL.AddIn
         </group>
 
         <group id='grpRun' label='Run'>
-          <dropDown id='ddPreset'
-                    label='Preset'
-                    sizeString='WWWWWWWWWWW'
-                    getItemCount='OnPresetGetItemCount'
-                    getItemLabel='OnPresetGetItemLabel'
-                    getItemID='OnPresetGetItemId'
-                    getSelectedItemIndex='OnPresetGetSelectedIndex'
-                    onAction='OnPresetChange'
-                    screentip='Analysis Preset'
-                    supertip='Fast: quick results. Balanced: good defaults with cross-validation. Thorough: extensive search, manual recompute.' />
-          <separator id='sepRun1' />
+          <menu id='menuPreset'
+                getLabel='OnPresetGetLabel'
+                size='large'
+                imageMso='ControlProperties'
+                screentip='Analysis Preset'
+                supertip='Fast: quick results. Balanced: good defaults with cross-validation. Thorough: extensive search, manual recompute.'>
+            <toggleButton id='btnPresetFast'
+                          label='Fast'
+                          tag='Fast'
+                          getPressed='OnPresetGetPressed'
+                          onAction='OnPresetMenuClick'
+                          screentip='Fast Preset'
+                          supertip='Quick results with minimal cross-validation. Best for exploratory work.' />
+            <toggleButton id='btnPresetBalanced'
+                          label='Balanced'
+                          tag='Balanced'
+                          getPressed='OnPresetGetPressed'
+                          onAction='OnPresetMenuClick'
+                          screentip='Balanced Preset (default)'
+                          supertip='Sensible defaults with cross-validation. The right choice for most analyses.' />
+            <toggleButton id='btnPresetThorough'
+                          label='Thorough'
+                          tag='Thorough'
+                          getPressed='OnPresetGetPressed'
+                          onAction='OnPresetMenuClick'
+                          screentip='Thorough Preset'
+                          supertip='Extensive model search and cross-validation. Slower; manual re-run required for THOROUGH formulas.' />
+          </menu>
+          <separator id='sepRun0' />
           <button id='btnRun'
                   label='Run'
                   size='large'

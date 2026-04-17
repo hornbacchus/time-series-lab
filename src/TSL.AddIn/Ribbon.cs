@@ -112,46 +112,47 @@ namespace TSL.AddIn
 
         // ── Run ────────────────────────────────────────────────────────
 
-        public void OnPresetChange(IRibbonControl control, string selectedId, int selectedIndex)
+        /// <summary>
+        /// Menu-level label for the Preset button. Shows "Preset: <current>"
+        /// so the user sees their active selection without having to open the
+        /// menu.
+        /// </summary>
+        public string OnPresetGetLabel(IRibbonControl control)
         {
-            var preset = selectedId.Replace("preset_", "");
-            AddIn.Settings.SetGlobalPreset(preset);
+            var preset = AddIn.Settings?.GetGlobalPreset() ?? "Balanced";
+            return $"Preset: {preset}";
+        }
+
+        /// <summary>
+        /// Returns true for the toggleButton whose tag matches the currently
+        /// active preset. Excel renders the matching item with a check mark
+        /// in the menu (just like "None (House Default)" in the Axes Grid
+        /// reference menu).
+        /// </summary>
+        public bool OnPresetGetPressed(IRibbonControl control)
+        {
+            var current = AddIn.Settings?.GetGlobalPreset() ?? "Balanced";
+            return string.Equals(control?.Tag, current, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Click handler for the three preset toggleButtons. Pulls the
+        /// preset name from the control's Tag attribute.
+        /// </summary>
+        public void OnPresetMenuClick(IRibbonControl control, bool pressed)
+        {
+            var preset = control?.Tag;
+            if (string.IsNullOrEmpty(preset)) return;
+
+            AddIn.Settings?.SetGlobalPreset(preset);
             TaskPaneManager.UpdatePreset(preset);
-        }
 
-        public int OnPresetGetSelectedIndex(IRibbonControl control)
-        {
-            var preset = AddIn.Settings.GetGlobalPreset();
-            switch (preset)
-            {
-                case "Fast": return 0;
-                case "Thorough": return 2;
-                default: return 1; // Balanced
-            }
-        }
-
-        public int OnPresetGetItemCount(IRibbonControl control) => 3;
-
-        public string OnPresetGetItemLabel(IRibbonControl control, int index)
-        {
-            switch (index)
-            {
-                case 0: return "Fast";
-                case 1: return "Balanced";
-                case 2: return "Thorough";
-                default: return "Balanced";
-            }
-        }
-
-        public string OnPresetGetItemId(IRibbonControl control, int index)
-        {
-            switch (index)
-            {
-                case 0: return "preset_Fast";
-                case 1: return "preset_Balanced";
-                case 2: return "preset_Thorough";
-                default: return "preset_Balanced";
-            }
+            // Refresh the menu button label and the check marks on the
+            // three toggle buttons so the UI reflects the new selection.
+            _ribbonUi?.InvalidateControl("menuPreset");
+            _ribbonUi?.InvalidateControl("btnPresetFast");
+            _ribbonUi?.InvalidateControl("btnPresetBalanced");
+            _ribbonUi?.InvalidateControl("btnPresetThorough");
         }
 
         public void OnRun(IRibbonControl control)

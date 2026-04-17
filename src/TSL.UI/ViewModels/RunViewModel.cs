@@ -37,6 +37,10 @@ namespace TSL.UI.ViewModels
         public string TableName { get; set; }
     }
 
+    // NOTE: TechniqueParameterItem is defined once in TechniqueExplorerViewModel.cs
+    // and reused here so the Explorer's "technique details" panel and the Run
+    // pane share a single parameter object model.
+
     /// <summary>
     /// ViewModel for the Run configuration and progress view.
     /// Shows selection preview, time index / frequency selectors, a progress log,
@@ -68,6 +72,16 @@ namespace TSL.UI.ViewModels
                 "Minutely",
                 "Custom"
             };
+
+        /// <summary>
+        /// Technique-specific parameters, rendered as controls in the Run
+        /// pane. Populated from the technique catalog when a technique is
+        /// selected.
+        /// </summary>
+        public ObservableCollection<TechniqueParameterItem> Parameters { get; }
+            = new ObservableCollection<TechniqueParameterItem>();
+
+        public bool HasParameters => Parameters != null && Parameters.Count > 0;
 
         // ── Properties ──────────────────────────────────────────────────
 
@@ -322,6 +336,56 @@ namespace TSL.UI.ViewModels
             ProgressLog.Clear();
             OutputSheets.Clear();
             OnPropertyChanged(nameof(ShowProgress));
+        }
+
+        /// <summary>
+        /// Populate the Parameters collection from a catalog parameter list.
+        /// Call this whenever the selected technique changes so the Run pane
+        /// shows the right controls with their default values.
+        /// </summary>
+        public void SetParameters(
+            System.Collections.Generic.IEnumerable<(string Name, string Label, string Type,
+                string Description, System.Collections.Generic.List<string> Options,
+                object Default)> paramSpecs)
+        {
+            Parameters.Clear();
+            if (paramSpecs == null) { OnPropertyChanged(nameof(HasParameters)); return; }
+            foreach (var p in paramSpecs)
+            {
+                var item = new TechniqueParameterItem
+                {
+                    Name = p.Name,
+                    Label = string.IsNullOrEmpty(p.Label) ? p.Name : p.Label,
+                    Type = p.Type ?? "string",
+                    Description = p.Description ?? "",
+                    Options = p.Options,
+                };
+                if (item.IsBool)
+                {
+                    item.BoolValue = p.Default is bool b && b;
+                }
+                else
+                {
+                    item.StringValue = p.Default?.ToString() ?? "";
+                }
+                Parameters.Add(item);
+            }
+            OnPropertyChanged(nameof(HasParameters));
+        }
+
+        /// <summary>
+        /// Serialize current parameter values into a Dictionary suitable for
+        /// the RunRequest.Params field the engine consumes.
+        /// </summary>
+        public System.Collections.Generic.Dictionary<string, object> GetParametersDict()
+        {
+            var d = new System.Collections.Generic.Dictionary<string, object>();
+            foreach (var p in Parameters)
+            {
+                if (!string.IsNullOrEmpty(p.Name))
+                    d[p.Name] = p.OutputValue;
+            }
+            return d;
         }
     }
 }
