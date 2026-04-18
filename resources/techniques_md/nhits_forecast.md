@@ -47,3 +47,29 @@ N-HiTS (Neural Hierarchical Interpolation for Time Series) is a deep learning ar
 **Fallback implementation**: When PyTorch is not installed, the module falls back to a sklearn-based ensemble that combines GradientBoosting regressors at multiple lag resolutions (full, half, quarter) to approximate the hierarchical concept.
 
 **Comparison**: N-HiTS achieves comparable or better accuracy than N-BEATS while using significantly fewer parameters, especially for long forecast horizons. It was introduced as a direct improvement over N-BEATS, showing particular strength on the long-horizon benchmarks (ETTh, Weather, Traffic).
+
+## Prediction Intervals — important caveat
+
+Machine-learning forecasters do **not** come with native prediction-
+interval machinery the way classical models (ARIMA, ETS, state-space)
+do. When this technique returns a prediction interval, it is derived
+empirically from in-sample residuals using a normal or t approximation —
+NOT from a probabilistic forecast distribution.
+
+Consequences:
+
+- The interval width does **not** reflect model uncertainty
+  (epistemic uncertainty about the learned parameters) — only
+  aleatoric noise captured by the residual distribution.
+- Coverage is not guaranteed. On out-of-sample data with regime
+  shifts or distribution drift, empirical intervals typically
+  under-cover.
+- The interval is **symmetric** around the point forecast, which
+  mis-represents asymmetric error distributions that ML models
+  often produce.
+
+For calibrated intervals on an ML forecast, wrap this technique with
+**Conformal Prediction Intervals** — it takes a point-forecast model
+and produces distribution-free intervals via a held-out calibration
+set. See also **Quantile Regression Forecast** for directly
+modeling conditional quantiles.

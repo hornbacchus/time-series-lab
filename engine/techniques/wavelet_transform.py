@@ -14,6 +14,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    flip_sign_vector,
 )
 
 
@@ -126,17 +127,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Each component is reconstructed to the original length
         reconstructed = {}
 
-        # Approximation (lowest frequency)
+        # Approximation (lowest frequency). The approximation coefficients
+        # are typically sign-stable (they track the low-frequency trend
+        # and inherit the input's sign), but apply the same convention
+        # as the detail bands below for consistency.
         approx_coeffs = [coeffs[0]] + [np.zeros_like(c) for c in coeffs[1:]]
         approx = pywt.waverec(approx_coeffs, wavelet, mode=mode)[:n]
-        reconstructed["Approximation (A)"] = approx
+        reconstructed["Approximation (A)"] = flip_sign_vector(approx)
 
-        # Detail levels
+        # Detail levels. pywt's detail-coefficient signs depend on the
+        # wavelet family's filter convention and can flip between
+        # pywt versions. Flipping the displayed subband is fine for
+        # interpretation — the user looks at each subband's shape, not
+        # at the reconstruction sum. Use the same max-|value|-positive
+        # convention used for PCA/SSA/DFM.
         for i in range(1, level + 1):
             detail_coeffs = [np.zeros_like(c) for c in coeffs]
             detail_coeffs[i] = coeffs[i]
             detail = pywt.waverec(detail_coeffs, wavelet, mode=mode)[:n]
-            reconstructed[f"Detail D{level - i + 1}"] = detail
+            reconstructed[f"Detail D{level - i + 1}"] = flip_sign_vector(detail)
 
         progress_callback("Computing energy distribution", 60)
 

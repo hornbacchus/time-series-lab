@@ -169,11 +169,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
             fc_rows,
         )
 
-        # Impulse Response Function
+        # Impulse Response Function (orthogonalized via Cholesky).
+        # The Cholesky factorization depends on the order of variables
+        # in the input, so the choice of ordering is a structural
+        # assumption the user is making: variable 1 can contemporaneously
+        # affect variables 2..k; variable 2 can contemporaneously affect
+        # 3..k but NOT 1; etc. This is the standard recursive identification.
+        # We pin the ordering to the user's selection order (names[]) and
+        # surface a warning so the user knows the output is ordering-sensitive.
         progress_callback("Computing impulse responses", 65)
+        warn_list.append(
+            "Impulse responses and FEVD are orthogonalized using a Cholesky "
+            f"decomposition with ordering = {list(names)}. This is an identifying "
+            "assumption: the first-listed variable can contemporaneously affect "
+            "all others, but not vice versa. Re-running with a different series "
+            "order will give different IRF and FEVD numbers."
+        )
         try:
             irf = fit.irf(irf_periods)
-            irf_data = irf.irfs  # shape: (periods+1, k, k)
+            # Use orthogonalized IRFs (orth_irfs) so they're consistent
+            # with the Cholesky-based FEVD reported below. The raw
+            # `irfs` attribute contains non-orthogonalized responses,
+            # which don't correspond to interpretable "shocks."
+            irf_data = getattr(irf, "orth_irfs", None)
+            if irf_data is None:
+                irf_data = irf.irfs  # fallback for older statsmodels
             irf_rows = []
             for t in range(min(irf_periods + 1, irf_data.shape[0])):
                 for shock_idx in range(k):
@@ -185,7 +205,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                             round(float(irf_data[t, resp_idx, shock_idx]), 6),
                         ])
             irf_table = make_table(
-                "Impulse Response Function",
+                "Impulse Response Function (Orthogonalized)",
                 ["Period", "Shock", "Response", "IRF"],
                 irf_rows,
             )

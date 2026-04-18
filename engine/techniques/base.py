@@ -33,6 +33,110 @@ def _normalize_frequency(raw: str) -> str:
     return _FREQUENCY_ALIASES.get(key, str(raw).strip())
 
 
+# ── Identification convention helpers ───────────────────────────────
+# Many time-series techniques produce solutions that are only
+# identified up to sign, scale, or permutation. These helpers apply
+# the standard deterministic conventions so the user sees consistent
+# output across runs, numpy versions, and LAPACK implementations.
+
+
+def flip_sign_svd(U, Vt=None, S=None):
+    """Apply sklearn-style ``svd_flip`` sign normalization.
+
+    Ensures each column of ``U`` has its largest-absolute-value entry
+    positive. If ``Vt`` is supplied, the corresponding rows are flipped
+    in lockstep so ``U @ diag(S) @ Vt`` is preserved exactly. Returns
+    ``(U, Vt)`` (or just ``U`` when no ``Vt``).
+
+    Use this anywhere eigenvectors / singular vectors get reported to
+    the user: PCA loadings, SSA basis, DFM factors, EMD IMFs, wavelet
+    detail bands. Without this step, the same input can yield visually
+    flipped charts across runs or library versions.
+    """
+    U = np.asarray(U)
+    if U.ndim == 1:
+        U = U.reshape(-1, 1)
+    abs_argmax = np.argmax(np.abs(U), axis=0)
+    signs = np.sign(U[abs_argmax, np.arange(U.shape[1])])
+    signs[signs == 0] = 1.0
+    U_flipped = U * signs
+    if Vt is not None:
+        Vt = np.asarray(Vt)
+        if Vt.ndim == 1:
+            Vt = Vt.reshape(1, -1)
+        Vt_flipped = Vt * signs[:, None]
+        return U_flipped, Vt_flipped
+    return U_flipped
+
+
+def flip_sign_vector(v):
+    """Sign-normalize a 1-D vector so its largest-absolute entry is positive.
+
+    Convenience for single-component sign fixes (e.g., one IMF from EMD).
+    """
+    v = np.asarray(v)
+    if v.size == 0:
+        return v
+    i = int(np.argmax(np.abs(v)))
+    sign = 1.0 if v[i] >= 0 else -1.0
+    return v * sign
+
+
+def sort_states_by_mean(means, *arrays, covars=None, transmat=None,
+                       labels=None, probs=None):
+    """Sort latent states (HMM, Markov Switching) by mean value.
+
+    Without a convention the library's arbitrary state order can flip
+    between runs — same data gives charts where "State 0" is sometimes
+    the high-mean regime and sometimes the low-mean one. This helper
+    returns the re-ordered arrays along with the permutation itself.
+
+    Parameters
+    ----------
+    means : array, shape (n_states,) or (n_states, n_vars)
+        Per-state mean (first column used for sorting if 2-D).
+    *arrays : any per-state arrays indexed along axis 0
+        Additional quantities to reorder (e.g., fitted parameters).
+    covars : array, shape (n_states, ...), optional
+        Per-state covariances.
+    transmat : array, shape (n_states, n_states), optional
+        Transition matrix — rows AND columns get permuted.
+    labels : array of ints, shape (T,), optional
+        Decoded state sequence — remapped to new labels.
+    probs : array, shape (T, n_states), optional
+        Smoothed or filtered per-state probabilities — columns permuted.
+
+    Returns
+    -------
+    dict with keys for whichever inputs were supplied, plus 'order'
+    (the permutation array that was applied).
+    """
+    means = np.asarray(means)
+    if means.ndim == 2:
+        sort_key = means[:, 0]
+    else:
+        sort_key = means
+    order = np.argsort(sort_key)
+
+    out = {"order": order, "means": means[order]}
+    if arrays:
+        out["arrays"] = tuple(np.asarray(a)[order] for a in arrays)
+    if covars is not None:
+        covars = np.asarray(covars)
+        out["covars"] = covars[order]
+    if transmat is not None:
+        tm = np.asarray(transmat)
+        out["transmat"] = tm[order][:, order]
+    if labels is not None:
+        labels = np.asarray(labels)
+        inv = np.empty_like(order)
+        inv[order] = np.arange(len(order))
+        out["labels"] = inv[labels]
+    if probs is not None:
+        out["probs"] = np.asarray(probs)[:, order]
+    return out
+
+
 class RunContext:
     """
     Encapsulates everything a technique needs to execute.

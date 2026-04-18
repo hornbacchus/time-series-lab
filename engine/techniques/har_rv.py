@@ -156,8 +156,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
         k = X.shape[1]
         R2_adj = 1 - (1 - R2) * (T - 1) / (T - k - 1) if T > k + 1 else R2
 
-        # Information criteria
-        sigma2 = np.sum(resid ** 2) / T
+        # Information criteria. Use the unbiased residual variance (divide
+        # by T − k, not T) so the downstream log-likelihood, AIC, and BIC
+        # reflect the proper OLS degrees-of-freedom correction. The MLE
+        # plug-in σ² (dividing by T) biases AIC/BIC low and makes
+        # forecast intervals look narrower than they should be, which
+        # matters for any risk-sensitive use (VaR, vol targeting).
+        dof = T - k
+        sigma2 = np.sum(resid ** 2) / dof if dof > 0 else np.sum(resid ** 2) / T
         log_lik = -T / 2 * (np.log(2 * np.pi) + np.log(sigma2) + 1)
         aic = -2 * log_lik + 2 * k
         bic = -2 * log_lik + k * np.log(T)

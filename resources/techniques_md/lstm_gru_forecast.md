@@ -72,3 +72,29 @@ Input shape: (batch_size, sequence_length, num_features)
 - **Quantile output**: Replace MSE loss with quantile loss and predict multiple quantiles directly.
 
 **LSTM vs. GRU**: LSTM has more parameters (4 weight matrices vs. 3) and can model more complex dynamics, but is slower to train and more prone to overfitting on small datasets. GRU is preferred when data is limited; LSTM when the series is long and complex.
+
+## Prediction Intervals — important caveat
+
+Machine-learning forecasters do **not** come with native prediction-
+interval machinery the way classical models (ARIMA, ETS, state-space)
+do. When this technique returns a prediction interval, it is derived
+empirically from in-sample residuals using a normal or t approximation —
+NOT from a probabilistic forecast distribution.
+
+Consequences:
+
+- The interval width does **not** reflect model uncertainty
+  (epistemic uncertainty about the learned parameters) — only
+  aleatoric noise captured by the residual distribution.
+- Coverage is not guaranteed. On out-of-sample data with regime
+  shifts or distribution drift, empirical intervals typically
+  under-cover.
+- The interval is **symmetric** around the point forecast, which
+  mis-represents asymmetric error distributions that ML models
+  often produce.
+
+For calibrated intervals on an ML forecast, wrap this technique with
+**Conformal Prediction Intervals** — it takes a point-forecast model
+and produces distribution-free intervals via a held-out calibration
+set. See also **Quantile Regression Forecast** for directly
+modeling conditional quantiles.

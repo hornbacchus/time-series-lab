@@ -19,6 +19,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    flip_sign_svd,
 )
 
 _PRESET_CONFIG = {
@@ -119,6 +120,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
         U = U[:, :n_components]
         sigma = sigma[:n_components]
         Vt = Vt[:n_components, :]
+
+        # Sign-normalize the SVD basis. np.linalg.svd doesn't guarantee
+        # a sign convention — U and Vt can flip between runs (different
+        # numpy builds, different LAPACK backends, or just when data
+        # changes by a rounding error). Flipping leaves sigma and Xi
+        # (the rank-1 reconstruction below) unchanged mathematically,
+        # but downstream the reconstructed trend / oscillatory
+        # components swap polarity, so charts look different. Apply
+        # sklearn's svd_flip convention (max-absolute entry of U
+        # positive) — stable across runs.
+        U, Vt = flip_sign_svd(U, Vt)
 
         total_variance = float(np.sum(sigma ** 2))
 

@@ -46,3 +46,29 @@ Echo State Networks (ESN) are a type of reservoir computing model for time serie
 **Fallback implementation**: When reservoirpy is not installed, a pure numpy implementation creates the reservoir, runs the dynamics, and trains the readout using ridge regression. This fallback is fully functional but may be slower for very large reservoirs.
 
 **Comparison**: ESNs train orders of magnitude faster than LSTMs/GRUs because only the output layer is trained. They perform well on chaotic time series and short-to-medium term forecasting. However, they may underperform deep learning models on very long series where the fixed reservoir lacks sufficient capacity. The randomness of the reservoir means results can vary across initializations (mitigated by the seed parameter).
+
+## Prediction Intervals — important caveat
+
+Machine-learning forecasters do **not** come with native prediction-
+interval machinery the way classical models (ARIMA, ETS, state-space)
+do. When this technique returns a prediction interval, it is derived
+empirically from in-sample residuals using a normal or t approximation —
+NOT from a probabilistic forecast distribution.
+
+Consequences:
+
+- The interval width does **not** reflect model uncertainty
+  (epistemic uncertainty about the learned parameters) — only
+  aleatoric noise captured by the residual distribution.
+- Coverage is not guaranteed. On out-of-sample data with regime
+  shifts or distribution drift, empirical intervals typically
+  under-cover.
+- The interval is **symmetric** around the point forecast, which
+  mis-represents asymmetric error distributions that ML models
+  often produce.
+
+For calibrated intervals on an ML forecast, wrap this technique with
+**Conformal Prediction Intervals** — it takes a point-forecast model
+and produces distribution-free intervals via a held-out calibration
+set. See also **Quantile Regression Forecast** for directly
+modeling conditional quantiles.

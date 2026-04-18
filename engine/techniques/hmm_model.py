@@ -13,6 +13,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    sort_states_by_mean,
 )
 
 
@@ -153,6 +154,34 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # State probabilities
         state_probs = best_model.predict_proba(X)
 
+        # Sort states deterministically by mean so "State 0" is always the
+        # lowest-mean regime across runs. Without this, hmmlearn's internal
+        # ordering (driven by EM starting point and the restart that won
+        # best score) can flip between otherwise-identical analyses,
+        # giving the user charts where the regime labels swap randomly.
+        #
+        # We keep sorted COPIES for reporting rather than mutating the
+        # fitted hmmlearn model — ``best_model.covars_`` is a property
+        # with strict shape validation that can reject an assignment
+        # even when the values are correct. The downstream forecast
+        # path below uses ``best_model.sample()`` which draws from the
+        # unsorted internal state indices; that's fine because the
+        # sampled values themselves are invariant to relabeling.
+        sort_result = sort_states_by_mean(
+            best_model.means_,
+            covars=best_model.covars_,
+            transmat=best_model.transmat_,
+            labels=states,
+            probs=state_probs,
+        )
+        order = sort_result["order"]
+        sorted_means = sort_result["means"]
+        sorted_covars = sort_result["covars"]
+        sorted_transmat = sort_result["transmat"]
+        sorted_startprob = best_model.startprob_[order]
+        states = sort_result["labels"]
+        state_probs = sort_result["probs"]
+
         progress_callback("Generating forecasts via simulation", 75)
 
         # Forecast: simulate from the model starting from the last state
@@ -173,27 +202,52 @@ def run(ctx: RunContext, progress_callback) -> dict:
         tables = []
 
         # ---- State means and covariances ----
-        means = best_model.means_  # (n_components, n_features)
-        covars = best_model.covars_  # shape depends on covariance_type
+        # Use the sorted copies built above so State 0 is the low-mean
+        # regime. best_model itself still carries the unsorted
+        # parameters because hmmlearn's covars_ property rejects in-
+        # place reassignment; the forecast-simulation path drew from
+        # the unsorted model, but the sampled values are invariant to
+        # relabeling so the end-user output is still consistent.
+        means = sorted_means        # (n_components, n_features)
+        covars = sorted_covars      # shape depends on covariance_type
+
+        def _diag_var_per_state(covars_arr, s, f):
+            """Extract the per-feature variance for state s, feature f.
+
+            hmmlearn's covars_ shape depends on covariance_type AND the
+            library's internal storage convention — even "diag" is
+            commonly stored as (n_components, n_features, n_features)
+            with zeros off-diagonal. Pull the diagonal robustly instead
+            of indexing with assumed shape.
+            """
+            arr_s = np.asarray(covars_arr[s])
+            if arr_s.ndim == 0:
+                return float(arr_s)           # scalar (spherical-style)
+            if arr_s.ndim == 1:
+                return float(arr_s[f])         # diag vector
+            return float(arr_s[f, f])          # full-matrix (or diag stored as full)
 
         mean_rows = []
         for s in range(n_components):
             row = [f"State {s}"]
             for f in range(n_features):
                 row.append(round(float(means[s, f]), 4))
-            # Variance/std
-            if covariance_type == "full":
+            if covariance_type == "spherical":
+                var_s = float(np.asarray(covars[s]).flatten()[0])
                 for f in range(n_features):
-                    row.append(round(float(np.sqrt(covars[s, f, f])), 4))
-            elif covariance_type == "diag":
+                    row.append(round(float(np.sqrt(var_s)), 4))
+            elif covariance_type == "tied":
+                # Single shared covariance matrix for all states.
+                tied = np.asarray(covars)
+                if tied.ndim == 2:
+                    for f in range(n_features):
+                        row.append(round(float(np.sqrt(tied[f, f])), 4))
+                else:
+                    for f in range(n_features):
+                        row.append(round(float(np.sqrt(tied.flatten()[f])), 4))
+            else:  # "full" or "diag" (both stored as (K, d, d) by hmmlearn)
                 for f in range(n_features):
-                    row.append(round(float(np.sqrt(covars[s, f])), 4))
-            elif covariance_type == "spherical":
-                for f in range(n_features):
-                    row.append(round(float(np.sqrt(covars[s])), 4))
-            else:  # tied
-                for f in range(n_features):
-                    row.append(round(float(np.sqrt(covars[f, f])), 4))
+                    row.append(round(float(np.sqrt(_diag_var_per_state(covars, s, f))), 4))
             mean_rows.append(row)
         mean_cols = [f"Mean({names[f]})" for f in range(n_features)]
         std_cols = [f"Std({names[f]})" for f in range(n_features)]
@@ -204,7 +258,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         ))
 
         # ---- Transition matrix ----
-        transmat = best_model.transmat_
+        transmat = sorted_transmat
         trans_rows = []
         for i in range(n_components):
             row = [f"From State {i}"]

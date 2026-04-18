@@ -11,6 +11,19 @@ Method:
 2. Extract exceedances Y_i = X_i - u for X_i > u.
 3. Fit GPD(xi, sigma) to exceedances via MLE (scipy.stats.genpareto).
 4. Compute VaR_p and ES_p using the GPD tail estimator.
+
+Confidence-interval caveat
+==========================
+The bootstrap confidence intervals reported here use the non-parametric
+percentile method. That's standard practice but known to be biased
+for the GPD shape parameter xi, especially in the regions xi near 0.5
+(the boundary of finite variance) and xi near 1 (where the ES integral
+diverges) — see Castillo & Padilla (2015). A bias-corrected and
+accelerated (BCa) bootstrap or profile-likelihood intervals would give
+tighter coverage in those regions. Treat the reported CIs as
+informational when |xi_hat| > 0.4 rather than as strict coverage
+guarantees; use the point estimate plus the residual plot and QQ-plot
+diagnostics to decide whether the tail model looks reliable.
 """
 
 import numpy as np

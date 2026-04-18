@@ -13,6 +13,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    sort_states_by_mean,
 )
 
 
@@ -211,6 +212,40 @@ def run(ctx: RunContext, progress_callback) -> dict:
             row_sums = transition_matrix.sum(axis=1, keepdims=True)
             row_sums[row_sums == 0] = 1
             transition_matrix = transition_matrix / row_sums
+
+        # Sort regimes deterministically by empirical mean so "Regime 0" is
+        # always the lowest-mean regime across runs. statsmodels'
+        # MarkovRegression assigns regime indices based on EM starting
+        # point — without this step, otherwise-identical runs can produce
+        # charts where the "high" and "low" labels swap between sessions.
+        # fit.params does not get remapped (the parameter names like
+        # "const[0]" are opaque strings); the Parameters table shows them
+        # as-returned and is documented as such.
+        regime_means_empirical = np.zeros(k_regimes)
+        for r in range(k_regimes):
+            mask_r = most_likely_regime == r
+            if mask_r.any():
+                regime_means_empirical[r] = np.mean(filled[:n_probs][mask_r])
+            else:
+                regime_means_empirical[r] = np.nan
+        # Preserve NaN regimes at the end of the sort order
+        finite_mask = ~np.isnan(regime_means_empirical)
+        if finite_mask.sum() >= 2:
+            sort_result = sort_states_by_mean(
+                regime_means_empirical,
+                transmat=transition_matrix,
+                labels=most_likely_regime,
+                probs=smoothed_probs,
+            )
+            most_likely_regime = sort_result["labels"]
+            smoothed_probs = sort_result["probs"]
+            transition_matrix = sort_result["transmat"]
+            warnings.append(
+                "Regimes have been sorted by empirical mean so that "
+                "\"Regime 0\" is the lowest-mean state. Model parameters "
+                "in the Parameters table retain the statsmodels-native "
+                "regime indices (which may differ from the sorted labels)."
+            )
 
         progress_callback("Building output tables", 75)
 

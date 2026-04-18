@@ -46,13 +46,38 @@ def _prepare_series(values):
     return trimmed, nan_count
 
 
-def _optimal_block_length(n):
+def _optimal_block_length(n, data=None):
     """
-    Estimate optimal block length using the rule of thumb: n^(1/3).
-    Politis & Romano (1994) suggest this as a reasonable starting point.
+    Estimate an optimal block length.
+
+    Starts from the Politis-Romano (1994) rule of thumb ``n^(1/3)``,
+    which is derived under the simplifying assumption that the AR(1)
+    coefficient of the series is modest. Real macro / financial data
+    is often highly persistent (ρ > 0.5), and the rule-of-thumb length
+    is too short there — block bootstrap replicates then break the
+    dependence structure the user is trying to preserve, and
+    confidence intervals come out too narrow.
+
+    When ``data`` is supplied we inflate the block length based on the
+    sample AR(1) coefficient ρ̂ using an Andrews-style correction:
+
+        bl_adj = bl_base * ((1 + |ρ̂|) / (1 - |ρ̂|))^(1/3)
+
+    This factor is >1 for |ρ̂| > 0 and grows sharply as ρ̂ approaches 1,
+    matching Andrews's optimal bandwidth scaling for HAC estimators.
+    The final length is capped at n//2 (the textbook upper bound for
+    overlapping block bootstrap).
     """
-    bl = max(2, int(round(n ** (1.0 / 3.0))))
-    return min(bl, n // 2)
+    bl_base = max(2, int(round(n ** (1.0 / 3.0))))
+    if data is None:
+        return min(bl_base, n // 2)
+    rho = _acf_lag1(np.asarray(data))
+    if not np.isfinite(rho):
+        return min(bl_base, n // 2)
+    rho = min(abs(float(rho)), 0.95)  # clip to keep the factor finite
+    factor = ((1.0 + rho) / (1.0 - rho)) ** (1.0 / 3.0)
+    bl_adj = max(2, int(round(bl_base * factor)))
+    return min(bl_adj, n // 2)
 
 
 def _block_bootstrap_sample(data, block_length, rng):
@@ -127,7 +152,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         bl_param = ctx.get_param("block_length", preset_cfg["block_length"])
         if bl_param == "auto" or bl_param is None:
-            block_length = _optimal_block_length(n)
+            # Pass the cleaned series so the helper can inflate the
+            # block length for persistent data (large lag-1 AC).
+            # Without this correction, highly autocorrelated macro /
+            # financial series get block lengths that are too short
+            # and the bootstrap confidence intervals come out too
+            # narrow (the bootstrap fails to preserve persistence).
+            bl_base = max(2, int(round(n ** (1.0 / 3.0))))
+            block_length = _optimal_block_length(n, data=clean)
+            if block_length > int(1.5 * bl_base):
+                rho_est = _acf_lag1(clean)
+                warn_list.append(
+                    f"Block length inflated to {block_length} "
+                    f"(base n^(1/3) = {bl_base}) to reflect lag-1 "
+                    f"autocorrelation rho = {rho_est:.2f}. Persistent "
+                    f"series need longer blocks to preserve their "
+                    f"dependence structure under the bootstrap."
+                )
         else:
             block_length = int(bl_param)
             if block_length < 1:

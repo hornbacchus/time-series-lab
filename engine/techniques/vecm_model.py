@@ -164,7 +164,32 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Cointegrating vectors
         progress_callback("Extracting cointegrating vectors", 70)
         beta = fit.beta  # shape (k, r)
-        beta_arr = np.asarray(beta)
+        beta_arr = np.asarray(beta).astype(float).copy()
+        alpha = fit.alpha  # shape (k, r)
+        alpha_arr = np.asarray(alpha).astype(float).copy()
+
+        # Normalize to Phillips triangular form: divide each
+        # cointegrating vector by its first nonzero coefficient so that
+        # β[0, j] = 1 (or β[p, j] = 1 for the first nonzero index p).
+        # Simultaneously multiply α's j-th column by the same scalar so
+        # that the product α β' (which drives the error-correction
+        # dynamics) is unchanged. Without this normalization the scales
+        # of β and α are arbitrary and user-facing numbers change
+        # across re-fits.
+        for j in range(r):
+            # Find first coefficient with meaningful magnitude to use
+            # as the normalization pivot. Prefer index 0 (user's first
+            # selected series); fall back to whichever index has the
+            # largest absolute value if index 0 is near zero.
+            pivot_idx = 0
+            if abs(beta_arr[pivot_idx, j]) < 1e-10:
+                pivot_idx = int(np.argmax(np.abs(beta_arr[:, j])))
+                if abs(beta_arr[pivot_idx, j]) < 1e-10:
+                    continue  # degenerate column; leave as-is
+            scale = beta_arr[pivot_idx, j]
+            beta_arr[:, j] = beta_arr[:, j] / scale
+            alpha_arr[:, j] = alpha_arr[:, j] * scale
+
         coint_rows = []
         for j in range(r):
             row = [f"Vector {j + 1}"]
@@ -176,10 +201,6 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["Vector"] + names,
             coint_rows,
         )
-
-        # Loading matrix (alpha)
-        alpha = fit.alpha  # shape (k, r)
-        alpha_arr = np.asarray(alpha)
         alpha_rows = []
         for i in range(k):
             row = [names[i]]

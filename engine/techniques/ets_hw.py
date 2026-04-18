@@ -202,11 +202,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
             lower = np.percentile(sim, 2.5, axis=1)
             upper = np.percentile(sim, 97.5, axis=1)
         except Exception:
-            # Fallback: rough interval from residual std
-            resid_std = np.std(clean - fit.fittedvalues)
-            lower = fc - 1.96 * resid_std
-            upper = fc + 1.96 * resid_std
-            warn_list.append("Prediction intervals estimated from residual std (simulation failed).")
+            # Fallback: t-distribution interval from residual std.
+            # 1.96 (standard normal 97.5 percentile) assumes known
+            # variance and infinite DoF — wrong on small samples and
+            # on skewed/heavy-tailed residuals. Use t-critical with
+            # T − n_params degrees of freedom and horizon-scaled σ
+            # (variance grows approximately √h for ETS random-walk
+            # additive errors; multiplicative errors grow differently
+            # but the simulation path above handles that case when
+            # it's available).
+            from scipy.stats import t as _t_dist
+            resid = clean - fit.fittedvalues
+            resid_std = float(np.std(resid, ddof=1))
+            n_params = int(getattr(fit, "k_params", len(getattr(fit, "params", [])) or 3))
+            dof = max(1, len(clean) - n_params)
+            t_crit = float(_t_dist.ppf(0.975, dof))
+            horizon_scale = np.sqrt(np.arange(1, horizon + 1))
+            half_width = t_crit * resid_std * horizon_scale
+            lower = fc - half_width
+            upper = fc + half_width
+            warn_list.append(
+                f"Prediction intervals estimated from residual std with "
+                f"t-critical ({t_crit:.2f}, dof={dof}) — simulation path "
+                f"failed. Intervals may under-cover if residuals are "
+                f"non-iid or heavily skewed."
+            )
 
         # In-sample
         fitted_vals = fit.fittedvalues

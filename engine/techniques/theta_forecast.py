@@ -141,12 +141,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
             lower = pi.iloc[:, 0].values if hasattr(pi, 'iloc') else pi[:, 0]
             upper = pi.iloc[:, 1].values if hasattr(pi, 'iloc') else pi[:, 1]
         except Exception:
-            # Fallback: simple interval
-            fitted_vals = fit.forecast(0)  # will fail, so use residual-based
-            resid_std = np.std(clean[1:] - clean[:-1]) * np.sqrt(np.arange(1, horizon + 1))
-            lower = fc_values - 1.96 * resid_std
-            upper = fc_values + 1.96 * resid_std
-            warn_list.append("Prediction intervals approximated from differenced residual std.")
+            # Fallback: t-distribution interval from IN-SAMPLE residuals.
+            # The previous fallback used np.diff(clean) (first differences
+            # of the raw series) as a proxy for residuals — which doesn't
+            # reflect the Theta model's fit at all and was using the
+            # standard-normal 1.96 critical value. Use the model's
+            # actual fitted values where available, fall back to series
+            # differences only if fittedvalues is unavailable, and use
+            # t-critical with T − k_params DoF.
+            from scipy.stats import t as _t_dist
+            if hasattr(fit, "fittedvalues"):
+                fv = fit.fittedvalues
+                fv = fv.values if hasattr(fv, "values") else np.asarray(fv)
+                # Align lengths (ThetaModel sometimes drops initial obs).
+                aligned_len = min(len(fv), len(clean))
+                resid = clean[-aligned_len:] - fv[-aligned_len:]
+            else:
+                resid = np.diff(clean)  # last-resort proxy
+            resid_std = float(np.std(resid, ddof=1))
+            n_params = 3  # Theta model: level, trend, smoothing
+            dof = max(1, len(clean) - n_params)
+            t_crit = float(_t_dist.ppf(0.975, dof))
+            horizon_scale = np.sqrt(np.arange(1, horizon + 1))
+            half_width = t_crit * resid_std * horizon_scale
+            lower = fc_values - half_width
+            upper = fc_values + half_width
+            warn_list.append(
+                f"Prediction intervals estimated from in-sample residuals "
+                f"with t-critical ({t_crit:.2f}, dof={dof}) — the native "
+                f"prediction_intervals path failed. Coverage may be off "
+                f"if Theta residuals are autocorrelated."
+            )
 
         progress_callback("Building output", 80)
 

@@ -10,6 +10,7 @@ numpy-based sifting implementation.
 import numpy as np
 
 from techniques.base import (
+    flip_sign_vector,
     RunContext,
     make_table,
     make_response,
@@ -278,6 +279,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 )
             else:
                 imfs, residual = _numpy_emd(clean, max_imfs, max_sift)
+
+        # Sign-normalize each IMF. EMD sifting is a nonlinear iterative
+        # procedure and both the `emd` library and the numpy fallback can
+        # return IMFs with flipped signs for equivalent data (depends on
+        # initialization, extrema detection, library version). Mathematics
+        # of the reconstruction (sum of IMFs ≈ signal) is invariant to
+        # per-component sign flips AS LONG AS the residual absorbs the
+        # flip, but from a user-chart perspective an oscillatory
+        # component should have a stable orientation run-to-run. Use
+        # the same "largest-absolute entry positive" convention as SVD.
+        # Adjust the residual so the total reconstruction is unchanged.
+        imfs = np.asarray(imfs) if not isinstance(imfs, np.ndarray) else imfs
+        for i in range(len(imfs)):
+            flipped = flip_sign_vector(imfs[i])
+            if not np.array_equal(flipped, imfs[i]):
+                # Sign was flipped — compensate the residual so that
+                # sum(imfs) + residual stays equal to the original signal.
+                delta = flipped - imfs[i]
+                imfs[i] = flipped
+                residual = residual - delta  # subtract the added signal
 
         n_imfs = len(imfs) if len(imfs) > 0 else 0
 

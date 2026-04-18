@@ -79,7 +79,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
             warnings.append(f"{n_interp} total NaN values interpolated across all series.")
 
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        k_factors = int(ctx.get_param("k_factors", min(cfg["max_factors"], n_vars - 1)))
+        # Accept both "n_factors" (the catalog parameter name used in the
+        # Run-pane UI) and "k_factors" (the older internal name, kept for
+        # backward compatibility with any notebooks / scripts that set it).
+        n_factors_param = ctx.get_param("n_factors")
+        k_factors_param = ctx.get_param("k_factors")
+        if n_factors_param is not None:
+            k_factors = int(n_factors_param)
+        elif k_factors_param is not None:
+            k_factors = int(k_factors_param)
+        else:
+            k_factors = min(cfg["max_factors"], n_vars - 1)
         factor_order = int(ctx.get_param("factor_order", cfg["factor_order"]))
         error_order = int(ctx.get_param("error_order", cfg["error_order"]))
         horizon = max(1, int(ctx.get_param("horizon", 10)))
@@ -331,15 +341,56 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         tables = []
 
+        # ---- Communality ----
+        # The correct variance-decomposition formula uses the full factor
+        # covariance matrix, not just the diagonal:
+        #     comm_i = Lambda[i, :] @ Cov(F) @ Lambda[i, :]'
+        # We rescaled each factor to unit sample variance above, so
+        # Cov(F) has 1s on the diagonal. But the factors are NOT
+        # guaranteed to be orthogonal — DFM fitting can converge to
+        # local optima where two factors end up nearly collinear,
+        # giving loading magnitudes that blow up (the variance is
+        # split ambiguously between near-parallel axes). Using the
+        # diagonal-only formula (sum of squared loadings) in that
+        # regime produces nonsense communalities > 1 and variance-
+        # explained > 100%. The quadratic form below handles
+        # correlated factors correctly.
+        factor_cov = np.cov(factors, rowvar=False)
+        if factor_cov.ndim == 0:  # k_factors == 1
+            factor_cov = np.array([[float(factor_cov)]])
+        elif factor_cov.ndim == 1:
+            factor_cov = factor_cov.reshape(1, 1)
+
+        communalities = np.array([
+            float(loading_matrix[i, :] @ factor_cov @ loading_matrix[i, :])
+            for i in range(n_vars)
+        ])
+
+        # Diagnostic: warn when factors are nearly collinear (degenerate
+        # fit — the second factor isn't adding independent information).
+        if k_factors >= 2:
+            # Off-diagonal entries of factor_cov are the factor
+            # correlations (diagonal is ~1 after our rescaling).
+            max_corr = 0.0
+            for a in range(k_factors):
+                for b in range(a + 1, k_factors):
+                    r = abs(factor_cov[a, b])
+                    if r > max_corr:
+                        max_corr = r
+            if max_corr > 0.90:
+                warnings.append(
+                    f"Factors are highly correlated (max |corr| = {max_corr:.2f}), "
+                    f"suggesting a degenerate fit. Try reducing k_factors — the "
+                    f"model is probably over-parameterized for this data."
+                )
+
         # ---- Factor loadings table ----
         loading_rows = []
         for i in range(n_vars):
             row = [names[i]]
             for f in range(k_factors):
                 row.append(round(float(loading_matrix[i, f]), 4))
-            # Communality
-            comm = float(np.sum(loading_matrix[i, :] ** 2))
-            row.append(round(comm, 4))
+            row.append(round(float(communalities[i]), 4))
             loading_rows.append(row)
         factor_cols = [f"Factor {f+1}" for f in range(k_factors)]
         loading_table = make_table(
@@ -384,15 +435,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ))
 
         # ---- Model summary ----
-        # Variance explained by factors. Factors have been rescaled to
-        # unit variance above, so loadings already absorb the factor
-        # scale. For standardized Y (unit variance per variable), the
-        # variance of Y_i explained by the factors is sum_f loading[i,f]^2
-        # (= communality_i), capped at 1 in the orthogonal case. Total
-        # variance = n_vars and total explained = sum of communalities.
-        total_var = float(n_vars)
-        total_explained = float(np.sum(loading_matrix ** 2))
-        var_explained = total_explained / total_var if total_var > 0 else 0.0
+        # Variance explained by factors = mean communality across
+        # variables. communalities[] was computed above using the
+        # correct quadratic form Lambda @ Cov(F) @ Lambda.T, which
+        # handles the case where the factors aren't perfectly orthogonal
+        # (common when DFM converges to a local optimum with correlated
+        # factors — reporting sum-of-squared-loadings there gave the
+        # nonsensical "1935% variance explained" bug).
+        var_explained = float(np.mean(communalities))
 
         rmse_vals = []
         for i in range(n_vars):

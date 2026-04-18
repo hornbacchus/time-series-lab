@@ -88,17 +88,28 @@ def _seasonal_naive_forecast(series, horizon, period):
 
     forecasts = np.array(forecasts)
 
-    # Compute naive residuals for intervals
+    # Compute naive residuals for intervals and derive a t-critical
+    # half-width. The old code used 1.96 (z for 97.5%) which assumes
+    # known variance and infinite DoF — too narrow on small samples.
+    # Scale by √h to let the interval widen with the forecast horizon
+    # (consistent with a random-walk error for the seasonal-naive
+    # baseline that this fallback approximates).
     residuals = []
     for i in range(period, n):
         residuals.append(series[i] - series[i - period])
     if len(residuals) > 0:
         std_resid = float(np.std(residuals, ddof=1))
+        dof = max(1, len(residuals) - 1)
     else:
         std_resid = float(np.std(series, ddof=1))
+        dof = max(1, n - 1)
 
-    lower = forecasts - 1.96 * std_resid
-    upper = forecasts + 1.96 * std_resid
+    from scipy.stats import t as _t_dist
+    t_crit = float(_t_dist.ppf(0.975, dof))
+    horizon_scale = np.sqrt(np.arange(1, horizon + 1))
+    half_width = t_crit * std_resid * horizon_scale
+    lower = forecasts - half_width
+    upper = forecasts + half_width
 
     return forecasts, lower, upper, std_resid
 

@@ -74,3 +74,29 @@ For squared error loss: `r_{i,m} = y_i - F_{m-1}(x_i)` (the actual residuals).
 Train separate models for the lower (e.g., tau = 0.025) and upper (tau = 0.975) quantiles to get a 95% prediction interval.
 
 **Global models**: Train a single gradient boosting model across multiple related time series (using series identifiers as features). This "global" approach often outperforms individual models because the algorithm can learn shared patterns across series, effectively increasing the training data size.
+
+## Prediction Intervals — important caveat
+
+Machine-learning forecasters do **not** come with native prediction-
+interval machinery the way classical models (ARIMA, ETS, state-space)
+do. When this technique returns a prediction interval, it is derived
+empirically from in-sample residuals using a normal or t approximation —
+NOT from a probabilistic forecast distribution.
+
+Consequences:
+
+- The interval width does **not** reflect model uncertainty
+  (epistemic uncertainty about the learned parameters) — only
+  aleatoric noise captured by the residual distribution.
+- Coverage is not guaranteed. On out-of-sample data with regime
+  shifts or distribution drift, empirical intervals typically
+  under-cover.
+- The interval is **symmetric** around the point forecast, which
+  mis-represents asymmetric error distributions that ML models
+  often produce.
+
+For calibrated intervals on an ML forecast, wrap this technique with
+**Conformal Prediction Intervals** — it takes a point-forecast model
+and produces distribution-free intervals via a held-out calibration
+set. See also **Quantile Regression Forecast** for directly
+modeling conditional quantiles.

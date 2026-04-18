@@ -114,11 +114,18 @@ def _manual_pp(series, regression, nlags):
     else:
         nlags_used = int(nlags)
 
-    gamma_0 = np.sum(resid ** 2) / n
+    # Long-run variance components. Use the same (n - k) denominator as
+    # s2 above so the short-run and long-run variance estimators are
+    # consistent — line 109 already applies the degrees-of-freedom
+    # correction for s2, but the previous version of this block
+    # divided gamma_0 / gamma_j by raw n, mixing biased and unbiased
+    # estimators in the PP correction factor below.
+    dof_denom = max(1, n - X.shape[1])
+    gamma_0 = np.sum(resid ** 2) / dof_denom
     lrv = gamma_0
     for j in range(1, nlags_used + 1):
         w = 1.0 - j / (nlags_used + 1)  # Bartlett kernel
-        gamma_j = np.sum(resid[j:] * resid[:-j]) / n
+        gamma_j = np.sum(resid[j:] * resid[:-j]) / dof_denom
         lrv += 2 * w * gamma_j
 
     # PP Z(t) statistic

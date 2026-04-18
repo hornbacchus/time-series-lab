@@ -3,7 +3,38 @@ Conformal Prediction Intervals for Time Series Lab.
 
 Implements split conformal inference for time series forecasts.
 Uses auto_arima residuals on a calibration set to construct
-distribution-free prediction intervals with finite-sample coverage guarantees.
+distribution-free prediction intervals.
+
+IMPORTANT — scope of the coverage guarantee
+============================================
+Standard split conformal prediction (Vovk, Shafer & Vovk 2005;
+Papadopoulos et al. 2002) gives distribution-free finite-sample
+coverage guarantees when the data are **exchangeable** (e.g., iid).
+Time-series residuals typically are NOT exchangeable — they exhibit
+autocorrelation, regime shifts, and heteroskedasticity — so the
+coverage guarantee does not transfer directly.
+
+What this implementation actually provides:
+
+  1. Rolling refit on the calibration set. The model is re-fit after
+     each new observation in the calibration window, so the residuals
+     used for the conformal quantile reflect the model's true one-step
+     errors along that path. This is stronger than vanilla split
+     conformal but still assumes the future conformity scores
+     distribute like the calibration ones.
+
+  2. An empirical quantile of the absolute residuals as the interval
+     half-width. Valid under exchangeability; *approximately* valid
+     when the series is close to stationary with short-range
+     dependence; potentially mis-calibrated when the series has
+     regime shifts or strong persistence.
+
+If you need a formal coverage guarantee for time series, use an
+adaptive / online conformal method (Lei et al. 2018, Gibbs & Candès
+2021) — not implemented here. The output now emits a diagnostic
+warning when calibration residuals show strong autocorrelation, which
+is the most common scenario in which the intervals quietly
+under-cover.
 """
 
 import numpy as np
@@ -156,6 +187,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
             extended = np.append(extended, cal[i])
 
         cal_residuals = np.array(cal_residuals)
+
+        # Diagnose whether the "exchangeability" assumption behind
+        # split conformal looks plausible here. If the calibration
+        # residuals carry strong autocorrelation, the implicit
+        # assumption breaks and realized coverage can fall below the
+        # nominal level — warn the user explicitly. Threshold of 0.2
+        # on |ρ̂| is a conservative flag; strong violations
+        # (|ρ| > 0.4) usually correspond to visible undercoverage.
+        if len(cal_residuals) >= 3:
+            _cr = cal_residuals - np.mean(cal_residuals)
+            _c0 = float(np.sum(_cr ** 2))
+            if _c0 > 0:
+                _c1 = float(np.sum(_cr[:-1] * _cr[1:]))
+                _rho = _c1 / _c0
+                if abs(_rho) > 0.2:
+                    warn_list.append(
+                        f"Calibration residuals show lag-1 autocorrelation "
+                        f"(rho = {_rho:+.2f}). Standard split conformal assumes "
+                        f"exchangeable residuals; the reported coverage guarantee "
+                        f"may not hold. For formally-guaranteed time-series "
+                        f"coverage, use an adaptive conformal method (not yet "
+                        f"implemented in this technique)."
+                    )
 
         progress_callback("Computing conformal quantile", 70)
 
