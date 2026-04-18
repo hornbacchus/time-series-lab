@@ -584,6 +584,38 @@ def generate_markdown(catalog, udf_catalog):
       "box that runs these commands for you.")
     blank()
 
+    h3("Multiple Python Installs on Your Machine")
+    p("If your PC has more than one Python installation (common on Windows when "
+      "Python is installed from python.org AND the Microsoft Store AND via a "
+      "standalone runtime AND via Anaconda), `pip install <package>` may install "
+      "the package into a Python different from the one Time Series Lab actually "
+      "uses. When you then run a technique, the engine reports something like "
+      "`No module named 'statsmodels'` even though `pip list` swears the package "
+      "is installed.")
+    blank()
+    p("The engine launches Python via Windows PATH resolution (the first `python.exe` "
+      "found). To install packages into that specific interpreter, do not rely on "
+      "a bare `pip install ...`. Instead, call pip through the exact python.exe "
+      "the engine will use:")
+    blank()
+    p("```")
+    p("# Find which Python the engine will launch")
+    p("where python")
+    p("")
+    p("# Install into THAT Python specifically (adjust path to match)")
+    p("\"C:\\Python314\\python.exe\" -m pip install -r ^")
+    p("    \"<project>\\engine\\requirements.txt\"")
+    p("\"C:\\Python314\\python.exe\" -m pip install prophet xgboost reservoirpy")
+    p("\"C:\\Python314\\python.exe\" -m pip install torch ^")
+    p("    --index-url https://download.pytorch.org/whl/cpu")
+    p("```")
+    blank()
+    p("If the installer provisioned a bundled runtime at "
+      "`%LOCALAPPDATA%\\TimeSeriesLab\\engine\\runtime\\python.exe`, the engine "
+      "uses that first and this entire issue disappears — pip-installing into the "
+      "bundled runtime updates exactly the Python the engine sees.")
+    blank()
+
     h3("What Does NOT Need To Be Installed Separately")
     p("Time Series Lab does not require R, TRAMO/SEATS, JDemetra+, EViews, SAS, MATLAB, "
       "or any cloud service. Everything runs locally. The only external components "

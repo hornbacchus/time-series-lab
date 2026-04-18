@@ -17,8 +17,21 @@ A Dynamic Factor Model (DFM) reduces a large panel of time series to a small num
 - A small number of factors explain most of the co-movement in the data
 - The relationship between observed variables and factors is linear
 - Idiosyncratic components are weakly correlated across series (or uncorrelated in the strict factor model)
-- The factors follow a stationary VAR process
+- **The factors follow a stationary VAR process — this is the critical one in practice**
 - The number of series is large relative to the number of factors
+
+## Input Transform (stationarity)
+
+The DFM is a **stationary-input** model. Fitting it on trending levels data (real GDP, industrial production, employment, CPI) will produce a factor that captures the dominant secular growth trend rather than the business cycle — usually the opposite of what the user wants. The canonical Stock-Watson (1989) treatment of the four coincident indicators — the exact dataset shipped as `dfm_coincident.csv` — applies month-over-month log differencing before fitting.
+
+This tool exposes a `transform` parameter that handles the issue automatically:
+
+- **`auto` (default)**: runs an Augmented Dickey-Fuller test on each input series. If any fails the stationarity test (p > 0.05), applies log-differencing (`log(x_t) - log(x_{t-1})` in percent) to all series. Falls back to simple first-differencing if any values are non-positive. A warning in the result tells you what was applied.
+- **`log_diff`**: forces month-over-month percent log changes on all series.
+- **`diff`**: forces simple first-differencing.
+- **`none`**: uses input as-is. Appropriate only when the input is already a stationary series (growth rates, log-returns, deviations from a trend).
+
+With `auto` enabled, you can pass raw level data and the technique will produce a business-cycle factor that cleanly tracks NBER recessions. With `none`, you get the pure "factor of levels" interpretation — useful for educational comparison but rarely what you want for cyclical analysis.
 
 ## Outputs
 

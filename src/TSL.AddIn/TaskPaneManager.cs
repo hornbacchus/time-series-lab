@@ -23,13 +23,35 @@ namespace TSL.AddIn
         private static readonly TimeIndexDetector _timeDetector = new TimeIndexDetector();
 
         /// <summary>
-        /// Show the task pane (create if needed) and optionally pre-select a technique.
+        /// Show the task pane (create if needed) and open the Technique
+        /// Explorer pre-selected to <paramref name="techniqueId"/>. Used by
+        /// Task Pane navigation flows that want the user to read the
+        /// description before running.
         /// </summary>
         public static void ShowAndSelect(string techniqueId)
         {
             EnsureTaskPane();
             _taskPane.Visible = true;
             _hostControl?.NavigateToTechnique(techniqueId);
+        }
+
+        /// <summary>
+        /// Show the task pane, navigate directly to the Run view for
+        /// <paramref name="techniqueId"/>, and immediately kick off the
+        /// analysis against the current Excel selection. This is the
+        /// "one-click" path used by the ribbon's Quick Action buttons —
+        /// users expect Seasonal Adjustment / PCA / Granger / etc. to
+        /// execute, not to land on a description page.
+        /// </summary>
+        public static void RunTechnique(string techniqueId)
+        {
+            EnsureTaskPane();
+            _taskPane.Visible = true;
+            // OnRunRequested does everything: extracts the Excel selection,
+            // populates the Run view, builds the RunRequest, and calls the
+            // engine. Going through the same event path that the Explorer's
+            // "Run on Selection" button uses keeps behavior consistent.
+            OnRunRequested(techniqueId, AddIn.Settings?.GetGlobalPreset() ?? "Balanced");
         }
 
         public static void ShowExplorer()

@@ -306,6 +306,56 @@ def run(ctx: RunContext, progress_callback) -> dict:
             # Simplified: use pseudo-inverse
             scores = centered @ np.linalg.pinv(loadings.T)
 
+        # Sign normalization. PCA eigenvectors are determined only up to
+        # sign — flipping a column of `eigenvectors` gives a mathematically
+        # identical solution. Pick a deterministic convention so the output
+        # doesn't flicker across runs depending on numpy's eigh sign.
+        #
+        # Two-part rule:
+        #
+        #   1. PC1 (the dominant "level" factor on correlated inputs) is
+        #      anchored independently: make its largest-absolute loading
+        #      positive. On yield curves / employment by sector / etc. this
+        #      produces a PC1 where scores rise when the overall level
+        #      rises — matching intuition.
+        #
+        #   2. PC2..PCn are decided as ONE GROUP. Under max-abs-positive,
+        #      some higher PCs would need flipping and others wouldn't —
+        #      leaving the user with an inconsistent-looking basis where
+        #      PC3 flipped but neighboring PC2 didn't. "If one flips, all
+        #      flip": if ANY PC in PC2..PCn would be flipped under the
+        #      max-abs rule, flip ALL of them together. Otherwise leave
+        #      them all as numpy returned.
+        #
+        # Flipping loadings[:, i] and scores[:, i] together preserves the
+        # decomposition exactly — scores @ loadings.T is unchanged.
+
+        # Sign normalization.
+        #
+        # PCA eigenvectors are only determined up to sign, and per-PC
+        # rules like max-abs-positive can give some PCs one orientation
+        # and others the opposite — leaving the user staring at a chart
+        # where PC3 flipped but neighboring PC2 didn't.
+        #
+        # Rule: anchor ONLY PC1. Make PC1's largest-absolute loading
+        # positive, producing the "level factor" interpretation expected
+        # on correlated inputs (yield curves, sectoral GDP, employment
+        # by industry — PC1 scores rise when the common level rises).
+        # Leave PC2..PCn in the orientation numpy.linalg.eigh returned.
+        # numpy's eigh is deterministic for a given input + LAPACK build,
+        # so the output is stable across runs; and by not re-flipping
+        # the higher PCs individually, the relative orientation between
+        # PC2, PC3, PC4 is preserved: "if one flips, all flip" (or, more
+        # precisely, "none flip relative to each other — only PC1 is
+        # anchored independently").
+        #
+        # Flip loadings[:, 0] and scores[:, 0] together so the
+        # reconstruction scores @ loadings.T is preserved exactly.
+        abs_argmax = int(np.argmax(np.abs(loadings[:, 0])))
+        if loadings[abs_argmax, 0] < 0:
+            loadings[:, 0] = -loadings[:, 0]
+            scores[:, 0] = -scores[:, 0]
+
         progress_callback("Building output tables", 80)
 
         # --- Table 1: Eigenvalues & Explained Variance ---

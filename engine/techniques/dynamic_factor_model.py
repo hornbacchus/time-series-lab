@@ -101,6 +101,74 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Provide a longer time series."],
             )
 
+        # ── Input transform ─────────────────────────────────────────────
+        # DFM is a stationary-input model. Fitting on levels of a trending
+        # series (e.g., real GDP, industrial production, payrolls) produces
+        # a factor that captures the secular growth trend rather than the
+        # business cycle — exactly the opposite of what most users want.
+        # Stock & Watson's canonical DFM works on month-over-month log
+        # changes for that reason.
+        #
+        # Supported values for `transform`:
+        #   "auto" (default): run an ADF test on each series. If any are
+        #     non-stationary (p > 0.05), apply log-diff (or simple diff if
+        #     any values are non-positive).
+        #   "log_diff": apply month-over-month % log change to all series.
+        #   "diff":     apply simple first difference to all series.
+        #   "none":     use input as-is (original behavior).
+        transform_param = str(ctx.get_param("transform", "auto")).strip().lower()
+        applied_transform = "none"
+
+        def _is_nonstationary(col):
+            try:
+                from statsmodels.tsa.stattools import adfuller
+                sample = col[-500:] if len(col) > 500 else col
+                p = adfuller(sample, autolag="AIC")[1]
+                return p > 0.05
+            except Exception:
+                return True  # treat as non-stationary if ADF can't run
+
+        if transform_param == "auto":
+            nonstationary_count = sum(1 for j in range(n_vars)
+                                       if _is_nonstationary(Y[:, j]))
+            if nonstationary_count >= 1:
+                if np.all(Y > 0):
+                    applied_transform = "log_diff"
+                else:
+                    applied_transform = "diff"
+                warnings.append(
+                    f"Auto-transform: {nonstationary_count} of {n_vars} input "
+                    f"series appear non-stationary (ADF p > 0.05). Applied "
+                    f"{applied_transform} so the factor captures cyclical "
+                    f"variation rather than the secular trend. Set "
+                    f"transform='none' to override."
+                )
+        elif transform_param == "log_diff":
+            if np.all(Y > 0):
+                applied_transform = "log_diff"
+            else:
+                warnings.append(
+                    "log_diff requires strictly positive values; "
+                    "falling back to simple diff."
+                )
+                applied_transform = "diff"
+        elif transform_param == "diff":
+            applied_transform = "diff"
+        # else "none": leave Y as-is
+
+        if applied_transform == "log_diff":
+            Y = np.diff(np.log(Y), axis=0) * 100.0  # percent MoM
+            T -= 1
+            if ctx.time and len(ctx.time) > T:
+                ctx.time = list(ctx.time)[1:]
+            names = [n + " (% MoM)" for n in names]
+        elif applied_transform == "diff":
+            Y = np.diff(Y, axis=0)
+            T -= 1
+            if ctx.time and len(ctx.time) > T:
+                ctx.time = list(ctx.time)[1:]
+            names = [n + " (diff)" for n in names]
+
         progress_callback("Standardizing data", 15)
 
         # Standardize for numerical stability
@@ -150,42 +218,90 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Extracting factors and loadings", 55)
 
-        # Extract smoothed factors
-        factors = fit.factors.filtered_state.T  # (T, k_factors)
+        # Extract smoothed factors. Modern statsmodels (>= 0.14) exposes
+        # these as fit.factors.smoothed / .filtered with shape
+        # (k_factors, T); older versions used fit.factors.filtered_state.
+        # We prefer `smoothed` over `filtered` because smoothed uses the
+        # full sample at each time point (two-pass Kalman) and is the
+        # right series for ex-post factor interpretation / plotting.
+        if hasattr(fit.factors, "smoothed") and fit.factors.smoothed is not None:
+            factors = fit.factors.smoothed.T  # (T, k_factors)
+        elif hasattr(fit.factors, "filtered") and fit.factors.filtered is not None:
+            factors = fit.factors.filtered.T
+        else:
+            # Pre-0.14 fallback
+            factors = fit.factors.filtered_state.T
         if factors.shape[0] > T:
             factors = factors[:T]
 
-        # Factor loadings
-        # The loading matrix is stored in params; extract from model structure
+        # Factor loadings.
+        #
+        # statsmodels DynamicFactor labels parameters as "loading.fN.yM"
+        # where N and M are 1-based indices (e.g. "loading.f1.y1" is the
+        # loading of the first observed variable on the first factor).
+        # We need to convert to 0-based indices for the loading matrix.
         loading_matrix = np.zeros((n_vars, k_factors))
         param_names = fit.param_names if hasattr(fit, 'param_names') else []
 
         for i, pname in enumerate(param_names):
-            if 'loading' in pname.lower():
-                parts = pname.split('.')
-                try:
-                    # Parse "loading.fN.yM" style names
-                    for pi, p in enumerate(parts):
-                        if p.startswith('f') and p[1:].isdigit():
-                            f_idx = int(p[1:])
-                        if p.startswith('y') and p[1:].isdigit():
-                            v_idx = int(p[1:])
-                    if f_idx < k_factors and v_idx < n_vars:
-                        loading_matrix[v_idx, f_idx] = fit.params.iloc[i] if hasattr(fit.params, 'iloc') else fit.params[i]
-                except Exception:
-                    pass
+            if 'loading' not in pname.lower():
+                continue
+            f_idx_1b = v_idx_1b = None
+            for p in pname.split('.'):
+                if p.startswith('f') and p[1:].isdigit():
+                    f_idx_1b = int(p[1:])
+                elif p.startswith('y') and p[1:].isdigit():
+                    v_idx_1b = int(p[1:])
+            if f_idx_1b is None or v_idx_1b is None:
+                continue
+            f_idx = f_idx_1b - 1  # convert 1-based -> 0-based
+            v_idx = v_idx_1b - 1
+            if 0 <= f_idx < k_factors and 0 <= v_idx < n_vars:
+                val = fit.params.iloc[i] if hasattr(fit.params, 'iloc') else fit.params[i]
+                loading_matrix[v_idx, f_idx] = val
 
-        # If we couldn't parse loadings, try alternative extraction
+        # Fallback: pull the loading matrix directly from the state-space
+        # design matrix. Modern statsmodels returns (n_vars, k_factors)
+        # for time-invariant systems; older versions returned a 3-D array
+        # with a trailing time axis.
         if np.all(loading_matrix == 0):
             try:
-                # Direct extraction from state space representation
-                design = fit.model.ssm['design']
+                design = np.asarray(fit.model.ssm['design'])
                 if design.ndim == 3:
                     loading_matrix = design[:n_vars, :k_factors, 0]
                 else:
                     loading_matrix = design[:n_vars, :k_factors]
             except Exception:
                 warnings.append("Could not extract factor loadings from model structure.")
+
+        # ── Rescale & sign-normalize factors and loadings ──────────────
+        # statsmodels' DynamicFactor identification leaves the factor
+        # scale ambiguous: the pair (factor * c, loading / c) produces an
+        # identical fit for any nonzero c. In practice this ships loadings
+        # like +/-0.03 with factor scores of magnitude 50 — technically
+        # correct but uninterpretable (communality = sum of squared
+        # loadings comes out as 0.001).
+        #
+        # Anchor each factor to unit sample variance. That absorbs the
+        # scale into the loadings, so for standardized Y each loading
+        # becomes the correlation between a variable and a factor. Then
+        # communality = sum_f loading^2 is the fraction of the variable's
+        # standardized variance explained by the factors (0 to 1).
+        #
+        # After rescaling, flip the sign of each factor so its largest-
+        # absolute loading is positive. For correlated pro-cyclical
+        # inputs this makes the leading factor a "level" factor where
+        # scores rise when the underlying economic level rises — the
+        # orientation a macro strategist expects to see.
+        for f in range(k_factors):
+            sigma = float(np.std(factors[:, f], ddof=1))
+            if sigma > 1e-10:
+                factors[:, f] = factors[:, f] / sigma
+                loading_matrix[:, f] = loading_matrix[:, f] * sigma
+            abs_argmax = int(np.argmax(np.abs(loading_matrix[:, f])))
+            if loading_matrix[abs_argmax, f] < 0:
+                factors[:, f] = -factors[:, f]
+                loading_matrix[:, f] = -loading_matrix[:, f]
 
         progress_callback("Generating forecasts", 70)
 
@@ -268,13 +384,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ))
 
         # ---- Model summary ----
-        # Variance explained by factors
-        total_var = np.sum(np.var(Y_std, axis=0))
-        factor_var = 0.0
-        for f in range(k_factors):
-            if f < factors.shape[1]:
-                factor_var += np.var(factors[:, f]) * np.sum(loading_matrix[:, f] ** 2)
-        var_explained = factor_var / total_var if total_var > 0 else 0.0
+        # Variance explained by factors. Factors have been rescaled to
+        # unit variance above, so loadings already absorb the factor
+        # scale. For standardized Y (unit variance per variable), the
+        # variance of Y_i explained by the factors is sum_f loading[i,f]^2
+        # (= communality_i), capped at 1 in the orthogonal case. Total
+        # variance = n_vars and total explained = sum of communalities.
+        total_var = float(n_vars)
+        total_explained = float(np.sum(loading_matrix ** 2))
+        var_explained = total_explained / total_var if total_var > 0 else 0.0
 
         rmse_vals = []
         for i in range(n_vars):

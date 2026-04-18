@@ -323,7 +323,8 @@
       "presets": ["Balanced", "Thorough"],
       "parameters": [
         {"name": "n_factors", "label": "Number of Factors", "type": "int", "default": 1, "required": false, "advanced": false, "description": "Number of latent factors", "options": null},
-        {"name": "factor_order", "label": "Factor AR Order", "type": "int", "default": 2, "required": false, "advanced": true, "description": "Autoregressive order for factors", "options": null}
+        {"name": "factor_order", "label": "Factor AR Order", "type": "int", "default": 2, "required": false, "advanced": true, "description": "Autoregressive order for factors", "options": null},
+        {"name": "transform", "label": "Input Transform", "type": "string", "default": "auto", "required": false, "advanced": false, "description": "How to prepare the input series. 'auto' runs an ADF test on each series and applies log-differencing (month-over-month % change) when any are non-stationary — the Stock-Watson canonical treatment. 'log_diff' forces log-differencing, 'diff' forces simple first-differencing, 'none' uses input as-is (appropriate only when inputs are already stationary growth rates or deviations).", "options": ["auto", "log_diff", "diff", "none"]}
       ],
       "output_tables": ["factors", "loadings", "model_summary"],
       "tags": ["multivariate", "factor-model", "latent"]
