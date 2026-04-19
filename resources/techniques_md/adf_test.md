@@ -21,11 +21,37 @@ The Augmented Dickey-Fuller (ADF) test checks whether a time series has a **unit
 
 ## Outputs
 
-- **Test statistic**: the t-statistic for the unit root coefficient
-- **p-value**: probability of observing the test statistic under the null hypothesis of a unit root
-- **Critical values** at 1%, 5%, and 10% significance levels
-- **Decision**: reject or fail to reject the null hypothesis of a unit root
-- **Selected lag order**: the number of augmentation lags used
+By default (ribbon path), this technique runs a **joint Stationarity Triage**: ADF + KPSS + Phillips-Perron are all executed and a single joint verdict is emitted. When called as the `TSL_ADF` UDF, it runs ADF alone for backward compatibility (override with `triage=True` via the Run pane to force the joint run).
+
+The Triage Results sheet contains three rows per input series — one per test — with test statistic, p-value, lag/bandwidth rule used, regression specification, and decision. The Summary sentence names the joint verdict:
+
+| ADF null (unit root) | KPSS null (stationarity) | Joint verdict |
+|---|---|---|
+| rejected | not rejected | **STATIONARY** |
+| not rejected | rejected | **UNIT ROOT (I(1))** — difference before stationary modelling |
+| rejected | rejected | **CONFLICTING** — likely a structural break or near-unit-root; consider Zivot-Andrews |
+| not rejected | not rejected | **INCONCLUSIVE** — low power on this sample; try a longer series or different specification |
+
+Phillips-Perron appears as a tie-breaker row on the ADF side (same null). In CONFLICTING cases the summary names which side PP agrees with.
+
+**Single-test ADF output** (UDF mode) contains:
+
+- **ADF statistic** and **p-value**
+- **AIC-selected lag** and the **Schwert upper bound** (`floor(12 · (T/100)^(1/4))`) that bounded the selection
+- **Regression specification** — the constant/trend form used (`c` / `ct` / `ctt` / `n`) shown both in the Summary and as a Regression column in the Results sheet
+- **Critical values** at 1%, 5%, 10% in ascending order
+- **Decision**: "unit root rejected" or "unit root not rejected" (the test cannot conclude "is stationary" — that requires the joint triage)
+- An advisory note when the series appears trending (`|t|>2` on a linear time regressor) and the current specification is `c` — suggests re-running with `ct`
+
+## Conventions Enforced
+
+**Specification transparency (P.1)**: The regression form, Schwert bound, and AIC-selected lag are all surfaced in user-visible output, not hidden in the audit sheet.
+
+**Summary language precision (P.2)**: ADF and PP summaries say "unit root rejected" / "unit root not rejected" — never "is stationary" as a standalone claim, because that conclusion requires the joint rubric. KPSS (whose null IS stationarity) is permitted to say "series appears stationary" when its null is not rejected.
+
+**Critical-value ordering (P.4)**: Significance levels are sorted ascending 1% / 5% / 10%, via the `order_critical_values` helper.
+
+**Trend disclosure, not imposition (P.6)**: When the series looks trending and the current spec is `c`, the summary appends a one-line suggestion to try `ct`. The wrapper never auto-switches the specification.
 
 ## Technical Details
 

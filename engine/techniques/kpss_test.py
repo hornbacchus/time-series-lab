@@ -1,14 +1,16 @@
 """
 KPSS stationarity test for Time Series Lab.
 
-Tests the null hypothesis that the series IS stationary (or trend-stationary).
-Rejecting H0 suggests the series is non-stationary.
+The KPSS null hypothesis is that the series IS stationary (around a constant
+or around a linear trend). Rejecting the null suggests the series is
+non-stationary — which is the opposite orientation of ADF (whose null is
+the presence of a unit root). When used together with ADF + PP, the joint
+verdict under the ``adf_test`` triage path is more conclusive than any
+single test alone.
 
-Note: KPSS is the complement of ADF. Using both together gives a clearer picture:
-- ADF rejects + KPSS fails to reject -> stationary
-- ADF fails to reject + KPSS rejects -> non-stationary
-- Both reject -> trend-stationary (difference-stationary around a trend)
-- Neither rejects -> inconclusive
+This wrapper exposes ``_run_kpss_single(clean, regression, nlags)`` for the
+triage path in ``adf_test.py`` to call directly, bypassing the per-series
+progress-callback / response-building overhead.
 """
 
 import warnings as _warnings
@@ -20,7 +22,86 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
+    order_critical_values,
 )
+
+
+_REGRESSION_LABEL = {
+    "c":  "level stationarity",
+    "ct": "trend stationarity",
+}
+
+
+def _prepare_series(values: np.ndarray, name: str, warnings: list) -> np.ndarray:
+    """Strip edge NaN and linearly interpolate interior NaN."""
+    first_valid = 0
+    while first_valid < len(values) and np.isnan(values[first_valid]):
+        first_valid += 1
+    last_valid = len(values) - 1
+    while last_valid >= 0 and np.isnan(values[last_valid]):
+        last_valid -= 1
+    if first_valid > last_valid:
+        return np.array([])
+    trimmed = values[first_valid:last_valid + 1].copy()
+    nan_count = int(np.isnan(trimmed).sum())
+    if nan_count > 0:
+        nans = np.where(np.isnan(trimmed))[0]
+        valid = np.where(~np.isnan(trimmed))[0]
+        if len(valid) >= 2:
+            trimmed[nans] = np.interp(nans, valid, trimmed[valid])
+            warnings.append(
+                f"'{name}': {nan_count} interior NaN values linearly "
+                "interpolated for KPSS test."
+            )
+        else:
+            return trimmed[~np.isnan(trimmed)]
+    return trimmed
+
+
+def _run_kpss_single(clean: np.ndarray, regression: str, nlags):
+    """Run KPSS on one prepared series. Returns a raw-results dict.
+
+    Keys:
+        stat, pvalue, used_lag, critical_values_ordered (list of
+        (level, value, rejects_H0) tuples — note KPSS rejects when
+        stat > CV, not <), regression, regression_label, nlags_rule,
+        decision_h0_rejected, error (str or None), pvalue_clipped (bool:
+        True when statsmodels reports the p-value at a boundary).
+    """
+    out = {
+        "stat": None, "pvalue": None, "used_lag": None,
+        "critical_values_ordered": [], "regression": regression,
+        "regression_label": _REGRESSION_LABEL.get(regression, regression),
+        "nlags_rule": nlags, "decision_h0_rejected": None,
+        "error": None, "pvalue_clipped": False,
+    }
+    n = len(clean)
+    if n < 12:
+        out["error"] = f"Too few observations ({n}; need ≥ 12)"
+        return out
+    try:
+        with _warnings.catch_warnings(record=True) as caught:
+            _warnings.simplefilter("always")
+            kpss_stat, p_value, used_lags, crit_vals = kpss(
+                clean, regression=regression, nlags=nlags,
+            )
+            for w in caught:
+                msg = str(w.message).lower()
+                if "p-value" in msg or "p value" in msg:
+                    out["pvalue_clipped"] = True
+    except Exception as e:
+        out["error"] = str(e)
+        return out
+    ordered = order_critical_values(crit_vals)
+    out["stat"] = float(kpss_stat)
+    out["pvalue"] = (float(p_value) if p_value is not None else None)
+    out["used_lag"] = int(used_lags)
+    # KPSS rejects H0 (stationarity) when stat > critical value.
+    out["critical_values_ordered"] = [
+        (lvl, cv, kpss_stat > cv) for (lvl, cv) in ordered
+    ]
+    return out
 
 
 def run(ctx: RunContext, progress_callback) -> dict:
@@ -32,8 +113,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
     regression : str, optional
         'c' for level stationarity (default), 'ct' for trend stationarity.
     nlags : int or str, optional
-        Number of lags for HAC covariance. 'auto' (default) = Hobbs formula,
-        'legacy' = old formula, or an integer.
+        Bandwidth rule: 'auto' (default, data-driven), 'legacy', or integer.
     significance_level : float, optional
         P-value threshold. Default 0.05.
     """
@@ -54,7 +134,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             nlags = int(nlags_param)
         else:
             nlags = str(nlags_param)
-        significance = ctx.get_param("significance_level", 0.05)
+        significance = float(ctx.get_param("significance_level", 0.05))
 
         warn_list = []
         result_rows = []
@@ -68,93 +148,96 @@ def run(ctx: RunContext, progress_callback) -> dict:
             progress_callback(f"Testing '{name}'", pct)
 
             clean = _prepare_series(values, name, warn_list)
-            n = len(clean)
+            single = _run_kpss_single(clean, regression, nlags)
 
-            if n < 12:
+            if single["error"] is not None:
                 result_rows.append([
-                    name, None, None, None, n, "Too few observations (need >= 12)"
+                    name, None, None, None,
+                    f"{regression} ({single['regression_label']})",
+                    len(clean), single["error"],
                 ])
-                all_summaries.append(f"'{name}': insufficient data ({n} observations).")
+                all_summaries.append(f"'{name}': {single['error']}.")
                 continue
 
-            try:
-                # kpss can emit an interpolation warning for p-values at boundaries
-                with _warnings.catch_warnings(record=True) as caught:
-                    _warnings.simplefilter("always")
-                    kpss_stat, p_value, used_lags, critical_values = kpss(
-                        clean, regression=regression, nlags=nlags
-                    )
-                    for w in caught:
-                        if "p-value" in str(w.message).lower():
-                            warn_list.append(f"'{name}': {w.message}")
-            except Exception as e:
-                result_rows.append([name, None, None, None, n, str(e)])
-                all_summaries.append(f"'{name}': test failed ({e}).")
-                continue
+            if single["pvalue_clipped"]:
+                warn_list.append(
+                    f"'{name}': KPSS p-value is at a table boundary; exact "
+                    "p-value interpolation is approximate."
+                )
 
-            # KPSS: REJECT H0 (stationary) if stat > critical value, i.e. p < alpha
-            non_stationary = p_value < significance
-            if non_stationary:
-                decision = "Non-Stationary"
-            else:
-                decision = "Stationary"
+            rejected = (
+                single["pvalue"] is not None
+                and single["pvalue"] < significance
+            )
+            single["decision_h0_rejected"] = bool(rejected)
+            decision = (
+                "Reject H0 (stationarity)" if rejected
+                else "Fail to reject H0 (stationarity)"
+            )
 
             result_rows.append([
                 name,
-                round(kpss_stat, 4),
-                round(p_value, 6) if p_value is not None else None,
-                used_lags,
-                n,
+                round(single["stat"], 4),
+                (round(single["pvalue"], 6)
+                 if single["pvalue"] is not None else None),
+                single["used_lag"],
+                f"{regression} ({single['regression_label']})",
+                len(clean),
                 decision,
             ])
 
-            # Critical values sub-table
-            cv_rows = []
-            for level, cv in sorted(critical_values.items(), key=lambda x: x[0]):
-                exceeds = "Yes" if kpss_stat > cv else "No"
-                cv_rows.append([level, round(cv, 4), exceeds])
-            cv_table = make_table(
+            cv_rows = [
+                [lvl, round(cv, 4), "Yes" if rej else "No"]
+                for (lvl, cv, rej) in single["critical_values_ordered"]
+            ]
+            detail_tables.append(make_table(
                 f"Critical Values - {name}",
-                ["Significance Level", "Critical Value", "Stat > CV? (Reject H0)"],
+                ["Significance Level", "Critical Value",
+                 "Stat > CV? (Reject H0)"],
                 cv_rows,
-            )
-            detail_tables.append(cv_table)
+            ))
 
-            # Summary sentence
-            reg_label = "level" if regression == "c" else "trend"
-            if non_stationary:
+            # P.2 summary language — KPSS null IS stationarity, so
+            # "stationarity null not rejected" DOES warrant saying "is
+            # stationary" in the caveat.
+            if rejected:
                 all_summaries.append(
-                    f"'{name}' is NOT {reg_label}-stationary "
-                    f"(KPSS={kpss_stat:.4f}, p={p_value:.4f}). "
-                    "The stationarity hypothesis is rejected. Consider differencing."
+                    f"'{name}': stationarity null rejected at the "
+                    f"{significance*100:.0f}% level "
+                    f"(KPSS={single['stat']:.4f}, p={single['pvalue']:.4f}, "
+                    f"regression='{regression}' / {single['regression_label']}, "
+                    f"lag={single['used_lag']}). Series appears non-stationary; "
+                    "consider differencing."
                 )
             else:
+                pv_str = (f"p={single['pvalue']:.4f}"
+                          if single["pvalue"] is not None else "p>=0.10")
                 all_summaries.append(
-                    f"'{name}' appears {reg_label}-stationary "
-                    f"(KPSS={kpss_stat:.4f}, p={p_value:.4f}). "
-                    "Cannot reject the stationarity hypothesis."
+                    f"'{name}': stationarity null not rejected at the "
+                    f"{significance*100:.0f}% level "
+                    f"(KPSS={single['stat']:.4f}, {pv_str}, "
+                    f"regression='{regression}' / {single['regression_label']}, "
+                    f"lag={single['used_lag']}). Series appears stationary; "
+                    "pair with ADF + PP via the Stationarity Triage "
+                    "for a confirmatory joint verdict."
                 )
 
         progress_callback("Building output", 90)
 
         main_table = make_table(
             "KPSS Test Results",
-            ["Series", "KPSS Statistic", "P-Value", "Lags Used", "N Obs", "Decision"],
+            ["Series", "KPSS Statistic", "P-Value", "Lags Used",
+             "Regression", "N Total", "Decision"],
             result_rows,
         )
 
-        plain_english = " ".join(all_summaries) if all_summaries else "No test results produced."
-
-        # Add guidance on ADF+KPSS interpretation
-        plain_english += (
-            " Tip: pair KPSS with the ADF test for a definitive stationarity assessment. "
-            "If ADF rejects and KPSS does not reject, the series is stationary. "
-            "If both reject, the series may be trend-stationary (try differencing)."
-        )
+        plain_english = (" ".join(all_summaries)
+                         if all_summaries else "No test results produced.")
 
         charting = (
-            "Table display with color coding: green for Stationary, red/orange for Non-Stationary. "
-            "Optionally show a bar chart of KPSS statistics vs. critical values."
+            "Table display color-coded by decision. KPSS's null IS "
+            "stationarity, so 'fail to reject' means the series looks "
+            "stationary — pair with ADF for a confirmatory joint verdict."
         )
 
         progress_callback("Done", 100)
@@ -167,9 +250,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
             charting_suggestions=charting,
             audit_fields={
                 "regression": regression,
-                "nlags": nlags,
+                "regression_label": _REGRESSION_LABEL.get(regression, regression),
+                "nlags_rule": nlags,
                 "significance_level": significance,
                 "n_series_tested": len(all_series),
+                **format_significance_disclosure(
+                    test_name="KPSS stationarity test",
+                    critical_value_formula=(
+                        "Kwiatkowski-Phillips-Schmidt-Shin critical values "
+                        "via statsmodels.tsa.stattools.kpss; Newey-West-style "
+                        "long-run variance estimator handles serial correlation"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 
@@ -185,32 +278,3 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "Try regression='ct' for trend-stationarity testing.",
             ],
         )
-
-
-def _prepare_series(values: np.ndarray, name: str, warnings: list) -> np.ndarray:
-    """Strip leading/trailing NaN and linearly interpolate interior NaN."""
-    first_valid = 0
-    while first_valid < len(values) and np.isnan(values[first_valid]):
-        first_valid += 1
-    last_valid = len(values) - 1
-    while last_valid >= 0 and np.isnan(values[last_valid]):
-        last_valid -= 1
-
-    if first_valid > last_valid:
-        return np.array([])
-
-    trimmed = values[first_valid:last_valid + 1].copy()
-
-    nan_count = int(np.isnan(trimmed).sum())
-    if nan_count > 0:
-        nans = np.where(np.isnan(trimmed))[0]
-        valid = np.where(~np.isnan(trimmed))[0]
-        if len(valid) >= 2:
-            trimmed[nans] = np.interp(nans, valid, trimmed[valid])
-            warnings.append(
-                f"'{name}': {nan_count} interior NaN values linearly interpolated for KPSS test."
-            )
-        else:
-            return trimmed[~np.isnan(trimmed)]
-
-    return trimmed

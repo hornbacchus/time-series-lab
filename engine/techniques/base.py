@@ -433,6 +433,39 @@ def format_significance_disclosure(
     return out
 
 
+def order_critical_values(cv_dict):
+    """Return ``[(level_str, value), ...]`` sorted by the numeric significance
+    level parsed from each key.
+
+    statsmodels and arch unit-root tests return critical-value tables as
+    dicts keyed by strings like ``"1%"``, ``"5%"``, ``"10%"``. Wrappers that
+    naively iterate the dict (or sort lexicographically) end up displaying
+    the levels in insertion/lexicographic order, which yields the confusing
+    ``1% / 10% / 5%`` ordering the user reported.
+
+    This helper parses the trailing numeric portion of each key — stripping
+    the percent sign and any whitespace — and sorts ascending. Keys that
+    cannot be parsed sort to the end in stable insertion order; they do not
+    raise.
+
+    Returns a list of ``(key, value)`` tuples, not a dict, so callers can
+    keep the original key strings in the display but iterate in numeric
+    order. Enforces the specification-transparency convention (§4.3) for
+    every stationarity test wrapper.
+    """
+    if not cv_dict:
+        return []
+    items = list(cv_dict.items())
+
+    def _level(k):
+        try:
+            return float(str(k).replace("%", "").strip())
+        except (ValueError, AttributeError):
+            return float("inf")
+
+    items.sort(key=lambda kv: _level(kv[0]))
+    return [(str(k), float(v)) for k, v in items]
+
 
 class RunContext:
     """

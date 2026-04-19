@@ -1,9 +1,18 @@
 """
-Phillips-Perron unit root test for Time Series Lab.
+Phillips-Perron unit-root test for Time Series Lab.
 
-Tests the null hypothesis that a unit root is present (series is non-stationary).
-Uses the statsmodels PhillipsPerron implementation. When unavailable, falls back
-to ADF with Newey-West bandwidth selection to approximate the PP test behaviour.
+Tests the null hypothesis that a unit root is present (series is
+non-stationary). Like ADF in orientation, but corrects for serial
+correlation non-parametrically (via a Newey-West long-run variance
+estimator) instead of by adding lagged differences.
+
+Tries in order:
+    1. ``statsmodels.tsa.stattools.phillips_perron`` (statsmodels ≥ 0.14)
+    2. ``arch.unitroot.PhillipsPerron``
+    3. A manual Z(t) implementation using Newey-West HAC correction.
+
+Exposes ``_run_pp_single(clean, regression, lags)`` for the triage path
+in ``adf_test.py``.
 """
 
 import numpy as np
@@ -14,7 +23,17 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
+    order_critical_values,
 )
+
+
+_REGRESSION_LABEL = {
+    "c":  "constant only",
+    "ct": "constant + linear trend",
+    "n":  "no deterministic term",
+    "nc": "no deterministic term",
+}
 
 
 def _prepare_series(values, name, warnings):
@@ -43,110 +62,88 @@ def _prepare_series(values, name, warnings):
 
 
 def _run_pp_test(series, regression, nlags):
-    """
-    Run the Phillips-Perron test. Try the dedicated implementation first,
-    fall back to arch package, then to a manual Z(t) approach.
+    """Back-end dispatcher: try statsmodels, then arch, then manual.
+
+    Returns (stat, p_value, used_lags, n, crit_dict, method_label).
     """
     n = len(series)
 
-    # Try statsmodels PhillipsPerron if available (statsmodels >= 0.14)
+    # statsmodels >= 0.14
     try:
-        from statsmodels.tsa.stattools import phillips_perron  # noqa: F811
-        stat, p_value, crit = phillips_perron(series, regression=regression, nlags=nlags)
-        return stat, p_value, nlags, n, crit, "statsmodels.phillips_perron"
+        from statsmodels.tsa.stattools import phillips_perron  # noqa: F401
+        stat, p_value, crit = phillips_perron(
+            series, regression=regression, nlags=nlags,
+        )
+        return (float(stat), float(p_value), nlags, n,
+                {k: float(v) for k, v in crit.items()},
+                "statsmodels.phillips_perron")
     except ImportError:
         pass
 
-    # Try arch package
+    # arch package (common in TSL)
     try:
         from arch.unitroot import PhillipsPerron as PP
-        pp = PP(series, trend=regression, lags=nlags)
-        stat = pp.stat
-        p_value = pp.pvalue
-        crit = pp.critical_values
-        # Convert crit from dict with string keys like '1%' to match ADF format
-        crit_dict = {}
-        for k, v in crit.items():
-            crit_dict[k] = float(v)
-        return float(stat), float(p_value), nlags, n, crit_dict, "arch.PhillipsPerron"
+        trend = regression if regression in ("n", "c", "ct") else "c"
+        pp = PP(series, trend=trend, lags=(None if nlags == "auto" else nlags))
+        stat = float(pp.stat)
+        p_value = float(pp.pvalue)
+        crit = {k: float(v) for k, v in pp.critical_values.items()}
+        used = getattr(pp, "lags", nlags if nlags != "auto" else None)
+        return stat, p_value, used, n, crit, "arch.PhillipsPerron"
     except ImportError:
         pass
 
-    # Manual Phillips-Perron Z(t) via OLS regression with HAC correction
+    # Manual Z(t) fallback.
     return _manual_pp(series, regression, nlags)
 
 
 def _manual_pp(series, regression, nlags):
-    """
-    Manual Phillips-Perron Z(t) implementation.
-
-    The PP test is based on the ADF regression Y_t = rho * Y_{t-1} + X_t'*delta + e_t
-    but corrects the t-statistic for serial correlation using a Newey-West style
-    bandwidth for the long-run variance.
-    """
-    from scipy import stats as sp_stats
-
+    """Manual Z(t) Phillips-Perron using Newey-West HAC correction."""
     y = series[1:]
     y_lag = series[:-1]
     n = len(y)
 
-    # Build regressor matrix
     if regression == "c":
         X = np.column_stack([y_lag, np.ones(n)])
     elif regression == "ct":
         X = np.column_stack([y_lag, np.ones(n), np.arange(1, n + 1)])
-    elif regression == "n":
+    elif regression in ("n", "nc"):
         X = y_lag.reshape(-1, 1)
     else:
         X = np.column_stack([y_lag, np.ones(n)])
 
-    # OLS
     beta = np.linalg.lstsq(X, y, rcond=None)[0]
     resid = y - X @ beta
     rho_hat = beta[0]
 
-    # Estimate variances
     s2 = np.sum(resid ** 2) / (n - X.shape[1])
 
-    # Long-run variance via Newey-West
     if nlags is None or nlags == "auto":
         nlags_used = int(np.floor(4 * (n / 100) ** (2 / 9)))
     else:
         nlags_used = int(nlags)
 
-    # Long-run variance components. Use the same (n - k) denominator as
-    # s2 above so the short-run and long-run variance estimators are
-    # consistent — line 109 already applies the degrees-of-freedom
-    # correction for s2, but the previous version of this block
-    # divided gamma_0 / gamma_j by raw n, mixing biased and unbiased
-    # estimators in the PP correction factor below.
     dof_denom = max(1, n - X.shape[1])
     gamma_0 = np.sum(resid ** 2) / dof_denom
     lrv = gamma_0
     for j in range(1, nlags_used + 1):
-        w = 1.0 - j / (nlags_used + 1)  # Bartlett kernel
+        w = 1.0 - j / (nlags_used + 1)
         gamma_j = np.sum(resid[j:] * resid[:-j]) / dof_denom
         lrv += 2 * w * gamma_j
 
-    # PP Z(t) statistic
-    se_rho = np.sqrt(s2 / np.sum((y_lag - np.mean(y_lag)) ** 2)) if regression != "n" else np.sqrt(s2 / np.sum(y_lag ** 2))
-    t_rho = (rho_hat - 1.0) / se_rho
+    if regression in ("n", "nc"):
+        se_rho = np.sqrt(s2 / np.sum(y_lag ** 2))
+    else:
+        se_rho = np.sqrt(s2 / np.sum((y_lag - np.mean(y_lag)) ** 2))
 
-    # Correction factor
+    t_rho = (rho_hat - 1.0) / se_rho
     correction = (n * se_rho / (2 * np.sqrt(lrv))) * (lrv - gamma_0)
     pp_stat = t_rho - correction
 
-    # Approximate p-value using MacKinnon tables (use ADF approximation)
     try:
-        from statsmodels.tsa.stattools import adfuller
-        # We use ADF just for its p-value interpolation
-        adf_result = adfuller(series, maxlag=0, regression=regression, autolag=None)
-        # Scale the p-value: the PP stat distribution is similar to ADF
-        # We use a rough approximation
         from statsmodels.tsa.adfvalues import MacKinnonP
         p_value = MacKinnonP(pp_stat, regression=regression, N=1)
     except Exception:
-        # Very rough p-value approximation
         if pp_stat < -3.5:
             p_value = 0.005
         elif pp_stat < -2.9:
@@ -156,7 +153,6 @@ def _manual_pp(series, regression, nlags):
         else:
             p_value = 0.50
 
-    # Critical values (approximate, same as ADF asymptotic)
     if regression == "c":
         crit = {"1%": -3.43, "5%": -2.86, "10%": -2.57}
     elif regression == "ct":
@@ -167,16 +163,56 @@ def _manual_pp(series, regression, nlags):
     return float(pp_stat), float(p_value), nlags_used, n, crit, "manual_pp"
 
 
+def _run_pp_single(clean: np.ndarray, regression: str, lags):
+    """Run PP on one prepared series. Returns a raw-results dict in the
+    same shape as ``_run_adf_single`` / ``_run_kpss_single`` so the triage
+    path can consume all three uniformly.
+
+    Keys: stat, pvalue, used_lag, critical_values_ordered, regression,
+    regression_label, method, decision_h0_rejected, error.
+    """
+    out = {
+        "stat": None, "pvalue": None, "used_lag": None,
+        "critical_values_ordered": [], "regression": regression,
+        "regression_label": _REGRESSION_LABEL.get(regression, regression),
+        "method": None, "decision_h0_rejected": None, "error": None,
+    }
+    n = len(clean)
+    if n < 12:
+        out["error"] = f"Too few observations ({n}; need ≥ 12)"
+        return out
+    if np.std(clean) < 1e-12:
+        out["error"] = "Constant series (zero variance)"
+        return out
+    try:
+        stat, p_value, used_lag, _nobs, crit, method = _run_pp_test(
+            clean, regression, lags if lags is not None else "auto",
+        )
+    except Exception as e:
+        out["error"] = str(e)
+        return out
+    ordered = order_critical_values(crit)
+    out["stat"] = float(stat)
+    out["pvalue"] = float(p_value)
+    out["used_lag"] = used_lag
+    out["method"] = method
+    out["critical_values_ordered"] = [
+        (lvl, cv, stat < cv) for (lvl, cv) in ordered
+    ]
+    return out
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
-    Run the Phillips-Perron test on one or more series.
+    Run the Phillips-Perron unit-root test on one or more series.
 
     Parameters (via ctx.params)
     ---------------------------
     regression : str, optional
         'c' (constant, default), 'ct' (constant + trend), 'n' (no constant).
     nlags : int or str, optional
-        Number of lags for Newey-West correction. 'auto' = automatic.
+        Truncation lag for the Newey-West correction. 'auto' uses the
+        standard Schwert-style ``floor(4 · (n/100)^(2/9))``.
     significance_level : float, optional
         P-value threshold. Default 0.05.
     """
@@ -186,18 +222,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
         all_series = ctx.get_all_series()
         if not all_series:
             return make_error_response(
-                ctx,
-                "No series provided.",
+                ctx, "No series provided.",
                 error_fixes=["Select at least one data column."],
             )
 
         regression = ctx.get_param("regression", "c")
         nlags_param = ctx.get_param("nlags", "auto")
         if isinstance(nlags_param, (int, float)):
-            nlags = int(nlags_param)
+            lags = int(nlags_param)
         else:
-            nlags = nlags_param  # 'auto' or None
-        significance = ctx.get_param("significance_level", 0.05)
+            lags = nlags_param
+        significance = float(ctx.get_param("significance_level", 0.05))
 
         warn_list = []
         result_rows = []
@@ -211,82 +246,86 @@ def run(ctx: RunContext, progress_callback) -> dict:
             progress_callback(f"Testing '{name}'", pct)
 
             clean = _prepare_series(values, name, warn_list)
-            n = len(clean)
+            single = _run_pp_single(clean, regression, lags)
 
-            if n < 12:
-                result_rows.append([name, None, None, None, None, n, "Too few observations (need >= 12)"])
-                all_summaries.append(f"'{name}': insufficient data ({n} observations).")
+            if single["error"] is not None:
+                result_rows.append([
+                    name, None, None, None,
+                    f"{regression} ({single['regression_label']})",
+                    single["method"] or "—", len(clean), single["error"],
+                ])
+                all_summaries.append(f"'{name}': {single['error']}.")
                 continue
 
-            # Check for constant series
-            if np.std(clean) < 1e-12:
-                result_rows.append([name, None, None, None, None, n, "Constant series (zero variance)"])
-                all_summaries.append(f"'{name}': constant series, cannot test.")
-                continue
-
-            try:
-                pp_stat, p_value, used_lags, nobs, crit_values, method = _run_pp_test(
-                    clean, regression, nlags
-                )
-            except Exception as e:
-                result_rows.append([name, None, None, None, None, n, str(e)])
-                all_summaries.append(f"'{name}': test failed ({e}).")
-                continue
-
-            stationary = p_value < significance
-            decision = "Stationary" if stationary else "Non-Stationary"
+            rejected = single["pvalue"] < significance
+            single["decision_h0_rejected"] = bool(rejected)
+            decision = (
+                "Reject H0 (UR null)" if rejected
+                else "Fail to reject H0"
+            )
 
             result_rows.append([
                 name,
-                round(pp_stat, 4),
-                round(p_value, 6),
-                used_lags,
+                round(single["stat"], 4),
+                round(single["pvalue"], 6),
+                single["used_lag"],
+                f"{regression} ({single['regression_label']})",
+                single["method"],
+                len(clean),
                 decision,
-                n,
-                method,
             ])
 
-            # Critical values table
-            cv_rows = []
-            for level, cv in sorted(crit_values.items()):
-                reject = "Yes" if pp_stat < cv else "No"
-                cv_rows.append([level, round(float(cv), 4), reject])
-            cv_table = make_table(
+            cv_rows = [
+                [lvl, round(cv, 4), "Yes" if rej else "No"]
+                for (lvl, cv, rej) in single["critical_values_ordered"]
+            ]
+            detail_tables.append(make_table(
                 f"Critical Values - {name}",
                 ["Significance Level", "Critical Value", "Reject H0?"],
                 cv_rows,
-            )
-            detail_tables.append(cv_table)
+            ))
 
-            if stationary:
+            # P.2 language — PP shares ADF's null (unit root).
+            if rejected:
                 all_summaries.append(
-                    f"'{name}' is stationary (PP={pp_stat:.4f}, p={p_value:.4f}). "
-                    "Unit root hypothesis rejected."
+                    f"'{name}': unit root rejected at the "
+                    f"{significance*100:.0f}% level "
+                    f"(PP={single['stat']:.4f}, p={single['pvalue']:.4f}, "
+                    f"regression='{regression}' / {single['regression_label']}, "
+                    f"truncation lag={single['used_lag']}, "
+                    f"method={single['method']})."
                 )
             else:
                 all_summaries.append(
-                    f"'{name}' appears non-stationary (PP={pp_stat:.4f}, p={p_value:.4f}). "
-                    "Cannot reject unit root. Consider differencing."
+                    f"'{name}': unit root not rejected at the "
+                    f"{significance*100:.0f}% level "
+                    f"(PP={single['stat']:.4f}, p={single['pvalue']:.4f}, "
+                    f"regression='{regression}' / {single['regression_label']}, "
+                    f"truncation lag={single['used_lag']}, "
+                    f"method={single['method']}). Consider differencing."
                 )
 
         progress_callback("Building output", 90)
 
         main_table = make_table(
             "Phillips-Perron Test Results",
-            ["Series", "PP Statistic", "P-Value", "Lags", "Decision", "N Obs", "Method"],
+            ["Series", "PP Statistic", "P-Value", "Truncation Lag",
+             "Regression", "Method", "N Total", "Decision"],
             result_rows,
         )
 
-        plain = " ".join(all_summaries) if all_summaries else "No test results produced."
+        plain = (" ".join(all_summaries)
+                 if all_summaries else "No test results produced.")
         plain += (
-            " Note: The PP test is similar to the ADF test but corrects for serial "
-            "correlation non-parametrically (using a Newey-West estimator) rather than "
-            "adding lagged difference terms."
+            " PP shares ADF's null (unit root) but corrects for serial "
+            "correlation non-parametrically via a Newey-West long-run "
+            "variance estimator. For a confirmatory joint verdict, use "
+            "the Stationarity Triage path (ADF + KPSS + PP together)."
         )
 
         charting = (
-            "Table display with color coding: green for Stationary, red for Non-Stationary. "
-            "Bar chart of PP statistics vs. critical values."
+            "Table display color-coded by decision. PP statistic plotted "
+            "against 1%/5%/10% Dickey-Fuller critical values."
         )
 
         progress_callback("Done", 100)
@@ -299,9 +338,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
             charting_suggestions=charting,
             audit_fields={
                 "regression": regression,
+                "regression_label": _REGRESSION_LABEL.get(regression, regression),
                 "nlags": nlags_param,
                 "significance_level": significance,
                 "n_series_tested": len(all_series),
+                **format_significance_disclosure(
+                    test_name="Phillips-Perron unit-root test",
+                    critical_value_formula=(
+                        "Newey-West spectral correction of the DF test "
+                        "statistic with Dickey-Fuller critical values"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 
@@ -309,8 +357,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         return make_error_response(ctx, str(e))
     except Exception as e:
         return make_error_response(
-            ctx,
-            f"Phillips-Perron test failed: {e}",
+            ctx, f"Phillips-Perron test failed: {e}",
             error_fixes=[
                 "Ensure the series is numeric.",
                 "Check for constant or near-constant series.",

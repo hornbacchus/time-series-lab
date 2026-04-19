@@ -4,6 +4,10 @@
 
 The Phillips-Perron (PP) test is a unit root test that checks whether a time series is non-stationary. Like the ADF test, its null hypothesis is that the series has a unit root. However, instead of adding lagged differences to handle autocorrelation (as ADF does), the PP test applies a non-parametric correction to the Dickey-Fuller test statistic, making it robust to general forms of heteroskedasticity and autocorrelation in the error term.
 
+**See also**: the **Stationarity Triage** (invoked from the ADF ribbon button) runs ADF + KPSS + PP together and emits a joint verdict. PP serves as a tie-breaker on the unit-root side when ADF and KPSS disagree. Standalone PP is useful for programmatic drill-down; the triage path is the recommended workflow for most macro users.
+
+**Summary language**: PP shares ADF's null (unit root), so the summary says "unit root rejected" / "unit root not rejected" — it does not affirm "is stationary" on its own, because that conclusion requires agreement from a complementary-null test like KPSS. Critical values appear in ascending 1% / 5% / 10% order.
+
 ## When to Use It
 
 - You want a unit root test that is robust to heteroskedasticity (changing variance)

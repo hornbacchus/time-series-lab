@@ -4,6 +4,10 @@
 
 The KPSS (Kwiatkowski-Phillips-Schmidt-Shin) test checks whether a time series is **stationary** around a deterministic level or trend. Unlike the ADF test, the KPSS null hypothesis is that the series IS stationary, and rejection indicates non-stationarity. This reversal of hypotheses makes it a useful complement to the ADF test for confirming the stationarity status of a series.
 
+**See also**: the **Stationarity Triage** (invoked from the ADF ribbon button) runs ADF + KPSS + PP together and emits a joint verdict. KPSS as a standalone technique is useful for programmatic drill-down; the triage path is the recommended workflow for most macro users.
+
+**Summary language**: because the KPSS null IS stationarity, "null not rejected" legitimately supports the phrasing "series appears stationary" — in contrast to ADF/PP, whose nulls are the unit root and which therefore can only say "unit root rejected" (not the same thing as affirming stationarity). Critical values in the Results sheet appear in ascending 1% / 5% / 10% order.
+
 ## When to Use It
 
 - You want to confirm results from the ADF test (use both together for robustness)

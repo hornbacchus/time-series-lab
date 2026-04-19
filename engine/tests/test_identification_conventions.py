@@ -736,9 +736,8 @@ class TestSignificanceDisclosureConvention(unittest.TestCase):
         "rolling_ccf_lag", "cross_correlation_lag", "prewhitened_ccf_lag",
         "granger_causality", "johansen_cointegration", "wavelet_coherence",
         "transfer_function", "dtw_alignment_lag",
-        # Unit-root / stationarity wrappers gain F3 disclosure in a
-        # later commit; not iterated here to keep this commit
-        # bisect-clean.
+        # Unit-root / stationarity
+        "adf_test", "kpss_test", "pp_test",
         # ARIMA family
         "arima", "sarima", "arimax_sarimax",
         # State-space
@@ -848,6 +847,204 @@ class TestSignificanceDisclosureConvention(unittest.TestCase):
             "Techniques not disclosing significance test metadata:\n"
             + "\n".join(failures)
         )
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Stationarity-test triage invariants (T1-T5)
+# ─────────────────────────────────────────────────────────────────────
+def _stationarity_ctx(values, *, run_id="pane_test", tech_id="adf_test",
+                      params=None):
+    n = len(values)
+    time_col = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(n)]
+    return RunContext({
+        "run_id": run_id,
+        "technique_id": tech_id,
+        "preset": "Balanced",
+        "seed": 42,
+        "frequency": "Quarterly",
+        "time": time_col,
+        "series": [{"name": "Y", "values": list(values)}],
+        "params": params or {},
+    })
+
+
+class TestCriticalValueOrdering(unittest.TestCase):
+    """T1 — ADF critical-value table must be in ascending significance
+    order (1%, 5%, 10%), not the lexicographic 1%, 10%, 5% bug that
+    dict iteration + sorted() on string keys produced."""
+
+    def test_adf_cv_table_sorted_ascending(self):
+        from techniques import adf_test
+        rng = np.random.default_rng(42)
+        # Force single-test mode so we get a Critical Values detail table.
+        ctx = _stationarity_ctx(
+            rng.normal(0, 1, 200), run_id="udf_tA",
+            params={"triage": False},
+        )
+        res = adf_test.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        cv_tbl = _find_table(res, "critical values")
+        self.assertIsNotNone(cv_tbl, "Critical Values detail table missing")
+        levels = [str(row[0]) for row in cv_tbl["rows"]]
+        self.assertEqual(
+            levels, ["1%", "5%", "10%"],
+            f"Critical-value levels must appear in ascending order; got {levels}"
+        )
+
+
+class TestRegressionSurfaced(unittest.TestCase):
+    """T2 — the regression specification must appear in user-visible output
+    (Summary sentence or Results sheet), not only in audit_fields."""
+
+    def test_regression_in_summary_or_results(self):
+        from techniques import adf_test
+        rng = np.random.default_rng(0)
+        ctx = _stationarity_ctx(
+            rng.normal(0, 1, 150), run_id="udf_tB",
+            params={"triage": False, "regression": "c"},
+        )
+        res = adf_test.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        summary = res.get("plain_english_summary", "")
+        results_tbl = _find_table(res, "adf test results")
+        visible_text = summary + " | " + (
+            " | ".join(
+                str(cell) for row in (results_tbl or {}).get("rows", [])
+                for cell in row
+            )
+        )
+        has_spec = (
+            "regression='c'" in visible_text
+            or "constant only" in visible_text
+            or "(c / " in visible_text
+        )
+        self.assertTrue(
+            has_spec,
+            f"Regression specification must appear in Summary or Results "
+            f"(not only audit). Visible text: {visible_text[:400]!r}"
+        )
+
+
+class TestSummaryLanguagePrecision(unittest.TestCase):
+    """T3 — ADF summary says 'unit root rejected' on a clearly stationary
+    series and never claims 'is stationary' as a standalone. KPSS may use
+    'is stationary'/'stationary' because its null IS stationarity."""
+
+    def test_adf_language_and_kpss_language(self):
+        from techniques import adf_test, kpss_test
+        rng = np.random.default_rng(42)
+        # White noise — stationary by construction.
+        y = rng.normal(0, 1, 500)
+
+        # ADF single-test
+        ctx_adf = _stationarity_ctx(
+            y, run_id="udf_tC1", params={"triage": False},
+        )
+        res_adf = adf_test.run(ctx_adf, _noop_progress)
+        self.assertEqual(res_adf.get("status"), "success")
+        adf_summary = res_adf["plain_english_summary"]
+        self.assertIn(
+            "unit root rejected", adf_summary,
+            f"ADF on white noise must say 'unit root rejected'; got: {adf_summary[:250]}"
+        )
+        # "is stationary" must not appear as a standalone ADF claim.
+        self.assertNotIn(
+            "is stationary", adf_summary.lower(),
+            f"ADF must not say 'is stationary'; got: {adf_summary[:250]}"
+        )
+
+        # KPSS standalone — "stationary" language is allowed
+        ctx_kpss = _stationarity_ctx(y, tech_id="kpss_test", run_id="udf_tC2")
+        res_kpss = kpss_test.run(ctx_kpss, _noop_progress)
+        self.assertEqual(res_kpss.get("status"), "success")
+        kpss_summary = res_kpss["plain_english_summary"]
+        acceptable = (
+            "stationarity null not rejected" in kpss_summary
+            or "appears stationary" in kpss_summary
+            or "stationarity null rejected" in kpss_summary
+        )
+        self.assertTrue(
+            acceptable,
+            f"KPSS summary must use stationarity-null language; got: {kpss_summary[:250]}"
+        )
+
+
+class TestTriageJointVerdict(unittest.TestCase):
+    """T4 — triage joint verdict is correct on a pure random walk and on
+    a stationary AR(0.3) series."""
+
+    def test_random_walk_is_unit_root(self):
+        from techniques import adf_test
+        rng = np.random.default_rng(42)
+        rw = np.cumsum(rng.normal(0, 1, 500))
+        ctx = _stationarity_ctx(rw, run_id="pane_tD1")  # triage path
+        res = adf_test.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        self.assertEqual(res["audit_fields"]["mode"], "triage")
+        self.assertIn(
+            "UNIT ROOT (I(1))", res["plain_english_summary"],
+            f"Random walk triage should verdict UNIT ROOT; got: "
+            f"{res['plain_english_summary'][:300]}"
+        )
+
+    def test_ar03_is_stationary(self):
+        from techniques import adf_test
+        rng = np.random.default_rng(42)
+        n = 500
+        ar = np.zeros(n)
+        ar[0] = rng.normal()
+        for i in range(1, n):
+            ar[i] = 0.3 * ar[i - 1] + rng.normal()
+        ctx = _stationarity_ctx(ar, run_id="pane_tD2")
+        res = adf_test.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        self.assertEqual(res["audit_fields"]["mode"], "triage")
+        summary = res["plain_english_summary"]
+        self.assertIn(
+            "STATIONARY", summary,
+            f"AR(0.3) triage should verdict STATIONARY; got: {summary[:300]}"
+        )
+        # And must not mislabel as UNIT ROOT
+        self.assertNotIn("UNIT ROOT", summary,
+            f"AR(0.3) triage mis-labelled; got: {summary[:300]}")
+
+
+class TestSchwertDefault(unittest.TestCase):
+    """T5 — on a 304-observation series with no user max_lag, the Results
+    sheet reports Schwert bound = floor(12 · (304/100)^(1/4)) = 15 and the
+    selected lag is ≤ 15."""
+
+    def test_schwert_bound_on_304_obs(self):
+        from techniques import adf_test
+        rng = np.random.default_rng(42)
+        y = rng.normal(0, 1, 304)
+        ctx = _stationarity_ctx(
+            y, run_id="udf_tE", params={"triage": False},
+        )
+        res = adf_test.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        results_tbl = _find_table(res, "adf test results")
+        self.assertIsNotNone(results_tbl)
+        cols = results_tbl["columns"]
+        self.assertIn("Schwert Bound", cols)
+        self.assertIn("Lags Used (AIC)", cols)
+        bound_idx = cols.index("Schwert Bound")
+        lag_idx = cols.index("Lags Used (AIC)")
+        row = results_tbl["rows"][0]
+        expected = int(np.floor(12.0 * (304 / 100.0) ** 0.25))
+        self.assertEqual(
+            expected, 15,
+            f"Sanity: Schwert bound for T=304 should compute to 15, got {expected}"
+        )
+        self.assertEqual(
+            int(row[bound_idx]), 15,
+            f"Results sheet must report Schwert bound 15 on T=304; got {row[bound_idx]}"
+        )
+        self.assertLessEqual(
+            int(row[lag_idx]), 15,
+            f"AIC-selected lag must be ≤ Schwert bound; got {row[lag_idx]}"
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
