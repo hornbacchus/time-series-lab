@@ -17,6 +17,7 @@ or without pytest:
     python -m unittest engine.tests.test_identification_conventions -v
 """
 import os
+import re
 import sys
 import unittest
 
@@ -353,6 +354,95 @@ class TestPcaSignStability(unittest.TestCase):
                           f"PC1 max-|loading| should be positive for the "
                           f"level-factor convention; got {pc1_loadings}")
 
+
+# ─────────────────────────────────────────────────────────────────────
+# Kalman Filter / UCM output-alignment invariant
+# ─────────────────────────────────────────────────────────────────────
+class TestKalmanOutputAlignment(unittest.TestCase):
+    """The wrapper must own alignment between the input's DatetimeIndex
+    and every output row — not statsmodels' returned arrays — because
+    statsmodels alternates between ndarray and Series depending on input
+    type and attribute (smoothed_state is ndarray; fittedvalues is
+    Series when input was a Series, ndarray when input was ndarray).
+
+    Previously crashed in the "Building output" phase with
+    ``AttributeError: 'numpy.ndarray' object has no attribute 'index'``
+    when iterating ``fit.params.index`` on an ndarray-input model.
+    """
+
+    def test_kalman_output_alignment_with_missing(self):
+        from techniques import kalman_filter_model
+
+        # Nile-like: 100-obs annual series with one interior NaN at position 50.
+        rng = np.random.default_rng(42)
+        values = (np.cumsum(rng.normal(0, 1, 100)) + 1120.0).tolist()
+        values[50] = None  # interior NaN — Kalman handles natively
+
+        time_axis = [f"{1901 + i}-12-31" for i in range(100)]
+
+        ctx = RunContext({
+            "run_id": "t",
+            "technique_id": "kalman_filter_model",
+            "preset": "Balanced",
+            "seed": 42,
+            "frequency": "Annual",
+            "time": time_axis,
+            "series": [{"name": "Nile", "values": values}],
+            "params": {"horizon": 10},
+        })
+
+        res = kalman_filter_model.run(ctx, _noop_progress)
+
+        # 1. Run completed — no swallowed AttributeError in the output phase.
+        self.assertEqual(
+            res.get("status"), "success",
+            msg=f"Kalman run failed: {res.get('error_message')}"
+        )
+
+        # 2. Output table present.
+        comp_tbl = _find_table(res, "smoothed components")
+        self.assertIsNotNone(comp_tbl, "Smoothed Components table missing")
+
+        # 3. Row count equals input row count — the interior NaN must NOT
+        #    cause a row to be dropped (Kalman handles it natively; the
+        #    output must still contain every input timestamp).
+        self.assertEqual(
+            len(comp_tbl["rows"]), 100,
+            msg=(f"Expected 100 rows aligned to input length; got "
+                 f"{len(comp_tbl['rows'])}. An interior NaN must not shrink "
+                 f"the output.")
+        )
+
+        # 4. Time column equals the input's DatetimeIndex element-wise.
+        for i, row in enumerate(comp_tbl["rows"]):
+            self.assertEqual(
+                row[0], time_axis[i],
+                msg=(f"Row {i} time cell '{row[0]}' does not match input "
+                     f"time_axis[{i}] '{time_axis[i]}' — wrapper is not "
+                     f"owning alignment per §4.1 of the design mandate.")
+            )
+
+        # 5. Forecast table extends the time axis via date arithmetic,
+        #    not integer step numbers (was previously "n + i + 1").
+        fc_tbl = _find_table(res, "forecast")
+        self.assertIsNotNone(fc_tbl)
+        self.assertEqual(len(fc_tbl["rows"]), 10)
+        first_fc_time = fc_tbl["rows"][0][0]
+        self.assertTrue(
+            str(first_fc_time).startswith("20"),
+            msg=(f"Forecast Time column should extend the DatetimeIndex as "
+                 f"a date string, got {first_fc_time!r}.")
+        )
+
+        # 6. Parameters table was produced — the original crash site was
+        #    iterating fit.params.index, so presence of this table is the
+        #    direct regression guard.
+        param_tbl = _find_table(res, "estimated parameters")
+        self.assertIsNotNone(param_tbl, "Estimated Parameters table missing")
+        self.assertGreater(
+            len(param_tbl["rows"]), 0,
+            "Parameters table should have at least one row"
+        )
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

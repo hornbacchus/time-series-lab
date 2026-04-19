@@ -7,6 +7,7 @@ latent components (level, trend, seasonal, cycle, irregular).
 """
 
 import numpy as np
+import pandas as pd
 import warnings as _warnings
 from statsmodels.tsa.statespace.structural import UnobservedComponents
 
@@ -19,7 +20,14 @@ from techniques.base import (
 
 
 def _prepare_series(values):
-    """Strip edge NaN, interpolate interior."""
+    """Strip edge NaN (UCM handles interior NaN natively via the Kalman filter).
+
+    Returns (trimmed_values, nan_count, first_idx, last_idx) where first_idx and
+    last_idx are the inclusive slice bounds into the original array. Callers
+    need them to trim the time axis in lockstep so the DatetimeIndex remains
+    aligned with the fitted series — see §4.1 of the design mandate (the wrapper
+    owns alignment).
+    """
     first = 0
     while first < len(values) and np.isnan(values[first]):
         first += 1
@@ -27,12 +35,55 @@ def _prepare_series(values):
     while last >= 0 and np.isnan(values[last]):
         last -= 1
     if first > last:
-        return np.array([]), 0
+        return np.array([]), 0, 0, -1
     trimmed = values[first:last + 1].copy()
     nan_count = int(np.isnan(trimmed).sum())
-    # UCM can handle NaN internally via the Kalman filter, so we leave
-    # interior NaN as-is but track the count for reporting.
-    return trimmed, nan_count
+    return trimmed, nan_count, first, last
+
+
+def _build_forecast_time_axis(last_time_label, frequency: str, horizon: int):
+    """Extend the input's DatetimeIndex by `horizon` steps at the detected
+    frequency. Falls back to string labels ``t+1..t+h`` if the last input
+    label can't be parsed as a date or the frequency is unknown.
+    """
+    # Frequency aliases: prefer pandas 2.2+ codes ("YE-DEC", "QE-DEC", "ME");
+    # fall back to the legacy codes on older pandas via a second attempt.
+    freq_map_modern = {
+        "A": "YE-DEC", "ANNUAL": "YE-DEC", "Y": "YE-DEC",
+        "Q": "QE-DEC", "QUARTERLY": "QE-DEC", "QS": "QS",
+        "M": "ME", "MONTHLY": "ME", "MS": "MS",
+        "W": "W", "WEEKLY": "W",
+        "D": "D", "DAILY": "D", "B": "B",
+        "H": "h", "HOURLY": "h",
+    }
+    freq_map_legacy = {
+        "A": "A-DEC", "ANNUAL": "A-DEC", "Y": "A-DEC",
+        "Q": "Q-DEC", "QUARTERLY": "Q-DEC", "QS": "QS",
+        "M": "M", "MONTHLY": "M", "MS": "MS",
+        "W": "W", "WEEKLY": "W",
+        "D": "D", "DAILY": "D", "B": "B",
+        "H": "H", "HOURLY": "H",
+    }
+    key = (frequency or "").strip().upper()
+    modern = freq_map_modern.get(key)
+    legacy = freq_map_legacy.get(key)
+    if modern is None and legacy is None:
+        return [f"t+{i + 1}" for i in range(horizon)]
+    try:
+        last_ts = pd.to_datetime(str(last_time_label))
+    except Exception:
+        return [f"t+{i + 1}" for i in range(horizon)]
+    for code in (modern, legacy):
+        if code is None:
+            continue
+        try:
+            with _warnings.catch_warnings():
+                _warnings.simplefilter("ignore", FutureWarning)
+                dates = pd.date_range(start=last_ts, periods=horizon + 1, freq=code)[1:]
+            return [d.strftime("%Y-%m-%d") for d in dates]
+        except (ValueError, TypeError):
+            continue
+    return [f"t+{i + 1}" for i in range(horizon)]
 
 
 def _infer_period(ctx):
@@ -82,8 +133,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
         name, values = ctx.get_primary_series()
         warn_list = []
 
-        clean, n_nan = _prepare_series(values)
+        clean, n_nan, first_idx, last_idx = _prepare_series(values)
         n = len(clean)
+        # Trim the time axis in lockstep with the value trim so the
+        # DatetimeIndex stays aligned with `clean` regardless of edge-NaN
+        # behavior. This is the source-of-truth for every output "Time"
+        # column per §4.1 of the design mandate.
+        if ctx.time and len(ctx.time) >= last_idx + 1 and last_idx >= first_idx:
+            time_axis = list(ctx.time[first_idx:last_idx + 1])
+        else:
+            time_axis = list(range(1, n + 1))
         if n_nan > 0:
             warn_list.append(
                 f"{n_nan} missing values present. The Kalman filter handles these "
@@ -261,15 +320,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Building output", 80)
 
-        # Components table
-        time_col = ctx.time if ctx.time and len(ctx.time) == n else list(range(1, n + 1))
+        # Components table. `time_axis` is the source of truth — already
+        # trimmed in lockstep with `clean` — so every row's "Time" cell lines
+        # up with the observation it describes. statsmodels result arrays
+        # (smoothed_state, fittedvalues, resid) vary between ndarray and
+        # Series across versions; we normalized them to ndarrays above and
+        # never touch `.index` on them. The output DataFrame's index is
+        # `time_axis`, not whatever statsmodels returned.
         comp_cols = ["Time", name, "Filtered"] + list(components.keys()) + ["Residual"]
         step = max(1, n // 500) if ctx.preset == "Fast" else max(1, n // 1000)
         comp_rows = []
         for i in range(0, n, step):
             row = [
-                time_col[i],
-                clean[i],
+                time_axis[i],
+                None if np.isnan(clean[i]) else float(clean[i]),
                 float(filt_arr[i]) if i < len(filt_arr) and not np.isnan(filt_arr[i]) else None,
             ]
             for comp_arr in components.values():
@@ -280,30 +344,52 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         comp_table = make_table("Smoothed Components", comp_cols, comp_rows)
 
-        # Forecast table
+        # Forecast table — extend the DatetimeIndex from the last input date
+        # at the detected frequency for `horizon` steps.
         tables = [comp_table]
         if len(fc_arr) > 0:
+            fc_time_axis = _build_forecast_time_axis(
+                time_axis[-1] if time_axis else None, ctx.frequency, len(fc_arr)
+            )
             fc_rows = []
             for i in range(len(fc_arr)):
                 fc_rows.append([
-                    n + i + 1,
+                    fc_time_axis[i],
                     round(float(fc_arr[i]), 6),
                     round(float(lower[i]), 6),
                     round(float(upper[i]), 6),
                 ])
             fc_table = make_table(
-                "Forecast", ["Step", "Forecast", "Lower 95%", "Upper 95%"], fc_rows
+                "Forecast", ["Time", "Forecast", "Lower 95%", "Upper 95%"], fc_rows
             )
             tables.append(fc_table)
 
-        # Model parameters
+        # Model parameters. `fit.params` and `fit.bse` come back as ndarray
+        # when the model was fit on a numpy array (which we do here) and as
+        # pandas.Series when fit on a pandas Series. `fit.param_names` is a
+        # plain list in both cases — use it as the source of names and index
+        # the values positionally. This avoids the earlier crash where
+        # `fit.params.index` raised AttributeError on ndarray.
+        param_names = list(getattr(fit, "param_names", []) or [])
+        params_arr = np.asarray(fit.params)
+        try:
+            bse_arr = np.asarray(fit.bse)
+        except Exception:
+            bse_arr = None
+
         param_rows = []
-        for pname in fit.params.index:
-            pval = float(fit.params[pname])
-            try:
-                se = float(fit.bse[pname]) if pname in fit.bse.index else None
-            except Exception:
-                se = None
+        for i, pname in enumerate(param_names):
+            if i >= len(params_arr):
+                break
+            pval = float(params_arr[i])
+            se = None
+            if bse_arr is not None and i < len(bse_arr):
+                try:
+                    se_val = float(bse_arr[i])
+                    if not np.isnan(se_val) and not np.isinf(se_val):
+                        se = se_val
+                except Exception:
+                    se = None
             param_rows.append([str(pname), round(pval, 6), round(se, 6) if se is not None else None])
 
         param_table = make_table(
