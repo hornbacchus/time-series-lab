@@ -43,6 +43,22 @@ Phillips-Perron appears as a tie-breaker row on the ADF side (same null). In CON
 - **Decision**: "unit root rejected" or "unit root not rejected" (the test cannot conclude "is stationary" — that requires the joint triage)
 - An advisory note when the series appears trending (`|t|>2` on a linear time regressor) and the current specification is `c` — suggests re-running with `ct`
 
+## Interpretation Block
+
+Every ADF Results sheet now carries a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section. This is additive — the Summary is unchanged and the data tables still appear in the same order.
+
+**Plain-Language Finding (Tier 1)** — 2–4 sentences, no Greek letters, no acronyms beyond business-news level. States the finding and the next step. Example on stationary macro data: *"'Real GDP Q/Q SAAR' is stationary — shocks decay rather than accumulating. The series can be used directly in regressions, VAR, and other stationarity-assuming models without first-differencing."*
+
+**Technical Interpretation (Tier 2)** — 3–6 sentences. Names the test, gives the statistic and p-value, discloses the regression specification, the Schwert bound, and the AIC-selected lag. Greek letters are permitted here when they communicate the statistical machinery.
+
+**Caveats (Tier 3, conditional)** — one italic gray bullet per trigger. Four triggers fire for ADF:
+- **Trending-series hint** — fires only when `regression='c'` AND the series shows a linear-time t-statistic above 2 in magnitude. Suggests re-running with `regression='ct'`.
+- **Borderline p-value** — fires when the ADF p-value is in `(0.04, 0.06)`. Names the direction of the potential flip ("stricter (1%)" or "looser (10%)" cutoff).
+- **Small sample** — fires when `n_obs < 50` in single-test mode or `n_obs < 100` in triage mode. Flags limited test power.
+- **Borderline joint triage** — fires in triage mode when both ADF and KPSS p-values sit within 0.03 of α. Flags the joint verdict as marginal.
+
+The block is **deterministic** — identical inputs produce bit-identical output. It is not an LLM summary. The wrapper reports statistical facts in plain English; it does not invent economic narrative (no "Volcker-era" or "demand-driven Phillips curve" annotations).
+
 ## Conventions Enforced
 
 **Specification transparency (P.1)**: The regression form, Schwert bound, and AIC-selected lag are all surfaced in user-visible output, not hidden in the audit sheet.

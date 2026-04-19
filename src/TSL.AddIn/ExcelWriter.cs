@@ -19,6 +19,78 @@ namespace TSL.AddIn
         /// <summary>Helper: typed Range from Cells indexer (COM returns object).</summary>
         private static Range C(Worksheet ws, int row, int col) => (Range)ws.Cells[row, col];
 
+        // The Python interpretation builder returns this exact Tier 1 string
+        // when no spec is registered for the technique. The writer detects
+        // it and suppresses the Interpretation block entirely so unwired
+        // techniques render exactly as before (additive rollout of Prompts
+        // B/C).
+        private const string InterpretationPlaceholderTier1 =
+            "Interpretation not yet available for this technique. " +
+            "See Results table for raw output.";
+
+        /// <summary>
+        /// Render the two-tier plain-language Interpretation block between
+        /// Summary and Warnings. Returns the next free row. Suppresses the
+        /// block entirely when the engine did not provide an interpretation,
+        /// when Tier 1 is empty, or when Tier 1 matches the placeholder.
+        /// </summary>
+        private static int WriteInterpretationBlock(Worksheet ws, int row, Interpretation interp)
+        {
+            if (interp == null) return row;
+            var tier1 = interp.Tier1 ?? "";
+            if (string.IsNullOrWhiteSpace(tier1)) return row;
+            if (tier1.Trim() == InterpretationPlaceholderTier1) return row;
+
+            // Section header
+            C(ws, row, 1).Value2 = "Interpretation";
+            C(ws, row, 1).Font.Bold = true;
+            C(ws, row, 1).Font.Size = 14;
+            row++;
+
+            // Tier 1 — Plain-Language Finding
+            C(ws, row, 1).Value2 = "Plain-Language Finding";
+            C(ws, row, 1).Font.Bold = true;
+            C(ws, row, 1).Font.Size = 11;
+            row++;
+            C(ws, row, 1).Value2 = tier1;
+            ws.Range[C(ws, row, 1), C(ws, row, 6)].Merge();
+            C(ws, row, 1).WrapText = true;
+            row += 2;
+
+            // Tier 2 — Technical Interpretation (only when non-empty)
+            var tier2 = interp.Tier2 ?? "";
+            if (!string.IsNullOrWhiteSpace(tier2))
+            {
+                C(ws, row, 1).Value2 = "Technical Interpretation";
+                C(ws, row, 1).Font.Bold = true;
+                C(ws, row, 1).Font.Size = 11;
+                row++;
+                C(ws, row, 1).Value2 = tier2;
+                ws.Range[C(ws, row, 1), C(ws, row, 6)].Merge();
+                C(ws, row, 1).WrapText = true;
+                row += 2;
+            }
+
+            // Tier 3 — Conditional caveats, one per row. Italic gray to
+            // signal supplementary reading without adopting Warnings' red.
+            if (interp.Tier3 != null && interp.Tier3.Count > 0)
+            {
+                foreach (var caveat in interp.Tier3)
+                {
+                    if (string.IsNullOrWhiteSpace(caveat)) continue;
+                    C(ws, row, 1).Value2 = caveat;
+                    ws.Range[C(ws, row, 1), C(ws, row, 6)].Merge();
+                    C(ws, row, 1).WrapText = true;
+                    C(ws, row, 1).Font.Italic = true;
+                    C(ws, row, 1).Font.Color = 0x808080; // medium gray
+                    row++;
+                }
+                row++; // blank separator after the caveat list
+            }
+
+            return row;
+        }
+
         /// <summary>
         /// Write a complete run result to the active workbook.
         /// Creates: results sheet, audit sheet, and embedded JSON record.
@@ -123,6 +195,12 @@ namespace TSL.AddIn
             ws.Range[C(ws, row, 1), C(ws, row, 6)].Merge();
             C(ws, row, 1).WrapText = true;
             row += 2;
+
+            // 1b) Interpretation block (Prompt A). Rendered only when the
+            // engine provided a non-placeholder Tier 1. Unwired techniques
+            // (most of them during Prompt A) omit the key and this block
+            // is suppressed entirely — sheet then renders exactly as before.
+            row = WriteInterpretationBlock(ws, row, response.Interpretation);
 
             // 2) Warnings
             if (response.Warnings != null && response.Warnings.Count > 0)

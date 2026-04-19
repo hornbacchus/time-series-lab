@@ -37,6 +37,25 @@ namespace TSL.AddIn.Models
 
         [JsonProperty("error_fixes")]
         public List<string> ErrorFixes { get; set; }
+
+        // Plain-language Interpretation block (Prompt A, two required tiers
+        // + optional Tier 3 caveats). Nullable — techniques that have not
+        // yet been wired (most of them during Prompt A) omit the key from
+        // the engine JSON, and the writer suppresses the block entirely.
+        [JsonProperty("interpretation")]
+        public Interpretation Interpretation { get; set; }
+    }
+
+    public class Interpretation
+    {
+        [JsonProperty("tier1")]
+        public string Tier1 { get; set; }
+
+        [JsonProperty("tier2")]
+        public string Tier2 { get; set; }
+
+        [JsonProperty("tier3")]
+        public List<string> Tier3 { get; set; } = new List<string>();
     }
 
     public class OutputTable

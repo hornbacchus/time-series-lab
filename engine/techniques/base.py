@@ -683,11 +683,20 @@ def make_response(
     error_message: str = None,
     error_fixes: list = None,
     engine_versions: dict = None,
+    interpretation: dict = None,
 ) -> dict:
     """
     Build a RunResponse dict matching the C# RunResponse schema.
 
     This is the canonical way for techniques to return results.
+
+    The ``interpretation`` kwarg carries the two-tier plain-language
+    Interpretation block (tier1 Plain-Language Finding, tier2 Technical
+    Interpretation, tier3 Caveats). Produced by
+    :func:`engine.interpretation.build_interpretation`. When ``None``
+    (e.g., techniques that have not yet been wired in Prompts B/C),
+    the response omits the ``"interpretation"`` key entirely and the
+    C# writer renders the sheet as before — purely additive rollout.
     """
     if audit_fields is None:
         audit_fields = {}
@@ -709,6 +718,8 @@ def make_response(
         "audit_fields": audit_fields,
         "charting_suggestions": charting_suggestions,
     }
+    if interpretation is not None:
+        resp["interpretation"] = interpretation
 
     if engine_versions:
         resp["engine_versions"] = engine_versions

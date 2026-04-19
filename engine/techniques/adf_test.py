@@ -31,6 +31,19 @@ from techniques.base import (
     order_critical_values,
 )
 
+# Interpretation layer (Prompt A). Import pulls in the registered spec
+# for 'adf_test' via side-effect imports in
+# ``interpretation.registry``.
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    # Defensive: if the interpretation module is unavailable for any
+    # reason (installation skew, circular import during a partial
+    # deployment), fall back to returning None so make_response omits
+    # the key and the C# writer renders the sheet as before.
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 
 _REGRESSION_LABEL = {
     "c":   "constant only",
@@ -296,6 +309,10 @@ def _run_single_test(ctx, progress_callback, all_series, regression,
     result_rows = []
     all_summaries = []
     detail_tables = []
+    # First successfully-fit series' facts — fed to build_interpretation
+    # below. Multi-series runs still get one interpretation block (on the
+    # first series); the per-series Summary sentences remain as before.
+    first_interp_results = None
 
     progress_callback("Running ADF tests", 15)
 
@@ -347,6 +364,12 @@ def _run_single_test(ctx, progress_callback, all_series, regression,
         all_summaries.append(_summary_adf(name, single, significance,
                                           trending, t_stat))
 
+        if first_interp_results is None:
+            first_interp_results = _build_interp_dict_single(
+                name=name, single=single, regression=regression,
+                significance=significance, trending=trending, t_stat=t_stat,
+            )
+
     progress_callback("Building output", 90)
 
     main_table = make_table(
@@ -367,12 +390,18 @@ def _run_single_test(ctx, progress_callback, all_series, regression,
 
     progress_callback("Done", 100)
 
+    interp = (
+        build_interpretation("adf_test", first_interp_results)
+        if first_interp_results is not None else None
+    )
+
     return make_response(
         ctx,
         tables=[main_table] + detail_tables,
         plain_english_summary=plain_english,
         warnings=warnings,
         charting_suggestions=charting,
+        interpretation=interp,
         audit_fields={
             "regression": regression,
             "regression_label": _REGRESSION_LABEL.get(regression, regression),
@@ -399,6 +428,35 @@ def _run_single_test(ctx, progress_callback, all_series, regression,
     )
 
 
+def _build_interp_dict_single(*, name, single, regression, significance,
+                              trending, t_stat) -> dict:
+    """Convert an ADF per-series result into the interpretation spec's
+    input dict. Isolates the naming translation so the spec layer can
+    change fields without touching every call site."""
+    cv_1 = cv_5 = None
+    for lvl, cv, _rej in single.get("critical_values_ordered", []):
+        if str(lvl).strip() == "1%":
+            cv_1 = float(cv)
+        elif str(lvl).strip() == "5%":
+            cv_5 = float(cv)
+    return {
+        "mode": "single_test",
+        "series_name": name,
+        "adf_stat": float(single["stat"]),
+        "p_value": float(single["pvalue"]),
+        "regression": regression,
+        "used_lag": int(single["used_lag"]),
+        "schwert_bound": int(single["schwert_bound"]),
+        "n_obs": int(single["nobs"]),
+        "crit_1pct": cv_1,
+        "crit_5pct": cv_5,
+        "significance_level": float(significance),
+        "trending": bool(trending),
+        "t_stat_trend": float(t_stat),
+        "decision_rejected": bool(single.get("decision_h0_rejected")),
+    }
+
+
 def _run_triage(ctx, progress_callback, all_series, regression,
                 max_lag_param, autolag, significance):
     """Joint ADF + KPSS + PP triage. Single-series input expected; for
@@ -411,6 +469,7 @@ def _run_triage(ctx, progress_callback, all_series, regression,
     triage_rows = []
     per_series_summaries = []
     detail_tables = []
+    first_interp_results = None
 
     progress_callback("Running ADF + KPSS + PP triage", 10)
 
@@ -544,6 +603,14 @@ def _run_triage(ctx, progress_callback, all_series, regression,
                 )
         per_series_summaries.append(sentence)
 
+        if first_interp_results is None and not adf_err:
+            first_interp_results = _build_interp_dict_triage(
+                name=name, adf=adf, kpss=kpss, pp=pp,
+                adf_rej=adf_rej, kpss_rej=kpss_rej, pp_rej=pp_rej,
+                regression=regression, significance=significance,
+                trending=trending, t_stat=t_stat, verdict=verdict,
+            )
+
     triage_table = make_table(
         "Stationarity Triage",
         ["Series", "Test", "Statistic", "P-Value", "Lag / Bandwidth",
@@ -576,12 +643,18 @@ def _run_triage(ctx, progress_callback, all_series, regression,
         ac_corrected=True,
     )
 
+    interp = (
+        build_interpretation("adf_test", first_interp_results)
+        if first_interp_results is not None else None
+    )
+
     return make_response(
         ctx,
         tables=tables,
         plain_english_summary=plain_english,
         warnings=warnings,
         charting_suggestions=charting,
+        interpretation=interp,
         audit_fields={
             "mode": "triage",
             "regression_adf": regression,
@@ -593,3 +666,44 @@ def _run_triage(ctx, progress_callback, all_series, regression,
             **disclosure,
         },
     )
+
+
+def _build_interp_dict_triage(*, name, adf, kpss, pp, adf_rej, kpss_rej,
+                              pp_rej, regression, significance, trending,
+                              t_stat, verdict) -> dict:
+    """Convert triage per-series results into the interpretation spec's
+    input dict."""
+    cv_1 = cv_5 = None
+    for lvl, cv, _rej in adf.get("critical_values_ordered", []):
+        if str(lvl).strip() == "1%":
+            cv_1 = float(cv)
+        elif str(lvl).strip() == "5%":
+            cv_5 = float(cv)
+    return {
+        "mode": "triage",
+        "series_name": name,
+        "adf_stat": float(adf["stat"]),
+        "p_value": float(adf["pvalue"]),
+        "regression": regression,
+        "used_lag": int(adf["used_lag"]),
+        "schwert_bound": int(adf["schwert_bound"]),
+        "n_obs": int(adf["nobs"]),
+        "crit_1pct": cv_1,
+        "crit_5pct": cv_5,
+        "significance_level": float(significance),
+        "trending": bool(trending),
+        "t_stat_trend": float(t_stat),
+        "decision_rejected": bool(adf_rej),
+        "kpss_stat": (float(kpss["stat"])
+                      if kpss.get("error") is None else float("nan")),
+        "kpss_pvalue": (float(kpss["pvalue"])
+                        if kpss.get("error") is None and kpss["pvalue"] is not None
+                        else float("nan")),
+        "kpss_rejected": bool(kpss_rej),
+        "pp_stat": (float(pp["stat"])
+                    if pp.get("error") is None else float("nan")),
+        "pp_pvalue": (float(pp["pvalue"])
+                      if pp.get("error") is None else float("nan")),
+        "pp_rejected": bool(pp_rej),
+        "joint_verdict": str(verdict),
+    }
