@@ -14,6 +14,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -329,6 +330,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "bic": round(bic, 2),
                 "rmse": round(rmse, 4) if rmse else None,
                 "horizon": horizon,
+                **format_significance_disclosure(
+                    test_name=(
+                        "ETS prediction interval (t-critical on residual std)"
+                    ),
+                    critical_value_formula=(
+                        "forecast ± t(1-α/2, T - n_params) · resid_std · "
+                        "sqrt(h). DoF-aware; NOT autocorrelation-aware — "
+                        "if residuals retain serial correlation, coverage is "
+                        "optimistic. Consider a rolling-origin bootstrap re-fit."
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

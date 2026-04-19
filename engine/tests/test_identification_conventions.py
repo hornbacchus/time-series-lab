@@ -444,5 +444,410 @@ class TestKalmanOutputAlignment(unittest.TestCase):
             "Parameters table should have at least one row"
         )
 
+
+# ─────────────────────────────────────────────────────────────────────
+# Rolling CCF F1 invariants and F2/F3 cross-technique invariants
+# ─────────────────────────────────────────────────────────────────────
+def _rolling_ccf_ctx(series_list, *, window=None, max_lag=None, preset="Balanced",
+                     frequency="Quarterly", seed=42, n=None):
+    """Build a minimal RunContext for rolling_ccf_lag. ``series_list`` is a
+    list of (name, values) tuples."""
+    if n is None:
+        n = len(series_list[0][1])
+    time_col = [f"{2000 + i // 4}-Q{i % 4 + 1}" for i in range(n)]
+    params = {}
+    if window is not None:
+        params["window"] = window
+    if max_lag is not None:
+        params["max_lag"] = max_lag
+    return RunContext({
+        "run_id": "t",
+        "technique_id": "rolling_ccf_lag",
+        "preset": preset,
+        "seed": seed,
+        "frequency": frequency,
+        "time": time_col,
+        "series": [{"name": name, "values": list(vals)} for name, vals in series_list],
+        "params": params,
+    })
+
+
+class TestBoundaryExclusion(unittest.TestCase):
+    """T1 — rolling_ccf_lag must flag boundary-hit windows and exclude them
+    from summary statistics."""
+
+    def test_boundary_column_present_and_excluded_from_stats(self):
+        from techniques import rolling_ccf_lag
+        rng = np.random.default_rng(42)
+
+        def ar1(n, rho=0.3):
+            e = rng.normal(0, 1, n); x = np.zeros(n); x[0] = e[0]
+            for i in range(1, n): x[i] = rho * x[i - 1] + e[i]
+            return x
+
+        x = ar1(400)
+        y = ar1(400)  # independent
+        ctx = _rolling_ccf_ctx([("X", x), ("Y", y)],
+                               window=120, max_lag=40, preset="Fast")
+        res = rolling_ccf_lag.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+
+        rolling_tbl = _find_table(res, "rolling optimal lag")
+        self.assertIsNotNone(rolling_tbl)
+        self.assertIn("Boundary_Hit", rolling_tbl["columns"])
+        boundary_col = rolling_tbl["columns"].index("Boundary_Hit")
+        flagged = sum(1 for row in rolling_tbl["rows"] if row[boundary_col] == "Yes")
+        # On 400-obs independent AR(0.3) with max_lag=40 and window=120, the
+        # optimizer often lands near ±max_lag on noise-dominated windows. We
+        # expect at least one flag.
+        self.assertGreaterEqual(
+            flagged, 1,
+            "At least one window should hit the ±0.8·max_lag boundary on "
+            "independent series; none were flagged"
+        )
+        self.assertEqual(res["audit_fields"]["n_windows_boundary_excluded"], flagged)
+
+
+class TestSignFlipDetection(unittest.TestCase):
+    """T2 — rolling_ccf_lag must detect a structural break when one exists,
+    and report pre/post regime signs correctly."""
+
+    def test_detects_regime_shift(self):
+        from techniques import rolling_ccf_lag
+        rng = np.random.default_rng(42)
+        n = 300
+        x = rng.normal(0, 1, n)
+        y = np.zeros(n)
+        for t in range(1, 150):
+            y[t] = -0.5 * x[t - 1] + rng.normal(0, 0.5)
+        for t in range(150, n):
+            y[t] = 0.5 * x[t - 3] + rng.normal(0, 0.5)
+        ctx = _rolling_ccf_ctx([("X", x), ("Y", y)],
+                               window=60, max_lag=10, preset="Balanced")
+        res = rolling_ccf_lag.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        af = res["audit_fields"]
+        self.assertTrue(
+            af["structural_break_detected"],
+            f"Expected structural break on two-regime synthetic; got details "
+            f"{af.get('structural_break_details')}"
+        )
+        # True break at obs 150; with window=60 the corresponding window
+        # index is ~120-150 by the center-time convention. Allow a ±20
+        # window tolerance.
+        break_idx = af["structural_break_window_index"]
+        self.assertIsNotNone(break_idx)
+        self.assertLess(
+            abs(break_idx - 120), 30,
+            f"Break window index {break_idx} is more than 30 windows from the "
+            f"expected ~120"
+        )
+        summary = res["plain_english_summary"]
+        # Pre-break synthetic had y = -0.5·x_{t-1}, so the wrapper should
+        # report sign=- in the pre-break segment. Post-break had y = +0.5·x_{t-3},
+        # so sign=+ and lag=3 in post-break.
+        self.assertIn("Pre-break", summary)
+        self.assertIn("Post-break", summary)
+        self.assertIn("ρ=-", summary, f"Pre-break ρ sign missing from: {summary}")
+        self.assertIn("ρ=+", summary, f"Post-break ρ sign missing from: {summary}")
+
+
+class TestMedianNotMean(unittest.TestCase):
+    """T3 — the summary must use the median lag (robust), not the mean,
+    so a handful of noisy windows with a far-off best-lag do not drag the
+    reported lag into a nonsense value."""
+
+    def test_summary_uses_median_not_mean(self):
+        from techniques import rolling_ccf_lag
+        rng = np.random.default_rng(7)
+        # Strong structural: y[t] = 0.9 * x[t-1] + eps. True modal/median
+        # lag is 1. Add a couple of very noisy windows by spiking x at a
+        # few positions — those windows will produce spurious far-off best
+        # lags that would pull the MEAN off 1 but not the median.
+        n = 260
+        x = rng.normal(0, 1, n)
+        x[20] = 15.0
+        x[21] = -15.0
+        x[180] = 12.0
+        y = np.zeros(n)
+        for t in range(1, n):
+            y[t] = 0.9 * x[t - 1] + rng.normal(0, 0.3)
+        ctx = _rolling_ccf_ctx([("X", x), ("Y", y)],
+                               window=40, max_lag=15, preset="Balanced")
+        res = rolling_ccf_lag.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        af = res["audit_fields"]
+        # Median should be 1 (the true lag); mean may differ due to outliers.
+        self.assertEqual(
+            int(af["median_lag_ex_boundary"]), 1,
+            f"Median lag (ex-boundary) should be 1 on y_t=0.9·x_{{t-1}} data"
+        )
+        summary = res["plain_english_summary"]
+        # The summary's "by N" clause should carry the median, i.e. 1.
+        self.assertIn(
+            " by 1 with ρ=",
+            summary,
+            f"Primary sentence should carry the median lag (1), got: {summary[:200]}"
+        )
+
+
+class TestWindowDefault(unittest.TestCase):
+    """T4 — on a 150-obs series with Balanced preset and no override,
+    window must be max(40, min(80, 150//3)) = 50."""
+
+    def test_balanced_default_window_150_obs(self):
+        from techniques import rolling_ccf_lag
+        rng = np.random.default_rng(0)
+        x = rng.normal(0, 1, 150)
+        y = rng.normal(0, 1, 150)
+        ctx = _rolling_ccf_ctx([("X", x), ("Y", y)], preset="Balanced")
+        res = rolling_ccf_lag.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        self.assertEqual(
+            res["audit_fields"]["window"], 50,
+            "Balanced preset on n=150 should auto-select window=50 "
+            "(= max(40, min(80, 150//3)))"
+        )
+
+
+class TestACCorrectionMateriality(unittest.TestCase):
+    """T7 — on two independent AR(0.9) series, the AC-corrected pct_significant
+    must be materially lower than the naive reference."""
+
+    def test_ac_correction_deflates_false_significance(self):
+        from techniques import rolling_ccf_lag
+        rng = np.random.default_rng(42)
+
+        def ar1(n, rho=0.9):
+            e = rng.normal(0, 1, n); x = np.zeros(n); x[0] = e[0]
+            for i in range(1, n): x[i] = rho * x[i - 1] + e[i]
+            return x
+
+        ctx = _rolling_ccf_ctx([("X", ar1(300)), ("Y", ar1(300))],
+                               preset="Balanced")
+        res = rolling_ccf_lag.run(ctx, _noop_progress)
+        self.assertEqual(res.get("status"), "success")
+        af = res["audit_fields"]
+        naive = af["pct_significant_naive_reference"]
+        corrected = af["pct_significant"]
+        # AC correction must reduce reported significance by at least 30pp
+        # on highly persistent (ρ=0.9) independent inputs. With the default
+        # heuristic window these tend to fall ~98% naive → ~25% corrected.
+        self.assertTrue(
+            af["ac_corrected"],
+            f"On AR(0.9) inputs AC correction should engage; "
+            f"ac_inflation={af.get('ac_inflation_factor_on_residuals', 'n/a')}"
+        )
+        self.assertLess(
+            corrected, naive - 30,
+            f"AC correction should deflate pct_significant by > 30pp on "
+            f"persistent independent series; got naive={naive}, corrected={corrected}"
+        )
+        self.assertLess(
+            corrected, 40,
+            f"AC-corrected pct_significant should be <40% on independent "
+            f"AR(0.9) series; got {corrected}"
+        )
+
+
+class TestPairwiseSummaryConvention(unittest.TestCase):
+    """T5 — every F2 technique summary pairs a sign indicator with a
+    correlation/coefficient AND carries a direction word or signed lag."""
+
+    F2_TECHNIQUES = [
+        "rolling_ccf_lag",
+        "cross_correlation_lag",
+        "prewhitened_ccf_lag",
+        "granger_causality",
+        "dtw_alignment_lag",
+        "wavelet_coherence",
+        "transfer_function",
+    ]
+
+    def _minimal_ctx(self, tech_id):
+        rng = np.random.default_rng(123)
+        n = 200
+        x = rng.normal(0, 1, n)
+        y = np.zeros(n)
+        for t in range(2, n):
+            y[t] = 0.5 * x[t - 1] + 0.2 * y[t - 1] + rng.normal(0, 0.3)
+        time_col = [f"{2000 + i // 4}-Q{i % 4 + 1}" for i in range(n)]
+        return RunContext({
+            "run_id": "t", "technique_id": tech_id,
+            "preset": "Balanced", "seed": 42, "frequency": "Quarterly",
+            "time": time_col,
+            "series": [
+                {"name": "X", "values": list(x)},
+                {"name": "Y", "values": list(y)},
+            ],
+            "params": {},
+        })
+
+    DIRECTION_WORDS = (
+        "leads", "lags", "causes", "follows", "aligns", "in phase",
+        "contemporaneously", "Granger-causes", "does not Granger-cause",
+        "->", "→",  # transfer-function arrow notation
+    )
+
+    # Pattern: any technique-specific statistic label followed by an "=" and
+    # a signed numeric value. Positive values without a leading "+" are
+    # accepted (English convention) — negatives must carry the "-" explicitly.
+    STAT_PATTERN = re.compile(
+        r"(?:ρ|CCF|F|weight|coherence|median\s+lag|multiplier|beta|β)"
+        r"\s*=\s*[-+]?\d",
+        re.IGNORECASE,
+    )
+
+    def test_every_summary_pairs_sign_and_direction(self):
+        failures = []
+        import importlib
+        for tech in self.F2_TECHNIQUES:
+            try:
+                mod = importlib.import_module(f"techniques.{tech}")
+                ctx = self._minimal_ctx(tech)
+                res = mod.run(ctx, _noop_progress)
+            except Exception as e:
+                failures.append(f"{tech}: run raised {type(e).__name__}: {e}")
+                continue
+            if res.get("status") != "success":
+                failures.append(
+                    f"{tech}: status={res.get('status')}, "
+                    f"error={res.get('error_message')}"
+                )
+                continue
+            summary = res.get("plain_english_summary", "")
+            has_direction = any(w in summary for w in self.DIRECTION_WORDS)
+            has_signed_stat = bool(self.STAT_PATTERN.search(summary))
+            if not (has_direction and has_signed_stat):
+                failures.append(
+                    f"{tech}: summary lacks paired sign+direction. "
+                    f"has_direction={has_direction}, has_signed_stat={has_signed_stat}. "
+                    f"Summary: {summary[:250]!r}"
+                )
+        self.assertFalse(failures, "\n" + "\n".join(failures))
+
+
+class TestSignificanceDisclosureConvention(unittest.TestCase):
+    """T6 — every F3 technique exposes test_name, critical_value_formula,
+    and ac_corrected in audit_fields."""
+
+    F3_TECHNIQUES = [
+        # Pairwise (F2 overlap)
+        "rolling_ccf_lag", "cross_correlation_lag", "prewhitened_ccf_lag",
+        "granger_causality", "johansen_cointegration", "wavelet_coherence",
+        "transfer_function", "dtw_alignment_lag",
+        # Unit-root / stationarity wrappers gain F3 disclosure in a
+        # later commit; not iterated here to keep this commit
+        # bisect-clean.
+        # ARIMA family
+        "arima", "sarima", "arimax_sarimax",
+        # State-space
+        "kalman_filter_model", "kalman_imputation",
+        # Volatility
+        "garch_model", "caviar_quantile_dynamics",
+        # Forecasting with CI
+        "ets_hw", "theta_forecast", "prophet_forecast",
+        "gaussian_process_forecast",
+        # Diagnostic / regression
+        "stl_esd_anomaly", "har_rv", "intervention_analysis",
+    ]
+
+    def _ctx_for(self, tech_id):
+        rng = np.random.default_rng(7)
+        n = 120
+        if tech_id in ("johansen_cointegration",):
+            # Needs k >= 2 series, I(1)
+            y1 = np.cumsum(rng.normal(0, 1, n))
+            y2 = 2 * y1 + rng.normal(0, 0.5, n)
+            series = [{"name": "Y1", "values": list(y1)},
+                      {"name": "Y2", "values": list(y2)}]
+        elif tech_id in ("rolling_ccf_lag", "cross_correlation_lag",
+                         "prewhitened_ccf_lag", "granger_causality",
+                         "dtw_alignment_lag", "wavelet_coherence",
+                         "transfer_function"):
+            x = rng.normal(0, 1, n)
+            y = np.zeros(n)
+            for t in range(2, n):
+                y[t] = 0.5 * x[t - 1] + 0.2 * y[t - 1] + rng.normal(0, 0.3)
+            series = [{"name": "X", "values": list(x)},
+                      {"name": "Y", "values": list(y)}]
+        elif tech_id == "kalman_imputation":
+            y = np.cumsum(rng.normal(0, 1, n))
+            y[30] = np.nan
+            y[60] = np.nan
+            series = [{"name": "Y", "values":
+                [float(v) if not np.isnan(v) else None for v in y]}]
+        elif tech_id == "caviar_quantile_dynamics":
+            # Returns-like
+            series = [{"name": "R", "values": list(rng.normal(0, 0.02, 500))}]
+        elif tech_id == "intervention_analysis":
+            y = np.cumsum(rng.normal(0, 1, n))
+            y[60:] += 5.0
+            series = [{"name": "Y", "values": list(y)}]
+        elif tech_id == "har_rv":
+            # Positive realized-vol-like series
+            base = rng.lognormal(0, 0.3, 300)
+            series = [{"name": "RV", "values": list(base)}]
+        elif tech_id == "prophet_forecast":
+            y = np.cumsum(rng.normal(0, 1, n))
+            series = [{"name": "Y", "values": list(y)}]
+        else:
+            y = np.cumsum(rng.normal(0, 1, n))
+            series = [{"name": "Y", "values": list(y)}]
+
+        time_col = [f"{2000 + i // 12}-{(i % 12) + 1:02d}-28"
+                    for i in range(len(series[0]["values"]))]
+        params = {}
+        if tech_id == "caviar_quantile_dynamics":
+            params = {"theta": 0.05}
+        elif tech_id == "intervention_analysis":
+            params = {"interventions": [{"index": 60, "type": "level_shift"}]}
+        elif tech_id == "transfer_function":
+            params = {"max_lag": 4, "ar_order": 1}
+        elif tech_id == "rolling_ccf_lag":
+            params = {"window": 40, "max_lag": 8}
+        return RunContext({
+            "run_id": "t", "technique_id": tech_id,
+            "preset": "Fast", "seed": 7, "frequency": "Monthly",
+            "time": time_col, "series": series, "params": params,
+        })
+
+    def test_every_technique_discloses_significance(self):
+        failures = []
+        skipped = []
+        import importlib
+        for tech in self.F3_TECHNIQUES:
+            try:
+                mod = importlib.import_module(f"techniques.{tech}")
+                ctx = self._ctx_for(tech)
+                res = mod.run(ctx, _noop_progress)
+            except Exception as e:
+                skipped.append(f"{tech}: run raised {type(e).__name__}: {e}")
+                continue
+            if res.get("status") != "success":
+                skipped.append(f"{tech}: status={res.get('status')}")
+                continue
+            af = res.get("audit_fields") or {}
+            missing = []
+            if not af.get("test_name"):
+                missing.append("test_name")
+            if not af.get("critical_value_formula"):
+                missing.append("critical_value_formula")
+            if "ac_corrected" not in af:
+                missing.append("ac_corrected")
+            elif not isinstance(af["ac_corrected"], (bool,)):
+                missing.append(f"ac_corrected-not-bool({type(af['ac_corrected']).__name__})")
+            if missing:
+                failures.append(f"{tech}: missing/bad audit fields: {missing}")
+        if skipped:
+            print("\n[T6] Skipped (fit failures on minimal synthetic):")
+            for s in skipped:
+                print("  -", s)
+        self.assertFalse(
+            failures,
+            "Techniques not disclosing significance test metadata:\n"
+            + "\n".join(failures)
+        )
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

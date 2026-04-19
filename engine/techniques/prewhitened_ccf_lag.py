@@ -22,6 +22,8 @@ from techniques.base import (
     make_response,
     make_error_response,
     dropna_aligned,
+    bartlett_effective_n,
+    format_significance_disclosure,
 )
 
 
@@ -45,9 +47,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         ctx.validate_min_series(2)
         all_series = ctx.get_all_series()
+        warnings = []
+        if len(all_series) > 2:
+            ignored = [s[0] for s in all_series[2:]]
+            warnings.append(
+                f"Prewhitened CCF is a pairwise technique. Used "
+                f"'{all_series[0][0]}' (X, input) and '{all_series[1][0]}' "
+                f"(Y, output); ignored {len(ignored)} additional series: "
+                f"{', '.join(ignored)}."
+            )
         x_name, x_vals = all_series[0]
         y_name, y_vals = all_series[1]
-        warnings = []
 
         if len(x_vals) != len(y_vals):
             return make_error_response(
@@ -123,11 +133,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
         ccf_pos = _compute_ccf(resid_x, resid_y, max_lag)  # positive lags: X leads Y
         ccf_neg = _compute_ccf(resid_y, resid_x, max_lag)  # negative lags: Y leads X
 
-        # Bartlett confidence band (approximate)
-        bartlett_se = 1.0 / np.sqrt(min_len)
+        # Bartlett confidence band. Prewhitening reduces but does not
+        # eliminate residual autocorrelation — the filter is only exact if
+        # the ARIMA model is. Apply Bartlett effective-n on the prewhitened
+        # residuals; when they really are iid the correction is ≈1.0 and
+        # the band matches the naive formula.
         from scipy.stats import norm
         z = norm.ppf(1.0 - significance / 2.0)
-        conf_band = z * bartlett_se
+        n_eff_pw, ac_inflation = bartlett_effective_n(resid_x, resid_y)
+        ac_corrected = ac_inflation >= 1.05
+        conf_band_naive = z / np.sqrt(min_len)
+        if ac_corrected:
+            conf_band = z / np.sqrt(n_eff_pw)
+        else:
+            conf_band = conf_band_naive
+        if ac_corrected and ac_inflation >= 1.5:
+            warnings.append(
+                f"Prewhitening did not fully remove autocorrelation "
+                f"(residual AC inflation {ac_inflation:.1f}x). Effective n "
+                f"on residuals ≈ {n_eff_pw:.0f}; Bartlett band widened to "
+                f"±{conf_band:.4f} from naive ±{conf_band_naive:.4f}."
+            )
 
         progress_callback("Identifying optimal lag", 80)
 
@@ -233,13 +259,28 @@ def run(ctx: RunContext, progress_callback) -> dict:
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,
+                "pair_used": [x_name, y_name],
+                "pairs_ignored": [s[0] for s in all_series[2:]],
                 "prewhiten_order": str(order),
                 "optimal_lag": best_lag,
                 "ccf_at_optimal": round(best_ccf_val, 6),
                 "bartlett_band": round(conf_band, 4),
+                "bartlett_band_naive_reference": round(conf_band_naive, 4),
+                "ac_inflation_factor_on_residuals": round(float(ac_inflation), 2),
                 "max_lag": max_lag,
                 "n_valid": min_len,
                 "n_significant_lags": sig_count,
+                **format_significance_disclosure(
+                    test_name="Bartlett band on prewhitened residuals",
+                    critical_value_formula=(
+                        f"±z(1-α/2)/sqrt(n_eff) with n_eff={n_eff_pw:.1f} "
+                        f"(residual AC inflation {ac_inflation:.2f}x)"
+                        if ac_corrected else
+                        f"±z(1-α/2)/sqrt(n) = ±{conf_band:.4f}"
+                    ),
+                    ac_corrected=bool(ac_corrected),
+                    effective_n=float(n_eff_pw) if ac_corrected else None,
+                ),
             },
         )
 

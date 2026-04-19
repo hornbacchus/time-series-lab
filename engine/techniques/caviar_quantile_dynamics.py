@@ -23,6 +23,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 _PRESET_CONFIG = {
@@ -250,6 +251,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "dq_pval": round(float(dq_pval), 6),
                 "n_obs": n,
                 "n_restarts": cfg["n_restarts"],
+                **format_significance_disclosure(
+                    test_name=(
+                        "Kupiec POF + Christoffersen independence + Engle-"
+                        "Manganelli DQ backtests"
+                    ),
+                    critical_value_formula=(
+                        "chi-squared p-values from likelihood-ratio (Kupiec, "
+                        "Christoffersen) and dynamic-quantile (DQ) tests"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 

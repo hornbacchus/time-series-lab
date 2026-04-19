@@ -14,6 +14,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -343,6 +344,15 @@ def _build_output(ctx, name, clean, order, seasonal_order, aic, bic,
         "rmse": round(rmse, 4) if rmse else None,
         "mae": round(mae, 4) if mae else None,
         "horizon": horizon,
+        **format_significance_disclosure(
+            test_name="ARIMA MLE t-tests + Ljung-Box residual diagnostic",
+            critical_value_formula=(
+                "statsmodels ARIMA standard errors (hessian/outer-product), "
+                "two-sided t-test at α; Ljung-Box via "
+                "statsmodels.stats.diagnostic.acorr_ljungbox"
+            ),
+            ac_corrected=True,
+        ),
     }
     if extra_audit:
         audit.update(extra_audit)

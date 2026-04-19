@@ -14,6 +14,8 @@ from techniques.base import (
     make_response,
     make_error_response,
     dropna_aligned,
+    format_pairwise_summary,
+    format_significance_disclosure,
 )
 
 
@@ -37,9 +39,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         ctx.validate_min_series(2)
         all_series = ctx.get_all_series()
+        warnings = []
+
+        # F2 multi-series disclosure: Granger is pairwise (dependent Y,
+        # potential cause X). If the user selected more than 2 columns,
+        # name the pair used and the columns ignored.
+        if len(all_series) > 2:
+            ignored = [s[0] for s in all_series[2:]]
+            warnings.append(
+                f"Granger causality is a pairwise test (Y ← X). Used "
+                f"'{all_series[0][0]}' as the dependent and '{all_series[1][0]}' "
+                f"as the potential cause; ignored {len(ignored)} additional "
+                f"series: {', '.join(ignored)}. Swap column order to test the "
+                f"reverse direction."
+            )
+
         y_name, y_vals = all_series[0]
         x_name, x_vals = all_series[1]
-        warnings = []
 
         # Align and drop NaN
         if len(y_vals) != len(x_vals):
@@ -102,6 +118,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         rows = []
         best_lag = None
         best_p = 1.0
+        best_f = 0.0
         for lag in range(1, max_lag + 1):
             test_dict = results[lag]
             # test_dict is (dict_of_tests, [ols_restricted, ols_unrestricted, ...])
@@ -118,6 +135,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             if p_value < best_p:
                 best_p = p_value
                 best_lag = lag
+                best_f = float(f_stat)
 
         results_table = make_table(
             "Granger Causality (F-test)",
@@ -139,21 +157,35 @@ def run(ctx: RunContext, progress_callback) -> dict:
         ]
         summary_table = make_table("Summary", ["Field", "Value"], summary_rows)
 
-        # Plain English
+        # Plain English via format_pairwise_summary — F2 (d)-form pairs
+        # direction + magnitude (F-statistic) + p-value. "sign" is always "+"
+        # for Granger because F is nonnegative by construction; the helper
+        # still requires it to enforce the convention.
+        test_name = "Granger F-test (SSR-based)"
+        ac_note = "AC-aware via lag augmentation"
         if best_p < significance:
-            plain_english = (
-                f"'{x_name}' Granger-causes '{y_name}' at lag {best_lag} "
-                f"(p={best_p:.4f}, significance level={significance}). "
-                f"Past values of '{x_name}' contain statistically significant "
-                f"information for predicting '{y_name}' beyond its own history."
-            )
+            direction_verb = "Granger-causes"
+            extra = (f"(p={best_p:.4f} vs α={significance}). Past values of "
+                     f"'{x_name}' add significant predictive power for "
+                     f"'{y_name}' beyond its own history.")
         else:
-            plain_english = (
-                f"'{x_name}' does NOT Granger-cause '{y_name}' at any tested lag "
-                f"(best p={best_p:.4f}, significance level={significance}). "
-                f"Past values of '{x_name}' do not add significant predictive power "
-                f"for '{y_name}' beyond its own past values."
-            )
+            direction_verb = "does not Granger-cause"
+            extra = (f"(best p={best_p:.4f} vs α={significance}). Past values "
+                     f"of '{x_name}' do not add significant predictive power "
+                     f"for '{y_name}' beyond its own history.")
+        prefix = (f"Granger causality test of '{x_name}' → '{y_name}' "
+                  f"at lags 1-{max_lag} (n={n})")
+        plain_english = format_pairwise_summary(
+            prefix, x_name, y_name,
+            sign="+",
+            magnitude=best_f,
+            lag=best_lag,
+            direction_verb=direction_verb,
+            stat_name="F",
+            test_name=test_name,
+            ac_note=ac_note,
+            extra=extra,
+        )
 
         # Check for reverse causality hint
         if ctx.preset == "Thorough":
@@ -193,12 +225,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
             audit_fields={
                 "y_series": y_name,
                 "x_series": x_name,
+                "pair_used": [y_name, x_name],
+                "pairs_ignored": [s[0] for s in all_series[2:]],
                 "max_lag": max_lag,
                 "optimal_lag": best_lag,
+                "best_f_stat": round(best_f, 4),
                 "best_p_value": round(best_p, 6),
                 "significant": decision == "Yes",
                 "significance_level": significance,
                 "n_valid": n,
+                **format_significance_disclosure(
+                    test_name="Granger F-test (SSR-based)",
+                    critical_value_formula=(
+                        "F-distribution with (lag, n-2*lag-1) DoF via "
+                        "statsmodels.tsa.stattools.grangercausalitytests"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 

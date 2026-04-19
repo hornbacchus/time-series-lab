@@ -15,6 +15,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -312,6 +313,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "bic": round(bic, 2),
                 "log_likelihood": round(llf, 2),
                 "horizon": horizon,
+                **format_significance_disclosure(
+                    test_name=(
+                        f"{model_label} MLE t-tests + Ljung-Box on squared "
+                        "standardized residuals"
+                    ),
+                    critical_value_formula=(
+                        "arch package MLE standard errors; two-sided t-tests; "
+                        "Ljung-Box on standardized² via "
+                        "statsmodels.stats.diagnostic.acorr_ljungbox"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 

@@ -14,6 +14,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -116,6 +117,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
         imputed_series = values.copy()
         imputed_values_info = []
 
+        # The confidence band around each imputed value is ± z * posterior_se
+        # where posterior_se comes from the Kalman smoother's state
+        # covariance. Coverage is correct under model-specification (the
+        # chosen UnobservedComponents variant captures the true dynamics).
+        # If the model is misspecified, the reported band understates true
+        # imputation uncertainty — disclose this honestly rather than
+        # applying a pseudo-correction that the state-space math does not
+        # support.
         from scipy import stats as sp_stats
         z = sp_stats.norm.ppf(1.0 - alpha / 2)
 
@@ -228,6 +237,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "Imputed values in this region have high uncertainty."
             )
 
+        warn_list.append(
+            "Imputation confidence bands assume the chosen state-space model "
+            "captures the true dynamics. If residual diagnostics show "
+            "unexplained structure (check Ljung-Box via the Kalman Filter "
+            "technique on the same series), the reported bands understate "
+            "true uncertainty — consider a bootstrap re-fit for calibrated "
+            "coverage."
+        )
+
         charting = (
             "Line chart of the imputed series with observed values as solid dots and "
             f"imputed values as open circles with {ci_label} error bars or shaded intervals. "
@@ -251,6 +269,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "rmse_observed": round(rmse, 6) if rmse else None,
                 "aic": round(float(result.aic), 2),
                 "avg_imputation_se": round(avg_se, 6),
+                **format_significance_disclosure(
+                    test_name="Kalman smoother state-covariance credible band",
+                    critical_value_formula=(
+                        "imputed ± z(1-α/2) · sqrt(smoothed_state_cov) from "
+                        "statsmodels.tsa.statespace.structural.UnobservedComponents"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 

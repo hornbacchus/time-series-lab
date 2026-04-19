@@ -19,6 +19,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 _PRESET_CONFIG = {
@@ -300,6 +301,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "stl_robust": cfg["stl_robust"],
                 "n_obs": n,
                 "anomaly_indices": [int(i) for i in anomaly_original_indices] if n_anomalies > 0 else [],
+                **format_significance_disclosure(
+                    test_name=(
+                        "Generalized ESD test on STL remainder (Rosner 1983)"
+                    ),
+                    critical_value_formula=(
+                        "λ_i = (n-i-1)·t_crit / sqrt((n-i-2+t_crit²)(n-i)) "
+                        "with t_crit = t.ppf(1 - α/(2(n-i)), n-i-2). "
+                        "Bonferroni-adjusted DoF; NOT AC-aware — assumes STL "
+                        "remainder is iid. Residual autocorrelation inflates "
+                        "false-positive rate."
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

@@ -16,6 +16,8 @@ from techniques.base import (
     make_response,
     make_error_response,
     dropna_aligned,
+    bartlett_effective_n,
+    format_significance_disclosure,
 )
 
 
@@ -40,9 +42,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         ctx.validate_min_series(2)
         all_series = ctx.get_all_series()
+        warn_list = []
+        if len(all_series) > 2:
+            ignored = [s[0] for s in all_series[2:]]
+            warn_list.append(
+                f"Cross-correlation is a pairwise technique. Used "
+                f"'{all_series[0][0]}' and '{all_series[1][0]}'; ignored "
+                f"{len(ignored)} additional series: {', '.join(ignored)}."
+            )
         x_name, x_vals = all_series[0]
         y_name, y_vals = all_series[1]
-        warn_list = []
 
         if len(x_vals) != len(y_vals):
             return make_error_response(
@@ -107,9 +116,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Identifying significant lags", 60)
 
-        # Bartlett confidence band: +/- z * 1/sqrt(n)
+        # Bartlett confidence band. The naive ±z/sqrt(n) formula assumes
+        # white-noise inputs; for autocorrelated time series it
+        # systematically understates the band width. Apply the Bartlett
+        # effective-n correction: n_eff = n / (1 + 2*sum(rho_x * rho_y)),
+        # then use ±z/sqrt(n_eff). Disclose both in the audit sheet.
         z = norm.ppf(1.0 - significance / 2.0)
-        conf_band = z / np.sqrt(n)
+        conf_band_naive = z / np.sqrt(n)
+        n_eff, ac_inflation = bartlett_effective_n(x_clean, y_clean)
+        ac_corrected = ac_inflation >= 1.05
+        if ac_corrected:
+            conf_band = z / np.sqrt(n_eff)
+        else:
+            conf_band = conf_band_naive
+        if ac_corrected and ac_inflation >= 1.5:
+            warn_list.append(
+                f"Autocorrelation inflation factor {ac_inflation:.1f}x "
+                f"(effective n ≈ {n_eff:.0f} vs nominal {n}). Significance "
+                f"band widened accordingly. Naive band would have been "
+                f"±{conf_band_naive:.4f}; AC-corrected is ±{conf_band:.4f}."
+            )
 
         # Build CCF table
         ccf_rows = []
@@ -215,13 +241,28 @@ def run(ctx: RunContext, progress_callback) -> dict:
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,
+                "pair_used": [x_name, y_name],
+                "pairs_ignored": [s[0] for s in all_series[2:]],
                 "max_lag": max_lag,
                 "optimal_lag": best_lag,
                 "ccf_at_optimal": round(best_val, 6),
                 "bartlett_band": round(conf_band, 4),
+                "bartlett_band_naive_reference": round(conf_band_naive, 4),
+                "ac_inflation_factor": round(float(ac_inflation), 2),
                 "n_significant": n_sig,
                 "n_valid": n,
                 "normalized": normalize,
+                **format_significance_disclosure(
+                    test_name="Bartlett white-noise band",
+                    critical_value_formula=(
+                        f"±z(1-α/2)/sqrt(n_eff) with n_eff={n_eff:.1f} from "
+                        f"Bartlett AC adjustment"
+                        if ac_corrected else
+                        f"±z(1-α/2)/sqrt(n) = ±{conf_band:.4f}"
+                    ),
+                    ac_corrected=bool(ac_corrected),
+                    effective_n=float(n_eff) if ac_corrected else None,
+                ),
             },
         )
 

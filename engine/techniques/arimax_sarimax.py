@@ -15,6 +15,7 @@ from techniques.base import (
     make_response,
     make_error_response,
     dropna_aligned,
+    format_significance_disclosure,
 )
 
 
@@ -285,6 +286,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "rmse": round(rmse, 4) if rmse else None,
             "mae": round(mae, 4) if mae else None,
             "horizon": horizon,
+            **format_significance_disclosure(
+                test_name="SARIMAX MLE t-tests + Ljung-Box residual diagnostic",
+                critical_value_formula=(
+                    "statsmodels SARIMAX standard errors via Kalman filter "
+                    "MLE; two-sided t-tests at α; Ljung-Box via "
+                    "statsmodels.stats.diagnostic.acorr_ljungbox"
+                ),
+                ac_corrected=True,
+            ),
         }
 
         return make_response(

@@ -13,6 +13,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -406,6 +407,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "mae": round(mae, 4),
                 "r2": round(r2, 4),
                 "horizon": horizon,
+                **format_significance_disclosure(
+                    test_name=(
+                        "Prophet posterior prediction interval (or t-critical "
+                        "on residuals when seasonal-naive fallback is used)"
+                    ),
+                    critical_value_formula=(
+                        "Prophet native yhat_lower / yhat_upper from MCMC/MAP "
+                        "posterior when backend='prophet'; seasonal-naive "
+                        "fallback uses forecast ± t(1-α/2, T-n_params) · "
+                        "resid_std · sqrt(h) — DoF-aware, NOT AC-aware. "
+                        "Consider bootstrap re-fit for calibrated coverage."
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

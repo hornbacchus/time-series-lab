@@ -19,6 +19,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 _PRESET_CONFIG = {
@@ -331,6 +332,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "bic": round(bic, 2),
                 "n_obs": T,
                 "bootstrap_samples": cfg["bootstrap_samples"],
+                **format_significance_disclosure(
+                    test_name=(
+                        "HAR-RV OLS t-tests on daily/weekly/monthly lag "
+                        "coefficients"
+                    ),
+                    critical_value_formula=(
+                        "p = 2·(1 - t.cdf(|t_stat|, T-k)). Standard OLS "
+                        "standard errors assume iid homoskedastic residuals; "
+                        "NOT AC-aware. For realized-volatility data with "
+                        "persistence, consider HAC/Newey-West or a block "
+                        "bootstrap of the beta estimates."
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

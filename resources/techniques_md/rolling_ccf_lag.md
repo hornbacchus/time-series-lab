@@ -23,10 +23,50 @@ Rolling CCF computes the cross-correlation function over a **sliding window**, r
 ## Outputs
 
 - **Time-varying CCF heatmap**: correlation as a function of both time (window center) and lag
-- **Optimal lag over time**: the lag with maximum correlation at each time point
+- **Optimal lag over time**: the lag with maximum correlation at each window, with a `Boundary_Hit` flag marking windows that landed at or near ±max_lag and were excluded from summary statistics
 - **Maximum correlation over time**: the strength of the peak relationship at each time point
-- **Lag stability analysis**: how much the optimal lag varies over time
-- **Regime identification**: periods where the relationship is strong, weak, or has shifted lag
+- **Lag stability analysis**: how much the optimal lag varies over time (on the boundary-excluded subset)
+- **Structural-break flag**: whether the rolling series exhibits a confirmed regime shift, with a pre-break / post-break split in the summary when confirmed
+- **Summary statistics**: mean, median, and std of optimal lag (ex-boundary); AC-corrected vs naive pct_significant for comparison
+
+## Conventions Enforced By This Technique
+
+Rolling CCF is the reference implementation for two platform-wide conventions. Every pairwise technique in Time Series Lab follows the same rules.
+
+**Pairwise-summary convention (F2)**: the primary plain-English sentence always pairs a sign indicator, a correlation magnitude, and a direction word. You will never see a summary that reports a lag without the associated ρ, or a ρ without the associated direction. When a structural break is confirmed, the sentence splits into pre-break and post-break clauses with the same sign+magnitude+direction triplet in each.
+
+**Significance-disclosure convention (F3)**: the audit sheet always exposes `test_name`, `critical_value_formula`, `ac_corrected`, and (when AC-corrected) `effective_n`. You can always trace exactly which test was applied, what critical value was used, and whether autocorrelation in the inputs was accounted for.
+
+## Boundary-lag flagging
+
+When the optimal lag in a window sits at or near the search boundary (|lag| ≥ 0.8 × max_lag), the reported lag is not reliable — the optimizer wanted a lag outside the search range and got clipped. Such windows are flagged in the `Boundary_Hit` column, **excluded from mean/median/std summary statistics**, and their count disclosed in both the Summary Statistics table and the audit sheet (`n_windows_boundary_excluded`). Raise `boundary_threshold` toward 1.0 if your data legitimately uses lags at the edge of the range; lower it below 0.8 if you want to be more conservative.
+
+## Autocorrelation-corrected significance
+
+The naive Bartlett band ±z / √window assumes white-noise inputs. For autocorrelated macro/financial series (the common case) it systematically overstates significance. This technique applies the **Bartlett effective-n correction** on the two input series:
+
+`n_eff = n / (1 + 2 · Σ_k ρ_x(k) · ρ_y(k))`
+
+then uses ±z / √n_eff for the critical band. Both naive and AC-corrected significance percentages are reported side-by-side so the materiality of the correction is explicit. On highly persistent data (AR(ρ)=0.9), effective-n can collapse to ~1/8 of nominal n, yielding a significance-rate drop from 90%+ (naive) to under 25% (corrected) — a dramatic qualitative change in the finding.
+
+## Structural-break detection
+
+After computing the rolling CCF, this technique invokes [ruptures](https://github.com/deepcharles/ruptures)' PELT algorithm on two derived series: the CCF-at-optimal-lag magnitude series and the sign-of-CCF series. A break is **confirmed** only if four criteria all hold:
+
+1. Each segment is ≥ max(8, n_windows/8) windows long.
+2. Each segment has >2/3 modal-sign consistency (not 50/50 random wandering).
+3. Pre- and post-break modal signs differ (true regime change, not persistence).
+4. |median_pre_ρ − median_post_ρ| > 0.25 (the mean shift is not a marginal wobble).
+
+This conservative rule deliberately misses borderline breaks rather than splitting the summary on noise. When confirmed, the summary emits a split-regime template with the break date, pre-break (N, sign, magnitude, lag, direction), and post-break triplet.
+
+## Multi-series disclosure
+
+Rolling CCF is a pairwise technique. If you supply more than two columns, the wrapper uses the first two in order and emits a warning naming both the pair used and the columns ignored. Re-run with a different column order to analyze a different pair.
+
+## Default window
+
+The Balanced preset auto-selects `window = max(40, min(80, n // 3))`. For n=286 quarterly observations this gives window=80 (a 20-year window), economically coherent for macro data. Override via the `window` parameter; the wrapper will warn if you request `window > n/2`.
 
 ## Technical Details
 

@@ -15,6 +15,7 @@ from techniques.base import (
     make_response,
     make_error_response,
     dropna_aligned,
+    format_significance_disclosure,
 )
 
 
@@ -59,6 +60,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         ctx.validate_min_series(2)
         all_series = ctx.get_all_series()
+        # Note: transfer_function genuinely USES series beyond the first two
+        # as additional exogenous inputs (see the extra_exog block below),
+        # so no "pairs_ignored" disclosure is emitted — the extra series are
+        # not silently dropped. We record them in audit_fields below.
         y_name, y_raw = all_series[0]
         x_name, x_raw = all_series[1]
 
@@ -300,6 +305,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "max_lag": max_lag,
                 "ar_order": ar_order,
                 "polynomial": poly_type,
+                "pair_used": [y_name, x_name],
+                "additional_exog_used": [s[0] for s in all_series[2:]],
                 "r_squared": round(r_squared, 4),
                 "adj_r_squared": round(adj_r_squared, 4),
                 "rmse": round(rmse, 4),
@@ -308,6 +315,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "long_run_multiplier": round(float(cum_weight), 6),
                 "peak_lag": peak_lag,
                 "n_effective": effective_n,
+                **format_significance_disclosure(
+                    test_name="OLS t-test on distributed-lag coefficients",
+                    critical_value_formula=(
+                        "t-distribution with (n_effective - k) DoF; no "
+                        "HAC/Newey-West correction applied"
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

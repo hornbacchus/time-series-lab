@@ -15,6 +15,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -203,22 +204,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
         ]
         summary_table = make_table("Summary", ["Field", "Value"], summary_rows)
 
-        # Plain English
+        # Plain English — F2 (d)-form: include the trace-statistic magnitude
+        # and the critical value it is being compared against, so a reader
+        # can judge the strength of the rejection rather than seeing only
+        # the discrete rank decision.
+        cv_name = cv_labels[sig_col]
+        # Trace stat at the H0: r <= determined_rank_trace - 1 boundary is
+        # the one that drove the decision (first index that rejected).
+        boundary_idx = max(0, determined_rank_trace - 1)
+        trace_stat_at_decision = float(trace_stats[boundary_idx])
+        trace_cv_at_decision = float(trace_cvs[boundary_idx, sig_col])
+
         if determined_rank_trace == determined_rank_eig:
             rank_msg = (
-                f"Both trace and max-eigenvalue tests indicate {determined_rank_trace} "
-                f"cointegrating relation(s) among the {k} series."
+                f"Both trace and max-eigenvalue tests indicate "
+                f"{determined_rank_trace} cointegrating relation(s) among the "
+                f"{k} series."
             )
         else:
             rank_msg = (
-                f"Trace test indicates {determined_rank_trace} cointegrating relation(s), "
-                f"while max-eigenvalue test indicates {determined_rank_eig}. "
-                "The results are not unanimous; consider the trace test as more robust."
+                f"Trace test indicates {determined_rank_trace} cointegrating "
+                f"relation(s), while max-eigenvalue indicates "
+                f"{determined_rank_eig}. The results are not unanimous; prefer "
+                f"the trace test for robustness."
             )
 
         plain = (
-            f"Johansen cointegration test on {k} series ({', '.join(names)}), "
-            f"lag order {p}. {rank_msg}"
+            f"Johansen cointegration test on {k} series "
+            f"({', '.join(names)}), lag order {p}. {rank_msg} "
+            f"Trace statistic at the decision boundary = "
+            f"{trace_stat_at_decision:.2f} vs CV({cv_name}) = "
+            f"{trace_cv_at_decision:.2f}."
         )
 
         if determined_rank_trace == 0 and determined_rank_eig == 0:
@@ -257,8 +273,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "det_order": det_order,
                 "trace_rank": determined_rank_trace,
                 "max_eig_rank": determined_rank_eig,
+                "trace_stat_at_decision": round(trace_stat_at_decision, 4),
+                "trace_cv_at_decision": round(trace_cv_at_decision, 4),
                 "significance_level": significance,
                 "eigenvalues": [round(float(ev), 6) for ev in eigenvalues],
+                **format_significance_disclosure(
+                    test_name="Johansen trace and max-eigenvalue tests",
+                    critical_value_formula=(
+                        "MacKinnon-Haug-Michelis (1999) critical values via "
+                        "statsmodels.tsa.vector_ar.vecm.coint_johansen"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 

@@ -12,6 +12,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -169,10 +170,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
         y_pred_fc = y_pred_all[n:]
         y_std_fc = y_std_all[n:]
 
-        # Confidence intervals
+        # Confidence intervals. The GP posterior std returned by
+        # ``gp.predict(return_std=True)`` is a Bayesian credible band for
+        # the latent function conditional on the fitted kernel — NOT a
+        # frequentist prediction interval. Coverage depends on the kernel
+        # capturing the true data-generating autocovariance; when it does
+        # not (a common case for macro series), the reported band
+        # underestimates real forecast uncertainty. Emit a warning and
+        # disclose in the audit sheet so the user knows to bootstrap if
+        # empirical coverage matters.
         z = sp_stats.norm.ppf(1.0 - alpha_ci / 2)
         fc_lower = y_pred_fc - z * y_std_fc
         fc_upper = y_pred_fc + z * y_std_fc
+        warn_list.append(
+            "GP confidence bands are Bayesian credible intervals conditional "
+            "on the fitted kernel. They are not guaranteed frequentist "
+            "prediction intervals: if the kernel does not capture the true "
+            "autocovariance of the series (common on macro data), reported "
+            "coverage will be optimistic. For calibrated coverage, use a "
+            "rolling-origin bootstrap re-fit or the Conformal Prediction "
+            "Intervals technique."
+        )
 
         progress_callback("Building output", 85)
 
@@ -285,6 +303,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "horizon": horizon,
                 "n_observations": n,
                 "normalized": normalize,
+                **format_significance_disclosure(
+                    test_name="GP Bayesian credible interval (kernel-conditional)",
+                    critical_value_formula=(
+                        "mean ± z(1-α/2) · posterior_std from "
+                        "sklearn.GaussianProcessRegressor.predict(return_std=True)"
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

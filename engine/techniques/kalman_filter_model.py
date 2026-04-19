@@ -16,6 +16,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -490,6 +491,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "rmse": round(rmse, 4) if rmse else None,
             "horizon": horizon,
             "n_missing": n_nan,
+            **format_significance_disclosure(
+                test_name=(
+                    "UCM MLE parameter t-tests + Ljung-Box residual diagnostic"
+                ),
+                critical_value_formula=(
+                    "Kalman-filter MLE standard errors; two-sided t-tests "
+                    "with (T - n_params) DoF; Ljung-Box via "
+                    "statsmodels.stats.diagnostic.acorr_ljungbox"
+                ),
+                ac_corrected=True,
+            ),
         }
 
         return make_response(

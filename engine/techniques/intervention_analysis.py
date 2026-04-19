@@ -21,6 +21,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 _PRESET_CONFIG = {
@@ -334,6 +335,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "aic": round(aic, 2),
                 "bic": round(bic, 2),
                 "n_obs": n,
+                **format_significance_disclosure(
+                    test_name=(
+                        "ARIMA-intervention MLE t-tests on intervention "
+                        "coefficients"
+                    ),
+                    critical_value_formula=(
+                        "statsmodels ARIMA standard errors via MLE hessian; "
+                        "two-sided t-tests at α; no HAC/Newey-West correction "
+                        "applied — intervention SE assumes the ARIMA errors "
+                        "are white noise"
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

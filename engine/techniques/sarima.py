@@ -14,6 +14,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -295,6 +296,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "bic": round(bic, 2),
                 "rmse": round(rmse, 4) if rmse else None,
                 "horizon": horizon,
+                **format_significance_disclosure(
+                    test_name="SARIMA MLE t-tests + Ljung-Box residual diagnostic",
+                    critical_value_formula=(
+                        "statsmodels SARIMAX standard errors; two-sided "
+                        "t-tests at α; Ljung-Box via acorr_ljungbox"
+                    ),
+                    ac_corrected=True,
+                ),
             },
         )
 

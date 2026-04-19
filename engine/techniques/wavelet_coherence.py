@@ -19,6 +19,8 @@ from techniques.base import (
     make_response,
     make_error_response,
     dropna_aligned,
+    format_pairwise_summary,
+    format_significance_disclosure,
 )
 
 _PRESET_CONFIG = {
@@ -53,9 +55,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         ctx.validate_min_series(2)
         all_series = ctx.get_all_series()
+        warnings = []
+        if len(all_series) > 2:
+            ignored = [s[0] for s in all_series[2:]]
+            warnings.append(
+                f"Wavelet coherence is a pairwise technique. Used "
+                f"'{all_series[0][0]}' and '{all_series[1][0]}'; ignored "
+                f"{len(ignored)} additional series: {', '.join(ignored)}."
+            )
         x_name, x_vals = all_series[0]
         y_name, y_vals = all_series[1]
-        warnings = []
 
         if len(x_vals) != len(y_vals):
             return make_error_response(
@@ -275,19 +284,38 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             coh_desc = "weak"
 
+        # F2 (d)-form paired fact. Coherence magnitude + best_period + signed
+        # phase lag. Sign convention: positive best_lag_val means x leads y;
+        # negative means y leads x.
         if abs(best_lag_val) < 0.5:
-            lag_desc = "approximately in phase (synchronous)"
+            direction_verb = "is in phase with"
+            paired_sign = "+"
+            paired_lag = 0
         elif best_lag_val > 0:
-            lag_desc = f"'{x_name}' leads '{y_name}' by ~{abs(best_lag_val):.1f} time units"
+            direction_verb = "leads"
+            paired_sign = "+"
+            paired_lag = int(round(best_lag_val))
         else:
-            lag_desc = f"'{y_name}' leads '{x_name}' by ~{abs(best_lag_val):.1f} time units"
+            direction_verb = "lags"
+            paired_sign = "-"
+            paired_lag = int(round(best_lag_val))
 
-        plain_english = (
-            f"Wavelet coherence analysis between '{x_name}' and '{y_name}' "
-            f"({n} observations). Strongest coherence ({best_coh:.3f}, {coh_desc}) "
-            f"at period {best_period:.1f}, where the series are {lag_desc}. "
-            f"Overall, {high_coh_pct:.1f}% of the time-frequency plane shows "
-            f"coherence above 0.7. Global mean coherence: {global_coh:.3f}."
+        prefix = (f"Wavelet coherence between '{x_name}' and '{y_name}' "
+                  f"({n} obs)")
+        extra = (f"Strongest coherence ({best_coh:.3f}, {coh_desc}) at period "
+                 f"{best_period:.1f}; {high_coh_pct:.1f}% of the time-frequency "
+                 f"plane exceeds 0.7; global mean coherence {global_coh:.3f}.")
+        plain_english = format_pairwise_summary(
+            prefix, x_name, y_name,
+            sign=paired_sign,
+            magnitude=best_coh,
+            lag=paired_lag,
+            lag_unit=" time units",
+            direction_verb=direction_verb,
+            stat_name="coherence",
+            test_name="wavelet coherence (no analytic null)",
+            ac_note="coherence magnitude is bounded [0,1]; no AC-aware test emitted",
+            extra=extra,
         )
 
         charting = (
@@ -308,6 +336,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,
+                "pair_used": [x_name, y_name],
+                "pairs_ignored": [s[0] for s in all_series[2:]],
                 "wavelet": wavelet_name,
                 "n_scales": n_scales,
                 "smoothing_width": smooth_w,
@@ -319,6 +349,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "best_scale_lag": round(best_lag_val, 2),
                 "high_coherence_pct": round(high_coh_pct, 1),
                 "n_obs": n,
+                **format_significance_disclosure(
+                    test_name="wavelet coherence (no analytic null distribution)",
+                    critical_value_formula=(
+                        "none — coherence is bounded [0,1]; significance "
+                        "would require a surrogate-data bootstrap, not "
+                        "implemented in this pass"
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

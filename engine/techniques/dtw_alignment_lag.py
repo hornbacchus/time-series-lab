@@ -18,6 +18,8 @@ from techniques.base import (
     make_response,
     make_error_response,
     dropna_aligned,
+    format_pairwise_summary,
+    format_significance_disclosure,
 )
 
 _PRESET_CONFIG = {
@@ -50,9 +52,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         ctx.validate_min_series(2)
         all_series = ctx.get_all_series()
+        warnings = []
+
+        # F2 multi-series disclosure.
+        if len(all_series) > 2:
+            ignored = [s[0] for s in all_series[2:]]
+            warnings.append(
+                f"DTW is a pairwise alignment. Used '{all_series[0][0]}' and "
+                f"'{all_series[1][0]}'; ignored {len(ignored)} additional "
+                f"series: {', '.join(ignored)}."
+            )
+
         x_name, x_vals = all_series[0]
         y_name, y_vals = all_series[1]
-        warnings = []
 
         if len(x_vals) != len(y_vals):
             # DTW can handle different lengths, but we'll note it
@@ -246,21 +258,41 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             lag_desc = "strongly time-varying"
 
-        if abs(mean_lag) < 1:
-            direction = "approximately synchronized"
-        elif mean_lag > 0:
-            direction = f"'{y_name}' leads '{x_name}' on average by {abs(mean_lag):.1f} periods"
+        # F2 (d)-form summary via format_pairwise_summary. DTW reports a
+        # signed median lag and a distance magnitude. Sign comes from the
+        # median lag (positive = y leads x by the DTW convention used in
+        # the segmentation code); the "statistic" shown in the paired fact
+        # is the normalized DTW distance (smaller = tighter alignment).
+        if abs(median_lag) < 1:
+            direction_verb = "aligns contemporaneously with"
+            paired_sign = "+"
+            paired_lag = 0
+        elif median_lag > 0:
+            direction_verb = "lags"  # y > x means x lagged = "x lags y"
+            paired_sign = "+"
+            paired_lag = int(round(median_lag))
         else:
-            direction = f"'{x_name}' leads '{y_name}' on average by {abs(mean_lag):.1f} periods"
+            direction_verb = "leads"
+            paired_sign = "-"
+            paired_lag = int(round(median_lag))
 
-        plain_english = (
-            f"DTW alignment of '{x_name}' and '{y_name}' "
-            f"({nx} and {ny} observations). "
-            f"Normalized DTW distance: {dtw_normalized:.4f} (lower = more similar). "
-            f"The series are {direction}, with {lag_desc} lag (std={std_lag:.1f}). "
-            f"Local lag ranges from {min_lag:.1f} to {max_lag:.1f} periods. "
-            f"Path distortion ratio: {distortion_ratio:.2f} "
-            f"(1.0 = no distortion, >1 = significant warping)."
+        prefix = (f"DTW alignment of '{x_name}' and '{y_name}' "
+                  f"({nx} and {ny} obs)")
+        extra = (f"Normalized DTW distance {dtw_normalized:.4f} "
+                 f"(lower = more similar), lag is {lag_desc} "
+                 f"(std={std_lag:.1f}, range {min_lag:.1f} to {max_lag:.1f}). "
+                 f"Path distortion ratio {distortion_ratio:.2f}.")
+        plain_english = format_pairwise_summary(
+            prefix, x_name, y_name,
+            sign=paired_sign,
+            magnitude=abs(median_lag),
+            lag=paired_lag,
+            lag_unit=" periods",
+            direction_verb=direction_verb,
+            stat_name="median lag",
+            test_name="DTW path analysis (no null distribution)",
+            ac_note="no significance test — distance-based diagnostic",
+            extra=extra,
         )
 
         charting = (
@@ -281,6 +313,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,
+                "pair_used": [x_name, y_name],
+                "pairs_ignored": [s[0] for s in all_series[2:]],
                 "dtw_distance": round(float(dtw_dist), 4),
                 "dtw_normalized": round(float(dtw_normalized), 6),
                 "mean_lag": round(mean_lag, 2),
@@ -296,6 +330,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "n_segments": len(lag_segments),
                 "nx": nx,
                 "ny": ny,
+                **format_significance_disclosure(
+                    test_name="DTW path analysis (distance-based, no null)",
+                    critical_value_formula=(
+                        "none — DTW is a distance metric, not a hypothesis "
+                        "test; no p-value or confidence band emitted"
+                    ),
+                    ac_corrected=False,
+                ),
             },
         )
 

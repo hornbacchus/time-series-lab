@@ -137,6 +137,303 @@ def sort_states_by_mean(means, *arrays, covars=None, transmat=None,
     return out
 
 
+# ── Pairwise-summary and significance-disclosure convention helpers ──
+# These enforce two platform-wide conventions introduced after a macro
+# run of rolling_ccf_lag produced a misleading summary that averaged
+# across two regimes and hid the actual sign reversal.
+#
+#   F2 — Every pairwise-output technique reports sign AND magnitude AND
+#        direction as a paired fact in the primary sentence.
+#   F3 — Every significance-emitting technique discloses its test name,
+#        critical-value formula, and AC-correction status.
+#
+# The helpers are convention enforcers, not statistical methods. Math
+# stays in libraries (scipy, statsmodels) per §4.1 of the design
+# mandate. The helper signatures make it *impossible* for a caller to
+# emit a summary or audit sheet that omits any of the required parts.
+
+
+def flag_boundary_hits(lags, max_lag: int, threshold: float = 0.8):
+    """Flag windows whose optimal lag sits near the search boundary.
+
+    When a rolling cross-correlation search is bounded to ``[-max_lag,
+    +max_lag]`` and the "best" lag lands at or near that edge, the
+    reported lag is not actually informative — the optimizer likely
+    wanted a lag outside the search window but got clipped. These
+    windows should be *excluded* from summary statistics (mean, median,
+    std of optimal lag) and their count disclosed to the user.
+
+    Parameters
+    ----------
+    lags : array-like of ints
+        The optimal lag selected in each rolling window.
+    max_lag : int
+        The absolute bound of the lag search, inclusive.
+    threshold : float, default 0.8
+        Fraction of ``max_lag`` above which a window is considered a
+        boundary hit. Default 0.8 means ``|lag| >= 0.8 * max_lag``
+        triggers the flag.
+
+    Returns
+    -------
+    np.ndarray of bool
+        Same length as ``lags``; True where the window hit the boundary.
+
+    See also §4.4 honest disclosure and the T1 regression invariant.
+    """
+    lags_arr = np.asarray(lags)
+    if lags_arr.size == 0 or max_lag <= 0:
+        return np.zeros_like(lags_arr, dtype=bool)
+    cutoff = threshold * float(max_lag)
+    return np.abs(lags_arr.astype(float)) >= cutoff
+
+
+def bartlett_effective_n(series_x, series_y, max_lag: int = None):
+    """Compute the Bartlett-effective sample size for two autocorrelated series.
+
+    Naive cross-correlation confidence bands use ``±z / sqrt(n)``, which
+    assumes independent observations. For two plausibly autocorrelated
+    time series (the common case for macro/financial data), the
+    effective n shrinks by the factor
+
+        n_eff = n / (1 + 2 * Σ_{k=1..K} ρ_x(k) * ρ_y(k))
+
+    Inflation in the denominator → smaller n_eff → wider confidence
+    band → fewer spurious significant lags. This is the standard
+    Bartlett (1946) correction; we use the Box-Jenkins variant that
+    multiplies the two autocorrelation sequences.
+
+    Parameters
+    ----------
+    series_x, series_y : array-like, same length
+        Two observed series (or equivalent aligned samples).
+    max_lag : int, optional
+        Highest lag to include in the sum. Defaults to ``int(sqrt(n))``,
+        which is the common practical truncation.
+
+    Returns
+    -------
+    (n_eff, inflation_factor) : tuple of (float, float)
+        ``n_eff`` is the effective sample size (<= n).
+        ``inflation_factor`` is ``n / n_eff`` so callers can decide
+        whether the AC correction is material (>1.5x is a common
+        disclosure threshold).
+
+    This helper does not *test* significance — it only returns the
+    effective n that a caller can substitute into whatever critical-
+    value formula they already use. See §4.1 (math from libraries,
+    convention in the wrapper).
+    """
+    x = np.asarray(series_x, dtype=float)
+    y = np.asarray(series_y, dtype=float)
+    n = min(x.size, y.size)
+    if n < 3:
+        return float(n), 1.0
+    x = x[:n]
+    y = y[:n]
+    mask = np.isfinite(x) & np.isfinite(y)
+    x = x[mask]
+    y = y[mask]
+    n_obs = x.size
+    if n_obs < 3:
+        return float(n_obs), 1.0
+    if max_lag is None:
+        max_lag = max(1, int(np.sqrt(n_obs)))
+    max_lag = min(max_lag, n_obs - 2)
+    x_c = x - x.mean()
+    y_c = y - y.mean()
+    x_var = float(np.sum(x_c ** 2))
+    y_var = float(np.sum(y_c ** 2))
+    if x_var <= 0 or y_var <= 0:
+        return float(n_obs), 1.0
+    denom = 1.0
+    for k in range(1, max_lag + 1):
+        rx = float(np.sum(x_c[:-k] * x_c[k:])) / x_var
+        ry = float(np.sum(y_c[:-k] * y_c[k:])) / y_var
+        denom += 2.0 * rx * ry
+    if denom <= 0:
+        # Over-persistent series can drive the sum negative; clamp to a
+        # conservative worst-case (large inflation, small n_eff).
+        return max(3.0, float(n_obs) / max(1.0, 2.0 * max_lag)), float(n_obs) / max(3.0, float(n_obs) / max(1.0, 2.0 * max_lag))
+    n_eff = float(n_obs) / denom
+    n_eff = max(3.0, min(float(n_obs), n_eff))
+    inflation = float(n_obs) / n_eff
+    return n_eff, inflation
+
+
+def format_pairwise_summary(
+    primary_prefix: str,
+    x_name: str,
+    y_name: str,
+    *,
+    sign: str,
+    magnitude: float,
+    direction_verb: str,
+    test_name: str,
+    ac_note: str,
+    lag=None,
+    lag_unit: str = "",
+    stat_name: str = "ρ",
+    break_info: dict = None,
+    excluded_n: int = 0,
+    extra: str = None,
+) -> str:
+    """Build a pairwise-technique summary that cannot omit sign/magnitude/direction.
+
+    F2 convention enforcement. The signature demands every primary-
+    sentence part by name: the caller must supply ``sign``,
+    ``magnitude``, and ``direction_verb`` — there is no way to emit a
+    summary that drops one. Lag, lag unit, and the statistic label
+    (``ρ``, ``F``, ``coherence``, ``distance``, …) are caller-chosen
+    keywords so each technique keeps its native vocabulary.
+
+    Parameters
+    ----------
+    primary_prefix : str
+        Technique-specific opening clause. Examples:
+            "Rolling cross-correlation between 'X' and 'Y' (300 obs, window=80)"
+            "Granger causality test of 'X' → 'Y' at lags 1-8 (n=286)"
+            "DTW alignment of 'X' and 'Y' (286 obs)"
+        Should NOT end with a period — the helper appends one.
+    x_name, y_name : str
+        Series names (already stripped of quotes; the helper adds them).
+    sign : {"+", "-"}
+        Sign of the correlation / coefficient / effect.
+    magnitude : float
+        Absolute value of the statistic. Helper formats with 2 decimals.
+    direction_verb : {"leads", "lags", "causes", "follows", "aligns with",
+                      "is contemporaneously correlated with", ...}
+        Connecting verb. Caller chooses.
+    test_name : str
+        Name of the significance test (e.g., "Bartlett band",
+        "Granger F-test", "Trace test"). Required for traceability.
+    ac_note : str
+        Autocorrelation correction status — ``"AC-corrected, n_eff=N"``
+        or ``"naive, AC inflation likely"``.
+    lag : int or None, optional
+        Signed lag in ``lag_unit``. If None, the "at lag X" phrase is
+        omitted (appropriate for contemporaneous / non-lag techniques
+        like Johansen or Copula).
+    lag_unit : str, optional
+        Unit suffix, e.g. " period(s)", "q", " hours". Default empty.
+    stat_name : str, default "ρ"
+        Label for the reported statistic. Pass "F" for Granger, "β"
+        for cointegrating coefficients, "coherence" for wavelet, etc.
+    break_info : dict, optional
+        If present, switches to the split-regime template. Required
+        keys: ``date``, ``n_pre``, ``sign_pre``, ``magnitude_pre``,
+        ``lag_pre``, ``direction_pre`` and the ``_post`` counterparts.
+    excluded_n : int, default 0
+        Number of windows / observations excluded (e.g., boundary hits).
+    extra : str, optional
+        Appended sentence for stability / diagnostic color.
+
+    Returns
+    -------
+    str
+        Single-paragraph plain-English summary.
+    """
+    if sign not in ("+", "-"):
+        raise ValueError(f"sign must be '+' or '-', got {sign!r}")
+    mag = abs(float(magnitude))
+
+    # Normalize the prefix — strip trailing punctuation so we can re-append
+    # a period consistently.
+    prefix = str(primary_prefix).rstrip().rstrip(".")
+
+    def _lag_clause(l):
+        if l is None:
+            return ""
+        try:
+            return f" by {int(l)}{lag_unit}"
+        except (TypeError, ValueError):
+            return f" by {l}{lag_unit}"
+
+    excluded_clause = (
+        f" {int(excluded_n)} observation(s) excluded."
+        if excluded_n and excluded_n > 0
+        else ""
+    )
+    sig_clause = f" Significance: {test_name} ({ac_note})."
+
+    if break_info is not None:
+        req = {"date", "n_pre", "sign_pre", "magnitude_pre", "lag_pre",
+               "direction_pre", "n_post", "sign_post", "magnitude_post",
+               "lag_post", "direction_post"}
+        missing = req - set(break_info.keys())
+        if missing:
+            raise ValueError(f"break_info missing keys: {sorted(missing)}")
+        s1 = break_info["sign_pre"]
+        s2 = break_info["sign_post"]
+        if s1 not in ("+", "-") or s2 not in ("+", "-"):
+            raise ValueError("break_info sign_pre/sign_post must be '+' or '-'")
+        out = (
+            f"{prefix}. Structural break detected at {break_info['date']}. "
+            f"Pre-break (N={int(break_info['n_pre'])}): '{x_name}' "
+            f"{break_info['direction_pre']} '{y_name}'"
+            f"{_lag_clause(break_info['lag_pre'])} with {stat_name}={s1}"
+            f"{abs(float(break_info['magnitude_pre'])):.2f}. "
+            f"Post-break (N={int(break_info['n_post'])}): '{x_name}' "
+            f"{break_info['direction_post']} '{y_name}'"
+            f"{_lag_clause(break_info['lag_post'])} with {stat_name}={s2}"
+            f"{abs(float(break_info['magnitude_post'])):.2f}."
+            f"{excluded_clause}{sig_clause}"
+        )
+    else:
+        out = (
+            f"{prefix}. '{x_name}' {direction_verb} '{y_name}'"
+            f"{_lag_clause(lag)} with {stat_name}={sign}{mag:.2f}."
+            f"{excluded_clause}{sig_clause}"
+        )
+
+    if extra:
+        out = out + " " + str(extra).strip()
+    return out
+
+
+def format_significance_disclosure(
+    test_name: str,
+    critical_value_formula: str,
+    ac_corrected: bool,
+    effective_n=None,
+) -> dict:
+    """Return the four audit fields every significance-emitting technique must expose.
+
+    F3 convention: any wrapper that reports a p-value, is_significant
+    flag, pct_significant, confidence band, or prediction interval owes
+    the user four disclosures in its audit sheet:
+
+      - ``test_name`` : the statistical test by name (e.g., "Augmented
+        Dickey-Fuller", "Bartlett white-noise band"). No empty strings.
+      - ``critical_value_formula`` : plain-text formula or library
+        reference (e.g., ``"±1.96/√window"``,
+        ``"statsmodels.tsa.stattools.adfuller critical values"``).
+      - ``ac_corrected`` : bool. True if the critical value accounts
+        for autocorrelation in the input series.
+      - ``effective_n`` : optional float. When ``ac_corrected=True``,
+        the AC-adjusted sample size used.
+
+    The helper is a thin dict builder — the value comes from the
+    signature forcing every caller to name the test and declare AC
+    status. That's the point. See §4.4 honest disclosure.
+    """
+    if not test_name or not str(test_name).strip():
+        raise ValueError("test_name must be non-empty")
+    if not critical_value_formula or not str(critical_value_formula).strip():
+        raise ValueError("critical_value_formula must be non-empty")
+    if not isinstance(ac_corrected, (bool, np.bool_)):
+        raise TypeError(f"ac_corrected must be bool, got {type(ac_corrected).__name__}")
+    out = {
+        "test_name": str(test_name).strip(),
+        "critical_value_formula": str(critical_value_formula).strip(),
+        "ac_corrected": bool(ac_corrected),
+    }
+    if effective_n is not None:
+        out["effective_n"] = float(effective_n)
+    return out
+
+
+
 class RunContext:
     """
     Encapsulates everything a technique needs to execute.
