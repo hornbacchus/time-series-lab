@@ -55,3 +55,16 @@ where `Z_t'' = Z_t - 2*Z_{t-1} + Z_{t-2}` denotes the second difference. When `t
 **Optimized Theta method**: Generalizations allow optimizing the theta parameter and the number of theta lines. The Dynamic Optimized Theta method fits multiple theta lines with optimized weights, improving accuracy at the cost of additional complexity.
 
 **Prediction intervals**: Since the standard Theta method reduces to SES with drift, prediction intervals are computed as for SES: `F_t+h +/- z * sigma * sqrt(1 + (h-1)*alpha^2)`, where `sigma` is the residual standard error and `z` is the normal quantile for the desired confidence level.
+
+## Interpretation
+
+Theta method runs emit a two-tier Interpretation block with qualitative component disclosure.
+
+**Plain-Language Finding (Tier 1)** - fit RMSE vs seasonal-naive baseline with percentage delta, end-of-horizon trend, seasonal pre-adjustment flag. Fit RMSE uses one-step-ahead expanding-window reconstruction when the statsmodels `fittedvalues` attribute is unavailable; a `fit_rmse_source` audit flag discloses the reconstruction method.
+
+**Technical Interpretation (Tier 2)** - Theta decomposition math (theta=0 linear drift + theta=2 SES) qualitatively; seasonal pre-adjustment detail; honest-disclosure note that short-horizon M3 benchmark strength does not extend to longer horizons or non-seasonal series; statsmodels' ThetaModel does not expose individual theta-line coefficients numerically.
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= naive baseline.
+- Forecast horizon > 2x seasonal period - treat longer-horizon forecasts cautiously.
+- Seasonal pre-adjustment disabled but a seasonal period is supplied.

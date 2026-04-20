@@ -45,3 +45,16 @@ Prophet is an additive regression model developed by Facebook (Meta) for time se
 **Fitting**: Prophet uses Stan (a probabilistic programming framework) for MAP estimation by default, or full Bayesian inference via MCMC for uncertainty quantification. The fallback implementation uses seasonal naive forecasting when Prophet is not installed.
 
 **Comparison**: Prophet excels at business time series with strong seasonality and is widely used in industry. It trades statistical optimality for ease of use and robustness. For purely stationary series or short series, classical methods like ARIMA or ETS may perform better.
+
+## Interpretation
+
+Prophet runs emit a two-tier Interpretation block with forecast-centric Tier 1 framing.
+
+**Plain-Language Finding (Tier 1)** - fit RMSE vs seasonal-naive baseline with percentage delta, yearly / weekly seasonality flags, number of candidate changepoints (most-recent candidate date rendered via frequency-aware ``format_break_date``). Honest disclosure: candidate changepoints are sparsity-controlled priors, not threshold-detected regime shifts.
+
+**Technical Interpretation (Tier 2)** - piecewise-linear trend with changepoint_prior_scale, yearly seasonality Fourier order, weekly flag, holiday component, L1-shrinkage prior for changepoints, 95% prediction intervals (forced at wrapper to match TSL's convention; Prophet library default is 80%), backend (Stan MAP via cmdstanpy). Includes an actionable closing sentence interpreting candidate changepoints as a flexibility budget the trend uses if the data supports it.
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= naive baseline.
+- Candidate changepoint density > 20% of observations.
+- Forecast extrapolation > 2x historical max (consider logistic growth).

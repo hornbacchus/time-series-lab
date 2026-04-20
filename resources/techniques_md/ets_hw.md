@@ -57,3 +57,26 @@ where `L` is the maximized likelihood, `k` is the number of parameters, and `n` 
 **Parameter estimation**: Parameters (alpha, beta, gamma, phi) and initial states (l_0, b_0, s_{1-m}, ..., s_0) are estimated by maximizing the likelihood function, which for additive errors is based on the Gaussian density of the one-step-ahead forecast errors. Constraints ensure stationarity and invertibility: `0 < alpha < 1`, `0 < beta < alpha`, `0 < gamma < 1 - alpha`, `0.8 < phi < 0.98`.
 
 **Prediction intervals**: Generated analytically for additive error models using the accumulated effect of future errors on forecasts. For multiplicative error models, simulation-based intervals are used since the forecast distribution is non-Gaussian.
+
+## Interpretation
+
+The wrapper services two user-facing technique IDs — `ets` and `holt_winters` — via distinct Interpretation specs that read the same fitted output but frame it differently.
+
+### ETS framing (`ets` technique_id)
+
+**Plain-Language Finding (Tier 1)** - component code "ETS(trend,seasonal)" composed from wrapper output (error component not separately exposed by the statsmodels ExponentialSmoothing path). Fit RMSE vs seasonal-naive baseline. Rationale sentence grounds the multiplicative-seasonal choice on strictly-positive series.
+
+**Technical Interpretation (Tier 2)** - smoothing parameters (level alpha, trend beta, seasonal gamma, damping phi), damping flag, AIC / RMSE, and the state-space vs Holt-Winters equivalence note.
+
+### Holt-Winters framing (`holt_winters` technique_id)
+
+**Plain-Language Finding (Tier 1)** - trend type (additive / multiplicative / none), seasonal type, seasonal period, damping flag. Fit RMSE vs seasonal-naive baseline.
+
+**Technical Interpretation (Tier 2)** - updating equations in citation form (multiplicative or additive per seasonal type), smoothing parameters, AIC / RMSE. Undamped long-horizon runs include explicit trend-amplification risk advice.
+
+**Caveats shared across both framings (Tier 3, conditional)**:
+- Fit RMSE >= naive baseline.
+- Multiplicative seasonal on non-positive data.
+- Trend smoothing beta ~ 0 (trend frozen at initialization; includes actionable refit advice).
+- Holt-Winters only: undamped trend over horizon > 2x seasonal period.
+- ETS only: level smoothing alpha > 0.9 (random-walk level).

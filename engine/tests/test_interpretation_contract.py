@@ -753,6 +753,14 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "forecast_combination",
         "robust_estimators",
         "rolling_origin_cv",
+        # Prompt C2 (7): Forecasting Classical family
+        "arima",
+        "auto_arima",
+        "ets",
+        "holt_winters",
+        "theta",
+        "intermittent_demand",
+        "prophet",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -968,19 +976,36 @@ class TestMarkovSwitchingVarianceDominantLabels(unittest.TestCase):
 
 
 class TestT13C1RegistryInventory(unittest.TestCase):
-    """T13 — After Prompt C1 lands, the registry contains exactly the
-    Prompt A + Prompt B + Prompt C1 specs, totaling 34 techniques. If
-    the set grows or shrinks unexpectedly, the registered-techniques
-    list in test T10 catches the first deviation; this test pins the
-    count independently."""
+    """T13 — After Prompt C1 lands, the registry contains at least the
+    Prompt A + Prompt B + Prompt C1 specs, totaling 34 techniques. Later
+    prompts (C2-C7) extend the registry; T13 pins the C1 minimum so
+    regressions in the C1 scope get caught immediately."""
 
-    def test_exactly_34_specs_registered(self):
+    def test_at_least_34_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertGreaterEqual(
+            len(registered), 34,
+            f"Expected at least 34 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26). Got {len(registered)}: {sorted(registered)}"
+        )
+
+
+class TestT16C2RegistryInventory(unittest.TestCase):
+    """T16 — After Prompt C2 lands, the registry contains exactly the
+    Prompt A + Prompt B + Prompt C1 + Prompt C2 specs, totaling 41
+    techniques (34 baseline + 7 forecasting classical). Pins the count
+    at the C2 landing moment; later prompts (C3-C7) will relax this
+    into a ">=" check as they grow the set further."""
+
+    def test_exactly_41_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
         self.assertEqual(
-            len(registered), 34,
-            f"Expected exactly 34 registered specs (Prompt A/B: 8 + "
-            f"Prompt C1: 26). Got {len(registered)}: {sorted(registered)}"
+            len(registered), 41,
+            f"Expected exactly 41 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7). Got {len(registered)}: "
+            f"{sorted(registered)}"
         )
 
 
@@ -1055,6 +1080,55 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "expected_durations": [10.0, 10.0],
         "final_period_probs": [0.5, 0.5],
         "sort_axis": "mean",
+        # Prompt C2 forecasting-family fields
+        "fit_rmse": 1.0,
+        "baseline_rmse": 1.5,
+        "baseline_label": "last-value naive",
+        "last_observed_value": 1.0,
+        "forecast_end_value": 1.0,
+        "series_std": 1.0,
+        "series_min": 0.5,
+        "ljung_box_lag10_pvalue": 0.5,
+        "seasonal_order": [0, 0, 0, 0],
+        "ic": "aic",
+        "stepwise": True,
+        "n_candidates_searched": 10,
+        "max_p": 5,
+        "max_q": 5,
+        "max_d": 2,
+        "max_P": 2,
+        "max_Q": 2,
+        "max_D": 1,
+        "seasonal_period_m": 12,
+        "m_inferred_from_freq": False,
+        "frequency": "M",
+        "aic": 100.0,
+        "bic": 110.0,
+        "trend_type": "add",
+        "seasonal_type": "mul",
+        "seasonal_period": 12,
+        "damped_trend": False,
+        "beta": 0.1,
+        "gamma": 0.1,
+        "phi": None,
+        "deseasonalized": True,
+        "method": "croston",
+        "forecast_mean_per_period": 1.0,
+        "baseline_mean": 1.0,
+        "demand_pattern": "intermittent",
+        "adi": 2.0,
+        "cv2_demand": 0.3,
+        "zero_rate": 0.5,
+        "last10_all_zero": False,
+        "backend": "prophet",
+        "changepoint_prior_scale": 0.05,
+        "yearly_seasonality_flag": "auto",
+        "weekly_seasonality_flag": "False",
+        "n_candidate_changepoints": 10,
+        "most_recent_candidate_changepoint": "2000-01",
+        "r2": 0.9,
+        "historical_max": 10.0,
+        "interval_width": 0.95,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1102,13 +1176,26 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
 
     _TOKEN_RE = re.compile(r"(?<![a-zA-Z0-9_])[a-zA-Z]+_[a-zA-Z]+(?![a-zA-Z0-9_])")
 
-    # Allowlist: math notation tokens that appear unquoted in prose.
-    # These are legitimate (not programmatic leaks) and slip past the
-    # parens-stripping heuristic when the surrounding expression is
-    # complex.
+    # Allowlist: tokens that are legitimate in user-facing prose even
+    # though they contain underscores. Three categories:
     _ALLOWED = {
-        "s_t", "y_t", "x_t", "z_t", "e_t", "u_t",  # time-series subscripts
+        # (a) math notation subscripts (time-series state variables,
+        # theta-lines, updating-equation state):
+        "s_t", "y_t", "x_t", "z_t", "e_t", "u_t", "d_t", "p_t",
+        "b_t", "ell_t", "q_t",
         "s_T", "y_T", "x_T",  # terminal-value subscripts
+        # (b) programmatic parameter names that specs cite verbatim in
+        # honest-disclosure prose (library API surface that users type):
+        "max_p", "max_q", "max_d", "max_P", "max_Q", "max_D",
+        "changepoint_prior_scale", "seasonality_prior_scale",
+        "country_holidays", "initial_trend", "initial_level",
+        # (c) technique_ids cited by name when a spec references a
+        # companion technique (e.g., arima's Tier 2 mentions that
+        # auto_arima would surface alternative orders):
+        "auto_arima",
+        # (d) test-fixture identifier used by TestT14's minimal-input
+        # probe — not a programmatic leak from production code:
+        "test_series",
     }
 
     @staticmethod

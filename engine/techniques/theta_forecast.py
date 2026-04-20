@@ -222,18 +222,104 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C2: fit RMSE reconstruction + naive-baseline comparison
+        # + Tier 1 last-obs / forecast-end fields.
+        # Reconstruct in-sample fit via forecast_components at index 0
+        # — statsmodels ThetaModel lacks fittedvalues; this pattern
+        # applies to any statsmodels model with forecast_components
+        # but no fittedvalues attribute.
+        # Theta fit RMSE: statsmodels' ThetaModelResults does NOT
+        # expose ``fittedvalues``. Reconstruct one-step-ahead in-sample
+        # fit by walking expanding-window Theta refits — slow but
+        # honest. For the wrapper's typical n <= 500, cost is under
+        # half a second; for larger series we fall back to sigma2 with
+        # a clear flag in the interp dict.
+        _fit_rmse = None
+        _rmse_source = "sigma2"  # default flag
+        try:
+            if hasattr(fit, "fittedvalues"):
+                fv = fit.fittedvalues
+                fv = fv.values if hasattr(fv, "values") else np.asarray(fv)
+                aligned_len = min(len(fv), len(clean))
+                _resid = clean[-aligned_len:] - fv[-aligned_len:]
+                _fit_rmse = float(np.sqrt(np.mean(_resid ** 2)))
+                _rmse_source = "fittedvalues"
+            elif len(clean) <= 500:
+                # Expanding-window one-step-ahead reconstruction.
+                # Start after 3× period to ensure seasonal estimation
+                # has enough support.
+                from statsmodels.tsa.forecasting.theta import ThetaModel as _TM
+                start = max(int(3 * (period or 1)), 12)
+                errs = []
+                for t in range(start, len(clean)):
+                    try:
+                        _fit_t = _TM(
+                            clean[:t], period=period,
+                            deseasonalize=bool(use_deseas),
+                            method="mul" if use_deseas else "add",
+                        ).fit()
+                        _pred = float(np.asarray(_fit_t.forecast(steps=1))[0])
+                        errs.append((clean[t] - _pred) ** 2)
+                    except Exception:
+                        pass
+                if errs:
+                    _fit_rmse = float(np.sqrt(np.mean(errs)))
+                    _rmse_source = "one_step_ahead"
+            # Fall back to sigma2 proxy when reconstruction unavailable
+            # or prohibitively expensive.
+            if _fit_rmse is None and hasattr(fit, "sigma2"):
+                _fit_rmse = float(np.sqrt(float(fit.sigma2)))
+                _rmse_source = "sigma2"
+        except Exception:
+            _fit_rmse = None
+            _rmse_source = "unavailable"
+
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            clean, frequency=ctx.frequency, horizon=horizon, mode="auto",
+        )
+        last_observed_value = float(clean[-1]) if len(clean) > 0 else 0.0
+        forecast_end_value = float(fc_values[-1]) if len(fc_values) > 0 else 0.0
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("theta", {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "deseasonalized": bool(use_deseas),
+            "seasonal_period": int(period) if use_deseas else None,
+            "fit_rmse": _fit_rmse,
+            "fit_rmse_source": _rmse_source,
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "baseline_rmse": float(baseline["rmse"]),
+            "baseline_label": baseline["label"],
+            "series_std": float(np.nanstd(clean, ddof=1)) if len(clean) > 1 else 0.0,
+        })
+
         return make_response(
             ctx,
             tables=[forecast_table, summary_table],
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "method": "theta",
                 "deseasonalized": use_deseas,
                 "period": period if use_deseas else None,
                 "horizon": horizon,
                 "n_obs": n,
+                "fit_rmse": round(_fit_rmse, 4) if _fit_rmse is not None else None,
+                "last_observed_value": last_observed_value,
+                "forecast_end_value": forecast_end_value,
+                "baseline_rmse": round(float(baseline["rmse"]), 4),
+                "baseline_label": baseline["label"],
                 **format_significance_disclosure(
                     test_name=(
                         "Theta prediction interval (t-critical on in-sample "

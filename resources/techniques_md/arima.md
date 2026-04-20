@@ -51,3 +51,17 @@ Or in operator notation: `phi(B) W_t = c + theta(B) e_t`, where `phi(B) = 1 - ph
 4. **Diagnose**: Check residuals for white noise using ACF plots and the Ljung-Box test: `Q = n(n+2) * sum_{k=1}^{h} r_k^2 / (n-k) ~ chi^2(h-p-q)`.
 
 **Forecasting**: Forecasts are computed recursively. For `h` steps ahead, future errors are set to zero (their expected value), and future observations are replaced by their forecasts. Prediction intervals widen with the horizon: `Var(e_t(h)) = sigma^2 * sum_{j=0}^{h-1} psi_j^2`, where `psi_j` are the coefficients of the infinite MA representation.
+
+## Interpretation
+
+Every manual-order ARIMA run emits a two-tier plain-language Interpretation block.
+
+**Plain-Language Finding (Tier 1)** - names the fitted order (p,d,q), observations, horizon, fit RMSE vs the last-value naive baseline with percentage delta, and the end-of-horizon forecast level. Uses the three-rule ``horizon_trend_pct`` fallback: when the latest observation is near-zero relative to the series' scale (common for growth-rate series), the clause reads "forecast ends at X, starting from Y" rather than a percentage.
+
+**Technical Interpretation (Tier 2)** - discloses the user-chosen (p,d,q), the differencing level applied, AIC / BIC / in-sample RMSE, and residual Ljung-Box at lag 10. Flags that manual ARIMA does not search alternatives; recommends auto_arima to validate the order choice.
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= naive baseline - the model does not beat naive.
+- Ljung-Box rejects white-noise - ARMA structure is inadequate.
+- (p+q) > sqrt(n_obs) - order may be overfitted.
+- d >= 2 - verify non-stationarity of the once-differenced series.

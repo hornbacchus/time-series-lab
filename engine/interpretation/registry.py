@@ -89,3 +89,13 @@ from interpretation.specs import conformal_intervals as _conformal              
 from interpretation.specs import forecast_combination as _fc_combo                    # noqa: F401, E402
 from interpretation.specs import robust_estimators as _robust                         # noqa: F401, E402
 from interpretation.specs import rolling_origin_cv as _rolling_cv                     # noqa: F401, E402
+
+# Prompt C2 (7 specs, 5 wrappers):
+# Forecasting classical — one spec per user-facing technique_id.
+from interpretation.specs import arima as _arima_spec                                 # noqa: F401, E402
+from interpretation.specs import auto_arima as _auto_arima_spec                       # noqa: F401, E402
+from interpretation.specs import ets as _ets_spec                                     # noqa: F401, E402
+from interpretation.specs import holt_winters as _holt_winters_spec                   # noqa: F401, E402
+from interpretation.specs import theta as _theta_spec                                 # noqa: F401, E402
+from interpretation.specs import intermittent_demand as _intermittent_spec            # noqa: F401, E402
+from interpretation.specs import prophet as _prophet_spec                             # noqa: F401, E402

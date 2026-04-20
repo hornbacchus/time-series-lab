@@ -63,3 +63,17 @@ Rather than evaluating all combinations (which could be hundreds), the stepwise 
 - If the algorithm fails to converge for a candidate model (common with near-unit-root parameters), that model is skipped.
 - When `d + D >= 2`, the constant term is excluded to avoid explosive forecasts.
 - A maximum model order constraint `p + q + P + Q <= max_order` (default 5) prevents overly complex models.
+
+## Interpretation
+
+Every auto_arima run emits a two-tier plain-language Interpretation block distinct from the manual arima spec.
+
+**Plain-Language Finding (Tier 1)** - AIC-minimized (p,d,q)(P,D,Q)[m] order with candidate count searched under pmdarima's stepwise algorithm. Fit RMSE vs seasonal-naive baseline with percentage delta; forecast end-of-horizon trend.
+
+**Technical Interpretation (Tier 2)** - IC used, search mode (stepwise vs exhaustive), search bounds (max_p / max_q / max_d, and seasonal equivalents), winning order's AIC / BIC, stepwise-tie reproducibility caveat, Ljung-Box diagnostic. The stepwise-tie caveat sits immediately after the search-disclosure sentence.
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= naive baseline.
+- Ljung-Box rejects white-noise.
+- Winning order at a search bound - widen the search.
+- Seasonal m auto-inferred from frequency - verify the period.

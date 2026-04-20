@@ -423,6 +423,102 @@ def stationary_distribution(P):
     return vec / total
 
 
+def fit_naive_baseline(y, frequency: str, horizon: int, mode: str = "auto"):
+    """Fit a naive-forecast baseline for Tier 1 comparison.
+
+    Used by forecasting-family specs (Prompt C2) to ground their
+    "model vs naive" disclosure in a single shared helper rather than
+    each wrapper rolling its own. Returns a struct whose ``label`` key
+    the spec reads directly — specs do NOT reconstruct the label from
+    ``mode``; the helper owns the label assignment.
+
+    Modes:
+
+      - ``"auto"`` (default): picks seasonal-naive if the helper can
+        infer a seasonal period ``m > 1`` from ``frequency`` AND
+        ``len(y) >= 2*m``. Otherwise falls back to last-value naive.
+      - ``"seasonal"``: forces seasonal-naive with period inferred
+        from frequency. Falls back to last-value naive if no seasonal
+        period can be inferred or ``len(y) < 2*m``.
+      - ``"last"``: last-value naive — predict the last observed
+        value for every horizon step.
+      - ``"mean"``: mean forecast — predict the sample mean for every
+        horizon step. Used by intermittent-demand where "last value"
+        is uninformative (most recent values are often zero).
+
+    Returns a dict:
+      {
+        "forecast": np.ndarray of length ``horizon``,
+        "rmse":     float, in-sample one-step RMSE of the baseline,
+        "label":    str, one of "seasonal-naive", "last-value naive",
+                    "mean forecast",
+        "period":   int or None, seasonal period when seasonal-naive
+                    was used, else None,
+      }
+
+    In-sample RMSE convention: for seasonal-naive, predict ``y[t] =
+    y[t-m]`` and compute RMSE over ``t >= m``. For last-value naive,
+    predict ``y[t] = y[t-1]`` and compute over ``t >= 1``. For mean
+    forecast, predict the sample mean and compute residual-from-mean
+    RMSE over the whole sample. This is the benchmark used by
+    M-competition literature for MASE denominators.
+
+    Cited Prompt C2: single source of truth for naive-baseline
+    computation across arima / auto_arima / ets / holt_winters /
+    theta / prophet.
+    """
+    y = np.asarray(y, dtype=float)
+    y = y[~np.isnan(y)]
+    n = int(len(y))
+    h = int(max(1, horizon))
+    mode = (mode or "auto").strip().lower()
+
+    _FREQ_TO_M = {
+        "D": 7, "B": 5, "W": 52,
+        "M": 12, "MS": 12,
+        "Q": 4, "QS": 4,
+        "Y": 1, "A": 1,
+    }
+    freq_code = str(frequency or "").strip().upper()
+    m_inferred = _FREQ_TO_M.get(freq_code, 1)
+
+    def _mean_forecast():
+        mu = float(np.mean(y)) if n > 0 else 0.0
+        fc = np.full(h, mu)
+        rmse = float(np.sqrt(np.mean((y - mu) ** 2))) if n > 0 else 0.0
+        return {"forecast": fc, "rmse": rmse,
+                "label": "mean forecast", "period": None}
+
+    def _last_value_forecast():
+        last = float(y[-1]) if n > 0 else 0.0
+        fc = np.full(h, last)
+        rmse = (float(np.sqrt(np.mean((y[1:] - y[:-1]) ** 2)))
+                if n >= 2 else 0.0)
+        return {"forecast": fc, "rmse": rmse,
+                "label": "last-value naive", "period": None}
+
+    def _seasonal_naive(m: int):
+        last_season = y[-m:]
+        fc = np.array([last_season[i % m] for i in range(h)])
+        rmse = (float(np.sqrt(np.mean((y[m:] - y[:-m]) ** 2)))
+                if n > m else 0.0)
+        return {"forecast": fc, "rmse": rmse,
+                "label": "seasonal-naive", "period": int(m)}
+
+    if mode == "mean":
+        return _mean_forecast()
+    if mode == "last":
+        return _last_value_forecast()
+    if mode == "seasonal":
+        if m_inferred > 1 and n >= 2 * m_inferred:
+            return _seasonal_naive(m_inferred)
+        return _last_value_forecast()
+    # "auto"
+    if m_inferred > 1 and n >= 2 * m_inferred:
+        return _seasonal_naive(m_inferred)
+    return _last_value_forecast()
+
+
 def build_forecast_time_axis(last_time_label, frequency: str, horizon: int):
     """Extend an input DatetimeIndex by ``horizon`` steps at the detected
     frequency, returning a list of ISO date strings (``"YYYY-MM-DD"``).

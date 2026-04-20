@@ -314,12 +314,73 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C2: naive-baseline comparison + smoothing-param labeling
+        # + Tier 1 trend-extrapolation fields.
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            clean, frequency=ctx.frequency, horizon=horizon, mode="auto",
+        )
+        last_observed_value = float(clean[-1]) if len(clean) > 0 else 0.0
+        forecast_end_value = float(np.asarray(fc)[-1]) if len(fc) > 0 else 0.0
+        # Extract labeled smoothing params from the fit object.
+        _alpha = _beta = _gamma = _phi = None
+        try:
+            _p = fit.params
+            if hasattr(_p, "get"):
+                _alpha = float(_p.get("smoothing_level")) if _p.get("smoothing_level") is not None else None
+                _beta  = float(_p.get("smoothing_trend")) if _p.get("smoothing_trend") is not None else None
+                _gamma = float(_p.get("smoothing_seasonal")) if _p.get("smoothing_seasonal") is not None else None
+                _phi_raw = _p.get("damping_trend")
+                if _phi_raw is not None and not (isinstance(_phi_raw, float) and np.isnan(_phi_raw)):
+                    _phi = float(_phi_raw)
+        except Exception:
+            pass
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        _interp_dict = {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "trend_type": trend_param,
+            "seasonal_type": seasonal_param,
+            "seasonal_period": int(period) if seasonal_param else None,
+            "damped_trend": bool(damped),
+            "alpha": _alpha,
+            "beta": _beta,
+            "gamma": _gamma,
+            "phi": _phi,
+            "aic": float(aic),
+            "bic": float(bic),
+            "fit_rmse": float(rmse) if rmse is not None else None,
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "baseline_rmse": float(baseline["rmse"]),
+            "baseline_label": baseline["label"],
+            "series_min": float(np.nanmin(clean)) if len(clean) > 0 else 0.0,
+            "series_std": float(np.nanstd(clean, ddof=1)) if len(clean) > 1 else 0.0,
+        }
+        # Route to ets vs holt_winters spec by technique_id.
+        _tid = str(ctx.technique_id or "").lower()
+        if _tid == "ets":
+            interp = build_interpretation("ets", _interp_dict)
+        elif _tid in ("holt_winters", "hw"):
+            interp = build_interpretation("holt_winters", _interp_dict)
+        else:
+            # default ets_hw alias falls to holt_winters spec
+            interp = build_interpretation("holt_winters", _interp_dict)
+
         return make_response(
             ctx,
             tables=[forecast_table, fitted_table, summary_table],
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "model": model_desc,
                 "trend": trend_param,
@@ -330,6 +391,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "bic": round(bic, 2),
                 "rmse": round(rmse, 4) if rmse else None,
                 "horizon": horizon,
+                "alpha": round(_alpha, 6) if _alpha is not None else None,
+                "beta": round(_beta, 6) if _beta is not None else None,
+                "gamma": round(_gamma, 6) if _gamma is not None else None,
+                "phi": round(_phi, 6) if _phi is not None else None,
+                "last_observed_value": last_observed_value,
+                "forecast_end_value": forecast_end_value,
+                "baseline_rmse": round(float(baseline["rmse"]), 4),
+                "baseline_label": baseline["label"],
                 **format_significance_disclosure(
                     test_name=(
                         "ETS prediction interval (t-critical on residual std)"

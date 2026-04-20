@@ -261,18 +261,56 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C2: mean-demand baseline + interp dict. For intermittent
+        # series, the generic last-value naive is misleading (recent values
+        # often zero); use mean-demand baseline as the Tier 1 benchmark.
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            values, frequency=ctx.frequency, horizon=horizon, mode="mean",
+        )
+        _fitted_rmse = float(np.sqrt(best_result["mse"]))
+        _baseline_rmse = float(baseline["rmse"])
+        _baseline_mean = float(baseline["forecast"][0]) if len(baseline["forecast"]) > 0 else 0.0
+        # Last-10-period all-zero flag for TSB obsolescence trigger
+        _last10_all_zero = bool(len(values) >= 10 and np.all(values[-10:] == 0))
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("intermittent_demand", {
+            "series_name": name,
+            "n_obs": int(len(values)),
+            "horizon": int(horizon),
+            "method": str(best_result["method"]).lower(),
+            "alpha": float(best_result["alpha"]),
+            "beta": float(best_result["beta"]) if best_result.get("beta") is not None else None,
+            "forecast_mean_per_period": float(best_result["forecast"]),
+            "fit_rmse": _fitted_rmse,
+            "baseline_rmse": _baseline_rmse,
+            "baseline_mean": _baseline_mean,
+            "demand_pattern": str(pattern).lower(),
+            "adi": float(adi),
+            "cv2_demand": float(cv2_demand),
+            "zero_rate": float(1.0 - demand_fraction),
+            "last10_all_zero": _last10_all_zero,
+        })
+
         return make_response(
             ctx,
             tables=[comp_table, summary_table, char_table, fitted_table, fc_table],
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "best_method": best_result["method"],
                 "alpha": best_result["alpha"],
                 "beta": best_result["beta"],
                 "mse": round(float(best_result["mse"]), 4),
-                "rmse": round(float(np.sqrt(best_result["mse"])), 4),
+                "rmse": round(_fitted_rmse, 4),
                 "forecast": round(float(best_result["forecast"]), 4),
                 "demand_pattern": pattern,
                 "adi": round(adi, 2),
@@ -280,6 +318,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "zero_fraction": round(1 - demand_fraction, 4),
                 "methods_tested": len(all_results),
                 "horizon": horizon,
+                "baseline_rmse": round(_baseline_rmse, 4),
+                "baseline_mean": round(_baseline_mean, 4),
             },
         )
 

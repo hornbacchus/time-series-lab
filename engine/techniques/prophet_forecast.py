@@ -229,6 +229,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
             progress_callback("Fitting Prophet model", 25)
 
+            # Prompt C2 Decision 4: force 95% prediction intervals to
+            # match TSL's forecaster convention (Prophet default is 80%).
             model = Prophet(
                 yearly_seasonality=yearly_seasonality,
                 weekly_seasonality=weekly_seasonality,
@@ -236,6 +238,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 seasonality_prior_scale=seasonality_prior_scale,
                 n_changepoints=min(n_changepoints, n // 2),
                 mcmc_samples=preset_cfg["mcmc_samples"],
+                interval_width=0.95,
             )
             model.fit(df)
 
@@ -283,8 +286,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
             components_table = make_table("Components", comp_cols, comp_rows)
 
-            # Changepoints
-            n_detected_changepoints = len(model.changepoints) if hasattr(model, "changepoints") else 0
+            # Changepoints. Prompt C2 Decision 9: Prophet's
+            # ``n_changepoints`` is the number of candidate changepoints
+            # placed under an L1-shrinkage prior, NOT a count of
+            # statistically-significant detected trend breaks. We rename
+            # the audit key accordingly and expose the most-recent
+            # candidate's date.
+            n_candidate_changepoints = len(model.changepoints) if hasattr(model, "changepoints") else 0
+            most_recent_cp_date = None
+            if hasattr(model, "changepoints") and len(model.changepoints) > 0:
+                try:
+                    from interpretation.primitives import format_break_date
+                    most_recent_cp_date = format_break_date(
+                        model.changepoints.iloc[-1], ctx.frequency or "",
+                    )
+                except Exception:
+                    try:
+                        most_recent_cp_date = str(model.changepoints.iloc[-1].date())
+                    except Exception:
+                        most_recent_cp_date = None
 
             # Metrics
             residuals = clean - fitted
@@ -329,7 +349,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 [["Seasonal naive fallback does not produce component decomposition. "
                   "Install Prophet for full decomposition."]]
             )
-            n_detected_changepoints = 0
+            n_candidate_changepoints = 0
+            most_recent_cp_date = None
             model_desc = f"Seasonal Naive (period={period})"
 
         progress_callback("Building output", 90)
@@ -356,7 +377,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["Changepoint Prior Scale", changepoint_prior_scale],
             ["Yearly Seasonality", str(yearly_seasonality)],
             ["Weekly Seasonality", str(weekly_seasonality)],
-            ["Detected Changepoints", n_detected_changepoints],
+            ["Candidate Changepoints", n_candidate_changepoints],
             ["RMSE (in-sample)", round(rmse, 4)],
             ["MAE (in-sample)", round(mae, 4)],
             ["R-squared (in-sample)", round(r2, 4)],
@@ -391,22 +412,65 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C2: naive-baseline comparison + interp dict.
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            clean, frequency=ctx.frequency, horizon=horizon, mode="auto",
+        )
+        last_observed_value = float(clean[-1]) if len(clean) > 0 else 0.0
+        forecast_end_value = float(fc_values[-1]) if len(fc_values) > 0 else 0.0
+        historical_max = float(np.nanmax(clean)) if len(clean) > 0 else 0.0
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("prophet", {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "backend": backend,
+            "changepoint_prior_scale": float(changepoint_prior_scale),
+            "yearly_seasonality_flag": str(yearly_seasonality),
+            "weekly_seasonality_flag": str(weekly_seasonality),
+            "n_candidate_changepoints": int(n_candidate_changepoints),
+            "most_recent_candidate_changepoint": most_recent_cp_date,
+            "fit_rmse": float(rmse),
+            "r2": float(r2),
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "baseline_rmse": float(baseline["rmse"]),
+            "baseline_label": baseline["label"],
+            "historical_max": historical_max,
+            "series_std": float(np.nanstd(clean, ddof=1)) if len(clean) > 1 else 0.0,
+            "interval_width": 0.95,
+        })
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "backend": backend,
                 "changepoint_prior_scale": changepoint_prior_scale,
                 "yearly_seasonality": str(yearly_seasonality),
                 "weekly_seasonality": str(weekly_seasonality),
-                "n_detected_changepoints": n_detected_changepoints,
+                "n_candidate_changepoints": n_candidate_changepoints,
+                "most_recent_candidate_changepoint": most_recent_cp_date,
                 "rmse": round(rmse, 4),
                 "mae": round(mae, 4),
                 "r2": round(r2, 4),
                 "horizon": horizon,
+                "interval_width": 0.95,
+                "last_observed_value": last_observed_value,
+                "forecast_end_value": forecast_end_value,
+                "baseline_rmse": round(float(baseline["rmse"]), 4),
+                "baseline_label": baseline["label"],
                 **format_significance_disclosure(
                     test_name=(
                         "Prophet posterior prediction interval (or t-critical "

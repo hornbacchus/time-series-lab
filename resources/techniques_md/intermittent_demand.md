@@ -72,3 +72,17 @@ Items are classified based on two dimensions:
 Smooth items can use standard ETS/ARIMA. Erratic items have variable sizes. Intermittent items have sporadic timing. Lumpy items have both problems and are the most challenging.
 
 **Prediction intervals**: Standard Gaussian intervals do not apply. Bootstrap or empirical methods are used, or parametric approaches assuming negative binomial or Poisson-distributed demand occurrences combined with a size distribution (gamma or log-normal).
+
+## Interpretation
+
+Intermittent-demand runs (Croston / SBA / TSB) emit a two-tier Interpretation block with a distinct Tier 1 shape — NOT the shared forecaster template used by the other six C2 techniques.
+
+**Plain-Language Finding (Tier 1)** - Syntetos-Boylan pattern classification (smooth / intermittent / erratic / lumpy) rendered via plain-language ADI and CV² descriptors (sporadic vs frequent demand periods; high / moderate / low demand-size variability). Flat forecast per period; mean-demand baseline (generic last-value naive is misleading for zero-dominant series); always-on caveat that intermittent forecasts ship without calibrated prediction intervals.
+
+**Technical Interpretation (Tier 2, method-branched)** - method-specific citation-form disclosure: Croston discloses the (z, p) updating rule and upward-bias property; SBA discloses the (1 - alpha/2) bias correction; TSB discloses the (z, d) parameterization and decay-to-zero probability for obsolescence handling. Every method's Tier 2 states which method was selected via the method parameter and names the alternatives.
+
+**Caveats (Tier 3, conditional)**:
+- Pattern is smooth but an intermittent method was chosen.
+- Last 10 periods all zero but method is not TSB - consider TSB.
+- Mean-demand baseline matches or beats the fitted model.
+- Prediction intervals are not calibrated (always fires).
