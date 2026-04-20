@@ -9,6 +9,12 @@ understanding the covariance structure of multivariate time series.
 
 import numpy as np
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -478,12 +484,56 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # PC2 dominant loader: unsigned per Decision 3 (PC2+ signs are not
+        # pinned by the PC1-only svd_flip convention).
+        if n_components >= 2:
+            pc2_abs_arr = np.abs(loadings[:, 1])
+            pc2_top_idx = int(np.argmax(pc2_abs_arr))
+            pc2_top_name = series_names[pc2_top_idx]
+            pc2_top_abs = float(pc2_abs_arr[pc2_top_idx])
+        else:
+            pc2_top_name = ""
+            pc2_top_abs = 0.0
+
+        # Mean off-diagonal |ρ| for the near-identity-correlation trigger.
+        # Built from the raw input `data` matrix (series × observations
+        # layout within this wrapper) so the ρ values are the native
+        # cross-series correlations before centering/standardization.
+        try:
+            corr = np.corrcoef(data, rowvar=False)
+            k_corr = corr.shape[0]
+            if k_corr >= 2:
+                iu = np.triu_indices(k_corr, k=1)
+                mean_off_abs_rho = float(np.mean(np.abs(corr[iu])))
+            else:
+                mean_off_abs_rho = 0.0
+        except Exception:
+            mean_off_abs_rho = None
+
+        interp = build_interpretation("pca_analysis", {
+            "n_series": n_series,
+            "n_obs": n_obs,
+            "eigenvalues": [float(e) for e in eigenvalues_all[:min(n_components, len(eigenvalues_all))]],
+            "explained_variance_ratio": [float(e) for e in explained_ratio],
+            "cumulative_variance_ratio": [float(c) for c in cumulative_ratio],
+            "loadings": loadings.tolist(),
+            "variable_names": list(series_names),
+            "kaiser_components": int(n_kaiser),
+            "n_80": int(n_80),
+            "top_pc1_loader": str(top_loader),
+            "top_pc1_loading_value": float(loadings[top_loader_idx, 0]),
+            "top_pc2_loader": str(pc2_top_name),
+            "top_pc2_loading_abs": float(pc2_top_abs),
+            "mean_off_diag_abs_rho": mean_off_abs_rho,
+        })
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "n_series": n_series,
                 "n_obs": n_obs,

@@ -58,3 +58,18 @@ where `S_t in {1, 2, ..., k}` is the unobserved regime at time t and `e_t ~ N(0,
 - **M-step**: Update transition probabilities: `p_hat_{ij} = sum_t P(S_t = j, S_{t-1} = i | Y_T) / sum_t P(S_{t-1} = i | Y_T)`. Update regime-specific parameters using weighted regressions with smoothed probabilities as weights.
 
 **Log-likelihood**: `log L = sum_t log f(Y_t | Y_{t-1})`, summing the log of the mixture likelihood at each step. The number of regimes is selected by BIC or likelihood ratio tests (with non-standard distributions due to unidentified parameters under the null).
+
+## Interpretation
+
+Every Markov-switching run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
+
+**Plain-Language Finding (Tier 1)** - 2-4 sentences. Names the regime count, the regime labels after mean-sorting (low-mean / high-mean for k=2; lowest-mean / mid-mean / highest-mean for k>=3), the current-state label, and the smoothed probability. Closes with a structure-implication sentence rather than a forecasting directive.
+
+**Technical Interpretation (Tier 2)** - per-regime (mu, sigma) citations, smoothed-probability current-state placement, pointer to the transition-matrix and expected-duration tables.
+
+**Caveats (Tier 3, conditional)**:
+- **Weakly separated regimes** - any pair's |mu_i - mu_j| < common sigma; regimes may be empirically indistinguishable.
+- **Near-absorbing state** - expected duration > 50 periods; forecasts can treat as effectively permanent.
+- **Ambiguous current state** - final-period max smoothed probability < 0.6; forecasts should weight multiple regimes.
+
+Mean-axis labeling is locked to the wrapper's current sort convention. A future variance-sort wrapper extension will add variance-regime descriptions to the spec.

@@ -65,3 +65,18 @@ Test `beta_1 = ... = beta_p = 0`. This tests whether X predicts Y beyond what bo
 - The test is sensitive to the information set: adding or removing variables can change the results.
 
 **Nonlinear Granger causality**: Extensions using nonparametric methods (Diks-Panchenko test) or transfer entropy measure whether X provides nonlinear predictive information about Y beyond the linear relationship captured by the standard test.
+
+## Interpretation
+
+Every Granger causality run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
+
+**Plain-Language Finding (Tier 1)** - 2-4 sentences, no Greek letters outside citation form. States the direction of predictive flow at the best lag and whether the reverse channel is also significant, then the practical implication for forecasting.
+
+**Technical Interpretation (Tier 2)** - names the test (Granger F-test, SSR-based), discloses the lag-range searched, cites the strongest-lag F-statistic and p-value, and names whether the reverse-direction test was run at this preset.
+
+**Caveats (Tier 3, conditional)** - italic gray bullets, one per trigger:
+- **Bidirectional causality** - both the forward and reverse tests reject at alpha. Signals a feedback loop rather than one-way causation.
+- **Borderline p-value** - best-lag p sits in (0.04, 0.06); the verdict is sensitive to the significance level and names the direction of the potential flip.
+- **Small sample** - n < 50; Granger tests have limited power in this range.
+
+Deterministic: identical inputs produce bit-identical output. The wrapper does not invent economic narrative.

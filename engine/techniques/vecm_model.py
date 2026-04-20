@@ -18,6 +18,12 @@ from techniques.base import (
     make_error_response,
 )
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 
 def run(ctx: RunContext, progress_callback) -> dict:
     """
@@ -111,29 +117,54 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Cointegration rank
         progress_callback("Estimating cointegration rank", 25)
         coint_rank_param = ctx.get_param("coint_rank")
+        # Capture Johansen trace statistics for audit disclosure, even when
+        # the user provides rank explicitly. Re-calling select_coint_rank
+        # is cheap (the expensive VECM fit happens below) and gives us the
+        # same trace_stats + crit_vals arrays needed by the interpretation
+        # spec. Wrapping in try/except so a selection failure can't derail
+        # the fit path.
+        trace_stats_arr = None
+        trace_cvs_arr = None
+        trace_user_rejected_r0 = None
+        with _warnings.catch_warnings():
+            _warnings.simplefilter("ignore")
+            try:
+                rank_result = select_coint_rank(
+                    stacked,
+                    det_order=0 if deterministic in ("ci", "n") else 1,
+                    k_ar_diff=p,
+                    signif=significance,
+                )
+                trace_stats_arr = np.asarray(rank_result.test_stats).astype(float)
+                trace_cvs_arr = np.asarray(rank_result.crit_vals).astype(float)
+                auto_rank = rank_result.rank
+                trace_user_rejected_r0 = bool(
+                    trace_stats_arr.size > 0 and trace_cvs_arr.size > 0
+                    and trace_stats_arr[0] > trace_cvs_arr[0]
+                )
+            except Exception:
+                auto_rank = None
+
         if coint_rank_param is not None:
             r = int(coint_rank_param)
         else:
-            with _warnings.catch_warnings():
-                _warnings.simplefilter("ignore")
-                try:
-                    rank_result = select_coint_rank(stacked, det_order=0 if deterministic in ("ci", "n") else 1, k_ar_diff=p, signif=significance)
-                    r = rank_result.rank
-                    if r == 0:
-                        warn_list.append(
-                            "No cointegrating relations detected at the given significance level. "
-                            "Using rank=1 anyway; consider a VAR model in differences instead."
-                        )
-                        r = 1
-                    if r >= k:
-                        warn_list.append(
-                            f"Cointegration rank ({r}) equals the number of variables ({k}). "
-                            "All series may be stationary; a VAR in levels might be more appropriate."
-                        )
-                        r = k - 1
-                except Exception as e:
-                    r = min(1, k - 1)
-                    warn_list.append(f"Cointegration rank selection failed ({e}). Using r={r}.")
+            if auto_rank is not None:
+                r = int(auto_rank)
+                if r == 0:
+                    warn_list.append(
+                        "No cointegrating relations detected at the given significance level. "
+                        "Using rank=1 anyway; consider a VAR model in differences instead."
+                    )
+                    r = 1
+                if r >= k:
+                    warn_list.append(
+                        f"Cointegration rank ({r}) equals the number of variables ({k}). "
+                        "All series may be stationary; a VAR in levels might be more appropriate."
+                    )
+                    r = k - 1
+            else:
+                r = min(1, k - 1)
+                warn_list.append(f"Cointegration rank selection failed. Using r={r}.")
 
         progress_callback(f"Fitting VECM(p={p}, r={r})", 40)
 
@@ -271,12 +302,59 @@ def run(ctx: RunContext, progress_callback) -> dict:
         if ec_table:
             tables.append(ec_table)
 
+        # Half-life of adjustment on the first cointegrating relationship:
+        # half_life = −ln(2) / ln(1 + α[0, 0]) when α[0, 0] ∈ (−2, 0) and the
+        # first series is speed-adjusting toward equilibrium. Outside that
+        # range the formula either diverges or flips sign; we return None so
+        # the interpretation spec can route on presence/absence.
+        half_life_periods = None
+        try:
+            if r >= 1 and alpha_arr.shape[0] >= 1:
+                a0 = float(alpha_arr[0, 0])
+                if -2.0 < a0 < 0.0:
+                    half_life_periods = float(-np.log(2.0) / np.log(1.0 + a0))
+        except Exception:
+            half_life_periods = None
+
+        # Build interpretation input. When the trace-statistic array is
+        # unavailable (a select_coint_rank failure earlier), the spec's
+        # tier builders fall back to zero-value defaults that don't make
+        # false claims.
+        _trace0 = float(trace_stats_arr[0]) if (
+            trace_stats_arr is not None and trace_stats_arr.size > 0
+        ) else 0.0
+        _cv0 = float(trace_cvs_arr[0]) if (
+            trace_cvs_arr is not None and trace_cvs_arr.size > 0
+        ) else 0.0
+        _trace1 = (float(trace_stats_arr[1]) if (
+            trace_stats_arr is not None and trace_stats_arr.size > 1
+        ) else None)
+        _cv1 = (float(trace_cvs_arr[1]) if (
+            trace_cvs_arr is not None and trace_cvs_arr.size > 1
+        ) else None)
+        interp = build_interpretation("vecm_model", {
+            "variable_names": names,
+            "coint_rank": r,
+            "lag_order": p,
+            "n_variables": k,
+            "n_obs": n,
+            "beta_normalized": beta_arr.tolist(),
+            "alpha_normalized": alpha_arr.tolist(),
+            "half_life_periods": half_life_periods,
+            "trace_stat": _trace0,
+            "trace_cv_5pct": _cv0,
+            "trace_stat_r1": _trace1,
+            "trace_cv_r1_5pct": _cv1,
+            "significance": float(significance),
+        })
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "lag_order": p,
                 "coint_rank": r,
@@ -284,6 +362,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "deterministic": deterministic,
                 "horizon": horizon,
                 "variable_names": names,
+                # Phillips-normalized cointegrating and adjustment
+                # matrices (β[0, j] = 1 after normalization). Surfaced so
+                # the interpretation spec can read them without parsing
+                # the display tables.
+                "beta_normalized": beta_arr.tolist(),
+                "alpha_normalized": alpha_arr.tolist(),
+                "half_life_periods": (round(half_life_periods, 2)
+                                      if half_life_periods is not None else None),
+                "trace_stat": round(_trace0, 4),
+                "trace_cv_5pct": round(_cv0, 4),
             },
         )
 

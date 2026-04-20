@@ -18,6 +18,12 @@ from techniques.base import (
     format_significance_disclosure,
 )
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 
 def _prepare_series(values):
     """Strip edge NaN, interpolate interior."""
@@ -230,7 +236,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["Forecast Horizon", horizon],
         ]
 
-        # Persistence: sum of alpha + beta (for GARCH)
+        # Persistence: sum of alpha + beta (for GARCH). Captured as locals
+        # so the interpretation spec can read them without re-deriving from
+        # the raw params index.
+        alpha_sum = None
+        beta_sum = None
+        persistence = None
         try:
             alpha_sum = sum(float(params[p]) for p in params.index if p.startswith("alpha"))
             beta_sum = sum(float(params[p]) for p in params.index if p.startswith("beta"))
@@ -251,6 +262,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             pass
 
         # Ljung-Box on squared standardized residuals
+        ljung_box_sq_p = None
         try:
             from statsmodels.stats.diagnostic import acorr_ljungbox
             sq_resid = std_resid_arr[~np.isnan(std_resid_arr)] ** 2
@@ -261,6 +273,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                         f"Ljung-Box Sq. Resid Lag {int(row.name)}",
                         f"Q={round(row['lb_stat'], 4)}, p={round(row['lb_pvalue'], 6)}"
                     ])
+                    if ljung_box_sq_p is None:
+                        ljung_box_sq_p = float(row["lb_pvalue"])
                     if row['lb_pvalue'] < 0.05:
                         warn_list.append(
                             "Remaining ARCH effects in squared residuals (Ljung-Box p < 0.05). "
@@ -296,12 +310,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("garch_model", {
+            "series_name": name,
+            "n_obs": n,
+            "dist": dist.capitalize() if isinstance(dist, str) else str(dist),
+            "order_p": p_order,
+            "order_q": q_order,
+            "alpha": float(alpha_sum) if alpha_sum is not None else 0.0,
+            "beta": float(beta_sum) if beta_sum is not None else 0.0,
+            "persistence": float(persistence) if persistence is not None else 0.0,
+            "ljung_box_sq_p": ljung_box_sq_p,
+        })
+
         return make_response(
             ctx,
             tables=[param_table, diag_table, vol_table, fc_table],
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "model": model_label,
                 "p": p_order,

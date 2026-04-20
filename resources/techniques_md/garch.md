@@ -69,3 +69,16 @@ Forecasts revert to the unconditional variance exponentially with rate `(alpha +
 **Testing for ARCH effects**: Before fitting GARCH, test for conditional heteroskedasticity:
 - **Engle's ARCH-LM test**: Regress squared residuals on their lags and test for joint significance via an F-test or chi-squared test.
 - **Ljung-Box test on squared residuals**: Tests for autocorrelation in squared residuals.
+
+## Interpretation
+
+Every GARCH run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
+
+**Plain-Language Finding (Tier 1)** - 2-4 sentences. Since GARCH is descriptive rather than a hypothesis test, the actionable is persistence-keyed: high persistence (alpha+beta close to 1) supports short-horizon volatility forecasts but converges slowly to unconditional variance; low persistence supports short-horizon forecasts and converges quickly.
+
+**Technical Interpretation (Tier 2)** - cites the ARCH coefficient alpha, GARCH coefficient beta, their persistence sum, and the derived shock half-life `ln(0.5)/ln(alpha+beta)`. Reports the Ljung-Box test on squared standardized residuals as a model-adequacy check.
+
+**Caveats (Tier 3, conditional)**:
+- **Near-IGARCH** (alpha+beta > 0.98) - volatility shocks effectively don't decay; unconditional-variance approximation breaks down.
+- **Ljung-Box on squared residuals rejects** - remaining ARCH effects; specification may be under-parameterized.
+- **Very low persistence** (alpha+beta < 0.3) - series behaves closer to iid than typical returns; verify residuals.

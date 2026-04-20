@@ -17,6 +17,12 @@ from techniques.base import (
     dropna_aligned,
 )
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 
 def _prepare_series(values):
     """Strip edge NaN, interpolate interior."""
@@ -240,6 +246,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
         bic = float(fit.bic)
         fpe = float(fit.fpe) if hasattr(fit, 'fpe') else None
 
+        # Companion-matrix stability: max root modulus. statsmodels VAR's
+        # ``fit.roots`` returns the inverse companion-matrix eigenvalues,
+        # so max|eig| = 1/min|root|. Stable iff < 1.0. Surfaces as a
+        # user-visible fact in the Model Summary and as an audit field for
+        # the interpretation spec to route on.
+        try:
+            roots = fit.roots
+            min_abs_root = float(min(abs(r) for r in roots))
+            max_root_modulus = (1.0 / min_abs_root) if min_abs_root > 0 else float("inf")
+        except Exception:
+            max_root_modulus = None
+
         summary_rows = [
             ["VAR Order (p)", p],
             ["Variables", k],
@@ -247,6 +265,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["AIC", round(aic, 4)],
             ["BIC", round(bic, 4)],
         ]
+        if max_root_modulus is not None:
+            summary_rows.append(
+                ["Max Companion-Root Modulus", round(max_root_modulus, 4)]
+            )
         if fpe is not None:
             summary_rows.append(["FPE", round(fpe, 6)])
         summary_rows.append(["Trend", trend_param])
@@ -315,12 +337,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("var_model", {
+            "variable_names": names,
+            "var_order": p,
+            "n_variables": k,
+            "aic": float(aic),
+            "bic": float(bic),
+            "ic_used": str(ic),
+            "max_root_modulus": max_root_modulus,
+            "granger_within_var": gc_rows,
+            "n_obs": int(fit.nobs),
+        })
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "var_order": p,
                 "n_variables": k,
@@ -331,6 +366,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "horizon": horizon,
                 "irf_periods": irf_periods,
                 "trend": trend_param,
+                "max_root_modulus": (round(max_root_modulus, 4)
+                                     if max_root_modulus is not None else None),
+                "granger_within_var": gc_rows,
             },
         )
 

@@ -112,3 +112,18 @@ where `lambda` (0 < lambda < 1) is the decay factor. Smaller lambda emphasizes m
 - Very short windows produce noisy CCF estimates; very long windows average over structural changes.
 - If both series have strong seasonality, deseasonalize before computing rolling CCF or the seasonal correlation will dominate.
 - The maximum lag should be less than W/4 to ensure reliable estimation at the edges of the lag range.
+
+## Interpretation
+
+Every Rolling CCF run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
+
+**Plain-Language Finding (Tier 1)** - 2-4 sentences, no Greek letters outside citation form. Either reports a split-regime summary (pre-break and post-break directions, signs, and lags with their magnitudes) when PELT confirms a structural break, or a single-regime summary when no break is confirmed. A low-significance branch fires when fewer than 10% of windows reject the no-correlation null.
+
+**Technical Interpretation (Tier 2)** - names the Bartlett significance band (AC-corrected or naive), cites per-segment median rho, median lag, and %-significant, lists the boundary-hit exclusion count, and describes the PELT changepoint location when relevant.
+
+**Caveats (Tier 3, conditional)**:
+- **Boundary-heavy** - >10% of windows hit the +/-max_lag boundary; suggests the search range is too narrow.
+- **Low significance** - <10% of windows reach significance at the AC-corrected Bartlett band.
+- **Unconfirmed break candidate** - PELT detected a changepoint but the >=8-window pre/post consistency criterion failed.
+
+Break dates are rendered via a frequency-keyed helper (quarterly -> `YYYY-Qn`, monthly -> `YYYY-MM`, daily -> `YYYY-MM-DD`, annual -> `YYYY`) for determinism across pandas versions.

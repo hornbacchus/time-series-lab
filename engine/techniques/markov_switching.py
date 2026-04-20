@@ -8,6 +8,12 @@ Allows regime-dependent mean, variance, and autoregressive parameters.
 import numpy as np
 from statsmodels.tsa.regime_switching.markov_regression import MarkovRegression
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -406,12 +412,42 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "horizon": horizon,
         }
 
+        # Build per-regime empirical means and stds for the interpretation
+        # spec (same computation as the Regime Summary table, distilled
+        # into flat lists). Regime order matches the sorted post-mean-sort
+        # convention applied to ``most_likely_regime``.
+        _regime_means_list = []
+        _regime_stds_list = []
+        for r in range(k_regimes):
+            mask_r = most_likely_regime == r
+            count_r = int(mask_r.sum())
+            mean_r = (float(np.mean(filled[:n_probs][mask_r])) if count_r > 0 else 0.0)
+            std_r = (float(np.std(filled[:n_probs][mask_r], ddof=1)) if count_r > 1 else 0.0)
+            _regime_means_list.append(mean_r)
+            _regime_stds_list.append(std_r)
+
+        _final_probs = (smoothed_probs[-1, :].tolist()
+                        if n_probs > 0 else [0.0] * k_regimes)
+        _current_prob = float(smoothed_probs[-1, current_regime]) if n_probs > 0 else 0.0
+
+        interp = build_interpretation("markov_switching", {
+            "k_regimes": k_regimes,
+            "regime_means": _regime_means_list,
+            "regime_stds": _regime_stds_list,
+            "current_regime": current_regime,
+            "current_prob": _current_prob,
+            "expected_durations": durations,
+            "final_period_probs": _final_probs,
+            "sort_axis": "mean",
+        })
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

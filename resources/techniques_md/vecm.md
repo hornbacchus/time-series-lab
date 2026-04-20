@@ -61,3 +61,19 @@ The term `beta' Y_{t-1}` measures the deviation from the r equilibria, and `alph
 **Testing the cointegrating rank**: The trace test statistic is `trace(r) = -T * sum_{i=r+1}^{k} log(1 - lambda_i)`, tested against critical values. The maximum eigenvalue test uses `lambda_max(r) = -T * log(1 - lambda_{r+1})`.
 
 **Forecasting**: VECM forecasts are generated recursively, and the error correction term keeps forecasts from diverging from the long-run equilibrium. This makes VECM forecasts especially valuable at longer horizons where the equilibrium relationship dominates.
+
+## Interpretation
+
+Every VECM run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
+
+**Plain-Language Finding (Tier 1)** - 2-4 sentences, no Greek letters outside citation form. Reports whether the series form a cointegrating relationship and, when they do, names the Phillips-normalized spread (X - c*Y) and the adjustment half-life. States the practical implication - the spread is a valid stationary state variable - without prescribing a specific modeling framework.
+
+**Technical Interpretation (Tier 2)** - Johansen trace test at each rank with critical values, Phillips-normalized cointegrating vector (beta with first coefficient 1), and error-correction coefficient alpha_1 with the derived half-life.
+
+**Caveats (Tier 3, conditional)**:
+- **Fast half-life** (< 5 periods) - may reflect noise rather than a durable equilibrium.
+- **Slow half-life** (> 100 periods) - the long-run equilibrium may be weakly identified.
+- **Borderline trace statistic** (within 10% of CV) - rank verdict is marginal.
+- **Near-unit alpha** - first series barely adjusts; cointegration is weakly identified.
+
+The wrapper surfaces `beta_normalized`, `alpha_normalized`, `half_life_periods`, `trace_stat`, and `trace_cv_5pct` in audit_fields so the spec consumes facts already computed.

@@ -45,5 +45,12 @@ def list_registered() -> list:
 
 
 # Import specs here so they self-register. Order-insensitive.
-# Prompts B/C will add more lines to this block.
-from interpretation.specs import adf_test as _adf  # noqa: F401, E402
+# Prompt C will add more lines to this block.
+from interpretation.specs import adf_test as _adf                      # noqa: F401, E402
+from interpretation.specs import granger_causality as _granger         # noqa: F401, E402
+from interpretation.specs import rolling_ccf_lag as _rolling_ccf       # noqa: F401, E402
+from interpretation.specs import vecm_model as _vecm                   # noqa: F401, E402
+from interpretation.specs import var_model as _var                     # noqa: F401, E402
+from interpretation.specs import garch_model as _garch                 # noqa: F401, E402
+from interpretation.specs import markov_switching as _markov           # noqa: F401, E402
+from interpretation.specs import pca_analysis as _pca                  # noqa: F401, E402

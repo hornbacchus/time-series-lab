@@ -27,6 +27,57 @@ from typing import Tuple, Optional
 
 
 # ---------------------------------------------------------------------
+# Format-specifier constants (R6 — §4.5 determinism)
+# ---------------------------------------------------------------------
+#
+# Pinned module-level format strings for every numeric value rendered
+# in Tier 1 / Tier 2 / Tier 3 output across every spec. Rationale:
+# bit-identical output across platforms, locales, and Python minor
+# versions requires that EVERY f-string interpolating a number in a
+# user-facing string route through one of these constants rather than
+# picking an ad-hoc ``{:.3f}`` / ``{:.4f}`` at the call site. Ad-hoc
+# formatting looks harmless in isolation but makes the T2 determinism
+# invariant brittle — two specs writing the same α+β value with
+# different specifiers produce non-identical rendered text even when
+# the underlying math is identical.
+#
+# Each technique spec MUST use these constants (or the
+# ``format_stat_technical`` helper which routes through them) for its
+# user-facing numeric formatting. Internal log / audit values that do
+# not appear in tier text are free to use any format.
+
+FMT_P_VALUE       = "{:.4f}"   # p-values
+FMT_RHO           = "{:.2f}"   # correlation coefficients
+FMT_COEF_SIGNED   = "{:+.3f}"  # β, α, loadings — sign-preserving
+FMT_COEF_UNSIGNED = "{:.3f}"   # magnitude-only coefficients
+FMT_F_STAT        = "{:.2f}"   # F-statistics
+FMT_PERSISTENCE   = "{:.3f}"   # α+β-style persistence sums
+FMT_EIGENVALUE    = "{:.2f}"   # eigenvalues
+FMT_PROBABILITY   = "{:.2f}"   # smoothed probabilities, posterior probs
+FMT_HALF_LIFE     = "{:.1f}"   # half-lives in any unit
+
+# Default format applied to any ``stat_name`` passed to
+# ``format_stat_technical`` that is not explicitly keyed in
+# ``FMT_STAT_BY_NAME``. Two-decimal convention matches the adjective
+# bands' numerical resolution (see C.2 / C.5).
+FMT_STAT_DEFAULT  = "{:.2f}"
+
+# Per-stat format mapping for the ``format_stat_technical`` helper.
+# Keyed on the stat name string the caller passes. Unknown names fall
+# back to ``FMT_STAT_DEFAULT``. Extend as additional stats become live
+# in later prompts (Prompt C will likely add "χ²", "LR", "Q", etc.).
+FMT_STAT_BY_NAME = {
+    "F":     FMT_F_STAT,
+    "ADF":   FMT_STAT_DEFAULT,
+    "KPSS":  FMT_STAT_DEFAULT,
+    "PP":    FMT_STAT_DEFAULT,
+    "trace": FMT_STAT_DEFAULT,
+    "λ":     FMT_EIGENVALUE,
+    "P":     FMT_PROBABILITY,
+}
+
+
+# ---------------------------------------------------------------------
 # C.1 — P-value bands (§4.4)
 # ---------------------------------------------------------------------
 
@@ -391,20 +442,28 @@ def format_stat_technical(
     10%) — callers should pass the critical value at whichever level
     they cite and name the level themselves in the surrounding prose.
 
+    The stat value is formatted via :data:`FMT_STAT_BY_NAME` (keyed on
+    ``stat_name``) with :data:`FMT_STAT_DEFAULT` as the fallback. The
+    critical value uses the same format. P-values route through
+    :data:`FMT_P_VALUE` via :func:`_format_p_value_inline`. Per R6
+    (§4.5 determinism), every numeric fragment this helper emits is
+    pinned — callers never need to repeat a specifier at the call site.
+
     Returns
     -------
     str
         A ready-to-paste technical fragment.
     """
-    head = f"{stat_name}={float(value):.4f}"
+    stat_fmt = FMT_STAT_BY_NAME.get(stat_name, FMT_STAT_DEFAULT)
+    head = f"{stat_name}={stat_fmt.format(float(value))}"
     if critical_value is not None and p_value is not None:
         p_fragment = _format_p_value_inline(p_value)
         return (
-            f"{head} vs critical value of {float(critical_value):.4f} "
+            f"{head} vs critical value of {stat_fmt.format(float(critical_value))} "
             f"({p_fragment})"
         )
     if critical_value is not None:
-        return f"{head} vs critical value of {float(critical_value):.4f}"
+        return f"{head} vs critical value of {stat_fmt.format(float(critical_value))}"
     if p_value is not None:
         p_fragment = _format_p_value_inline(p_value)
         return f"{head}, {p_fragment}"
@@ -412,8 +471,72 @@ def format_stat_technical(
 
 
 def _format_p_value_inline(p: float) -> str:
-    """Render a p-value with sensible precision for inline prose."""
+    """Render a p-value with sensible precision for inline prose.
+
+    Routes through :data:`FMT_P_VALUE` per R6. P-values numerically
+    below 0.0001 are rendered as ``p<0.0001`` rather than stringifying
+    to a misleading ``p=0.0000``.
+    """
     p_f = float(p)
     if p_f < 1e-4:
         return "p<0.0001"
-    return f"p={p_f:.4f}"
+    return f"p={FMT_P_VALUE.format(p_f)}"
+
+
+# ---------------------------------------------------------------------
+# R7 — Break-date formatting (§4.5 determinism)
+# ---------------------------------------------------------------------
+
+def format_break_date(date_value, frequency: str) -> str:
+    """Render a changepoint / structural-break date deterministically.
+
+    Used by specs whose Tier 1/Tier 2 text includes a break date drawn
+    from a rolling / windowed fit. Frequency-keyed format to match how
+    analysts quote dates at each sampling rate:
+
+        "quarterly"  -> "YYYY-Qn"
+        "monthly"    -> "YYYY-MM"
+        "daily"      -> "YYYY-MM-DD"
+        "annual"     -> "YYYY"
+
+    Unknown frequency or parse failure falls back to the input's
+    ``str()`` repr with any trailing whitespace stripped — deterministic
+    in that the input determines the output, but the caller should
+    ideally pass a recognized frequency.
+
+    Pure function: no locale, no tzinfo, no current-time calls.
+
+    Parameters
+    ----------
+    date_value
+        A pandas ``Timestamp``, ``date``, or ISO-format string. The
+        helper calls ``pd.Timestamp(date_value)`` internally.
+    frequency : str
+        One of ``"quarterly"``, ``"monthly"``, ``"daily"``, ``"annual"``.
+        Case-insensitive; matched via ``str.strip().lower()``.
+
+    Returns
+    -------
+    str
+        Formatted date string.
+    """
+    key = str(frequency or "").strip().lower()
+    try:
+        import pandas as pd  # local import: primitives otherwise numpy-only
+        ts = pd.Timestamp(date_value)
+    except Exception:
+        return str(date_value).strip()
+    if key == "quarterly":
+        # pandas quarters: month 1-3 -> Q1, 4-6 -> Q2, etc. Pin explicitly
+        # rather than use pd.Period string rendering (which varies by
+        # pandas version).
+        q = (ts.month - 1) // 3 + 1
+        return f"{ts.year:04d}-Q{q}"
+    if key == "monthly":
+        return f"{ts.year:04d}-{ts.month:02d}"
+    if key == "daily":
+        return f"{ts.year:04d}-{ts.month:02d}-{ts.day:02d}"
+    if key == "annual":
+        return f"{ts.year:04d}"
+    # Fallback: ISO date only (no time component, no tzinfo)
+    return f"{ts.year:04d}-{ts.month:02d}-{ts.day:02d}"

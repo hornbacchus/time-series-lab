@@ -48,3 +48,16 @@ Principal Component Analysis (PCA) finds the orthogonal directions of maximum va
 **Reconstruction**: With `k < p` components, the reconstructed data is `X_hat = S_k * L_k^T`. The reconstruction error quantifies how much information is lost by reducing to `k` dimensions. Low RMSE means the retained components capture most of the series' behavior.
 
 **Comparison**: PCA is closely related to Dynamic Factor Models (DFM) but is static — it does not model temporal dynamics within the factors. For time series with strong autoregressive structure in the factors, DFM may be more appropriate. PCA is faster and simpler, making it a good exploratory first step before more complex multivariate models.
+
+## Interpretation
+
+Every PCA run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
+
+**Plain-Language Finding (Tier 1)** - 2-4 sentences. Reports PC1's variance-explained percentage, whether a single factor dominates, Kaiser's criterion retention count, and the implication for dimensionality reduction. On a flat eigenvalue spectrum, states that PCA is not adding value for this dataset.
+
+**Technical Interpretation (Tier 2)** - the full eigenvalue spectrum, cumulative-variance milestones at PC2 and PC3, Kaiser retention count, PC1 top-loader with signed loading, and PC2 top-loader with an unsigned (magnitude-only) citation plus an explicit 'sign unpinned' note for PC2+ since only PC1 is svd_flip-normalized in the current wrapper.
+
+**Caveats (Tier 3, conditional)**:
+- **Borderline first eigenvalue** (0.95 < lambda_1 < 1.05) - retention decision is sensitive to the Kaiser threshold choice.
+- **Near-identity correlation matrix** (mean off-diagonal |rho| < 0.1) - PCA is uninformative on weakly-related data.
+- **PC1 echoes a single variable** - top PC1 |loading| > 0.95 and no other variable loads above 0.30.

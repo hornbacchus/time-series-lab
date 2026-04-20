@@ -58,6 +58,11 @@ from interpretation.primitives import (
 )
 from interpretation.registry import register
 
+# Preset-gated input-dict keys (T11 invariant). Empty tuple means no
+# input keys are conditioned on the preset; Tier 1 has no preset-
+# dependent assertions to guard.
+PRESET_GATED_KEYS = ()
+
 
 # ---------------------------------------------------------------------
 # Tier 1 — Plain-Language Finding
@@ -205,9 +210,13 @@ def _tier2(results: dict) -> str:
             f"Augmented Dickey-Fuller {pband['phrase']} the unit-root null "
             f"at the {sig_pct} level ({adf_fragment})."
         )
+        # Retroactive T9 fix: integrate the Schwert bound into a verb-
+        # containing sentence rather than leaving it as a dangling
+        # parenthetical disclosure.
         spec_sentence = (
-            f"The test used a {reg_label} regression with {lag_phrase} "
-            f"(Schwert bound {schwert} on {n_obs} observations)."
+            f"The test used a {reg_label} regression with {lag_phrase}, "
+            f"with lag selection bounded by Schwert's rule ("
+            f"{schwert} on {n_obs} observations)."
         )
         closer = (
             f"The regression='{regression}' specification is appropriate — "
@@ -219,13 +228,14 @@ def _tier2(results: dict) -> str:
         )
         return f"{opener} {spec_sentence} {closer}"
 
-    # "does not reject"
+    # "does not reject" — Schwert bound integrated into the main sentence
+    # so the disclosure carries a verb.
     return (
         f"Augmented Dickey-Fuller does not reject the unit-root null "
         f"({adf_fragment}, {reg_label} regression, {lag_phrase}, "
-        f"Schwert bound {schwert} on {n_obs} observations). Consider "
-        "first-differencing the series, or re-running with a different "
-        "regression specification."
+        f"with lag selection bounded by Schwert's rule at {schwert} on "
+        f"{n_obs} observations). Consider first-differencing the series, "
+        f"or re-running with a different regression specification."
     )
 
 
@@ -280,8 +290,6 @@ def _tier2_triage(
         f"ADF ({pp_frag})"
     )
 
-    verdict_sentence = f"The joint triage verdict is {verdict}."
-
     # Verdict-specific closer. CONFLICTING closes without the
     # follow-up sentence (moved to Tier 1 per Edit 6). Other verdicts
     # carry a short technical coda.
@@ -292,9 +300,12 @@ def _tier2_triage(
             "mid-sample."
         )
     elif verdict == "STATIONARY":
+        # Retroactive T8 fix: the prior coda ("series is usable directly in
+        # stationarity-assuming models") restated the Tier 1 action. Replace
+        # with a mechanistic statement of why the joint verdict is strong.
         coda = (
-            "Both nulls are decisively resolved; the series is usable "
-            "directly in stationarity-assuming models."
+            "Both the ADF rejection and the KPSS non-rejection sit "
+            "decisively on the correct sides of their critical values."
         )
     elif verdict == "UNIT ROOT (I(1))":
         coda = (
@@ -309,15 +320,20 @@ def _tier2_triage(
     else:
         coda = ""
 
+    # Integrate the Schwert-bound disclosure into the verdict sentence so
+    # it isn't a dangling single-statistic fragment (retroactive T9 fix).
+    verdict_sentence_with_bound = (
+        f"The joint triage verdict is {verdict}; lag selection used "
+        f"{lag_phrase} within a Schwert bound of {schwert} on "
+        f"{n_obs} observations."
+    )
     base = (
         f"{adf_sentence} {kpss_sentence}, and {pp_sentence}. "
-        f"{verdict_sentence}"
+        f"{verdict_sentence_with_bound}"
     )
     if coda:
         base = f"{base} {coda}"
-    # Disclose the Schwert bound at the end so the reader can audit
-    # the lag-selection budget without rereading the opening clause.
-    return base + f" Schwert bound {schwert} on {n_obs} observations."
+    return base
 
 
 def _critical_value_for_verdict(results: dict) -> Optional[float]:
@@ -340,10 +356,14 @@ def _critical_value_for_verdict(results: dict) -> Optional[float]:
 
 
 def _lag_phrase(used_lag: int) -> str:
-    """Grammar helper: phrase lag selection in English."""
+    """Grammar helper: phrase lag selection in English.
+
+    Returns a noun phrase (no verb) so callers can embed it in a wider
+    sentence without awkward "lag selection used X needed" constructions.
+    """
     n = int(used_lag)
     if n == 0:
-        return "no augmentation lags needed"
+        return "no augmentation lags"
     if n == 1:
         return "one AIC-selected augmentation lag"
     return f"{n} AIC-selected augmentation lags"

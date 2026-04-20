@@ -42,6 +42,13 @@ from techniques.base import (
     format_significance_disclosure,
 )
 
+# Interpretation layer (Prompt B).
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 # Preset config no longer hard-codes default_window; it is derived from `n`
 # via ``_default_window`` below. Keeps Balanced-default appropriate across
 # short and long inputs.
@@ -761,12 +768,65 @@ def run(ctx: RunContext, progress_callback) -> dict:
         }
         audit.update(disclosure)
 
+        # Assemble interpretation-input dict. The spec's split/single
+        # routing reads `structural_break`; per-regime facts live in
+        # pre_* / post_* (split) or single_* (single/sub-threshold).
+        _interp_input = {
+            "series_name_x": x_name,
+            "series_name_y": y_name,
+            "n_obs": n,
+            "window": window,
+            "n_windows": n_windows,
+            "pct_significant": float(pct_significant),
+            "n_excluded": int(n_boundary),
+            "ac_corrected": bool(ac_corrected),
+            "frequency": ctx.frequency,
+            "structural_break": break_idx is not None and pct_significant >= 10,
+            "candidate_break_idx": (int(break_idx)
+                                    if break_idx is not None else None),
+            "min_segment": 8,
+        }
+        if break_idx is not None and pct_significant >= 10:
+            # Signed ρ = +magnitude when sign is "+", else -magnitude
+            _pre_signed = (pre_stats["magnitude"]
+                           if pre_stats["sign"] == "+" else -pre_stats["magnitude"])
+            _post_signed = (post_stats["magnitude"]
+                            if post_stats["sign"] == "+" else -post_stats["magnitude"])
+            # Per-segment pct-significant derived from sig_mask on slices
+            pre_mask = sig_mask[:break_idx]
+            post_mask = sig_mask[break_idx:]
+            _interp_input.update({
+                "break_date": break_date,
+                "pre_median_rho": float(_pre_signed),
+                "pre_median_lag": int(pre_stats["lag"]),
+                "pre_pct_significant": float(100.0 * pre_mask.mean())
+                    if len(pre_mask) else 0.0,
+                "pre_n_windows": int(break_idx),
+                "post_median_rho": float(_post_signed),
+                "post_median_lag": int(post_stats["lag"]),
+                "post_pct_significant": float(100.0 * post_mask.mean())
+                    if len(post_mask) else 0.0,
+                "post_n_windows": int(n_windows - break_idx),
+            })
+        else:
+            # Single-regime (or low-significance) path
+            _single_signed = (summary_stats["magnitude"]
+                              if summary_stats["sign"] == "+"
+                              else -summary_stats["magnitude"])
+            _interp_input.update({
+                "single_median_rho": float(_single_signed),
+                "single_median_lag": int(summary_stats["lag"]),
+            })
+
+        interp = build_interpretation("rolling_ccf_lag", _interp_input)
+
         return make_response(
             ctx,
             tables=[rolling_table, lag_dist_table, stats_table, heat_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

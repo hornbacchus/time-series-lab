@@ -55,3 +55,18 @@ where `Z_t = (Y_t', Y_{t-1}', ..., Y_{t-p+1}')'` and `A` is the companion matrix
 **Granger causality**: Variable X Granger-causes variable Y if lagged values of X significantly improve the prediction of Y, conditional on Y's own lags. Tested via an F-test (or Wald test) comparing the unrestricted VAR with a restricted version excluding the lags of X in the Y equation.
 
 **Forecast error variance decomposition**: Decomposes the h-step forecast error variance of each variable into contributions from orthogonalized shocks: `FEVD_j,k(h) = sum_{i=0}^{h-1} (e_j' Phi_i P e_k)^2 / sum_{i=0}^{h-1} e_j' Phi_i Sigma_u Phi_i' e_j`, where `P` is the Cholesky factor of `Sigma_u`.
+
+## Interpretation
+
+Every VAR run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
+
+**Plain-Language Finding (Tier 1)** - 2-4 sentences. Leads with the system stability verdict (max companion-matrix root modulus relative to 1), names the lag order and variable count, and cites the single strongest within-system Granger relationship. Closes with a forecast-horizon note keyed to stability: stable systems support standard-horizon forecasts; near-unstable ones widen sharply with horizon.
+
+**Technical Interpretation (Tier 2)** - the companion-matrix max root modulus with its stability classification, the Granger-within-VAR test verdict on the strongest pair, and a pointer to the IRF/FEVD data tables.
+
+**Caveats (Tier 3, conditional)**:
+- **Near-unstable** - max root modulus >= 0.95; long-horizon forecasts widen and a VECM refit may be appropriate.
+- **Borderline Granger p** - strongest p in (0.04, 0.06).
+- **FEVD dominance** - any target variable's variance is >80% explained by one source at horizon >= 4.
+
+The wrapper surfaces `max_root_modulus` in audit_fields (computed from `fit.roots`) so the spec can route on stability without redoing the companion-matrix math.

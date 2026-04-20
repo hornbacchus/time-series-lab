@@ -18,6 +18,15 @@ from techniques.base import (
     format_significance_disclosure,
 )
 
+# Interpretation layer (Prompt B). Defensive import: partial deployments
+# without the interpretation package fall back to a no-op that yields
+# None, which make_response then omits from the response JSON.
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 
 def run(ctx: RunContext, progress_callback) -> dict:
     """
@@ -188,16 +197,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
         )
 
         # Check for reverse causality hint
+        rev_best_p = None
+        rev_best_f = None
+        rev_best_lag = None
         if ctx.preset == "Thorough":
             progress_callback("Testing reverse direction", 85)
             data_rev = np.column_stack([x_clean, y_clean])
             results_rev = grangercausalitytests(data_rev, maxlag=max_lag, verbose=False)
             rev_best_p = 1.0
-            rev_best_lag = None
             for lag in range(1, max_lag + 1):
                 p_rev = results_rev[lag][0]["ssr_ftest"][1]
+                f_rev = results_rev[lag][0]["ssr_ftest"][0]
                 if p_rev < rev_best_p:
                     rev_best_p = p_rev
+                    rev_best_f = float(f_rev)
                     rev_best_lag = lag
 
             if rev_best_p < significance:
@@ -216,12 +229,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("granger_causality", {
+            "series_name_x": x_name,
+            "series_name_y": y_name,
+            "best_lag": best_lag,
+            "best_f": float(best_f),
+            "best_p": float(best_p),
+            "max_lag": max_lag,
+            "n_obs": n,
+            "significance": float(significance),
+            "reverse_f": rev_best_f,
+            "reverse_p": rev_best_p,
+        })
+
         return make_response(
             ctx,
             tables=[results_table, summary_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "y_series": y_name,
                 "x_series": x_name,
