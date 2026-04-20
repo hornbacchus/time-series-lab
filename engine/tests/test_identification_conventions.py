@@ -299,6 +299,154 @@ class TestMarkovSwitchingLabelingConvention(unittest.TestCase):
 # ─────────────────────────────────────────────────────────────────────
 # Markov Switching — transition-matrix forecast invariants
 # ─────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────
+# Markov Switching — single-regime RMSE benchmark invariants
+# ─────────────────────────────────────────────────────────────────────
+class TestMarkovSwitchingBenchmark(unittest.TestCase):
+    """The Markov Switching wrapper now fits a single-regime benchmark
+    (constant mean under order=0, ARIMA(order, 0, 0) under order>=1)
+    alongside the Markov fit, reports benchmark RMSE and the Markov-
+    vs-benchmark lift in the Model Summary table, and surfaces both
+    into audit_fields and the interpretation layer.
+
+    Motivation: Markov RMSE reported as a single absolute number gives
+    the user no way to see whether the specification is earning its
+    complexity. The lift metric converts an opaque RMSE into a signal
+    that either validates or challenges the regime-switching choice.
+
+    Three invariants:
+    - order=0 benchmark produces a finite RMSE and the correct name.
+    - order>=1 benchmark on a single-regime AR(1) series produces a
+      name of "AR(1)" and a lift close to zero (the Markov fit cannot
+      materially outperform its own benchmark on data without regime
+      structure).
+    - Both Model Summary rows (Benchmark RMSE, RMSE Lift vs Benchmark)
+      are present in the output table. Guards against future edits
+      accidentally dropping the reporting.
+    """
+
+    def _variance_dominant_ctx(self):
+        """Fixture used by T_new_1 and T_new_3 — same variance-dominant
+        DGP as TestMarkovSwitchingForecasts so order=0 is exercised on
+        a series whose regimes actually differ (in variance)."""
+        rng = np.random.default_rng(42)
+        n = 500
+        P = np.array([[0.95, 0.05], [0.05, 0.95]])
+        state = 0
+        y = np.zeros(n)
+        for t in range(n):
+            y[t] = rng.normal(0.0, 1.0 if state == 0 else 5.0)
+            if rng.random() < 1 - P[state, state]:
+                state = 1 - state
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(n)]
+        return RunContext({
+            "run_id": "t", "technique_id": "markov_switching",
+            "preset": "Fast", "seed": 42, "frequency": "Quarterly",
+            "time": time_axis,
+            "series": [{"name": "Y", "values": y.tolist()}],
+            "params": {"k_regimes": 2, "order": 0,
+                       "switching_variance": True},
+        })
+
+    def test_order0_benchmark_constant_mean(self):
+        """order=0 fit: benchmark_rmse should be finite, benchmark_name
+        should be 'constant mean', and the lift should be modest on a
+        mean-identical two-regime process (both regimes have μ=0 so the
+        constant-mean benchmark is actually quite competitive)."""
+        from techniques import markov_switching
+        res = markov_switching.run(self._variance_dominant_ctx(), _noop_progress)
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+
+        audit = res.get("audit_fields") or {}
+        benchmark_rmse = audit.get("benchmark_rmse")
+        benchmark_name = audit.get("benchmark_name")
+        lift = audit.get("rmse_lift_vs_benchmark")
+
+        self.assertIsNotNone(benchmark_rmse,
+                             "benchmark_rmse missing from audit_fields")
+        self.assertTrue(
+            np.isfinite(benchmark_rmse),
+            f"benchmark_rmse should be finite; got {benchmark_rmse}"
+        )
+        self.assertEqual(
+            benchmark_name, "constant mean",
+            f"order=0 benchmark should be 'constant mean'; "
+            f"got {benchmark_name!r}"
+        )
+        self.assertIsNotNone(lift, "rmse_lift_vs_benchmark missing")
+        self.assertTrue(
+            -0.20 <= lift <= 0.20,
+            f"Lift on mean-identical two-regime process should be "
+            f"within ±20%; got {lift:+.1%}"
+        )
+
+    def test_order1_benchmark_ar1(self):
+        """order=1 fit on a synthetic AR(1): benchmark_name should be
+        'AR(1)' and lift should be within ±10%. The Markov fit on
+        single-regime AR(1) data should not materially beat its own
+        AR(1) benchmark — substantial positive lift would signal the
+        Markov is overfitting spurious regimes; substantial negative
+        lift would signal the benchmark is a better specification."""
+        from techniques import markov_switching
+        rng = np.random.default_rng(42)
+        rho = 0.6
+        n = 200
+        y = np.zeros(n)
+        for t in range(1, n):
+            y[t] = rho * y[t - 1] + rng.normal(0, 1)
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(n)]
+        ctx = RunContext({
+            "run_id": "t", "technique_id": "markov_switching",
+            "preset": "Balanced", "seed": 42, "frequency": "Quarterly",
+            "time": time_axis,
+            "series": [{"name": "AR1", "values": y.tolist()}],
+            "params": {"k_regimes": 2, "order": 1,
+                       "switching_variance": True},
+        })
+        res = markov_switching.run(ctx, _noop_progress)
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+
+        audit = res.get("audit_fields") or {}
+        benchmark_name = audit.get("benchmark_name")
+        lift = audit.get("rmse_lift_vs_benchmark")
+
+        self.assertEqual(
+            benchmark_name, "AR(1)",
+            f"order=1 benchmark should be 'AR(1)'; got {benchmark_name!r}"
+        )
+        self.assertIsNotNone(lift, "rmse_lift_vs_benchmark missing")
+        self.assertTrue(
+            -0.10 <= lift <= 0.10,
+            f"Lift on single-regime AR(1) fixture should be within "
+            f"±10% of its AR(1) benchmark; got {lift:+.1%}. Larger "
+            f"positive lift signals spurious regime overfitting."
+        )
+
+    def test_model_summary_has_benchmark_rows(self):
+        """Guard against future edits that drop either the Benchmark
+        RMSE or RMSE Lift row from the Model Summary table output."""
+        from techniques import markov_switching
+        res = markov_switching.run(self._variance_dominant_ctx(), _noop_progress)
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+
+        summary = _find_table(res, "model summary")
+        self.assertIsNotNone(summary, "Model Summary table missing")
+        metrics = {str(row[0]) for row in summary["rows"]}
+        self.assertIn(
+            "Benchmark RMSE", metrics,
+            f"Model Summary must include 'Benchmark RMSE' row. "
+            f"Got metrics: {sorted(metrics)}"
+        )
+        self.assertIn(
+            "RMSE Lift vs Benchmark", metrics,
+            f"Model Summary must include 'RMSE Lift vs Benchmark' row. "
+            f"Got metrics: {sorted(metrics)}"
+        )
+
+
 class TestMarkovSwitchingForecasts(unittest.TestCase):
     """The wrapper now constructs multi-step forecasts manually from
     the transition matrix and the final filtered regime probabilities,

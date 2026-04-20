@@ -25,6 +25,11 @@ Results-dict keys consumed:
                                               sorted order)
     forecast_stationary : list[float] | None (stationary distribution
                                               of the transition matrix)
+    markov_rmse         : float | None (in-sample RMSE of the Markov fit)
+    benchmark_rmse      : float | None (in-sample RMSE of a single-
+                                        regime same-AR-order reference)
+    benchmark_name      : str | None ("constant mean" | "AR(k)")
+    rmse_lift_vs_benchmark : float | None ((bench - markov) / bench)
 """
 
 from typing import Optional
@@ -241,7 +246,26 @@ def _tier2(results: dict) -> str:
                 f"95% intervals assume Gaussian within-regime emissions."
             )
 
-    return f"{header} {per_regime} {current_sentence} {closer}{forecast_sentence}"
+    # Single-regime benchmark disclosure. Converts the Markov fit's
+    # absolute RMSE into a lift metric users can actually reason about.
+    # Placed after the forecast disclosure to keep the reporting order
+    # "fit details → forecast math → calibration check against a
+    # simpler alternative".
+    markov_rmse = results.get("markov_rmse")
+    benchmark_rmse = results.get("benchmark_rmse")
+    benchmark_name = results.get("benchmark_name")
+    lift = results.get("rmse_lift_vs_benchmark")
+    benchmark_sentence = ""
+    if (markov_rmse is not None and benchmark_rmse is not None
+            and benchmark_name and lift is not None):
+        benchmark_sentence = (
+            f" The model's RMSE of {float(markov_rmse):.2f} compares with "
+            f"a single-regime {benchmark_name} benchmark RMSE of "
+            f"{float(benchmark_rmse):.2f}, an in-sample lift of "
+            f"{float(lift):+.1%}."
+        )
+
+    return f"{header} {per_regime} {current_sentence} {closer}{forecast_sentence}{benchmark_sentence}"
 
 
 # ---------------------------------------------------------------------

@@ -6,6 +6,7 @@ Allows regime-dependent mean, variance, and autoregressive parameters.
 """
 
 import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.regime_switching.markov_regression import MarkovRegression
 from statsmodels.tsa.regime_switching.markov_autoregression import MarkovAutoregression
 
@@ -118,6 +119,54 @@ def _extract_ar_params(param_names, params_native, k_regimes, order):
                 except ValueError:
                     continue
     return consts_native, ar_coefs_native
+
+
+def _fit_benchmark(filled, order):
+    """Fit a single-regime reference model with matching AR order.
+
+    Used to convert the Markov Switching RMSE from an absolute number
+    into a lift metric: how much does the regime-switching
+    specification reduce in-sample error over the simplest same-order
+    alternative?
+
+    - ``order == 0``  → constant-mean benchmark
+      (RMSE reduces to the sample standard deviation of ``filled``).
+      Name: ``"constant mean"``.
+    - ``order >= 1``  → statsmodels ARIMA(order, 0, 0) benchmark.
+      Name: ``"AR({order})"``.
+
+    Benchmark RMSE is computed against the same ``filled`` series the
+    Markov fit used, so the denominator is consistent. The first
+    ``order`` residuals of the ARIMA fit are dropped to match the
+    AR-initialization window dropped from the Markov residual vector.
+
+    Returns
+    -------
+    (benchmark_rmse, benchmark_name) : tuple
+        Both ``None`` when the benchmark fit raises an exception; the
+        caller emits a warning and omits the benchmark rows. The main
+        Markov fit is unaffected.
+    """
+    try:
+        y = np.asarray(filled, dtype=float)
+        if order == 0:
+            mu = float(np.mean(y))
+            rmse = float(np.sqrt(np.mean((y - mu) ** 2)))
+            return rmse, "constant mean"
+        # order >= 1
+        arima_fit = ARIMA(y, order=(order, 0, 0)).fit()
+        resid = np.asarray(arima_fit.resid, dtype=float)
+        # Match the Markov wrapper's AR-init drop: skip the first
+        # `order` residuals where the AR term has no history.
+        if len(resid) > order:
+            resid = resid[order:]
+        valid = resid[np.isfinite(resid)]
+        if len(valid) == 0:
+            return None, None
+        rmse = float(np.sqrt(np.mean(valid ** 2)))
+        return rmse, f"AR({order})"
+    except Exception:
+        return None, None
 
 
 def _build_forecast(
@@ -734,6 +783,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
         valid_resid = residuals[~np.isnan(residuals)]
         rmse = float(np.sqrt(np.mean(valid_resid ** 2))) if len(valid_resid) > 0 else None
 
+        # Single-regime benchmark — converts the absolute RMSE above
+        # into a lift metric so the user can see whether the Markov
+        # specification is earning its complexity. In-sample match of
+        # AR order so the comparison is structurally apples-to-apples.
+        benchmark_rmse, benchmark_name = _fit_benchmark(filled, order)
+        rmse_lift_vs_benchmark = None
+        if benchmark_rmse is not None and rmse is not None and benchmark_rmse > 0:
+            rmse_lift_vs_benchmark = float(
+                (benchmark_rmse - rmse) / benchmark_rmse
+            )
+        elif benchmark_rmse is None:
+            warnings.append(
+                "Benchmark fit failed. RMSE Lift vs Benchmark row omitted "
+                "from Model Summary."
+            )
+
         # Expected regime duration
         durations = []
         for r in range(k_regimes):
@@ -754,8 +819,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["AIC", round(float(fit.aic), 2)],
             ["BIC", round(float(fit.bic), 2)],
             ["RMSE", round(rmse, 4) if rmse else None],
-            ["Forecast Horizon", horizon],
         ]
+        # Benchmark comparison — appended only when the benchmark fit
+        # succeeded. Negative lift values permitted: a negative lift
+        # is useful signal that the specification is overfitting noise
+        # on a series without real regime structure.
+        if benchmark_rmse is not None:
+            summary_rows.append([
+                "Benchmark RMSE",
+                f"{benchmark_rmse:.4f} ({benchmark_name})",
+            ])
+        if rmse_lift_vs_benchmark is not None:
+            summary_rows.append([
+                "RMSE Lift vs Benchmark",
+                f"{rmse_lift_vs_benchmark:+.1%}",
+            ])
+        summary_rows.append(["Forecast Horizon", horizon])
         for r in range(k_regimes):
             summary_rows.append([f"Expected Duration Regime {r}", durations[r] if r < len(durations) else None])
 
@@ -804,6 +883,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "ignoring parameter estimation uncertainty; AR-innovation "
                 "variance not compounded across horizons"
             ) if forecast_method else None,
+            "benchmark_rmse": (
+                round(benchmark_rmse, 4) if benchmark_rmse is not None else None
+            ),
+            "benchmark_name": benchmark_name,
+            "rmse_lift_vs_benchmark": (
+                round(rmse_lift_vs_benchmark, 4)
+                if rmse_lift_vs_benchmark is not None else None
+            ),
         }
 
         # Build per-regime empirical means and stds for the interpretation
@@ -843,6 +930,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 stationary_distribution.tolist()
                 if stationary_distribution is not None else None
             ),
+            "markov_rmse": rmse,
+            "benchmark_rmse": benchmark_rmse,
+            "benchmark_name": benchmark_name,
+            "rmse_lift_vs_benchmark": rmse_lift_vs_benchmark,
         })
 
         return make_response(
