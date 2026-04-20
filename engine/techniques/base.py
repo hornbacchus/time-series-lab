@@ -2,6 +2,24 @@
 Base classes and helpers for Time Series Lab technique modules.
 
 Every technique receives a RunContext and returns a dict matching the RunResponse schema.
+
+This module also hosts platform-wide calendar and contiguity helpers:
+  - ``NYSEHolidayCalendar`` / ``NYSE_CALENDAR`` / ``nyse_bday()`` —
+    authoritative NYSE trading-day calendar for equity-market
+    financial series (sp500 index, stocks, etc.) and user-provided
+    data tagged ``nyse_daily``. Differs from
+    ``USFederalHolidayCalendar`` by INCLUDING Good Friday (NYSE
+    closed) and EXCLUDING Columbus Day and Veterans Day (NYSE open).
+  - ``SIFMAHolidayCalendar`` / ``SIFMA_CALENDAR`` / ``sifma_bday()`` —
+    authoritative US fixed-income trading-day calendar for Treasury
+    and bond-market series (treasury yields, SOFR, etc.) and
+    user-provided data tagged ``sifma_daily``. Equivalent to
+    ``USFederalHolidayCalendar`` plus Good Friday. Treasury markets
+    close on Columbus Day, Veterans Day, and Good Friday; NYSE does
+    not match on the first two.
+  - ``enforce_contiguous_tail(df, freq)`` — truncates a dated
+    DataFrame so the tail is gap-free at the detected frequency,
+    preserving the most-recent contiguous run.
 """
 
 import datetime
@@ -80,6 +98,283 @@ def flip_sign_vector(v):
     i = int(np.argmax(np.abs(v)))
     sign = 1.0 if v[i] >= 0 else -1.0
     return v * sign
+
+
+def _nyse_holiday_calendar():
+    """Lazily build the NYSE trading-day holiday calendar.
+
+    Local import keeps base.py's top-level imports minimal and avoids
+    paying the pandas.tseries.holiday import cost on every module load.
+
+    The NYSE calendar differs from ``pandas.tseries.holiday.
+    USFederalHolidayCalendar`` by:
+      - INCLUDING Good Friday — NYSE closed, federal government open.
+      - EXCLUDING Columbus Day — NYSE open, federal government closed.
+      - EXCLUDING Veterans Day — NYSE open, federal government closed.
+
+    Juneteenth is included from 2021-06-19 onward per NYSE's adoption
+    of the federal holiday when it was established.
+    """
+    import pandas as pd
+    from pandas.tseries.holiday import (
+        AbstractHolidayCalendar, Holiday, USMartinLutherKingJr,
+        USPresidentsDay, USMemorialDay, USLaborDay, USThanksgivingDay,
+        GoodFriday, nearest_workday,
+    )
+
+    class NYSEHolidayCalendar(AbstractHolidayCalendar):
+        """NYSE trading-day holiday calendar.
+
+        Authoritative for NYSE-traded instruments in TSL sample data
+        and user-provided data tagged ``nyse_daily``."""
+        rules = [
+            Holiday("New Year's Day", month=1, day=1, observance=nearest_workday),
+            USMartinLutherKingJr,
+            USPresidentsDay,
+            GoodFriday,
+            USMemorialDay,
+            Holiday("Juneteenth", month=6, day=19,
+                    start_date=pd.Timestamp("2021-06-19"),
+                    observance=nearest_workday),
+            Holiday("Independence Day", month=7, day=4, observance=nearest_workday),
+            USLaborDay,
+            USThanksgivingDay,
+            Holiday("Christmas", month=12, day=25, observance=nearest_workday),
+        ]
+
+    return NYSEHolidayCalendar()
+
+
+# Module-level NYSE calendar singleton. Prefer this over constructing
+# a fresh NYSEHolidayCalendar at every call site — the calendar object
+# caches its resolved holiday dates lazily.
+NYSE_CALENDAR = _nyse_holiday_calendar()
+
+
+def nyse_bday():
+    """Return a ``CustomBusinessDay`` anchored on the NYSE trading
+    calendar. Use for ``date + nyse_bday()`` / ``date - nyse_bday()``
+    arithmetic on equity-market daily series."""
+    import pandas as pd
+    return pd.offsets.CustomBusinessDay(calendar=NYSE_CALENDAR)
+
+
+def _sifma_holiday_calendar():
+    """Lazily build the US fixed-income (SIFMA) trading-day calendar.
+
+    Equivalent to ``USFederalHolidayCalendar`` plus Good Friday.
+    Treasury and bond markets close on every federal holiday AND on
+    Good Friday; NYSE-only behavior (open on Columbus Day / Veterans
+    Day, closed on Good Friday) does not apply.
+
+    Authoritative for Treasury yields, SOFR, and other US fixed-income
+    series in TSL sample data and user-provided data tagged
+    ``sifma_daily``.
+    """
+    from pandas.tseries.holiday import (
+        AbstractHolidayCalendar, USFederalHolidayCalendar, GoodFriday,
+    )
+    fed_rules = list(USFederalHolidayCalendar.rules)
+
+    class SIFMAHolidayCalendar(AbstractHolidayCalendar):
+        """US fixed-income trading-day holiday calendar."""
+        rules = fed_rules + [GoodFriday]
+
+    return SIFMAHolidayCalendar()
+
+
+SIFMA_CALENDAR = _sifma_holiday_calendar()
+
+
+def sifma_bday():
+    """Return a ``CustomBusinessDay`` anchored on the SIFMA trading
+    calendar. Use for ``date + sifma_bday()`` / ``date - sifma_bday()``
+    arithmetic on US fixed-income daily series (Treasury yields,
+    SOFR, etc.)."""
+    import pandas as pd
+    return pd.offsets.CustomBusinessDay(calendar=SIFMA_CALENDAR)
+
+
+_BDAY_OFFSET_CACHE = {}
+
+
+def _bday_offset_for(freq: str):
+    """Return the single ``CustomBusinessDay`` offset for the given
+    freq token, cached across calls. Creating a fresh offset per
+    iteration over thousands of rows was the dominant cost of
+    ``enforce_contiguous_tail`` on a 16k-row daily series."""
+    import pandas as pd
+    from pandas.tseries.holiday import USFederalHolidayCalendar
+    cached = _BDAY_OFFSET_CACHE.get(freq)
+    if cached is not None:
+        return cached
+    if freq == "daily":
+        offset = pd.offsets.CustomBusinessDay(calendar=USFederalHolidayCalendar())
+    elif freq == "nyse_daily":
+        offset = nyse_bday()
+    elif freq == "sifma_daily":
+        offset = sifma_bday()
+    else:
+        return None
+    _BDAY_OFFSET_CACHE[freq] = offset
+    return offset
+
+
+def _expected_previous_date(current_ts, freq: str):
+    """Compute the expected previous-observation date under the given
+    frequency convention. Helper for :func:`enforce_contiguous_tail`.
+
+    Supported ``freq`` values (case-insensitive):
+      ``"annual"``      → one year earlier on the same month/day
+      ``"quarterly"``   → three months earlier
+      ``"monthly"``     → one month earlier
+      ``"weekly"``      → seven days earlier
+      ``"daily"``       → one US-federal business day earlier
+      ``"nyse_daily"``  → one NYSE trading day earlier
+      ``"sifma_daily"`` → one SIFMA trading day earlier (Treasury / bond markets)
+    """
+    import pandas as pd
+    key = str(freq or "").strip().lower()
+    if key == "annual":
+        return current_ts - pd.DateOffset(years=1)
+    if key == "quarterly":
+        return current_ts - pd.DateOffset(months=3)
+    if key == "monthly":
+        return current_ts - pd.DateOffset(months=1)
+    if key == "weekly":
+        return current_ts - pd.DateOffset(weeks=1)
+    if key in ("daily", "nyse_daily", "sifma_daily"):
+        return current_ts - _bday_offset_for(key)
+    # Unknown frequency: fall back to one calendar day.
+    return current_ts - pd.DateOffset(days=1)
+
+
+def enforce_contiguous_tail(df, freq: str, *, min_tail: int = 60):
+    """Truncate a dated DataFrame so its tail is contiguous at the
+    given frequency, preserving the most-recent contiguous run.
+
+    The DataFrame is expected to have a DatetimeIndex OR a first
+    column parseable as dates. The helper sorts rows ascending by
+    date internally for the gap walk; the returned DataFrame keeps
+    the caller's original row order.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dated DataFrame. Either the index is a DatetimeIndex or the
+        first column holds dates.
+    freq : str
+        One of ``"annual"``, ``"quarterly"``, ``"monthly"``,
+        ``"weekly"``, ``"daily"``, ``"nyse_daily"``.
+    min_tail : int, default 60
+        Floor on the contiguous-tail length. When the computed tail
+        falls below this threshold, the helper does NOT auto-truncate
+        — it returns the original DataFrame unchanged with
+        ``info["below_min"] = True``. Callers decide whether to emit
+        a warning and skip, or raise.
+
+    Returns
+    -------
+    (truncated_df, info) : tuple
+        ``info`` keys:
+            ``tail_length``          — int, contiguous-tail size in observations
+            ``most_recent_gap_date`` — pd.Timestamp or None
+            ``below_min``            — bool, True when tail < min_tail
+            ``rows_dropped``         — int, how many rows the truncation removed
+            ``dropped_date_range``   — (first_dropped, last_dropped) or None
+    """
+    import pandas as pd
+    tol_days = {
+        "annual": 5, "quarterly": 5, "monthly": 5,
+        "weekly": 2, "daily": 1, "nyse_daily": 1, "sifma_daily": 1,
+    }.get(str(freq or "").strip().lower(), 5)
+
+    if isinstance(df.index, pd.DatetimeIndex):
+        date_col = None
+        dates_orig = df.index
+    else:
+        date_col = df.columns[0]
+        dates_orig = pd.to_datetime(df[date_col])
+
+    if len(df) < 2:
+        return df.copy(), {
+            "tail_length": len(df),
+            "most_recent_gap_date": None,
+            "below_min": len(df) < min_tail,
+            "rows_dropped": 0,
+            "dropped_date_range": None,
+        }
+
+    # Sort ascending for the gap walk; retain the original order map.
+    order_asc = np.argsort(dates_orig.values)
+    dates_sorted = dates_orig.values[order_asc]
+    dates_sorted = pd.to_datetime(dates_sorted)
+
+    # Walk backward from the most recent date; stop at the first
+    # unexpected gap.
+    tail = 1
+    gap_cutoff_idx = 0  # inclusive lower bound of the contiguous tail
+    for i in range(len(dates_sorted) - 1, 0, -1):
+        here = dates_sorted[i]
+        actual_prev = dates_sorted[i - 1]
+        expected_prev = _expected_previous_date(here, freq)
+        gap_days = abs((actual_prev - expected_prev).days)
+        if gap_days <= tol_days:
+            tail += 1
+        else:
+            gap_cutoff_idx = i
+            break
+
+    if tail == len(dates_sorted):
+        # Already contiguous — no truncation.
+        return df.copy(), {
+            "tail_length": tail,
+            "most_recent_gap_date": None,
+            "below_min": tail < min_tail,
+            "rows_dropped": 0,
+            "dropped_date_range": None,
+        }
+
+    if tail < min_tail:
+        # Below-min: do not auto-truncate; callers decide.
+        most_recent_gap = dates_sorted[gap_cutoff_idx - 1]
+        return df.copy(), {
+            "tail_length": tail,
+            "most_recent_gap_date": most_recent_gap,
+            "below_min": True,
+            "rows_dropped": 0,
+            "dropped_date_range": None,
+        }
+
+    # Truncate: keep only rows with date >= dates_sorted[gap_cutoff_idx].
+    cutoff_date = dates_sorted[gap_cutoff_idx]
+    most_recent_gap = dates_sorted[gap_cutoff_idx - 1]
+    if date_col is None:
+        mask = df.index >= cutoff_date
+    else:
+        mask = pd.to_datetime(df[date_col]) >= cutoff_date
+    truncated = df.loc[mask].copy()
+
+    # Report what was dropped.
+    dropped_mask = ~mask
+    if dropped_mask.any():
+        if date_col is None:
+            dropped_dates = df.index[dropped_mask]
+        else:
+            dropped_dates = pd.to_datetime(df.loc[dropped_mask, date_col])
+        first_dropped = dropped_dates.min()
+        last_dropped = dropped_dates.max()
+        dropped_range = (first_dropped, last_dropped)
+    else:
+        dropped_range = None
+
+    return truncated, {
+        "tail_length": tail,
+        "most_recent_gap_date": most_recent_gap,
+        "below_min": False,
+        "rows_dropped": int(dropped_mask.sum()),
+        "dropped_date_range": dropped_range,
+    }
 
 
 def build_forecast_time_axis(last_time_label, frequency: str, horizon: int):
