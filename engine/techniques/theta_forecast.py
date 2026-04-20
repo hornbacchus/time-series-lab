@@ -300,6 +300,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "baseline_rmse": float(baseline["rmse"]),
             "baseline_label": baseline["label"],
             "series_std": float(np.nanstd(clean, ddof=1)) if len(clean) > 1 else 0.0,
+            "series_mean": float(np.nanmean(clean)) if len(clean) > 0 else 0.0,
         })
 
         return make_response(

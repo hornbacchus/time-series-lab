@@ -371,11 +371,9 @@ def _build_output(ctx, name, clean, order, seasonal_order, aic, bic,
     plain_english += f"AIC={aic:.1f}, RMSE={rmse:.4f}. " if rmse else f"AIC={aic:.1f}. "
     plain_english += f"{horizon}-step forecast produced."
 
-    if rmse and rmse > np.nanstd(clean) * 0.9:
-        warnings.append(
-            "RMSE is close to the standard deviation of the original series, "
-            "suggesting the model may not be much better than a naive forecast."
-        )
+    # (RMSE-vs-std heuristic warning removed in post-C2 corrections
+    # batch — the interpretation layer's naive-baseline comparison in
+    # Tier 1 supersedes it and uses a more honest baseline.)
 
     charting = (
         "Line chart with the original series, fitted values overlaid, and forecast "
@@ -404,6 +402,9 @@ def _build_output(ctx, name, clean, order, seasonal_order, aic, bic,
             break
     if lb10_p is None and lb_results:
         lb10_p = float(lb_results[-1][2])
+    # Jarque-Bera p-value for the residuals-non-normal Tier 3 trigger
+    # (Fix 5, post-C2 corrections batch).
+    jb_p_out = float(jb_p) if jb_p is not None else None
 
     audit = {
         "order": order_str,
@@ -419,6 +420,7 @@ def _build_output(ctx, name, clean, order, seasonal_order, aic, bic,
         "baseline_label": baseline["label"],
         "baseline_period": baseline["period"],
         "ljung_box_lag10_pvalue": lb10_p,
+        "jarque_bera_pvalue": (round(jb_p_out, 6) if jb_p_out is not None else None),
         **format_significance_disclosure(
             test_name="ARIMA MLE t-tests + Ljung-Box residual diagnostic",
             critical_value_formula=(
@@ -454,7 +456,9 @@ def _build_output(ctx, name, clean, order, seasonal_order, aic, bic,
         "baseline_rmse": float(baseline["rmse"]),
         "baseline_label": baseline["label"],
         "ljung_box_lag10_pvalue": lb10_p,
+        "jarque_bera_pvalue": jb_p_out,
         "series_std": float(np.nanstd(clean, ddof=1)) if len(clean) > 1 else 0.0,
+        "series_mean": float(np.nanmean(clean)) if len(clean) > 0 else 0.0,
     }
     if is_auto:
         _interp_dict.update({

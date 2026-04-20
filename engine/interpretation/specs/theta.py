@@ -38,6 +38,7 @@ def _tier1(results: dict) -> str:
         last_observed_value=float(results.get("last_observed_value", 0.0)),
         forecast_end_value=float(results.get("forecast_end_value", 0.0)),
         series_std=float(results.get("series_std", 0.0)),
+        series_mean=results.get("series_mean"),
         horizon=horizon,
     )
     if deseasonalized and period:

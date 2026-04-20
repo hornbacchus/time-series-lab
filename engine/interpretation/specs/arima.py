@@ -48,6 +48,7 @@ def _tier1(results: dict) -> str:
         last_observed_value=float(results.get("last_observed_value", 0.0)),
         forecast_end_value=float(results.get("forecast_end_value", 0.0)),
         series_std=float(results.get("series_std", 0.0)),
+        series_mean=results.get("series_mean"),
         horizon=horizon,
     )
     return (
@@ -164,6 +165,25 @@ def _trigger_differencing_overkill(results: dict) -> Optional[str]:
     )
 
 
+def _trigger_residuals_non_normal(results: dict) -> Optional[str]:
+    """Fix 5 (post-C2 corrections): fires when the Jarque-Bera
+    residual-normality test rejects at 5%. Complements the
+    ``residual_structure`` (Ljung-Box) trigger: JB catches
+    distributional mis-fit (fat tails / skewness) that Ljung-Box
+    can miss. Prediction intervals assume Gaussian errors, so a JB
+    rejection flags interval-coverage risk."""
+    jb_p = results.get("jarque_bera_pvalue")
+    if jb_p is None or float(jb_p) >= 0.05:
+        return None
+    return (
+        f"Residual normality test rejects at the 5% level "
+        f"(JB p={FMT_P_VALUE.format(float(jb_p))}); prediction "
+        f"intervals assume Gaussian errors and may be mis-calibrated "
+        f"for this series. Consider bootstrapped intervals or a "
+        f"heavier-tailed specification."
+    )
+
+
 SPEC = InterpretationSpec(
     technique_id="arima",
     tier1_builder=_tier1,
@@ -171,6 +191,7 @@ SPEC = InterpretationSpec(
     tier3_triggers=(
         _trigger_rmse_exceeds_naive,
         _trigger_residual_structure,
+        _trigger_residuals_non_normal,
         _trigger_pathological_order,
         _trigger_differencing_overkill,
     ),

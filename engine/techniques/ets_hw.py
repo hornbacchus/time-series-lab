@@ -116,17 +116,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         damped = ctx.get_param("damped_trend", False)
 
-        # Seasonal
+        # Seasonal.
+        # Distinguish three cases for the ``seasonal`` param (Fix 4,
+        # post-C2 corrections batch):
+        #   (a) absent from params dict → auto-detect based on n and period
+        #   (b) present with value None (or string "none"/"null"/"false")
+        #       → explicit disable; respect user intent
+        #   (c) present with value "add"/"mul" → use as specified
         period = _infer_period(ctx)
+        user_supplied_seasonal = "seasonal" in ctx.params
         seasonal_param = ctx.get_param("seasonal")
         if seasonal_param and str(seasonal_param).lower() in ("none", "null", "false"):
-            seasonal_param = None
+            seasonal_param = None  # explicit string disable (case b)
         elif seasonal_param:
             seasonal_param = str(seasonal_param).lower()[:3]
             if seasonal_param not in ("add", "mul"):
                 seasonal_param = "add"
+        elif user_supplied_seasonal:
+            # User explicitly passed Python None — respect it (case b).
+            seasonal_param = None
         else:
-            # Auto-detect: use seasonal if we have enough data
+            # Param absent entirely (case a) — auto-detect.
             if period >= 2 and n >= 2 * period:
                 seasonal_param = "add"
             else:
@@ -324,15 +334,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
         forecast_end_value = float(np.asarray(fc)[-1]) if len(fc) > 0 else 0.0
         # Extract labeled smoothing params from the fit object.
         _alpha = _beta = _gamma = _phi = None
+        def _coerce(v):
+            """Return float(v) when finite, else None. statsmodels reports
+            missing smoothing params (e.g., gamma when seasonal is disabled)
+            as float('nan'); the spec should treat those as absent."""
+            if v is None:
+                return None
+            try:
+                fv = float(v)
+            except Exception:
+                return None
+            if np.isnan(fv):
+                return None
+            return fv
         try:
             _p = fit.params
             if hasattr(_p, "get"):
-                _alpha = float(_p.get("smoothing_level")) if _p.get("smoothing_level") is not None else None
-                _beta  = float(_p.get("smoothing_trend")) if _p.get("smoothing_trend") is not None else None
-                _gamma = float(_p.get("smoothing_seasonal")) if _p.get("smoothing_seasonal") is not None else None
-                _phi_raw = _p.get("damping_trend")
-                if _phi_raw is not None and not (isinstance(_phi_raw, float) and np.isnan(_phi_raw)):
-                    _phi = float(_phi_raw)
+                _alpha = _coerce(_p.get("smoothing_level"))
+                _beta  = _coerce(_p.get("smoothing_trend"))
+                _gamma = _coerce(_p.get("smoothing_seasonal"))
+                _phi   = _coerce(_p.get("damping_trend"))
         except Exception:
             pass
 
@@ -363,6 +384,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "baseline_label": baseline["label"],
             "series_min": float(np.nanmin(clean)) if len(clean) > 0 else 0.0,
             "series_std": float(np.nanstd(clean, ddof=1)) if len(clean) > 1 else 0.0,
+            "series_mean": float(np.nanmean(clean)) if len(clean) > 0 else 0.0,
         }
         # Route to ets vs holt_winters spec by technique_id.
         _tid = str(ctx.technique_id or "").lower()

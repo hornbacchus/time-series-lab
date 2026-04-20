@@ -68,6 +68,7 @@ def _tier1(results: dict) -> str:
         last_observed_value=float(results.get("last_observed_value", 0.0)),
         forecast_end_value=float(results.get("forecast_end_value", 0.0)),
         series_std=float(results.get("series_std", 0.0)),
+        series_mean=results.get("series_mean"),
         horizon=horizon,
     )
     ic = str(results.get("ic", "aic")).upper()
@@ -193,6 +194,24 @@ def _trigger_search_scope_narrow(results: dict) -> Optional[str]:
     )
 
 
+def _trigger_residuals_non_normal(results: dict) -> Optional[str]:
+    """Fix 5 (post-C2 corrections): same semantics as the arima spec's
+    trigger — JB rejection flags Gaussian-interval mis-calibration
+    risk. auto_arima inherits the diagnostic because both modes share
+    ``engine/techniques/arima.py`` and its residual-diagnostic code
+    path."""
+    jb_p = results.get("jarque_bera_pvalue")
+    if jb_p is None or float(jb_p) >= 0.05:
+        return None
+    return (
+        f"Residual normality test rejects at the 5% level "
+        f"(JB p={FMT_P_VALUE.format(float(jb_p))}); prediction "
+        f"intervals assume Gaussian errors and may be mis-calibrated "
+        f"for this series. Consider bootstrapped intervals or a "
+        f"heavier-tailed specification."
+    )
+
+
 def _trigger_seasonal_m_inferred(results: dict) -> Optional[str]:
     if not bool(results.get("m_inferred_from_freq", False)):
         return None
@@ -200,6 +219,18 @@ def _trigger_seasonal_m_inferred(results: dict) -> Optional[str]:
     freq = results.get("frequency", "")
     if not m_val:
         return None
+    # Fix 3 (post-C2 corrections batch): when auto_arima selected a
+    # zero seasonal component (P=D=Q=0), the search has already
+    # concluded no seasonal structure; the "verify inferred m" advice
+    # is moot. Suppress the trigger in that case.
+    seasonal_order = results.get("seasonal_order") or []
+    try:
+        if len(seasonal_order) >= 3:
+            P, D, Q = int(seasonal_order[0]), int(seasonal_order[1]), int(seasonal_order[2])
+            if P == 0 and D == 0 and Q == 0:
+                return None
+    except Exception:
+        pass
     return (
         f"Seasonal period m={int(m_val)} auto-inferred from frequency '{freq}'; "
         f"verify the inferred period matches the intended seasonality."
@@ -213,6 +244,7 @@ SPEC = InterpretationSpec(
     tier3_triggers=(
         _trigger_rmse_exceeds_naive,
         _trigger_residual_structure,
+        _trigger_residuals_non_normal,
         _trigger_search_scope_narrow,
         _trigger_seasonal_m_inferred,
     ),

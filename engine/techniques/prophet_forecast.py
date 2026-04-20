@@ -445,6 +445,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "baseline_label": baseline["label"],
             "historical_max": historical_max,
             "series_std": float(np.nanstd(clean, ddof=1)) if len(clean) > 1 else 0.0,
+            "series_mean": float(np.nanmean(clean)) if len(clean) > 0 else 0.0,
             "interval_width": 0.95,
         })
 

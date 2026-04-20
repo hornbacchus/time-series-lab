@@ -19,22 +19,31 @@ def render_horizon_trend_clause(
     forecast_end_value: float,
     series_std: float,
     horizon: int,
+    series_mean: float = None,
 ) -> str:
     """Render the "forecast ends {...}" clause.
 
-    Three-rule fallback hierarchy (Prompt C2 Decision 7):
+    Four-rule fallback hierarchy (Prompt C2 Decision 7 + post-eval
+    rule 4 for near-zero-mean series):
       1. ``|last| < 1e-6`` → absolute-level fallback.
       2. ``|last| < 0.2 * series_std`` → absolute-level fallback.
       3. ``|trend_pct| > 100.0`` → absolute-level fallback.
-      4. Else: render as signed percentage change.
+      4. ``|series_mean| < 0.3 * series_std`` → absolute-level
+         fallback (near-zero-mean regime; catches financial-
+         returns-class series like S&P returns, yield diffs, FX
+         returns, VIX changes, credit-spread changes where the
+         series oscillates around zero and a single-endpoint
+         percentage is semantically misleading).
+      5. Else: render as signed percentage change.
 
     Absolute-level fallback phrasing includes the units suffix and
-    named start-value context per Revision 1:
+    named start-value context:
       "forecast ends at X, starting from Y"
     """
     last = float(last_observed_value)
     end = float(forecast_end_value)
     std = float(series_std) if series_std is not None else 0.0
+    mean = float(series_mean) if series_mean is not None else None
     abs_last = abs(last)
 
     # Rule 1: near-zero last observation
@@ -55,6 +64,13 @@ def render_horizon_trend_clause(
 
     # Rule 3: extreme-ratio cap
     if abs(trend_pct) > 100.0:
+        return (
+            f"forecast ends at {format_scale_aware(end)}, "
+            f"starting from {format_scale_aware(last)}"
+        )
+
+    # Rule 4: near-zero-mean regime (returns-class series)
+    if mean is not None and std > 0 and abs(mean) < 0.3 * std:
         return (
             f"forecast ends at {format_scale_aware(end)}, "
             f"starting from {format_scale_aware(last)}"
