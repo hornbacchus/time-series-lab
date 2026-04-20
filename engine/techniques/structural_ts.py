@@ -8,7 +8,10 @@ This is the most flexible UCM specification, encompassing local level and
 local linear trend as special cases.
 """
 
+import warnings as _warnings
+
 import numpy as np
+import pandas as pd
 from statsmodels.tsa.statespace.structural import UnobservedComponents
 
 from techniques.base import (
@@ -16,6 +19,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
+    format_significance_disclosure,
 )
 
 
@@ -27,6 +31,55 @@ _PRESET_CONFIG = {
     "Balanced": {"maxiter": 500, "stochastic_cycle": True, "autoregressive": 0},
     "Thorough": {"maxiter": 1000, "stochastic_cycle": True, "autoregressive": 2},
 }
+
+
+# ---------------------------------------------------------------------------
+# Forecast-axis extension (ported from the retired kalman_filter_model.py —
+# keeps the §4.1 invariant that the wrapper owns time-axis alignment).
+# ---------------------------------------------------------------------------
+def _build_forecast_time_axis(last_time_label, frequency: str, horizon: int):
+    """Extend the input's DatetimeIndex by `horizon` steps at the detected
+    frequency. Falls back to string labels ``t+1..t+h`` if the last input
+    label can't be parsed as a date or the frequency is unknown.
+    """
+    # Frequency aliases: prefer pandas 2.2+ codes ("YE-DEC", "QE-DEC", "ME");
+    # fall back to the legacy codes on older pandas via a second attempt.
+    freq_map_modern = {
+        "A": "YE-DEC", "ANNUAL": "YE-DEC", "Y": "YE-DEC",
+        "Q": "QE-DEC", "QUARTERLY": "QE-DEC", "QS": "QS",
+        "M": "ME", "MONTHLY": "ME", "MS": "MS",
+        "W": "W", "WEEKLY": "W",
+        "D": "D", "DAILY": "D", "B": "B",
+        "H": "h", "HOURLY": "h",
+    }
+    freq_map_legacy = {
+        "A": "A-DEC", "ANNUAL": "A-DEC", "Y": "A-DEC",
+        "Q": "Q-DEC", "QUARTERLY": "Q-DEC", "QS": "QS",
+        "M": "M", "MONTHLY": "M", "MS": "MS",
+        "W": "W", "WEEKLY": "W",
+        "D": "D", "DAILY": "D", "B": "B",
+        "H": "H", "HOURLY": "H",
+    }
+    key = (frequency or "").strip().upper()
+    modern = freq_map_modern.get(key)
+    legacy = freq_map_legacy.get(key)
+    if modern is None and legacy is None:
+        return [f"t+{i + 1}" for i in range(horizon)]
+    try:
+        last_ts = pd.to_datetime(str(last_time_label))
+    except Exception:
+        return [f"t+{i + 1}" for i in range(horizon)]
+    for code in (modern, legacy):
+        if code is None:
+            continue
+        try:
+            with _warnings.catch_warnings():
+                _warnings.simplefilter("ignore", FutureWarning)
+                dates = pd.date_range(start=last_ts, periods=horizon + 1, freq=code)[1:]
+            return [d.strftime("%Y-%m-%d") for d in dates]
+        except (ValueError, TypeError):
+            continue
+    return [f"t+{i + 1}" for i in range(horizon)]
 
 
 def run(ctx: RunContext, progress_callback) -> dict:
@@ -246,17 +299,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
         tables = []
 
         # ---- Forecast table ----
+        # Extend the input DatetimeIndex by `horizon` steps at the
+        # detected frequency, per §4.1 (wrapper owns alignment). Falls
+        # back to "t+1".."t+h" when frequency is unknown.
+        last_label = ctx.time[-1] if ctx.time else None
+        fc_time_axis = _build_forecast_time_axis(
+            last_label, ctx.frequency or "", horizon,
+        )
         fc_rows = []
         for h in range(horizon):
             fc_rows.append([
-                n + h + 1,
+                fc_time_axis[h],
                 round(float(fc_mean[h]), 6),
                 round(float(ci[h, 0]), 6),
                 round(float(ci[h, 1]), 6),
             ])
         tables.append(make_table(
             "Forecast",
-            ["Step", "Forecast", f"Lower {ci_pct}%", f"Upper {ci_pct}%"],
+            ["Time", "Forecast", f"Lower {ci_pct}%", f"Upper {ci_pct}%"],
             fc_rows,
         ))
 
@@ -288,7 +348,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 round(float(bse.iloc[i] if hasattr(bse, 'iloc') else bse[i]), 6),
                 round(float(pvalues.iloc[i] if hasattr(pvalues, 'iloc') else pvalues[i]), 6),
             ])
-        tables.append(make_table("Model Parameters", ["Parameter", "Estimate", "Std Error", "P-Value"], param_rows))
+        tables.append(make_table("Estimated Parameters", ["Parameter", "Estimate", "Std Error", "P-Value"], param_rows))
 
         # ---- Model summary ----
         valid_resid = residuals[~np.isnan(residuals)]
@@ -378,6 +438,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "rmse": round(rmse, 4) if rmse else None,
             "components": component_names,
             "horizon": horizon,
+            **format_significance_disclosure(
+                test_name=(
+                    "UCM MLE parameter t-tests + Ljung-Box residual diagnostic"
+                ),
+                critical_value_formula=(
+                    "Kalman-filter MLE standard errors; two-sided t-tests "
+                    "with (T - n_params) DoF; Ljung-Box via "
+                    "statsmodels.stats.diagnostic.acorr_ljungbox"
+                ),
+                ac_corrected=True,
+            ),
         }
 
         return make_response(

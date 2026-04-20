@@ -66,8 +66,6 @@ namespace TSL.AddIn
                     { "dynamic_factor_model", ("dfm_coincident.csv", "DFM Data") },
                     { "pca_analysis", ("treasury_yields.csv", "Treasury Yields") },
                     { "forecast_reconciliation", ("macro_var.csv", "Macro VAR") },
-                    { "kalman_filter", ("nile_river.csv", "Nile River") },
-                    { "kalman_smoother", ("nile_river.csv", "Nile River") },
                     { "local_level", ("nile_river.csv", "Nile River") },
                     { "local_linear_trend", ("airline_passengers.csv", "Airline Passengers") },
                     { "structural_ts", ("airline_passengers.csv", "Airline Passengers") },
@@ -225,9 +223,9 @@ namespace TSL.AddIn
             TaskPaneManager.RunTechnique("garch");
         }
 
-        public void OnKalmanFilter(IRibbonControl control)
+        public void OnStructuralTS(IRibbonControl control)
         {
-            TaskPaneManager.RunTechnique("kalman_filter");
+            TaskPaneManager.RunTechnique("structural_ts");
         }
 
         // ── Legacy Quick Action handlers ──────────────────────────────

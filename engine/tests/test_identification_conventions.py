@@ -356,9 +356,9 @@ class TestPcaSignStability(unittest.TestCase):
 
 
 # ─────────────────────────────────────────────────────────────────────
-# Kalman Filter / UCM output-alignment invariant
+# Structural TS / UCM output-alignment invariant
 # ─────────────────────────────────────────────────────────────────────
-class TestKalmanOutputAlignment(unittest.TestCase):
+class TestStructuralTSOutputAlignment(unittest.TestCase):
     """The wrapper must own alignment between the input's DatetimeIndex
     and every output row — not statsmodels' returned arrays — because
     statsmodels alternates between ndarray and Series depending on input
@@ -367,11 +367,13 @@ class TestKalmanOutputAlignment(unittest.TestCase):
 
     Previously crashed in the "Building output" phase with
     ``AttributeError: 'numpy.ndarray' object has no attribute 'index'``
-    when iterating ``fit.params.index`` on an ndarray-input model.
+    when iterating ``fit.params.index`` on an ndarray-input model. The
+    guarded pattern for statsmodels `fit.params` / `fit.bse` access is
+    documented in engine/techniques/NOTES_statsmodels_params.md.
     """
 
     def test_kalman_output_alignment_with_missing(self):
-        from techniques import kalman_filter_model
+        from techniques import structural_ts
 
         # Nile-like: 100-obs annual series with one interior NaN at position 50.
         rng = np.random.default_rng(42)
@@ -382,7 +384,7 @@ class TestKalmanOutputAlignment(unittest.TestCase):
 
         ctx = RunContext({
             "run_id": "t",
-            "technique_id": "kalman_filter_model",
+            "technique_id": "structural_ts",
             "preset": "Balanced",
             "seed": 42,
             "frequency": "Annual",
@@ -391,12 +393,12 @@ class TestKalmanOutputAlignment(unittest.TestCase):
             "params": {"horizon": 10},
         })
 
-        res = kalman_filter_model.run(ctx, _noop_progress)
+        res = structural_ts.run(ctx, _noop_progress)
 
         # 1. Run completed — no swallowed AttributeError in the output phase.
         self.assertEqual(
             res.get("status"), "success",
-            msg=f"Kalman run failed: {res.get('error_message')}"
+            msg=f"Structural TS run failed: {res.get('error_message')}"
         )
 
         # 2. Output table present.
@@ -741,7 +743,7 @@ class TestSignificanceDisclosureConvention(unittest.TestCase):
         # ARIMA family
         "arima", "sarima", "arimax_sarimax",
         # State-space
-        "kalman_filter_model", "kalman_imputation",
+        "structural_ts", "kalman_imputation",
         # Volatility
         "garch_model", "caviar_quantile_dynamics",
         # Forecasting with CI

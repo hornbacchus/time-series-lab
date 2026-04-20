@@ -53,7 +53,7 @@ msbuild TimeSeriesLab.sln -p:Configuration=Release -p:Platform=x64
 | Forecasting (Classical) | 8 | Auto ARIMA, ETS, Theta, Prophet |
 | Stationarity Tests | 3 | ADF, KPSS, Zivot-Andrews |
 | Multivariate | 6 | VAR, VECM, PCA, Dynamic Factor |
-| State Space | 6 | Kalman Filter, Unobserved Components |
+| State Space | 6 | Structural TS (UCM), Local Level, Local Linear Trend |
 | Regimes / Nonlinear | 5 | Markov Switching, SETAR, HMM |
 | Volatility / Risk | 7 | GARCH, EGARCH, Value-at-Risk |
 | Frequency Domain | 6 | FFT, Wavelet, Spectral Analysis |

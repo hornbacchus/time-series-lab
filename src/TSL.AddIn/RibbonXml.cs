@@ -113,12 +113,12 @@ namespace TSL.AddIn
                   screentip='GARCH Volatility Model'
                   supertip='Fit a GARCH(1,1) model to capture volatility clustering in a return series. Basis for VaR, risk budgeting, and volatility regime analysis.' />
           <button id='btnKalman'
-                  label='Kalman Filter'
+                  label='Structural TS'
                   size='large'
                   imageMso='FunctionWizard'
-                  onAction='OnKalmanFilter'
-                  screentip='Kalman Filter'
-                  supertip='Recursive state-space filter for signal extraction and nowcasting. Used for unobserved-components models (output gap, NAIRU, neutral rate r*) and online state estimation.' />
+                  onAction='OnStructuralTS'
+                  screentip='Structural Time Series (UCM)'
+                  supertip='Fit an Unobserved Components Model that decomposes the series into level, trend, seasonal, and cycle components via Kalman filtering. Used for signal extraction, nowcasting, and structural decomposition (output gap, NAIRU, neutral rate r*).' />
         </group>
 
         <group id='grpExplore' label='Explore'>
@@ -436,19 +436,12 @@ namespace TSL.AddIn
               </menu>
               <menu id='menuSample_state' label='State Space / Filtering'>
                 <button id='btnSample_kalman_filter'
-                        label='Kalman Filter Data: Nile River Annual Flow (1871-1970)'
+                        label='Structural TS Data: Nile River Annual Flow (1871-1970)'
                         imageMso='TableInsertExcel'
                         onAction='OnSampleDataByTechnique'
-                        tag='kalman_filter'
-                        screentip='Sample data for Kalman Filter'
-                        supertip='Load a representative sample dataset for the Kalman Filter technique. Dataset: Nile River Annual Flow (1871-1970). Each technique&apos;s sample was chosen to be a canonical or otherwise appropriate input. This is the same data you can use with the technique&apos;s Quick Action button or by selecting it in the Technique Explorer.' />
-                <button id='btnSample_kalman_smoother'
-                        label='Kalman Smoother Data: Nile River Annual Flow (1871-1970)'
-                        imageMso='TableInsertExcel'
-                        onAction='OnSampleDataByTechnique'
-                        tag='kalman_smoother'
-                        screentip='Sample data for Kalman Smoother'
-                        supertip='Load a representative sample dataset for the Kalman Smoother technique. Dataset: Nile River Annual Flow (1871-1970). Each technique&apos;s sample was chosen to be a canonical or otherwise appropriate input. This is the same data you can use with the technique&apos;s Quick Action button or by selecting it in the Technique Explorer.' />
+                        tag='structural_ts'
+                        screentip='Sample data for Structural Time Series (UCM)'
+                        supertip='Load a representative sample dataset for the Structural Time Series (UCM) technique. Dataset: Nile River Annual Flow (1871-1970). Each technique&apos;s sample was chosen to be a canonical or otherwise appropriate input. This is the same data you can use with the technique&apos;s Quick Action button or by selecting it in the Technique Explorer.' />
                 <button id='btnSample_local_level'
                         label='Local Level Data: Nile River Annual Flow (1871-1970)'
                         imageMso='TableInsertExcel'

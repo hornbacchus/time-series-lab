@@ -240,7 +240,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         warn_list.append(
             "Imputation confidence bands assume the chosen state-space model "
             "captures the true dynamics. If residual diagnostics show "
-            "unexplained structure (check Ljung-Box via the Kalman Filter "
+            "unexplained structure (check Ljung-Box via the Structural TS "
             "technique on the same series), the reported bands understate "
             "true uncertainty — consider a bootstrap re-fit for calibrated "
             "coverage."

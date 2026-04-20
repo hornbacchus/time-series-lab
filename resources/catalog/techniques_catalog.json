@@ -363,36 +363,6 @@
       "tags": ["multivariate", "hierarchical", "reconciliation"]
     },
     {
-      "id": "kalman_filter",
-      "name": "Kalman Filter",
-      "category": "State Space / Filtering",
-      "summary": "Apply Kalman filtering for state estimation in linear Gaussian state-space models.",
-      "description_file": "kalman_filter.md",
-      "min_series": 1, "max_series": 1,
-      "supports_auto_udf": false, "auto_udf_name": null,
-      "presets": ["Fast", "Balanced", "Thorough"],
-      "parameters": [
-        {"name": "model_type", "label": "Model Type", "type": "string", "default": "local_level", "required": false, "advanced": false, "description": "State-space model type", "options": ["local_level", "local_linear_trend", "random_walk"]}
-      ],
-      "output_tables": ["filtered_states", "model_summary"],
-      "tags": ["state-space", "kalman", "filtering"]
-    },
-    {
-      "id": "kalman_smoother",
-      "name": "Kalman Smoother",
-      "category": "State Space / Filtering",
-      "summary": "Kalman smoother for optimal state estimation using all available observations.",
-      "description_file": "kalman_smoother.md",
-      "min_series": 1, "max_series": 1,
-      "supports_auto_udf": false, "auto_udf_name": null,
-      "presets": ["Fast", "Balanced", "Thorough"],
-      "parameters": [
-        {"name": "model_type", "label": "Model Type", "type": "string", "default": "local_linear_trend", "required": false, "advanced": false, "description": "State-space model type", "options": ["local_level", "local_linear_trend"]}
-      ],
-      "output_tables": ["smoothed_states", "model_summary"],
-      "tags": ["state-space", "kalman", "smoothing"]
-    },
-    {
       "id": "local_level",
       "name": "Local Level Model",
       "category": "State Space / Filtering",

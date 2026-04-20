@@ -66,9 +66,13 @@ TECHNIQUE_REGISTRY = {
     "wavelet": "techniques.wavelet_transform",
 
     # --- State space / Kalman ---
-    "kalman_filter_model": "techniques.kalman_filter_model",
-    "kalman": "techniques.kalman_filter_model",
-    "ucm": "techniques.kalman_filter_model",
+    # NOTE: `kalman_filter`, `kalman_smoother`, `kalman`, and `ucm` aliases
+    # were removed when the "Kalman Filter" ribbon button was renamed to
+    # "Structural TS" and kalman_filter_model.py was retired in favor of
+    # the richer structural_ts.py wrapper. The catalog IDs `kalman_filter`
+    # and `kalman_smoother` are reserved for the genuine filter/smoother
+    # techniques that Prompt C's State Space batch will implement as
+    # distinct wrappers.
 
     # --- Evaluation / Uncertainty (K) ---
     "rolling_origin_cv": "techniques.rolling_origin_cv",
@@ -261,6 +265,7 @@ TECHNIQUE_REGISTRY = {
     "gjr_garch": "techniques.garch_model",
     "egarch": "techniques.garch_model",
     "wavelet_coherence_phase_lag": "techniques.wavelet_coherence",
-    "kalman_filter": "techniques.kalman_filter_model",
-    "kalman_smoother": "techniques.kalman_filter_model",
+    # kalman_filter / kalman_smoother aliases intentionally absent — see
+    # the State Space block above. They will be re-added by Prompt C as
+    # their own distinct technique IDs.
 }
