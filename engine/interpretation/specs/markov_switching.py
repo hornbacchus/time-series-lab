@@ -18,6 +18,13 @@ Results-dict keys consumed:
     final_period_probs  : list[float] (for the ambiguous-state trigger)
     sort_axis           : str ("mean" or "std"; wrapper classifies via
                                label_regimes_by_dominant_key)
+    forecast_method     : str | None ("transition_matrix_closed_form" |
+                                      "iterated_regime_weighted")
+    forecast_horizon    : int | None (horizon in forecast periods)
+    forecast_h_probs    : list[float] | None (pi_h at final horizon,
+                                              sorted order)
+    forecast_stationary : list[float] | None (stationary distribution
+                                              of the transition matrix)
 """
 
 from typing import Optional
@@ -205,7 +212,36 @@ def _tier2(results: dict) -> str:
             "the data tables."
         )
 
-    return f"{header} {per_regime} {current_sentence} {closer}"
+    # Forecast-disclosure sentence. Appended after the closer so Tier 1
+    # and Tier 2 prose don't overlap on "transition matrix" / "regime
+    # probabilities" vocabulary. Named by method so the Hamilton (1994)
+    # iterated-convention bias is disclosed when it applies.
+    method = str(results.get("forecast_method") or "")
+    h = results.get("forecast_horizon")
+    forecast_sentence = ""
+    if method and h:
+        if method == "transition_matrix_closed_form":
+            method_prose = "the closed-form π_h · μ construction"
+        else:
+            method_prose = (
+                "the iterated regime-weighted scheme (Hamilton 1994), "
+                "treating earlier forecasts as realized observations"
+            )
+        if k == 2:
+            forecast_sentence = (
+                f" The {int(h)}-step forecast in the data tables uses "
+                f"{method_prose}; 95% intervals assume Gaussian "
+                f"within-regime emissions, ignore parameter estimation "
+                f"uncertainty, and do not compound AR-innovation "
+                f"variance across forecast horizons."
+            )
+        else:
+            forecast_sentence = (
+                f" The {int(h)}-step forecast uses {method_prose}; "
+                f"95% intervals assume Gaussian within-regime emissions."
+            )
+
+    return f"{header} {per_regime} {current_sentence} {closer}{forecast_sentence}"
 
 
 # ---------------------------------------------------------------------
@@ -275,6 +311,38 @@ def _trigger_ambiguous_current_state(results: dict) -> Optional[str]:
     )
 
 
+def _trigger_near_stationary_at_horizon(results: dict) -> Optional[str]:
+    """Fires when the h-step regime-probability forecast is within 1%
+    (max-norm) of the stationary distribution of the transition matrix.
+    Under that condition, forecasts beyond this horizon carry no
+    additional regime-path information — they all reduce to the
+    unconditional stationary mixture."""
+    h_probs = results.get("forecast_h_probs")
+    stationary = results.get("forecast_stationary")
+    horizon = results.get("forecast_horizon")
+    if h_probs is None or stationary is None or horizon is None:
+        return None
+    try:
+        h_arr = [float(p) for p in h_probs]
+        s_arr = [float(p) for p in stationary]
+    except (TypeError, ValueError):
+        return None
+    if len(h_arr) != len(s_arr) or not h_arr:
+        return None
+    max_abs_diff = max(abs(hp - sp) for hp, sp in zip(h_arr, s_arr))
+    # 1e-2 threshold chosen for informative coverage at horizon=10 on
+    # typical macro regime persistence. The tighter 1e-3 would rarely
+    # fire; 1e-2 surfaces genuinely near-stationary chains.
+    if max_abs_diff >= 1e-2:
+        return None
+    return (
+        f"Regime probabilities at h={int(horizon)} are within 1% of "
+        f"the stationary distribution — forecasts beyond this horizon "
+        f"converge to the unconditional mixture and carry no "
+        f"additional regime information."
+    )
+
+
 # ---------------------------------------------------------------------
 # Register
 # ---------------------------------------------------------------------
@@ -287,6 +355,7 @@ SPEC = InterpretationSpec(
         _trigger_weak_separation,
         _trigger_near_absorbing,
         _trigger_ambiguous_current_state,
+        _trigger_near_stationary_at_horizon,
     ),
     mode_aware=False,
 )

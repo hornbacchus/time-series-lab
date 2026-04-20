@@ -21,7 +21,254 @@ from techniques.base import (
     make_response,
     make_error_response,
     label_regimes_by_dominant_key,
+    build_forecast_time_axis,
 )
+
+
+# ---------------------------------------------------------------------------
+# Forecast-construction helpers
+# ---------------------------------------------------------------------------
+# statsmodels' MarkovRegression and MarkovAutoregression expose a
+# ``.predict()`` / ``.forecast()`` signature but both raise
+# NotImplementedError on any multi-step call. Per §4.3 the library is
+# inviting the caller to do this construction from fitted quantities —
+# the transition matrix and the final filtered regime probabilities are
+# all we need for the probability-path recursion, and ``fit.params``
+# plus ``fit.model.param_names`` supply the per-regime constants and AR
+# coefficients for the conditional-mean recursion.
+
+def _stationary_distribution(P):
+    """Normalized left-eigenvector of P corresponding to eigenvalue 1.
+
+    Fallback to uniform 1/k when P is not ergodic (e.g., contains an
+    absorbing state) or the eigendecomposition returns a sign-flipped
+    vector that doesn't normalize to a valid probability simplex entry.
+    Used (a) for the Tier 3 near-stationary trigger and (b) as a
+    debugging sanity comparison against pi_h at h=horizon.
+    """
+    from scipy.linalg import eig
+    P_arr = np.asarray(P)
+    k = P_arr.shape[0]
+    try:
+        eigvals, eigvecs = eig(P_arr.T)
+    except Exception:
+        return np.ones(k) / k
+    # Find the eigenvalue closest to 1 (real part).
+    idx = int(np.argmin(np.abs(np.real(eigvals) - 1.0)))
+    vec = np.real(eigvecs[:, idx])
+    # Some conventions return a sign-flipped eigenvector; absolute
+    # value recovers the probability-simplex form.
+    if np.any(vec < -1e-9):
+        vec = np.abs(vec)
+    total = float(vec.sum())
+    if total <= 0 or not np.isfinite(total):
+        return np.ones(k) / k
+    return vec / total
+
+
+def _extract_ar_params(param_names, params_native, k_regimes, order):
+    """Pull per-regime constants and AR coefficients from the fit's
+    parameter vector in native (statsmodels) regime order.
+
+    Returns
+    -------
+    consts_native : ndarray (k_regimes,)
+        const[j] for native regime index j. Entries default to 0.0
+        when a name is missing (e.g., non-switching trend across
+        regimes produces a single "const" without a regime index).
+    ar_coefs_native : ndarray (k_regimes, order)
+        ar.L{lag}[j] for native regime j and lag index ``lag - 1``.
+        Non-switching AR produces a single "ar.L{lag}" name without
+        regime index; that value is broadcast across all regimes.
+    """
+    consts_native = np.zeros(k_regimes)
+    ar_coefs_native = np.zeros((k_regimes, max(order, 1)))
+    for idx, pname in enumerate(param_names):
+        try:
+            val = float(params_native[idx])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if pname.startswith("const["):
+            try:
+                j = int(pname[len("const["):-1])
+                if 0 <= j < k_regimes:
+                    consts_native[j] = val
+            except ValueError:
+                continue
+        elif pname == "const":
+            # Non-switching constant: broadcast to all regimes.
+            consts_native[:] = val
+        elif pname.startswith("ar.L"):
+            rest = pname[len("ar.L"):]
+            if "[" in rest:
+                lag_str, regime_str = rest.split("[", 1)
+                try:
+                    lag = int(lag_str) - 1
+                    j = int(regime_str.rstrip("]"))
+                    if 0 <= j < k_regimes and 0 <= lag < order:
+                        ar_coefs_native[j, lag] = val
+                except ValueError:
+                    continue
+            else:
+                # Non-switching AR: broadcast.
+                try:
+                    lag = int(rest) - 1
+                    if 0 <= lag < order:
+                        ar_coefs_native[:, lag] = val
+                except ValueError:
+                    continue
+    return consts_native, ar_coefs_native
+
+
+def _build_forecast(
+    *,
+    order,
+    horizon,
+    transition_matrix,
+    pi_T,
+    sort_order,
+    regime_means_sorted,
+    regime_stds_sorted,
+    last_observations,
+    param_names,
+    params_native,
+):
+    """Construct h-step regime-probability, conditional-mean, and
+    conditional-variance forecasts for a Markov-switching fit.
+
+    All sorted-aligned inputs must be permuted according to the wrapper's
+    post-fit labeling decision (``sort_axis`` mean-dominant or
+    std-dominant); ``sort_order`` supplies the native → sorted
+    permutation for mapping native-order fit.params entries to the
+    sorted column layout used by ``pi_T`` and ``transition_matrix``.
+
+    Method selection:
+      order == 0 → "transition_matrix_closed_form": the mean forecast
+        reduces to ``pi_h @ regime_means_sorted`` with no AR
+        recursion.
+      order >= 1 → "iterated_regime_weighted" (Hamilton 1994 /
+        Kim-Nelson 1999): at each horizon, compute per-regime one-step
+        conditional means given the AR history, weight by pi_h, append
+        the weighted mean to the history as if realized, and iterate.
+        Biased at long horizons when the implied regime path is
+        uncertain; disclosed in Tier 2 output.
+
+    Variance construction uses the law of total variance across
+    regimes (within + between). Three sources of variance are NOT
+    compounded: AR-innovation variance across forecast horizons;
+    parameter estimation uncertainty; and non-Gaussian within-regime
+    emissions. All three are disclosed in the audit field and Tier 2.
+
+    Returns
+    -------
+    dict with keys
+        regime_probs_forecast : (horizon, k) ndarray  (sorted columns)
+        mean_forecast         : (horizon,) ndarray
+        variance_forecast     : (horizon,) ndarray
+        lower_95 / upper_95   : (horizon,) ndarray
+        stationary_distribution : (k,) ndarray       (sorted order)
+        method                : str
+    """
+    P = np.asarray(transition_matrix, dtype=float)
+    k = P.shape[0]
+    pi_T_arr = np.asarray(pi_T, dtype=float).reshape(-1)
+    if pi_T_arr.shape[0] != k:
+        raise ValueError(
+            f"pi_T length {pi_T_arr.shape[0]} does not match "
+            f"transition matrix dim {k}"
+        )
+
+    # --- P.2 regime probability recursion ---
+    regime_probs_forecast = np.empty((horizon, k))
+    P_power = np.eye(k)
+    for h in range(horizon):
+        P_power = P_power @ P
+        regime_probs_forecast[h] = pi_T_arr @ P_power
+
+    stationary = _stationary_distribution(P)
+
+    # --- P.3 conditional mean construction ---
+    method = ("transition_matrix_closed_form" if order == 0
+              else "iterated_regime_weighted")
+
+    regime_means_sorted_arr = np.asarray(regime_means_sorted, dtype=float)
+    regime_stds_sorted_arr = np.asarray(regime_stds_sorted, dtype=float)
+
+    # Per-horizon per-regime conditional mean matrix — (horizon, k).
+    # Needed for both the mean forecast and the between-regime
+    # variance contribution.
+    per_regime_h = np.empty((horizon, k))
+
+    if order == 0:
+        # Closed form: every horizon's per-regime mean is just the
+        # regime's unconditional mean.
+        per_regime_h[:] = regime_means_sorted_arr
+        mean_forecast = regime_probs_forecast @ regime_means_sorted_arr
+    else:
+        # Extract native-order per-regime constants and AR coefficients.
+        consts_native, ar_coefs_native = _extract_ar_params(
+            param_names, params_native, k, order
+        )
+        # Permute to sorted regime order so columns align with pi_h.
+        sort_order_arr = np.asarray(sort_order, dtype=int)
+        consts_sorted = consts_native[sort_order_arr]
+        ar_coefs_sorted = ar_coefs_native[sort_order_arr]
+
+        # Build y_history starting from the last ``order`` observed
+        # values. Appending forecasts as if realized is the iterated
+        # convention (Note 1); bias is disclosed in Tier 2.
+        y_history = list(np.asarray(last_observations, dtype=float))
+        # Guard: if last_observations is shorter than order, pad with
+        # the overall mean (rare — happens only when n <= order at fit
+        # time, which the wrapper's min-obs check prevents).
+        while len(y_history) < order:
+            y_history.insert(
+                0, float(np.mean(regime_means_sorted_arr))
+            )
+
+        mean_forecast = np.empty(horizon)
+        for h in range(horizon):
+            # For each sorted regime j compute the one-step conditional
+            # mean given current y_history:
+            #   ŷ_h(j) = const[j] + Σ_lag ar[j, lag] * (y_{-(lag+1)} - const[j])
+            for j in range(k):
+                ar_contrib = 0.0
+                for lag in range(order):
+                    ar_contrib += ar_coefs_sorted[j, lag] * (
+                        y_history[-lag - 1] - consts_sorted[j]
+                    )
+                per_regime_h[h, j] = consts_sorted[j] + ar_contrib
+            mean_forecast[h] = float(
+                regime_probs_forecast[h] @ per_regime_h[h]
+            )
+            # Iterated convention: treat ŷ_h as realized for next step.
+            y_history.append(mean_forecast[h])
+
+    # --- P.4 conditional variance via law of total variance ---
+    variance_forecast = np.empty(horizon)
+    sigma2_sorted = regime_stds_sorted_arr ** 2
+    for h in range(horizon):
+        within = float(regime_probs_forecast[h] @ sigma2_sorted)
+        between = float(
+            regime_probs_forecast[h]
+            @ (per_regime_h[h] - mean_forecast[h]) ** 2
+        )
+        variance_forecast[h] = within + between
+
+    z = 1.96
+    sd = np.sqrt(np.maximum(variance_forecast, 0.0))
+    lower_95 = mean_forecast - z * sd
+    upper_95 = mean_forecast + z * sd
+
+    return {
+        "regime_probs_forecast": regime_probs_forecast,
+        "mean_forecast": mean_forecast,
+        "variance_forecast": variance_forecast,
+        "lower_95": lower_95,
+        "upper_95": upper_95,
+        "stationary_distribution": stationary,
+        "method": method,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -235,7 +482,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 except Exception:
                     pass
 
-        # Try to extract transition matrix from model
+        # Try to extract transition matrix from model. statsmodels
+        # returns `regime_transition` in COLUMN-stochastic convention:
+        # regime_transition[i, j, t] = P(S_{t+1} = i | S_t = j), so
+        # columns sum to 1 and rows don't. Transpose to the row-
+        # stochastic convention used everywhere else in this wrapper
+        # (display: "From Regime i" rows, forecast recursion:
+        # pi_T @ P, fallback transition-count path: [prev, curr]).
+        # This was a latent display bug before the forecast landing:
+        # "From Regime 0" row actually showed P(→ 0 | ← j) values.
         try:
             tp = fit.regime_transition
             if hasattr(tp, 'values'):
@@ -243,6 +498,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             transition_matrix = np.asarray(tp)
             if transition_matrix.ndim == 3:
                 transition_matrix = transition_matrix[:, :, 0]
+            transition_matrix = transition_matrix.T
         except Exception:
             # Build from smoothed probabilities
             for t in range(1, n_probs):
@@ -282,6 +538,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Preserve NaN regimes at the end of the sort order
         finite_mask = ~np.isnan(regime_means_empirical)
         sort_axis = "mean"
+        sort_order = np.arange(k_regimes, dtype=int)
         if finite_mask.sum() >= 2:
             sort_result = label_regimes_by_dominant_key(
                 regime_means_empirical,
@@ -294,6 +551,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             smoothed_probs = sort_result["probs"]
             transition_matrix = sort_result["transmat"]
             sort_axis = sort_result["axis_name"]
+            sort_order = np.asarray(sort_result["order"], dtype=int)
             if sort_axis == "std":
                 vr = sort_result["variance_ratio"]
                 msr = sort_result["mean_sep_in_min_sigma"]
@@ -380,32 +638,97 @@ def run(ctx: RunContext, progress_callback) -> dict:
         ))
 
         # ---- Forecast ----
-        # For Markov-switching, forecast is regime-weighted average
+        # Manual regime-weighted construction. statsmodels'
+        # MarkovRegression and MarkovAutoregression both raise
+        # NotImplementedError on their .predict/.forecast entry points
+        # (stubs with signatures but no bodies) — the library invites
+        # the caller to do this construction from fitted quantities per
+        # §4.3. See _build_forecast for the mean/variance math and the
+        # iterated-regime-weighted convention under order >= 1.
         progress_callback("Generating forecasts", 85)
+        forecast_method = None
+        stationary_distribution = None
+        final_horizon_probs = None
         try:
-            fc_result = fit.get_forecast(steps=horizon)
-            fc_mean = fc_result.predicted_mean
-            if hasattr(fc_mean, 'values'):
-                fc_mean = fc_mean.values
-            fc_mean = np.asarray(fc_mean, dtype=np.float64)
+            # Permute empirical regime stats to sorted column order so
+            # they align with pi_T / transition_matrix columns.
+            regime_means_sorted = regime_means_empirical[sort_order]
+            regime_stds_sorted = regime_stds_empirical[sort_order]
+            # Replace any NaN (rare: regimes with zero decoded periods)
+            # with 0.0 to keep the forecast math finite; their
+            # contribution is gated by pi_h[h, j] which will be near
+            # zero in practice.
+            regime_means_sorted = np.where(
+                np.isfinite(regime_means_sorted), regime_means_sorted, 0.0
+            )
+            regime_stds_sorted = np.where(
+                np.isfinite(regime_stds_sorted) & (regime_stds_sorted > 0),
+                regime_stds_sorted, 0.0,
+            )
 
-            ci_df = fc_result.conf_int(alpha=0.10)
-            if hasattr(ci_df, 'values'):
-                ci = ci_df.values
-            else:
-                ci = np.asarray(ci_df)
+            # π_T: the final smoothed regime-probability vector
+            # (sorted columns via the earlier sort_result).
+            pi_T = smoothed_probs[-1, :] if n_probs > 0 else np.ones(k_regimes) / k_regimes
+
+            # Last `order` observations from the filled series feed the
+            # AR recursion (order=0: list is empty and unused).
+            last_observations = (
+                filled[-order:].tolist() if order > 0 else []
+            )
+
+            param_names_list_nat = list(
+                getattr(fit, "param_names", None)
+                or getattr(getattr(fit, "model", None), "param_names", None)
+                or [f"p{i}" for i in range(len(params))]
+            )
+            params_native_arr = np.asarray(params, dtype=float)
+
+            fc = _build_forecast(
+                order=order,
+                horizon=horizon,
+                transition_matrix=transition_matrix,
+                pi_T=pi_T,
+                sort_order=sort_order,
+                regime_means_sorted=regime_means_sorted,
+                regime_stds_sorted=regime_stds_sorted,
+                last_observations=last_observations,
+                param_names=param_names_list_nat,
+                params_native=params_native_arr,
+            )
+            forecast_method = fc["method"]
+            stationary_distribution = fc["stationary_distribution"]
+            final_horizon_probs = fc["regime_probs_forecast"][-1]
+
+            fc_time_axis = build_forecast_time_axis(
+                ctx.time[-1] if ctx.time else None,
+                ctx.frequency or "",
+                horizon,
+            )
 
             fc_rows = []
             for h in range(horizon):
-                fc_rows.append([
-                    n + h + 1,
-                    round(float(fc_mean[h]), 6),
-                    round(float(ci[h, 0]), 6),
-                    round(float(ci[h, 1]), 6),
-                ])
-            tables.append(make_table("Forecast", ["Step", "Forecast", "Lower 90%", "Upper 90%"], fc_rows))
+                row = [
+                    fc_time_axis[h],
+                    round(float(fc["mean_forecast"][h]), 6),
+                    round(float(fc["lower_95"][h]), 6),
+                    round(float(fc["upper_95"][h]), 6),
+                ]
+                for r in range(k_regimes):
+                    row.append(round(float(fc["regime_probs_forecast"][h, r]), 4))
+                fc_rows.append(row)
+            prob_cols = [f"P(Regime {r})" for r in range(k_regimes)]
+            tables.append(make_table(
+                "Forecast",
+                ["Time", "Mean Forecast", "Lower 95%", "Upper 95%"] + prob_cols,
+                fc_rows,
+            ))
         except Exception as fc_e:
-            warnings.append(f"Forecasting not available for this model configuration: {fc_e}")
+            warnings.append(
+                f"Forecast construction failed: {fc_e}. "
+                "The fit completed successfully; re-run or inspect the "
+                "transition matrix and regime probability tables for "
+                "manual-forecast construction."
+            )
 
         # ---- Model summary ----
         valid_resid = residuals[~np.isnan(residuals)]
@@ -474,6 +797,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "rmse": round(rmse, 4) if rmse else None,
             "expected_durations": durations,
             "horizon": horizon,
+            "forecast_method": forecast_method,
+            "forecast_horizon": horizon if forecast_method else None,
+            "forecast_interval_assumes": (
+                "Gaussian within-regime emissions; plug-in forecast "
+                "ignoring parameter estimation uncertainty; AR-innovation "
+                "variance not compounded across horizons"
+            ) if forecast_method else None,
         }
 
         # Build per-regime empirical means and stds for the interpretation
@@ -503,6 +833,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "expected_durations": durations,
             "final_period_probs": _final_probs,
             "sort_axis": sort_axis,
+            "forecast_method": forecast_method,
+            "forecast_horizon": horizon if forecast_method else None,
+            "forecast_h_probs": (
+                final_horizon_probs.tolist()
+                if final_horizon_probs is not None else None
+            ),
+            "forecast_stationary": (
+                stationary_distribution.tolist()
+                if stationary_distribution is not None else None
+            ),
         })
 
         return make_response(

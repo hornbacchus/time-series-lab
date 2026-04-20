@@ -82,6 +82,78 @@ def flip_sign_vector(v):
     return v * sign
 
 
+def build_forecast_time_axis(last_time_label, frequency: str, horizon: int):
+    """Extend an input DatetimeIndex by ``horizon`` steps at the detected
+    frequency, returning a list of ISO date strings (``"YYYY-MM-DD"``).
+
+    Shared helper used by wrappers that emit multi-step forecasts and
+    need the forecast-row "Time" column to extend the input series'
+    date axis rather than emit integer step numbers. Falls back to
+    ``t+1..t+h`` when the last label can't be parsed as a date or the
+    frequency is unknown.
+
+    Originally ported from the retired kalman_filter_model.py during
+    the Structural TS consolidation; now lives in base.py as the
+    canonical implementation for every wrapper that produces a
+    Forecast table on a date-indexed input.
+
+    Parameters
+    ----------
+    last_time_label
+        The last entry of the wrapper's input time axis. Any type
+        that :func:`pandas.to_datetime` accepts.
+    frequency : str
+        One of "A"/"Annual"/"Y", "Q"/"Quarterly"/"QS", "M"/"Monthly"/"MS",
+        "W"/"Weekly", "D"/"Daily"/"B", "H"/"Hourly" (case-insensitive).
+        Other strings fall back to the ``t+1..t+h`` form.
+    horizon : int
+        Number of forecast steps.
+
+    Returns
+    -------
+    list[str]
+        Length-``horizon`` list of date strings extending the axis.
+    """
+    import warnings as _warnings
+    import pandas as pd
+    freq_map_modern = {
+        "A": "YE-DEC", "ANNUAL": "YE-DEC", "Y": "YE-DEC",
+        "Q": "QE-DEC", "QUARTERLY": "QE-DEC", "QS": "QS",
+        "M": "ME", "MONTHLY": "ME", "MS": "MS",
+        "W": "W", "WEEKLY": "W",
+        "D": "D", "DAILY": "D", "B": "B",
+        "H": "h", "HOURLY": "h",
+    }
+    freq_map_legacy = {
+        "A": "A-DEC", "ANNUAL": "A-DEC", "Y": "A-DEC",
+        "Q": "Q-DEC", "QUARTERLY": "Q-DEC", "QS": "QS",
+        "M": "M", "MONTHLY": "M", "MS": "MS",
+        "W": "W", "WEEKLY": "W",
+        "D": "D", "DAILY": "D", "B": "B",
+        "H": "H", "HOURLY": "H",
+    }
+    key = (frequency or "").strip().upper()
+    modern = freq_map_modern.get(key)
+    legacy = freq_map_legacy.get(key)
+    if modern is None and legacy is None:
+        return [f"t+{i + 1}" for i in range(horizon)]
+    try:
+        last_ts = pd.to_datetime(str(last_time_label))
+    except Exception:
+        return [f"t+{i + 1}" for i in range(horizon)]
+    for code in (modern, legacy):
+        if code is None:
+            continue
+        try:
+            with _warnings.catch_warnings():
+                _warnings.simplefilter("ignore", FutureWarning)
+                dates = pd.date_range(start=last_ts, periods=horizon + 1, freq=code)[1:]
+            return [d.strftime("%Y-%m-%d") for d in dates]
+        except (ValueError, TypeError):
+            continue
+    return [f"t+{i + 1}" for i in range(horizon)]
+
+
 def label_regimes_by_dominant_key(means, stds, *, covars=None,
                                    transmat=None, labels=None, probs=None):
     """Sort latent states by whichever axis — mean or standard deviation —

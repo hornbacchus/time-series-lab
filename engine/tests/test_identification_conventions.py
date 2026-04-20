@@ -296,6 +296,223 @@ class TestMarkovSwitchingLabelingConvention(unittest.TestCase):
         )
 
 
+# ─────────────────────────────────────────────────────────────────────
+# Markov Switching — transition-matrix forecast invariants
+# ─────────────────────────────────────────────────────────────────────
+class TestMarkovSwitchingForecasts(unittest.TestCase):
+    """The wrapper now constructs multi-step forecasts manually from
+    the transition matrix and the final filtered regime probabilities,
+    after confirming that statsmodels' native forecast methods raise
+    NotImplementedError on both MarkovRegression and
+    MarkovAutoregression.
+
+    Four invariants guard the construction:
+
+    - regime_probs_sum_to_one: π_h rows are valid probability vectors.
+    - pi_h_base_case: π_h[0] equals π_T @ P (the recursion's base step).
+    - pi_h_converges_to_stationary: under an ergodic P, π_h at horizon=10
+      is close to the stationary distribution (helper also under test).
+    - h1_mean_matches_closed_form: under order=0, the first forecast
+      mean equals (π_T @ P) · regime_means exactly. This anchors the
+      mean-construction arithmetic end-to-end.
+    """
+
+    def _find_forecast_table(self, res):
+        for t in res.get("tables") or []:
+            if str(t.get("name", "")).lower() == "forecast":
+                return t
+        return None
+
+    def _run_variance_dominant_fit(self):
+        """Shared fixture: a 2-regime variance-dominant series (μ=0 in
+        both regimes, σ=1 vs σ=5) fit under order=0. Used by all four
+        tests to avoid the noise of AR-coefficient recovery. Returns
+        the RunContext result dict."""
+        from techniques import markov_switching
+        rng = np.random.default_rng(42)
+        n = 500
+        P = np.array([[0.95, 0.05], [0.05, 0.95]])
+        state = 0
+        y = np.zeros(n)
+        for t in range(n):
+            y[t] = rng.normal(0.0, 1.0 if state == 0 else 5.0)
+            if rng.random() < 1 - P[state, state]:
+                state = 1 - state
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(n)]
+        ctx = RunContext({
+            "run_id": "t", "technique_id": "markov_switching",
+            "preset": "Fast", "seed": 42, "frequency": "Quarterly",
+            "time": time_axis,
+            "series": [{"name": "Y", "values": y.tolist()}],
+            "params": {"k_regimes": 2, "order": 0,
+                       "switching_variance": True},
+        })
+        res = markov_switching.run(ctx, _noop_progress)
+        return res
+
+    def _extract_pi_h_and_P(self, res):
+        """Pull π_h (horizon × k) and the transition matrix from the
+        output tables. Reconstructs the probability grid from the
+        Forecast table's P(Regime j) columns."""
+        fc_tbl = self._find_forecast_table(res)
+        self.assertIsNotNone(fc_tbl, "Forecast table missing")
+        cols = fc_tbl["columns"]
+        regime_cols = [i for i, c in enumerate(cols)
+                       if str(c).startswith("P(Regime ")]
+        self.assertGreaterEqual(len(regime_cols), 2,
+                                "Forecast table missing P(Regime *) columns")
+        pi_h = np.array([
+            [float(row[i]) for i in regime_cols]
+            for row in fc_tbl["rows"]
+        ])
+
+        trans_tbl = None
+        for t in res.get("tables") or []:
+            if str(t.get("name", "")).lower() == "transition matrix":
+                trans_tbl = t
+                break
+        self.assertIsNotNone(trans_tbl, "Transition Matrix table missing")
+        # Rows: [label, P(->0), P(->1), ...]; skip first column.
+        P = np.array([
+            [float(row[j + 1]) for j in range(len(regime_cols))]
+            for row in trans_tbl["rows"]
+        ])
+        return pi_h, P
+
+    def test_regime_probs_sum_to_one(self):
+        res = self._run_variance_dominant_fit()
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+        pi_h, _ = self._extract_pi_h_and_P(res)
+        for h, row in enumerate(pi_h):
+            self.assertAlmostEqual(
+                float(row.sum()), 1.0, places=6,
+                msg=f"π_h row {h} does not sum to 1: sum={row.sum()}"
+            )
+
+    def test_pi_h_base_case_matches_pi_T_times_P(self):
+        """π_h[0] = π_T @ P — reconstruct π_T from the last row of the
+        Regime Probabilities table and verify the forecast base case.
+
+        The Forecast table stores P(Regime j) rounded to 4 decimals, so
+        we allow a tolerance consistent with that rounding (1e-3)."""
+        res = self._run_variance_dominant_fit()
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+        pi_h, P = self._extract_pi_h_and_P(res)
+
+        # Reconstruct π_T from the last row of the Regime Probabilities
+        # table. Columns: Time, series_value, P(Regime 0), ..., Most Likely Regime.
+        probs_tbl = None
+        for t in res.get("tables") or []:
+            if str(t.get("name", "")).lower() == "regime probabilities":
+                probs_tbl = t
+                break
+        self.assertIsNotNone(probs_tbl, "Regime Probabilities table missing")
+        cols = probs_tbl["columns"]
+        k = P.shape[0]
+        regime_col_idxs = [i for i, c in enumerate(cols)
+                           if str(c).startswith("P(Regime ")]
+        self.assertEqual(len(regime_col_idxs), k)
+        pi_T = np.array([
+            float(probs_tbl["rows"][-1][i]) for i in regime_col_idxs
+        ])
+        expected_pi_h0 = pi_T @ P
+
+        diff = np.max(np.abs(pi_h[0] - expected_pi_h0))
+        self.assertLess(
+            diff, 1e-3,
+            f"π_h[0] should equal π_T @ P within 4-decimal rounding; "
+            f"got max |diff|={diff:.6f}. π_h[0]={pi_h[0]}, "
+            f"π_T @ P = {expected_pi_h0}"
+        )
+
+    def test_pi_h_converges_to_stationary(self):
+        """On a fast-mixing fixture (self-transition ~0.5, mixing
+        timescale ~2), π_h at horizon=10 should be within 0.05 of the
+        stationary distribution.
+
+        A separate fixture from the variance-dominant one is used here
+        because that fixture has self-transition 0.95 (mixing timescale
+        ~20) — too slow for convergence within horizon=10. The
+        convergence math is fixture-independent; this test exercises it
+        on a chain that does converge quickly."""
+        from techniques import markov_switching
+        rng = np.random.default_rng(42)
+        n = 500
+        # Fast-mixing DGP: P = [[0.5, 0.5], [0.5, 0.5]]. Stationary
+        # distribution is [0.5, 0.5]; any π_T @ P equals [0.5, 0.5]
+        # exactly after just one step.
+        P_true = np.array([[0.5, 0.5], [0.5, 0.5]])
+        state = 0
+        y = np.zeros(n)
+        for t in range(n):
+            y[t] = rng.normal(-1.0 if state == 0 else 1.0, 1.0)
+            if rng.random() < 1 - P_true[state, state]:
+                state = 1 - state
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(n)]
+        ctx = RunContext({
+            "run_id": "t", "technique_id": "markov_switching",
+            "preset": "Fast", "seed": 42, "frequency": "Quarterly",
+            "time": time_axis,
+            "series": [{"name": "Y", "values": y.tolist()}],
+            "params": {"k_regimes": 2, "order": 0,
+                       "switching_variance": False},
+        })
+        res = markov_switching.run(ctx, _noop_progress)
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+        pi_h, P = self._extract_pi_h_and_P(res)
+
+        # Compute stationary distribution directly from the fitted P.
+        from scipy.linalg import eig
+        eigvals, eigvecs = eig(P.T)
+        idx = int(np.argmin(np.abs(np.real(eigvals) - 1.0)))
+        vec = np.real(eigvecs[:, idx])
+        if np.any(vec < -1e-9):
+            vec = np.abs(vec)
+        stationary = vec / vec.sum()
+
+        diff = np.max(np.abs(pi_h[-1] - stationary))
+        self.assertLess(
+            diff, 0.05,
+            f"π_h at horizon=10 should be within 0.05 of stationary "
+            f"distribution on a fast-mixing chain; got max |diff|="
+            f"{diff:.4f}. π_h[-1]={pi_h[-1]}, stationary={stationary}"
+        )
+
+    def test_h1_mean_matches_closed_form(self):
+        """Under order=0 (MarkovRegression path), mean_forecast[0] ==
+        (π_T @ P) · regime_means. Reconstructs regime means from the
+        Regime Summary table and verifies the first-horizon mean
+        arithmetic end-to-end."""
+        res = self._run_variance_dominant_fit()
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+        pi_h, _ = self._extract_pi_h_and_P(res)
+
+        fc_tbl = self._find_forecast_table(res)
+        mean_forecast_h1 = float(fc_tbl["rows"][0][1])  # "Mean Forecast" column
+
+        summary = _find_table(res, "regime summary")
+        self.assertIsNotNone(summary, "Regime Summary table missing")
+        regime_means = np.array([
+            float(row[3]) for row in summary["rows"] if row[3] is not None
+        ])
+        self.assertEqual(len(regime_means), pi_h.shape[1])
+
+        expected = float(pi_h[0] @ regime_means)
+        # The forecast table stores values rounded to 6 decimals; allow
+        # that rounding plus the rounding in pi_h (4 decimals) and
+        # regime_means (4 decimals from Regime Summary). 1e-2 tolerance.
+        self.assertLess(
+            abs(mean_forecast_h1 - expected), 1e-2,
+            f"mean_forecast[h=1] should equal π_h[0] @ regime_means "
+            f"within table-rounding tolerance; got {mean_forecast_h1}, "
+            f"expected {expected}"
+        )
+
+
 class TestMarkovSwitchingARCoefficient(unittest.TestCase):
     """The wrapper previously passed `order=1` to MarkovRegression,
     which silently accepts the kwarg but interprets it as regime-
