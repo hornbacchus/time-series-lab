@@ -7,6 +7,7 @@ Allows regime-dependent mean, variance, and autoregressive parameters.
 
 import numpy as np
 from statsmodels.tsa.regime_switching.markov_regression import MarkovRegression
+from statsmodels.tsa.regime_switching.markov_autoregression import MarkovAutoregression
 
 try:
     from interpretation import build_interpretation  # type: ignore
@@ -123,15 +124,38 @@ def run(ctx: RunContext, progress_callback) -> dict:
         progress_callback(f"Fitting Markov-switching model ({k_regimes} regimes)", 20)
 
         try:
-            model = MarkovRegression(
-                filled,
-                k_regimes=k_regimes,
-                order=order,
-                trend="c",
-                switching_trend=switching_trend,
-                switching_variance=switching_var,
-                exog=exog,
-            )
+            # Class selection by `order` semantics:
+            #   order == 0 → MarkovRegression (plain MS, no AR)
+            #   order >= 1 → MarkovAutoregression (genuine MS-AR, per
+            #               Hamilton 1989). `switching_ar=True` lets the
+            #               AR coefficients differ by regime, which is
+            #               what the user-facing "AR Order" claim and the
+            #               preset defaults have always implied.
+            # Pre-change behavior: MarkovRegression silently accepted
+            # `order` but interpreted it as regime-likelihood dependence,
+            # NOT as AR lag polynomial — so order >= 1 never actually
+            # fitted any AR terms. This conditional fixes that.
+            if order >= 1:
+                model = MarkovAutoregression(
+                    filled,
+                    k_regimes=k_regimes,
+                    order=order,
+                    trend="c",
+                    switching_ar=True,
+                    switching_trend=switching_trend,
+                    switching_variance=switching_var,
+                    exog=exog,
+                )
+            else:
+                model = MarkovRegression(
+                    filled,
+                    k_regimes=k_regimes,
+                    order=0,
+                    trend="c",
+                    switching_trend=switching_trend,
+                    switching_variance=switching_var,
+                    exog=exog,
+                )
             fit = model.fit(maxiter=maxiter, search_reps=25)
         except Exception as e1:
             # Fallback: simpler model
@@ -184,9 +208,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Extracting regime parameters", 65)
 
-        # Regime-specific parameters
-        params = fit.params
-        param_names_list = params.index.tolist() if hasattr(params, 'index') else [f"p{i}" for i in range(len(params))]
+        # Regime-specific parameters — route through `fit.model.param_names`
+        # per the canonical statsmodels-wrapping pattern documented in
+        # engine/techniques/NOTES_statsmodels_params.md. `fit.params` is
+        # an ndarray for MarkovRegression/MarkovAutoregression (not a
+        # pandas Series), so `.index` would fall through to the
+        # placeholder "p0..pN" labels and hide meaningful names like
+        # "p[0->0]", "const[0]", "ar.L1[0]". Name source is the
+        # underlying model (guaranteed list[str] on both classes).
+        params = np.asarray(fit.params)
+        param_names_list = list(
+            getattr(fit, "param_names", None)
+            or getattr(getattr(fit, "model", None), "param_names", None)
+            or [f"p{i}" for i in range(len(params))]
+        )
 
         # Transition matrix
         transition_matrix = np.zeros((k_regimes, k_regimes))
@@ -292,6 +327,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
         for i, pn in enumerate(param_names_list):
             val = float(params.iloc[i] if hasattr(params, 'iloc') else params[i])
             param_rows.append([pn, round(val, 6)])
+        # TODO: rename to "Estimated Parameters" to match the cross-wrapper
+        # naming convention — see engine/techniques/README.md
         tables.append(make_table("Model Parameters", ["Parameter", "Value"], param_rows))
 
         # ---- Regime summary ----

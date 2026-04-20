@@ -122,6 +122,210 @@ class TestStatePermutation(unittest.TestCase):
 
 
 # ─────────────────────────────────────────────────────────────────────
+# Markov Switching — AR coefficient fit invariant
+# ─────────────────────────────────────────────────────────────────────
+class TestMarkovSwitchingARCoefficient(unittest.TestCase):
+    """The wrapper previously passed `order=1` to MarkovRegression,
+    which silently accepts the kwarg but interprets it as regime-
+    likelihood dependence, not an AR lag polynomial — so no AR term
+    was actually fitted. This class verifies the fix: when
+    ``order >= 1`` the wrapper now instantiates MarkovAutoregression
+    with ``switching_ar=True``, so AR coefficients appear in the
+    parameter vector and recover true AR dynamics within tolerance.
+
+    Two fixtures:
+
+    1. **Primary (null-hypothesis for regimes)** — pure AR(1) with
+       ρ=0.6 and no regime switching. Promotes the Phase 1 audit probe
+       to a permanent invariant. Catches the "class switch never
+       happened" regression: if the wrapper reverts to MarkovRegression
+       or drops AR entries from the output, no row named ``ar.L1[*]``
+       will appear.
+
+    2. **Secondary (positive control)** — true 2-regime MS-AR DGP with
+       known per-regime AR coefficients ρ₀=0.3 and ρ₁=0.8. Catches the
+       subtler regression where the class switch succeeds but both
+       regimes fit noise and happen to hit 0.6 by accident under the
+       primary fixture. Tolerance is slightly wider (±0.20) because
+       2-regime MS-AR recovery on finite samples is noisier than
+       single-regime AR recovery.
+    """
+
+    def _find_ar_rows(self, res):
+        """Extract (regime_idx, coefficient) tuples from the
+        parameters table for rows whose Parameter cell starts with
+        ``ar.L1[``."""
+        out = []
+        for t in res.get("tables") or []:
+            if "parameters" not in str(t.get("name", "")).lower():
+                continue
+            for row in t.get("rows") or []:
+                pname = str(row[0])
+                if pname.startswith("ar.L1["):
+                    # Extract the integer regime index from "ar.L1[0]" etc.
+                    try:
+                        idx = int(pname[len("ar.L1["):-1])
+                    except ValueError:
+                        continue
+                    try:
+                        coef = float(row[1])
+                    except (TypeError, ValueError):
+                        continue
+                    out.append((idx, coef))
+            break  # Only inspect the first parameters-named table.
+        return out
+
+    def test_ar_coefficient_present_and_recovers_rho_06(self):
+        """Primary fixture: pure AR(1) with ρ=0.6, seed 42, n=200,
+        no regime switching. The wrapper should instantiate
+        MarkovAutoregression, produce >6 parameter rows (baseline MS
+        has 6 for k=2 with switching_variance), and recover ρ=0.6 on
+        at least one regime's AR coefficient within ±0.15."""
+        from techniques import markov_switching
+
+        rng = np.random.default_rng(42)
+        rho = 0.6
+        n = 200
+        y = np.zeros(n)
+        for t in range(1, n):
+            y[t] = rho * y[t - 1] + rng.normal(0, 1)
+
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(n)]
+        ctx = RunContext({
+            "run_id": "t", "technique_id": "markov_switching",
+            "preset": "Balanced", "seed": 42, "frequency": "Quarterly",
+            "time": time_axis,
+            "series": [{"name": "AR1", "values": y.tolist()}],
+            "params": {"k_regimes": 2, "order": 1,
+                       "switching_variance": True},
+        })
+
+        res = markov_switching.run(ctx, _noop_progress)
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+
+        # Assertion 1 — parameter vector grew to include AR entries.
+        params_tbl = _find_table(res, "parameters")
+        self.assertIsNotNone(params_tbl, "Parameters table missing")
+        self.assertGreater(
+            len(params_tbl["rows"]), 6,
+            f"Parameters table has {len(params_tbl['rows'])} rows; "
+            f"expected >6 (6 baseline + AR entries). The class switch "
+            f"to MarkovAutoregression may not be in effect."
+        )
+
+        # Assertion 2 — at least one row labeled ar.L1[*].
+        ar_rows = self._find_ar_rows(res)
+        self.assertGreaterEqual(
+            len(ar_rows), 1,
+            f"No rows labeled 'ar.L1[*]' in the Parameters table. "
+            f"Table rows: {[r[0] for r in params_tbl['rows']]}"
+        )
+
+        # Assertion 3 — at least one regime recovers ρ=0.6 within ±0.15.
+        # (Either regime may be the AR-driven one; the other may fit
+        # noise under a null-hypothesis-for-regimes DGP.)
+        recovered = [coef for _, coef in ar_rows]
+        closest_to_06 = min(recovered, key=lambda c: abs(c - 0.6))
+        self.assertLess(
+            abs(closest_to_06 - 0.6), 0.15,
+            f"No ar.L1 coefficient within ±0.15 of ρ=0.6. "
+            f"Recovered: {recovered}"
+        )
+
+    def test_ar_coefficients_recover_both_regime_rhos(self):
+        """Secondary fixture (positive control): true 2-regime MS-AR
+        DGP with ρ₀=0.3 (low-mean regime) and ρ₁=0.8 (high-mean
+        regime). After the wrapper sorts regimes by empirical mean,
+        ar.L1[0] should recover ρ₀=0.3 and ar.L1[1] should recover
+        ρ₁=0.8, each within ±0.20 (MS-AR recovery on n=500 is noisier
+        than single-regime AR on n=200, so the tolerance is wider)."""
+        from techniques import markov_switching
+
+        rng = np.random.default_rng(42)
+        n = 500
+        # Transition matrix: P(stay) = 0.97 → mean duration ~33 periods.
+        P = np.array([[0.97, 0.03], [0.03, 0.97]])
+        # Per-regime DGP parameters: (μ, σ, ρ) for regimes 0 and 1.
+        mu = [0.0, 2.0]
+        sigma = [1.0, 1.0]
+        rho = [0.3, 0.8]
+
+        # Simulate the hidden regime sequence.
+        state = 0
+        states = np.zeros(n, dtype=int)
+        for t in range(n):
+            states[t] = state
+            if rng.random() < 1 - P[state, state]:
+                state = 1 - state
+
+        # Simulate the AR(1)-by-regime observed series.
+        y = np.zeros(n)
+        y[0] = mu[states[0]]
+        for t in range(1, n):
+            r = states[t]
+            y[t] = mu[r] + rho[r] * (y[t - 1] - mu[states[t - 1]]) + \
+                   rng.normal(0, sigma[r])
+
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(n)]
+        ctx = RunContext({
+            "run_id": "t", "technique_id": "markov_switching",
+            "preset": "Balanced", "seed": 42, "frequency": "Quarterly",
+            "time": time_axis,
+            "series": [{"name": "MSAR", "values": y.tolist()}],
+            "params": {"k_regimes": 2, "order": 1,
+                       "switching_variance": True},
+        })
+
+        res = markov_switching.run(ctx, _noop_progress)
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+
+        ar_rows = self._find_ar_rows(res)
+        self.assertEqual(
+            len(ar_rows), 2,
+            f"Expected exactly 2 ar.L1[*] rows for k=2 regimes with "
+            f"switching_ar=True; got {len(ar_rows)}"
+        )
+
+        # Recover regime means (from Regime Summary) so we can identify
+        # which statsmodels-native index corresponds to the low-mean /
+        # high-mean regime AFTER the wrapper's post-fit sort. Note: the
+        # wrapper sorts `most_likely_regime` for display, but the
+        # parameter names (ar.L1[0], ar.L1[1]) reflect statsmodels-
+        # native ordering and are NOT remapped. So we cross-reference
+        # via the constants in the same parameter vector.
+        param_rows = {row[0]: float(row[1])
+                      for row in _find_table(res, "parameters")["rows"]}
+        const0 = param_rows.get("const[0]")
+        const1 = param_rows.get("const[1]")
+        self.assertIsNotNone(const0, "const[0] missing")
+        self.assertIsNotNone(const1, "const[1] missing")
+
+        # Map native regime index → sorted position by empirical mean.
+        # Lowest const = native "low-mean regime" = sorted Regime 0.
+        low_mean_native = 0 if const0 <= const1 else 1
+        high_mean_native = 1 - low_mean_native
+
+        ar_by_native = {idx: coef for idx, coef in ar_rows}
+        rho_low = ar_by_native.get(low_mean_native)
+        rho_high = ar_by_native.get(high_mean_native)
+        self.assertIsNotNone(rho_low, "ar.L1 for low-mean regime missing")
+        self.assertIsNotNone(rho_high, "ar.L1 for high-mean regime missing")
+
+        self.assertLess(
+            abs(rho_low - 0.3), 0.20,
+            f"Low-mean regime ar.L1={rho_low:.3f} is not within ±0.20 "
+            f"of true ρ₀=0.3. Recovery failed on n=500."
+        )
+        self.assertLess(
+            abs(rho_high - 0.8), 0.20,
+            f"High-mean regime ar.L1={rho_high:.3f} is not within ±0.20 "
+            f"of true ρ₁=0.8. Recovery failed on n=500."
+        )
+
+
+# ─────────────────────────────────────────────────────────────────────
 # Tier 1 — HAR-RV degrees-of-freedom correction
 # ─────────────────────────────────────────────────────────────────────
 class TestHarRvDof(unittest.TestCase):
