@@ -76,3 +76,14 @@ With equal weights: `MSE_c = (1/M^2) sum_m sum_j sigma_m sigma_j rho_{mj}`. As M
 - Simulation-based: draw from each model's predictive distribution with weights proportional to the combination weights.
 
 **Model diversity**: The effectiveness of combination depends on error diversity. Adding a model that is highly correlated with existing models provides little benefit. The optimal ensemble has models with uncorrelated errors, even if individually they are not the best.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - ensemble size, dominant model weight, inverse-MSE weighting, ensemble holdout MSE vs best single constituent MSE with delta percentage (Decision A option b).
+
+**Technical Interpretation (Tier 2)** - holdout split, per-model MSE values in prose (S3 convention), equal-weight baseline comparison.
+
+**Caveats (Tier 3, conditional)**:
+- Near-single ensemble (dominant weight > 0.9) - use dominant alone.
+- Ensemble hurts (ensemble MSE > best constituent) - use best alone.
+- Weights ~= equal - simple averaging suffices.

@@ -9,6 +9,12 @@ Implemented with numpy/scipy (no external TAR library).
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 from scipy import stats as sp_stats
 from itertools import product
 
@@ -362,12 +368,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "horizon": horizon,
         }
 
+        # Package regimes_info for the interp spec.
+        _regimes_info = []
+        for rr in regime_results:
+            _regimes_info.append({
+                "n_obs": int(rr["count"]),
+                "sigma": float(rr["sigma"]),
+                "ar_order": int(rr["ar_order"]),
+            })
+        _regime_1_share = None
+        _total = sum(int(rr["count"]) for rr in regime_results)
+        if _total > 0 and regime_results:
+            _regime_1_share = float(regime_results[0]["count"]) / _total
+
+        interp = build_interpretation("tar_setar", {
+            "series_name": name,
+            "n_obs": int(n),
+            "n_regimes": int(n_regimes),
+            "thresholds": [float(th) for th in thresholds],
+            "delay": int(delay),
+            "linearity_f_stat": (float(f_stat) if 'f_stat' in dir() and n_regimes == 2 else None),
+            "linearity_p_value": (float(f_pval) if 'f_pval' in dir() and n_regimes == 2 else None),
+            "regime_1_share": _regime_1_share,
+            "regimes_info": _regimes_info,
+        })
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

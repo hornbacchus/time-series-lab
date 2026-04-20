@@ -72,3 +72,14 @@ Sliding windows prevent very old data from influencing the model and can better 
 - Overlapping forecast horizons create correlated errors, complicating statistical comparison.
 - If model selection is performed within the CV loop, it must be re-done at each origin to avoid lookahead bias.
 - Very few origins (short series) give unstable accuracy estimates.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - mean MASE with performance band (strong/standard/weak/worse-than-naive), std across folds with stability descriptor, coverage vs target, neutral framing (S6 convention).
+
+**Technical Interpretation (Tier 2)** - fold configuration (min_train, step, horizon), per-fold MASE range, sMAPE/MAE summaries, std/mean ratio stability interpretation.
+
+**Caveats (Tier 3, conditional)**:
+- Volatile folds (std/mean > 0.3) - regime-dependent predictability.
+- Mean MASE > 1 - naive beats this model.
+- Miscalibrated coverage (> 10 points off target) - review uncertainty spec.

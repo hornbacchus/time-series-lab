@@ -69,3 +69,13 @@ where `l_0 = (1, 0, ..., 0)'` extracts the intercept, X is the local design matr
 - LOESS does not model autocorrelation explicitly. For series with strong AR dynamics, Kalman-based imputation may be more appropriate.
 - Seasonal patterns should be removed before LOESS interpolation (or use STL which uses LOESS internally).
 - At the edges of gaps, the fit relies on one-sided information and may be less accurate than in the middle.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - imputed count and percent, LOESS fraction, gap count, global RMSE on observed. Explicitly notes that LOESS does NOT provide per-value uncertainty; validate longer-gap fills against auxiliary data.
+
+**Technical Interpretation (Tier 2)** - span, robustifying iterations, no-per-value-SE disclosure, recommendation of Kalman imputation for uncertainty-aware longer-gap work.
+
+**Caveats (Tier 3, conditional)**:
+- Wide span (frac > 0.5) - LOESS degenerates to global polynomial fit.
+- Long gap (> 5% of series) - exceeds local-fit scale, validate visually.

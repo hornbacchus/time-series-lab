@@ -70,3 +70,13 @@ This produces an ACF that is not distorted by outliers, enabling correct ARIMA o
 **Breakdown point**: The maximum fraction of contaminated observations that the estimator can handle before giving an arbitrary result. The median has breakdown 50% (highest possible); OLS has breakdown 1/n (a single outlier can destroy it).
 
 **Efficiency**: The relative precision of the robust estimator compared to OLS under ideal (Gaussian) conditions. Huber with c=1.345: 95% efficiency. Tukey bisquare with c=4.685: 95% efficiency. The small efficiency loss is the "insurance premium" for robustness.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - univariate location/scale summary. Median vs mean (gap indicates skew/outliers), std vs MAD-based scale with ratio band (well-behaved / mild / heavy / very heavy).
+
+**Technical Interpretation (Tier 2)** - four location estimators (mean, median, trimmed, Huber/winsorized) and four scale estimators (std, MAD, IQR, Qn). Ratio-based interpretation framing.
+
+**Caveats (Tier 3, conditional)**:
+- Very heavy tails (Std/MAD > 3) - classical methods unreliable.
+- Well-behaved (ratio < 1.3, small mean-median gap) - robust and classical agree.

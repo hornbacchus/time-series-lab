@@ -49,3 +49,13 @@ STL operates through an inner loop and an outer loop. The inner loop alternates 
 - `n_outer`: 0 for non-robust decomposition, 15 for robust decomposition with outlier resistance.
 
 The Loess smoother at each point fits a weighted least-squares polynomial (degree 1 or 2) using a tricube weight function `W(u) = (1 - u^3)^3` based on the distance to neighboring points within the smoothing window.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - observations, period, seasonal and trend strengths with adjective bands, and an actionable closer pointing at the trend for growth-rate analysis and the seasonal for calendar-pattern attribution.
+
+**Technical Interpretation (Tier 2)** - LOESS-based decomposition with seasonal window s.window and robust fitting flag. Explains strength formulas and STL's adaptive-seasonality advantage over classical.
+
+**Caveats (Tier 3, conditional)**:
+- Near-noise series (both strengths < 0.3) - decomposition uninformative.
+- Non-robust fit with flagged large residuals - suggest robust=True.

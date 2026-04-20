@@ -23,6 +23,7 @@ from techniques.base import (
     make_error_response,
     label_regimes_by_dominant_key,
     build_forecast_time_axis,
+    stationary_distribution,
 )
 
 
@@ -38,33 +39,9 @@ from techniques.base import (
 # plus ``fit.model.param_names`` supply the per-regime constants and AR
 # coefficients for the conditional-mean recursion.
 
-def _stationary_distribution(P):
-    """Normalized left-eigenvector of P corresponding to eigenvalue 1.
-
-    Fallback to uniform 1/k when P is not ergodic (e.g., contains an
-    absorbing state) or the eigendecomposition returns a sign-flipped
-    vector that doesn't normalize to a valid probability simplex entry.
-    Used (a) for the Tier 3 near-stationary trigger and (b) as a
-    debugging sanity comparison against pi_h at h=horizon.
-    """
-    from scipy.linalg import eig
-    P_arr = np.asarray(P)
-    k = P_arr.shape[0]
-    try:
-        eigvals, eigvecs = eig(P_arr.T)
-    except Exception:
-        return np.ones(k) / k
-    # Find the eigenvalue closest to 1 (real part).
-    idx = int(np.argmin(np.abs(np.real(eigvals) - 1.0)))
-    vec = np.real(eigvecs[:, idx])
-    # Some conventions return a sign-flipped eigenvector; absolute
-    # value recovers the probability-simplex form.
-    if np.any(vec < -1e-9):
-        vec = np.abs(vec)
-    total = float(vec.sum())
-    if total <= 0 or not np.isfinite(total):
-        return np.ones(k) / k
-    return vec / total
+# _stationary_distribution promoted to engine/techniques/base.py as
+# `stationary_distribution` during Prompt C1 (second consumer: HMM spec).
+_stationary_distribution = stationary_distribution
 
 
 def _extract_ar_params(param_names, params_native, k_regimes, order):

@@ -62,3 +62,13 @@ This jointly estimates the parameters and imputes the missing values.
 - Model misspecification (e.g., wrong seasonal period) leads to biased imputations.
 - Validate by artificially removing known observations and comparing imputed vs. true values.
 - For data with many missing values, the EM algorithm may converge slowly. Good initial parameter estimates help.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - count and percent of observations imputed, state-space model type (local level / local linear trend), gap segment count, average posterior SE. Notes that single-point interpolation is tight while gaps longer than 5 periods carry meaningful uncertainty.
+
+**Technical Interpretation (Tier 2)** - state-space specification, gap geometry (max gap length), SE-widens-toward-interior interpretation of Kalman smoother posterior variance, fit diagnostics (RMSE, AIC).
+
+**Caveats (Tier 3, conditional)**:
+- High missing fraction (> 50%) - fit quality weak.
+- Long interior gap (> 10% of series) - single-series imputation unreliable.

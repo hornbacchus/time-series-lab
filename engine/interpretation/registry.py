@@ -45,7 +45,7 @@ def list_registered() -> list:
 
 
 # Import specs here so they self-register. Order-insensitive.
-# Prompt C will add more lines to this block.
+# Prompt A + B (8 specs):
 from interpretation.specs import adf_test as _adf                      # noqa: F401, E402
 from interpretation.specs import granger_causality as _granger         # noqa: F401, E402
 from interpretation.specs import rolling_ccf_lag as _rolling_ccf       # noqa: F401, E402
@@ -54,3 +54,38 @@ from interpretation.specs import var_model as _var                     # noqa: F
 from interpretation.specs import garch_model as _garch                 # noqa: F401, E402
 from interpretation.specs import markov_switching as _markov           # noqa: F401, E402
 from interpretation.specs import pca_analysis as _pca                  # noqa: F401, E402
+
+# Prompt C1 (26 specs):
+# Decomposition (4)
+from interpretation.specs import classical_decompose as _classical_decompose          # noqa: F401, E402
+from interpretation.specs import stl_decompose as _stl_decompose                      # noqa: F401, E402
+from interpretation.specs import mstl_decompose as _mstl_decompose                    # noqa: F401, E402
+from interpretation.specs import x13_seasonal_adjust as _x13_seasonal_adjust          # noqa: F401, E402
+# Missing Data (3)
+from interpretation.specs import denton_chowlin_disaggregation as _denton_chowlin     # noqa: F401, E402
+from interpretation.specs import kalman_imputation as _kalman_imputation              # noqa: F401, E402
+from interpretation.specs import loess_interpolation as _loess_interpolation          # noqa: F401, E402
+# Change Points / Anomalies (5)
+from interpretation.specs import bocpd as _bocpd                                      # noqa: F401, E402
+from interpretation.specs import cusum_page_hinkley as _cusum_ph                      # noqa: F401, E402
+from interpretation.specs import intervention_analysis as _intervention               # noqa: F401, E402
+from interpretation.specs import pelt_change_points as _pelt                          # noqa: F401, E402
+from interpretation.specs import stl_esd_anomaly as _stl_esd                          # noqa: F401, E402
+# Stationarity standalone (2)
+from interpretation.specs import kpss_test as _kpss                                   # noqa: F401, E402
+from interpretation.specs import pp_test as _pp                                       # noqa: F401, E402
+# Causality remainder (4)
+from interpretation.specs import cross_correlation_lag as _ccf_lag                    # noqa: F401, E402
+from interpretation.specs import prewhitened_ccf_lag as _prewhitened_ccf              # noqa: F401, E402
+from interpretation.specs import dtw_alignment_lag as _dtw                            # noqa: F401, E402
+from interpretation.specs import gcc_phat_delay as _gcc_phat                          # noqa: F401, E402
+# Regimes remainder (3 — NAR_NARX deferred to C7)
+from interpretation.specs import hmm as _hmm                                          # noqa: F401, E402
+from interpretation.specs import star_model as _star                                  # noqa: F401, E402
+from interpretation.specs import tar_setar as _tar_setar                              # noqa: F401, E402
+# Evaluation / Uncertainty (5)
+from interpretation.specs import block_bootstrap as _block_bootstrap                  # noqa: F401, E402
+from interpretation.specs import conformal_intervals as _conformal                    # noqa: F401, E402
+from interpretation.specs import forecast_combination as _fc_combo                    # noqa: F401, E402
+from interpretation.specs import robust_estimators as _robust                         # noqa: F401, E402
+from interpretation.specs import rolling_origin_cv as _rolling_cv                     # noqa: F401, E402

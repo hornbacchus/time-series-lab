@@ -9,6 +9,12 @@ via statsmodels seasonal_decompose.
 import numpy as np
 from statsmodels.tsa.seasonal import seasonal_decompose
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -222,12 +228,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("classical_decompose", {
+            "series_name": name,
+            "n_obs": int(len(values)),
+            "period": int(period),
+            "model_type": model_type,
+            "two_sided": bool(two_sided),
+            "seasonal_strength": float(seasonal_strength),
+            "trend_strength": float(trend_strength),
+        })
         return make_response(
             ctx,
             tables=[decomp_table, diag_table],
             plain_english_summary=" ".join(parts),
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "model_type": model_type,
                 "period": period,

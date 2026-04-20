@@ -60,3 +60,13 @@ Decompose the ARIMA model for `Z_t` into signal components (trend, seasonal, irr
 - **M-statistics (M1-M11)**: assess quality aspects like relative contribution of the irregular, seasonal moving average adequacy, and randomness of residuals. The overall **Q-statistic** summarizes them; Q < 1 indicates acceptable quality.
 - **Sliding spans**: re-run the adjustment on overlapping subspans to check stability. Seasonal factors should not change substantially across spans.
 - **Spectral plots**: check for residual seasonality in the adjusted series at seasonal frequencies.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - observations, frequency, transform choice, outlier-detection status, seasonal strength band. Closes by pointing at the seasonally-adjusted series for month-over-month analysis.
+
+**Technical Interpretation (Tier 2)** - **always discloses which backend** (Census Bureau binary or statsmodels fallback) was actually used. Reports outlier count, seasonal strength formula, and notes the separate irregular component.
+
+**Caveats (Tier 3, conditional)**:
+- Fallback in use - Census binary unavailable, results are approximate.
+- Negligible seasonality (< 0.3) - series may not require SA.

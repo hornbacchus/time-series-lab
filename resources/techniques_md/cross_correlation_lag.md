@@ -76,3 +76,13 @@ This is more complex than the white noise bounds and requires estimating the aut
 - The maximum lag to examine should be small relative to T (typically T/4 or less).
 - Multiple significant lags may indicate a distributed lag relationship (transfer function model).
 - A single dominant peak suggests a simple delay.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - static single-window CCF. Names leader/follower, lag, peak rho with correlation-strength adjective, Bartlett-band significance, single-window vs rolling caveat.
+
+**Technical Interpretation (Tier 2)** - static lag range, peak vs Bartlett band, pointer to prewhitening for autocorrelation-robust variant.
+
+**Caveats (Tier 3, conditional)**:
+- Insignificant peak (|rho| < band) - pair may be informationally independent.
+- Boundary peak (at +/-max_lag) - optimum outside search range.

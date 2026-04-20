@@ -9,6 +9,12 @@ Estimation via nonlinear least squares (scipy.optimize).
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 from scipy.optimize import minimize
 from scipy import stats as sp_stats
 
@@ -320,12 +326,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "horizon": horizon,
         }
 
+        # Fit a linear AR(ar_order) baseline for Tier 3's AIC-improvement
+        # trigger (per Prompt C1 Phase 1 audit Decision — star_model
+        # needs ~5 extra LOC for aic_linear_baseline).
+        _aic_linear_baseline = None
+        try:
+            from statsmodels.tsa.ar_model import AutoReg
+            _linear_fit = AutoReg(filled, lags=ar_order, old_names=False).fit()
+            _aic_linear_baseline = float(_linear_fit.aic)
+        except Exception:
+            _aic_linear_baseline = None
+
+        interp = build_interpretation("star_model", {
+            "series_name": name,
+            "transition_type": best_type,
+            "ar_order": int(ar_order),
+            "delay": int(delay),
+            "gamma": float(gamma),
+            "c": float(c),
+            "G_at_latest": float(G_vals[-1]) if len(G_vals) > 0 else None,
+            "phi_lower": [float(p) for p in phi1[1:]] if len(phi1) > 1 else [],
+            "phi_upper": [float(p) for p in phi2[1:]] if len(phi2) > 1 else [],
+            "aic": float(best["aic"]),
+            "aic_linear_baseline": _aic_linear_baseline,
+        })
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

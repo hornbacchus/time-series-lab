@@ -71,3 +71,13 @@ Both statistics follow the same asymptotic distributions as their Dickey-Fuller 
 - **Recommendation**: Use both tests. If they agree, the conclusion is robust. If they disagree, investigate further with the KPSS test or examine the data for structural breaks.
 
 **Practical note**: The PP test is particularly useful for financial time series, where heteroskedasticity (volatility clustering) is common and the non-parametric correction provides robustness without requiring a specific volatility model.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - Phillips-Perron verdict (null = unit root, mirrors ADF). Z(t) statistic, p-value, critical value, Newey-West correction note.
+
+**Technical Interpretation (Tier 2)** - regression type, Newey-West bandwidth, sample size. Contrasts with ADF (lag augmentation) and KPSS (flipped null).
+
+**Caveats (Tier 3, conditional)**:
+- Borderline verdict (Z(t) within 10% of critical).
+- Trending series with regression='c' - try regression='ct'.

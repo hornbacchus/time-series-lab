@@ -76,3 +76,13 @@ with Bartlett kernel weights `w(j,l) = 1 - j/(l+1)`.
 | 1% | 0.739 | 0.216 |
 
 **Joint use with ADF**: Four outcomes are possible: (1) ADF rejects, KPSS does not reject: series is stationary. (2) ADF does not reject, KPSS rejects: series has a unit root. (3) Both reject: inconclusive, possibly fractional integration. (4) Neither rejects: inconclusive, low power in both tests.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - KPSS verdict (null = stationarity, inverts ADF/PP direction). Names the rejection/fail-to-reject verb, stat value, critical value, series consequence.
+
+**Technical Interpretation (Tier 2)** - regression type (constant/trend), Newey-West bandwidth, sample size. Emphasizes null-direction flip (rejection means non-stationarity). Pairs with ADF for joint triage.
+
+**Caveats (Tier 3, conditional)**:
+- Borderline verdict (LM within 10% of critical) - joint triage advisable.
+- Trending series with regression='c' - try regression='ct'.

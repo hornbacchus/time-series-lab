@@ -77,3 +77,13 @@ Designed specifically for time series:
 - The learning rate gamma in ACI controls responsiveness: larger values adapt faster but are noisier.
 - Conformal intervals are always at least as wide as the empirical quantile of recent residuals, which can be conservative if the model is very good.
 - Any base forecaster can be used -- the conformal wrapper only adjusts the intervals, not the point predictions.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - verdict-free (per Prompt C1 Decision B). Distribution-free N% prediction intervals with average width, optional comparison to parametric baseline when wrapper exposes it.
+
+**Technical Interpretation (Tier 2)** - split-conformal with base model, train/calibration split, conformal quantile, exchangeability disclosure (time-series caveat).
+
+**Caveats (Tier 3, conditional)**:
+- Calibration-residual lag-1 ACF > 0.3 - exchangeability violated, nominal coverage overstates true.
+- Interval width >= parametric baseline - conformal adds no tightness.

@@ -377,6 +377,52 @@ def enforce_contiguous_tail(df, freq: str, *, min_tail: int = 60):
     }
 
 
+def stationary_distribution(P):
+    """Return the normalized left-eigenvector of P corresponding to
+    eigenvalue 1 — the stationary distribution of the Markov chain.
+
+    Falls back to uniform ``1/k`` when P is not ergodic (e.g., contains
+    an absorbing state) or the eigendecomposition returns a vector that
+    cannot be normalized to a valid probability simplex entry.
+
+    Used by Markov-Switching and HMM interpretation specs for (a) the
+    Tier 3 near-stationary trigger and (b) debugging sanity comparison
+    against forecast regime-probability paths at long horizons.
+
+    Originally lived as a private helper in
+    ``engine/techniques/markov_switching.py`` during the Prompt 3 Markov
+    batch; promoted to base.py when a second consumer (HMM interpretation
+    spec, Prompt C1) emerged. Follows the future-promotion convention:
+    primitives/helpers are promoted to the shared layer on the second
+    distinct technique that needs them.
+
+    Parameters
+    ----------
+    P : array-like, shape (k, k)
+        Row-stochastic transition matrix: ``P[i, j] = Prob(state=j | prev=i)``.
+
+    Returns
+    -------
+    ndarray, shape (k,)
+        Stationary distribution on the probability simplex (values sum to 1).
+    """
+    from scipy.linalg import eig
+    P_arr = np.asarray(P)
+    k = P_arr.shape[0]
+    try:
+        eigvals, eigvecs = eig(P_arr.T)
+    except Exception:
+        return np.ones(k) / k
+    idx = int(np.argmin(np.abs(np.real(eigvals) - 1.0)))
+    vec = np.real(eigvecs[:, idx])
+    if np.any(vec < -1e-9):
+        vec = np.abs(vec)
+    total = float(vec.sum())
+    if total <= 0 or not np.isfinite(total):
+        return np.ones(k) / k
+    return vec / total
+
+
 def build_forecast_time_axis(last_time_label, frequency: str, horizon: int):
     """Extend an input DatetimeIndex by ``horizon`` steps at the detected
     frequency, returning a list of ISO date strings (``"YYYY-MM-DD"``).

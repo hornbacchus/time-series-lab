@@ -14,6 +14,12 @@ Both implemented from scratch with numpy/scipy.
 import numpy as np
 from scipy import linalg
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -434,12 +440,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
         }
         audit.update(reg_info)
 
+        interp = build_interpretation("denton_chowlin_disaggregation", {
+            "series_name": lo_name,
+            "method": method,
+            "ratio": int(conversion_ratio),
+            "n_low": int(n_low),
+            "n_high": int(n_high),
+            "indicator_name": z_name if z_high is not None else None,
+            "max_discrepancy": float(max_discrepancy),
+            "rho": reg_info.get("rho"),
+            "betas": list(reg_info.get("beta") or []),
+        })
         return make_response(
             ctx,
             tables=[hf_table, agg_table, diag_table, desc_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

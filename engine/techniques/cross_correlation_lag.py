@@ -8,6 +8,12 @@ first -- useful as a quick exploratory tool or when prewhitening is undesired.
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 from scipy.stats import norm
 
 from techniques.base import (
@@ -232,12 +238,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("cross_correlation_lag", {
+            "series_name_x": x_name,
+            "series_name_y": y_name,
+            "best_lag": int(best_lag),
+            "best_rho": float(best_val),
+            "bartlett_band": float(conf_band),
+            "n_obs": int(n),
+            "max_lag": int(max_lag),
+            "significance": 0.05,
+        })
         return make_response(
             ctx,
             tables=[ccf_table, top_table, summary_table],
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,

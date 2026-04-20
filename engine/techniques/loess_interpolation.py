@@ -8,6 +8,12 @@ on observed values and used to predict at missing positions.
 
 import numpy as np
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -252,12 +258,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("loess_interpolation", {
+            "series_name": name,
+            "n_obs": int(len(values)),
+            "n_missing": int(n_missing),
+            "n_gaps": int(n_gaps),
+            "max_gap": int(max_gap),
+            "frac": float(frac),
+            "it": int(it),
+            "rmse": float(rmse),
+            "max_residual": float(max_resid),
+        })
         return make_response(
             ctx,
             tables=[series_table, imp_table, diag_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "frac": round(frac, 4),
                 "it": it,

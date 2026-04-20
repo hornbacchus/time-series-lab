@@ -12,6 +12,12 @@ giving a cleaner picture of the true lead/lag relationship.
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 import pmdarima as pm
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.stattools import ccf as sm_ccf
@@ -250,12 +256,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("prewhitened_ccf_lag", {
+            "series_name_x": x_name,
+            "series_name_y": y_name,
+            "best_lag": int(best_lag),
+            "best_rho": float(best_ccf_val),
+            "bartlett_band": float(conf_band),
+            "n_post_prewhitening": int(min_len),
+            "prewhiten_arima_order": list(order),
+            "residual_ljung_box_p": None,
+        })
         return make_response(
             ctx,
             tables=[ccf_table, summary_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,

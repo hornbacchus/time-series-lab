@@ -71,3 +71,14 @@ where `X_{j,t}^{(T_j)}` is the intervention variable for event j at time T_j, `v
 **Automatic outlier detection**: A related technique fits the ARIMA model and then systematically tests for the presence of additive outliers (AO), level shifts (LS), temporary changes (TC), and innovational outliers (IO) at each time point, using t-statistics to identify significant interventions. This is built into X-13-ARIMA-SEATS and other packages.
 
 **Counterfactual analysis**: The estimated counterfactual (no-intervention) series is `Y_t - v(B) X_t^{(T)}`, giving the series that would have been observed without the event. The cumulative intervention effect over time sums the differences.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - event-centered (distinct from detection-based change-point specs). Leads with the top intervention's date, label, effect coefficient, p-value, CI, significance verdict, count of significant effects, and scale reference.
+
+**Technical Interpretation (Tier 2)** - ARIMA order with intervention dummies, Ljung-Box residual diagnostic, AIC improvement over no-intervention baseline.
+
+**Caveats (Tier 3, conditional)**:
+- Some interventions not significant at 5%.
+- AIC improvement < 2 over no-intervention - interventions add little.
+- Residual Ljung-Box rejects - ARMA structure inadequate.

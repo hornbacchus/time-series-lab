@@ -8,6 +8,12 @@ using Seasonal-Trend decomposition using LOESS (STL).
 import numpy as np
 from statsmodels.tsa.seasonal import STL
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -236,12 +242,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "Optionally overlay Seasonally Adjusted on the Original panel as a dashed line."
         )
 
+        interp = build_interpretation("stl_decompose", {
+            "series_name": name,
+            "n_obs": int(len(values)),
+            "period": int(period),
+            "seasonal_window": seasonal,
+            "seasonal_strength": float(seasonal_strength),
+            "trend_strength": float(trend_strength),
+            "robust": bool(robust),
+        })
         return make_response(
             ctx,
             tables=[decomp_table, diag_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "period": period,
                 "seasonal_window": seasonal,

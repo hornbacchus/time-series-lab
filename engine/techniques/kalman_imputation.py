@@ -9,6 +9,12 @@ estimates and uncertainty bounds for each imputed value.
 import numpy as np
 import warnings as _warnings
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -254,12 +260,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("kalman_imputation", {
+            "series_name": name,
+            "n_obs": int(n),
+            "n_missing": int(n_missing),
+            "model_type": model_type,
+            "n_gaps": int(n_gaps),
+            "max_gap": int(max_gap),
+            "avg_imputation_se": float(avg_se),
+            "rmse": float(rmse) if rmse else None,
+            "aic": float(result.aic),
+        })
         return make_response(
             ctx,
             tables=[series_table, imp_table, diag_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "model_type": model_type,
                 "n_missing": n_missing,

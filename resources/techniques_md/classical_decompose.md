@@ -54,3 +54,15 @@ For multiplicative decomposition:
 - There is no robustness mechanism; a single extreme value affects the trend and consequently the seasonal and remainder estimates.
 
 **Choosing additive vs. multiplicative**: If the magnitude of seasonal swings grows with the level of the series, use multiplicative. If seasonal swings remain constant, use additive. Alternatively, apply a log transform and use the additive model, which is equivalent to a multiplicative decomposition on the original scale.
+
+## Interpretation
+
+Every classical_decompose run emits a two-tier plain-language Interpretation block.
+
+**Plain-Language Finding (Tier 1)** - names the technique, observations, period, seasonal strength band (weak/moderate/strong/very strong), trend strength band, and the dominant component. Closes by pointing at the seasonally-adjusted values for downstream analysis.
+
+**Technical Interpretation (Tier 2)** - discloses the additive vs multiplicative model, the two-sided centered moving average at the detected period, and the ratio-to-moving-average method. Warns that classical assumes stable seasonality across the sample.
+
+**Caveats (Tier 3, conditional)**:
+- Residual ACF Ljung-Box rejects white-noise - residuals carry structure, consider STL or MSTL.
+- Multiplicative-on-nonpositive-values - wrapper auto-switched to additive.

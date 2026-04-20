@@ -14,6 +14,12 @@ where D_i(t) are intervention dummy variables.
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 from scipy import stats as sp_stats
 
 from techniques.base import (
@@ -321,12 +327,68 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Additional compute for the interpretation spec:
+        # - series_std on the filled series for scale reference
+        # - aic_no_intervention: refit ARIMA without intervention dummies
+        _series_std = float(np.std(filled)) if len(filled) > 0 else None
+        _aic_no_intervention = None
+        try:
+            _no_int_fit = ARIMA(filled, order=order).fit()
+            _aic_no_intervention = float(_no_int_fit.aic)
+        except Exception:
+            _aic_no_intervention = None
+
+        # Pick the top intervention (largest absolute effect) for Tier 1.
+        _top_idx = None
+        _top_abs = -1.0
+        for i, row in enumerate(intv_rows):
+            c = row[1]
+            if c is None:
+                continue
+            if abs(float(c)) > _top_abs:
+                _top_abs = abs(float(c))
+                _top_idx = i
+        _top_date = None
+        _top_label = None
+        _top_coef = None
+        _top_p = None
+        _top_ci_lo = None
+        _top_ci_hi = None
+        if _top_idx is not None:
+            _top_label = intv_rows[_top_idx][0]
+            # Look up the intervention's date from the `interventions` list.
+            if _top_idx < len(interventions):
+                iv = interventions[_top_idx]
+                if isinstance(iv, dict):
+                    _top_date = iv.get("date") or iv.get("index")
+            _top_coef = intv_rows[_top_idx][1]
+            _top_p = intv_rows[_top_idx][4]
+            _top_ci_lo = intv_rows[_top_idx][5]
+            _top_ci_hi = intv_rows[_top_idx][6]
+
+        interp = build_interpretation("intervention_analysis", {
+            "series_name": name,
+            "n_interventions": int(len(interventions)),
+            "n_significant": int(n_sig),
+            "top_intervention_date": _top_date,
+            "top_intervention_label": _top_label,
+            "top_intervention_coef": _top_coef,
+            "top_intervention_p_value": _top_p,
+            "top_intervention_ci_lower": _top_ci_lo,
+            "top_intervention_ci_upper": _top_ci_hi,
+            "series_std": _series_std,
+            "arima_order": list(order),
+            "ljung_box_p_value": lb_pval,
+            "aic": float(aic),
+            "aic_no_intervention": _aic_no_intervention,
+        })
         return make_response(
             ctx,
             tables=[intv_table, arima_table, diag_table, ts_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "arima_order": list(order),
                 "n_interventions": len(interventions),

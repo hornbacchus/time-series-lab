@@ -80,3 +80,13 @@ where `D_inv` involves the inverse of `D' D` appropriately handled.
 Maximize over rho in (-1, 1).
 
 **Practical guidance**: Chow-Lin is preferred when a good indicator is available (it uses the regression relationship). Denton proportional is preferred when you want to preserve the movement pattern of the indicator without imposing a statistical relationship.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - temporal disaggregation (distinct from imputation); leads with low-/high-frequency period counts, conversion ratio, method (Denton vs Chow-Lin), indicator series if any, and max aggregation discrepancy.
+
+**Technical Interpretation (Tier 2)** - for Chow-Lin, cites AR(1) rho and indicator betas; for Denton, notes no-indicator convention.
+
+**Caveats (Tier 3, conditional)**:
+- Loose aggregation constraint (max discrepancy > 0.01).
+- Chow-Lin rho at edge of admissible range (< 0.1 or > 0.95) - AR(1) assumption dubious.

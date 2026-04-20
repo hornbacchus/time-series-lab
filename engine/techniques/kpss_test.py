@@ -17,6 +17,12 @@ import warnings as _warnings
 import numpy as np
 from statsmodels.tsa.stattools import kpss
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -140,6 +146,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
         result_rows = []
         all_summaries = []
         detail_tables = []
+        # Track first-series data for the interpretation block (the spec
+        # renders a single-series verdict; multi-series runs use the
+        # first series as a representative summary).
+        _first_interp_dict = None
 
         progress_callback("Running KPSS tests", 15)
 
@@ -185,6 +195,35 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 len(clean),
                 decision,
             ])
+
+            # Capture first-series data for the interp block (below).
+            if _first_interp_dict is None:
+                _crit_at_sig = None
+                # lvl is a string like "1%", "5%", "10%"; parse to float
+                for (lvl, cv, _rej) in single["critical_values_ordered"]:
+                    try:
+                        lvl_f = float(str(lvl).rstrip("%")) / 100.0
+                    except (ValueError, TypeError):
+                        continue
+                    if abs(lvl_f - significance) < 1e-9:
+                        _crit_at_sig = float(cv)
+                        break
+                if _crit_at_sig is None and single["critical_values_ordered"]:
+                    _crit_at_sig = float(single["critical_values_ordered"][0][1])
+                _first_interp_dict = {
+                    "series_name": name,
+                    "rejected": bool(rejected),
+                    "stat_value": float(single["stat"]),
+                    "p_value": (float(single["pvalue"])
+                                if single["pvalue"] is not None else None),
+                    "crit_value": _crit_at_sig or 0.0,
+                    "significance": float(significance),
+                    "regression": regression,
+                    "n_obs": int(len(clean)),
+                    "bandwidth": single.get("used_lag"),
+                    "trending": None,
+                    "effective_sample_size": None,
+                }
 
             cv_rows = [
                 [lvl, round(cv, 4), "Yes" if rej else "No"]
@@ -242,12 +281,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = (
+            build_interpretation("kpss_test", _first_interp_dict)
+            if _first_interp_dict else None
+        )
+
         return make_response(
             ctx,
             tables=[main_table] + detail_tables,
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "regression": regression,
                 "regression_label": _REGRESSION_LABEL.get(regression, regression),

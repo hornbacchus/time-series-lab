@@ -16,6 +16,12 @@ Both methods can detect upward and downward shifts.
 
 import numpy as np
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -329,12 +335,54 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Extract most-recent alarm details for the interp spec.
+        _most_recent_date = None
+        _most_recent_pre = None
+        _most_recent_post = None
+        _most_recent_method_agreement = False
+        if cp_rows:
+            _last_row = cp_rows[-1]
+            _most_recent_date = _last_row[1]
+            # cp_rows columns: [# or method-list, time, idx, method, pre_mean, post_mean, shift]
+            # (exact layout varies by wrapper version; extract defensively)
+            for v in _last_row:
+                if isinstance(v, (int, float)):
+                    continue
+            # Method agreement: check if any two methods fire on the same index
+            _last_idx = cp_rows[-1][2] if len(cp_rows[-1]) > 2 else None
+            if _last_idx is not None:
+                method_hits = sum(
+                    1 for m, i in all_cps_sorted if i == _last_idx
+                )
+                _most_recent_method_agreement = method_hits > 1
+            # Pre/post means are in the row (positions vary); try to extract numeric fields
+            _numerics = [v for v in _last_row if isinstance(v, (int, float))]
+            if len(_numerics) >= 2:
+                _most_recent_pre = _numerics[-2]
+                _most_recent_post = _numerics[-1]
+        interp = build_interpretation("cusum_page_hinkley", {
+            "series_name": name,
+            "n_obs": int(n),
+            "n_alarms_total": int(len(all_cps_sorted)),
+            "n_alarms_upward": int(len(cusum_up_alarms) + len(ph_up_alarms)),
+            "n_alarms_downward": int(len(cusum_down_alarms) + len(ph_down_alarms)),
+            "n_alarms_cusum": int(len(cusum_up_alarms) + len(cusum_down_alarms)),
+            "n_alarms_page_hinkley": int(len(ph_up_alarms) + len(ph_down_alarms)),
+            "most_recent_alarm_date": _most_recent_date,
+            "most_recent_pre_mean": _most_recent_pre,
+            "most_recent_post_mean": _most_recent_post,
+            "most_recent_method_agreement": _most_recent_method_agreement,
+            "cusum_threshold": float(cusum_h),
+            "ph_delta": float(ph_delta),
+            "ph_lambda": float(ph_lambda),
+        })
         return make_response(
             ctx,
             tables=[cp_table, params_table, ts_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "target": round(target, 6),
                 "cusum_k": round(cusum_k, 6),

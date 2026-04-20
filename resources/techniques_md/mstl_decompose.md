@@ -52,3 +52,13 @@ MSTL works by iterating STL decompositions, extracting one seasonal component at
 **Seasonal strength measure**: For each component `S_i`, the relative strength can be quantified as `1 - Var(R) / Var(S_i + R)`, where values close to 1 indicate a strong seasonal pattern and values near 0 indicate weak or negligible seasonality at that period.
 
 **Comparison with STL**: STL handles one period; MSTL handles multiple. If you only have one seasonal period, MSTL reduces to STL. MSTL is particularly valuable for sub-daily data where multiple overlapping cycles are common.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - multiple seasonal periods, per-period seasonal strengths with adjective bands, trend strength, and identification of the dominant cycle.
+
+**Technical Interpretation (Tier 2)** - nested-STL method across the period list, strength computation per period, and the additive-only restriction (log-transform for multiplicative behavior).
+
+**Caveats (Tier 3, conditional)**:
+- Negligible seasonality at a period (< 0.1) - drop from the period list.
+- Harmonic periods (strengths > 0.7 and ratio <= 2x) - one may be a harmonic of the other.

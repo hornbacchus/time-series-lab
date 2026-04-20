@@ -16,6 +16,12 @@ Method:
 
 import numpy as np
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -277,12 +283,28 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        _ci_lo = delay_ci[0] if delay_ci and len(delay_ci) >= 2 else None
+        _ci_hi = delay_ci[1] if delay_ci and len(delay_ci) >= 2 else None
+        interp = build_interpretation("gcc_phat_delay", {
+            "series_name_x": x_name,
+            "series_name_y": y_name,
+            "delay_time": float(estimated_delay_time),
+            "delay_time_units": "seconds" if fs else "samples",
+            "delay_samples": float(estimated_delay_samples),
+            "snr": float(snr),
+            "ci_lower": float(_ci_lo) if _ci_lo is not None else None,
+            "ci_upper": float(_ci_hi) if _ci_hi is not None else None,
+            "sample_rate_hz": float(fs) if fs else None,
+            "weighting": weighting,
+            "n_bootstrap": int(cfg["bootstrap"]) if cfg.get("bootstrap") else None,
+        })
         return make_response(
             ctx,
             tables=[peak_table, summary_table, gcc_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,

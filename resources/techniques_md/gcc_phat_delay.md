@@ -70,3 +70,13 @@ The weighted cross-spectrum `G_{xy}(f) / |G_{xy}(f)|` has unit magnitude at all 
 - **ML (Maximum Likelihood)**: `W(f) = |gamma_{xy}|^2 / (|G_xy|(1 - |gamma_{xy}|^2))`. Optimal in Gaussian noise but requires coherence estimation.
 
 **Windowed analysis**: For signals where the delay changes over time, apply GCC-PHAT to overlapping short windows (similar to STFT). This produces a delay trajectory over time.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - estimated delay in time units via GCC-PHAT, SNR with confidence descriptor (low/moderate/high), 95% bootstrap CI.
+
+**Technical Interpretation (Tier 2)** - PHAT weighting mechanics, peak at lag in samples, SNR definition (peak vs median-around-peak), bootstrap CI construction.
+
+**Caveats (Tier 3, conditional)**:
+- Low SNR (< 3) - delay-estimate confidence low.
+- Wide CI (> 20% of point estimate) - uncertainty large relative to magnitude.

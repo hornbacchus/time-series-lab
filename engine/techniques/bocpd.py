@@ -11,6 +11,12 @@ Uses a normal-inverse-gamma conjugate prior for the observation model
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 from scipy.special import gammaln, betaln
 
 from techniques.base import (
@@ -343,12 +349,39 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Extract most-recent change point details from cp_rows for the spec.
+        _most_recent_date = None
+        _most_recent_prob = None
+        _most_recent_index = None
+        _most_recent_pre_mean = None
+        _most_recent_post_mean = None
+        if cp_rows:
+            # cp_rows is ordered chronologically; take the last entry
+            _last = cp_rows[-1]
+            _most_recent_date = _last[1]
+            _most_recent_index = _last[2]
+            _most_recent_prob = _last[3]
+            _most_recent_pre_mean = _last[4]
+            _most_recent_post_mean = _last[5]
+        interp = build_interpretation("bocpd", {
+            "series_name": name,
+            "n_obs": int(n),
+            "n_cps": int(n_cps),
+            "most_recent_cp_date": _most_recent_date,
+            "most_recent_cp_prob": _most_recent_prob,
+            "most_recent_cp_index": _most_recent_index,
+            "most_recent_pre_mean": _most_recent_pre_mean,
+            "most_recent_post_mean": _most_recent_post_mean,
+            "hazard_rate": float(1.0 / hazard_lambda) if hazard_lambda else None,
+            "probability_threshold": float(threshold),
+        })
         return make_response(
             ctx,
             tables=[cp_table, seg_table, params_table, ts_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "hazard_lambda": hazard_lambda,
                 "threshold": threshold,

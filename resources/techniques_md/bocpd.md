@@ -65,3 +65,13 @@ where `pi_t(y_t | r_{t-1})` is the predictive probability of `y_t` given the cur
 - **Gradual changes**: Use models that can capture both abrupt and gradual transitions.
 
 **Comparison with offline methods**: BOCPD processes data sequentially and does not need the full series. PELT requires the full series but can be more accurate because it optimizes a global objective. BOCPD provides probabilities at each step; PELT provides a single best segmentation.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - count of posterior-probability-thresholded change points, most recent with posterior probability and pre/post mean shift, pointer to run-length posterior in data tables.
+
+**Technical Interpretation (Tier 2)** - BOCPD with hazard rate and probability threshold, streaming-compatible (contrast with offline PELT).
+
+**Caveats (Tier 3, conditional)**:
+- Trailing detection (within 5 obs of series end) - uncertain, more data may reverse.
+- High detection count (> 10% of series) - threshold may be too loose.

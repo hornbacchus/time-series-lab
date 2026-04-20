@@ -8,6 +8,12 @@ for the mean, variance, and autocorrelation at lag 1.
 
 import numpy as np
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -289,12 +295,32 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("block_bootstrap", {
+            "series_name": name,
+            "n_obs": int(n),
+            "block_length": int(block_length),
+            "n_resamples": int(n_bootstrap),
+            "mean_point": float(orig_mean),
+            "mean_bias": float(mean_bias),
+            "mean_se": float(mean_se),
+            "mean_ci_lower": float(mean_ci[0]),
+            "mean_ci_upper": float(mean_ci[1]),
+            "variance_point": float(orig_var),
+            "variance_se": float(var_se),
+            "variance_ci_lower": float(var_ci[0]),
+            "variance_ci_upper": float(var_ci[1]),
+            "acf1_point": float(orig_acf1),
+            "acf1_se": float(acf1_se),
+            "acf1_ci_lower": float(acf1_ci[0]),
+            "acf1_ci_upper": float(acf1_ci[1]),
+        })
         return make_response(
             ctx,
             tables=[results_table, dist_table, config_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "block_length": block_length,
                 "n_bootstrap": n_bootstrap,

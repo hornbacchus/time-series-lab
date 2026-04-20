@@ -13,6 +13,12 @@ import subprocess
 import numpy as np
 import warnings as _warnings
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -762,12 +768,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("x13_seasonal_adjust", {
+            "series_name": name,
+            "n_obs": int(len(values)),
+            "period": int(period),
+            "transform": transform,
+            "outlier_detection": bool(outlier),
+            "seasonal_strength": float(seasonal_strength),
+            "backend": backend_note,
+            # n_outliers not surfaced by this wrapper; spec falls back
+            # gracefully to "No AO/LS outliers detected (or detection disabled)"
+        })
         return make_response(
             ctx,
             tables=[decomp_table, diag_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "backend": backend_note,
                 "period": period,

@@ -71,3 +71,13 @@ Alarm when `PH_t > lambda` (threshold). This is equivalent to the CUSUM but accu
 - **CUSUM for variance**: Monitor `(y_t - mu_0)^2` instead of `y_t - mu_0`.
 - **Multivariate CUSUM**: Use the Mahalanobis distance or directional CUSUMs.
 - **Self-starting CUSUM**: Estimate mu_0 and sigma from the data during an initial learning period.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - total alarm count across two parallel detectors, upward/downward split, most-recent alarm with pre/post mean shift, dual-method agreement signal.
+
+**Technical Interpretation (Tier 2)** - CUSUM threshold h and PH delta, lambda parameters; online detectors (contrast with offline BOCPD/PELT which retrospectively re-estimate positions).
+
+**Caveats (Tier 3, conditional)**:
+- Method disagreement (CUSUM vs PH counts differ > 2x) - thresholds need retuning.
+- Alarm cluster (> 3 alarms in one segment) - hypersensitive thresholds.

@@ -38,6 +38,12 @@ under-cover.
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 import warnings as _warnings
 
 from techniques.base import (
@@ -192,19 +198,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # split conformal looks plausible here. If the calibration
         # residuals carry strong autocorrelation, the implicit
         # assumption breaks and realized coverage can fall below the
-        # nominal level — warn the user explicitly. Threshold of 0.2
-        # on |ρ̂| is a conservative flag; strong violations
-        # (|ρ| > 0.4) usually correspond to visible undercoverage.
+        # Compute calibration-residual lag-1 ACF unconditionally (lifted
+        # from inside the warning branch per Prompt C1 wiring). Preserve
+        # the defensive guards (short-residuals, zero-variance) by
+        # setting _rho_calibration to None when guards fail.
+        _rho_calibration = None
         if len(cal_residuals) >= 3:
             _cr = cal_residuals - np.mean(cal_residuals)
             _c0 = float(np.sum(_cr ** 2))
             if _c0 > 0:
                 _c1 = float(np.sum(_cr[:-1] * _cr[1:]))
-                _rho = _c1 / _c0
-                if abs(_rho) > 0.2:
+                _rho_calibration = _c1 / _c0
+                if abs(_rho_calibration) > 0.2:
                     warn_list.append(
                         f"Calibration residuals show lag-1 autocorrelation "
-                        f"(rho = {_rho:+.2f}). Standard split conformal assumes "
+                        f"(rho = {_rho_calibration:+.2f}). Standard split conformal assumes "
                         f"exchangeable residuals; the reported coverage guarantee "
                         f"may not hold. For formally-guaranteed time-series "
                         f"coverage, use an adaptive conformal method (not yet "
@@ -308,12 +316,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("conformal_intervals", {
+            "series_name": name,
+            "target_coverage": float(conf_level),
+            "horizon": int(horizon),
+            "avg_interval_width": float(conformal_width),
+            "parametric_baseline_width": float(avg_parametric_width),
+            "base_model": f"ARIMA({model.order[0]},{model.order[1]},{model.order[2]})",
+            "train_frac": float(1.0 - cal_frac),
+            "calibration_frac": float(cal_frac),
+            "conformal_quantile": float(conformal_q),
+            "calibration_residual_acf_lag1": (
+                float(_rho_calibration) if _rho_calibration is not None else None
+            ),
+        })
         return make_response(
             ctx,
             tables=[fc_table, diag_table, cal_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "n_train": n_train,
                 "n_cal": n_cal,

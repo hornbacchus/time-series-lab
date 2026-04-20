@@ -70,3 +70,13 @@ Prewhitened cross-correlation applies a filtering step before computing the cros
 - If x_t cannot be adequately modeled by ARIMA (e.g., it contains outliers), the prewhitening will be imperfect.
 - For multiple inputs, prewhiten each input separately and examine the CCF with the output.
 - The method assumes linearity; nonlinear relationships will not be captured.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - leader/follower after prewhitening, ARIMA order used to prewhiten, lag, peak rho, Bartlett-band significance. Explains prewhitening removes autocorrelation so residual CCF captures genuine cross-series lead-lag.
+
+**Technical Interpretation (Tier 2)** - prewhitening model (auto or user-specified), residual Ljung-Box adequacy check, post-prewhitening sample size.
+
+**Caveats (Tier 3, conditional)**:
+- Residual Ljung-Box rejects - prewhitening model misspecified.
+- ARIMA(0,0,0) selected - prewhitening was unnecessary.

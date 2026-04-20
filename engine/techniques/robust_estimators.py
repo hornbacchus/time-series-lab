@@ -9,6 +9,12 @@ Computes robust alternatives to the mean and standard deviation:
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 from scipy import stats as sp_stats
 
 from techniques.base import (
@@ -294,12 +300,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("robust_estimators", {
+            "series_name": name,
+            "n_obs": int(n),
+            "mean": float(classical_mean),
+            "median": float(classical_median),
+            "std": float(classical_std),
+            "mad_scale": float(mad_val),
+            "trimmed_mean": float(tm_val),
+            "huber_m_estimate": float(wm_val),  # winsorized mean stands in for Huber M
+            "qn_scale": float(qn_val) if n <= 5000 else None,
+            "iqr_scale": None,  # not computed by this wrapper
+        })
         return make_response(
             ctx,
             tables=[location_table, scale_table, diag_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "n_valid": n,
                 "classical_mean": round(classical_mean, 6),

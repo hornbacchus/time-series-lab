@@ -66,3 +66,13 @@ Computational cost: O(N * M) time and space.
 **Comparison with cross-correlation**: Cross-correlation finds a single, global time shift that maximizes the linear correlation. DTW finds a nonlinear, time-varying alignment. Use cross-correlation when the delay is constant; use DTW when the delay varies or the series have speed differences.
 
 **Caution**: DTW always returns an alignment, even for completely unrelated series. The DTW distance should be compared against a null distribution (e.g., from permuted or random series) to assess significance.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - DTW alignment distance (novel distance-based shape, not correlation). Normalized DTW distance raw (per Prompt C1 Decision C, no qualitative bands), median warp lag, lag std showing time-varying lead-lag. Closer: lower distance = closer alignment, interpret relative to Sakoe-Chiba band and series magnitudes.
+
+**Technical Interpretation (Tier 2)** - Sakoe-Chiba band parameter, warp path length vs diagonal, distortion ratio. Contrasts with CCF: DTW handles non-linear alignment but provides no significance band.
+
+**Caveats (Tier 3, conditional)**:
+- Severe warping (distortion > 2) - alignment poor, CCF likely also unreliable.
+- Highly variable lag (std > 50% of max_lag) - single-number summary misleading.

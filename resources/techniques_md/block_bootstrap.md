@@ -75,3 +75,13 @@ Methods for selecting l:
 **Sieve bootstrap** (alternative approach): Fit an AR(p) model (with p selected by AIC), resample the residuals using the iid bootstrap (since AR residuals are approximately iid), and generate new series from the AR model with resampled innovations. This parameterically captures the dependence and allows iid resampling of residuals.
 
 **Number of replications B**: At least 1,000 for confidence intervals, 5,000-10,000 for accurate tail probabilities. Use the Monte Carlo error `SE_MC = s / sqrt(B)` (where s is the bootstrap standard deviation) to assess whether B is large enough.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - 95% CIs for mean, variance, ACF(1). Mean CI vs zero is the actionable test. Explicitly cites whether the mean CI excludes zero at the 5% level.
+
+**Technical Interpretation (Tier 2)** - non-overlapping block bootstrap with block length tuned to series autocorrelation, per-statistic point / bias / SE / CI in prose form (V2 convention).
+
+**Caveats (Tier 3, conditional)**:
+- Wide mean CI (width > point estimate) - weak evidence about mean.
+- High bootstrap bias (> 10% of point) - block length too short.

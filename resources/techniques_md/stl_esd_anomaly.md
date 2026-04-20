@@ -62,3 +62,13 @@ For one-sided tests, modify the ESD statistic to `G_i = max(R_j' - R_bar) / s` (
 - The ESD test assumes approximate normality of the remainder. For highly skewed data, apply a Box-Cox transformation before STL.
 - Very long seasonal periods (e.g., 365 for daily data with yearly seasonality) require correspondingly long series.
 - For real-time monitoring, apply STL-ESD to a rolling window.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - anomaly count, rate (%), alpha threshold, upward/downward split, most extreme anomaly with z-score on STL-adjusted remainders.
+
+**Technical Interpretation (Tier 2)** - STL-decomposed series with generalized-ESD test on the remainder, per-iteration test statistics in data tables, alpha trade-off framing.
+
+**Caveats (Tier 3, conditional)**:
+- High anomaly rate (> 15%) - threshold too loose or regime shift being misclassified.
+- All anomalies in one direction - series may have heteroscedasticity, not discrete outliers.

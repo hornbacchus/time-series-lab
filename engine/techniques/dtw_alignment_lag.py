@@ -12,6 +12,12 @@ window constraints (Sakoe-Chiba band or Itakura parallelogram).
 
 import numpy as np
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -304,12 +310,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        interp = build_interpretation("dtw_alignment_lag", {
+            "series_name_x": x_name,
+            "series_name_y": y_name,
+            "dtw_normalized": float(dtw_normalized),
+            "median_lag": float(median_lag),
+            "lag_std": float(std_lag),
+            "max_lag": float(max_lag),
+            "n_x": int(nx),
+            "n_y": int(ny),
+            "sakoe_chiba_band": int(window_size),
+            "path_length": int(path_len),
+            "diag_length": int(diag_len),
+            "distortion_ratio": float(distortion_ratio),
+        })
         return make_response(
             ctx,
             tables=[summary_table, lag_table, seg_table, wp_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "x_series": x_name,
                 "y_series": y_name,

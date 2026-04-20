@@ -61,3 +61,13 @@ Under the condition that `C(y_{s+1:t}) + C(y_{t+1:T}) <= C(y_{s+1:T}) + K` for s
 **Minimum segment length**: A constraint `tau_{i+1} - tau_i >= l_min` prevents spuriously short segments. Typical choice: `l_min = 2 * p` (at least twice the number of parameters to estimate).
 
 **Extensions**: PELT can be applied to multivariate series (joint change point detection across multiple channels) by using multivariate cost functions. Non-parametric cost functions based on ranks or kernel-based two-sample tests allow detection of general distributional changes.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - count of change points as offline penalized optimum, cost model, penalty, most-recent CP with pre/post mean shift.
+
+**Technical Interpretation (Tier 2)** - pruned exact linear-time segmentation under the chosen cost and penalty; contrast with BOCPD's streaming framework.
+
+**Caveats (Tier 3, conditional)**:
+- Low detection count on long series (n > 500, n_cp < 2) - penalty may be too high.
+- Dominant segment (> 50% of obs) - verify within-segment fit.

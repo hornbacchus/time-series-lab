@@ -6,6 +6,12 @@ Computes MAE, sMAPE, MASE, and prediction interval coverage.
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 import warnings as _warnings
 
 from techniques.base import (
@@ -279,12 +285,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        _std_mase = (
+            float(np.std(all_mase, ddof=1)) if len(all_mase) > 1 else 0.0
+        )
+        interp = build_interpretation("rolling_origin_cv", {
+            "series_name": name,
+            "model_name": "auto-ARIMA",
+            "n_folds": int(len(fold_rows)),
+            "mean_mase": float(avg_mase),
+            "std_mase": float(_std_mase),
+            "avg_coverage": float(avg_coverage) / 100.0,
+            "target_coverage": float(target_cov) / 100.0,
+            "min_train": int(min_train) if 'min_train' in dir() else None,
+            "test_horizon": int(horizon),
+            "min_mase": float(np.min(all_mase)) if all_mase else None,
+            "max_mase": float(np.max(all_mase)) if all_mase else None,
+            "mean_smape": float(avg_smape),
+            "mean_mae": float(avg_mae),
+        })
         return make_response(
             ctx,
             tables=[fold_table, summary_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "n_folds": len(fold_rows),
                 "horizon": horizon,

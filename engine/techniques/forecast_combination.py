@@ -8,6 +8,12 @@ Combines forecasts from multiple models (ETS, ARIMA, Theta) using:
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 import warnings as _warnings
 
 from techniques.base import (
@@ -372,12 +378,43 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Package inverse-MSE ensemble details for the interp spec
+        # (Prompt C1 audit flagged this wrapper as needing ~12 LOC
+        # of ensemble-results packaging — the per-model MSE and
+        # equal-weight MSE live in locals and holdout_rows).
+        _imse_mse = None
+        _equal_mse = None
+        for row in holdout_rows:
+            if row[0] == "Inv-MSE":
+                _imse_mse = float(row[1])
+            elif row[0] == "Simple Avg":
+                _equal_mse = float(row[1])
+        _imse_weights_list = [float(imse_weights[m]) for m in model_names]
+        _per_model_mse_list = [float(holdout_mses[m]) for m in model_names]
+        _dominant_mse = float(holdout_mses.get(dominant_model, 0.0))
+
+        interp = build_interpretation("forecast_combination", {
+            "series_name": name,
+            "horizon": int(horizon),
+            "n_models": int(len(model_names)),
+            "model_names": list(model_names),
+            "weights": _imse_weights_list,
+            "ensemble_holdout_mse": _imse_mse,
+            "dominant_model_name": dominant_model,
+            "dominant_model_weight": float(dom_weight),
+            "dominant_model_mse": _dominant_mse,
+            "equal_weight_holdout_mse": _equal_mse,
+            "per_model_holdout_mse": _per_model_mse_list,
+            "combination_method": "inverse-MSE",
+            "holdout_length": int(actual_holdout_len),
+        })
         return make_response(
             ctx,
             tables=[fc_table, weight_table, holdout_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "models": model_names,
                 "n_holdout": actual_holdout_len,

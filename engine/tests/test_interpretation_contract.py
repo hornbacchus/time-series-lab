@@ -716,6 +716,7 @@ class TestT10RegistryGrowth(unittest.TestCase):
     """T10 — The registry exposes the full Prompt A + Prompt B spec set."""
 
     EXPECTED = {
+        # Prompt A + B (8)
         "adf_test",
         "granger_causality",
         "rolling_ccf_lag",
@@ -724,6 +725,34 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "garch_model",
         "markov_switching",
         "pca_analysis",
+        # Prompt C1 (26): Decomposition, Missing Data, Change Points,
+        # Stationarity, Causality, Regimes, Evaluation
+        "classical_decompose",
+        "stl_decompose",
+        "mstl_decompose",
+        "x13_seasonal_adjust",
+        "denton_chowlin_disaggregation",
+        "kalman_imputation",
+        "loess_interpolation",
+        "bocpd",
+        "cusum_page_hinkley",
+        "intervention_analysis",
+        "pelt_change_points",
+        "stl_esd_anomaly",
+        "kpss_test",
+        "pp_test",
+        "cross_correlation_lag",
+        "prewhitened_ccf_lag",
+        "dtw_alignment_lag",
+        "gcc_phat_delay",
+        "hmm",
+        "star_model",
+        "tar_setar",
+        "block_bootstrap",
+        "conformal_intervals",
+        "forecast_combination",
+        "robust_estimators",
+        "rolling_origin_cv",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -935,6 +964,119 @@ class TestMarkovSwitchingVarianceDominantLabels(unittest.TestCase):
         self.assertNotIn(
             "high-σ", tier1,
             f"Mean-dominant Tier 1 must not emit σ-labels. Got: {tier1!r}"
+        )
+
+
+class TestT13C1RegistryInventory(unittest.TestCase):
+    """T13 — After Prompt C1 lands, the registry contains exactly the
+    Prompt A + Prompt B + Prompt C1 specs, totaling 34 techniques. If
+    the set grows or shrinks unexpectedly, the registered-techniques
+    list in test T10 catches the first deviation; this test pins the
+    count independently."""
+
+    def test_exactly_34_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertEqual(
+            len(registered), 34,
+            f"Expected exactly 34 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26). Got {len(registered)}: {sorted(registered)}"
+        )
+
+
+class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
+    """T14 — Every registered spec's tier builders must not raise on
+    a minimal-valid input dict. Catches the class of bug where a
+    spec's tier builder references a key that isn't always present.
+
+    Minimal-input strategy: construct a dict of just a few harmless
+    keys (series_name + n_obs + a handful of numeric defaults), invoke
+    build_interpretation, and assert it returns a non-error dict
+    rather than propagating a KeyError or AttributeError.
+
+    Tier text may be gibberish under minimal inputs — that's fine.
+    The invariant is "does not raise"; correctness of content is
+    the job of T4/T5/T6/T7/T8/T9/T11/T12 on realistic fixtures."""
+
+    _MINIMAL_INPUT = {
+        "series_name": "test_series",
+        "series_name_x": "X",
+        "series_name_y": "Y",
+        "n_obs": 100,
+        "n": 100,
+        "k_regimes": 2,
+        "period": 12,
+        "order": 1,
+        "max_lag": 8,
+        "best_lag": 0,
+        "best_f": 1.0,
+        "best_p": 0.5,
+        "significance": 0.05,
+        "seasonal_strength": 0.5,
+        "trend_strength": 0.5,
+        "model_type": "additive",
+        "two_sided": True,
+        "alpha": 0.05,
+        "regression": "c",
+        "stat_value": 1.0,
+        "crit_value": 1.0,
+        "rejected": False,
+        "p_value": 0.5,
+        "horizon": 10,
+        "n_missing": 0,
+        "n_gaps": 0,
+        "max_gap": 0,
+        "n_folds": 5,
+        "mean_mase": 0.9,
+        "std_mase": 0.1,
+        "n_cps": 0,
+        "n_change_points": 0,
+        "n_anomalies": 0,
+        "n_anomalies_upward": 0,
+        "n_anomalies_downward": 0,
+        "n_alarms_total": 0,
+        "n_alarms_upward": 0,
+        "n_alarms_downward": 0,
+        "n_interventions": 0,
+        "n_significant": 0,
+        "target_coverage": 0.95,
+        "avg_interval_width": 1.0,
+        "n_models": 3,
+        "n_resamples": 1000,
+        "block_length": 10,
+        "mean": 0.0,
+        "median": 0.0,
+        "std": 1.0,
+        "mad_scale": 0.8,
+        "regime_means": [0.0, 1.0],
+        "regime_stds": [1.0, 1.0],
+        "current_regime": 0,
+        "current_prob": 0.5,
+        "expected_durations": [10.0, 10.0],
+        "final_period_probs": [0.5, 0.5],
+        "sort_axis": "mean",
+    }
+
+    def test_all_registered_specs_no_raise(self):
+        from interpretation import list_registered
+        failures = []
+        for tech_id in list_registered():
+            try:
+                out = build_interpretation(tech_id, dict(self._MINIMAL_INPUT))
+                # Must be a dict with tier1/tier2/tier3 keys
+                if not isinstance(out, dict):
+                    failures.append(f"{tech_id}: returned non-dict {type(out).__name__}")
+                    continue
+                if set(out.keys()) != {"tier1", "tier2", "tier3"}:
+                    failures.append(
+                        f"{tech_id}: returned keys {set(out.keys())} "
+                        f"instead of {{tier1, tier2, tier3}}"
+                    )
+            except Exception as e:
+                failures.append(f"{tech_id}: {type(e).__name__}: {e}")
+        self.assertFalse(
+            failures,
+            "Specs raised on minimal-input probe:\n  " + "\n  ".join(failures)
         )
 
 

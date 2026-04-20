@@ -8,6 +8,12 @@ weekly and yearly seasonality) using statsmodels MSTL.
 import numpy as np
 from statsmodels.tsa.seasonal import MSTL
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -220,12 +226,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
         for sname, fs in strengths:
             audit[f"strength_{sname}"] = fs
 
+        interp = build_interpretation("mstl_decompose", {
+            "series_name": name,
+            "n_obs": int(len(values)),
+            "periods": list(periods),
+            "seasonal_strengths": [float(s[1]) for s in strengths],
+            "trend_strength": float(trend_strength),
+        })
         return make_response(
             ctx,
             tables=[decomp_table, diag_table],
             plain_english_summary=" ".join(parts),
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

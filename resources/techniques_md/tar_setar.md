@@ -63,3 +63,14 @@ where `r` is the threshold, `d` is the delay parameter (d >= 1), `p_1, p_2` are 
 **Threshold cointegration**: TAR models can be applied to error correction terms to allow asymmetric adjustment toward equilibrium. The Enders-Siklos threshold cointegration test extends the Engle-Granger framework.
 
 **Ergodicity and stationarity**: A 2-regime SETAR is globally stationary if the autoregressive processes in both regimes are contractive. Sufficient conditions involve the spectral radii of the companion matrices in each regime being less than 1.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - SETAR with threshold(s) on y(t-d), delay, linearity-test F-stat and p-value verdict, regime-1 share, actionable closer on regime-conditional inference.
+
+**Technical Interpretation (Tier 2)** - threshold grid-search estimation, per-regime sigma and observation counts, linearity-test construction. Contrasts with STAR (discrete vs smooth transition) and Markov Switching (observable vs latent triggering variable).
+
+**Caveats (Tier 3, conditional)**:
+- Weak linearity test (p > 0.10) - linear AR may suffice.
+- Imbalanced regimes (any < 15%) - coefficient estimates unstable.
+- Underpopulated inner regime in 3-regime SETAR - consider 2-regime.

@@ -67,3 +67,14 @@ Test H0: beta_1 = beta_2 = beta_3 = 0 using an F-test or LM test. Rejection indi
 **Identification issue**: gamma and c can be poorly identified when gamma is very large (near SETAR) or very small (near linear). Rescaling gamma by the standard deviation of s_t helps: `gamma* = gamma / std(s_t)`.
 
 **Forecasting**: Multi-step forecasts require simulating forward, since `E[G(Y_{t+h-d})]` does not equal `G(E[Y_{t+h-d}])`. Monte Carlo simulation or skeleton (deterministic) forecasts are used.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - LSTAR or ESTAR model with transition variable, smoothness gamma with speed descriptor (gradual/moderate/fast/discrete), centering c, current regime-indicator value.
+
+**Technical Interpretation (Tier 2)** - transition function math, per-regime AR coefficients in citation form (lower regime AR(1)=..., upper regime AR(1)=...), AIC comparison against linear AR baseline.
+
+**Caveats (Tier 3, conditional)**:
+- Very gradual transition (gamma < 0.5) - may not need two regimes.
+- Effectively discrete (gamma > 100) - TAR suffices with fewer parameters.
+- AIC improvement < 2 vs linear AR - STAR adds little.

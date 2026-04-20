@@ -8,12 +8,19 @@ state-dependent distributional parameters.
 
 import numpy as np
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
     make_response,
     make_error_response,
     label_regimes_by_dominant_key,
+    stationary_distribution,
 )
 
 
@@ -416,12 +423,55 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "horizon": horizon,
         }
 
+        # Build the interpretation-layer dict with markov_switching-shaped
+        # fields (Prompt C1 Decision D). Reuses the already-computed
+        # sorted regime stats and adds HMM-specific fields
+        # (covariance_type, stationary_distribution) so the HMM spec can
+        # disclose them in Tier 2.
+        try:
+            _k = int(n_components)
+            _regime_means_list = [
+                float(np.mean([float(y_t[0]) for y_t, s_t in zip(X, states) if s_t == r] or [0.0]))
+                for r in range(_k)
+            ]
+            _regime_stds_list = [
+                float(np.std([float(y_t[0]) for y_t, s_t in zip(X, states) if s_t == r] or [0.0], ddof=1)
+                      if sum(1 for s_t in states if s_t == r) > 1 else 0.0)
+                for r in range(_k)
+            ]
+            # Expected durations from the (sorted) transition matrix diagonal.
+            _expected_durations = []
+            for r in range(_k):
+                p_stay = float(sorted_transmat[r, r]) if r < sorted_transmat.shape[0] else 0.0
+                _expected_durations.append(
+                    1.0 / (1.0 - p_stay) if p_stay < 1.0 else float("inf")
+                )
+            _stationary = stationary_distribution(sorted_transmat).tolist()
+            _final_probs = state_probs[-1, :].tolist() if state_probs.shape[0] > 0 else [0.0] * _k
+            interp = build_interpretation("hmm", {
+                "k_regimes": _k,
+                "regime_means": _regime_means_list,
+                "regime_stds": _regime_stds_list,
+                "current_regime": int(current_state),
+                "current_prob": float(_final_probs[current_state])
+                                if current_state < len(_final_probs) else 0.0,
+                "expected_durations": _expected_durations,
+                "final_period_probs": _final_probs,
+                "sort_axis": hmm_sort_axis,
+                "covariance_type": covariance_type,
+                "stationary_distribution": _stationary,
+                "n_obs": int(len(X)),
+            })
+        except Exception:
+            interp = None
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

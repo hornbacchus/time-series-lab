@@ -61,3 +61,15 @@ A Hidden Markov Model (HMM) describes a system that transitions between a finite
 **Scaling**: Forward and backward probabilities can underflow for long sequences. Log-space computation or scaling factors (dividing by `sum_j alpha_t(j)` at each step) prevent this.
 
 **Posterior decoding** (alternative to Viterbi): Assign each time point to the state with highest `gamma_t(j)`. This maximizes the expected number of correct states, whereas Viterbi maximizes the probability of the entire path.
+
+## Interpretation
+
+**Plain-Language Finding (Tier 1)** - k-state Gaussian HMM, sort-axis-labeled states (low-mean/high-mean or low-sigma/high-sigma), well-separation verdict, current state with smoothed probability.
+
+**Technical Interpretation (Tier 2)** - EM-fit specification, per-state mean/std and expected duration, contrast with Markov Switching's AR dynamics (HMM assumes i.i.d. emissions within state).
+
+**Caveats (Tier 3, conditional)**:
+- Weakly separated states (|mu diff| < common sigma) - single-state + heteroskedasticity may fit comparably.
+- Tied covariance with heterogeneous within-state variance - reconsider covariance_type.
+- Near-absorbing state (duration > 50) - forecasts can treat current state as permanent.
+- Ambiguous current state (max P < 0.6) - weight multiple states.

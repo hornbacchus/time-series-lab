@@ -21,6 +21,18 @@ wire them as they reach target techniques.
 
 Do NOT expand this module with imperative rendering code. All sentence
 assembly happens in ``engine/interpretation/specs/*.py``.
+
+Future-promotion convention (Prompt C1 Decision 4). Spec authors
+routinely need small helper functions (adjective-band mappings,
+format adapters, local rule renderers) that *might* eventually
+generalize across specs. The convention: **promote a helper to
+this module on the second distinct technique that needs it**, not
+the first. A single-use helper lives privately in its spec; the
+second distinct use promotes it here, with a docstring citing both
+consumers. This keeps primitives.py focused on proven-general
+utilities and avoids speculative API additions. Applies equally to
+``engine/techniques/base.py`` helpers (e.g., ``stationary_distribution``
+was promoted on its second consumer in Prompt C1).
 """
 
 from typing import Tuple, Optional

@@ -8,6 +8,12 @@ Detects abrupt changes in the statistical properties of a time series
 import numpy as np
 import ruptures as rpt
 
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
+
 from techniques.base import (
     RunContext,
     make_table,
@@ -257,12 +263,35 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Extract most-recent change point details + largest segment.
+        _most_recent_date = cp_rows[-1][2] if cp_rows else None
+        _most_recent_pre = cp_rows[-1][3] if cp_rows else None
+        _most_recent_post = cp_rows[-1][4] if cp_rows else None
+        _largest_segment = max(
+            (boundaries[i + 1] - boundaries[i] for i in range(len(boundaries) - 1)),
+            default=n,
+        )
+        _penalty_numeric = (
+            float(penalty_method) if isinstance(penalty_method, (int, float)) else None
+        )
+        interp = build_interpretation("pelt_change_points", {
+            "series_name": name,
+            "n_obs": int(n),
+            "n_change_points": int(n_cp),
+            "cost_model": str(cost_model).upper(),
+            "penalty": _penalty_numeric,
+            "most_recent_cp_date": _most_recent_date,
+            "most_recent_pre_mean": _most_recent_pre,
+            "most_recent_post_mean": _most_recent_post,
+            "largest_segment_size": int(_largest_segment),
+        })
         return make_response(
             ctx,
             tables=[cp_table, seg_table, diag_table, label_table],
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "cost_model": cost_model,
                 "penalty": str(penalty_method),

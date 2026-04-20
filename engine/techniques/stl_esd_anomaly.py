@@ -12,6 +12,12 @@ anomaly detection algorithm.
 """
 
 import numpy as np
+
+try:
+    from interpretation import build_interpretation  # type: ignore
+except Exception:
+    def build_interpretation(technique_id, results):  # type: ignore
+        return None
 from scipy import stats as sp_stats
 
 from techniques.base import (
@@ -283,12 +289,36 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Count anomalies by direction and find most extreme.
+        _n_up = sum(1 for r in anomaly_rows if r[5] == "Upper")
+        _n_down = sum(1 for r in anomaly_rows if r[5] == "Lower")
+        _most_extreme_date = None
+        _most_extreme_z = None
+        if anomaly_rows:
+            _sorted_by_score = sorted(
+                anomaly_rows, key=lambda r: r[4] if r[4] is not None else 0,
+                reverse=True,
+            )
+            _most_extreme_date = _sorted_by_score[0][0]
+            _most_extreme_z = _sorted_by_score[0][4]
+        interp = build_interpretation("stl_esd_anomaly", {
+            "series_name": name,
+            "n_obs": int(n),
+            "n_anomalies": int(n_anomalies),
+            "alpha": float(alpha),
+            "n_anomalies_upward": int(_n_up),
+            "n_anomalies_downward": int(_n_down),
+            "most_extreme_date": _most_extreme_date,
+            "most_extreme_z_score": _most_extreme_z,
+            "max_anomalies": int(max_anomalies),
+        })
         return make_response(
             ctx,
             tables=[anomaly_table, summary_table, esd_table, ts_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields={
                 "period": period,
                 "alpha": alpha,
