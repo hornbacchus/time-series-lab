@@ -10,11 +10,44 @@ from typing import Optional
 
 from interpretation.builder import InterpretationSpec
 from interpretation.primitives import (
-    FMT_COEF_UNSIGNED,
     FMT_PROBABILITY,
+    format_scale_aware,
     format_series_reference,
 )
 from interpretation.registry import register
+
+
+# Humanized sentence-start rendering of the programmatic method
+# name. FIX 6: "inverse-MSE" lowercased at sentence start. Raw
+# ``method_name`` is retained for programmatic branching, but
+# user-facing prose uses this label when the word leads a sentence.
+_METHOD_LABEL_SENTENCE_START = {
+    "inverse-MSE": "Inverse-MSE",
+    "inverse_mse": "Inverse-MSE",
+    "simple-average": "Simple averaging",
+    "simple_average": "Simple averaging",
+    "equal-weight": "Equal-weight",
+    "equal_weight": "Equal-weight",
+}
+
+
+def _method_sentence_start(method_name: str) -> str:
+    return _METHOD_LABEL_SENTENCE_START.get(method_name, str(method_name).capitalize())
+
+
+# Minimum |delta_pct| (ensemble-vs-best-constituent) at which the
+# Tier 1 comparison sentence renders the standard "ensemble adds X%"
+# / "ensemble is worse by X%" phrasing. Below this threshold, the
+# ensemble and best constituent are treated as indistinguishable
+# within rounding — the comparison sentence switches to the
+# "matches within rounding" phrasing, and the ensemble_hurts Tier 3
+# trigger is suppressed (otherwise a -0.004% gap would fire a false
+# "ensemble hurts" verdict).
+#
+# 0.5% is the chosen threshold: large enough to exclude numerical
+# ties at any realistic scale; small enough that genuine
+# improvements or regressions still produce the delta sentence.
+MEANINGFUL_LIFT_PCT_THRESHOLD = 0.5
 
 PRESET_GATED_KEYS = ()
 
@@ -51,8 +84,10 @@ def _tier1(results: dict) -> str:
     dominant_clause = ""
     if dominant_name and dominant_weight is not None:
         band = _weight_dominance_band(float(dominant_weight), n_models)
+        # FIX 6: capitalize method name at sentence start.
         dominant_clause = (
-            f" {method_name} weights: {dominant_name} receives "
+            f" {_method_sentence_start(method_name)} weights: "
+            f"{dominant_name} receives "
             f"{FMT_PROBABILITY.format(float(dominant_weight))} ({band})"
         )
         # Append the other weights inline
@@ -71,21 +106,32 @@ def _tier1(results: dict) -> str:
         and float(dominant_mse) > 0
     ):
         delta_pct = 100.0 * (float(dominant_mse) - float(ensemble_mse)) / float(dominant_mse)
-        if delta_pct > 0:
+        # FIX A (post-eval): when ensemble and best constituent are
+        # numerically indistinguishable (|delta_pct| below the
+        # meaningful-lift threshold), render a "matches within
+        # rounding" sentence rather than two identical integers + a
+        # 0.0% delta. Keeps Tier 1 readable and the message honest.
+        if abs(delta_pct) < MEANINGFUL_LIFT_PCT_THRESHOLD:
+            comparison_clause = (
+                f" Ensemble holdout MSE matches the best single "
+                f"constituent ({dominant_name}) within rounding — no "
+                f"meaningful lift from ensembling."
+            )
+        elif delta_pct > 0:
             comparison_clause = (
                 f" Ensemble holdout MSE "
-                f"{FMT_COEF_UNSIGNED.format(float(ensemble_mse))} vs "
+                f"{format_scale_aware(float(ensemble_mse))} vs "
                 f"{dominant_name} alone "
-                f"{FMT_COEF_UNSIGNED.format(float(dominant_mse))} — "
+                f"{format_scale_aware(float(dominant_mse))} — "
                 f"ensemble adds {delta_pct:.1f}% MSE reduction over "
                 f"the single best constituent, justifying the weighting."
             )
         else:
             comparison_clause = (
                 f" Ensemble holdout MSE "
-                f"{FMT_COEF_UNSIGNED.format(float(ensemble_mse))} "
+                f"{format_scale_aware(float(ensemble_mse))} "
                 f"exceeds {dominant_name} alone "
-                f"{FMT_COEF_UNSIGNED.format(float(dominant_mse))} by "
+                f"{format_scale_aware(float(dominant_mse))} by "
                 f"{abs(delta_pct):.1f}% — ensemble does not improve "
                 f"over the best constituent."
             )
@@ -114,7 +160,7 @@ def _tier2(results: dict) -> str:
         for m, w, mse in zip(model_names, weights, per_model_mse):
             pairs.append(
                 f"{m} receives {FMT_PROBABILITY.format(float(w))} "
-                f"(MSE={FMT_COEF_UNSIGNED.format(float(mse))})"
+                f"(MSE={format_scale_aware(float(mse))})"
             )
         weights_sentence = (
             f"Weights assigned by {method_name}: " + "; ".join(pairs) + "."
@@ -123,7 +169,7 @@ def _tier2(results: dict) -> str:
     if equal_weight_mse is not None and ensemble_mse is not None:
         equal_sentence = (
             f" Equal-weight baseline MSE "
-            f"{FMT_COEF_UNSIGNED.format(float(equal_weight_mse))}."
+            f"{format_scale_aware(float(equal_weight_mse))}."
         )
     return (
         f"Weights determined via {method_name} {holdout_clause}. "
@@ -155,13 +201,22 @@ def _trigger_ensemble_hurts(results: dict) -> Optional[str]:
     dominant_mse = results.get("dominant_model_mse")
     if ensemble_mse is None or dominant_mse is None:
         return None
-    if float(ensemble_mse) <= float(dominant_mse):
+    if float(dominant_mse) <= 0:
+        return None
+    # FIX B (post-eval): require the ensemble to be worse by more
+    # than MEANINGFUL_LIFT_PCT_THRESHOLD (0.5%) before firing an
+    # "ensemble hurts" verdict. Below that threshold, the Tier 1
+    # "matches within rounding" phrasing already communicates the
+    # finding; a Tier 3 "ensemble hurts" on a -0.004% gap is too
+    # strong.
+    ratio = float(ensemble_mse) / float(dominant_mse)
+    if ratio <= 1.0 + MEANINGFUL_LIFT_PCT_THRESHOLD / 100.0:
         return None
     return (
         f"Ensemble holdout MSE "
-        f"{FMT_COEF_UNSIGNED.format(float(ensemble_mse))} exceeds the "
+        f"{format_scale_aware(float(ensemble_mse))} exceeds the "
         f"best single constituent's "
-        f"{FMT_COEF_UNSIGNED.format(float(dominant_mse))}. Ensemble "
+        f"{format_scale_aware(float(dominant_mse))}. Ensemble "
         f"hurts; use the best constituent alone."
     )
 

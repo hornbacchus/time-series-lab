@@ -378,17 +378,28 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
-        # Package inverse-MSE ensemble details for the interp spec
-        # (Prompt C1 audit flagged this wrapper as needing ~12 LOC
-        # of ensemble-results packaging — the per-model MSE and
-        # equal-weight MSE live in locals and holdout_rows).
+        # Package inverse-MSE ensemble details for the interp spec.
+        # FIX 3 (post-eval): previously matched `holdout_rows[0] ==
+        # "Inv-MSE"` which never matched (the actual label is
+        # "Inverse-MSE"), so `_imse_mse` was silently None and the
+        # Tier 1 ensemble-vs-best-constituent closer never rendered.
+        # Compute the ensemble holdout MSE directly from the
+        # inverse-MSE-weighted forecast on the holdout set — no
+        # display-label matching.
         _imse_mse = None
         _equal_mse = None
-        for row in holdout_rows:
-            if row[0] == "Inv-MSE":
-                _imse_mse = float(row[1])
-            elif row[0] == "Simple Avg":
-                _equal_mse = float(row[1])
+        try:
+            _imse_fc = np.zeros(actual_holdout_len)
+            for m in model_names:
+                _imse_fc = _imse_fc + imse_weights[m] * holdout_forecasts[m][:actual_holdout_len]
+            _imse_mse = float(np.mean((holdout - _imse_fc) ** 2))
+            _equal_fc = np.zeros(actual_holdout_len)
+            for m in model_names:
+                _equal_fc = _equal_fc + simple_weights[m] * holdout_forecasts[m][:actual_holdout_len]
+            _equal_mse = float(np.mean((holdout - _equal_fc) ** 2))
+        except Exception:
+            _imse_mse = None
+            _equal_mse = None
         _imse_weights_list = [float(imse_weights[m]) for m in model_names]
         _per_model_mse_list = [float(holdout_mses[m]) for m in model_names]
         _dominant_mse = float(holdout_mses.get(dominant_model, 0.0))

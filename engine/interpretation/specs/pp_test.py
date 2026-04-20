@@ -34,6 +34,7 @@ def _tier1(results: dict) -> str:
         bandwidth=results.get("bandwidth"),
         trending=results.get("trending"),
         effective_sample_size=results.get("effective_sample_size"),
+        pvalue_clipped=bool(results.get("pvalue_clipped", False)),
     )
 
 
@@ -53,6 +54,7 @@ def _tier2(results: dict) -> str:
         bandwidth=results.get("bandwidth"),
         trending=results.get("trending"),
         effective_sample_size=results.get("effective_sample_size"),
+        pvalue_clipped=bool(results.get("pvalue_clipped", False)),
     )
 
 

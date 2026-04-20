@@ -35,12 +35,23 @@ _REGRESSION_LABEL = {
     "n": "no-deterministic-term",
 }
 
+# Humanized rendering of the ``null_direction`` key for user-facing
+# verdict text. The raw key is retained for programmatic equality
+# checks elsewhere in this module (`== "unit_root"` branch selection),
+# but never flows into Tier 1 / Tier 2 prose. See Prompt C1 post-eval
+# FIX 1 (token leak: "unit_root" appeared verbatim in rendered text).
+_NULL_DIRECTION_LABEL = {
+    "unit_root": "unit-root",
+    "stationarity": "stationarity",
+}
+
 
 def _verdict_phrase(test_name: str, null_direction: str, rejected: bool) -> str:
     """Return the rejection / fail-to-reject verb phrase."""
+    label = _NULL_DIRECTION_LABEL.get(null_direction, null_direction)
     if rejected:
-        return f"{test_name} rejects the {null_direction} null"
-    return f"{test_name} fails to reject the {null_direction} null"
+        return f"{test_name} rejects the {label} null"
+    return f"{test_name} fails to reject the {label} null"
 
 
 def _series_verdict_clause(null_direction: str, rejected: bool) -> str:
@@ -100,6 +111,7 @@ def render_stationarity_tier(
     bandwidth: Optional[int] = None,
     trending: Optional[bool] = None,
     effective_sample_size: Optional[int] = None,
+    pvalue_clipped: bool = False,
 ) -> str:
     """Render Tier 1 or Tier 2 text for a standalone KPSS / PP invocation.
 
@@ -191,4 +203,18 @@ def render_stationarity_tier(
     else:
         null_clause = "Null = unit root (mirrors ADF)."
 
-    return f"{stat_line} {numeric_line} {null_clause} {_triage_hint(null_direction, rejected)}"
+    # FIX 8: when statsmodels reports the p-value at the critical-value
+    # table boundary (common for KPSS), disclose that the value is a
+    # bound rather than a precise interpolation.
+    boundary_clause = ""
+    if pvalue_clipped and p_value is not None:
+        boundary_clause = (
+            f" The reported p-value is clipped at the tabulated "
+            f"boundary; treat p={FMT_P_VALUE.format(float(p_value))} as "
+            f"an upper/lower bound rather than an exact interpolation."
+        )
+
+    return (
+        f"{stat_line} {numeric_line} {null_clause} "
+        f"{_triage_hint(null_direction, rejected)}{boundary_clause}"
+    )

@@ -11,7 +11,7 @@ from typing import Optional
 
 from interpretation.builder import InterpretationSpec
 from interpretation.primitives import (
-    FMT_COEF_UNSIGNED,
+    format_scale_aware,
     format_series_reference,
 )
 from interpretation.registry import register
@@ -27,15 +27,18 @@ def _tier1(results: dict) -> str:
     model_type = str(results.get("model_type", "local linear trend"))
     n_gaps = int(results.get("n_gaps", 0))
     avg_se = results.get("avg_imputation_se")
+    # Citation form "SE = value" avoids needing a verb in the
+    # enclosing sentence (FIX 4, V1 convention from Prompt C1).
+    # Capitalized at sentence start.
     se_clause = (
-        f"average imputation SE {FMT_COEF_UNSIGNED.format(float(avg_se))}"
-        if avg_se is not None else "per-value SE reported in the data tables"
+        f"Average imputation SE = {format_scale_aware(float(avg_se))}"
+        if avg_se is not None else "Per-value SE reported in the data tables"
     )
     return (
         f"{n_missing} of {n} observations ({pct:.0f}%) imputed in "
         f"{format_series_reference(name)} using Kalman smoother "
         f"({model_type}) across {n_gaps} gap segment{'s' if n_gaps != 1 else ''}. "
-        f"The {se_clause}; single-point interpolation is tight but "
+        f"{se_clause}; single-point interpolation is tight but "
         f"gaps longer than 5 periods carry meaningful uncertainty."
     )
 
@@ -47,16 +50,17 @@ def _tier2(results: dict) -> str:
     rmse = results.get("rmse")
     aic = results.get("aic")
     rmse_clause = (
-        f"RMSE on observed data {FMT_COEF_UNSIGNED.format(float(rmse))}"
+        f"RMSE on observed data {format_scale_aware(float(rmse))}"
         if rmse is not None else "RMSE not reported"
     )
     aic_clause = (
-        f"AIC {FMT_COEF_UNSIGNED.format(float(aic))}" if aic is not None
+        f"AIC {format_scale_aware(float(aic))}" if aic is not None
         else "AIC not reported"
     )
+    gap_word = "gap" if n_gaps == 1 else "gaps"
     return (
         f"State-space model: {model_type}. Gap geometry: {n_gaps} "
-        f"gaps, max gap length {max_gap} periods. Imputation "
+        f"{gap_word}, max gap length {max_gap} periods. Imputation "
         f"uncertainty comes from the Kalman smoother posterior "
         f"variance: SE at gap-interior points is typically 2-3× SE at "
         f"gap edges. Model diagnostics: {rmse_clause}, {aic_clause}. "

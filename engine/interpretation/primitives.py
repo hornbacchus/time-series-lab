@@ -33,6 +33,34 @@ consumers. This keeps primitives.py focused on proven-general
 utilities and avoids speculative API additions. Applies equally to
 ``engine/techniques/base.py`` helpers (e.g., ``stationary_distribution``
 was promoted on its second consumer in Prompt C1).
+
+Formatter selection guidance (Prompt C1 post-eval fix batch).
+Specs ingest numeric values whose natural scale varies widely
+(coefficients in (-1, 1); AIC in the 1000s; MSE in the 1000s or
+higher; interval widths in whatever the series units are). Pick
+the right formatter at the call site:
+
+  - Coefficient magnitudes bounded in (-1, 1) (correlations,
+    ensemble weights, β coefficients, ACF values): use
+    ``FMT_COEF_UNSIGNED`` (``".3f"``, pinned).
+  - p-values: use ``FMT_P_VALUE`` (``".4f"``, pinned).
+  - Probabilities on [0, 1] (smoothed probs, posterior probs,
+    ensemble weights): use ``FMT_PROBABILITY`` (``".2f"``, pinned).
+  - Correlation coefficients ρ: use ``FMT_RHO`` (``".2f"``, pinned).
+  - Any other arbitrary-scale statistic (AIC, MSE, RMSE, SE,
+    interval widths, F, LM, Z-statistics, test statistics): use
+    :func:`format_scale_aware` — it adapts decimal precision to
+    the value's order of magnitude and avoids the misleading-
+    precision failure mode (e.g., ``"AIC 17043.245"`` vs the
+    readable ``"AIC 17043"``).
+  - **When in doubt, use format_scale_aware.** It reads at
+    appropriate precision across scales and is the safe default
+    for new specs. The pinned constants are for values whose
+    scale is known a priori; if a value's scale depends on the
+    series, route through format_scale_aware.
+
+This convention applies to all future spec authoring (Prompts
+C2-C7 and beyond).
 """
 
 from typing import Tuple, Optional
@@ -434,6 +462,61 @@ def format_series_reference(name: str, with_quotes: bool = True) -> str:
     return f"'{name}'" if with_quotes else str(name)
 
 
+def format_scale_aware(value, sub_unit_specifier: str = "{:.4f}") -> str:
+    """Render a numeric magnitude with precision adapted to scale.
+
+    Used by specs that report statistics whose natural range spans
+    multiple orders of magnitude across techniques and invocations
+    (AIC, MSE, RMSE, SE, interval widths, etc.). Preserves
+    ``FMT_COEF_UNSIGNED`` and its peers for values whose scale is
+    known a priori.
+
+    Precision rule:
+
+        |v| >= 1000 : "{:.0f}"  (integer rounding, e.g. "17043")
+         100 <= |v| < 1000 : "{:.1f}"  (e.g. "162.9")
+          10 <= |v| < 100  : "{:.2f}"  (e.g. "21.24")
+           1 <= |v| < 10   : "{:.3f}"  (e.g. "1.476")
+          |v| < 1          : sub_unit_specifier (default "{:.4f}")
+
+    The ``sub_unit_specifier`` argument lets callers pin higher
+    precision for sub-unit magnitudes whose natural resolution is
+    finer than ``".4f"`` (e.g., block-bootstrap return means where
+    the meaningful precision is ``".5f"`` or finer).
+
+    Parameters
+    ----------
+    value : float
+        The numeric value to render.
+    sub_unit_specifier : str, default "{:.4f}"
+        Format specifier applied when ``|value| < 1``. Allows callers
+        with higher-precision requirements to override.
+
+    Returns
+    -------
+    str
+        Formatted value.
+
+    Cited Prompt C1 post-eval: the over-precision finding (AIC
+    17043.245, MSE 6700.951, interval width 162.965, etc.) came from
+    specs reaching for ``FMT_COEF_UNSIGNED = "{:.3f}"`` because it
+    was the nearest pinned constant. That constant is for
+    coefficient magnitudes in (-1, 1), not arbitrary-scale
+    statistics. This helper serves the arbitrary-scale case.
+    """
+    v = float(value)
+    av = abs(v)
+    if av >= 1000:
+        return f"{v:.0f}"
+    if av >= 100:
+        return f"{v:.1f}"
+    if av >= 10:
+        return f"{v:.2f}"
+    if av >= 1:
+        return f"{v:.3f}"
+    return sub_unit_specifier.format(v)
+
+
 def format_stat_technical(
     stat_name: str,
     value: float,
@@ -533,6 +616,22 @@ def format_break_date(date_value, frequency: str) -> str:
         Formatted date string.
     """
     key = str(frequency or "").strip().lower()
+    # Accept pandas-style short codes as aliases for the long-form keys
+    # (RunContext._normalize_frequency converts incoming labels to short
+    # codes like "Q"/"M"/"D"/"Y" before wrappers see them). Spec callers
+    # that pass ``ctx.frequency`` directly should still get sensible
+    # output without needing to translate.
+    _SHORT_CODE_ALIAS = {
+        "q": "quarterly",
+        "qs": "quarterly",
+        "m": "monthly",
+        "ms": "monthly",
+        "d": "daily",
+        "b": "daily",
+        "y": "annual",
+        "a": "annual",
+    }
+    key = _SHORT_CODE_ALIAS.get(key, key)
     try:
         import pandas as pd  # local import: primitives otherwise numpy-only
         ts = pd.Timestamp(date_value)

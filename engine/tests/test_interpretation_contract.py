@@ -1080,5 +1080,111 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         )
 
 
+class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
+    """T15 — No programmatic tokens (identifiers with underscores)
+    leak into user-facing tier text. Regression guard for Prompt C1
+    post-eval FIX 1: pp_test's Tier 1 rendered "unit_root null"
+    verbatim because ``null_direction`` — a programmatic equality-
+    check key — flowed into prose without humanization.
+
+    Scan only **unquoted** prose tokens — quoted series names,
+    intervention labels, and math notation inside ``(s_t;γ,c)``-
+    style expressions are user content or legitimate notation and
+    must not be flagged. Content inside ``'...'`` quotes, ``"..."``
+    quotes, or mathematical parenthesized expressions is stripped
+    before scanning.
+
+    A specific allowlist tolerates common inline notation that
+    legitimately uses underscores outside quotes (e.g., ``t_stat``,
+    ``p_value`` — though these specifically should not appear since
+    specs render them as ``t-stat`` / ``p-value`` via FMT_P_VALUE).
+    """
+
+    _TOKEN_RE = re.compile(r"(?<![a-zA-Z0-9_])[a-zA-Z]+_[a-zA-Z]+(?![a-zA-Z0-9_])")
+
+    # Allowlist: math notation tokens that appear unquoted in prose.
+    # These are legitimate (not programmatic leaks) and slip past the
+    # parens-stripping heuristic when the surrounding expression is
+    # complex.
+    _ALLOWED = {
+        "s_t", "y_t", "x_t", "z_t", "e_t", "u_t",  # time-series subscripts
+        "s_T", "y_T", "x_T",  # terminal-value subscripts
+    }
+
+    @staticmethod
+    def _strip_quoted_and_math(text: str) -> str:
+        """Remove content that legitimately contains underscore-bearing
+        tokens: (a) single-quoted strings (series names, labels);
+        (b) double-quoted strings; (c) parenthesized math expressions
+        containing a semicolon (the convention for transition-function
+        notation like ``G(s_t;γ,c)``)."""
+        # Single-quoted
+        text = re.sub(r"'[^']*'", "''", text)
+        # Double-quoted
+        text = re.sub(r'"[^"]*"', '""', text)
+        # Parenthesized math (identified by inner semicolon)
+        text = re.sub(r"\([^)]*;[^)]*\)", "(…)", text)
+        return text
+
+    def _scan_text(self, text: str, context: str, failures: list) -> None:
+        scannable = self._strip_quoted_and_math(text)
+        for match in self._TOKEN_RE.finditer(scannable):
+            token = match.group(0)
+            if token in self._ALLOWED:
+                continue
+            failures.append(f"{context}: token '{token}' in text: {text[:200]!r}")
+
+    def test_no_underscored_tokens_in_t14_minimal_inputs(self):
+        from interpretation import list_registered
+        # Reuse T14's minimal input construction via import.
+        minimal = TestT14NoRaiseOnMinimalInputs._MINIMAL_INPUT
+        failures = []
+        for tech_id in list_registered():
+            try:
+                out = build_interpretation(tech_id, dict(minimal))
+            except Exception:
+                continue
+            if not isinstance(out, dict):
+                continue
+            for key in ("tier1", "tier2", "tier3"):
+                val = out.get(key, "")
+                if isinstance(val, list):
+                    for item in val:
+                        if isinstance(item, str):
+                            self._scan_text(item, f"{tech_id}.{key}", failures)
+                elif isinstance(val, str):
+                    self._scan_text(val, f"{tech_id}.{key}", failures)
+        self.assertFalse(
+            failures,
+            "Programmatic tokens leaked into rendered tier text:\n  "
+            + "\n  ".join(failures)
+        )
+
+    def test_no_underscored_tokens_in_realistic_fixtures(self):
+        failures = []
+        for tech_id, cases in _FIXTURES.items():
+            for case_name, fixture in cases:
+                try:
+                    out = build_interpretation(tech_id, dict(fixture))
+                except Exception:
+                    continue
+                if not isinstance(out, dict):
+                    continue
+                ctx = f"{tech_id}[{case_name}]"
+                for key in ("tier1", "tier2", "tier3"):
+                    val = out.get(key, "")
+                    if isinstance(val, list):
+                        for item in val:
+                            if isinstance(item, str):
+                                self._scan_text(item, f"{ctx}.{key}", failures)
+                    elif isinstance(val, str):
+                        self._scan_text(val, f"{ctx}.{key}", failures)
+        self.assertFalse(
+            failures,
+            "Programmatic tokens leaked in realistic fixtures:\n  "
+            + "\n  ".join(failures)
+        )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

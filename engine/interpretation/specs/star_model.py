@@ -11,6 +11,7 @@ from interpretation.builder import InterpretationSpec
 from interpretation.primitives import (
     FMT_COEF_SIGNED,
     FMT_COEF_UNSIGNED,
+    format_scale_aware,
     format_series_reference,
 )
 from interpretation.registry import register
@@ -84,8 +85,8 @@ def _tier2(results: dict) -> str:
     if aic is not None and aic_linear is not None:
         improvement = float(aic_linear) - float(aic)
         aic_clause = (
-            f" AIC {FMT_COEF_UNSIGNED.format(float(aic))} vs "
-            f"{FMT_COEF_UNSIGNED.format(float(aic_linear))} for a "
+            f" AIC {format_scale_aware(float(aic))} vs "
+            f"{format_scale_aware(float(aic_linear))} for a "
             f"linear AR({ar_order}) baseline — STAR improvement is "
             f"{improvement:.1f} AIC units."
         )

@@ -294,6 +294,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     "bandwidth": single.get("used_lag"),
                     "trending": None,
                     "effective_sample_size": None,
+                    # FIX 8: surface the p-value-at-table-boundary flag
+                    # so the spec's Tier 2 can disclose the clipping.
+                    "pvalue_clipped": bool(single.get("pvalue_clipped", False)),
                 }
             decision = (
                 "Reject H0 (UR null)" if rejected

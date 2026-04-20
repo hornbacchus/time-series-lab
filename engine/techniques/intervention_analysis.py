@@ -355,12 +355,43 @@ def run(ctx: RunContext, progress_callback) -> dict:
         _top_ci_lo = None
         _top_ci_hi = None
         if _top_idx is not None:
-            _top_label = intv_rows[_top_idx][0]
-            # Look up the intervention's date from the `interventions` list.
+            # Strip the raw "(type@index)" annotation from the display
+            # label so the interpretation layer shows the user-friendly
+            # name (e.g., "COVID shock"). The resolved date is attached
+            # separately below.
+            import re as _re_label
+            _raw_label = str(intv_rows[_top_idx][0])
+            _top_label = _re_label.sub(
+                r"\s*\([^)]*@\d+\)\s*$", "", _raw_label
+            ).strip()
+            # Resolve the intervention's display date. FIX 2: previously
+            # fell back to the raw integer index ("intervention on 262")
+            # because the parsed intervention dict only carries `index`.
+            # Look up the corresponding date in ctx.time and format via
+            # the frequency-aware helper so user-facing text reads
+            # "2020-Q1" / "2020-03" / etc.
             if _top_idx < len(interventions):
                 iv = interventions[_top_idx]
                 if isinstance(iv, dict):
-                    _top_date = iv.get("date") or iv.get("index")
+                    _iv_idx = iv.get("index")
+                    _iv_date_raw = iv.get("date")
+                    if _iv_date_raw is not None:
+                        _top_date = str(_iv_date_raw)
+                    elif (
+                        _iv_idx is not None
+                        and ctx.time
+                        and 0 <= int(_iv_idx) < len(ctx.time)
+                    ):
+                        try:
+                            from interpretation.primitives import format_break_date
+                            _top_date = format_break_date(
+                                ctx.time[int(_iv_idx)],
+                                ctx.frequency or "",
+                            )
+                        except Exception:
+                            _top_date = str(ctx.time[int(_iv_idx)])
+                    elif _iv_idx is not None:
+                        _top_date = f"index {int(_iv_idx)}"
             _top_coef = intv_rows[_top_idx][1]
             _top_p = intv_rows[_top_idx][4]
             _top_ci_lo = intv_rows[_top_idx][5]

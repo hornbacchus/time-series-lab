@@ -14,6 +14,7 @@ from interpretation.primitives import (
     FMT_COEF_SIGNED,
     FMT_COEF_UNSIGNED,
     FMT_P_VALUE,
+    format_scale_aware,
     format_series_reference,
     interpret_pvalue,
 )
@@ -95,8 +96,8 @@ def _tier2(results: dict) -> str:
     aic_clause = ""
     if aic is not None and aic_noint is not None:
         aic_clause = (
-            f" AIC {FMT_COEF_UNSIGNED.format(float(aic))} vs "
-            f"{FMT_COEF_UNSIGNED.format(float(aic_noint))} for the "
+            f" AIC {format_scale_aware(float(aic))} vs "
+            f"{format_scale_aware(float(aic_noint))} for the "
             f"no-intervention specification."
         )
     return (
