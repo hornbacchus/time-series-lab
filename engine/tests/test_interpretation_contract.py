@@ -473,6 +473,16 @@ _FIXTURES = {
             expected_durations=[10.0, 14.0, 11.0],
             final_period_probs=[0.11, 0.78, 0.11], sort_axis="mean",
         )),
+        ("two_regime_variance_dominant", dict(
+            # Motivating case: Real GDP Q/Q SAAR under switching_variance.
+            # μ differs by 60bp; σ differs 3.5× (variance ratio 12×).
+            # sort_axis="std" exercises the variance-dominant label path
+            # added in Prompt 2 of the Markov batch.
+            k_regimes=2, regime_means=[3.00, 3.60],
+            regime_stds=[1.86, 6.48], current_regime=0, current_prob=0.95,
+            expected_durations=[25.0, 8.0],
+            final_period_probs=[0.95, 0.05], sort_axis="std",
+        )),
     ],
     "pca_analysis": [
         ("strong_dominance", dict(
@@ -857,6 +867,74 @@ class TestT11PresetGatedClaims(unittest.TestCase):
             "reverse-direction test was not run", tier2,
             f"Tier 2 under Fast preset must disclose that the reverse "
             f"test was not run. Got: {tier2!r}"
+        )
+
+
+class TestMarkovSwitchingVarianceDominantLabels(unittest.TestCase):
+    """Under ``sort_axis="std"`` (the variance-dominant regime-labeling
+    path added in Prompt 2 of the Markov batch), the rendered Tier 1
+    must use σ-based labels (``low-σ regime``, ``high-σ regime``) and
+    ``"standard deviation"`` in the sort-axis prose. The default
+    ``sort_axis="mean"`` path continues to emit mean-based labels and
+    is guarded by the existing ``two_regime`` / ``three_regime``
+    fixtures via T4/T8/T9/T10/T11/T12.
+
+    This test directly validates the spec's label-vs-prose translation
+    for the variance-dominant case on the ``two_regime_variance_dominant``
+    fixture (Real GDP Q/Q SAAR analogue: μ=(3.00, 3.60), σ=(1.86, 6.48))."""
+
+    def test_variance_dominant_tier1_uses_sigma_labels(self):
+        fixture = dict(_FIXTURES["markov_switching"][2][1])  # "two_regime_variance_dominant"
+        out = build_interpretation("markov_switching", fixture)
+        tier1 = out["tier1"]
+
+        # Must contain σ-based regime labels.
+        self.assertTrue(
+            "low-σ" in tier1 or "high-σ" in tier1,
+            f"Variance-dominant Tier 1 must use 'low-σ' / 'high-σ' "
+            f"regime labels. Got: {tier1!r}"
+        )
+
+        # Must use full-prose form for the sort axis.
+        self.assertIn(
+            "standard deviation", tier1,
+            f"Variance-dominant Tier 1 must say 'standard deviation' in "
+            f"the sort-axis prose (not 'std' nor 'σ' in prose position). "
+            f"Got: {tier1!r}"
+        )
+
+        # Must NOT contain mean-based labels (regression guard — the
+        # hardcoded axis="mean" was removed in this prompt).
+        self.assertNotIn(
+            "low-mean", tier1,
+            f"Variance-dominant Tier 1 must not emit 'low-mean' "
+            f"labels. Got: {tier1!r}"
+        )
+        self.assertNotIn(
+            "high-mean", tier1,
+            f"Variance-dominant Tier 1 must not emit 'high-mean' "
+            f"labels. Got: {tier1!r}"
+        )
+
+    def test_mean_dominant_tier1_still_uses_mean_labels(self):
+        """Regression guard: the default ``sort_axis="mean"`` fixtures
+        must continue to emit mean-based labels after the spec wiring
+        change."""
+        fixture = dict(_FIXTURES["markov_switching"][0][1])  # "two_regime"
+        out = build_interpretation("markov_switching", fixture)
+        tier1 = out["tier1"]
+        self.assertTrue(
+            "low-mean" in tier1 or "high-mean" in tier1,
+            f"Mean-dominant Tier 1 must use 'low-mean' / 'high-mean' "
+            f"regime labels. Got: {tier1!r}"
+        )
+        self.assertNotIn(
+            "low-σ", tier1,
+            f"Mean-dominant Tier 1 must not emit σ-labels. Got: {tier1!r}"
+        )
+        self.assertNotIn(
+            "high-σ", tier1,
+            f"Mean-dominant Tier 1 must not emit σ-labels. Got: {tier1!r}"
         )
 
 

@@ -13,7 +13,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
-    sort_states_by_mean,
+    label_regimes_by_dominant_key,
 )
 
 
@@ -154,11 +154,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # State probabilities
         state_probs = best_model.predict_proba(X)
 
-        # Sort states deterministically by mean so "State 0" is always the
-        # lowest-mean regime across runs. Without this, hmmlearn's internal
-        # ordering (driven by EM starting point and the restart that won
-        # best score) can flip between otherwise-identical analyses,
-        # giving the user charts where the regime labels swap randomly.
+        # Sort states deterministically so "State 0" is the lowest-axis
+        # regime across runs. Without this, hmmlearn's internal ordering
+        # (driven by EM starting point and the restart that won best
+        # score) can flip between otherwise-identical analyses, giving
+        # the user charts where the regime labels swap randomly.
+        #
+        # Axis selection (mean vs std) is decided by
+        # label_regimes_by_dominant_key: mean-sort by default, std-sort
+        # when the variance ratio dominates the mean separation
+        # (variance_ratio >= 3.0 AND variance_ratio /
+        # max(mean_sep_in_min_sigma, 0.5) > 2.0). This prevents the
+        # misleading mean-labeling on runs where two regimes have
+        # nearly-identical means but very different volatilities.
         #
         # We keep sorted COPIES for reporting rather than mutating the
         # fitted hmmlearn model — ``best_model.covars_`` is a property
@@ -167,8 +175,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # path below uses ``best_model.sample()`` which draws from the
         # unsorted internal state indices; that's fine because the
         # sampled values themselves are invariant to relabeling.
-        sort_result = sort_states_by_mean(
-            best_model.means_,
+        # Extract per-state std from covars_ for the dominant-key
+        # sort helper. hmmlearn normalizes all covariance_types
+        # ("diag"/"full"/"spherical"/"tied") to the same 3-D shape
+        # (n_components, n_features, n_features) on .covars_; the
+        # [i, 0, 0] element is always the regime-i variance along
+        # the first feature, which is the only feature for the
+        # univariate series this wrapper supports. Handle 1-D /
+        # 2-D / 3-D defensively in case a future hmmlearn version
+        # changes the layout.
+        _covars_arr = np.asarray(best_model.covars_)
+        if _covars_arr.ndim == 3:
+            # Standard hmmlearn layout: (n_components, n_features, n_features)
+            state_vars = _covars_arr[:, 0, 0]
+        elif _covars_arr.ndim == 2:
+            # (n_components, n_features) per-state diag variances.
+            state_vars = _covars_arr[:, 0]
+        elif _covars_arr.ndim == 1:
+            # Rare: (n_components,) scalar per-state variances.
+            state_vars = _covars_arr
+        else:
+            # Unknown layout → uniform stds trigger mean-sort fallback.
+            state_vars = np.ones(best_model.n_components)
+        # Guard against negative variances from numerical noise.
+        state_stds = np.sqrt(np.maximum(np.asarray(state_vars, dtype=float), 0.0))
+
+        # Pass the 2-D means array as-is; the helper uses column 0 as
+        # the sort key while preserving full 2-D shape in the reordered
+        # output so downstream per-feature rendering still works.
+        sort_result = label_regimes_by_dominant_key(
+            means=best_model.means_,
+            stds=state_stds,
             covars=best_model.covars_,
             transmat=best_model.transmat_,
             labels=states,
@@ -181,6 +218,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         sorted_startprob = best_model.startprob_[order]
         states = sort_result["labels"]
         state_probs = sort_result["probs"]
+        hmm_sort_axis = sort_result["axis_name"]
 
         progress_callback("Generating forecasts via simulation", 75)
 

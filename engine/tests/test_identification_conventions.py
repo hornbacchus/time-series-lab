@@ -124,6 +124,178 @@ class TestStatePermutation(unittest.TestCase):
 # ─────────────────────────────────────────────────────────────────────
 # Markov Switching — AR coefficient fit invariant
 # ─────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────
+# Markov Switching — labeling convention (sort by dominant axis)
+# ─────────────────────────────────────────────────────────────────────
+class TestMarkovSwitchingLabelingConvention(unittest.TestCase):
+    """The wrapper previously sorted regimes unconditionally by empirical
+    mean. Under ``switching_variance=True`` fits where the variance axis
+    dominates the separation (typified by Real GDP Q/Q SAAR: μ=(3.00,
+    3.60) but σ=(1.86, 6.48), a 12× variance ratio), sorting by mean
+    labels the output as if the regimes differ in mean growth, when in
+    fact the model separated quiet volatility from turbulent volatility.
+
+    The fix: ``label_regimes_by_dominant_key`` now chooses between mean-
+    and std-sort based on which axis dominates. The ``sort_axis`` field
+    in the interpretation dict reports which axis was chosen.
+
+    Three fixtures cover the classification rule:
+
+    - **T_new_1** (variance-dominant): verifies std-sort fires when the
+      motivating condition holds.
+    - **T_new_2** (mean-dominant preserved): regression guard against an
+      over-aggressive threshold reclassifying genuinely mean-separated
+      regimes as variance-dominant.
+    - **T_new_3** (boundary): dominance exactly 2.0 must fall on the
+      mean-sort side (strict ``>`` threshold).
+    """
+
+    def _make_two_regime_series(self, mu, sigma, n=500, seed=42,
+                                 p_stay=0.95):
+        """Draw n observations from a 2-regime Markov chain with per-
+        regime Gaussian emissions N(mu[r], sigma[r]**2) and self-
+        transition probability p_stay."""
+        rng = np.random.default_rng(seed)
+        P = np.array([[p_stay, 1 - p_stay], [1 - p_stay, p_stay]])
+        state = 0
+        y = np.zeros(n)
+        for t in range(n):
+            y[t] = rng.normal(mu[state], sigma[state])
+            if rng.random() < 1 - P[state, state]:
+                state = 1 - state
+        return y
+
+    def _extract_sort_axis(self, res):
+        """Read sort_axis from the interp block (where the wrapper
+        surfaces it for the interpretation layer)."""
+        interp = res.get("interpretation") or {}
+        # build_interpretation returns the rendered text; the source
+        # dict isn't exposed. Instead, read from audit/warnings shape.
+        # Sort-axis is visible via the emitted warning text.
+        for w in res.get("warnings") or []:
+            if "sorted by empirical standard deviation" in w:
+                return "std"
+            if "sorted by empirical mean" in w:
+                return "mean"
+        return None
+
+    def test_variance_dominant_classification(self):
+        """T_new_1: μ₀=μ₁=0, σ₀=1, σ₁=5, n=500, seed=42. Variance
+        ratio 25× dominates a zero mean gap → sort by std, Regime 0
+        has smaller std."""
+        from techniques import markov_switching
+
+        y = self._make_two_regime_series(mu=[0.0, 0.0], sigma=[1.0, 5.0])
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(len(y))]
+
+        def build_ctx():
+            return RunContext({
+                "run_id": "t", "technique_id": "markov_switching",
+                "preset": "Fast", "seed": 42, "frequency": "Quarterly",
+                "time": time_axis,
+                "series": [{"name": "VARSWITCH", "values": y.tolist()}],
+                # order=0 intentional: isolates variance-sort decision
+                # from AR-fit noise introduced by MarkovAutoregression
+                # under order >= 1.
+                "params": {"k_regimes": 2, "order": 0,
+                           "switching_variance": True},
+            })
+
+        res1, res2 = _run_twice(markov_switching.run, build_ctx)
+        if res1.get("status") != "success":
+            self.skipTest(f"fit failed: {res1.get('error_message')}")
+
+        axis = self._extract_sort_axis(res1)
+        self.assertEqual(
+            axis, "std",
+            f"Expected std-sort on variance-dominant DGP; got {axis}. "
+            f"Warnings: {res1.get('warnings')}"
+        )
+
+        summary = _find_table(res1, "regime summary")
+        self.assertIsNotNone(summary, "Regime Summary table missing")
+        # Row layout: [regime, periods, pct, mean, std]. Check std
+        # column ascending.
+        stds = [row[4] for row in summary["rows"] if row[4] is not None]
+        self.assertGreaterEqual(len(stds), 2, "Need two regimes with std")
+        self.assertLessEqual(
+            stds[0], stds[1] + 1e-9,
+            f"Regime 0 should have lower std than Regime 1 under "
+            f"std-sort; got Regime 0 std={stds[0]}, Regime 1 std={stds[1]}"
+        )
+
+        # Bit-identical label stability across two seeded runs.
+        summary2 = _find_table(res2, "regime summary")
+        self.assertIsNotNone(summary2)
+        self.assertEqual(
+            [row[0] for row in summary["rows"]],
+            [row[0] for row in summary2["rows"]],
+            "Regime labels must be stable across two seeded runs"
+        )
+
+    def test_mean_dominant_classification_preserved(self):
+        """T_new_2: μ₀=-2, μ₁=2, σ₀=σ₁=1, n=500, seed=42. Guards
+        against an over-aggressive threshold that reclassifies
+        well-separated means as variance-dominant when σ happens to
+        drift slightly."""
+        from techniques import markov_switching
+
+        y = self._make_two_regime_series(mu=[-2.0, 2.0], sigma=[1.0, 1.0])
+        time_axis = [f"{2000 + i // 4}-Q{(i % 4) + 1}" for i in range(len(y))]
+
+        ctx = RunContext({
+            "run_id": "t", "technique_id": "markov_switching",
+            "preset": "Fast", "seed": 42, "frequency": "Quarterly",
+            "time": time_axis,
+            "series": [{"name": "MEANSWITCH", "values": y.tolist()}],
+            "params": {"k_regimes": 2, "order": 0,
+                       "switching_variance": True},
+        })
+        res = markov_switching.run(ctx, _noop_progress)
+        if res.get("status") != "success":
+            self.skipTest(f"fit failed: {res.get('error_message')}")
+
+        axis = self._extract_sort_axis(res)
+        self.assertEqual(
+            axis, "mean",
+            f"Expected mean-sort on mean-dominant DGP; got {axis}. "
+            f"Warnings: {res.get('warnings')}"
+        )
+
+        summary = _find_table(res, "regime summary")
+        self.assertIsNotNone(summary)
+        means = [row[3] for row in summary["rows"] if row[3] is not None]
+        self.assertGreaterEqual(len(means), 2)
+        self.assertLessEqual(
+            means[0], means[1] + 1e-9,
+            f"Regime 0 should have lower mean than Regime 1 under "
+            f"mean-sort; got {means}"
+        )
+
+    def test_boundary_classification_is_mean(self):
+        """T_new_3: μ₀=0, μ₁=2, σ₀=1, σ₁=2 — variance_ratio=4.0,
+        mean_sep_in_min_σ=2.0, dominance=2.0 exactly. Strict ``> 2.0``
+        threshold means this falls on the mean-sort side. Documents
+        that ties resolve to mean.
+
+        Direct check of the helper with the fixture-defined stds is
+        the deterministic assertion; the end-to-end wrapper fit would
+        depend on statsmodels' recovery and might not land exactly on
+        the boundary."""
+        from techniques.base import label_regimes_by_dominant_key
+
+        means = np.array([0.0, 2.0])
+        stds = np.array([1.0, 2.0])
+        result = label_regimes_by_dominant_key(means, stds)
+        self.assertEqual(
+            result["axis_name"], "mean",
+            f"Boundary case (dominance=2.0 exactly) must resolve to "
+            f"mean-sort; got {result['axis_name']}. "
+            f"variance_ratio={result['variance_ratio']}, "
+            f"mean_sep_in_min_sigma={result['mean_sep_in_min_sigma']}"
+        )
+
+
 class TestMarkovSwitchingARCoefficient(unittest.TestCase):
     """The wrapper previously passed `order=1` to MarkovRegression,
     which silently accepts the kwarg but interprets it as regime-

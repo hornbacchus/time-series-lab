@@ -20,7 +20,7 @@ from techniques.base import (
     make_table,
     make_response,
     make_error_response,
-    sort_states_by_mean,
+    label_regimes_by_dominant_key,
 )
 
 
@@ -263,17 +263,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # "const[0]" are opaque strings); the Parameters table shows them
         # as-returned and is documented as such.
         regime_means_empirical = np.zeros(k_regimes)
+        regime_stds_empirical = np.zeros(k_regimes)
         for r in range(k_regimes):
             mask_r = most_likely_regime == r
-            if mask_r.any():
+            count_r = int(mask_r.sum())
+            if count_r > 0:
                 regime_means_empirical[r] = np.mean(filled[:n_probs][mask_r])
+                # ddof=1 matches the Regime Summary table below; regimes
+                # with count=1 get 0.0 std, treated as degenerate by the
+                # dominant-key helper (→ mean-axis fallback).
+                regime_stds_empirical[r] = (
+                    float(np.std(filled[:n_probs][mask_r], ddof=1))
+                    if count_r > 1 else 0.0
+                )
             else:
                 regime_means_empirical[r] = np.nan
+                regime_stds_empirical[r] = np.nan
         # Preserve NaN regimes at the end of the sort order
         finite_mask = ~np.isnan(regime_means_empirical)
+        sort_axis = "mean"
         if finite_mask.sum() >= 2:
-            sort_result = sort_states_by_mean(
+            sort_result = label_regimes_by_dominant_key(
                 regime_means_empirical,
+                regime_stds_empirical,
                 transmat=transition_matrix,
                 labels=most_likely_regime,
                 probs=smoothed_probs,
@@ -281,12 +293,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
             most_likely_regime = sort_result["labels"]
             smoothed_probs = sort_result["probs"]
             transition_matrix = sort_result["transmat"]
-            warnings.append(
-                "Regimes have been sorted by empirical mean so that "
-                "\"Regime 0\" is the lowest-mean state. Model parameters "
-                "in the Parameters table retain the statsmodels-native "
-                "regime indices (which may differ from the sorted labels)."
-            )
+            sort_axis = sort_result["axis_name"]
+            if sort_axis == "std":
+                vr = sort_result["variance_ratio"]
+                msr = sort_result["mean_sep_in_min_sigma"]
+                warnings.append(
+                    f"Regimes have been sorted by empirical standard "
+                    f"deviation (variance ratio {vr:.1f}× dominates mean "
+                    f"separation {msr:.2f}σ). \"Regime 0\" is the "
+                    f"lowest-σ state. To override, re-run with "
+                    f"switching_variance=False. Model parameters in the "
+                    f"Parameters table retain the statsmodels-native "
+                    f"regime indices (which may differ from the sorted "
+                    f"labels)."
+                )
+            else:
+                warnings.append(
+                    "Regimes have been sorted by empirical mean so that "
+                    "\"Regime 0\" is the lowest-mean state. Model parameters "
+                    "in the Parameters table retain the statsmodels-native "
+                    "regime indices (which may differ from the sorted labels)."
+                )
 
         progress_callback("Building output tables", 75)
 
@@ -475,7 +502,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "current_prob": _current_prob,
             "expected_durations": durations,
             "final_period_probs": _final_probs,
-            "sort_axis": "mean",
+            "sort_axis": sort_axis,
         })
 
         return make_response(

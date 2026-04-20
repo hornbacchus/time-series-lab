@@ -1,22 +1,23 @@
 """
 InterpretationSpec for markov_switching.
 
-Tier 1 leads with regime count + sorted-by-mean labels + current state
-+ smoothed probability, then a structure-implication closer (not a
+Tier 1 leads with regime count + sorted labels (by mean or by std,
+whichever axis dominates regime separation) + current state +
+smoothed probability, then a structure-implication closer (not a
 forecasting directive). Tier 2 enumerates per-regime (μ, σ) and notes
 the transition-matrix role in multi-step forecasts.
 
 Results-dict keys consumed:
 
     k_regimes           : int
-    regime_means        : list[float] (sorted ascending per
-                                       sort_states_by_mean)
+    regime_means        : list[float] (sorted per sort_axis)
     regime_stds         : list[float] (in the same permutation)
     current_regime      : int (index into the sorted list)
     current_prob        : float (smoothed probability on final period)
     expected_durations  : list[float] (1/(1-P(stay)) per regime)
     final_period_probs  : list[float] (for the ambiguous-state trigger)
-    sort_axis           : str ("mean"; wrapper currently hardcodes this)
+    sort_axis           : str ("mean" or "std"; wrapper classifies via
+                               label_regimes_by_dominant_key)
 """
 
 from typing import Optional
@@ -42,6 +43,28 @@ def _regime_label(regime_idx: int, n_regimes: int, axis: str = "mean") -> str:
     return str(rec["label"])
 
 
+def _axis_labels(sort_axis: str) -> dict:
+    """Translate the wrapper's machine-readable ``sort_axis`` token
+    into the spec's label-vs-prose vocabulary pair.
+
+    - ``label`` is the token fed to :func:`interpret_regime_label` to
+      produce regime-label strings like ``"low-{label} regime"``.
+    - ``prose`` is the word-form used in full-prose sentences like
+      ``"sorted by empirical {prose}"``.
+
+    Mapping (§Prompt-2 Markov batch decisions):
+
+        sort_axis == "mean" → label="mean", prose="mean"
+        sort_axis == "std"  → label="σ",    prose="standard deviation"
+
+    Any other string is treated as ``"mean"`` for robustness.
+    """
+    key = str(sort_axis or "").strip().lower()
+    if key == "std":
+        return {"label": "σ", "prose": "standard deviation"}
+    return {"label": "mean", "prose": "mean"}
+
+
 def _format_mu(mu: float) -> str:
     # μ is a location value on the input series' scale; pin to 2dp.
     return f"{float(mu):.2f}"
@@ -61,8 +84,10 @@ def _tier1(results: dict) -> str:
     stds = list(results.get("regime_stds") or [])
     current = int(results.get("current_regime", 0))
     current_p = float(results.get("current_prob", 0.0))
-    axis = str(results.get("sort_axis", "mean"))
-    current_label = _regime_label(current, k, axis=axis)
+    axis_tokens = _axis_labels(results.get("sort_axis", "mean"))
+    label_axis = axis_tokens["label"]
+    prose_axis = axis_tokens["prose"]
+    current_label = _regime_label(current, k, axis=label_axis)
 
     # Build per-regime (μ) citation string, sorted as provided
     if k == 2:
@@ -78,19 +103,19 @@ def _tier1(results: dict) -> str:
         else:
             vol_clause = ""
         regime_listing = (
-            f"the {_regime_label(0, 2, axis)} (μ=−{mu0[1:]}) "
+            f"the {_regime_label(0, 2, label_axis)} (μ=−{mu0[1:]}) "
             if means and means[0] < 0 else
-            f"the {_regime_label(0, 2, axis)} (μ={mu0}) "
+            f"the {_regime_label(0, 2, label_axis)} (μ={mu0}) "
         )
         # Normalize signed μ display with Unicode minus
         regime_listing = (
-            f"the {_regime_label(0, 2, axis)} (μ={_signed_mu(means[0])}) "
-            f"and {_regime_label(1, 2, axis)} (μ={_signed_mu(means[1])}) "
+            f"the {_regime_label(0, 2, label_axis)} (μ={_signed_mu(means[0])}) "
+            f"and {_regime_label(1, 2, label_axis)} (μ={_signed_mu(means[1])}) "
             f"are well-separated{vol_clause}"
         )
         return (
             f"2-regime Markov switching model. After sorting regimes by "
-            f"empirical {axis}, {regime_listing}. The current state is "
+            f"empirical {prose_axis}, {regime_listing}. The current state is "
             f"the {current_label} with smoothed probability "
             f"{FMT_PROBABILITY.format(current_p)}. The {current_label}'s "
             f"dynamics, not the unconditional-sample mean, characterize "
@@ -102,12 +127,12 @@ def _tier1(results: dict) -> str:
     for i in range(k):
         mu = _signed_mu(means[i]) if i < len(means) else "0.00"
         regime_fragments.append(
-            f"{_regime_label(i, k, axis)} (μ={mu})"
+            f"{_regime_label(i, k, label_axis)} (μ={mu})"
         )
     regime_listing = ", ".join(regime_fragments[:-1]) + ", and " + regime_fragments[-1]
     return (
         f"{k}-regime Markov switching model. After sorting by empirical "
-        f"{axis}, the {regime_listing} are well-separated. The current "
+        f"{prose_axis}, the {regime_listing} are well-separated. The current "
         f"state is the {current_label} with smoothed probability "
         f"{FMT_PROBABILITY.format(current_p)}. The current state and "
         f"its transition probabilities to adjacent regimes characterize "
@@ -134,13 +159,15 @@ def _tier2(results: dict) -> str:
     stds = list(results.get("regime_stds") or [])
     current = int(results.get("current_regime", 0))
     current_p = float(results.get("current_prob", 0.0))
-    axis = str(results.get("sort_axis", "mean"))
+    axis_tokens = _axis_labels(results.get("sort_axis", "mean"))
+    label_axis = axis_tokens["label"]
+    prose_axis = axis_tokens["prose"]
 
     header = f"Markov switching fit with {k} regimes."
     # Per-regime citation: Regime i (label): μ=..., σ=...
     lines = []
     for i in range(k):
-        label = _regime_label(i, k, axis)
+        label = _regime_label(i, k, label_axis)
         mu = _signed_mu(means[i]) if i < len(means) else "0.00"
         sigma = _format_sigma(stds[i]) if i < len(stds) else "0.00"
         if k == 2:
@@ -153,7 +180,7 @@ def _tier2(results: dict) -> str:
         # regimes in a single "Regime 0 (μ=..., σ=...) and Regime 1
         # (μ=..., σ=...)." construction.
         per_regime = (
-            f"Regimes are sorted by empirical {axis}: "
+            f"Regimes are sorted by empirical {prose_axis}: "
             f"{lines[0]} and {lines[1]}."
         )
     else:

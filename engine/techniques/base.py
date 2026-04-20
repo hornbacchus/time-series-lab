@@ -82,6 +82,166 @@ def flip_sign_vector(v):
     return v * sign
 
 
+def label_regimes_by_dominant_key(means, stds, *, covars=None,
+                                   transmat=None, labels=None, probs=None):
+    """Sort latent states by whichever axis — mean or standard deviation —
+    dominates the regime separation, returning an axis-aware view for
+    wrappers that fit variance-bearing emission distributions (Markov
+    Switching with ``switching_variance=True``, GaussianHMM with
+    ``covariance_type="full"``/``"diag"``, etc.).
+
+    Motivating case: Markov Switching on Real GDP Q/Q SAAR produced
+    regimes with μ=(3.00, 3.60) — a 60bp mean gap — and σ=(1.86, 6.48)
+    — a 12× variance ratio. Sorting by mean labels the output as
+    though the regimes differ in mean growth, when in fact the model
+    has separated quiet volatility from turbulent volatility. Sorting
+    by std exposes the real structure.
+
+    Classification rule (only applied when n_regimes >= 2):
+
+        variance_ratio         = max(σ²) / min(σ²)
+        mean_sep               = |max(μ) − min(μ)|            (k=2)
+                                  min adjacent gap after mean-sort  (k>=3)
+        mean_sep_in_min_sigma  = mean_sep / max(min(σ), eps)
+        denom                  = max(mean_sep_in_min_sigma, 0.5)
+        dominance              = variance_ratio / denom
+
+        axis_name = 'std' if (variance_ratio >= 3.0 AND dominance > 2.0)
+                    else 'mean'
+
+    Tuning rationale: the 3.0 floor on variance_ratio prevents a
+    narrow-μ cluster from flipping to std-sort when both regimes have
+    nearly identical variance. The ``> 2.0`` strict-inequality
+    dominance threshold with a 0.5 floor on mean_sep_in_min_sigma
+    keeps mean-dominant cases (e.g., μ=(-1.20, 3.40), σ=(1.10, 1.10))
+    firmly on the mean-sort path even when their variance_ratio drifts
+    slightly above 1.0.
+
+    Caller pre-computes the per-regime std vector — this helper does
+    NOT infer std from statsmodels ``sigma2[*]`` parameters or
+    hmmlearn ``covars_`` matrices; that translation is wrapper-side
+    where the layout varies by model class.
+
+    Degenerate-input behavior matches :func:`sort_states_by_mean` for
+    drop-in migration safety: ``n=0`` returns empty arrays (no
+    exception); ``n=1`` returns ``order=[0], axis_name="mean"``. Zero
+    or NaN in any std triggers a mean-axis fallback regardless of the
+    variance_ratio.
+
+    Parameters
+    ----------
+    means : array-like, shape (n_states,) or (n_states, n_vars)
+        Per-regime mean. First column used as the sort key if 2-D.
+    stds : array-like, shape (n_states,)
+        Per-regime standard deviation. Caller's responsibility to
+        extract from whatever covariance layout the underlying model
+        class uses.
+    covars : array, shape (n_states, ...), optional
+        Per-state covariances. Reordered under the chosen axis.
+    transmat : array, shape (n_states, n_states), optional
+        Transition matrix — rows AND columns are permuted.
+    labels : array of ints, shape (T,), optional
+        Decoded state sequence — remapped to new labels.
+    probs : array, shape (T, n_states), optional
+        Smoothed/filtered per-state probabilities — columns permuted.
+
+    Returns
+    -------
+    dict with keys:
+        order       : ndarray[int], the permutation applied
+        axis_name   : str, "mean" or "std"
+        means       : reordered means
+        stds        : reordered stds
+        variance_ratio        : float or None (None when n < 2)
+        mean_sep_in_min_sigma : float or None (None when n < 2)
+        plus reordered ``covars``, ``transmat``, ``labels``, ``probs``
+        when the corresponding input was supplied.
+    """
+    means_arr = np.asarray(means)
+    stds_arr = np.asarray(stds, dtype=float)
+
+    if means_arr.ndim == 2:
+        mean_key = means_arr[:, 0]
+    else:
+        mean_key = means_arr
+
+    n = int(len(mean_key))
+
+    # Degenerate inputs: match sort_states_by_mean's silent-return
+    # contract. No exceptions on n=0.
+    if n < 2:
+        order = np.arange(n, dtype=int)
+        out = {
+            "order": order,
+            "axis_name": "mean",
+            "means": means_arr[order] if n > 0 else means_arr,
+            "stds": stds_arr[order] if n > 0 else stds_arr,
+            "variance_ratio": None,
+            "mean_sep_in_min_sigma": None,
+        }
+        if covars is not None:
+            out["covars"] = np.asarray(covars)[order] if n > 0 else np.asarray(covars)
+        if transmat is not None:
+            tm = np.asarray(transmat)
+            out["transmat"] = tm[order][:, order] if n > 0 else tm
+        if labels is not None:
+            out["labels"] = np.asarray(labels)
+        if probs is not None:
+            p = np.asarray(probs)
+            out["probs"] = p[:, order] if n > 0 else p
+        return out
+
+    # Classification inputs. Guard against zero/NaN std (→ mean-axis).
+    stds_finite = np.isfinite(stds_arr) & (stds_arr > 0)
+    if not stds_finite.all():
+        axis_name = "mean"
+        variance_ratio = None
+        mean_sep_in_min_sigma = None
+    else:
+        sigma2 = stds_arr ** 2
+        variance_ratio = float(np.max(sigma2) / np.min(sigma2))
+        if n == 2:
+            mean_sep = float(np.abs(mean_key[0] - mean_key[1]))
+        else:
+            # Min adjacent gap after mean-sort (k >= 3).
+            sorted_means = np.sort(mean_key)
+            mean_sep = float(np.min(np.diff(sorted_means)))
+        min_sigma = float(np.min(stds_arr))
+        mean_sep_in_min_sigma = (
+            mean_sep / max(min_sigma, 1e-12)
+        )
+        denom = max(mean_sep_in_min_sigma, 0.5)
+        dominance = variance_ratio / denom
+        axis_name = (
+            "std" if (variance_ratio >= 3.0 and dominance > 2.0) else "mean"
+        )
+
+    sort_key = stds_arr if axis_name == "std" else mean_key
+    order = np.argsort(sort_key)
+
+    out = {
+        "order": order,
+        "axis_name": axis_name,
+        "means": means_arr[order],
+        "stds": stds_arr[order],
+        "variance_ratio": variance_ratio,
+        "mean_sep_in_min_sigma": mean_sep_in_min_sigma,
+    }
+    if covars is not None:
+        out["covars"] = np.asarray(covars)[order]
+    if transmat is not None:
+        tm = np.asarray(transmat)
+        out["transmat"] = tm[order][:, order]
+    if labels is not None:
+        labels_arr = np.asarray(labels)
+        inv = np.empty_like(order)
+        inv[order] = np.arange(len(order))
+        out["labels"] = inv[labels_arr]
+    if probs is not None:
+        out["probs"] = np.asarray(probs)[:, order]
+    return out
+
+
 def sort_states_by_mean(means, *arrays, covars=None, transmat=None,
                        labels=None, probs=None):
     """Sort latent states (HMM, Markov Switching) by mean value.
