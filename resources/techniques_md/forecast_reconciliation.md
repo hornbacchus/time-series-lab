@@ -58,3 +58,16 @@ Forecast reconciliation ensures that forecasts across a hierarchical or grouped 
 - Gaussian reconciliation: if base forecasts are Gaussian, the reconciled forecasts are also Gaussian with analytically computable mean and covariance.
 
 **Cross-temporal reconciliation**: Extends the framework to simultaneously reconcile across the hierarchy and across temporal aggregation levels (e.g., monthly forecasts must sum to quarterly, which must sum to annual).
+
+## Interpretation
+
+Every Forecast Reconciliation run emits a two-tier plain-language Interpretation block, framed as a post-processing operation rather than a fit technique.
+
+**Plain-Language Finding (Tier 1)** - names the hierarchy shape (top aggregate = sum of N bottom components), the primary reconciliation method (MinT-OLS preferred when the covariance is well-conditioned, bottom-up fallback otherwise), the forecast horizon, and the historical coherence status. The voice leads with "Reconciled N-level hierarchy..." to signal that this is a coherence operation, not a fit.
+
+**Technical Interpretation (Tier 2)** - discloses which reconciliation methods ran, the primary-method convention and any fallback, the base forecaster, and the historical aggregation residual. Explicitly notes that reconciliation projects base forecasts onto the coherent subspace (so the top forecast equals the sum of the bottom forecasts exactly at every step) but cannot correct systematic base-forecast bias — "reconciliation enforces coherence only."
+
+**Caveats (Tier 3, conditional)**:
+- Historical incoherence > 5% of top level - input hierarchy is materially inconsistent; investigate data quality before trusting reconciliation.
+- MinT-OLS fell back to bottom-up - singular covariance detected; MinT's variance-minimization benefit is lost.
+- Base forecaster is 'naive' with horizon > 3 - reconciliation preserves a flat trajectory; consider 'drift' or 'ets' for more informative forecasts.

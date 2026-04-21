@@ -776,6 +776,14 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "wavelet_coherence",
         "ssa_model",
         "emd_hht",
+        # Prompt C5 (7): Multivariate remainder
+        "arimax",
+        "sarimax",
+        "bvar",
+        "dynamic_factor_model",
+        "forecast_reconciliation",
+        "johansen_cointegration",
+        "transfer_function",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1041,21 +1049,38 @@ class TestT17C3RegistryInventory(unittest.TestCase):
 
 
 class TestT18C4RegistryInventory(unittest.TestCase):
-    """T18 — After Prompt C4 lands, the registry contains exactly the
-    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 + Prompt
-    C4 specs, totaling 52 techniques (45 baseline + 7 Frequency
-    Domain). Pins the count at the C4 landing moment; later prompts
-    (C5-C7) will relax this into a ">=" check as they grow the set
-    further."""
+    """T18 — After Prompt C4 landed, the registry contained at least 52
+    specs (45 baseline + 7 Frequency Domain). Prompt C5 grows the set
+    further; T18 now pins the C4 minimum and T19 pins the exact C5
+    count."""
 
-    def test_exactly_52_specs_registered(self):
+    def test_at_least_52_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertGreaterEqual(
+            len(registered), 52,
+            f"Expected at least 52 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
+            f"C4: 7). Got {len(registered)}: {sorted(registered)}"
+        )
+
+
+class TestT19C5RegistryInventory(unittest.TestCase):
+    """T19 — After Prompt C5 lands, the registry contains exactly the
+    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 + Prompt C4
+    + Prompt C5 specs, totaling 59 techniques (52 baseline + 7
+    Multivariate remainder). Pins the count at the C5 landing moment;
+    later prompts (C6-C7) will relax this into a ">=" check."""
+
+    def test_exactly_59_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
         self.assertEqual(
-            len(registered), 52,
-            f"Expected exactly 52 registered specs (Prompt A/B: 8 + "
+            len(registered), 59,
+            f"Expected exactly 59 registered specs (Prompt A/B: 8 + "
             f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
-            f"C4: 7). Got {len(registered)}: {sorted(registered)}"
+            f"C4: 7 + Prompt C5: 7). Got {len(registered)}: "
+            f"{sorted(registered)}"
         )
 
 
@@ -1273,6 +1298,73 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "dominant_imf_period": 5.0,
         "per_imf_periods": [5.0, 10.0, 20.0],
         "residual_variance_pct": 20.0,
+        # Prompt C5 Multivariate remainder fields
+        # arimax / sarimax (inherit forecaster fields above, plus):
+        "exog_count": 0,
+        "exog_names": [],
+        "exog_coefs": [],
+        "converged": True,
+        "jarque_bera_pvalue": 0.5,
+        # bvar (inherit var_model fields where applicable, plus):
+        "variables": ["A", "B", "C"],
+        "n_variables": 3,
+        "lags": 2,
+        "lambda1": 0.1,
+        "lambda2": 1.0,
+        "lambda3": 1.0,
+        "n_effective": 90,
+        "n_draws": 1000,
+        "total_params": 21,
+        "bic_approx": 200.0,
+        "rmse": {"A": 1.0, "B": 1.0, "C": 1.0},
+        "prior_tightness_band": "moderate",
+        "credible_interval_coverage": 0.90,
+        "interval_type": "credible",
+        # dynamic_factor_model
+        "k_factors": 1,
+        "factor_order": 2,
+        "error_order": 1,
+        "variance_explained_pct": 50.0,
+        "n_observations": 100,
+        "loadings_per_factor": [[0.8, 0.6, 0.4]],
+        "communalities": [0.7, 0.5, 0.3],
+        # forecast_reconciliation
+        "top_series": "Total",
+        "bottom_series": ["A", "B"],
+        "n_bottom": 2,
+        "methods": ["bottom_up"],
+        "primary_method": "bottom_up",
+        "primary_method_fell_back": False,
+        "base_forecaster": "naive",
+        "relative_incoherence": 0.0,
+        # johansen_cointegration
+        "variable_names": ["A", "B", "C"],
+        "lag_order": 2,
+        "det_order": 0,
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 30.0,
+        "trace_cv_at_decision": 29.8,
+        # NOTE: ``significance_level`` is intentionally omitted. ADF
+        # reads it as a float (converted via ``float(...)``) whereas
+        # Johansen reads it as a display string (``"5%"``); a single
+        # minimal-input value can't satisfy both spec contracts, so
+        # each spec falls back to its own default when the key is
+        # absent.
+        "eigenvalues": [0.1, 0.05, 0.01],
+        "rank_implication_label": "VECM",
+        "first_cointegrating_vector": [1.0, -0.5, 0.2],
+        "tests_agree": True,
+        # transfer_function
+        "y_series": "Y",
+        "x_series": "X",
+        "polynomial": "unrestricted",
+        "r_squared": 0.5,
+        "adj_r_squared": 0.45,
+        "rmse": 1.0,
+        "long_run_multiplier": 0.3,
+        "peak_lag": 1,
+        "peak_lag_weight": 0.4,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1347,6 +1439,19 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # cross-spectral math notation:
         "wavelet_transform", "periodogram_spectral_density",
         "S_xy", "S_xx", "S_yy",  # cross/auto-spectrum subscripts
+        # (c4) Prompt C5 — cross-technique name references and
+        # programmatic parameter names that specs cite verbatim in
+        # Tier 2 honest-disclosure prose (model-order misspecification
+        # caveat for transfer_function; Johansen deterministic order
+        # flag; cross-spec pointers between var_model/bvar and between
+        # arimax and auto_arima):
+        "var_model", "dynamic_factor_model",
+        "forecast_reconciliation", "johansen_cointegration",
+        "transfer_function",
+        "max_lag", "ar_order", "det_order",
+        # Uppercase state-variable subscript cited by
+        # transfer_function's Box-Jenkins equation:
+        "Y_t",
         # (d) test-fixture identifier used by TestT14's minimal-input
         # probe — not a programmatic leak from production code:
         "test_series",

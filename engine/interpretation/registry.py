@@ -117,3 +117,18 @@ from interpretation.specs import wavelet_transform as _wavelet_transform_spec   
 from interpretation.specs import wavelet_coherence as _wavelet_coherence_spec         # noqa: F401, E402
 from interpretation.specs import ssa_model as _ssa_model_spec                         # noqa: F401, E402
 from interpretation.specs import emd_hht as _emd_hht_spec                             # noqa: F401, E402
+
+# Prompt C5 (7 specs, 6 wrappers):
+# Multivariate family — arimax_sarimax wrapper dispatches to 2 specs
+# (arimax, sarimax). Inheritance: arimax/sarimax follow C2 forecaster
+# Tier 1; bvar follows C1 var_model Tier 1. Four NEW Tier 1 shapes:
+# dfm (named-loading-per-factor), forecast_reconciliation (coherence-
+# operation), johansen_cointegration (rank-centric), transfer_function
+# (input-output dynamic regression).
+from interpretation.specs import arimax as _arimax_spec                               # noqa: F401, E402
+from interpretation.specs import sarimax as _sarimax_spec                             # noqa: F401, E402
+from interpretation.specs import bvar as _bvar_spec                                   # noqa: F401, E402
+from interpretation.specs import dynamic_factor_model as _dfm_spec                    # noqa: F401, E402
+from interpretation.specs import forecast_reconciliation as _reconciliation_spec      # noqa: F401, E402
+from interpretation.specs import johansen_cointegration as _johansen_spec             # noqa: F401, E402
+from interpretation.specs import transfer_function as _transfer_function_spec         # noqa: F401, E402

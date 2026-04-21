@@ -70,3 +70,16 @@ where `u_t ~ N(0, Q)` are factor innovations.
 **Mixed-frequency and ragged edges**: For nowcasting, DFMs handle data arriving at different frequencies (e.g., monthly and quarterly) and at different publication lags (ragged edges). The state space formulation naturally accommodates this by treating unobserved values as missing data in the Kalman filter.
 
 **Identification**: Factors are identified only up to rotation. Common normalizations include requiring `Lambda' Lambda / n = I_r` (principal components normalization) or imposing a lower-triangular structure on the first r rows of `Lambda`.
+
+## Interpretation
+
+Every Dynamic Factor Model run emits a two-tier plain-language Interpretation block.
+
+**Plain-Language Finding (Tier 1)** - uses a distinct named-loading-per-factor shape: for each fitted factor, cites the two series with the largest absolute loadings (with correlation-strength adjectives) and the weakest-loading series as a contrast anchor. Reports the panel-variance share explained by the common factor(s) with a strong / moderate / weak adjective, and the complementary idiosyncratic share.
+
+**Technical Interpretation (Tier 2)** - discloses the state-space formulation (Stock-Watson 1989), number of factors k (user-specified, not automatically selected by Bai-Ng IC or eigenvalue-ratio criteria), factor AR order, idiosyncratic AR order, and the automatic stationary transformation applied (if any). Discloses the factor sign normalization convention: factor signs are normalized so that the largest-loading series loads positively; flip-invariance is resolved by this convention and does not affect interpretation. Suggests comparing k with k+1 for empirical rank selection.
+
+**Caveats (Tier 3, conditional)**:
+- Common factors explain less than 30% of panel variance - series are weakly linked; factor model may not be the best framing.
+- Any factor has max|loading| / min|loading| > 5 - factor is essentially a proxy for one dominant series; consider a univariate model.
+- Idiosyncratic AR dynamics enabled on 4+ series - relaxes strict-factor assumption; AR terms may compensate for true cross-sectional residual correlation.

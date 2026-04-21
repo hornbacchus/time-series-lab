@@ -63,3 +63,18 @@ For h-step-ahead forecasts, you need future values of all exogenous variables `X
 where `eta_hat_{t+h}` is the ARIMA forecast of the error component. Prediction intervals combine the uncertainty from the ARIMA error forecasts with the regression estimation uncertainty.
 
 **Model selection**: Use AICc or BIC to compare models with different exogenous variable subsets and ARIMA orders. Stepwise procedures can be applied to both the ARIMA order and the regressor selection.
+
+## Interpretation
+
+Every ARIMAX / SARIMAX run emits a two-tier plain-language Interpretation block. The spec variant (arimax vs sarimax) is chosen from the fitted seasonal order: runs with a non-trivial seasonal specification route to the sarimax spec; runs without seasonal route to arimax.
+
+**Plain-Language Finding (Tier 1)** - names the fitted order (and seasonal order for sarimax), observations, count of exogenous regressors, horizon, fit RMSE vs the naive baseline (last-value for arimax, seasonal-naive for sarimax) with percentage delta, and the end-of-horizon forecast level. The horizon-trend phrasing uses the four-rule fallback hierarchy (near-zero observation, near-zero-scale, extreme percentage, returns-class mean) for robustness on economic series.
+
+**Technical Interpretation (Tier 2)** - discloses the user-chosen (p,d,q) and (P,D,Q)[m], the differencing levels applied, AIC / BIC / in-sample RMSE, residual Ljung-Box at lag 10, and — when exogenous regressors are present — each exogenous coefficient with its p-value and significance verdict at 5% / 10%. Also explicitly discloses the exog-carry-forward convention: the naive baseline uses last-value-carried-forward for both the endogenous series and exogenous regressors, making the RMSE comparison apples-to-apples on identical exogenous paths.
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= naive baseline - the model does not beat naive.
+- Residuals reject normality (Jarque-Bera) - prediction intervals assume Gaussian errors and may be mis-calibrated.
+- Maximum-likelihood optimization did not fully converge - coefficient standard errors are approximate.
+- (arimax) None of the exogenous regressors reach the 5% significance threshold - refit without exog and compare AIC.
+- (sarimax) Combined ARMA+SARMA order (p+q+P+Q) is high and exceeds 10% of sample size - model may be overparameterized (composite threshold: order > 6 AND > 0.1 * n_obs).

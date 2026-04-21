@@ -275,6 +275,64 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C5 additions: naive baseline, horizon-trend fields,
+        # Ljung-Box residual diagnostic, convergence flag, coefficient
+        # significance summary.
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            y, frequency=ctx.frequency, horizon=horizon, mode="auto",
+        )
+        last_observed_value = float(y[-1]) if len(y) > 0 else 0.0
+        forecast_end_value = float(np.asarray(fc)[-1]) if len(fc) > 0 else 0.0
+        series_mean = float(np.nanmean(y)) if len(y) > 0 else 0.0
+        series_std = float(np.nanstd(y, ddof=1)) if len(y) > 1 else 0.0
+        lb10_p = None
+        jb_p_out = None
+        try:
+            from statsmodels.stats.diagnostic import acorr_ljungbox
+            if len(valid_resid) >= 11:
+                _lb = acorr_ljungbox(valid_resid, lags=[10], return_df=True)
+                lb10_p = float(_lb["lb_pvalue"].values[0])
+        except Exception:
+            pass
+        try:
+            from scipy import stats as _sp_stats
+            if len(valid_resid) > 10:
+                jb_p_out = float(_sp_stats.jarque_bera(valid_resid).pvalue)
+        except Exception:
+            pass
+
+        # Convergence flag from statsmodels fit
+        converged = True
+        try:
+            converged = bool(fit.mle_retvals.get("converged", True))
+        except Exception:
+            pass
+
+        # Package exogenous coefficients with p-values for Tier 2
+        # disclosure. The SARIMAX params vector is [exog_1, ..., exog_k,
+        # AR_1, ..., MA_q, ...]; exog names from user-supplied ctx.exog
+        # align with the first ``len(exog_names)`` params when trend is
+        # 'c' (the constant) or the first k params when trend='n'.
+        # Use fit.params.index (pandas Series) for exact name-to-value
+        # matching.
+        exog_coef_table = []
+        try:
+            params_series = fit.params
+            params_index = (
+                list(params_series.index)
+                if hasattr(params_series, "index")
+                else [f"p{i}" for i in range(len(params_series))]
+            )
+            pvalues_series = fit.pvalues
+            for i, param_name in enumerate(params_index):
+                if param_name in exog_names:
+                    est = float(params_series.iloc[i] if hasattr(params_series, "iloc") else params_series[i])
+                    p = float(pvalues_series.iloc[i] if hasattr(pvalues_series, "iloc") else pvalues_series[i])
+                    exog_coef_table.append({"name": param_name, "estimate": est, "p_value": p})
+        except Exception:
+            pass
+
         audit = {
             "order": order_str,
             "seasonal_order": seas_str,
@@ -286,6 +344,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "rmse": round(rmse, 4) if rmse else None,
             "mae": round(mae, 4) if mae else None,
             "horizon": horizon,
+            "baseline_rmse": round(float(baseline["rmse"]), 4),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "ljung_box_lag10_pvalue": round(lb10_p, 6) if lb10_p is not None else None,
+            "jarque_bera_pvalue": round(jb_p_out, 6) if jb_p_out is not None else None,
+            "converged": converged,
             **format_significance_disclosure(
                 test_name="SARIMAX MLE t-tests + Ljung-Box residual diagnostic",
                 critical_value_formula=(
@@ -297,12 +362,50 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ),
         }
 
+        # Prompt C5 interpretation layer wire-in.
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        _interp_dict = {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "order": list(order),
+            "seasonal_order": list(seasonal_order),
+            "trend": trend,
+            "exog_names": list(exog_names),
+            "exog_coefs": exog_coef_table,
+            "aic": float(fit.aic),
+            "bic": float(fit.bic),
+            "fit_rmse": float(rmse) if rmse is not None else None,
+            "baseline_rmse": float(baseline["rmse"]),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "series_mean": series_mean,
+            "series_std": series_std,
+            "ljung_box_lag10_pvalue": lb10_p,
+            "jarque_bera_pvalue": jb_p_out,
+            "converged": converged,
+        }
+        # Route to arimax vs sarimax spec by technique_id.
+        _tid = str(ctx.technique_id or "").lower()
+        if _tid == "sarimax" or seasonal_order != (0, 0, 0, 0):
+            _target_spec = "sarimax"
+        else:
+            _target_spec = "arimax"
+        interp = build_interpretation(_target_spec, _interp_dict)
+
         return make_response(
             ctx,
             tables=[forecast_table, summary_table, coef_table, diag_table],
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

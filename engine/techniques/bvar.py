@@ -380,26 +380,67 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C5: prior-tightness adjective band (D12) and credible-
+        # interval-semantic label (D2).
+        def _prior_tightness_band(lam):
+            if lam is None:
+                return "unknown"
+            v = float(lam)
+            if v < 0.1: return "tight"
+            if v < 0.3: return "moderate"
+            return "loose"
+        prior_tightness_band = _prior_tightness_band(lambda1)
+
+        audit = {
+            "variables": names,
+            "n_variables": k,
+            "lags": p,
+            "lambda1": lambda1,
+            "lambda2": lambda2,
+            "lambda3": lambda3,
+            "n_effective": T,
+            "total_params": total_params,
+            "bic_approx": round(float(bic_approx), 2),
+            "n_draws": n_draws,
+            "rmse": {names[i]: round(rmse_vals[i], 4) for i in range(k)},
+            "horizon": horizon,
+            "prior_tightness_band": prior_tightness_band,
+            "interval_type": "credible",
+            "credible_interval_coverage": 0.90,
+        }
+
+        # Prompt C5 interpretation layer wire-in.
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("bvar", {
+            "variables": names,
+            "n_variables": int(k),
+            "lags": int(p),
+            "n_effective": int(T),
+            "lambda1": float(lambda1),
+            "lambda2": float(lambda2),
+            "lambda3": float(lambda3),
+            "prior_tightness_band": prior_tightness_band,
+            "n_draws": int(n_draws),
+            "total_params": int(total_params),
+            "bic_approx": float(bic_approx),
+            "rmse": {names[i]: float(rmse_vals[i]) for i in range(k)},
+            "horizon": int(horizon),
+            "credible_interval_coverage": 0.90,
+        })
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "variables": names,
-                "n_variables": k,
-                "lags": p,
-                "lambda1": lambda1,
-                "lambda2": lambda2,
-                "lambda3": lambda3,
-                "n_effective": T,
-                "total_params": total_params,
-                "bic_approx": round(float(bic_approx), 2),
-                "n_draws": n_draws,
-                "rmse": {names[i]: round(rmse_vals[i], 4) for i in range(k)},
-                "horizon": horizon,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

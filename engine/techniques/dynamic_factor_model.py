@@ -488,25 +488,47 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C5) ──────────────────────────
+        # Expose the loadings matrix + communalities so the dfm spec can
+        # render the named-loading-per-factor Tier 1 (Decision D3
+        # Option A: spec-side extraction, zero wrapper change beyond
+        # field export).
+        loadings_per_factor = []
+        for f in range(k_factors):
+            loadings_per_factor.append([float(loading_matrix[i, f]) for i in range(n_vars)])
+
+        audit = {
+            "variables": names,
+            "n_variables": n_vars,
+            "k_factors": k_factors,
+            "factor_order": factor_order,
+            "error_order": error_order,
+            "aic": round(float(fit.aic), 2),
+            "bic": round(float(fit.bic), 2),
+            "log_likelihood": round(float(fit.llf), 2),
+            "variance_explained_pct": round(var_explained * 100, 1),
+            "n_observations": T,
+            "horizon": horizon,
+            "loadings_per_factor": loadings_per_factor,
+            "communalities": [float(c) for c in communalities],
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        interp = build_interpretation("dynamic_factor_model", _interp_dict)
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "variables": names,
-                "n_variables": n_vars,
-                "k_factors": k_factors,
-                "factor_order": factor_order,
-                "error_order": error_order,
-                "aic": round(float(fit.aic), 2),
-                "bic": round(float(fit.bic), 2),
-                "log_likelihood": round(float(fit.llf), 2),
-                "variance_explained_pct": round(var_explained * 100, 1),
-                "n_observations": T,
-                "horizon": horizon,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

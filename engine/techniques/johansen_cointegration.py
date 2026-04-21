@@ -260,32 +260,73 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C5) ──────────────────────────
+        # Rank-implication label (Decision D7): encodes the downstream
+        # model suggestion consistent with the plain_english above.
+        if determined_rank_trace == 0:
+            rank_implication_label = "differenced-VAR"
+        elif determined_rank_trace >= k:
+            rank_implication_label = "levels-VAR"
+        elif determined_rank_trace >= k - 1:
+            rank_implication_label = "levels-VAR"
+        else:
+            rank_implication_label = "VECM"
+
+        # First cointegrating vector (if any) for Tier 2 display.
+        first_cointegrating_vector = None
+        try:
+            # evec_rows[i] is an eigenvector row; the first vector is
+            # the one corresponding to the largest eigenvalue.
+            if determined_rank_trace >= 1 and hasattr(model, "evec"):
+                evec_arr = np.asarray(model.evec)
+                if evec_arr.ndim == 2 and evec_arr.shape[1] >= 1:
+                    first_cointegrating_vector = [
+                        round(float(v), 4) for v in evec_arr[:, 0]
+                    ]
+        except Exception:
+            first_cointegrating_vector = None
+
+        audit = {
+            "n_variables": k,
+            "variable_names": names,
+            "lag_order": p,
+            "det_order": det_order,
+            "trace_rank": determined_rank_trace,
+            "max_eig_rank": determined_rank_eig,
+            "trace_stat_at_decision": round(trace_stat_at_decision, 4),
+            "trace_cv_at_decision": round(trace_cv_at_decision, 4),
+            "significance_level": significance,
+            "eigenvalues": [round(float(ev), 6) for ev in eigenvalues],
+            "rank_implication_label": rank_implication_label,
+            "first_cointegrating_vector": first_cointegrating_vector,
+            "n_observations": n,
+            "tests_agree": bool(determined_rank_trace == determined_rank_eig),
+            **format_significance_disclosure(
+                test_name="Johansen trace and max-eigenvalue tests",
+                critical_value_formula=(
+                    "MacKinnon-Haug-Michelis (1999) critical values via "
+                    "statsmodels.tsa.vector_ar.vecm.coint_johansen"
+                ),
+                ac_corrected=True,
+            ),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        interp = build_interpretation("johansen_cointegration", _interp_dict)
+
         return make_response(
             ctx,
             tables=[summary_table, trace_table, eig_table, eig_val_table, evec_table],
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "n_variables": k,
-                "variable_names": names,
-                "lag_order": p,
-                "det_order": det_order,
-                "trace_rank": determined_rank_trace,
-                "max_eig_rank": determined_rank_eig,
-                "trace_stat_at_decision": round(trace_stat_at_decision, 4),
-                "trace_cv_at_decision": round(trace_cv_at_decision, 4),
-                "significance_level": significance,
-                "eigenvalues": [round(float(ev), 6) for ev in eigenvalues],
-                **format_significance_disclosure(
-                    test_name="Johansen trace and max-eigenvalue tests",
-                    critical_value_formula=(
-                        "MacKinnon-Haug-Michelis (1999) critical values via "
-                        "statsmodels.tsa.vector_ar.vecm.coint_johansen"
-                    ),
-                    ac_corrected=True,
-                ),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

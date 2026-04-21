@@ -293,22 +293,50 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C5) ──────────────────────────
+        # Primary-method citation convention (Decision D5):
+        # MinT-OLS preferred when available; fall back to bottom_up
+        # when OLS fails (detected via fallback warning at line 182).
+        _methods_ran = list(results.keys())
+        if "ols" in _methods_ran:
+            _ols_fell_back = any("OLS reconciliation failed" in w for w in warnings)
+            primary_method = "bottom_up" if _ols_fell_back else "ols"
+        elif "bottom_up" in _methods_ran:
+            primary_method = "bottom_up"
+        elif "top_down" in _methods_ran:
+            primary_method = "top_down"
+        else:
+            primary_method = _methods_ran[0] if _methods_ran else None
+
+        audit = {
+            "top_series": top_name,
+            "bottom_series": bottom_names,
+            "n_bottom": n_bottom,
+            "methods": _methods_ran,
+            "primary_method": primary_method,
+            "primary_method_fell_back": bool("ols" in _methods_ran and any("OLS reconciliation failed" in w for w in warnings)),
+            "base_forecaster": base_fc_type,
+            "horizon": horizon,
+            "n_observations": T,
+            "relative_incoherence": round(relative_incoherence, 4),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        interp = build_interpretation("forecast_reconciliation", _interp_dict)
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "top_series": top_name,
-                "bottom_series": bottom_names,
-                "n_bottom": n_bottom,
-                "methods": list(results.keys()),
-                "base_forecaster": base_fc_type,
-                "horizon": horizon,
-                "n_observations": T,
-                "relative_incoherence": round(relative_incoherence, 4),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

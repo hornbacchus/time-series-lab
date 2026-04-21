@@ -258,8 +258,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["Residual Mean", round(float(np.mean(resid)), 6)],
             ["Residual Std", round(float(np.std(resid, ddof=1)), 6)],
         ]
+        jb_p_val = None
+        dw_val = None
+        lb_p_val = None
         if len(resid) > 10:
             jb, jb_p = sp_stats.jarque_bera(resid)
+            jb_p_val = float(jb_p)
             diag_rows.append(["Jarque-Bera Statistic", round(float(jb), 4)])
             diag_rows.append(["Jarque-Bera P-Value", round(float(jb_p), 6)])
             if jb_p < 0.05:
@@ -267,11 +271,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
             # Durbin-Watson
             dw = float(np.sum(np.diff(resid) ** 2) / np.sum(resid ** 2))
+            dw_val = dw
             diag_rows.append(["Durbin-Watson", round(dw, 4)])
             if dw < 1.5:
                 warnings.append(f"Durbin-Watson={dw:.2f} suggests positive autocorrelation in residuals.")
             elif dw > 2.5:
                 warnings.append(f"Durbin-Watson={dw:.2f} suggests negative autocorrelation in residuals.")
+
+            # Ljung-Box at lag 10 (Prompt C5 Decision D9 — transfer-function
+            # model-order misspecification is the dominant failure mode;
+            # Ljung-Box on residuals is the primary specification check).
+            try:
+                from statsmodels.stats.diagnostic import acorr_ljungbox
+                lb_lag = min(10, max(1, len(resid) // 5))
+                lb_result = acorr_ljungbox(resid, lags=[lb_lag], return_df=True)
+                lb_p_val = float(lb_result["lb_pvalue"].iloc[0])
+                diag_rows.append([f"Ljung-Box P-Value (lag {lb_lag})", round(lb_p_val, 6)])
+                if lb_p_val < 0.05:
+                    warnings.append(
+                        f"Ljung-Box at lag {lb_lag} rejects white-noise (p={lb_p_val:.4f}); "
+                        f"model orders (max_lag, ar_order) may be misspecified."
+                    )
+            except Exception:
+                lb_p_val = None
         diag_table = make_table("Residual Diagnostics", ["Metric", "Value"], diag_rows)
 
         # ---- Plain English ----
@@ -293,37 +315,56 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C5) ──────────────────────────
+        peak_lag_weight = float(lag_weights[int(np.argmax(np.abs(lag_weights)))])
+
+        audit = {
+            "y_series": y_name,
+            "x_series": x_name,
+            "max_lag": max_lag,
+            "ar_order": ar_order,
+            "polynomial": poly_type,
+            "pair_used": [y_name, x_name],
+            "additional_exog_used": [s[0] for s in all_series[2:]],
+            "r_squared": round(r_squared, 4),
+            "adj_r_squared": round(adj_r_squared, 4),
+            "rmse": round(rmse, 4),
+            "aic": round(float(aic), 2),
+            "bic": round(float(bic), 2),
+            "long_run_multiplier": round(float(cum_weight), 6),
+            "peak_lag": peak_lag,
+            "peak_lag_weight": round(peak_lag_weight, 6),
+            "n_effective": effective_n,
+            "n_observations": effective_n,
+            "jarque_bera_pvalue": round(jb_p_val, 6) if jb_p_val is not None else None,
+            "durbin_watson": round(dw_val, 4) if dw_val is not None else None,
+            "ljung_box_lag10_pvalue": round(lb_p_val, 6) if lb_p_val is not None else None,
+            **format_significance_disclosure(
+                test_name="OLS t-test on distributed-lag coefficients",
+                critical_value_formula=(
+                    "t-distribution with (n_effective - k) DoF; no "
+                    "HAC/Newey-West correction applied"
+                ),
+                ac_corrected=False,
+            ),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        interp = build_interpretation("transfer_function", _interp_dict)
+
         return make_response(
             ctx,
             tables=[coef_table, lag_table, summary_table, diag_table],
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "y_series": y_name,
-                "x_series": x_name,
-                "max_lag": max_lag,
-                "ar_order": ar_order,
-                "polynomial": poly_type,
-                "pair_used": [y_name, x_name],
-                "additional_exog_used": [s[0] for s in all_series[2:]],
-                "r_squared": round(r_squared, 4),
-                "adj_r_squared": round(adj_r_squared, 4),
-                "rmse": round(rmse, 4),
-                "aic": round(float(aic), 2),
-                "bic": round(float(bic), 2),
-                "long_run_multiplier": round(float(cum_weight), 6),
-                "peak_lag": peak_lag,
-                "n_effective": effective_n,
-                **format_significance_disclosure(
-                    test_name="OLS t-test on distributed-lag coefficients",
-                    critical_value_formula=(
-                        "t-distribution with (n_effective - k) DoF; no "
-                        "HAC/Newey-West correction applied"
-                    ),
-                    ac_corrected=False,
-                ),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

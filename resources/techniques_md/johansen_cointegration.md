@@ -63,3 +63,17 @@ The choice affects the critical values and the interpretation of the cointegrati
 **Critical values**: The distributions are non-standard and depend on `k - r` (the number of common stochastic trends), the deterministic specification, and the sample size. Tabulated values from Osterwald-Lenum or computed by response surface regressions are used. Finite-sample corrections (Reimers or Bartlett corrections) can improve small-sample performance.
 
 **Normalization**: The cointegrating vectors `beta` are identified only up to a non-singular transformation. Normalization (e.g., setting the coefficient of one variable to 1 in each vector) is needed for interpretation. The loading matrix `alpha` adjusts accordingly.
+
+## Interpretation
+
+Every Johansen cointegration run emits a two-tier plain-language Interpretation block with a rank-centric Tier 1 shape.
+
+**Plain-Language Finding (Tier 1)** - leads with the trace-test rank decision ("trace test selects rank r"), the trace statistic at the decision boundary vs the critical value at the chosen significance level, whether the max-eigenvalue test agrees, and a rank-implication actionable clause: rank 0 → differenced-VAR; 1 <= r < k-1 → VECM with r long-run equilibrium relationships; r >= k-1 → levels-VAR may be appropriate.
+
+**Technical Interpretation (Tier 2)** - discloses the VAR lag order, deterministic-component specification (det_order), trace and max-eigenvalue agreement, eigenvalues, and the first cointegrating vector (when r >= 1) aligned with the variable names. Honestly discloses the MacKinnon-Haug-Michelis asymptotic critical values limitation: "on samples below ~100 observations these tend to over-reject the no-cointegration null," with a positive acknowledgment when the sample is comfortably large.
+
+**Caveats (Tier 3, conditional)**:
+- Trace and max-eigenvalue tests select different ranks - borderline case; trace-test decision is cited for robustness.
+- Sample size n < 100 - MacKinnon-Haug-Michelis asymptotic CVs over-reject; consider Reinsel-Ahn or Cheung-Lai finite-sample corrections.
+- Rank >= k-1 - series may all be stationary; verify with per-series ADF / KPSS / PP triage before committing to a VECM.
+

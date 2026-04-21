@@ -57,3 +57,16 @@ where `A_post` and `V_post` are the posterior mean and variance of the coefficie
 **Dummy observation priors**: The Minnesota prior, sum-of-coefficients prior, and single-unit-root prior can all be implemented by adding "dummy observations" to the data matrix before running OLS. This makes BVAR estimation straightforward.
 
 **Hyperparameter selection**: The marginal likelihood `p(Y | lambda)` is computed in closed form for the conjugate prior and maximized over the hyperparameters. This empirical Bayes approach automatically calibrates the degree of shrinkage.
+
+## Interpretation
+
+Every BVAR run emits a two-tier plain-language Interpretation block.
+
+**Plain-Language Finding (Tier 1)** - inherits the var_model Tier 1 shape: names the lag order, number of variables and their names, effective observations, prior tightness (lambda1 with adjective band tight / moderate / loose), per-variable fit RMSEs, and the horizon + credible-interval coverage level. Includes an explicit cross-spec pointer to the frequentist var_model technique — noting that BVAR does not emit impulse-response functions or forecast-error-variance decomposition.
+
+**Technical Interpretation (Tier 2)** - discloses the Minnesota prior hyperparameters (lambda1, lambda2, lambda3), the analytical Normal-Inverse-Wishart posterior, the number of Monte Carlo draws used to form the credible intervals, BIC approximation, and total parameter count. Critically, discloses that reported intervals are Bayesian credible intervals — they answer "what is the probability the parameter lies in this range given the data and prior" rather than the frequentist "what fraction of resampled intervals would contain the true parameter under repeated sampling." Points to var_model for causal structure analysis (IRF / FEVD).
+
+**Caveats (Tier 3, conditional)**:
+- Prior tightness lambda1 < 0.05 - posterior is strongly shrunk toward the random-walk prior; forecasts mirror RW-forecasts.
+- Prior tightness lambda1 > 0.5 - posterior is close to OLS with little shrinkage; Bayesian regularization benefits muted.
+- Total parameters > 20% of effective observations - even with Minnesota shrinkage the fit is data-hungry.

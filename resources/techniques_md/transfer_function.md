@@ -57,3 +57,16 @@ where:
 **Estimation**: Joint MLE of transfer function parameters (omega, delta) and noise model parameters (phi, theta). The optimization is nonlinear due to the denominator polynomial `delta(B)`, requiring iterative algorithms (Gauss-Newton or Marquardt).
 
 **Stability condition**: All roots of `delta(B) = 0` must lie outside the unit circle, ensuring the impulse response weights decay over time rather than explode.
+
+## Interpretation
+
+Every Transfer Function run emits a two-tier plain-language Interpretation block.
+
+**Plain-Language Finding (Tier 1)** - uses an input-output dynamic-regression shape: names the output Y, the input X, observations, max_lag and ar_order, long-run gain (cumulative distributed-lag weight) with adjective band (negligible / moderate / strong / amplifying), dominant response lag with careful phrasing (worded as "dominant response at lag N" rather than formal Box-Jenkins delay `b`, which is a distinct quantity), R-squared, and the residual Ljung-Box verdict.
+
+**Technical Interpretation (Tier 2)** - discloses the OLS fit specification, R-squared / adjusted R-squared / RMSE / AIC / BIC, and the three residual diagnostics (Jarque-Bera, Durbin-Watson, Ljung-Box at lag 10). Includes an always-fire honest-disclosure caveat: "Model orders for the distributed-lag polynomial and AR noise are user-specified; misspecification is the dominant failure mode for transfer functions. If residual Ljung-Box rejects white-noise, revisit (max_lag, ar_order) before interpreting gain or delay coefficients." Also discloses the weak-exogeneity assumption — feedback from Y to X is NOT modeled and would bias gain estimates.
+
+**Caveats (Tier 3, conditional)**:
+- Residual Ljung-Box at lag 10 rejects white-noise - model orders likely misspecified; gain / delay not interpretable until this test passes.
+- Residual Jarque-Bera rejects normality - prediction intervals may be mis-calibrated.
+- |gain| < 0.1 AND R-squared < 0.2 - negligible cumulative effect with low explanatory power; revisit (max_lag, ar_order) and check residual Ljung-Box.
