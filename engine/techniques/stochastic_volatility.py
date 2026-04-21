@@ -232,22 +232,93 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C6) ──────────────────────────
+        # AIC approximation from quasi-ML neg-log-likelihood:
+        # AIC = 2k - 2·LL, where k=3 free parameters (mu, phi, sigma_eta)
+        # and LL = -best_nll (since wrapper reports neg-log-likelihood).
+        _k_params = 3
+        try:
+            _aic = 2 * _k_params + 2 * float(best_nll)
+        except Exception:
+            _aic = None
+
+        # Input excess kurtosis for SV Gaussian-only Tier 3 trigger.
+        try:
+            _arr = np.asarray(values, dtype=float)
+            _arr = _arr[np.isfinite(_arr)]
+            if len(_arr) >= 4:
+                _m = _arr.mean()
+                _s = _arr.std(ddof=1)
+                if _s > 0:
+                    _input_kurtosis = float(np.mean(((_arr - _m) / _s) ** 4))
+                else:
+                    _input_kurtosis = None
+            else:
+                _input_kurtosis = None
+        except Exception:
+            _input_kurtosis = None
+
+        # Unconditional log-vol std: σ_η / √(1 − φ²). Diverges as φ→1;
+        # report None near the unit root boundary.
+        try:
+            if abs(phi_hat) < 0.999:
+                _unc_log_vol_std = float(
+                    sigma_eta_hat / np.sqrt(max(1e-12, 1.0 - phi_hat * phi_hat))
+                )
+            else:
+                _unc_log_vol_std = None
+        except Exception:
+            _unc_log_vol_std = None
+
+        # Smoothed-vol dynamic range for Tier 1 color (D1: Tier 1
+        # headlines filtered vol for GARCH-comparability; smoothed
+        # range is Tier 2 informational).
+        try:
+            _smoothed_vol_min = float(np.min(vol_smoothed))
+            _smoothed_vol_max = float(np.max(vol_smoothed))
+            _filtered_vol_min = float(np.min(vol_filtered))
+            _filtered_vol_max = float(np.max(vol_filtered))
+        except Exception:
+            _smoothed_vol_min = None
+            _smoothed_vol_max = None
+            _filtered_vol_min = None
+            _filtered_vol_max = None
+
+        audit = {
+            "mu": round(mu_hat, 6),
+            "phi": round(phi_hat, 6),
+            "sigma_eta": round(sigma_eta_hat, 6),
+            "half_life": round(half_life, 2) if np.isfinite(half_life) else None,
+            "neg_loglik": round(best_nll, 4),
+            "aic": round(_aic, 2) if _aic is not None else None,
+            "n_obs": n,
+            "n_restarts": cfg["n_restarts"],
+            "method": cfg["method"],
+            "input_kurtosis": round(_input_kurtosis, 4) if _input_kurtosis is not None else None,
+            "unconditional_log_vol_std": round(_unc_log_vol_std, 4) if _unc_log_vol_std is not None else None,
+            "smoothed_vol_min": round(_smoothed_vol_min, 4) if _smoothed_vol_min is not None else None,
+            "smoothed_vol_max": round(_smoothed_vol_max, 4) if _smoothed_vol_max is not None else None,
+            "filtered_vol_min": round(_filtered_vol_min, 4) if _filtered_vol_min is not None else None,
+            "filtered_vol_max": round(_filtered_vol_max, 4) if _filtered_vol_max is not None else None,
+            "series_name": name,
+            "innovation_distribution": "Gaussian",
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("stochastic_volatility", dict(audit))
+
         return make_response(
             ctx,
             tables=[param_table, stats_table, ts_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "mu": round(mu_hat, 6),
-                "phi": round(phi_hat, 6),
-                "sigma_eta": round(sigma_eta_hat, 6),
-                "half_life": round(half_life, 2) if np.isfinite(half_life) else None,
-                "neg_loglik": round(best_nll, 4),
-                "n_obs": n,
-                "n_restarts": cfg["n_restarts"],
-                "method": cfg["method"],
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

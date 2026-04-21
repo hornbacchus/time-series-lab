@@ -63,3 +63,20 @@ Negative rho (typically -0.5 to -0.8 for equities) captures the leverage effect:
 - In forecasting competitions, GARCH and SV often perform similarly for conditional variance prediction.
 
 **Unconditional distribution**: The unconditional variance of `h_t` is `sigma_eta^2 / (1 - phi^2)`. The unconditional distribution of returns is a scale mixture of normals, which produces fat tails.
+
+## Interpretation
+
+Every Stochastic Volatility run emits a two-tier plain-language Interpretation block. Tier 1 inherits the GARCH persistence-band narrative (shared with `garch_model`) with adaptations for SV's latent-state framing.
+
+**Plain-Language Finding (Tier 1)** - names the persistence φ with its adjective band (low / moderate / high / very high, shared with GARCH via the 4-band convention), the volatility shock half-life, and the filtered-volatility dynamic range across the sample. Tier 1 cites the *filtered* volatility path as the forward-causal analog of GARCH's σ_t for cross-spec comparability.
+
+**Technical Interpretation (Tier 2)** - discloses the SV AR(1) log-variance model equations, the quasi-maximum likelihood Kalman-filter inference path, and three honest-disclosure sentences:
+1. **Transformation-bias (D13):** back-transforming filtered/smoothed log-volatility to volatility scale introduces Jensen-inequality bias (E[exp(X)] ≠ exp(E[X])); reported values carry this systematic bias.
+2. **Gaussian-only (D12, Convention C):** the wrapper assumes Gaussian innovations; Student-t or other heavy-tailed alternatives are not implemented.
+3. **No forecast path (D4):** the wrapper does not emit a forecast; historical filtered/smoothed volatility is the deliverable, paralleling the BVAR wrapper's IRF/FEVD absence.
+
+**Caveats (Tier 3, conditional)**:
+- φ > 0.98 (near-integrated volatility) - shocks decay extremely slowly; forward-looking use beyond a few weeks carries substantial uncertainty. Threshold inherited from GARCH for cross-spec consistency.
+- φ < 0.3 (low persistence) - volatility is essentially iid; SV framing adds little over sample-mean-volatility. Verify the input is returns (not levels) and that the series has volatility clustering.
+- Sample kurtosis > 6 (Gaussian assumption mis-specified) - input is heavy-tailed; Gaussian innovations understate tail-event volatility. MCMC-based SV with Student-t innovations or GARCH with skew-t innovations would be more appropriate.
+

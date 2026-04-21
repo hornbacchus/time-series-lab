@@ -242,19 +242,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
             param_rows,
         )
 
-        # Goodness of fit: KS test on exceedances
+        # Goodness of fit: KS test on exceedances.
+        #
+        # Decision D14 (Prompt C6): the previous implementation also
+        # called ``sp_stats.anderson(pit, dist='uniform')`` on the
+        # probability-integral transform, but scipy's anderson only
+        # accepts {'norm', 'expon', 'logistic', 'gumbel_l', 'gumbel_r',
+        # 'weibull_min'} — 'uniform' raised ``Invalid distribution``
+        # and blocked every real-data run. We drop the Anderson-Darling
+        # row and keep the KS test, which already covers goodness-of-fit
+        # on the GPD at a single reported statistic + p-value.
         ks_stat, ks_pval = sp_stats.kstest(
             exceedances, 'genpareto', args=(xi_hat, 0, sigma_hat)
         )
-        # Anderson-Darling on probability-integral transform
-        pit = sp_stats.genpareto.cdf(exceedances, xi_hat, loc=0, scale=sigma_hat)
-        ad_stat, ad_crit, ad_sig = sp_stats.anderson(pit, dist='uniform')
 
         gof_rows = [
             ["KS statistic", round(float(ks_stat), 6), round(float(ks_pval), 6),
              "Good fit" if ks_pval > 0.05 else "Poor fit (reject GPD at 5%)"],
-            ["Anderson-Darling", round(float(ad_stat), 6), "",
-             f"Critical values: {[round(c, 3) for c in ad_crit]}"],
         ]
         gof_table = make_table(
             "Goodness of Fit",
@@ -347,25 +351,65 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C6) ──────────────────────────
+        # Flag fields for Tier 3 triggers: D5 declustering caveat
+        # always fires for time-indexed input (which is the usual case
+        # for financial-return EVT analysis). D6 30-exceedance-
+        # sufficiency warning bridges the 10-observation hard minimum
+        # and the 30-observation reliable-fit rule-of-thumb.
+        _is_time_series = bool(ctx.time) and len(ctx.time) >= 2
+        _exceedances_below_30 = bool(10 <= n_exceed < 30)
+
+        # Pack VaR/ES levels + values for spec-side rendering.
+        # risk_rows stores conf_level as a formatted string ("95.0%"),
+        # so we reconstruct the raw float from conf_levels (the input
+        # list) in parallel. This keeps the spec rendering decoupled
+        # from the wrapper's display formatting.
+        _conf_levels = [float(p) for p in conf_levels]
+        _var_values = []
+        _es_values = []
+        for row in risk_rows:
+            try:
+                _var_values.append(float(row[1]))
+                _es_values.append(float(row[2]) if row[2] is not None else None)
+            except Exception:
+                continue
+
+        audit = {
+            "xi": round(xi_hat, 6),
+            "sigma": round(sigma_hat, 6),
+            "threshold": round(float(u if tail != "lower" else -u), 6),
+            "threshold_quantile": threshold_quantile,
+            "n_exceedances": n_exceed,
+            "exceedance_rate": round(zeta_u, 6),
+            "tail": tail,
+            "ks_stat": round(float(ks_stat), 6),
+            "ks_pval": round(float(ks_pval), 6),
+            "n_obs": n,
+            "bootstrap_samples": cfg["bootstrap_samples"],
+            "confidence_levels": _conf_levels,
+            "var_values": _var_values,
+            "es_values": _es_values,
+            "is_time_series_input": _is_time_series,
+            "exceedances_below_30": _exceedances_below_30,
+            "series_name": name,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("evt_pot_gpd", dict(audit))
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "xi": round(xi_hat, 6),
-                "sigma": round(sigma_hat, 6),
-                "threshold": round(float(u if tail != "lower" else -u), 6),
-                "threshold_quantile": threshold_quantile,
-                "n_exceedances": n_exceed,
-                "exceedance_rate": round(zeta_u, 6),
-                "tail": tail,
-                "ks_stat": round(float(ks_stat), 6),
-                "ks_pval": round(float(ks_pval), 6),
-                "n_obs": n,
-                "bootstrap_samples": cfg["bootstrap_samples"],
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

@@ -70,3 +70,17 @@ This is a non-differentiable, nonlinear optimization problem. The standard appro
 **Comparison with GARCH-based VaR**: CAViaR directly models the object of interest (the quantile) rather than going through a volatility model plus distributional assumption. This avoids the risk of distributional misspecification. However, it provides VaR for only one quantile level at a time and does not produce a full conditional distribution.
 
 **Expected Shortfall extension**: ES cannot be directly estimated by quantile regression. Two-step approaches first estimate VaR via CAViaR, then estimate ES conditional on VaR exceedance. Joint quantile-ES regression methods (Patton, Ziegel, Chen, 2019) estimate both simultaneously.
+
+## Interpretation
+
+Every CAViaR run emits a two-tier plain-language Interpretation block with a distinct quantile-forecast-with-backtest Tier 1 shape.
+
+**Plain-Language Finding (Tier 1)** - names the CAViaR specification variant (SAV / AS / IG with full names Symmetric Absolute Value / Asymmetric Slope / Indirect GARCH), the VaR confidence level (integer-when-whole per Convention A), the quantile level θ, realized vs expected violation counts with the exceedance ratio, a coverage descriptor (too conservative / too aggressive / well-calibrated), and two of the three backtest p-values: Kupiec unconditional coverage first, then Engle-Manganelli Dynamic Quantile (Convention D backtest ordering per D8). The Christoffersen conditional coverage test is flagged separately in Tier 3.
+
+**Technical Interpretation (Tier 2)** - explicitly states the distribution-free framing (Convention C): the quantile loss (check / pinball function) makes no distributional assumption about returns. Discloses the Nelder-Mead optimization with random restarts, the specification-specific quantile-dynamics equation, parameter values with coefficient labels, minimized quantile loss, and all three backtests with verdicts (Kupiec, Christoffersen conditional coverage via first-order Markov chain, and Engle-Manganelli Dynamic Quantile joint test). Suggests refitting with Asymmetric Slope if leverage effects are of interest.
+
+**Caveats (Tier 3, conditional)**:
+- Kupiec rejects - realized exceedance rate differs materially from nominal; quantile level miscalibrated.
+- Christoffersen conditional-coverage rejects - violations are clustered; dynamic response too slow. Consider AS variant for leverage-effect responses.
+- DQ joint test rejects - neither well-calibrated nor adequate; consider AS, IG, or more optimization restarts (Thorough preset).
+

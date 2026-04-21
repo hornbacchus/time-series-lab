@@ -60,3 +60,21 @@ Newey-West standard errors account for serial correlation in the residuals (espe
 - **Log-HAR**: Model `log(RV_t)` to reduce heteroskedasticity and ensure positive forecasts.
 
 **Microstructure noise**: At very high frequencies, bid-ask bounce and other microstructure effects inflate RV. Solutions include sampling at 5-minute intervals, using kernel-based estimators (Barndorff-Nielsen et al.), or pre-averaging.
+
+## Interpretation
+
+Every HAR-RV run emits a two-tier plain-language Interpretation block. Tier 1 inherits the Prompt C2 forecaster template (RMSE + baseline comparison + horizon-trend) with a volatility-vs-return unit distinction.
+
+**Plain-Language Finding (Tier 1)** - names the model type, the Corsi-2009 default lag structure (1 / 5 / 22 for daily / weekly / monthly), the rolling-22-period mean RV baseline comparison, the horizon-trend clause, the fit R² with adjusted R², and the dominant component (daily, weekly, or monthly) by coefficient magnitude. The noun phrase "realized volatility" anchors the reader on volatility scale to prevent unit-confusion with return-forecasting techniques.
+
+**Technical Interpretation (Tier 2)** - discloses the OLS coefficients (β₀, β_d, β_w, β_m) with signed values, the persistence sum β_d + β_w + β_m, AIC / BIC, residual Ljung-Box and Jarque-Bera p-values, and three structured notes:
+1. **Scale note:** fit RMSE is on realized-variance scale (not return scale) — direct RMSE comparison with return-forecasting techniques such as ARIMA is not meaningful.
+2. **Annualization (Convention B):** daily volatility × √252 ≈ 15.87 converts to annual-scale volatility; daily variance × 252 converts to annual-scale variance. No wrapper change is applied; the caller annualizes post-hoc.
+3. **Standard errors:** OLS under normal-residuals assumption (not HAC/Newey-West corrected); HAR residuals often exhibit heteroscedasticity and autocorrelation on RV, so coefficient-level significance should be treated as indicative.
+
+**Caveats (Tier 3, conditional)**:
+- Residual Ljung-Box rejects white-noise - HAR structure is inadequate; consider log-HAR form (use_log=True), adding lags beyond 22, or a HAR-CJ variant for jumps.
+- Residual Jarque-Bera rejects normality (and use_log=False) - raw-scale HAR is sensitive to right-skewness; consider log-HAR (use_log=True).
+- Fit RMSE ≥ rolling-mean baseline - HAR does not beat a simple trailing-average volatility forecast on this series.
+- R² < 0.30 - lag structure may not capture the full volatility dynamics; consider (a) log-HAR, (b) longer lags for long-memory volatility, or (c) jumps-aware variants like HAR-CJ.
+

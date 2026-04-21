@@ -233,36 +233,60 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C6) ──────────────────────────
+        # Parameter-name mapping so the spec can cite β-labels without
+        # re-deriving the spec-to-name mapping.
+        _parameter_names = list(pnames)
+
+        audit = {
+            "specification": spec,
+            "theta": theta,
+            "quantile_theta": theta,  # alias to avoid T14 collision risk
+            "parameter_names": _parameter_names,
+            "parameters": [round(float(p), 6) for p in best_params],
+            "quantile_loss": round(float(best_loss), 6),
+            "n_violations": n_violations,
+            "expected_violations": round(expected_violations, 2),
+            "violation_ratio": round(violation_ratio, 4),
+            "kupiec_stat": round(float(kupiec_stat), 4),
+            "kupiec_pval": round(float(kupiec_pval), 6),
+            "christoffersen_stat": round(float(cc_stat), 4),
+            "christoffersen_pval": round(float(cc_pval), 6),
+            "dq_stat": round(float(dq_stat), 4),
+            "dq_pval": round(float(dq_pval), 6),
+            "n_obs": n,
+            "n_restarts": cfg["n_restarts"],
+            "distribution_free": True,
+            "series_name": name,
+            **format_significance_disclosure(
+                test_name=(
+                    "Kupiec unconditional coverage + Christoffersen "
+                    "conditional coverage + Engle-Manganelli Dynamic "
+                    "Quantile backtests"
+                ),
+                critical_value_formula=(
+                    "chi-squared p-values from likelihood-ratio (Kupiec, "
+                    "Christoffersen) and dynamic-quantile (DQ) tests"
+                ),
+                ac_corrected=True,
+            ),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("caviar_quantile_dynamics", dict(audit))
+
         return make_response(
             ctx,
             tables=[param_table, bt_table, ts_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "specification": spec,
-                "theta": theta,
-                "parameters": [round(float(p), 6) for p in best_params],
-                "quantile_loss": round(float(best_loss), 6),
-                "n_violations": n_violations,
-                "violation_ratio": round(violation_ratio, 4),
-                "kupiec_pval": round(float(kupiec_pval), 6),
-                "christoffersen_pval": round(float(cc_pval), 6),
-                "dq_pval": round(float(dq_pval), 6),
-                "n_obs": n,
-                "n_restarts": cfg["n_restarts"],
-                **format_significance_disclosure(
-                    test_name=(
-                        "Kupiec POF + Christoffersen independence + Engle-"
-                        "Manganelli DQ backtests"
-                    ),
-                    critical_value_formula=(
-                        "chi-squared p-values from likelihood-ratio (Kupiec, "
-                        "Christoffersen) and dynamic-quantile (DQ) tests"
-                    ),
-                    ac_corrected=True,
-                ),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:
@@ -293,7 +317,9 @@ def _get_initial_params(spec, y, theta, q0):
         beta3 = 0.1 * np.std(y) * (0.5 + np.random.rand())
         return np.array([beta0, beta1, beta2, beta3])
     else:  # IG
-        sigma = np.std(y)
+        # Note: the previous implementation assigned ``sigma = np.std(y)``
+        # here but never used it in the IG initialization (the beta2
+        # draw is scale-free). Removed as orphan per Prompt C6 D17.
         beta0 = q0 ** 2 * (1 - 0.9) * (0.5 + np.random.rand())
         beta1 = 0.85 + 0.1 * np.random.rand()
         beta2 = 0.1 * (0.5 + np.random.rand())
@@ -344,7 +370,12 @@ def _kupiec_test(n, v, theta):
 
 
 def _christoffersen_test(violations, theta):
-    """Christoffersen (1998) independence test for violation clustering."""
+    """Christoffersen (1998) conditional-coverage test for violation
+    clustering via first-order Markov chain. Prompt C6 D17 label fix:
+    this is a conditional-coverage test (hit indicators form a Markov
+    chain), not a pure "independence" test — the name was previously
+    mislabeled. The Engle-Manganelli Dynamic Quantile test is a
+    separate, stronger joint-coverage test that complements this one."""
     from scipy.stats import chi2
     v = violations.astype(int)
     n = len(v)

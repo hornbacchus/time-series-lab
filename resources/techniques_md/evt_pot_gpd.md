@@ -66,3 +66,18 @@ Defined for `y > 0` and `(1 + xi y / sigma) > 0`.
 **Return levels**: The level exceeded on average once every m periods: `z_m = u + (sigma/xi) * ((m * n_u/n)^xi - 1)`.
 
 **Conditional EVT**: Fit a GARCH model to capture time-varying volatility, then apply GPD to the standardized residuals. VaR and ES are then `sigma_t * VaR_{standardized}`, combining dynamic volatility with extreme tail estimation.
+
+## Interpretation
+
+Every EVT-POT-GPD run emits a two-tier plain-language Interpretation block with a distribution-fit-with-tail-parameters Tier 1 shape.
+
+**Plain-Language Finding (Tier 1)** - leads with the tail (left or right), threshold quantile and its value in series units, the exceedance count, the GPD shape parameter ξ with its tail-domain label (heavy-tailed Frechet, bounded Weibull, or approximately exponential), the scale parameter σ, and canonical VaR / Expected Shortfall quantiles (99% and 99.9% when available). Confidence levels render integer-when-whole per the platform convention.
+
+**Technical Interpretation (Tier 2)** - discloses the POT methodology, explicitly names the Generalized Pareto Distribution (GPD) by name (Convention C), cites the maximum-likelihood fit via scipy.stats.genpareto, reports the Kolmogorov-Smirnov goodness-of-fit p-value, notes the GPD moment-finiteness rule (finite moments only of order less than 1/ξ when ξ > 0), and flags the POT independence assumption as an idealization for time-series data with volatility clustering. Honest-discloses the absence of backtest metrics at the wrapper level.
+
+**Caveats (Tier 3, conditional)**:
+- ξ > 0 (heavy tail) - moments of order ≥ 1/ξ are infinite; higher-moment estimates from finite samples are unreliable.
+- 10 ≤ n_exceedances < 30 - above the wrapper's hard minimum but below the reliable-fit rule of thumb; tail-parameter standard errors are wide.
+- Time-indexed input (always-fires on time series) - POT assumes independent exceedances; clustering can produce violation runs that violate this assumption. Consider declustered POT or block-maxima for production risk measurement.
+- Kolmogorov-Smirnov rejects the GPD fit - threshold may be too low; try raising the threshold quantile or inspecting the mean excess function for a stable-linear region.
+

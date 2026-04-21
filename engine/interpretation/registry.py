@@ -132,3 +132,15 @@ from interpretation.specs import dynamic_factor_model as _dfm_spec              
 from interpretation.specs import forecast_reconciliation as _reconciliation_spec      # noqa: F401, E402
 from interpretation.specs import johansen_cointegration as _johansen_spec             # noqa: F401, E402
 from interpretation.specs import transfer_function as _transfer_function_spec         # noqa: F401, E402
+
+# Prompt C6 (4 specs, 4 wrappers):
+# Volatility / Risk remainder — GARCH already registered in Prompt A/B.
+# Inheritance: stochastic_volatility follows garch_model Tier 1;
+# har_rv follows the C2 forecaster Tier 1 with volatility-vs-return
+# unit disclosure. Two NEW Tier 1 shapes:
+# evt_pot_gpd (distribution-fit-with-tail-parameters) and
+# caviar_quantile_dynamics (quantile-forecast-with-backtest).
+from interpretation.specs import evt_pot_gpd as _evt_pot_gpd_spec                     # noqa: F401, E402
+from interpretation.specs import stochastic_volatility as _stochastic_volatility_spec # noqa: F401, E402
+from interpretation.specs import har_rv as _har_rv_spec                               # noqa: F401, E402
+from interpretation.specs import caviar_quantile_dynamics as _caviar_spec             # noqa: F401, E402

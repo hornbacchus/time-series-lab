@@ -784,6 +784,11 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "forecast_reconciliation",
         "johansen_cointegration",
         "transfer_function",
+        # Prompt C6 (4): Volatility / Risk remainder
+        "evt_pot_gpd",
+        "stochastic_volatility",
+        "har_rv",
+        "caviar_quantile_dynamics",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1066,21 +1071,39 @@ class TestT18C4RegistryInventory(unittest.TestCase):
 
 
 class TestT19C5RegistryInventory(unittest.TestCase):
-    """T19 — After Prompt C5 lands, the registry contains exactly the
-    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 + Prompt C4
-    + Prompt C5 specs, totaling 59 techniques (52 baseline + 7
-    Multivariate remainder). Pins the count at the C5 landing moment;
-    later prompts (C6-C7) will relax this into a ">=" check."""
+    """T19 — After Prompt C5 landed, the registry contained at least
+    59 specs (52 baseline + 7 Multivariate remainder). Prompt C6 grows
+    the set further; T19 now pins the C5 minimum and T20 pins the
+    exact C6 count."""
 
-    def test_exactly_59_specs_registered(self):
+    def test_at_least_59_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
-        self.assertEqual(
+        self.assertGreaterEqual(
             len(registered), 59,
-            f"Expected exactly 59 registered specs (Prompt A/B: 8 + "
+            f"Expected at least 59 registered specs (Prompt A/B: 8 + "
             f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
             f"C4: 7 + Prompt C5: 7). Got {len(registered)}: "
             f"{sorted(registered)}"
+        )
+
+
+class TestT20C6RegistryInventory(unittest.TestCase):
+    """T20 — After Prompt C6 lands, the registry contains exactly the
+    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 + Prompt C4
+    + Prompt C5 + Prompt C6 specs, totaling 63 techniques (59 baseline
+    + 4 Volatility / Risk remainder). Pins the count at the C6 landing
+    moment; Prompt C7 will relax this into a ">=" check."""
+
+    def test_exactly_63_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertEqual(
+            len(registered), 63,
+            f"Expected exactly 63 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
+            f"C4: 7 + Prompt C5: 7 + Prompt C6: 4). Got "
+            f"{len(registered)}: {sorted(registered)}"
         )
 
 
@@ -1185,7 +1208,12 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "damped_trend": False,
         "beta": 0.1,
         "gamma": 0.1,
-        "phi": None,
+        # C6: phi was previously None (safe for ETS/HW via None guard).
+        # Now set to 0.9 for SV (persistence parameter); ETS/HW still
+        # tolerate via the same None guard path since the check is
+        # ``if phi is not None``, which renders "damping φ=0.900" under
+        # T14 minimal input — harmless for the no-raise invariant.
+        "phi": 0.9,
         "deseasonalized": True,
         "method": "croston",
         "forecast_mean_per_period": 1.0,
@@ -1365,6 +1393,61 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "long_run_multiplier": 0.3,
         "peak_lag": 1,
         "peak_lag_weight": 0.4,
+        # Prompt C6 Volatility / Risk remainder fields
+        # evt_pot_gpd
+        "xi": 0.25,
+        "sigma": 1.0,
+        "threshold": 2.0,
+        "threshold_quantile": 0.975,
+        "n_exceedances": 50,
+        "exceedance_rate": 0.025,
+        "tail": "lower",
+        "ks_stat": 0.05,
+        "ks_pval": 0.5,
+        "confidence_levels": [0.95, 0.99, 0.999],
+        "var_values": [1.5, 3.0, 6.0],
+        "es_values": [2.0, 4.0, 8.0],
+        "is_time_series_input": True,
+        "exceedances_below_30": False,
+        # stochastic_volatility (phi already above; mu already above
+        # from markov_switching shared key — compatible semantically
+        # with SV as log-variance level, both are numeric)
+        "sigma_eta": 0.2,
+        "neg_loglik": 3000.0,
+        "filtered_vol_min": 0.1,
+        "filtered_vol_max": 5.0,
+        "smoothed_vol_min": 0.15,
+        "smoothed_vol_max": 4.5,
+        "input_kurtosis": 10.0,
+        "unconditional_log_vol_std": 0.5,
+        "innovation_distribution": "Gaussian",
+        # har_rv
+        "use_log": False,
+        "beta_d": 0.2,
+        "beta_w": 0.4,
+        "beta_m": 0.1,
+        "persistence_sum": 0.7,
+        "R2": 0.25,
+        "R2_adj": 0.24,
+        # caviar_quantile_dynamics (theta already present with
+        # CAViaR-compatible numeric semantics; quantile_theta is our
+        # alias alternative)
+        "specification": "SAV",
+        "parameter_names": ["beta_0", "beta_1", "beta_2"],
+        "parameters": [0.02, 0.8, -0.4],
+        "quantile_loss": 0.1,
+        "n_violations": 50,
+        "expected_violations": 50.0,
+        "violation_ratio": 1.0,
+        "kupiec_stat": 0.01,
+        "kupiec_pval": 0.9,
+        "christoffersen_stat": 1.0,
+        "christoffersen_pval": 0.3,
+        "dq_stat": 5.0,
+        "dq_pval": 0.4,
+        "distribution_free": True,
+        "quantile_theta": 0.05,
+        "theta": 0.05,  # CAViaR quantile level; no existing collision
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1452,6 +1535,15 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # Uppercase state-variable subscript cited by
         # transfer_function's Box-Jenkins equation:
         "Y_t",
+        # (c5) Prompt C6 — programmatic parameter names and
+        # math-notation subscripts cited in Volatility/Risk specs:
+        # har_rv Tier 2/3 cite ``use_log`` as the wrapper's user-
+        # facing param name (same category as changepoint_prior_scale
+        # / seasonality_prior_scale etc. from Prompt C2 Prophet);
+        # stochastic_volatility's SV log-variance equation cites
+        # ``h_t`` as the latent AR(1) state variable subscript (same
+        # category as y_t / x_t etc. from the Prompt A allowlist).
+        "use_log", "h_t",
         # (d) test-fixture identifier used by TestT14's minimal-input
         # probe — not a programmatic leak from production code:
         "test_series",

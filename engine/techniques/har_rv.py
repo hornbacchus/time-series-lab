@@ -310,43 +310,142 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C6) ──────────────────────────
+        # Decision D2: rolling-22-period mean RV baseline for the
+        # forecaster-family Tier 1 baseline-comparison clause. Computed
+        # on the same aligned index as y (the dependent variable after
+        # lag warmup). Fit RMSE is on RV scale (sqrt of mean squared
+        # residuals).
+        try:
+            _fit_rmse = float(np.sqrt(np.mean(resid ** 2)))
+        except Exception:
+            _fit_rmse = None
+
+        # Rolling-22 mean RV as naive baseline. For each aligned-y
+        # index, the naive forecast is mean(rv[t-22:t]).
+        try:
+            baseline_forecasts = np.zeros(T)
+            for t_idx in range(T):
+                t = start + t_idx
+                baseline_forecasts[t_idx] = np.mean(rv[t - 22:t]) if t >= 22 else np.mean(rv[:t + 1])
+            _baseline_rmse = float(np.sqrt(np.mean((y - baseline_forecasts) ** 2)))
+        except Exception:
+            _baseline_rmse = None
+        _baseline_label = "rolling-22-period mean RV"
+
+        # 1-step-ahead forecast from last fitted tuple, scaled back
+        # if use_log=True for comparability to raw RV.
+        try:
+            _last_daily = float(np.mean(rv[-daily_lag:]))
+            _last_weekly = float(np.mean(rv[-weekly_lag:]))
+            _last_monthly = float(np.mean(rv[-monthly_lag:]))
+            _forecast_next = float(
+                beta[0] + beta[1] * _last_daily + beta[2] * _last_weekly + beta[3] * _last_monthly
+            )
+            if use_log:
+                _forecast_end_value = float(np.exp(_forecast_next))
+                _last_observed_value = float(np.exp(rv[-1]))
+            else:
+                _forecast_end_value = _forecast_next
+                _last_observed_value = float(rv[-1])
+        except Exception:
+            _forecast_end_value = None
+            _last_observed_value = None
+
+        # Series-level stats for render_horizon_trend_clause 4-rule
+        # fallback (reused from C2 forecaster helpers).
+        try:
+            _series_mean = float(np.mean(rv))
+            _series_std = float(np.std(rv, ddof=1)) if len(rv) > 1 else None
+        except Exception:
+            _series_mean = None
+            _series_std = None
+
+        # Ljung-Box p at lag 10 (already computed when residual_diag
+        # enabled; re-compute here for interp consistency).
+        _lb10 = None
+        try:
+            from statsmodels.stats.diagnostic import acorr_ljungbox
+            lb_result = acorr_ljungbox(resid, lags=[10], return_df=True)
+            _lb10 = float(lb_result["lb_pvalue"].iloc[0])
+        except Exception:
+            _lb10 = None
+
+        # Jarque-Bera p for D19 residual-non-normality check for
+        # log-HAR recommendation.
+        _jb_p = None
+        try:
+            from scipy import stats as _ss
+            _, _jb_p = _ss.jarque_bera(resid)
+            _jb_p = float(_jb_p)
+        except Exception:
+            _jb_p = None
+
+        # Persistence sum for Tier 2 commentary.
+        try:
+            _persistence_sum = float(beta[1] + beta[2] + beta[3])
+        except Exception:
+            _persistence_sum = None
+
+        audit = {
+            "model": model_label,
+            "use_log": use_log,
+            "daily_lag": daily_lag,
+            "weekly_lag": weekly_lag,
+            "monthly_lag": monthly_lag,
+            "h_ahead": h_ahead,
+            "beta_0": round(float(beta[0]), 6),
+            "beta_d": round(float(beta[1]), 6),
+            "beta_w": round(float(beta[2]), 6),
+            "beta_m": round(float(beta[3]), 6),
+            "persistence_sum": round(_persistence_sum, 4) if _persistence_sum is not None else None,
+            "R2": round(R2, 6),
+            "R2_adj": round(R2_adj, 6),
+            "aic": round(aic, 2),
+            "bic": round(bic, 2),
+            "n_obs": T,
+            "bootstrap_samples": cfg["bootstrap_samples"],
+            "fit_rmse": round(_fit_rmse, 6) if _fit_rmse is not None else None,
+            "baseline_rmse": round(_baseline_rmse, 6) if _baseline_rmse is not None else None,
+            "baseline_label": _baseline_label,
+            "forecast_end_value": round(_forecast_end_value, 6) if _forecast_end_value is not None else None,
+            "last_observed_value": round(_last_observed_value, 6) if _last_observed_value is not None else None,
+            "series_mean": round(_series_mean, 6) if _series_mean is not None else None,
+            "series_std": round(_series_std, 6) if _series_std is not None else None,
+            "ljung_box_lag10_pvalue": round(_lb10, 6) if _lb10 is not None else None,
+            "jarque_bera_pvalue": round(_jb_p, 6) if _jb_p is not None else None,
+            "series_name": name,
+            **format_significance_disclosure(
+                test_name=(
+                    "HAR-RV OLS t-tests on daily/weekly/monthly lag "
+                    "coefficients"
+                ),
+                critical_value_formula=(
+                    "p = 2·(1 - t.cdf(|t_stat|, T-k)). Standard OLS "
+                    "standard errors assume iid homoskedastic residuals; "
+                    "NOT AC-aware. For realized-volatility data with "
+                    "persistence, consider HAC/Newey-West or a block "
+                    "bootstrap of the beta estimates."
+                ),
+                ac_corrected=False,
+            ),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("har_rv", dict(audit))
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=summary,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "model": model_label,
-                "daily_lag": daily_lag,
-                "weekly_lag": weekly_lag,
-                "monthly_lag": monthly_lag,
-                "h_ahead": h_ahead,
-                "beta_0": round(float(beta[0]), 6),
-                "beta_d": round(float(beta[1]), 6),
-                "beta_w": round(float(beta[2]), 6),
-                "beta_m": round(float(beta[3]), 6),
-                "R2": round(R2, 6),
-                "R2_adj": round(R2_adj, 6),
-                "aic": round(aic, 2),
-                "bic": round(bic, 2),
-                "n_obs": T,
-                "bootstrap_samples": cfg["bootstrap_samples"],
-                **format_significance_disclosure(
-                    test_name=(
-                        "HAR-RV OLS t-tests on daily/weekly/monthly lag "
-                        "coefficients"
-                    ),
-                    critical_value_formula=(
-                        "p = 2·(1 - t.cdf(|t_stat|, T-k)). Standard OLS "
-                        "standard errors assume iid homoskedastic residuals; "
-                        "NOT AC-aware. For realized-volatility data with "
-                        "persistence, consider HAC/Newey-West or a block "
-                        "bootstrap of the beta estimates."
-                    ),
-                    ac_corrected=False,
-                ),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:
