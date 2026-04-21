@@ -279,6 +279,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C3: minimal fields for the particle_filter spec
+        # (SMC-centric Tier 1 per D4 — no naive-baseline or
+        # horizon_trend_pct rendering, but expose mean/std for
+        # audit consistency).
+        series_mean = float(np.nanmean(values)) if len(values) > 0 else 0.0
+        series_std = float(np.nanstd(values, ddof=1)) if len(values) > 1 else 0.0
+
         audit = {
             "model": model_type,
             "n_particles": n_particles,
@@ -290,7 +297,33 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "min_ess": round(min_ess, 0),
             "n_resamples": n_resamples,
             "horizon": horizon,
+            "series_mean": series_mean,
+            "series_std": series_std,
         }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("particle_filter", {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "model_type": str(model_type),
+            "n_particles": int(n_particles),
+            "sigma_state": float(sigma_state),
+            "sigma_obs": float(sigma_obs),
+            "log_likelihood": float(log_likelihood),
+            "fit_rmse": float(rmse) if rmse else None,
+            "avg_ess": float(avg_ess),
+            "min_ess": float(min_ess),
+            "n_resamples": int(n_resamples),
+            "resample_threshold": float(resample_thresh),
+            "series_mean": series_mean,
+            "series_std": series_std,
+        })
 
         return make_response(
             ctx,
@@ -298,6 +331,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

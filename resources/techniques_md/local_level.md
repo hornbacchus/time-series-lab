@@ -60,3 +60,15 @@ where `v_t = y_t - mu_t|t-1` and `S_t = P_t|t-1 + sigma_epsilon^2`.
 **Smoothed estimates**: The Kalman smoother applied to this model produces `mu_t|T`, which uses both past and future observations. The smoothed level is less variable than the filtered level and provides the best retrospective signal extraction.
 
 **Diagnostic checking**: Examine the standardized innovations `v_t / sqrt(S_t)` for normality, independence (no autocorrelation), and homoskedasticity. Significant autocorrelation suggests the model needs additional components (trend or seasonal).
+
+## Interpretation
+
+local_level runs emit a two-tier Interpretation block framed around the signal-to-noise ratio q = sigma^2_eta / sigma^2_epsilon.
+
+**Plain-Language Finding (Tier 1)** - fit RMSE vs last-value naive baseline with percentage delta, end-of-horizon trend clause, signal-to-noise ratio q with adjective band (very low / low / moderate / high / very high) and its consequence sentence. The forecast is the smoothed final level extended flat; local_level has no drift component.
+
+**Technical Interpretation (Tier 2)** - state-space equations y_t = mu_t + epsilon_t, mu_t = mu_{t-1} + eta_t, the two variance components sigma^2_epsilon and sigma^2_eta, AIC / BIC / log-likelihood, smoothed final level. Note on smoother-vs-filter state (wrapper uses the retrospective smoother).
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= last-value naive baseline - state-space model does not beat naive; a constant-forecast baseline is competitive.
+- Residual normality rejection (JB p < 0.05) - prediction intervals may be mis-calibrated.

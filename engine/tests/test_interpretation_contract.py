@@ -761,6 +761,13 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "theta",
         "intermittent_demand",
         "prophet",
+        # Prompt C3 (4): State Space family
+        # (kalman_filter, kalman_smoother deferred — see registry.py
+        # topology comment and follow-up backlog)
+        "local_level",
+        "local_linear_trend",
+        "structural_ts",
+        "particle_filter",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -992,20 +999,38 @@ class TestT13C1RegistryInventory(unittest.TestCase):
 
 
 class TestT16C2RegistryInventory(unittest.TestCase):
-    """T16 — After Prompt C2 lands, the registry contains exactly the
+    """T16 — After Prompt C2 landed, the registry contained the
     Prompt A + Prompt B + Prompt C1 + Prompt C2 specs, totaling 41
-    techniques (34 baseline + 7 forecasting classical). Pins the count
-    at the C2 landing moment; later prompts (C3-C7) will relax this
-    into a ">=" check as they grow the set further."""
+    techniques. C3 extends the registry; T16 now pins the C2
+    minimum so regressions against the C2 set get caught immediately.
+    T17 pins the exact C3 count."""
 
-    def test_exactly_41_specs_registered(self):
+    def test_at_least_41_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertGreaterEqual(
+            len(registered), 41,
+            f"Expected at least 41 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7). Got {len(registered)}: "
+            f"{sorted(registered)}"
+        )
+
+
+class TestT17C3RegistryInventory(unittest.TestCase):
+    """T17 — After Prompt C3 lands, the registry contains exactly the
+    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 specs,
+    totaling 45 techniques (41 baseline + 4 State Space). Pins the
+    count at the C3 landing moment; later prompts (C4-C7) will relax
+    this into a ">=" check as they grow the set further."""
+
+    def test_exactly_45_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
         self.assertEqual(
-            len(registered), 41,
-            f"Expected exactly 41 registered specs (Prompt A/B: 8 + "
-            f"Prompt C1: 26 + Prompt C2: 7). Got {len(registered)}: "
-            f"{sorted(registered)}"
+            len(registered), 45,
+            f"Expected exactly 45 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4). Got "
+            f"{len(registered)}: {sorted(registered)}"
         )
 
 
@@ -1129,6 +1154,35 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "r2": 0.9,
         "historical_max": 10.0,
         "interval_width": 0.95,
+        # Prompt C3 State Space fields
+        "q_ratio": 0.5,
+        "q_band_label": "moderate",
+        "smoothed_final_level": 100.0,
+        "smoothed_final_slope": 1.0,
+        "sigma_trend": 0.1,
+        "slope_adaptivity": 0.1,
+        "slope_adaptivity_band": "moderately adaptive",
+        "damped_not_wired": False,
+        "components": ["Level", "Trend"],
+        "variance_decomposition": {
+            "Level": {"variance": 10.0, "pct_of_total": 80.0},
+            "Trend": {"variance": 1.0, "pct_of_total": 10.0},
+            "Residual": {"variance": 0.5, "pct_of_total": 10.0},
+        },
+        "dominant_component": "Level",
+        "level_type": "local level",
+        "cycle_enabled": False,
+        "ar_order": 0,
+        "durbin_watson": 2.0,
+        "model_type": "local_level",
+        "n_particles": 500,
+        "sigma_state": 0.5,
+        "sigma_obs": 0.5,
+        "avg_ess": 250.0,
+        "min_ess": 50.0,
+        "n_resamples": 100,
+        "resample_threshold": 0.5,
+        "log_likelihood": -100.0,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1189,10 +1243,16 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         "max_p", "max_q", "max_d", "max_P", "max_Q", "max_D",
         "changepoint_prior_scale", "seasonality_prior_scale",
         "country_holidays", "initial_trend", "initial_level",
+        "n_particles",
         # (c) technique_ids cited by name when a spec references a
         # companion technique (e.g., arima's Tier 2 mentions that
         # auto_arima would surface alternative orders):
         "auto_arima",
+        # (c2) Prompt C3 — particle_filter model_type built-ins cited
+        # in Tier 2 honest-disclosure prose (user-visible library API
+        # surface that users type as param values):
+        "local_level", "Local_level", "local_level_sv",
+        "nonlinear_growth", "random_walk_sv",
         # (d) test-fixture identifier used by TestT14's minimal-input
         # probe — not a programmatic leak from production code:
         "test_series",

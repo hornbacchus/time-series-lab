@@ -58,3 +58,16 @@ For each time step t = 1, 2, ...:
 **Computational cost**: O(N) per time step (times the cost of simulating one state transition and evaluating one likelihood). Typically N = 100 to 10,000 particles depending on the state dimension and model complexity.
 
 **Rao-Blackwellization**: If part of the state is conditionally linear-Gaussian, use a Kalman filter for that part and particles only for the nonlinear part. This dramatically reduces the number of particles needed.
+
+## Interpretation
+
+particle_filter runs emit a two-tier Interpretation block with a distinct SMC-centric Tier 1 - framed around particle count, ESS utilization, and resampling diagnostics rather than forecast-trajectory or variance-component citations (which the Kalman-family state-space wrappers use).
+
+**Plain-Language Finding (Tier 1)** - model type (local_level / local_level_sv / nonlinear_growth / random_walk_sv), particle count, average effective sample size with adjective band (degenerate / moderate / efficient), resampling event rate, log-likelihood approximation. When minimum ESS drops below 10, Tier 1 flags the weight-collapse tail behavior.
+
+**Technical Interpretation (Tier 2)** - SIR bootstrap algorithm, systematic resampling threshold, per-step sigma_state and sigma_obs, stochastic nature of the log-likelihood approximation, and disclosure that user-supplied nonlinear transitions are not injected (four built-in model types only). Forecast is a posterior-predictive sample path; 90% credible bands are empirical Q5/Q95 quantiles.
+
+**Caveats (Tier 3, conditional)**:
+- ESS degeneracy (min_ess < 10) - SMC approximation is unreliable for the affected steps.
+- Average ESS/N ratio in 'degenerate' band (< 0.1) - filter is persistently weight-degenerate.
+- High resampling rate (> 50% of steps) - the filter spends most of its budget on resampling rather than sequential update.

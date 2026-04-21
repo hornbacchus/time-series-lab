@@ -52,7 +52,12 @@ the right formatter at the call site:
     :func:`format_scale_aware` — it adapts decimal precision to
     the value's order of magnitude and avoids the misleading-
     precision failure mode (e.g., ``"AIC 17043.245"`` vs the
-    readable ``"AIC 17043"``).
+    readable ``"AIC 17043"``). For very-near-zero values
+    (``|v| < 1e-3``), ``format_scale_aware`` switches to
+    scientific notation (``"1.2e-10"``) to preserve the
+    magnitude signal that a ``.4f`` rendering would collapse
+    to ``"0.0000"``. This matters for State Space variance
+    components that optimize to the floor.
   - **When in doubt, use format_scale_aware.** It reads at
     appropriate precision across scales and is the safe default
     for new specs. The pinned constants are for values whose
@@ -477,7 +482,16 @@ def format_scale_aware(value, sub_unit_specifier: str = "{:.4f}") -> str:
          100 <= |v| < 1000 : "{:.1f}"  (e.g. "162.9")
           10 <= |v| < 100  : "{:.2f}"  (e.g. "21.24")
            1 <= |v| < 10   : "{:.3f}"  (e.g. "1.476")
-          |v| < 1          : sub_unit_specifier (default "{:.4f}")
+          1e-3 <= |v| < 1  : sub_unit_specifier (default "{:.4f}")
+          |v| < 1e-3       : "{:.1e}"  (scientific notation, e.g. "1.2e-10")
+
+    The sub-``1e-3`` branch catches near-zero values where ``".4f"``
+    would render as ``"0.0000"`` and lose all magnitude signal
+    (e.g., a local-linear-trend model's slope variance at the
+    optimizer floor — ``σ²_ζ = 1.2e-10`` must render as
+    ``"1.2e-10"``, not ``"0.0000"``). ``abs(v)`` is used for the
+    threshold check so negative near-zero values route through
+    the same branch.
 
     The ``sub_unit_specifier`` argument lets callers pin higher
     precision for sub-unit magnitudes whose natural resolution is
@@ -514,7 +528,11 @@ def format_scale_aware(value, sub_unit_specifier: str = "{:.4f}") -> str:
         return f"{v:.2f}"
     if av >= 1:
         return f"{v:.3f}"
-    return sub_unit_specifier.format(v)
+    if av >= 1e-3:
+        return sub_unit_specifier.format(v)
+    # Near-zero: scientific notation preserves the magnitude signal
+    # that a .4f rendering would lose (0.0000).
+    return f"{v:.1e}"
 
 
 def format_stat_technical(

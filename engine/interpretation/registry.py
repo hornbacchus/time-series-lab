@@ -99,3 +99,11 @@ from interpretation.specs import holt_winters as _holt_winters_spec             
 from interpretation.specs import theta as _theta_spec                                 # noqa: F401, E402
 from interpretation.specs import intermittent_demand as _intermittent_spec            # noqa: F401, E402
 from interpretation.specs import prophet as _prophet_spec                             # noqa: F401, E402
+
+# Prompt C3 (4 specs, 4 wrappers):
+# State Space family — kalman_filter and kalman_smoother deferred to
+# a separate wrapper-creation prompt per Phase 1 topology discovery.
+from interpretation.specs import local_level as _local_level_spec                     # noqa: F401, E402
+from interpretation.specs import local_linear_trend as _local_linear_trend_spec       # noqa: F401, E402
+from interpretation.specs import structural_ts as _structural_ts_spec                 # noqa: F401, E402
+from interpretation.specs import particle_filter as _particle_filter_spec             # noqa: F401, E402

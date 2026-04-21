@@ -62,3 +62,19 @@ which is exactly Holt's linear method with smoothing parameters `alpha` and `bet
 **Forecasting**: The h-step-ahead forecast is `y_hat_{T+h|T} = mu_T|T + h * nu_T|T`. The prediction variance grows cubically with h: `Var(y_{T+h} - y_hat_{T+h|T}) = sigma_epsilon^2 + h * sigma_eta^2 + h^2 * sigma_zeta^2 / 3 + higher order terms`. This widening reflects the increasing uncertainty about both the level and the slope at distant horizons.
 
 **Parameter estimation**: Three variance parameters (sigma_epsilon^2, sigma_eta^2, sigma_zeta^2) are estimated by maximizing the log-likelihood from the Kalman filter. Initial state can be estimated or set using diffuse initialization.
+
+## Interpretation
+
+local_linear_trend runs emit a two-tier Interpretation block framed around the three variance components and the slope-adaptivity ratio sigma^2_zeta / sigma^2_eta.
+
+**Plain-Language Finding (Tier 1)** - fit RMSE vs naive baseline, end-of-horizon trend clause, slope-adaptivity adjective band (near-linear / moderately adaptive / highly adaptive) with its consequence sentence and smoothed final slope.
+
+**Technical Interpretation (Tier 2)** - state-space equations with level and slope disturbances, three variance components sigma^2_epsilon / sigma^2_eta / sigma^2_zeta, AIC / RMSE, smoothed final level and slope. Long-horizon forecast variance amplifies cubically with h under the integrated-slope structure.
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= naive baseline.
+- Slope variance sigma^2_zeta at optimizer floor - the trend is effectively a fixed (non-stochastic) slope; the fitted model behaves as local_level with linear drift.
+- Residual normality rejection (JB p < 0.05).
+- Residual Ljung-Box rejection - the model leaves structure in the residuals.
+
+The wrapper accepts a `damped` parameter that is not currently wired into the fit; Tier 2 honest-disclosure flags this when the parameter was supplied.

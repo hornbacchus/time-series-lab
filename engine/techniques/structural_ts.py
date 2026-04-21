@@ -374,6 +374,55 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C3 additions: variance_decomposition dict, naive
+        # baseline, trend-extrapolation fields, residual diagnostic
+        # p-values, Durbin-Watson.
+        variance_decomposition = {}
+        for row in var_decomp_rows:
+            comp_name, v_val, v_pct = row[0], float(row[1]), float(row[2])
+            variance_decomposition[comp_name] = {
+                "variance": v_val,
+                "pct_of_total": v_pct,
+            }
+        # Dominant component by share (exclude Residual from dominance check)
+        dominant_component = None
+        dom_pct = -1.0
+        for cname, vd in variance_decomposition.items():
+            if cname == "Residual":
+                continue
+            if vd["pct_of_total"] > dom_pct:
+                dom_pct = vd["pct_of_total"]
+                dominant_component = cname
+
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            filled, frequency=ctx.frequency, horizon=horizon, mode="auto",
+        )
+        last_observed_value = float(filled[-1]) if len(filled) > 0 else 0.0
+        forecast_end_value = float(fc_mean[-1]) if len(fc_mean) > 0 else 0.0
+        series_mean = float(np.nanmean(filled)) if len(filled) > 0 else 0.0
+        series_std = float(np.nanstd(filled, ddof=1)) if len(filled) > 1 else 0.0
+        jb_p_out = None
+        lb10_p_out = None
+        dw_out = None
+        try:
+            from scipy import stats as _sp_stats
+            jb_p_out = float(_sp_stats.jarque_bera(valid_resid).pvalue) if len(valid_resid) > 10 else None
+        except Exception:
+            pass
+        try:
+            from statsmodels.stats.diagnostic import acorr_ljungbox
+            if len(valid_resid) >= 11:
+                _lb = acorr_ljungbox(valid_resid, lags=[10], return_df=True)
+                lb10_p_out = float(_lb["lb_pvalue"].values[0])
+        except Exception:
+            pass
+        try:
+            if len(valid_resid) > 1 and np.sum(valid_resid ** 2) > 0:
+                dw_out = float(np.sum(np.diff(valid_resid) ** 2) / np.sum(valid_resid ** 2))
+        except Exception:
+            pass
+
         audit = {
             "model": f"structural_ts_{level_type}",
             "level_type": level_type,
@@ -386,7 +435,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "log_likelihood": round(float(fit.llf), 2),
             "rmse": round(rmse, 4) if rmse else None,
             "components": component_names,
+            "variance_decomposition": variance_decomposition,
+            "dominant_component": dominant_component,
             "horizon": horizon,
+            "baseline_rmse": round(float(baseline["rmse"]), 4),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "jarque_bera_pvalue": round(jb_p_out, 6) if jb_p_out is not None else None,
+            "ljung_box_lag10_pvalue": round(lb10_p_out, 6) if lb10_p_out is not None else None,
+            "durbin_watson": round(dw_out, 4) if dw_out is not None else None,
             **format_significance_disclosure(
                 test_name=(
                     "UCM MLE parameter t-tests + Ljung-Box residual diagnostic"
@@ -400,12 +458,45 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ),
         }
 
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("structural_ts", {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "components": list(component_names),
+            "variance_decomposition": variance_decomposition,
+            "dominant_component": dominant_component,
+            "level_type": level_type,
+            "seasonal_period": seasonal_period,
+            "cycle_enabled": bool(include_cycle),
+            "ar_order": int(ar_order),
+            "aic": float(fit.aic),
+            "bic": float(fit.bic),
+            "log_likelihood": float(fit.llf),
+            "fit_rmse": float(rmse) if rmse else None,
+            "baseline_rmse": float(baseline["rmse"]),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "series_mean": series_mean,
+            "series_std": series_std,
+            "jarque_bera_pvalue": jb_p_out,
+            "ljung_box_lag10_pvalue": lb10_p_out,
+            "durbin_watson": dw_out,
+        })
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

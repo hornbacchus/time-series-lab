@@ -161,8 +161,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
         )
 
         # ---- Model summary ----
+        # Prompt C3 fix: same statsmodels param-name extraction bug as
+        # local_level.py — fit.params is an ndarray, not a Series, so
+        # ``params.index`` fails. Use fit.param_names as the authoritative
+        # source when available.
         params = fit.params
-        param_names = params.index.tolist() if hasattr(params, 'index') else []
+        param_names = list(getattr(fit, "param_names", None) or (
+            params.index.tolist() if hasattr(params, "index") else []
+        ))
 
         sigma_obs = sigma_level = sigma_trend = None
         for i, pn in enumerate(param_names):
@@ -254,6 +260,52 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C3 additions: slope_adaptivity + naive baseline +
+        # trend-extrapolation fields + residual diagnostic p-values.
+        slope_adaptivity = (
+            float(sigma_trend) / float(sigma_level)
+            if (sigma_trend is not None and sigma_level is not None and float(sigma_level) > 0)
+            else None
+        )
+        def _slope_band(ratio):
+            if ratio is None:
+                return None
+            r = float(ratio)
+            if r < 0.05:
+                return "near-linear"
+            if r < 1:
+                return "moderately adaptive"
+            return "highly adaptive"
+        slope_adaptivity_band = _slope_band(slope_adaptivity)
+
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            filled, frequency=ctx.frequency, horizon=horizon, mode="auto",
+        )
+        last_observed_value = float(filled[-1]) if len(filled) > 0 else 0.0
+        forecast_end_value = float(np.asarray(fc_mean)[-1]) if len(fc_mean) > 0 else 0.0
+        series_mean = float(np.nanmean(filled)) if len(filled) > 0 else 0.0
+        series_std = float(np.nanstd(filled, ddof=1)) if len(filled) > 1 else 0.0
+        # Residual diagnostic p-values for Tier 3.
+        jb_p_out = None
+        lb10_p_out = None
+        try:
+            from scipy import stats as _sp_stats
+            jb_p_out = float(_sp_stats.jarque_bera(valid_resid).pvalue) if len(valid_resid) > 10 else None
+        except Exception:
+            pass
+        try:
+            from statsmodels.stats.diagnostic import acorr_ljungbox
+            if len(valid_resid) >= 11:
+                _lb = acorr_ljungbox(valid_resid, lags=[10], return_df=True)
+                lb10_p_out = float(_lb["lb_pvalue"].values[0])
+        except Exception:
+            pass
+
+        # Smoothed final level (in addition to final_slope, already
+        # computed above).
+        smoothed_final_level = float(level[-1]) if len(level) > 0 else 0.0
+
         audit = {
             "model": "local_linear_trend",
             "damped": damped,
@@ -266,8 +318,53 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "sigma_obs": round(sigma_obs, 6) if sigma_obs else None,
             "sigma_level": round(sigma_level, 6) if sigma_level else None,
             "sigma_trend": round(sigma_trend, 6) if sigma_trend else None,
+            "slope_adaptivity": round(slope_adaptivity, 8) if slope_adaptivity is not None else None,
+            "slope_adaptivity_band": slope_adaptivity_band,
             "horizon": horizon,
+            "baseline_rmse": round(float(baseline["rmse"]), 4),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "smoothed_final_level": smoothed_final_level,
+            "jarque_bera_pvalue": round(jb_p_out, 6) if jb_p_out is not None else None,
+            "ljung_box_lag10_pvalue": round(lb10_p_out, 6) if lb10_p_out is not None else None,
         }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("local_linear_trend", {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "sigma_obs": sigma_obs,
+            "sigma_level": sigma_level,
+            "sigma_trend": sigma_trend,
+            "slope_adaptivity": slope_adaptivity,
+            "slope_adaptivity_band": slope_adaptivity_band,
+            "aic": float(fit.aic),
+            "bic": float(fit.bic),
+            "log_likelihood": float(fit.llf),
+            "fit_rmse": float(rmse) if rmse else None,
+            "baseline_rmse": float(baseline["rmse"]),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "smoothed_final_level": smoothed_final_level,
+            "smoothed_final_slope": final_slope,
+            "series_mean": series_mean,
+            "series_std": series_std,
+            "jarque_bera_pvalue": jb_p_out,
+            "ljung_box_lag10_pvalue": lb10_p_out,
+            # D7: honest disclosure of orphan param — only flag when
+            # the user actually passed the ``damped`` param, so the
+            # "damping has no effect on this run" wording isn't
+            # misleading for users who didn't request damping.
+            "damped_not_wired": bool("damped" in ctx.params and ctx.params.get("damped")),
+        })
 
         return make_response(
             ctx,
@@ -275,6 +372,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

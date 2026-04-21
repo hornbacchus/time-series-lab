@@ -68,3 +68,17 @@ where `rho` is the damping factor (0 < rho < 1), `lambda_c` is the cycle frequen
 **Parameter estimation**: The hyperparameters (sigma_epsilon^2, sigma_eta^2, sigma_zeta^2, sigma_omega^2, rho, lambda_c, sigma_kappa^2) are estimated by maximizing the log-likelihood via numerical optimization. Some parameters may be set to zero to simplify the model (e.g., fixed seasonal, deterministic trend).
 
 **Advantages over classical decomposition**: (1) Components can evolve. (2) Missing data is handled automatically. (3) Proper prediction intervals. (4) Model selection via information criteria. (5) Diagnostic tests for model adequacy.
+
+## Interpretation
+
+structural_ts runs emit a two-tier Interpretation block with a single parameterized Tier 1 template that dynamically cites the active components.
+
+**Plain-Language Finding (Tier 1)** - active-components list (level, trend, seasonal, cycle, AR) rendered in prose form, fit RMSE vs seasonal-naive baseline, end-of-horizon trend clause, dominant component by variance share with its percentage.
+
+**Technical Interpretation (Tier 2)** - UCM component-by-component disclosure, per-component variance shares, AIC / BIC / log-likelihood, Durbin-Watson residual autocorrelation diagnostic. When level dominates (> 80%) and trend variance is near-zero, the Tier 2 notes the UCM collapses to a simpler local_level specification with seasonal-plus-cycle refinement.
+
+**Caveats (Tier 3, conditional)**:
+- Fit RMSE >= seasonal-naive baseline.
+- Component variance collapsed (< 1e-8 x max_variance) - names the specific component that collapsed and recommends refitting without it.
+- Residual normality rejection (JB p < 0.05).
+- Residual Ljung-Box rejection - consider enabling additional components (AR, cycle) or extending the seasonal specification.

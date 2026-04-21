@@ -151,9 +151,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
         )
 
         # ---- Model summary ----
-        # Extract variance parameters
+        # Extract variance parameters. Prompt C3 fix: statsmodels
+        # exposes parameter names via ``fit.param_names`` (a list),
+        # not via ``fit.params.index`` (which is only present when
+        # ``params`` is a pandas Series; for UnobservedComponents
+        # ``fit.params`` is a plain numpy array). Prior code tried
+        # ``params.index.tolist()``, fell into the ``[f"param_{i}"]``
+        # fallback, and silently failed to match "irregular" / "level"
+        # substrings — sigma_obs and sigma_level both returned None.
         params = fit.params
-        param_names = params.index.tolist() if hasattr(params, 'index') else [f"param_{i}" for i in range(len(params))]
+        param_names = list(getattr(fit, "param_names", None) or (
+            params.index.tolist() if hasattr(params, "index")
+            else [f"param_{i}" for i in range(len(params))]
+        ))
         sigma_obs = None
         sigma_level = None
         for i, pn in enumerate(param_names):
@@ -241,6 +251,36 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C3: q-band label + naive baseline + trend-extrapolation
+        # fields for the local_level interpretation spec.
+        def _q_band(q):
+            if q is None:
+                return None
+            qf = float(q)
+            if qf < 0.01: return "very low"
+            if qf < 0.1:  return "low"
+            if qf < 1:    return "moderate"
+            if qf < 10:   return "high"
+            return "very high"
+        q_band_label = _q_band(q_ratio)
+
+        from techniques.base import fit_naive_baseline
+        baseline = fit_naive_baseline(
+            filled, frequency=ctx.frequency, horizon=horizon, mode="last",
+        )
+        last_observed_value = float(filled[-1]) if len(filled) > 0 else 0.0
+        forecast_end_value = float(np.asarray(fc_mean)[-1]) if len(fc_mean) > 0 else 0.0
+        series_mean = float(np.nanmean(filled)) if len(filled) > 0 else 0.0
+        series_std = float(np.nanstd(filled, ddof=1)) if len(filled) > 1 else 0.0
+        # Extract JB p and final smoothed level for Tier 2 / Tier 3.
+        jb_p_out = None
+        try:
+            from scipy import stats as _sp_stats
+            jb_p_out = float(_sp_stats.jarque_bera(valid_resid).pvalue) if len(valid_resid) > 10 else None
+        except Exception:
+            pass
+        smoothed_final_level = float(fit.level.smoothed[-1]) if hasattr(fit, "level") else None
+
         audit = {
             "model": "local_level",
             "aic": round(float(fit.aic), 2),
@@ -251,8 +291,43 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "sigma_obs": round(sigma_obs, 6) if sigma_obs else None,
             "sigma_level": round(sigma_level, 6) if sigma_level else None,
             "signal_to_noise": round(q_ratio, 4) if q_ratio else None,
+            "q_band_label": q_band_label,
             "horizon": horizon,
+            "baseline_rmse": round(float(baseline["rmse"]), 4),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "smoothed_final_level": smoothed_final_level,
+            "jarque_bera_pvalue": round(jb_p_out, 6) if jb_p_out is not None else None,
         }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+
+        interp = build_interpretation("local_level", {
+            "series_name": name,
+            "n_obs": int(n),
+            "horizon": int(horizon),
+            "sigma_obs": sigma_obs,
+            "sigma_level": sigma_level,
+            "q_ratio": q_ratio,
+            "q_band_label": q_band_label,
+            "aic": float(fit.aic),
+            "bic": float(fit.bic),
+            "log_likelihood": float(fit.llf),
+            "fit_rmse": float(rmse) if rmse else None,
+            "baseline_rmse": float(baseline["rmse"]),
+            "baseline_label": baseline["label"],
+            "last_observed_value": last_observed_value,
+            "forecast_end_value": forecast_end_value,
+            "smoothed_final_level": smoothed_final_level,
+            "series_mean": series_mean,
+            "series_std": series_std,
+            "jarque_bera_pvalue": jb_p_out,
+        })
 
         return make_response(
             ctx,
@@ -260,6 +335,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 
