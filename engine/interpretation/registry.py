@@ -107,3 +107,13 @@ from interpretation.specs import local_level as _local_level_spec               
 from interpretation.specs import local_linear_trend as _local_linear_trend_spec       # noqa: F401, E402
 from interpretation.specs import structural_ts as _structural_ts_spec                 # noqa: F401, E402
 from interpretation.specs import particle_filter as _particle_filter_spec             # noqa: F401, E402
+
+# Prompt C4 (7 specs, 7 wrappers):
+# Frequency Domain family — 4 distinct Tier 1 shapes across 7 specs.
+from interpretation.specs import fft_spectrum as _fft_spectrum_spec                   # noqa: F401, E402
+from interpretation.specs import periodogram_spectral_density as _periodogram_spec    # noqa: F401, E402
+from interpretation.specs import lomb_scargle as _lomb_scargle_spec                   # noqa: F401, E402
+from interpretation.specs import wavelet_transform as _wavelet_transform_spec         # noqa: F401, E402
+from interpretation.specs import wavelet_coherence as _wavelet_coherence_spec         # noqa: F401, E402
+from interpretation.specs import ssa_model as _ssa_model_spec                         # noqa: F401, E402
+from interpretation.specs import emd_hht as _emd_hht_spec                             # noqa: F401, E402

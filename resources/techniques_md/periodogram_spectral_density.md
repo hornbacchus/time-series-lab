@@ -69,3 +69,15 @@ The tapers are optimally concentrated in a frequency band of width W = (K+1)/(N*
 provides a (1-alpha) confidence interval on the log scale. Intervals are wide for small nu and narrow for large nu.
 
 **Bandwidth**: The spectral window bandwidth `B = sum w_j^2 / (sum w_j)^2 * (1/dt)` determines the effective frequency resolution of the smoothed estimate. Wider bandwidth means more smoothing (lower variance, less resolution).
+
+## Interpretation
+
+periodogram_spectral_density runs emit a two-tier Interpretation block. Shares Tier 1 shape with fft_spectrum but differs in Tier 2 (estimator-variant disclosure).
+
+**Plain-Language Finding (Tier 1)** - dominant period and frequency, power share with adjective band, spectral entropy with distribution descriptor (highly concentrated / moderate / broadband / nearly flat), Nyquist limit, frequency resolution, estimator variant.
+
+**Technical Interpretation (Tier 2)** - raw periodogram via scipy.signal.periodogram (not Welch, not multitaper), window and detrending choice, spectral centroid / bandwidth / 95% edge, variance-vs-bias trade-off honest disclosure (raw periodogram is unbiased but inconsistent), Welch / multitaper alternatives for long series.
+
+**Caveats (Tier 3, conditional)**:
+- Dominant peak weak concentration.
+- Raw periodogram on long series - consider Welch or multitaper for variance reduction.

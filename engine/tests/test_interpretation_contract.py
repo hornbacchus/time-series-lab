@@ -768,6 +768,14 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "local_linear_trend",
         "structural_ts",
         "particle_filter",
+        # Prompt C4 (7): Frequency Domain family
+        "fft_spectrum",
+        "periodogram_spectral_density",
+        "lomb_scargle",
+        "wavelet_transform",
+        "wavelet_coherence",
+        "ssa_model",
+        "emd_hht",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1017,20 +1025,37 @@ class TestT16C2RegistryInventory(unittest.TestCase):
 
 
 class TestT17C3RegistryInventory(unittest.TestCase):
-    """T17 — After Prompt C3 lands, the registry contains exactly the
-    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 specs,
-    totaling 45 techniques (41 baseline + 4 State Space). Pins the
-    count at the C3 landing moment; later prompts (C4-C7) will relax
-    this into a ">=" check as they grow the set further."""
+    """T17 — After Prompt C3 landed, the registry contained at least
+    45 specs (41 + 4 State Space). C4 extends further; T17 now pins
+    the C3 minimum. T18 pins the exact C4 count."""
 
-    def test_exactly_45_specs_registered(self):
+    def test_at_least_45_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertGreaterEqual(
+            len(registered), 45,
+            f"Expected at least 45 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4). Got "
+            f"{len(registered)}: {sorted(registered)}"
+        )
+
+
+class TestT18C4RegistryInventory(unittest.TestCase):
+    """T18 — After Prompt C4 lands, the registry contains exactly the
+    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 + Prompt
+    C4 specs, totaling 52 techniques (45 baseline + 7 Frequency
+    Domain). Pins the count at the C4 landing moment; later prompts
+    (C5-C7) will relax this into a ">=" check as they grow the set
+    further."""
+
+    def test_exactly_52_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
         self.assertEqual(
-            len(registered), 45,
-            f"Expected exactly 45 registered specs (Prompt A/B: 8 + "
-            f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4). Got "
-            f"{len(registered)}: {sorted(registered)}"
+            len(registered), 52,
+            f"Expected exactly 52 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
+            f"C4: 7). Got {len(registered)}: {sorted(registered)}"
         )
 
 
@@ -1183,6 +1208,71 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "n_resamples": 100,
         "resample_threshold": 0.5,
         "log_likelihood": -100.0,
+        # Prompt C4 Frequency Domain fields
+        "series_name_x": "X",
+        "series_name_y": "Y",
+        "dominant_frequency": 0.1,
+        "dominant_period": 10.0,
+        "top_peak_power_pct": 20.0,
+        "top_peaks_power_pct": 50.0,
+        "sampling_frequency": 1.0,
+        "nyquist_frequency": 0.5,
+        "frequency_resolution": 0.01,
+        "total_power": 100.0,
+        "spectral_entropy": 0.5,
+        "spectral_centroid": 0.05,
+        "spectral_bandwidth": 0.1,
+        "spectral_edge_95": 0.2,
+        "estimator_variant": "raw",
+        # NOTE: "window" intentionally omitted from minimal input — it's
+        # read as int by rolling_ccf_lag.py and as string by fft/periodogram
+        # specs. Each spec's default handles absence.
+        "detrend": "linear",
+        "time_span": 100.0,
+        "oversampling": 5,
+        "n_freqs": 500,
+        "fap_method": "baluev",
+        "max_power": 0.2,
+        "fap_at_dominant_peak": 0.05,
+        "sampling_irregularity_cv": 0.0,
+        "wavelet": "db4",
+        "level": 3,
+        "max_level": 4,
+        "mode": "symmetric",
+        "dominant_component": "Approximation (A)",
+        "dominant_energy_pct": 80.0,
+        "filter_length": 8,
+        "detail_band_energies_pct": {"Detail D1": 5.0, "Detail D2": 10.0},
+        "detail_band_periods": {"Detail D1": "2-4 obs", "Detail D2": "4-8 obs"},
+        "dominant_band_period_range": "> 16 obs",
+        "n_scales": 32,
+        "smoothing_width": 5,
+        "global_mean_coherence": 0.4,
+        "max_coherence": 0.9,
+        "best_scale": 10.0,
+        "best_period": 10.0,
+        "best_scale_coherence": 0.6,
+        "best_scale_lag": 2.0,
+        "high_coherence_pct": 25.0,
+        "phase_degrees_at_dominant_scale": 45.0,
+        "direction_verb": "leads",
+        "window_length": 50,
+        "n_components": 10,
+        "n_groups": 5,
+        "explained_variance_pct_1": 70.0,
+        "components_for_95pct": 3,
+        "components_for_99pct": 8,
+        "total_variance": 100.0,
+        "dominant_group_share": 70.0,
+        "second_group_share": 15.0,
+        "backend": "emd",
+        "n_imfs": 3,
+        "max_imfs": 5,
+        "dominant_imf": 1,
+        "dominant_imf_variance_pct": 40.0,
+        "dominant_imf_period": 5.0,
+        "per_imf_periods": [5.0, 10.0, 20.0],
+        "residual_variance_pct": 20.0,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1253,6 +1343,10 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # surface that users type as param values):
         "local_level", "Local_level", "local_level_sv",
         "nonlinear_growth", "random_walk_sv",
+        # (c3) Prompt C4 — cross-technique name references and
+        # cross-spectral math notation:
+        "wavelet_transform", "periodogram_spectral_density",
+        "S_xy", "S_xx", "S_yy",  # cross/auto-spectrum subscripts
         # (d) test-fixture identifier used by TestT14's minimal-input
         # probe — not a programmatic leak from production code:
         "test_series",

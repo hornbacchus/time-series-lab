@@ -291,23 +291,44 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C4: extract FAP at dominant peak for Tier 1 rendering.
+        # top_rows schema: [rank, frequency, period, ls_power, pct, fap_label_or_value]
+        fap_at_peak = None
+        if top_rows:
+            fap_at_peak = top_rows[0][5] if len(top_rows[0]) >= 6 else None
+
+        audit = {
+            "n_obs": n,
+            "time_span": round(float(T_span), 4),
+            "oversampling": oversampling,
+            "n_freqs": n_freqs,
+            "fap_method": cfg["false_alarm_method"],
+            "max_power": round(float(np.max(power)), 6),
+            "dominant_frequency": round(float(top_rows[0][1]), 6) if top_rows else None,
+            "dominant_period": top_rows[0][2] if top_rows else None,
+            "sampling_irregularity_cv": round(float(dt_std), 4),
+            "fap_at_dominant_peak": fap_at_peak,
+        }
+
+        # Prompt C4 interpretation layer wire-in.
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        _interp_dict["series_name"] = name
+        _interp_dict["frequency"] = str(ctx.frequency or "")
+        interp = build_interpretation("lomb_scargle", _interp_dict)
+
         return make_response(
             ctx,
             tables=[top_table, fap_table, stats_table, psd_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "n_obs": n,
-                "time_span": round(float(T_span), 4),
-                "oversampling": oversampling,
-                "n_freqs": n_freqs,
-                "fap_method": cfg["false_alarm_method"],
-                "max_power": round(float(np.max(power)), 6),
-                "dominant_frequency": round(float(top_rows[0][1]), 6) if top_rows else None,
-                "dominant_period": top_rows[0][2] if top_rows else None,
-                "sampling_irregularity_cv": round(float(dt_std), 4),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

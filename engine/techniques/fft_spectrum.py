@@ -235,15 +235,40 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C4 additions: explicit sampling/Nyquist disclosure;
+        # top-peak power share and top-N share for Tier 1 rendering.
+        freq_resolution = float(freqs[1] - freqs[0]) if len(freqs) > 1 else 1.0 / max(n, 1)
+        nyquist_freq = float(np.max(freqs)) if len(freqs) > 0 else 0.5
+        top1_pct = None
+        if len(top_peaks) > 0 and total_power > 0:
+            top1_pct = float(power[top_peaks[0]] / total_power * 100.0)
+
         audit = {
             "detrend": detrend,
             "window": window_type,
             "n_observations": n,
             "n_peaks_reported": len(top_peaks),
+            "sampling_frequency": 1.0,  # cycles/obs normalized
+            "nyquist_frequency": nyquist_freq,
+            "frequency_resolution": freq_resolution,
+            "total_power": round(total_power, 6),
+            "top_peak_power_pct": round(top1_pct, 2) if top1_pct is not None else None,
+            "top_peaks_power_pct": float(top_pct),
         }
         if len(top_peaks) > 0:
             audit["dominant_period"] = round(float(periods[top_peaks[0]]), 2)
             audit["dominant_frequency"] = round(float(freqs[top_peaks[0]]), 6)
+
+        # Prompt C4 interpretation layer wire-in.
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        _interp_dict["series_name"] = name
+        _interp_dict["n_obs"] = n
+        interp = build_interpretation("fft_spectrum", _interp_dict)
 
         return make_response(
             ctx,
@@ -251,6 +276,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

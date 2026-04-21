@@ -327,38 +327,71 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C4: expose phase_degrees_at_dominant_scale and
+        # direction_verb for the spec's Tier 1 rendering.
+        phase_deg_at_best = float(np.degrees(mean_phase[best_scale_idx]))
+
+        audit = {
+            "x_series": x_name,
+            "y_series": y_name,
+            "pair_used": [x_name, y_name],
+            "pairs_ignored": [s[0] for s in all_series[2:]],
+            "wavelet": wavelet_name,
+            "n_scales": n_scales,
+            "smoothing_width": smooth_w,
+            "global_mean_coherence": round(global_coh, 4),
+            "max_coherence": round(max_coh, 4),
+            "best_scale": round(float(scales[best_scale_idx]), 2),
+            "best_period": round(float(periods[best_scale_idx]), 2),
+            "best_scale_coherence": round(best_coh, 4),
+            "best_scale_lag": round(best_lag_val, 2),
+            "high_coherence_pct": round(high_coh_pct, 1),
+            "phase_degrees_at_dominant_scale": round(phase_deg_at_best, 2),
+            "direction_verb": direction_verb,
+            "n_obs": n,
+            **format_significance_disclosure(
+                test_name="wavelet coherence (no analytic null distribution)",
+                critical_value_formula=(
+                    "none — coherence is bounded [0,1]; significance "
+                    "would require a surrogate-data bootstrap, not "
+                    "implemented in this pass"
+                ),
+                ac_corrected=False,
+            ),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("wavelet_coherence", {
+            "series_name_x": x_name,
+            "series_name_y": y_name,
+            "n_obs": int(n),
+            "frequency": str(ctx.frequency or ""),
+            "wavelet": wavelet_name,
+            "n_scales": int(n_scales),
+            "smoothing_width": int(smooth_w),
+            "global_mean_coherence": float(global_coh),
+            "max_coherence": float(max_coh),
+            "best_scale": float(scales[best_scale_idx]),
+            "best_period": float(periods[best_scale_idx]),
+            "best_scale_coherence": float(best_coh),
+            "best_scale_lag": float(best_lag_val),
+            "high_coherence_pct": float(high_coh_pct),
+            "phase_degrees_at_dominant_scale": float(phase_deg_at_best),
+            "direction_verb": direction_verb,
+        })
+
         return make_response(
             ctx,
             tables=[scale_table, stats_table, profile_table, tv_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "x_series": x_name,
-                "y_series": y_name,
-                "pair_used": [x_name, y_name],
-                "pairs_ignored": [s[0] for s in all_series[2:]],
-                "wavelet": wavelet_name,
-                "n_scales": n_scales,
-                "smoothing_width": smooth_w,
-                "global_mean_coherence": round(global_coh, 4),
-                "max_coherence": round(max_coh, 4),
-                "best_scale": round(float(scales[best_scale_idx]), 2),
-                "best_period": round(float(periods[best_scale_idx]), 2),
-                "best_scale_coherence": round(best_coh, 4),
-                "best_scale_lag": round(best_lag_val, 2),
-                "high_coherence_pct": round(high_coh_pct, 1),
-                "n_obs": n,
-                **format_significance_disclosure(
-                    test_name="wavelet coherence (no analytic null distribution)",
-                    critical_value_formula=(
-                        "none — coherence is bounded [0,1]; significance "
-                        "would require a surrogate-data bootstrap, not "
-                        "implemented in this pass"
-                    ),
-                    ac_corrected=False,
-                ),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

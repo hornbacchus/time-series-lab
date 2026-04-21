@@ -67,3 +67,15 @@ Typical significance thresholds range from 0.5 to 0.8, depending on the smoothin
 **Partial wavelet coherence**: Analogous to partial correlation, this measures the coherence between two series after removing the influence of a third series. Useful for identifying direct vs. indirect relationships in multivariate systems.
 
 **Scale-averaged coherence**: Average the coherence over a band of scales to produce a time series of coherence at a specific frequency band. This simplifies interpretation when the relationship is consistent across nearby scales.
+
+## Interpretation
+
+wavelet_coherence runs emit a two-tier Interpretation block with a distinct Tier 1 shape - bivariate cross-spectral output frames the paired-fact structure (lead/lag + coherence magnitude + period at dominant scale), mirroring rolling_ccf_lag but extended to time-frequency space.
+
+**Plain-Language Finding (Tier 1)** - dominant-scale period in frequency-aware units (years approximation for long quarterly/monthly periods), coherence magnitude with adjective band (reuses C1 interpret_correlation_strength), direction verb (leads / lags / in phase with / in antiphase with) with lag magnitude, global mean coherence, fraction of time-frequency plane above 0.70 threshold.
+
+**Technical Interpretation (Tier 2)** - smoothed cross-wavelet spectrum normalized by auto-spectra, no analytic null (surrogate-data Monte Carlo would be needed for formal significance), phase lag at dominant scale with antiphase disclosure when applicable (half-period lag is not true lead-lag), cone of influence caveat.
+
+**Caveats (Tier 3, conditional)**:
+- Phase at dominant scale near 180 degrees - antiphase coupling, not causal lead-lag.
+- Global mean coherence < 0.3 - series are largely uncoupled across the time-frequency plane.

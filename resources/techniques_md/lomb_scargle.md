@@ -62,3 +62,15 @@ where M is the number of independent frequencies tested (approximately `N/2` for
 **Spectral window**: The irregular sampling creates a non-trivial spectral window function. Compute it by applying Lomb-Scargle to a synthetic unit-amplitude sinusoid sampled at the actual observation times. Sidelobes in the window function can create spurious peaks in the data's spectrum.
 
 **Aliasing**: Unlike regular sampling where aliasing is well-defined, irregular sampling can partially suppress aliasing. However, clusters of observations at regular intervals can create aliasing at unexpected frequencies.
+
+## Interpretation
+
+lomb_scargle runs emit a two-tier Interpretation block with FAP significance machinery and regular-sampling degeneracy disclosure.
+
+**Plain-Language Finding (Tier 1)** - dominant period (converted to ctx.frequency natural units when wrapper's time axis is seconds-scale), dominant frequency, normalized-power share, false-alarm probability with astronomical-convention band (highly significant < 0.001 / significant < 0.01 / marginal < 0.05 / not significant >= 0.05). When sampling_irregularity_cv indicates regular sampling, Tier 1 notes the degeneracy toward ordinary periodogram.
+
+**Technical Interpretation (Tier 2)** - scipy.signal.lombscargle (normalized), Baluev analytic FAP (Balanced/Fast preset) or bootstrap permutation (Thorough preset), oversampling factor, per-peak (not per-spectrum) FAP convention. When regularly sampled: "Consider periodogram_spectral_density for a more direct estimation."
+
+**Caveats (Tier 3, conditional)**:
+- Dominant peak FAP exceeds 5% - not statistically distinguishable from noise.
+- Input data is effectively regularly sampled - Lomb-Scargle's irregular-sampling advantage is not exercised.

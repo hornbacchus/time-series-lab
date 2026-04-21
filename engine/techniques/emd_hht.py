@@ -413,22 +413,47 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C4: per-IMF periods for Tier 1 citation.
+        per_imf_periods = []
+        for row in imf_rows:
+            if row[0] != "Residual":
+                p = row[4]
+                per_imf_periods.append(float(p) if isinstance(p, (int, float)) else None)
+        dominant_imf_period = None
+        if dominant_imf is not None and 1 <= int(dominant_imf) <= len(per_imf_periods):
+            dominant_imf_period = per_imf_periods[int(dominant_imf) - 1]
+
+        audit = {
+            "backend": backend,
+            "method": method,
+            "n_imfs": n_imfs,
+            "max_imfs": max_imfs,
+            "n_observations": n,
+            "dominant_imf": dominant_imf,
+            "dominant_imf_variance_pct": round(dominant_pct, 2),
+            "dominant_imf_period": dominant_imf_period,
+            "per_imf_periods": per_imf_periods,
+            "residual_variance_pct": round(res_pct, 2),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        _interp_dict["series_name"] = name
+        _interp_dict["n_obs"] = n
+        interp = build_interpretation("emd_hht", _interp_dict)
+
         return make_response(
             ctx,
             tables=[imf_table, imf_val_table, freq_table, config_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "backend": backend,
-                "method": method,
-                "n_imfs": n_imfs,
-                "max_imfs": max_imfs,
-                "n_observations": n,
-                "dominant_imf": dominant_imf,
-                "dominant_imf_variance_pct": round(dominant_pct, 2),
-                "residual_variance_pct": round(res_pct, 2),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

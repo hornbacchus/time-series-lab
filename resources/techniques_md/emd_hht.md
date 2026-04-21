@@ -41,3 +41,15 @@ Uses the `emd` package (Andrew Quinn, Oxford) when available for optimized sifti
 - **Fast**: Standard EMD, up to 4 IMFs, 50 sift iterations
 - **Balanced**: Standard EMD, up to 8 IMFs, 200 sift iterations
 - **Thorough**: Ensemble EMD (100 trials), up to 12 IMFs, 500 sift iterations
+
+## Interpretation
+
+emd_hht runs emit a two-tier Interpretation block framed around IMF decomposition (Class 4) with Hilbert instantaneous-frequency context (Class 2 proxy).
+
+**Plain-Language Finding (Tier 1)** - EMD variant (standard EMD or EEMD), backend (emd library or numpy fallback), number of IMFs extracted, dominant IMF with variance share and mean period (high-frequency-noise / short-cycle-oscillation descriptor), per-IMF period progression, residual trend variance share with non-orthogonal-overlap honest disclosure (defers mechanistic explanation to Tier 2).
+
+**Technical Interpretation (Tier 2)** - iterative envelope-based sifting, Cauchy stopping criterion (SD threshold 0.001), EEMD ensemble averaging when applicable, Hilbert transform produces per-IMF instantaneous frequency (time-frequency proxy, not unified 2D Hilbert-Huang spectrum), mode-mixing caveat, instantaneous-frequency-only-valid-for-mono-component-IMFs honest disclosure, residual-variance-exceeds-100% explanation for sifting-based non-orthogonality.
+
+**Caveats (Tier 3, conditional)**:
+- Residual variance > 100% of input - IMF non-orthogonality; shares are not variance-additive.
+- numpy_fallback backend - emd library unavailable; results valid but may differ from reference.

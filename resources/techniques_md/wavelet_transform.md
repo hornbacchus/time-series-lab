@@ -61,3 +61,15 @@ The DWT uses a cascade of high-pass and low-pass filters (quadrature mirror filt
 **Maximal Overlap DWT (MODWT)**: A shift-invariant version that does not downsample, producing the same number of coefficients as the original series at each scale. Better for time series analysis than the standard DWT because it is not sensitive to the starting point.
 
 **Scale-to-frequency conversion**: For the Morlet wavelet with `omega_0 = 6`: `frequency = 1 / (1.03 * scale)`. For Daubechies wavelets at level j with sampling interval dt: the frequency band is approximately `[1/(2^{j+1} dt), 1/(2^j dt)]`.
+
+## Interpretation
+
+wavelet_transform runs emit a two-tier Interpretation block. Output shape is Class 4 (component decomposition) - DWT produces reconstructed time series per dyadic frequency band, not a 2D scalogram heatmap.
+
+**Plain-Language Finding (Tier 1)** - wavelet family, decomposition level (vs max possible for series length), dominant component (Approximation band or a specific detail) with period range and energy-concentration adjective band, second-highest detail band for context.
+
+**Technical Interpretation (Tier 2)** - PyWavelets-based DWT, boundary extension mode (symmetric default), per-band dyadic octave ranges (D1 period 2-4 obs, D2 period 4-8 obs, etc.), Approximation band period > 2^(level+1) obs, boundary artifact caveat within ~filter_length samples of each edge, energy normalization caveat (lower-frequency bands aggregate fewer downsampled coefficients).
+
+**Caveats (Tier 3, conditional)**:
+- Approximation band carries > 95% of energy - trend-dominant; detail bands are effectively numerical residual.
+- Max-level decomposition on short series - trend-vs-noise separation at coarsest scale is fragile.

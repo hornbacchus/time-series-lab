@@ -247,24 +247,49 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C4 additions: dominant peak share, Nyquist, frequency
+        # resolution, estimator variant disclosure.
+        nyquist_freq = float(fs) / 2.0
+        freq_resolution = float(fs) / max(n, 1)
+        top1_pct = float(top_rows[0][4]) if top_rows else None
+
+        audit = {
+            "window": window,
+            "detrend": str(detrend_val),
+            "fs": fs,
+            "n_obs": n,
+            "n_freq_bins": len(freqs),
+            "total_power": round(total_power, 6),
+            "spectral_entropy": round(spectral_entropy, 6),
+            "spectral_centroid": round(spectral_centroid, 6),
+            "spectral_bandwidth": round(spectral_bandwidth, 6),
+            "spectral_edge_95": round(spectral_edge, 6),
+            "nyquist_frequency": nyquist_freq,
+            "frequency_resolution": freq_resolution,
+            "estimator_variant": "raw",
+            "top_peak_power_pct": top1_pct,
+            "dominant_frequency": round(float(top_rows[0][1]), 6) if top_rows else None,
+            "dominant_period": top_rows[0][2] if top_rows else None,
+        }
+
+        # Prompt C4 interpretation layer wire-in.
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        _interp_dict["series_name"] = name
+        interp = build_interpretation("periodogram_spectral_density", _interp_dict)
+
         return make_response(
             ctx,
             tables=[top_table, stats_table, psd_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "window": window,
-                "detrend": str(detrend_val),
-                "fs": fs,
-                "n_obs": n,
-                "n_freq_bins": len(freqs),
-                "total_power": round(total_power, 6),
-                "spectral_entropy": round(spectral_entropy, 6),
-                "spectral_centroid": round(spectral_centroid, 6),
-                "dominant_frequency": round(float(top_rows[0][1]), 6) if top_rows else None,
-                "dominant_period": top_rows[0][2] if top_rows else None,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

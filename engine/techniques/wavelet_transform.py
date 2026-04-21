@@ -252,21 +252,69 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C4: per-band energy shares + period ranges for Tier 1
+        # context on the second-highest detail band.
+        detail_band_energies_pct = {}
+        detail_band_periods = {}
+        for name_k, arr in reconstructed.items():
+            if "Detail" not in name_k:
+                continue
+            e_k = float(np.sum(arr ** 2))
+            pct_k = round(e_k / total_energy * 100, 2) if total_energy > 0 else 0.0
+            detail_band_energies_pct[name_k] = pct_k
+        for i in range(1, level + 1):
+            low = 2 ** i
+            high = 2 ** (i + 1)
+            detail_band_periods[f"Detail D{i}"] = f"{low}-{high} obs"
+        dominant_band_period_range = None
+        if "Approximation" in dominant:
+            dominant_band_period_range = f"> {2 ** (level + 1)} obs"
+        else:
+            # e.g., "Detail D3"
+            for i in range(1, level + 1):
+                if f"D{i}" in dominant:
+                    dominant_band_period_range = f"{2 ** i}-{2 ** (i + 1)} obs"
+                    break
+        # Filter length (pywt is imported at module top; no local
+        # shadowing allowed here since other parts of the function
+        # already reference the module-level name).
+        try:
+            filter_length = int(pywt.Wavelet(wavelet_name).dec_len)
+        except Exception:
+            filter_length = None
+
+        audit = {
+            "wavelet": wavelet_name,
+            "level": level,
+            "max_level": max_level,
+            "mode": mode,
+            "dominant_component": dominant,
+            "dominant_energy_pct": dom_pct,
+            "n_observations": n,
+            "filter_length": filter_length,
+            "detail_band_energies_pct": detail_band_energies_pct,
+            "detail_band_periods": detail_band_periods,
+            "dominant_band_period_range": dominant_band_period_range,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        _interp_dict["series_name"] = name
+        _interp_dict["n_obs"] = n
+        interp = build_interpretation("wavelet_transform", _interp_dict)
+
         return make_response(
             ctx,
             tables=[energy_table, coef_table, decomp_table, diag_table],
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "wavelet": wavelet_name,
-                "level": level,
-                "max_level": max_level,
-                "mode": mode,
-                "dominant_component": dominant,
-                "dominant_energy_pct": dom_pct,
-                "n_observations": n,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

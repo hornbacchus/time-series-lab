@@ -279,23 +279,43 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # Prompt C4: expose dominant and second-group variance shares
+        # from the group_rows computation just above.
+        group_shares = [float(row[2]) for row in group_rows if row[0] != "Residual"]
+        dominant_group_share = group_shares[0] if len(group_shares) >= 1 else None
+        second_group_share = group_shares[1] if len(group_shares) >= 2 else None
+
+        audit = {
+            "window_length": L,
+            "n_components": n_components,
+            "n_groups": len(groups),
+            "groups": [[int(i) for i in g] for g in groups],
+            "explained_variance_pct_1": round(float(explained_pct[0]), 4),
+            "components_for_95pct": n_95,
+            "components_for_99pct": n_99,
+            "total_variance": round(total_variance, 4),
+            "n_obs": n,
+            "dominant_group_share": round(dominant_group_share, 2) if dominant_group_share is not None else None,
+            "second_group_share": round(second_group_share, 2) if second_group_share is not None else None,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        _interp_dict = dict(audit)
+        _interp_dict["series_name"] = name
+        interp = build_interpretation("ssa_model", _interp_dict)
+
         return make_response(
             ctx,
             tables=[eigen_table, group_table, wcorr_table, ts_table],
             plain_english_summary=plain_english,
             warnings=warnings,
             charting_suggestions=charting,
-            audit_fields={
-                "window_length": L,
-                "n_components": n_components,
-                "n_groups": len(groups),
-                "groups": [[int(i) for i in g] for g in groups],
-                "explained_variance_pct_1": round(float(explained_pct[0]), 4),
-                "components_for_95pct": n_95,
-                "components_for_99pct": n_99,
-                "total_variance": round(total_variance, 4),
-                "n_obs": n,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

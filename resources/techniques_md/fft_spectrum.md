@@ -60,3 +60,15 @@ Windows reduce leakage at the cost of widening the main lobe (reducing frequency
 **Zero padding**: Appending zeros to the series before the FFT interpolates the spectrum (finer frequency grid) but does not improve true frequency resolution. Useful for visualization.
 
 **Preprocessing**: Remove the mean (and any linear trend) before computing the FFT. The DC component (k=0) reflects the mean; a trend creates a large low-frequency contribution that can obscure other features.
+
+## Interpretation
+
+fft_spectrum runs emit a two-tier Interpretation block framed around the dominant period and its concentration share.
+
+**Plain-Language Finding (Tier 1)** - dominant period in observations, frequency in cycles/obs, top-peak power share with adjective band (weak / moderate / strong / dominant), top-10 peaks aggregate share, Nyquist limit, detrending choice, windowing choice with spectral-leakage caveat when rectangular.
+
+**Technical Interpretation (Tier 2)** - DFT formulation, windowing and tapering trade-offs, frequency resolution, Nyquist aliasing caveat, stationarity assumption. Explicit pointer to wavelet_transform for time-localized analysis.
+
+**Caveats (Tier 3, conditional)**:
+- Dominant peak < 10% (weak concentration) - broadband rather than cyclic.
+- No windowing on long series with a clear peak - spectral leakage inflates peak power; try window='hann'.
