@@ -1623,6 +1623,17 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "n_harmonics_per_period": [1],
         "gamma_per_period": [1e-6, 1e-6],
         "bats_rounding_applied": [],
+        # Follow-up 1c BVAR IRF/FEVD fields
+        "irf_fevd_computed": False,
+        "identification_scheme": None,
+        "variable_ordering": None,
+        "irf_horizon": None,
+        "fevd_horizons": [],
+        "own_shock_share_longest_horizon": {},
+        "fevd_longest_horizon": None,
+        "zero_straddle_pairs": [],
+        "irf_skip_reason": "fast_preset_default",
+        "sigma_posterior_uncertainty_propagated": False,
     }
 
     def test_all_registered_specs_no_raise(self):

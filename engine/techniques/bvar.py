@@ -25,10 +25,187 @@ from techniques.base import (
 # Preset configurations
 # ---------------------------------------------------------------------------
 _PRESET_CONFIG = {
-    "Fast": {"max_lags": 2, "n_draws": 500, "lambda1": 0.1, "lambda2": 0.5},
-    "Balanced": {"max_lags": 4, "n_draws": 1000, "lambda1": 0.1, "lambda2": 1.0},
-    "Thorough": {"max_lags": 6, "n_draws": 5000, "lambda1": 0.1, "lambda2": 1.0},
+    "Fast": {
+        "max_lags": 2, "n_draws": 500, "lambda1": 0.1, "lambda2": 0.5,
+        "compute_irf_fevd": False, "irf_horizon": 16,
+    },
+    "Balanced": {
+        "max_lags": 4, "n_draws": 1000, "lambda1": 0.1, "lambda2": 1.0,
+        "compute_irf_fevd": True, "irf_horizon": 24,
+    },
+    "Thorough": {
+        "max_lags": 6, "n_draws": 5000, "lambda1": 0.1, "lambda2": 1.0,
+        "compute_irf_fevd": True, "irf_horizon": 36,
+    },
 }
+
+
+# ---------------------------------------------------------------------------
+# IRF / FEVD helpers (Follow-up 1c)
+# ---------------------------------------------------------------------------
+
+def _compute_posterior_irf(
+    B_post, B_post_var, Sigma_post, k, p, m, include_const,
+    n_draws, H, rng,
+):
+    """Monte Carlo posterior IRF under Cholesky identification.
+
+    Reuses the same coefficient-draw strategy as the forecast MC loop
+    (equation-by-equation Normal draws from posterior mean ± std).
+    Innovation covariance Σ is held at the posterior point estimate
+    (R1 Cholesky disclosure): credible bands therefore reflect VAR
+    coefficient uncertainty but not Σ uncertainty. This is a common
+    BVAR simplification when avoiding MCMC.
+
+    Returns a dict with:
+      median    : (H, k, k)  — [h, response, shock]
+      lower_5   : same shape (5th percentile across draws)
+      upper_95  : same shape (95th percentile across draws)
+      cholesky  : (k, k)     — point-estimate Cholesky lower factor
+      tensor    : (n_draws, H, k, k) — kept for FEVD reuse
+    """
+    try:
+        P = np.linalg.cholesky(Sigma_post)
+    except np.linalg.LinAlgError:
+        # Near-singular Σ — add a tiny ridge so Cholesky succeeds.
+        P = np.linalg.cholesky(Sigma_post + 1e-8 * np.eye(k))
+
+    irf_tensor = np.zeros((n_draws, H, k, k))
+
+    for d in range(n_draws):
+        # Draw coefficients from posterior (equation-by-equation).
+        B_draw = np.zeros((m, k))
+        for i in range(k):
+            sd = np.sqrt(np.maximum(B_post_var[i], 1e-12))
+            B_draw[:, i] = B_post[:, i] + sd * rng.standard_normal(m)
+
+        # Extract A_1, ..., A_p from B_draw (drop constant row if any).
+        # B_draw layout: rows [0..k*p-1] stack lag-1 through lag-p
+        # blocks; each block is (k, k). Within a block, row j, column
+        # i is "equation i's coefficient on variable j at lag-(blk+1)".
+        # In the Y_t = A_lag @ Y_{t-lag} convention, A_lag[i, j] is
+        # the coefficient on variable j in equation i, so A_lag = block.T.
+        A_list = []
+        for lag in range(p):
+            block = B_draw[lag * k:(lag + 1) * k, :]  # (k, k)
+            A_list.append(block.T)
+
+        # MA coefficients via recursion:
+        # Phi_0 = I, Phi_h = sum_{j=1..min(h,p)} A_j @ Phi_{h-j}.
+        Phi = [np.eye(k)]
+        for h in range(1, H):
+            Phi_h = np.zeros((k, k))
+            for j in range(1, min(h, p) + 1):
+                Phi_h += A_list[j - 1] @ Phi[h - j]
+            Phi.append(Phi_h)
+
+        # Orthogonalized IRF: Theta_h = Phi_h @ P.
+        for h in range(H):
+            irf_tensor[d, h] = Phi[h] @ P
+
+    median_irf = np.median(irf_tensor, axis=0)
+    lower_5 = np.percentile(irf_tensor, 5, axis=0)
+    upper_95 = np.percentile(irf_tensor, 95, axis=0)
+
+    return {
+        "median": median_irf,
+        "lower_5": lower_5,
+        "upper_95": upper_95,
+        "cholesky": P,
+        "tensor": irf_tensor,
+    }
+
+
+def _compute_posterior_fevd(irf_tensor, horizons):
+    """FEVD across posterior draws at specific horizons.
+
+    Args:
+      irf_tensor: (n_draws, H_max, k, k) — IRF posterior draws
+      horizons:   list of int horizons to report (<=H_max)
+
+    Returns dict:
+      median  : {horizon: (k, k)} — [i, j] = share of var i's MSE
+                from shock j (rows sum to 1)
+      lower_5 : {horizon: (k, k)} — 5th percentile per cell
+      upper_95: {horizon: (k, k)} — 95th percentile per cell
+    """
+    n_draws, H_max, k, _ = irf_tensor.shape
+    median_fevd = {}
+    lower_5_fevd = {}
+    upper_95_fevd = {}
+
+    for h in horizons:
+        if h > H_max:
+            continue
+        # Cumulative squared orthogonalized IRF up to horizon h-1.
+        # contrib[d, i, j] = sum_{t=0..h-1} irf[d, t, i, j]^2
+        contrib = np.sum(irf_tensor[:, :h, :, :] ** 2, axis=1)
+        mse = np.sum(contrib, axis=2, keepdims=True)
+        share = contrib / np.maximum(mse, 1e-12)
+        median_fevd[int(h)] = np.median(share, axis=0)
+        lower_5_fevd[int(h)] = np.percentile(share, 5, axis=0)
+        upper_95_fevd[int(h)] = np.percentile(share, 95, axis=0)
+
+    return {
+        "median": median_fevd,
+        "lower_5": lower_5_fevd,
+        "upper_95": upper_95_fevd,
+    }
+
+
+def _collect_zero_straddle_pairs(irf_results, names, k, threshold_frac=0.05):
+    """Identify cross-variable shock-response pairs whose 90% credible
+    band straddles zero at the peak lag, filtered to non-trivial
+    median effects (R2 threshold: |median_at_peak| > threshold_frac
+    × max_abs_median across all cross-pairs).
+
+    Returns list of dicts: [{shock, response, peak_horizon,
+    median_at_peak, lower_at_peak, upper_at_peak}, ...]
+    """
+    median = irf_results["median"]
+    lower = irf_results["lower_5"]
+    upper = irf_results["upper_95"]
+
+    # First pass: find peak |median| across all cross-pairs for
+    # threshold calibration.
+    cross_peaks = []
+    for resp_idx in range(k):
+        for shock_idx in range(k):
+            if resp_idx == shock_idx:
+                continue
+            med_path = median[:, resp_idx, shock_idx]
+            peak_h = int(np.argmax(np.abs(med_path)))
+            cross_peaks.append(abs(float(med_path[peak_h])))
+    if not cross_peaks:
+        return []
+    max_abs_median = max(cross_peaks)
+    threshold = threshold_frac * max_abs_median
+
+    # Second pass: collect pairs whose credible band straddles zero
+    # AND whose median magnitude exceeds the threshold.
+    pairs = []
+    for resp_idx in range(k):
+        for shock_idx in range(k):
+            if resp_idx == shock_idx:
+                continue
+            med_path = median[:, resp_idx, shock_idx]
+            peak_h = int(np.argmax(np.abs(med_path)))
+            med_at_peak = float(med_path[peak_h])
+            if abs(med_at_peak) <= threshold:
+                # R2 filter: essentially-null effect, not "uncertain"
+                continue
+            lo = float(lower[peak_h, resp_idx, shock_idx])
+            hi = float(upper[peak_h, resp_idx, shock_idx])
+            if lo <= 0 <= hi:
+                pairs.append({
+                    "shock": names[shock_idx],
+                    "response": names[resp_idx],
+                    "peak_horizon": peak_h,
+                    "median_at_peak": round(med_at_peak, 6),
+                    "lower_at_peak": round(lo, 6),
+                    "upper_at_peak": round(hi, 6),
+                })
+    return pairs
 
 
 def run(ctx: RunContext, progress_callback) -> dict:
@@ -269,6 +446,49 @@ def run(ctx: RunContext, progress_callback) -> dict:
         fc_lower = np.percentile(fc_draws, 5, axis=0)
         fc_upper = np.percentile(fc_draws, 95, axis=0)
 
+        # ── IRF / FEVD (Follow-up 1c) ──────────────────────────────────
+        compute_irf_fevd = bool(ctx.get_param(
+            "compute_irf_fevd", cfg.get("compute_irf_fevd", True)
+        ))
+        irf_horizon = int(ctx.get_param(
+            "irf_horizon", cfg.get("irf_horizon", 24)
+        ))
+        irf_horizon = max(2, irf_horizon)
+        irf_fevd_computed = False
+        irf_results = None
+        fevd_results = None
+        fevd_horizons_used = []
+        zero_straddle_pairs = []
+        irf_skip_reason = None
+
+        if compute_irf_fevd:
+            progress_callback("Computing IRF / FEVD (posterior)", 72)
+            try:
+                irf_rng = np.random.default_rng(ctx.seed)
+                irf_results = _compute_posterior_irf(
+                    B_post, B_post_var, Sigma_post,
+                    k=k, p=p, m=m, include_const=include_const,
+                    n_draws=n_draws, H=irf_horizon, rng=irf_rng,
+                )
+                fevd_horizons_used = [
+                    h for h in [1, 4, 8, 12, 24] if h <= irf_horizon
+                ]
+                fevd_results = _compute_posterior_fevd(
+                    irf_results["tensor"], fevd_horizons_used,
+                )
+                zero_straddle_pairs = _collect_zero_straddle_pairs(
+                    irf_results, names, k,
+                )
+                irf_fevd_computed = True
+            except Exception as e:
+                warnings.append(f"IRF/FEVD computation failed: {e}")
+                irf_skip_reason = f"computation_error: {e}"
+        else:
+            if str(ctx.preset).lower() == "fast":
+                irf_skip_reason = "fast_preset_default"
+            else:
+                irf_skip_reason = "user_disabled"
+
         progress_callback("Building output tables", 80)
 
         # ---- Forecast table (for each variable) ----
@@ -356,11 +576,62 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["BIC Approximation", round(float(bic_approx), 2)],
             ["Posterior Draws", n_draws],
             ["Forecast Horizon", horizon],
+            ["IRF/FEVD Computed", irf_fevd_computed],
         ]
+        if irf_fevd_computed:
+            summary_rows.append(["Identification", "cholesky"])
+            summary_rows.append(["Variable Ordering", ", ".join(names)])
+            summary_rows.append(["IRF Horizon", irf_horizon])
+            summary_rows.append(["FEVD Horizons", str(fevd_horizons_used)])
+        else:
+            summary_rows.append(["IRF/FEVD Skip Reason", str(irf_skip_reason)])
         for i in range(k):
             summary_rows.append([f"RMSE ({names[i]})", round(rmse_vals[i], 4)])
         summary_table = make_table("Model Summary", ["Metric", "Value"], summary_rows)
         tables.append(summary_table)
+
+        # ---- IRF and FEVD tables when computed ----
+        if irf_fevd_computed:
+            irf_rows = []
+            for h in range(irf_horizon):
+                for resp_idx in range(k):
+                    for shock_idx in range(k):
+                        irf_rows.append([
+                            h,
+                            names[shock_idx],
+                            names[resp_idx],
+                            round(float(irf_results["median"][h, resp_idx, shock_idx]), 6),
+                            round(float(irf_results["lower_5"][h, resp_idx, shock_idx]), 6),
+                            round(float(irf_results["upper_95"][h, resp_idx, shock_idx]), 6),
+                        ])
+            irf_table = make_table(
+                "Impulse Response (Posterior Median, 90% Credible Band)",
+                ["Period", "Shock", "Response", "Median", "Lower 5%", "Upper 95%"],
+                irf_rows,
+            )
+            tables.append(irf_table)
+
+            fevd_rows = []
+            for h in fevd_horizons_used:
+                med_h = fevd_results["median"][h]
+                lo_h = fevd_results["lower_5"][h]
+                hi_h = fevd_results["upper_95"][h]
+                for resp_idx in range(k):
+                    for shock_idx in range(k):
+                        fevd_rows.append([
+                            h,
+                            names[resp_idx],
+                            names[shock_idx],
+                            round(float(med_h[resp_idx, shock_idx]), 6),
+                            round(float(lo_h[resp_idx, shock_idx]), 6),
+                            round(float(hi_h[resp_idx, shock_idx]), 6),
+                        ])
+            fevd_table = make_table(
+                "FEVD (Posterior)",
+                ["Horizon", "Variable", "Shock", "Median Share", "Lower 5%", "Upper 95%"],
+                fevd_rows,
+            )
+            tables.append(fevd_table)
 
         # ---- Plain English ----
         rmse_str = ", ".join([f"{names[i]}={rmse_vals[i]:.4f}" for i in range(k)])
@@ -391,6 +662,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
             return "loose"
         prior_tightness_band = _prior_tightness_band(lambda1)
 
+        # Follow-up 1c — IRF/FEVD audit fields + scalar summaries.
+        own_shock_share_longest = {}
+        fevd_longest_h = None
+        if irf_fevd_computed and fevd_horizons_used:
+            fevd_longest_h = max(fevd_horizons_used)
+            diag = np.diag(fevd_results["median"][fevd_longest_h])
+            for i in range(k):
+                own_shock_share_longest[names[i]] = round(float(diag[i]), 4)
+
         audit = {
             "variables": names,
             "n_variables": k,
@@ -407,31 +687,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "prior_tightness_band": prior_tightness_band,
             "interval_type": "credible",
             "credible_interval_coverage": 0.90,
+            # Follow-up 1c IRF/FEVD fields
+            "irf_fevd_computed": irf_fevd_computed,
+            "identification_scheme": "cholesky" if irf_fevd_computed else None,
+            "variable_ordering": list(names) if irf_fevd_computed else None,
+            "irf_horizon": irf_horizon if irf_fevd_computed else None,
+            "fevd_horizons": list(fevd_horizons_used) if irf_fevd_computed else [],
+            "own_shock_share_longest_horizon": own_shock_share_longest,
+            "fevd_longest_horizon": fevd_longest_h,
+            "zero_straddle_pairs": zero_straddle_pairs,
+            "irf_skip_reason": irf_skip_reason,
+            # R1 — Σ point-estimate disclosure flag (honest disclosure
+            # that posterior covariance is held at point estimate; VAR
+            # coefficient uncertainty propagates but Σ uncertainty
+            # does not).
+            "sigma_posterior_uncertainty_propagated": False,
         }
 
-        # Prompt C5 interpretation layer wire-in.
+        # Prompt C5 + Follow-up 1c interpretation layer wire-in.
         try:
             from interpretation import build_interpretation  # type: ignore
         except Exception:
             def build_interpretation(technique_id, results):  # type: ignore
                 return None
 
-        interp = build_interpretation("bvar", {
-            "variables": names,
-            "n_variables": int(k),
-            "lags": int(p),
-            "n_effective": int(T),
-            "lambda1": float(lambda1),
-            "lambda2": float(lambda2),
-            "lambda3": float(lambda3),
-            "prior_tightness_band": prior_tightness_band,
-            "n_draws": int(n_draws),
-            "total_params": int(total_params),
-            "bic_approx": float(bic_approx),
-            "rmse": {names[i]: float(rmse_vals[i]) for i in range(k)},
-            "horizon": int(horizon),
-            "credible_interval_coverage": 0.90,
-        })
+        interp = build_interpretation("bvar", dict(audit))
 
         return make_response(
             ctx,

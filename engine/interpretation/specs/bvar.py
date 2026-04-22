@@ -4,8 +4,16 @@ InterpretationSpec for bvar (Bayesian VAR with Minnesota prior).
 Inherits the Prompt C1 var_model Tier 1 shape (multivariate forecasts +
 series list + cross-series RMSEs). Tier 2 reframes as Bayesian —
 Minnesota prior specification + credible-interval semantic label
-(Decision D2) + honest disclosure that this wrapper does not emit
-IRF/FEVD (Decision D15 cross-spec pointer).
+(Decision D2).
+
+Follow-up 1c added IRF/FEVD capability: the C5 "does not emit IRF/FEVD"
+honest disclosure now conditions on ``irf_fevd_computed``:
+  - When True, Tier 1 cross-spec pointer is removed and Tier 2
+    discloses Cholesky identification, ordering sensitivity,
+    FEVD breakdown at the longest horizon, and the Σ point-estimate
+    simplification.
+  - When False (Fast preset default, or user disabled), Tier 2
+    discloses the skip reason and how to enable.
 
 Results-dict keys consumed:
 
@@ -18,6 +26,18 @@ Results-dict keys consumed:
     prior_tightness_band      : "tight" | "moderate" | "loose"
     credible_interval_coverage: float (e.g. 0.90)
     interval_type             : "credible"
+    # Follow-up 1c fields:
+    irf_fevd_computed         : bool
+    identification_scheme     : "cholesky" | None
+    variable_ordering         : list[str] | None
+    irf_horizon               : int | None
+    fevd_horizons             : list[int]
+    own_shock_share_longest_horizon : dict[var -> share (0..1)]
+    fevd_longest_horizon      : int | None
+    zero_straddle_pairs       : list[dict]  (D1 trigger input)
+    irf_skip_reason           : "fast_preset_default" | "user_disabled"
+                                | "computation_error: ..." | None
+    sigma_posterior_uncertainty_propagated : bool (R1 disclosure flag)
 """
 
 from typing import Optional
@@ -79,12 +99,24 @@ def _tier1(results: dict) -> str:
 
     rmse_clause = _rmse_clauses(results)
 
-    # Decision D15 — cross-spec pointer to frequentist var_model
-    cross_spec_pointer = (
-        f" Unlike the frequentist var_model technique, this run does not "
-        f"emit impulse-response functions or forecast-error-variance "
-        f"decomposition — see Tier 2 for the Bayesian-specific disclosure."
-    )
+    # Follow-up 1c — Tier 1 closer conditions on irf_fevd_computed.
+    # When computed: point readers to Tier 2 for the structural analysis.
+    # When not computed: keep a softer cross-spec pointer indicating
+    # IRF/FEVD are available by re-running on Balanced / Thorough.
+    irf_fevd_computed = bool(results.get("irf_fevd_computed", False))
+    if irf_fevd_computed:
+        structural_closer = (
+            " Impulse-response functions and forecast-error-variance "
+            "decomposition are computed under Cholesky identification "
+            "— see Tier 2 for the structural analysis."
+        )
+    else:
+        structural_closer = (
+            " Impulse-response functions and forecast-error-variance "
+            "decomposition are not computed on this run (see Tier 2 "
+            "for the skip reason); Balanced / Thorough preset enables "
+            "them by default."
+        )
 
     draws_clause = (
         f" {horizon}-step posterior-mean forecasts with {coverage_pct}% "
@@ -99,7 +131,7 @@ def _tier1(results: dict) -> str:
         f"{n_eff} effective observations under a Minnesota prior "
         f"(tightness λ1={lam1_str}, {tightness_band})."
         f" {rmse_clause}{draws_clause}"
-        f"{cross_spec_pointer}"
+        f"{structural_closer}"
     )
 
 
@@ -131,6 +163,117 @@ def _tier2(results: dict) -> str:
         f"sampling.'"
     )
 
+    # Follow-up 1c — structural analysis block conditions on
+    # irf_fevd_computed.
+    irf_fevd_computed = bool(results.get("irf_fevd_computed", False))
+    if irf_fevd_computed:
+        ordering = list(results.get("variable_ordering") or [])
+        irf_horizon_val = results.get("irf_horizon")
+        fevd_horizons_val = list(results.get("fevd_horizons") or [])
+        fevd_longest = results.get("fevd_longest_horizon")
+        own_shares = results.get("own_shock_share_longest_horizon") or {}
+
+        # Ordering-effect explanation
+        if len(ordering) >= 2:
+            first = ordering[0]
+            last_vars = ordering[1:]
+            if len(last_vars) == 1:
+                order_note = (
+                    f"'{first}' shocks can affect '{last_vars[0]}' "
+                    f"contemporaneously, but not vice versa."
+                )
+            else:
+                order_note = (
+                    f"'{first}' shocks can affect '{', '.join(last_vars)}' "
+                    f"contemporaneously, '{ordering[1]}' shocks affect "
+                    f"'{', '.join(ordering[2:])}' contemporaneously but "
+                    f"not '{first}', and so on down the ordering."
+                )
+        else:
+            order_note = ""
+
+        # FEVD own-shock breakdown (R3: one-decimal formatting)
+        if own_shares and fevd_longest is not None:
+            parts = []
+            for var_name in ordering:
+                share = own_shares.get(var_name)
+                if share is not None:
+                    try:
+                        parts.append(
+                            f"'{var_name}'s own shocks account for "
+                            f"{float(share) * 100:.1f}% of its forecast-"
+                            f"error variance"
+                        )
+                    except Exception:
+                        continue
+            if parts:
+                fevd_sentence = (
+                    f" Forecast-error-variance decomposition at horizons "
+                    f"{fevd_horizons_val}. At the {fevd_longest}-period "
+                    f"horizon, " + "; ".join(parts)
+                    + ". The FEVD data table gives the full breakdown "
+                    "with 90% credible bands."
+                )
+            else:
+                fevd_sentence = (
+                    f" Forecast-error-variance decomposition at horizons "
+                    f"{fevd_horizons_val}; see the FEVD data table for "
+                    f"the full breakdown."
+                )
+        else:
+            fevd_sentence = ""
+
+        # R1 — Σ point-estimate disclosure
+        sigma_note = (
+            " Credible bands reflect posterior uncertainty in VAR "
+            "coefficient draws; innovation covariance Σ is held at its "
+            "posterior point estimate (a common simplification that "
+            "keeps computational cost bounded). For fuller posterior "
+            "propagation including Σ uncertainty, refit with MCMC-"
+            "based BVAR (not yet available in TSL)."
+        )
+
+        structural_block = (
+            f" **Structural analysis (IRF and FEVD)**: posterior "
+            f"impulse-response functions computed under Cholesky "
+            f"identification with ordering "
+            f"[{', '.join(ordering)}] over {irf_horizon_val} periods. "
+            f"The ordering reflects an economic-theory assumption: "
+            f"{order_note} Reported IRF is the posterior median; 90% "
+            f"credible bands are in the Impulse Response data table."
+            f"{fevd_sentence}{sigma_note}"
+        )
+    else:
+        skip = str(results.get("irf_skip_reason") or "")
+        if skip == "fast_preset_default":
+            skip_msg = (
+                "Impulse-response functions and forecast-error-variance "
+                "decomposition were skipped on the Fast preset for speed. "
+                "Switch to Balanced or Thorough preset, or pass "
+                "compute_irf_fevd=True in params, to enable posterior "
+                "structural analysis."
+            )
+        elif skip == "user_disabled":
+            skip_msg = (
+                "Impulse-response functions and forecast-error-variance "
+                "decomposition were disabled by the caller "
+                "(compute_irf_fevd=False). Pass compute_irf_fevd=True "
+                "to enable."
+            )
+        elif skip.startswith("computation_error"):
+            skip_msg = (
+                f"IRF/FEVD computation failed ({skip}); the fit itself "
+                f"succeeded but structural analysis was skipped. Check "
+                f"the warning log for details; re-running may succeed."
+            )
+        else:
+            skip_msg = (
+                "Impulse-response functions and forecast-error-variance "
+                "decomposition are not computed on this run. Enable "
+                "with Balanced / Thorough preset or compute_irf_fevd=True."
+            )
+        structural_block = f" **Structural analysis**: {skip_msg}"
+
     return (
         f"Bayesian VAR with Minnesota (Litterman) prior and analytical "
         f"Normal-Inverse-Wishart posterior (no MCMC). Hyperparameters: "
@@ -140,10 +283,8 @@ def _tier2(results: dict) -> str:
         f"computed equation-by-equation; {n_draws} Monte Carlo posterior "
         f"draws generate the {coverage_pct}% credible intervals for the "
         f"forecast paths. {credible_sentence} BIC approximation {bic_str} "
-        f"on {total_params_str} total parameters. Impulse-response functions "
-        f"and forecast-error-variance decomposition are not emitted by this "
-        f"wrapper (unlike var_model); if causal structure is needed, refit "
-        f"with the frequentist var_model spec."
+        f"on {total_params_str} total parameters."
+        f"{structural_block}"
     )
 
 
@@ -202,6 +343,61 @@ def _trigger_parameter_blowup(results: dict) -> Optional[str]:
     )
 
 
+def _trigger_irf_credible_bands_straddle_zero(results: dict) -> Optional[str]:
+    """Follow-up 1c D1 — fires when any cross-variable shock-response
+    pair has a 90% credible band straddling zero at the peak IRF lag
+    AND the median effect exceeds the R2 magnitude-threshold filter
+    applied in the wrapper (so this only fires on "uncertain non-
+    trivial effects", not "essentially null effects")."""
+    pairs = results.get("zero_straddle_pairs") or []
+    if not pairs:
+        return None
+    n_pairs = len(pairs)
+    example_parts = []
+    for p in pairs[:3]:
+        try:
+            example_parts.append(
+                f"'{p.get('shock')}' → '{p.get('response')}' "
+                f"(peak at horizon {p.get('peak_horizon')})"
+            )
+        except Exception:
+            continue
+    more_clause = (
+        f", and {n_pairs - 3} more" if n_pairs > 3 else ""
+    )
+    return (
+        f"{n_pairs} cross-variable shock-response pair"
+        f"{'s' if n_pairs != 1 else ''} have a 90% credible band "
+        f"straddling zero at the peak IRF lag: "
+        + ", ".join(example_parts)
+        + more_clause
+        + ". These structural effects are not statistically "
+        "distinguishable from no response under the posterior. "
+        "Draw conclusions about these channels cautiously."
+    )
+
+
+def _trigger_cholesky_ordering_sensitivity(results: dict) -> Optional[str]:
+    """Follow-up 1c D2 — always-fires when IRF/FEVD was computed,
+    reminding the reader that Cholesky identification is ordering-
+    dependent. Silent when IRF/FEVD was skipped."""
+    if not results.get("irf_fevd_computed"):
+        return None
+    ordering = list(results.get("variable_ordering") or [])
+    if not ordering:
+        return None
+    return (
+        f"Cholesky identification imposes a recursive ordering: "
+        f"{', '.join(ordering)}. Results are sensitive to the "
+        f"variable order — rearranging these series will change "
+        f"IRF and FEVD interpretation. The ordering reflects an "
+        f"economic-theory assumption that earlier variables' shocks "
+        f"can contemporaneously affect later variables, but not "
+        f"vice versa. For robust structural analysis, compare "
+        f"results across multiple plausible orderings."
+    )
+
+
 SPEC = InterpretationSpec(
     technique_id="bvar",
     tier1_builder=_tier1,
@@ -210,6 +406,8 @@ SPEC = InterpretationSpec(
         _trigger_tight_prior_extreme,
         _trigger_loose_prior_extreme,
         _trigger_parameter_blowup,
+        _trigger_irf_credible_bands_straddle_zero,
+        _trigger_cholesky_ordering_sensitivity,
     ),
     mode_aware=False,
 )

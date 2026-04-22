@@ -62,11 +62,20 @@ where `A_post` and `V_post` are the posterior mean and variance of the coefficie
 
 Every BVAR run emits a two-tier plain-language Interpretation block.
 
-**Plain-Language Finding (Tier 1)** - inherits the var_model Tier 1 shape: names the lag order, number of variables and their names, effective observations, prior tightness (lambda1 with adjective band tight / moderate / loose), per-variable fit RMSEs, and the horizon + credible-interval coverage level. Includes an explicit cross-spec pointer to the frequentist var_model technique — noting that BVAR does not emit impulse-response functions or forecast-error-variance decomposition.
+**Plain-Language Finding (Tier 1)** - inherits the var_model Tier 1 shape: names the lag order, number of variables and their names, effective observations, prior tightness (lambda1 with adjective band tight / moderate / loose), per-variable fit RMSEs, and the horizon + credible-interval coverage level. When IRF/FEVD is computed (Balanced / Thorough preset default, or user override), Tier 1 closes with a pointer to Tier 2 for the structural analysis. When skipped (Fast preset default, or explicitly disabled), Tier 1 notes that IRF/FEVD can be enabled by re-running on a Balanced / Thorough preset.
 
-**Technical Interpretation (Tier 2)** - discloses the Minnesota prior hyperparameters (lambda1, lambda2, lambda3), the analytical Normal-Inverse-Wishart posterior, the number of Monte Carlo draws used to form the credible intervals, BIC approximation, and total parameter count. Critically, discloses that reported intervals are Bayesian credible intervals — they answer "what is the probability the parameter lies in this range given the data and prior" rather than the frequentist "what fraction of resampled intervals would contain the true parameter under repeated sampling." Points to var_model for causal structure analysis (IRF / FEVD).
+**Technical Interpretation (Tier 2)** - discloses the Minnesota prior hyperparameters (lambda1, lambda2, lambda3), the analytical Normal-Inverse-Wishart posterior, the number of Monte Carlo draws used to form the credible intervals, BIC approximation, and total parameter count. Critically, discloses that reported intervals are Bayesian credible intervals — they answer "what is the probability the parameter lies in this range given the data and prior" rather than the frequentist "what fraction of resampled intervals would contain the true parameter under repeated sampling."
+
+**Structural analysis (Tier 2, when computed)**:
+- **IRF** is computed under Cholesky identification with ordering matching the input variable order. Reported IRF is the posterior median across draws; 90% credible bands are in the Impulse Response data table.
+- **FEVD** is reported at horizons [1, 4, 8, 12, 24] (subject to the IRF horizon). Tier 2 cites each variable's own-shock share at the longest horizon (one-decimal precision, e.g., "Real GDP Growth's own shocks account for 50.3% of its forecast-error variance").
+- **Σ point-estimate disclosure**: credible bands reflect posterior uncertainty in VAR coefficient draws; innovation covariance Σ is held at its posterior point estimate (a simplification that keeps computational cost bounded). Fuller posterior propagation including Σ uncertainty requires MCMC-based BVAR, which is not yet available in TSL.
+
+When IRF/FEVD is skipped, Tier 2 discloses the reason (Fast preset default, user-disabled, or computation error) and how to enable.
 
 **Caveats (Tier 3, conditional)**:
 - Prior tightness lambda1 < 0.05 - posterior is strongly shrunk toward the random-walk prior; forecasts mirror RW-forecasts.
 - Prior tightness lambda1 > 0.5 - posterior is close to OLS with little shrinkage; Bayesian regularization benefits muted.
 - Total parameters > 20% of effective observations - even with Minnesota shrinkage the fit is data-hungry.
+- **IRF credible bands straddle zero at peak lag** (D1, Follow-up 1c) - fires when any cross-variable shock-response pair has a 90% credible band that straddles zero at its peak IRF lag AND the median effect is non-trivial (filtered by 5% of max cross-pair magnitude). These structural channels are not statistically distinguishable from no response under the posterior.
+- **Cholesky ordering sensitivity** (D2, Follow-up 1c) - always-fires when IRF/FEVD was computed. Reminds the reader that the recursive identification is ordering-dependent; rearranging variables changes interpretation. Suggests comparing results across multiple plausible orderings for robustness.
