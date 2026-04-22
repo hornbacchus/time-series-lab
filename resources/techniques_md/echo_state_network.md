@@ -72,3 +72,17 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every Echo State Network run emits a two-tier Interpretation block. Inherits C2 forecaster Tier 1; Tier 2 highlights closed-form readout and non-interpretability.
+
+**Tier 1** - names reservoir size, spectral radius rho, leak rate alpha, sparsity, ridge readout regularization. Backend (reservoirpy preferred; numpy fallback).
+
+**Tier 2** - explains closed-form ridge-regression readout (**no loss curve** - unlike other C7 neural specs). Spectral radius < 1.0 satisfies the echo state property. **D9 non-interpretability disclosure**: "Reservoir is a random sparse projection - no feature semantics are learned. Readout coefficients operate on random high-dimensional coordinates rather than original time-series features." Parallels C5 BVAR IRF/FEVD absence.
+
+**Caveats (Tier 3, conditional)**:
+- Backend fallback (reservoirpy -> numpy).
+- Spectral radius >= 1.0 - echo state property violated.
+- n_train < 5 x reservoir_size - readout ridge poorly constrained.

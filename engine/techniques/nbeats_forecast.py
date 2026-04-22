@@ -446,24 +446,62 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        _series_mean = float(np.mean(clean))
+        _series_std = float(np.std(clean, ddof=1)) if len(clean) > 1 else 0.0
+        _last_observed_value = float(clean[-1])
+        _forecast_end_value = float(fc_values[-1]) if len(fc_values) else _last_observed_value
+        _n_train = int(len(X)) if "X" in dir() else n - n_lags
+        _initial_loss = float(losses[0]) if losses else None
+        _loss_curve_summary = None
+        if losses and len(losses) >= 3:
+            mid_start = len(losses) // 3
+            mid_end = 2 * len(losses) // 3
+            mid_slice = losses[mid_start:mid_end] if mid_end > mid_start else losses
+            _loss_curve_summary = {
+                "initial": float(losses[0]),
+                "final": float(losses[-1]),
+                "median_middle_30pct": float(np.median(mid_slice)),
+                "n_epochs": len(losses),
+            }
+
+        audit = {
+            "backend": backend,
+            "stack_types": stack_types,
+            "n_blocks": n_blocks,
+            "hidden_size": hidden_size,
+            "n_lags": n_lags,
+            "epochs": epochs,
+            "final_loss": round(final_loss, 6),
+            "initial_loss": round(_initial_loss, 6) if _initial_loss is not None else None,
+            "loss_curve_summary": _loss_curve_summary,
+            "rmse": round(rmse, 4),
+            "r2": round(r2, 4),
+            "horizon": horizon,
+            "series_mean": round(_series_mean, 6),
+            "series_std": round(_series_std, 6),
+            "last_observed_value": round(_last_observed_value, 6),
+            "forecast_end_value": round(_forecast_end_value, 6),
+            "n_train": _n_train,
+            "n_obs": n,
+            "series_name": name,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("nbeats_forecast", dict(audit))
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "backend": backend,
-                "stack_types": stack_types,
-                "n_blocks": n_blocks,
-                "hidden_size": hidden_size,
-                "n_lags": n_lags,
-                "epochs": epochs,
-                "final_loss": round(final_loss, 6),
-                "rmse": round(rmse, 4),
-                "r2": round(r2, 4),
-                "horizon": horizon,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

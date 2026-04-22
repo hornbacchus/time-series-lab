@@ -144,3 +144,33 @@ from interpretation.specs import evt_pot_gpd as _evt_pot_gpd_spec               
 from interpretation.specs import stochastic_volatility as _stochastic_volatility_spec # noqa: F401, E402
 from interpretation.specs import har_rv as _har_rv_spec                               # noqa: F401, E402
 from interpretation.specs import caviar_quantile_dynamics as _caviar_spec             # noqa: F401, E402
+
+# Prompt C7 (15 specs, 15 wrappers):
+# ML / Deep Learning family — final C batch.
+# Tree cohort (4): C2 forecaster inheritance + feature importance.
+# Neural sequence (3): LSTM/GRU, TCN, Transformer — C2 inheritance +
+# training-loss disclosure; share _neural_sequence_common helper.
+# Neural decomposition (2): NBEATS, NHITS — direct multi-horizon;
+# share _neural_decomposition_common helper.
+# Standalone (6): nar_narx (feedforward MLP + AR lags; D5 framing),
+# gaussian_process_forecast (GP with D6 BVAR credible-interval reuse),
+# quantile_regression (stands alone per D7, distinct from CAViaR),
+# svr_forecast (C2 inheritance + SV structure), echo_state_network
+# (C2 inheritance + closed-form readout + D9 non-interpretability),
+# autoencoder_anomaly (stl_esd_anomaly shape + D10/D18 contamination
+# disclosure).
+from interpretation.specs import random_forest_forecast as _rf_spec                   # noqa: F401, E402
+from interpretation.specs import xgboost_forecast as _xgb_spec                        # noqa: F401, E402
+from interpretation.specs import lightgbm_forecast as _lgb_spec                       # noqa: F401, E402
+from interpretation.specs import gradient_boosting_forecast as _gbr_spec              # noqa: F401, E402
+from interpretation.specs import lstm_gru_forecast as _lstm_gru_spec                  # noqa: F401, E402
+from interpretation.specs import tcn_forecast as _tcn_spec                            # noqa: F401, E402
+from interpretation.specs import transformer_forecast as _transformer_spec            # noqa: F401, E402
+from interpretation.specs import nbeats_forecast as _nbeats_spec                      # noqa: F401, E402
+from interpretation.specs import nhits_forecast as _nhits_spec                        # noqa: F401, E402
+from interpretation.specs import nar_narx as _nar_narx_spec                           # noqa: F401, E402
+from interpretation.specs import gaussian_process_forecast as _gp_spec                # noqa: F401, E402
+from interpretation.specs import quantile_regression as _quantile_regression_spec     # noqa: F401, E402
+from interpretation.specs import svr_forecast as _svr_spec                            # noqa: F401, E402
+from interpretation.specs import echo_state_network as _esn_spec                      # noqa: F401, E402
+from interpretation.specs import autoencoder_anomaly as _autoencoder_spec             # noqa: F401, E402

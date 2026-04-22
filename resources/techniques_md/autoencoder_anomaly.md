@@ -45,3 +45,16 @@ Autoencoder Anomaly Detection uses a neural network autoencoder to learn a compr
 **PCA fallback**: When PyTorch is not available, the implementation uses PCA-based reconstruction. PCA projects windows onto the top `d` principal components and reconstructs from this subspace. The reconstruction error serves the same anomaly detection purpose, though with a linear model instead of nonlinear.
 
 **Comparison**: Autoencoders can capture complex nonlinear patterns that statistical methods (Z-score, IQR) miss. They are especially effective for multivariate time series where anomalies manifest as unusual combinations of variables. For univariate series with simple patterns, the STL-ESD method may be simpler and equally effective.
+
+
+## Interpretation
+
+Every Autoencoder Anomaly run emits a two-tier Interpretation block. Inherits the **C1 `stl_esd_anomaly` Tier 1 shape** (count + rate + threshold + most-extreme) with modifications.
+
+**Tier 1** - cites detected anomaly count and rate, most-extreme anomaly index and reconstruction error, window size and latent dimension. PyTorch preferred; sklearn PCA reconstruction fallback.
+
+**Tier 2** - discloses autoencoder reconstruction structure (window -> latent -> reconstruction; anomaly score = squared reconstruction error). **D10 threshold disclosure**: threshold is percentile-of-training-error controlled by the `contamination` parameter - NOT a hypothesis-test alpha (unlike stl_esd_anomaly). **Key divergence from stl_esd_anomaly**: reconstruction error is unsigned - no upward/downward direction split. Per-feature error attribution not exposed (backlog).
+
+**Caveats (Tier 3, conditional)**:
+- Backend fallback (PyTorch -> PCA linear reconstruction).
+- **D18 always-fires**: detected anomaly rate equals contamination parameter by construction - the count does not provide evidence about true anomaly fraction.

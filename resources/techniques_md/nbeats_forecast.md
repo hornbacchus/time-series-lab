@@ -90,3 +90,17 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every N-BEATS run emits a two-tier Interpretation block with neural-decomposition-cohort shared helpers.
+
+**Tier 1** - names stack types, blocks per stack, hidden size. Emphasizes **direct multi-horizon** training (all horizon steps in one pass) vs recursive 1-step feed-forward.
+
+**Tier 2** - explains architectural basis expansion via stacked residual blocks. Generic stacks are non-interpretable; trend/seasonality stacks (Thorough preset) enforce semantic decomposition. Per-stack variance contribution not exposed - dominant stack cannot be identified from available output.
+
+**Caveats (Tier 3, conditional)**:
+- Backend fallback to sklearn_ensemble (Ridge + GBR + MLP, no residual stacking).
+- Stack configuration is `['generic']` -> architecturally-interpretable decomposition not active; suggest switching to `['trend', 'seasonality']`.
+- Insufficient training, convergence not reached.

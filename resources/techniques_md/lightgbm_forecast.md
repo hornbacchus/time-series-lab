@@ -67,3 +67,17 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every LightGBM run emits a two-tier Interpretation block with tree-cohort Tier 1 + LightGBM-specific Tier 2.
+
+**Tier 1** - same shape as Random Forest with backend disclosure. Leaf-wise growth via `num_leaves` is cited explicitly.
+
+**Tier 2** - discloses leaf-wise growth (more aggressive than depth-wise; typically overfits faster on short series). When lightgbm library is not installed, discloses sklearn.GBR fallback (depth-wise, no num_leaves effect, different feature-importance convention).
+
+**Caveats (Tier 3, conditional)**:
+- Backend fallback to sklearn.GBR.
+- `num_leaves * 10 > n_train` - leaf-wise growth on short series.
+- Shared tree-cohort triggers (overfitting, insufficient training, extrapolation, time-index).

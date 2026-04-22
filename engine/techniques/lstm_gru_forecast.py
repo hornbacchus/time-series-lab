@@ -297,6 +297,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
             progress_callback(f"Training MLP ({epochs} epochs)", 20)
             model = _train_sklearn_mlp(X, y, hidden_sizes, epochs, lr, ctx.seed)
             final_loss = float(np.mean((y - model.predict(X)) ** 2))
+            # Attempt to pull the sklearn MLP loss curve for convergence
+            # diagnostic (D14). Fallback: empty list — trigger will skip.
+            losses = list(getattr(model, "loss_curve_", []))
 
             progress_callback("Generating forecasts", 80)
             last_features = normalized[-n_lags:]
@@ -384,26 +387,65 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        _series_mean = float(np.mean(clean))
+        _series_std = float(np.std(clean, ddof=1)) if len(clean) > 1 else 0.0
+        _last_observed_value = float(clean[-1])
+        _forecast_end_value = float(fc_values[-1]) if len(fc_values) else _last_observed_value
+        _n_train = int(len(X))
+        # D14 convergence-diagnostic fields
+        _initial_loss = float(losses[0]) if losses else None
+        _loss_curve_summary = None
+        if losses and len(losses) >= 3:
+            mid_start = len(losses) // 3
+            mid_end = 2 * len(losses) // 3
+            mid_slice = losses[mid_start:mid_end] if mid_end > mid_start else losses
+            _loss_curve_summary = {
+                "initial": float(losses[0]),
+                "final": float(losses[-1]),
+                "median_middle_30pct": float(np.median(mid_slice)),
+                "n_epochs": len(losses),
+            }
+
+        audit = {
+            "model_type": model_type,
+            "backend": backend,
+            "hidden_size": hidden_size,
+            "n_layers": n_layers,
+            "n_lags": n_lags,
+            "epochs": epochs,
+            "learning_rate": lr,
+            "final_loss": round(final_loss, 6),
+            "initial_loss": round(_initial_loss, 6) if _initial_loss is not None else None,
+            "loss_curve_summary": _loss_curve_summary,
+            "rmse": round(rmse, 4),
+            "mae": round(mae, 4),
+            "r2": round(r2, 4),
+            "horizon": horizon,
+            "series_mean": round(_series_mean, 6),
+            "series_std": round(_series_std, 6),
+            "last_observed_value": round(_last_observed_value, 6),
+            "forecast_end_value": round(_forecast_end_value, 6),
+            "n_train": _n_train,
+            "n_obs": n,
+            "series_name": name,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("lstm_gru_forecast", dict(audit))
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "model_type": model_type,
-                "backend": backend,
-                "hidden_size": hidden_size,
-                "n_layers": n_layers,
-                "n_lags": n_lags,
-                "epochs": epochs,
-                "learning_rate": lr,
-                "final_loss": round(final_loss, 6),
-                "rmse": round(rmse, 4),
-                "mae": round(mae, 4),
-                "r2": round(r2, 4),
-                "horizon": horizon,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

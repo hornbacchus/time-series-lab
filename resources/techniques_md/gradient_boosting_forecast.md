@@ -100,3 +100,14 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every Gradient Boosting run emits a two-tier Interpretation block with tree-cohort template.
+
+**Tier 1** - sklearn-native gradient boosting with shallowest default max_depth in the tree cohort. No backend fallback (sklearn always available).
+
+**Tier 2** - Unlike XGBoost / LightGBM, this wrapper has no subsample / colsample hyperparameters exposed; sklearn defaults apply. Shallowest max_depth tightens regularization by default.
+
+**Caveats (Tier 3, conditional)**: shared tree-cohort triggers (overfitting, insufficient training, extrapolation, time-index dominance).

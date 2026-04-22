@@ -73,3 +73,16 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every N-HiTS run emits a two-tier Interpretation block with neural-decomposition-cohort shared helpers.
+
+**Tier 1** - names stacks, blocks, hidden size, and multi-rate pooling sizes. Direct multi-horizon like NBEATS.
+
+**Tier 2** - explains hierarchical-interpolation extension via multi-rate pooling (each stack operates at a different temporal resolution; coarser stacks capture low-frequency, finer stacks add detail).
+
+**Caveats (Tier 3, conditional)**:
+- Backend fallback always-fires: under sklearn_ensemble, NHITS collapses to NBEATS (identical output - the multi-rate pooling that distinguishes NHITS requires PyTorch).
+- Shared neural-decomp triggers.

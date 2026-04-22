@@ -789,6 +789,22 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "stochastic_volatility",
         "har_rv",
         "caviar_quantile_dynamics",
+        # Prompt C7 (15): ML / Deep Learning family
+        "random_forest_forecast",
+        "xgboost_forecast",
+        "lightgbm_forecast",
+        "gradient_boosting_forecast",
+        "lstm_gru_forecast",
+        "tcn_forecast",
+        "transformer_forecast",
+        "nbeats_forecast",
+        "nhits_forecast",
+        "nar_narx",
+        "gaussian_process_forecast",
+        "quantile_regression",
+        "svr_forecast",
+        "echo_state_network",
+        "autoencoder_anomaly",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1089,21 +1105,39 @@ class TestT19C5RegistryInventory(unittest.TestCase):
 
 
 class TestT20C6RegistryInventory(unittest.TestCase):
-    """T20 — After Prompt C6 lands, the registry contains exactly the
-    Prompt A + Prompt B + Prompt C1 + Prompt C2 + Prompt C3 + Prompt C4
-    + Prompt C5 + Prompt C6 specs, totaling 63 techniques (59 baseline
-    + 4 Volatility / Risk remainder). Pins the count at the C6 landing
-    moment; Prompt C7 will relax this into a ">=" check."""
+    """T20 — After Prompt C6 landed, the registry contained at least
+    63 specs (59 baseline + 4 Volatility / Risk remainder). Prompt C7
+    grows the set further; T20 now pins the C6 minimum and T21 pins
+    the exact C7 count."""
 
-    def test_exactly_63_specs_registered(self):
+    def test_at_least_63_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
-        self.assertEqual(
+        self.assertGreaterEqual(
             len(registered), 63,
-            f"Expected exactly 63 registered specs (Prompt A/B: 8 + "
+            f"Expected at least 63 registered specs (Prompt A/B: 8 + "
             f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
             f"C4: 7 + Prompt C5: 7 + Prompt C6: 4). Got "
             f"{len(registered)}: {sorted(registered)}"
+        )
+
+
+class TestT21C7RegistryInventory(unittest.TestCase):
+    """T21 — After Prompt C7 lands (the final C batch), the registry
+    contains exactly the Prompt A + Prompt B + Prompt C1 + Prompt C2 +
+    Prompt C3 + Prompt C4 + Prompt C5 + Prompt C6 + Prompt C7 specs,
+    totaling 78 techniques (63 baseline + 15 ML / Deep Learning
+    family). Pins the count at the C7 landing moment."""
+
+    def test_exactly_78_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertEqual(
+            len(registered), 78,
+            f"Expected exactly 78 registered specs (Prompt A/B: 8 + "
+            f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
+            f"C4: 7 + Prompt C5: 7 + Prompt C6: 4 + Prompt C7: 15). "
+            f"Got {len(registered)}: {sorted(registered)}"
         )
 
 
@@ -1448,6 +1482,116 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "distribution_free": True,
         "quantile_theta": 0.05,
         "theta": 0.05,  # CAViaR quantile level; no existing collision
+        # Prompt C7 ML / Deep Learning fields
+        # Tree cohort
+        "n_estimators": 100,
+        "max_depth": 6,
+        "min_samples_leaf": 2,
+        "learning_rate": 0.1,
+        "subsample": 1.0,
+        "num_leaves": 15,
+        "train_rmse": 10.0,
+        "train_mae": 8.0,
+        "train_r2": 0.9,
+        "cv_rmse": 15.0,
+        "top_feature": "lag_1",
+        "top_features": [
+            {"name": "lag_1", "importance": 0.5},
+            {"name": "lag_2", "importance": 0.2},
+        ],
+        "backend": "sklearn",
+        # Neural sequence cohort
+        "hidden_size": 32,
+        "n_layers": 1,
+        "epochs": 50,
+        "final_loss": 0.1,
+        "initial_loss": 1.0,
+        "loss_curve_summary": {
+            "initial": 1.0, "final": 0.1, "median_middle_30pct": 0.3, "n_epochs": 50,
+        },
+        "model_type": "lstm",  # used by lstm_gru_forecast
+        "n_channels": [16, 16],
+        "kernel_size": 3,
+        "receptive_field": 8,
+        "d_model": 32,
+        "n_heads": 2,
+        "n_encoder_layers": 1,
+        "dim_feedforward": 64,
+        "n_params": 1000,
+        # Neural decomposition cohort
+        "stack_types": ["generic"],
+        "n_blocks": 2,
+        "n_stacks": 2,
+        "pooling_sizes": [2, 1],
+        # nar_narx
+        "ar_lags": 3,
+        "hidden_layers": [10],
+        "activation": "relu",
+        "alpha_reg": 1e-4,
+        "rmse_insample": 5.0,
+        "mae_insample": 3.0,
+        "r_squared": 0.3,
+        "rmse_cv": None,
+        "n_effective": 200,
+        "n_features": 3,
+        "training_iters": 100,
+        "exogenous": [],
+        "exog_lags": None,
+        "model": "NAR",
+        # GP
+        "kernel_type": "rbf",
+        "kernel_params": "RBF(length_scale=1.0)",
+        "log_marginal_likelihood": -100.0,
+        "avg_forecast_std": 1.0,
+        "length_scale": 1.0,
+        "length_scale_lower_bound": 1e-5,
+        # Quantile regression (overlap with CAViaR keys theta/quantiles is fine)
+        "n_quantiles": 5,
+        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+        "n_lags": 6,
+        "train_rmse_median": 0.5,
+        "n_crossings": 0,
+        "top_features_per_quantile": {
+            "0.500": [{"name": "lag_1", "importance": 0.5}],
+        },
+        # SVR
+        # NOTE: `gamma` key is NOT re-set here — ETS / HW / STAR specs
+        # also read `gamma` as a float smoothing parameter. SVR spec
+        # renders `gamma` gracefully when None (the wrapper exports it
+        # as the string "scale" in practice, which would clash with
+        # ETS / HW numeric-gamma). The SVR-specific fixture instead
+        # relies on the earlier numeric `gamma` value; at runtime the
+        # wrapper's actual string "scale" routes through the SVR spec
+        # which formats with !r.
+        "kernel": "rbf",
+        "C": 1.0,
+        "epsilon": 0.1,
+        "n_support_vectors": 50,
+        "sv_ratio": 0.3,
+        "scaling_applied": True,
+        # ESN
+        "reservoir_size": 100,
+        "spectral_radius": 0.9,
+        "leak_rate": 0.3,
+        "input_scaling": 1.0,
+        "ridge_alpha": 1e-4,
+        "sparsity": 0.1,
+        "warmup": 10,
+        "r2": 0.8,
+        "rmse": 1.5,
+        "mae": 1.0,
+        # Autoencoder anomaly
+        "window_size": 5,
+        "hidden_dim": 8,
+        "contamination": 0.05,
+        "threshold": 0.5,
+        "threshold_type": "percentile_of_training_error",
+        "anomaly_rate": 0.05,
+        "mean_recon_error": 0.1,
+        "max_recon_error": 1.0,
+        "most_extreme_idx": 500,
+        "most_extreme_error": 1.0,
+        "anomaly_indices": [100, 200],
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1544,6 +1688,32 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # ``h_t`` as the latent AR(1) state variable subscript (same
         # category as y_t / x_t etc. from the Prompt A allowlist).
         "use_log", "h_t",
+        # (c6) Prompt C7 — ML/DL programmatic hyperparameter names
+        # cited in Tier 2 disclosure (sklearn / PyTorch / library API
+        # surface that users type as param values). Tree cohort,
+        # neural cohort, GP, SVR, ESN, autoencoder hyperparameters.
+        "max_depth", "learning_rate", "num_leaves", "colsample_bytree",
+        "min_samples_leaf", "min_child_samples",
+        "hidden_size", "n_layers", "n_estimators", "n_lags",
+        "d_model", "n_heads", "dim_feedforward",
+        "n_blocks", "n_stacks", "stack_types", "pooling_sizes",
+        "reservoir_size", "spectral_radius", "leak_rate",
+        "input_scaling", "ridge_alpha",
+        "length_scale", "length_scales", "noise_level", "signal_variance",
+        "hidden_dim", "window_size",
+        "ar_lags", "exog_lags", "alpha_reg",
+        "early_stopping", "weight_decay",
+        "changepoint_range",
+        # Cross-technique names cited in C7 specs (e.g., NBEATS
+        # references NHITS; neural decomposition references Ridge /
+        # GBR / MLP fallbacks):
+        "random_forest_forecast", "xgboost_forecast",
+        "lightgbm_forecast", "gradient_boosting_forecast",
+        "stl_esd_anomaly",
+        # Math notation in C7 specs: W_out is the readout-weight
+        # matrix in echo_state_network Tier 2 (same category as y_t /
+        # x_t / h_t — state-variable subscript/suffix notation):
+        "W_out",
         # (d) test-fixture identifier used by TestT14's minimal-input
         # probe — not a programmatic leak from production code:
         "test_series",

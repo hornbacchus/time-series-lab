@@ -332,22 +332,56 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        # Top-5 feature importances per quantile (D7 + Phase 2 addition).
+        _top_features_per_quantile = {}
+        try:
+            for q in quantiles:
+                m = models[q]
+                imp = getattr(m, "feature_importances_", None)
+                if imp is not None:
+                    pairs = sorted(zip(feature_names, imp), key=lambda x: -float(x[1]))[:5]
+                    _top_features_per_quantile[f"{q:.3f}"] = [
+                        {"name": str(nm), "importance": round(float(v), 4)}
+                        for nm, v in pairs
+                    ]
+        except Exception:
+            pass
+
+        _series_mean = float(np.mean(clean))
+        _series_std = float(np.std(clean, ddof=1)) if len(clean) > 1 else 0.0
+
+        audit = {
+            "n_quantiles": len(quantiles),
+            "quantiles": [round(q, 3) for q in quantiles],
+            "n_estimators": n_estimators,
+            "max_depth": max_depth,
+            "n_lags": n_lags,
+            "train_rmse_median": round(train_rmse, 4),
+            "n_crossings": n_crossings,
+            "horizon": horizon,
+            "top_features_per_quantile": _top_features_per_quantile,
+            "series_mean": round(_series_mean, 6),
+            "series_std": round(_series_std, 6),
+            "n_obs": n,
+            "series_name": name,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("quantile_regression", dict(audit))
+
         return make_response(
             ctx,
             tables=[fc_table, interval_table, summary_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "n_quantiles": len(quantiles),
-                "quantiles": [round(q, 3) for q in quantiles],
-                "n_estimators": n_estimators,
-                "max_depth": max_depth,
-                "n_lags": n_lags,
-                "train_rmse_median": round(train_rmse, 4),
-                "n_crossings": n_crossings,
-                "horizon": horizon,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

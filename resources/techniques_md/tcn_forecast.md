@@ -100,3 +100,14 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every TCN run emits a two-tier Interpretation block with neural-sequence-cohort shared helpers.
+
+**Tier 1** - names dilated convolutional channels, kernel size, receptive field (the model's memory span in timesteps).
+
+**Tier 2** - explains dilation geometry (receptive field expands geometrically with depth, enabling long-range dependencies at shallow depths). Fallback caveat when PyTorch unavailable.
+
+**Caveats (Tier 3, conditional)**: shared neural-sequence triggers (backend fallback, insufficient training, convergence, params-exceed-samples).

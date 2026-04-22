@@ -67,3 +67,17 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every SVR run emits a two-tier Interpretation block. Inherits C2 forecaster Tier 1 structure; Tier 2 substitutes support-vector structure for tree-style feature importances.
+
+**Tier 1** - names kernel (default RBF), train vs CV RMSE with overfitting ratio, support-vector count with SV ratio health indicator (healthy / elevated / overfitting-by-memorization), hyperparameters (C, epsilon, gamma).
+
+**Tier 2** - discloses C (regularization), epsilon (insensitive-tube half-width), gamma fixed at "scale" (the #1 SVR sensitivity, NOT user-configurable). Explicit feature-scaling disclosure (StandardScaler applied to X and y) with double-scaling warning. RBF extrapolation caveat (predictions collapse to global mean at long horizons). Honest-disclosure of limited interpretability: no native feature importance on non-linear kernels.
+
+**Caveats (Tier 3, conditional)**:
+- Overfitting (CV/train RMSE > 2).
+- **Overfitting by memorization** (D11 refined label): support vectors > 80% of training set.
+- RBF + horizon > 3 - extrapolation collapse warning.

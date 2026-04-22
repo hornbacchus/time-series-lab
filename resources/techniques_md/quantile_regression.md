@@ -64,3 +64,16 @@ XGBoost, LightGBM, and similar methods support quantile loss natively, allowing 
 **Application to time series**: Lag features `(y_{t-1}, ..., y_{t-p})`, rolling statistics, and calendar features serve as predictors X. The quantile regression produces conditional quantile forecasts at each horizon, naturally accommodating heteroskedastic forecast uncertainty (wider intervals during volatile periods, narrower during calm periods).
 
 **Comparison with parametric intervals**: Gaussian prediction intervals assume `Y_t | X ~ N(mu, sigma^2)` and compute `mu +/- z * sigma`. Quantile regression imposes no distributional assumption and can produce asymmetric intervals that better reflect the true conditional distribution.
+
+
+## Interpretation
+
+Every Quantile Regression run emits a two-tier Interpretation block. **Stands alone** per D7 - distinct from CAViaR (which is autoregressive on the quantile state).
+
+**Tier 1** - names the quantile levels (integer-when-whole rendering per Convention A), median-model RMSE, and any quantile-crossing violations. Discloses the median-rollover coupling risk up-front.
+
+**Tier 2** - explains sklearn GradientBoostingRegressor with `loss='quantile'` fitted independently per quantile level (distribution-free check / pinball loss - no distributional assumption). Contrasts with CAViaR: no backtest suite (Kupiec/DQ/Christoffersen); only quantile-crossing count as a monotonicity sanity check. Cites top-3 feature importances per quantile.
+
+**Caveats (Tier 3, conditional)**:
+- Quantile crossings detected -> suggest isotonic post-processing or joint-quantile model.
+- Median rollover coupling (always fires for horizon > 1) - quantile uncertainty at long horizons reflects median uncertainty rather than quantile-specific dynamics.

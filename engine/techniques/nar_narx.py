@@ -423,6 +423,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        _top_features = [
+            {"name": str(fn), "importance": round(float(imp), 4)}
+            for fn, imp in sorted(importances.items(), key=lambda x: -x[1])[:5]
+        ]
+        _series_mean = float(np.mean(y))
+        _series_std = float(np.std(y, ddof=1)) if len(y) > 1 else 0.0
+        _last_observed_value = float(y[-1])
+        # For nar_narx, `fc` is the forecast array
+        _forecast_end_value = None
+        try:
+            _forecast_end_value = float(fc[-1])
+        except Exception:
+            pass
+
         audit = {
             "model": model_name,
             "ar_lags": ar_lags,
@@ -437,10 +452,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "rmse_cv": round(cv_rmse, 4) if cv_rmse is not None else None,
             "n_effective": effective_n,
             "n_features": X.shape[1],
-            "n_params": sum(np.prod(w.shape) for w in mlp.coefs_) + sum(len(b) for b in mlp.intercepts_),
-            "training_iters": mlp.n_iter_,
+            "n_params": int(sum(np.prod(w.shape) for w in mlp.coefs_) + sum(len(b) for b in mlp.intercepts_)),
+            "training_iters": int(mlp.n_iter_),
             "horizon": horizon,
+            "top_feature": top_feature,
+            "top_features": _top_features,
+            "series_mean": round(_series_mean, 6),
+            "series_std": round(_series_std, 6),
+            "last_observed_value": round(_last_observed_value, 6),
+            "forecast_end_value": round(_forecast_end_value, 6) if _forecast_end_value is not None else None,
+            "n_obs": int(len(y)),
+            "series_name": name,
         }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("nar_narx", dict(audit))
 
         return make_response(
             ctx,
@@ -448,6 +478,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             plain_english_summary=plain,
             warnings=warnings,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

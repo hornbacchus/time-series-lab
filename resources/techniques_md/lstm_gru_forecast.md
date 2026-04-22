@@ -98,3 +98,18 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every LSTM/GRU run emits a two-tier Interpretation block with neural-sequence-cohort shared helpers.
+
+**Tier 1** - names architecture (layers x hidden units), sequence length, training epochs, in-sample RMSE/R-squared. PyTorch preferred; sklearn MLP fallback approximates via flat-feature regression.
+
+**Tier 2** - discloses sequence model structure (LSTM gates or GRU update/reset gates via BPTT when PyTorch available). Fallback caveat: sklearn MLP cannot emulate true recurrence.
+
+**Caveats (Tier 3, conditional)**:
+- Backend fallback (PyTorch -> sklearn_mlp).
+- Insufficient training data (n_train < 100).
+- Training-loss convergence not reached (D14 - final_loss > 0.95 x initial or > 2 x median).
+- Params-exceed-training-samples (n_params > 10 x n_train).

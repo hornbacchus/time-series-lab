@@ -90,3 +90,16 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every Gaussian Process run emits a two-tier Interpretation block. Inherits C2 forecaster Tier 1 structure; Tier 2 reuses the Prompt C5 BVAR credible-vs-confidence semantic disclosure pattern (D6).
+
+**Tier 1** - names the kernel (RBF / Matern / Rational Quadratic), in-sample RMSE and R-squared, average posterior forecast standard deviation.
+
+**Tier 2** - cites fitted kernel hyperparameters (length-scale, noise level, log marginal likelihood). Explicitly discloses: "Credible intervals (Bayesian posterior) are NOT confidence intervals (frequentist coverage)" - same disclosure convention as BVAR. Joint multi-horizon posterior - covariance encodes multi-step dependencies. O(n^3) cost gated by preset.
+
+**Caveats (Tier 3, conditional)**:
+- Length-scale at bound (D17) - optimizer failed to find meaningful smoothness; kernel has degenerated to near-white-noise.
+- Low R-squared with posterior std near RMSE - treat as uncertain nowcast, not point forecast.

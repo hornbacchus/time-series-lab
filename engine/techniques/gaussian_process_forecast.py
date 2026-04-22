@@ -287,31 +287,75 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        _series_mean = float(np.mean(clean))
+        _series_std = float(np.std(clean, ddof=1)) if len(clean) > 1 else 0.0
+        _last_observed_value = float(clean[-1])
+        _forecast_end_value = float(y_pred_fc[-1]) if len(y_pred_fc) else _last_observed_value
+        # D17 — length-scale-at-bound detection. Try to extract length_scale
+        # from the fitted kernel hyperparameters. sklearn exposes
+        # theta-log-space and hyperparameter metadata on gp.kernel_.
+        _length_scale = None
+        _length_scale_lower_bound = 1e-5  # sklearn default
+        try:
+            for hyp in gp.kernel_.hyperparameters:
+                if "length_scale" in hyp.name:
+                    _length_scale = float(
+                        np.exp(gp.kernel_.theta[list(
+                            h.name for h in gp.kernel_.hyperparameters
+                        ).index(hyp.name)])
+                    )
+                    if hasattr(hyp, "bounds") and hyp.bounds is not None:
+                        try:
+                            _length_scale_lower_bound = float(hyp.bounds[0][0])
+                        except Exception:
+                            pass
+                    break
+        except Exception:
+            pass
+
+        audit = {
+            "kernel_type": kernel_type,
+            "kernel_params": kernel_str,
+            "log_marginal_likelihood": round(lml, 4),
+            "rmse": round(rmse, 4),
+            "r2": round(r2, 4),
+            "avg_forecast_std": round(avg_fc_std, 4),
+            "horizon": horizon,
+            "n_observations": n,
+            "normalized": normalize,
+            "length_scale": round(_length_scale, 6) if _length_scale is not None else None,
+            "length_scale_lower_bound": _length_scale_lower_bound,
+            "series_mean": round(_series_mean, 6),
+            "series_std": round(_series_std, 6),
+            "last_observed_value": round(_last_observed_value, 6),
+            "forecast_end_value": round(_forecast_end_value, 6),
+            "series_name": name,
+            **format_significance_disclosure(
+                test_name="GP Bayesian credible interval (kernel-conditional)",
+                critical_value_formula=(
+                    "mean ± z(1-α/2) · posterior_std from "
+                    "sklearn.GaussianProcessRegressor.predict(return_std=True)"
+                ),
+                ac_corrected=False,
+            ),
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("gaussian_process_forecast", dict(audit))
+
         return make_response(
             ctx,
             tables=[fc_table, fitted_table, summary_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "kernel_type": kernel_type,
-                "kernel_params": kernel_str,
-                "log_marginal_likelihood": round(lml, 4),
-                "rmse": round(rmse, 4),
-                "r2": round(r2, 4),
-                "avg_forecast_std": round(avg_fc_std, 4),
-                "horizon": horizon,
-                "n_observations": n,
-                "normalized": normalize,
-                **format_significance_disclosure(
-                    test_name="GP Bayesian credible interval (kernel-conditional)",
-                    critical_value_formula=(
-                        "mean ± z(1-α/2) · posterior_std from "
-                        "sklearn.GaussianProcessRegressor.predict(return_std=True)"
-                    ),
-                    ac_corrected=False,
-                ),
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

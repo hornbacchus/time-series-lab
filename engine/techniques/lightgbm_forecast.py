@@ -433,28 +433,57 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        _series_mean = float(np.mean(clean))
+        _series_std = float(np.std(clean, ddof=1)) if len(clean) > 1 else 0.0
+        _last_observed_value = float(clean[-1])
+        _forecast_end_value = float(fc_values[-1]) if len(fc_values) else _last_observed_value
+        _top_features = [
+            {"name": str(fname), "importance": round(float(imp), 4)}
+            for fname, imp in feat_imp[:5]
+        ]
+        _n_train = int(n - n_lags)
+
+        audit = {
+            "backend": backend,
+            "n_estimators": n_estimators,
+            "max_depth": max_depth,
+            "num_leaves": num_leaves,
+            "learning_rate": lr,
+            "subsample": subsample,
+            "n_lags": n_lags,
+            "n_features": len(feature_names),
+            "train_rmse": round(train_rmse, 4),
+            "train_mae": round(train_mae, 4),
+            "train_r2": round(train_r2, 4),
+            "cv_rmse": round(avg_cv_rmse, 4),
+            "horizon": horizon,
+            "top_feature": top_feature,
+            "top_features": _top_features,
+            "series_mean": round(_series_mean, 6),
+            "series_std": round(_series_std, 6),
+            "last_observed_value": round(_last_observed_value, 6),
+            "forecast_end_value": round(_forecast_end_value, 6),
+            "n_train": _n_train,
+            "n_obs": n,
+            "series_name": name,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("lightgbm_forecast", dict(audit))
+
         return make_response(
             ctx,
             tables=[fc_table, summary_table, imp_table],
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "backend": backend,
-                "n_estimators": n_estimators,
-                "max_depth": max_depth,
-                "num_leaves": num_leaves,
-                "learning_rate": lr,
-                "subsample": subsample,
-                "n_lags": n_lags,
-                "n_features": len(feature_names),
-                "train_rmse": round(train_rmse, 4),
-                "train_mae": round(train_mae, 4),
-                "train_r2": round(train_r2, 4),
-                "cv_rmse": round(avg_cv_rmse, 4),
-                "horizon": horizon,
-                "top_feature": top_feature,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

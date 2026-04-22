@@ -98,3 +98,14 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every Transformer run emits a two-tier Interpretation block with neural-sequence-cohort shared helpers.
+
+**Tier 1** - names d_model, attention heads, encoder layers, feed-forward dim, total parameter count.
+
+**Tier 2** - explains self-attention structure (query/key/value projections). Attention weights COULD be extracted as an interpretability axis but are NOT currently exposed at the wrapper level (backlog).
+
+**Caveats (Tier 3, conditional)**: shared neural-sequence triggers; params-exceed-samples fires frequently on short series given Transformer's typical parameter count.

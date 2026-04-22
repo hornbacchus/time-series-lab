@@ -65,3 +65,16 @@ where `z = (Y_{t-1}, ..., Y_{t-p}, X_{t-1}, ..., X_{t-q})`, `g` is an activation
 - **White's test**: Uses neural network auxiliary regressions.
 
 **Comparison with linear models**: NAR/NARX should outperform linear ARIMA when genuine nonlinearity exists. If the true process is linear, the extra flexibility can lead to worse forecasts due to overfitting. Always compare against linear benchmarks using out-of-sample evaluation.
+
+
+## Interpretation
+
+Every NAR/NARX run emits a two-tier Interpretation block. Stands alone per D5 framing: "Feedforward neural forecaster (MLP with AR lags)".
+
+**Tier 1** - distinct framing that emphasizes the feedforward-MLP nature (NOT a temporal architecture). Cites architecture, AR lags, exogenous regressors (NARX mode), total parameters, training iterations, and permutation-based top-5 features.
+
+**Tier 2** - explains sklearn MLPRegressor + AR-lag feature construction. Uniquely among C7 neural specs, exposes permutation-based feature importance (LSTM/GRU/TCN/Transformer have none at the wrapper level).
+
+**Caveats (Tier 3, conditional)**:
+- Low R-squared < 0.4 - consider exogenous regressors (NARX), longer AR lags, or a temporal architecture.
+- Effective training samples < 100.

@@ -486,26 +486,50 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        _series_mean = float(np.mean(clean))
+        _series_std = float(np.std(clean, ddof=1)) if len(clean) > 1 else 0.0
+        _last_observed_value = float(clean[-1])
+        _forecast_end_value = float(fc_values[-1]) if len(fc_values) else _last_observed_value
+        _n_train = int(n - warmup)
+
+        audit = {
+            "backend": backend,
+            "reservoir_size": reservoir_size,
+            "spectral_radius": spectral_radius,
+            "leak_rate": leak_rate,
+            "input_scaling": input_scaling,
+            "ridge_alpha": ridge_alpha,
+            "sparsity": sparsity,
+            "warmup": warmup,
+            "rmse": round(rmse, 4),
+            "mae": round(mae, 4),
+            "r2": round(r2, 4),
+            "horizon": horizon,
+            "series_mean": round(_series_mean, 6),
+            "series_std": round(_series_std, 6),
+            "last_observed_value": round(_last_observed_value, 6),
+            "forecast_end_value": round(_forecast_end_value, 6),
+            "n_train": _n_train,
+            "n_obs": n,
+            "series_name": name,
+        }
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("echo_state_network", dict(audit))
+
         return make_response(
             ctx,
             tables=tables,
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
-            audit_fields={
-                "backend": backend,
-                "reservoir_size": reservoir_size,
-                "spectral_radius": spectral_radius,
-                "leak_rate": leak_rate,
-                "input_scaling": input_scaling,
-                "ridge_alpha": ridge_alpha,
-                "sparsity": sparsity,
-                "warmup": warmup,
-                "rmse": round(rmse, 4),
-                "mae": round(mae, 4),
-                "r2": round(r2, 4),
-                "horizon": horizon,
-            },
+            interpretation=interp,
+            audit_fields=audit,
         )
 
     except ValueError as e:

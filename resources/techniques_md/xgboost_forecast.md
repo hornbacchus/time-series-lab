@@ -71,3 +71,16 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every XGBoost run emits a two-tier Interpretation block with tree-cohort Tier 1 template + XGBoost-specific Tier 2.
+
+**Plain-Language Finding (Tier 1)** - same shape as Random Forest with backend disclosure (xgboost preferred; falls back to sklearn.GradientBoostingRegressor when unavailable).
+
+**Technical Interpretation (Tier 2)** - discloses gradient-boosted ensemble structure with subsample / learning_rate regularization. When the xgboost library is not installed, explicitly discloses the sklearn.GBR fallback as a semantic drift (not equivalent to true XGBoost defaults).
+
+**Caveats (Tier 3, conditional)**:
+- Backend fallback (xgboost -> sklearn_gbr) - results are approximate.
+- Overfitting, insufficient training, tree extrapolation, time-index dominance triggers (shared with RF).

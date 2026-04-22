@@ -364,19 +364,38 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Done", 100)
 
+        # ── Interpretation layer (Prompt C7) ──────────────────────────
+        # D10 — threshold is percentile-of-training-error, not α.
+        # D18 — anomaly rate matches contamination by construction.
+        _most_extreme_idx = int(np.argmax(point_errors)) if len(point_errors) else None
+        _most_extreme_error = float(np.max(point_errors)) if len(point_errors) else None
+
         audit = {
             "backend": backend,
             "window_size": window_size,
             "hidden_dim": hidden_dim,
             "contamination": contamination,
             "threshold": round(threshold, 6),
+            "threshold_type": "percentile_of_training_error",
             "n_anomalies": n_anomalies,
             "anomaly_rate": round(n_anomalies / n, 6),
             "mean_recon_error": round(float(np.mean(point_errors)), 6),
             "max_recon_error": round(float(np.max(point_errors)), 6),
+            "most_extreme_idx": _most_extreme_idx,
+            "most_extreme_error": round(_most_extreme_error, 6) if _most_extreme_error is not None else None,
             "anomaly_indices": [int(i) for i in anomaly_indices],
+            "direction_absent": True,
+            "n_obs": n,
+            "series_name": name,
         }
         audit.update(extra_info)
+
+        try:
+            from interpretation import build_interpretation  # type: ignore
+        except Exception:
+            def build_interpretation(technique_id, results):  # type: ignore
+                return None
+        interp = build_interpretation("autoencoder_anomaly", dict(audit))
 
         return make_response(
             ctx,
@@ -384,6 +403,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             plain_english_summary=plain_english,
             warnings=warn_list,
             charting_suggestions=charting,
+            interpretation=interp,
             audit_fields=audit,
         )
 

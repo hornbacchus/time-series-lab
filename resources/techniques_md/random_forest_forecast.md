@@ -73,3 +73,18 @@ For calibrated intervals on an ML forecast, wrap this technique with
 and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
+
+
+## Interpretation
+
+Every Random Forest run emits a two-tier plain-language Interpretation block. Inherits the Prompt C2 forecaster Tier 1 template via the `_tree_common.py` shared helper.
+
+**Plain-Language Finding (Tier 1)** - names the series, observations, horizon, train vs 3-fold CV RMSEs (with overfitting ratio), number of trees and max_depth, and the top-ranked feature from importance ranking.
+
+**Technical Interpretation (Tier 2)** - discloses the bagging ensemble structure (each tree trained on a bootstrap sample with a random subset of features at each split; predictions averaged), recursive 1-step horizon mechanism, feature-importance semantics (Gini/split-based), and the absence of SHAP or partial-dependence plots at the wrapper level.
+
+**Caveats (Tier 3, conditional)**:
+- Overfitting on short series (CV RMSE / train RMSE > 2).
+- Training sample count below 100 (insufficient for ensemble stability).
+- Horizon > 6 (tree extrapolation warning - tree forecasters cannot extrapolate beyond training-sample range).
+- `time_index` feature dominates importance - model has learned positional memorization rather than temporal dynamics.
