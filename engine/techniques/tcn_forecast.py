@@ -267,6 +267,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 X, y, n_channels, kernel_size, epochs, lr, ctx.seed,
             )
             final_loss = losses[-1] if losses else float("inf")
+            # Parameter count (Follow-up 1a D16 parity with Transformer).
+            try:
+                n_params = int(sum(p.numel() for p in model.parameters()))
+            except Exception:
+                n_params = None
 
             progress_callback("Generating forecasts", 80)
             last_seq = normalized[-n_lags:]
@@ -306,6 +311,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             model.fit(X, y)
             final_loss = float(np.mean((y - model.predict(X)) ** 2))
             losses = list(getattr(model, "loss_curve_", []))
+            # Parameter count (Follow-up 1a D16 parity with Transformer).
+            try:
+                n_params = int(
+                    sum(c.size for c in model.coefs_)
+                    + sum(b.size for b in model.intercepts_)
+                )
+            except Exception:
+                n_params = None
 
             progress_callback("Generating forecasts", 80)
             current = normalized[-n_lags:]
@@ -417,6 +430,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "receptive_field": receptive_field,
             "n_lags": n_lags,
             "epochs": epochs,
+            "n_params": n_params,
             "final_loss": round(final_loss, 6),
             "initial_loss": round(_initial_loss, 6) if _initial_loss is not None else None,
             "loss_curve_summary": _loss_curve_summary,

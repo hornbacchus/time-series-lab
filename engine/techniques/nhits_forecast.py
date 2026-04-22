@@ -325,6 +325,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         n_stacks = int(ctx.get_param("n_stacks", preset_cfg["n_stacks"]))
         n_blocks = int(ctx.get_param("n_blocks", preset_cfg["n_blocks"]))
+        # Honor user-supplied pooling_sizes override (Follow-up 1a
+        # fix — was silently ignored, always using preset default).
+        _pooling_user = ctx.get_param("pooling_sizes", None)
+        if _pooling_user is not None:
+            try:
+                _candidate = list(_pooling_user)
+                if all(isinstance(p, (int, float)) and p >= 1 for p in _candidate) and _candidate:
+                    preset_cfg = dict(preset_cfg)
+                    preset_cfg["pooling_sizes"] = [int(p) for p in _candidate]
+            except (TypeError, ValueError):
+                pass
         hidden_size = int(ctx.get_param("hidden_size", preset_cfg["hidden_size"]))
         epochs = int(ctx.get_param("epochs", preset_cfg["epochs"]))
         n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))

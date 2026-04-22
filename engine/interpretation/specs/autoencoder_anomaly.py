@@ -49,7 +49,7 @@ def _tier1(results: dict) -> str:
         except Exception:
             pass
     backend_clause = ""
-    if backend and backend != "pytorch":
+    if backend and backend not in ("pytorch", "pytorch_autoencoder"):
         backend_clause = f" Running on {backend} fallback — PyTorch not installed."
     return (
         f"Autoencoder anomaly detection on "
@@ -72,7 +72,7 @@ def _tier2(results: dict) -> str:
     except Exception:
         cont_pct = 5.0
     backend_note = ""
-    if backend and backend != "pytorch":
+    if backend and backend not in ("pytorch", "pytorch_autoencoder"):
         backend_note = (
             f" **Backend fallback:** PyTorch not available; {backend} "
             f"used as the autoencoder substitute (linear reconstruction "
@@ -133,7 +133,7 @@ def _trigger_contamination_matches_rate(results: dict) -> Optional[str]:
 
 def _trigger_backend_fallback(results: dict) -> Optional[str]:
     backend = str(results.get("backend") or "")
-    if not backend or backend == "pytorch":
+    if not backend or backend in ("pytorch", "pytorch_autoencoder"):
         return None
     return (
         f"Preferred backend `pytorch` is not installed; running on "

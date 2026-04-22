@@ -270,6 +270,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 X, y, model_type, hidden_size, n_layers, epochs, lr, ctx.seed,
             )
             final_loss = losses[-1] if losses else float("inf")
+            # Parameter count (Follow-up 1a D16 parity with Transformer).
+            try:
+                n_params = int(sum(p.numel() for p in model.parameters()))
+            except Exception:
+                n_params = None
 
             progress_callback("Generating forecasts", 80)
             last_seq = normalized[-n_lags:]
@@ -300,6 +305,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             # Attempt to pull the sklearn MLP loss curve for convergence
             # diagnostic (D14). Fallback: empty list — trigger will skip.
             losses = list(getattr(model, "loss_curve_", []))
+            # Parameter count (Follow-up 1a D16 parity with Transformer).
+            try:
+                n_params = int(
+                    sum(c.size for c in model.coefs_)
+                    + sum(b.size for b in model.intercepts_)
+                )
+            except Exception:
+                n_params = None
 
             progress_callback("Generating forecasts", 80)
             last_features = normalized[-n_lags:]
@@ -415,6 +428,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "n_lags": n_lags,
             "epochs": epochs,
             "learning_rate": lr,
+            "n_params": n_params,
             "final_loss": round(final_loss, 6),
             "initial_loss": round(_initial_loss, 6) if _initial_loss is not None else None,
             "loss_curve_summary": _loss_curve_summary,

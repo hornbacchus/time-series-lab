@@ -286,7 +286,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
             horizon = 1
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        stack_types = preset_cfg["stack_types"]
+        # Honor user-supplied stack_types override (Follow-up 1a fix).
+        # The param accepts a list of stack-type strings; whitelist
+        # against valid N-BEATS stack names to prevent downstream
+        # _build_nbeats_model failure.
+        _stack_user = ctx.get_param("stack_types", None)
+        if _stack_user is None:
+            stack_types = preset_cfg["stack_types"]
+        else:
+            try:
+                _candidate = list(_stack_user)
+                _valid = {"generic", "trend", "seasonality"}
+                if all(str(s) in _valid for s in _candidate) and _candidate:
+                    stack_types = [str(s) for s in _candidate]
+                else:
+                    stack_types = preset_cfg["stack_types"]
+            except (TypeError, ValueError):
+                stack_types = preset_cfg["stack_types"]
         n_blocks = int(ctx.get_param("n_blocks", preset_cfg["n_blocks"]))
         hidden_size = int(ctx.get_param("hidden_size", preset_cfg["hidden_size"]))
         theta_size = int(ctx.get_param("theta_size", preset_cfg["theta_size"]))
