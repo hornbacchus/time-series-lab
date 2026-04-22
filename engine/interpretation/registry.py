@@ -174,3 +174,10 @@ from interpretation.specs import quantile_regression as _quantile_regression_spe
 from interpretation.specs import svr_forecast as _svr_spec                            # noqa: F401, E402
 from interpretation.specs import echo_state_network as _esn_spec                      # noqa: F401, E402
 from interpretation.specs import autoencoder_anomaly as _autoencoder_spec             # noqa: F401, E402
+
+# Follow-up 1b (1 spec, 1 wrapper):
+# TBATS / BATS multi-seasonal forecaster. Deferred from C2 because no
+# wrapper existed at the time; added via follow-up once the wrapper
+# was created. Inherits C2 forecaster Tier 1 template with
+# seasonality-rendering closer. Registry: 78 → 79.
+from interpretation.specs import tbats_forecast as _tbats_spec                        # noqa: F401, E402

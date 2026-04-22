@@ -17,6 +17,15 @@ TECHNIQUE_REGISTRY = {
     "theta_forecast": "techniques.theta_forecast",
     "theta": "techniques.theta_forecast",
 
+    # --- TBATS / BATS (Follow-up 1b) ---
+    # Multi-seasonal forecaster. `use_trigonometric=False` (param) selects
+    # BATS instead of TBATS within the same wrapper; the `bats` alias
+    # routes to the same module and users can override the default in
+    # params.
+    "tbats_forecast": "techniques.tbats_forecast",
+    "tbats": "techniques.tbats_forecast",
+    "bats": "techniques.tbats_forecast",
+
     # --- ARIMA family ---
     "auto_arima": "techniques.arima",
     "arima": "techniques.arima",

@@ -805,6 +805,8 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "svr_forecast",
         "echo_state_network",
         "autoencoder_anomaly",
+        # Follow-up 1b (1): TBATS / BATS multi-seasonal forecaster
+        "tbats_forecast",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1123,21 +1125,38 @@ class TestT20C6RegistryInventory(unittest.TestCase):
 
 
 class TestT21C7RegistryInventory(unittest.TestCase):
-    """T21 — After Prompt C7 lands (the final C batch), the registry
-    contains exactly the Prompt A + Prompt B + Prompt C1 + Prompt C2 +
-    Prompt C3 + Prompt C4 + Prompt C5 + Prompt C6 + Prompt C7 specs,
-    totaling 78 techniques (63 baseline + 15 ML / Deep Learning
-    family). Pins the count at the C7 landing moment."""
+    """T21 — After Prompt C7 landed, the registry contained at least
+    78 specs (63 baseline + 15 ML / Deep Learning family). Follow-up
+    1b grows the set further; T21 now pins the C7 minimum and T22
+    pins the exact post-1b count."""
 
-    def test_exactly_78_specs_registered(self):
+    def test_at_least_78_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
-        self.assertEqual(
+        self.assertGreaterEqual(
             len(registered), 78,
-            f"Expected exactly 78 registered specs (Prompt A/B: 8 + "
+            f"Expected at least 78 registered specs (Prompt A/B: 8 + "
             f"Prompt C1: 26 + Prompt C2: 7 + Prompt C3: 4 + Prompt "
             f"C4: 7 + Prompt C5: 7 + Prompt C6: 4 + Prompt C7: 15). "
             f"Got {len(registered)}: {sorted(registered)}"
+        )
+
+
+class TestT22FollowUp1bRegistryInventory(unittest.TestCase):
+    """T22 — After Follow-up 1b lands (TBATS wrapper creation), the
+    registry contains exactly 79 specs (78 C7 baseline + 1 tbats_
+    forecast). TBATS was deferred from Prompt C2 because no wrapper
+    existed at the time; Follow-up 1b created the wrapper and added
+    the interpretation spec."""
+
+    def test_exactly_79_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertEqual(
+            len(registered), 79,
+            f"Expected exactly 79 registered specs (78 C7 baseline + "
+            f"1 Follow-up 1b tbats_forecast). Got {len(registered)}: "
+            f"{sorted(registered)}"
         )
 
 
@@ -1592,6 +1611,18 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "most_extreme_idx": 500,
         "most_extreme_error": 1.0,
         "anomaly_indices": [100, 200],
+        # Follow-up 1b TBATS fields
+        "seasonal_periods_used": [7.0],
+        "seasonal_periods_filtered": [],
+        "seasonal_periods_source": "auto-inferred",
+        "use_trigonometric": True,
+        "use_box_cox_selected": False,
+        "box_cox_lambda": None,
+        "use_arma_errors_selected": False,
+        "use_damped_trend_selected": False,
+        "n_harmonics_per_period": [1],
+        "gamma_per_period": [1e-6, 1e-6],
+        "bats_rounding_applied": [],
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1688,6 +1719,12 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # ``h_t`` as the latent AR(1) state variable subscript (same
         # category as y_t / x_t etc. from the Prompt A allowlist).
         "use_log", "h_t",
+        # (c7) Follow-up 1b — TBATS programmatic parameter names
+        # cited in Tier 2 disclosure. The tbats library exposes these
+        # as constructor kwargs that users set via ctx.params:
+        "use_trigonometric", "use_box_cox", "use_arma_errors",
+        "use_damped_trend", "seasonal_periods", "box_cox_lambda",
+        "n_jobs",
         # (c6) Prompt C7 — ML/DL programmatic hyperparameter names
         # cited in Tier 2 disclosure (sklearn / PyTorch / library API
         # surface that users type as param values). Tree cohort,
