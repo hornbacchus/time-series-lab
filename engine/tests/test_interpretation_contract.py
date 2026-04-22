@@ -1684,6 +1684,17 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "n_free_params": 2,
         "sigma_slope": None,
         "custom_matrix_shapes": None,
+        # Follow-up 2c — Student-t SV innovations fields. Default to
+        # Gaussian path with nu None; the Student-t path is exercised
+        # in Phase 5 canonical validation, not T14's minimal probe.
+        # requested/fitted split captures D13 fallback semantics;
+        # fallback_occurred flags the event for the D3 trigger.
+        "innovations": "gaussian",
+        "requested_innovations": "gaussian",
+        "fitted_innovations": "gaussian",
+        "fallback_occurred": False,
+        "nu_degrees_of_freedom": None,
+        "nu_interpretation_band": None,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1829,6 +1840,16 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         "state_space_model", "local_linear_trend",
         "SE_smoothed", "SE_filtered",
         "initial_state", "initial_covariance",
+        # (c9) Follow-up 2c — Student-t SV innovations. Programmatic
+        # param value `student_t` that users type as the innovations
+        # parameter (same category as use_trigonometric / use_log from
+        # earlier blocks). `nu_degrees_of_freedom` is cited verbatim in
+        # spec prose when rendering the audit-field name. The other
+        # tokens enumerated in the Follow-up 2c prompt (`nu`,
+        # `gaussian`, `digamma`, `trigamma`, `innovations`) contain no
+        # underscores and therefore do not match the T15 regex —
+        # defensive allowlisting is unnecessary for those.
+        "student_t", "nu_degrees_of_freedom",
     }
 
     @staticmethod

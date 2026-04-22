@@ -70,13 +70,32 @@ Every Stochastic Volatility run emits a two-tier plain-language Interpretation b
 
 **Plain-Language Finding (Tier 1)** - names the persistence φ with its adjective band (low / moderate / high / very high, shared with GARCH via the 4-band convention), the volatility shock half-life, and the filtered-volatility dynamic range across the sample. Tier 1 cites the *filtered* volatility path as the forward-causal analog of GARCH's σ_t for cross-spec comparability.
 
-**Technical Interpretation (Tier 2)** - discloses the SV AR(1) log-variance model equations, the quasi-maximum likelihood Kalman-filter inference path, and three honest-disclosure sentences:
-1. **Transformation-bias (D13):** back-transforming filtered/smoothed log-volatility to volatility scale introduces Jensen-inequality bias (E[exp(X)] ≠ exp(E[X])); reported values carry this systematic bias.
-2. **Gaussian-only (D12, Convention C):** the wrapper assumes Gaussian innovations; Student-t or other heavy-tailed alternatives are not implemented.
+**Technical Interpretation (Tier 2)** - discloses the SV AR(1) log-variance model equations, the quasi-maximum likelihood Kalman-filter inference path, the innovation-distribution choice (Gaussian default or Student-t opt-in), AIC/BIC on the adjusted parameter count (k=3 Gaussian, k=4 Student-t), and three honest-disclosure sentences:
+1. **Transformation-bias (D13):** back-transforming filtered/smoothed log-volatility to volatility scale introduces Jensen-inequality bias (E[exp(X)] ≠ exp(E[X])); reported values carry this systematic bias. This applies on both Gaussian and Student-t paths — Student-t does NOT fix this limitation (future follow-up 2b addresses via MCMC).
+2. **Innovation distribution (D12):** the wrapper defaults to Gaussian innovations; set `innovations='student_t'` to use Student-t_ν innovations with ν jointly estimated via quasi-ML (Follow-up 2c). On the Student-t path, Tier 2 renders the digamma/trigamma-based observation offset and variance and a "what Student-t fixes / what it does NOT fix" scope frame.
 3. **No forecast path (D4):** the wrapper does not emit a forecast; historical filtered/smoothed volatility is the deliverable, paralleling the BVAR wrapper's IRF/FEVD absence.
+
+### Innovation distribution (Follow-up 2c)
+
+The `innovations` parameter toggles the return-innovation distribution:
+
+- **`gaussian`** (default) — ε_t ~ N(0, 1). Fast, 3 free parameters (μ, φ, σ_η). Appropriate when return kurtosis is near 3.
+- **`student_t`** — ε_t ~ t_ν(0, 1) with ν jointly estimated. 4 free parameters (μ, φ, σ_η, ν). ν is constrained to (2.01, 200) via a sigmoid reparameterization and initialized at ν₀ = 10. Captures heavy tails explicitly; for typical daily equity returns ν lands in the 5–10 range ("heavy tails").
+
+On the Student-t path, the Kalman-filter quasi-ML framework is retained but the observation-equation offset and variance shift to:
+
+  `offset(ν)  = ψ(1/2) − ψ(ν/2) + log(ν)`
+  `obs_var(ν) = ψ'(1/2) + ψ'(ν/2)`
+
+where ψ and ψ' are digamma and trigamma (scipy.special). As ν → ∞ these recover the Gaussian constants (−1.2704, π²/2).
+
+**Graceful degradation (D13):** if Student-t optimization fails to converge on all restarts, the wrapper automatically falls back to Gaussian fit. The fallback is visible — audit fields record `requested_innovations='student_t'` vs `fitted_innovations='gaussian'`, and Tier 2 / Tier 3 disclose the event with three possible causes (genuinely-Gaussian data, too-short series, destabilizing outliers) and their specific remediations.
 
 **Caveats (Tier 3, conditional)**:
 - φ > 0.98 (near-integrated volatility) - shocks decay extremely slowly; forward-looking use beyond a few weeks carries substantial uncertainty. Threshold inherited from GARCH for cross-spec consistency.
 - φ < 0.3 (low persistence) - volatility is essentially iid; SV framing adds little over sample-mean-volatility. Verify the input is returns (not levels) and that the series has volatility clustering.
-- Sample kurtosis > 6 (Gaussian assumption mis-specified) - input is heavy-tailed; Gaussian innovations understate tail-event volatility. MCMC-based SV with Student-t innovations or GARCH with skew-t innovations would be more appropriate.
+- Sample kurtosis > 6 AND `innovations='gaussian'` - input is heavy-tailed and user is on the Gaussian path. Rerun with `innovations='student_t'` to capture tails directly. Suppressed on the Student-t path (user is already handling tails).
+- **Student-t ν < 5** (Follow-up 2c D1) - very heavy tails; even Student-t may struggle with extreme moves. Consider checking for structural breaks, outliers, or mean dynamics beyond the SV model's scope.
+- **Student-t ν ≥ 30** (Follow-up 2c D2) - essentially Gaussian; series does not exhibit heavy tails at the sampling frequency. Consider `innovations='gaussian'` on the next fit (faster, fewer free parameters).
+- **Student-t optimization failed, fell back to Gaussian** (Follow-up 2c D3) - user requested Student-t but the wrapper converged only under Gaussian. Reported parameters are from the Gaussian fit. See Tier 2 for specific remediations.
 

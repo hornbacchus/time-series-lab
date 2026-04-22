@@ -608,14 +608,16 @@
       "id": "stochastic_volatility",
       "name": "Stochastic Volatility",
       "category": "Volatility / Risk / Tails",
-      "summary": "Stochastic volatility model where log-variance follows a latent AR(1) process.",
+      "summary": "Stochastic volatility model where log-variance follows a latent AR(1) process; Gaussian (default) or Student-t innovations.",
       "description_file": "stochastic_volatility.md",
       "min_series": 1, "max_series": 1,
       "supports_auto_udf": false, "auto_udf_name": null,
       "presets": ["Balanced", "Thorough"],
-      "parameters": [],
+      "parameters": [
+        {"name": "innovations", "label": "Innovation Distribution", "type": "string", "default": "gaussian", "required": false, "advanced": false, "description": "Return-innovation distribution: 'gaussian' (default) or 'student_t' (estimates degrees-of-freedom \u03bd jointly with SV parameters).", "options": ["gaussian", "student_t"]}
+      ],
       "output_tables": ["volatility_estimates", "model_summary"],
-      "tags": ["volatility", "stochastic-volatility", "latent"]
+      "tags": ["volatility", "stochastic-volatility", "latent", "student-t"]
     },
     {
       "id": "har_rv",
