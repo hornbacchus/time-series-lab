@@ -181,3 +181,17 @@ from interpretation.specs import autoencoder_anomaly as _autoencoder_spec       
 # was created. Inherits C2 forecaster Tier 1 template with
 # seasonality-rendering closer. Registry: 78 → 79.
 from interpretation.specs import tbats_forecast as _tbats_spec                        # noqa: F401, E402
+
+# Follow-up 2a (2 specs, 2 wrappers):
+# Direct-access Kalman filter and smoother. Deferred from C3 because
+# no wrapper existed at the time (structural_ts handled the state-
+# space use case via UnobservedComponents). Follow-up 2a created both
+# wrappers with four named templates (local_level, local_linear_trend,
+# seasonal, ar1) plus a custom path that accepts user-supplied
+# (Z, T, R, H, Q) matrices via a zero-free-parameter MLEModel subclass.
+# The pair shares engine/interpretation/specs/_state_space_common.py
+# for Tier 1 skeleton, filter-vs-smoother disclosure, model equations,
+# initialization disclosure, and Tier 3 shared triggers. Registry:
+# 79 → 81.
+from interpretation.specs import kalman_filter as _kalman_filter_spec                 # noqa: F401, E402
+from interpretation.specs import kalman_smoother as _kalman_smoother_spec             # noqa: F401, E402

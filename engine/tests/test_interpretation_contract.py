@@ -762,8 +762,6 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "intermittent_demand",
         "prophet",
         # Prompt C3 (4): State Space family
-        # (kalman_filter, kalman_smoother deferred — see registry.py
-        # topology comment and follow-up backlog)
         "local_level",
         "local_linear_trend",
         "structural_ts",
@@ -807,6 +805,13 @@ class TestT10RegistryGrowth(unittest.TestCase):
         "autoencoder_anomaly",
         # Follow-up 1b (1): TBATS / BATS multi-seasonal forecaster
         "tbats_forecast",
+        # Follow-up 2a (2): Direct-access Kalman filter and smoother
+        # (deferred from C3 — no wrapper existed at the time). Both
+        # share _state_space_common.py spec helper + _kalman_common.py
+        # wrapper helper + _TSLStateSpaceModel MLEModel subclass for
+        # the custom-matrix path.
+        "kalman_filter",
+        "kalman_smoother",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1143,20 +1148,44 @@ class TestT21C7RegistryInventory(unittest.TestCase):
 
 
 class TestT22FollowUp1bRegistryInventory(unittest.TestCase):
-    """T22 — After Follow-up 1b lands (TBATS wrapper creation), the
-    registry contains exactly 79 specs (78 C7 baseline + 1 tbats_
+    """T22 — After Follow-up 1b landed (TBATS wrapper creation), the
+    registry contained at least 79 specs (78 C7 baseline + 1 tbats_
     forecast). TBATS was deferred from Prompt C2 because no wrapper
     existed at the time; Follow-up 1b created the wrapper and added
-    the interpretation spec."""
+    the interpretation spec. Follow-up 2a grows the set further; T22
+    now pins the post-1b minimum and T23 pins the exact post-2a count."""
 
-    def test_exactly_79_specs_registered(self):
+    def test_at_least_79_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertGreaterEqual(
+            len(registered), 79,
+            f"Expected at least 79 registered specs (78 C7 baseline + "
+            f"1 Follow-up 1b tbats_forecast). Got {len(registered)}: "
+            f"{sorted(registered)}"
+        )
+
+
+class TestT23FollowUp2aRegistryInventory(unittest.TestCase):
+    """T23 — After Follow-up 2a lands (kalman_filter and
+    kalman_smoother wrapper creation), the registry contains exactly
+    81 specs (79 post-1b baseline + 2 direct-access Kalman wrappers).
+    Both were deferred from Prompt C3 because no wrapper existed at
+    the time — structural_ts handled the state-space use case via
+    UnobservedComponents, but did not expose filtered states (online)
+    or user-specified state-space matrices. Follow-up 2a created both
+    wrappers with four named templates plus a custom-matrix escape
+    hatch via a zero-free-parameter MLEModel subclass."""
+
+    def test_exactly_81_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
         self.assertEqual(
-            len(registered), 79,
-            f"Expected exactly 79 registered specs (78 C7 baseline + "
-            f"1 Follow-up 1b tbats_forecast). Got {len(registered)}: "
-            f"{sorted(registered)}"
+            len(registered), 81,
+            f"Expected exactly 81 registered specs (79 post-1b "
+            f"baseline + 2 Follow-up 2a direct-access Kalman specs: "
+            f"kalman_filter, kalman_smoother). Got "
+            f"{len(registered)}: {sorted(registered)}"
         )
 
 
@@ -1634,6 +1663,27 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "zero_straddle_pairs": [],
         "irf_skip_reason": "fast_preset_default",
         "sigma_posterior_uncertainty_propagated": False,
+        # Follow-up 2a direct-access Kalman fields. The wrappers share
+        # most audit keys (horizon, aic, bic, fit_rmse, baseline_rmse,
+        # etc.) with other state-space and forecasting specs; only
+        # Kalman-specific keys are listed here. state_dim matches C5
+        # multivariate-family semantics (not to be confused with
+        # variables / n_variables).
+        "state_space_model": "local_level",
+        "state_dim": 1,
+        "obs_dim": 1,
+        "state_labels": ["level"],
+        "initialization": "diffuse",
+        "filter_final_state": {"level": 0.0},
+        "filter_final_state_se": {"level": 0.5},
+        "smoother_final_state": {"level": 0.0},
+        "smoother_final_state_se": {"level": 0.4},
+        "disturbance_smoother_computed": False,
+        "mean_abs_smoothed_minus_filtered": 0.1,
+        "mean_filter_se": 0.5,
+        "n_free_params": 2,
+        "sigma_slope": None,
+        "custom_matrix_shapes": None,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1765,6 +1815,20 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # (d) test-fixture identifier used by TestT14's minimal-input
         # probe — not a programmatic leak from production code:
         "test_series",
+        # (c8) Follow-up 2a — direct-access Kalman filter / smoother
+        # programmatic tokens and math notation. Cross-technique name
+        # references: the filter spec cites kalman_smoother and vice
+        # versa (same category as auto_arima / var_model from earlier
+        # allowlist blocks). Programmatic template names: the wrapper's
+        # user-facing state_space_model param accepts these string
+        # values (same category as local_level / use_log / etc.).
+        # Math-notation subscripts: SE_smoothed / SE_filtered are
+        # standard-error subscripts used in the smoother vs filter
+        # disclosure (same category as y_t / s_t / S_xy).
+        "kalman_filter", "kalman_smoother",
+        "state_space_model", "local_linear_trend",
+        "SE_smoothed", "SE_filtered",
+        "initial_state", "initial_covariance",
     }
 
     @staticmethod

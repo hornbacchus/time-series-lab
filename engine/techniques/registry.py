@@ -75,13 +75,15 @@ TECHNIQUE_REGISTRY = {
     "wavelet": "techniques.wavelet_transform",
 
     # --- State space / Kalman ---
-    # NOTE: `kalman_filter`, `kalman_smoother`, `kalman`, and `ucm` aliases
-    # were removed when the "Kalman Filter" ribbon button was renamed to
-    # "Structural TS" and kalman_filter_model.py was retired in favor of
-    # the richer structural_ts.py wrapper. The catalog IDs `kalman_filter`
-    # and `kalman_smoother` are reserved for the genuine filter/smoother
-    # techniques that Prompt C's State Space batch will implement as
-    # distinct wrappers.
+    # Direct-access Kalman wrappers introduced by Follow-up 2a. Both
+    # share `techniques._kalman_common` (preset config, param
+    # resolution, `_TSLStateSpaceModel` custom-matrix MLEModel
+    # subclass, fit+smooth path, state-table extractor).
+    # The filter emits online filtered states (y_{1:t}); the smoother
+    # emits retrospective smoothed states (y_{1:T}) and — on
+    # Balanced/Thorough presets — the smoothed-disturbance table.
+    "kalman_filter": "techniques.kalman_filter",
+    "kalman_smoother": "techniques.kalman_smoother",
 
     # --- Evaluation / Uncertainty (K) ---
     "rolling_origin_cv": "techniques.rolling_origin_cv",
@@ -274,7 +276,6 @@ TECHNIQUE_REGISTRY = {
     "gjr_garch": "techniques.garch_model",
     "egarch": "techniques.garch_model",
     "wavelet_coherence_phase_lag": "techniques.wavelet_coherence",
-    # kalman_filter / kalman_smoother aliases intentionally absent — see
-    # the State Space block above. They will be re-added by Prompt C as
-    # their own distinct technique IDs.
+    # kalman_filter / kalman_smoother aliases live in the State Space
+    # block above (Follow-up 2a).
 }

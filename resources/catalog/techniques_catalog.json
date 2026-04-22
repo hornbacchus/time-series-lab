@@ -428,6 +428,47 @@
       "tags": ["state-space", "particle-filter", "nonlinear", "monte-carlo"]
     },
     {
+      "id": "kalman_filter",
+      "name": "Kalman Filter (Direct Access)",
+      "category": "State Space / Filtering",
+      "summary": "Online filtered-state estimation for a linear Gaussian state-space model (template or user-supplied matrices).",
+      "description_file": "kalman_filter.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "state_space_model", "label": "State-Space Model", "type": "string", "default": "local_level", "required": false, "advanced": false, "description": "Named template or 'custom' for user-supplied matrices", "options": ["local_level", "local_linear_trend", "seasonal", "ar1", "custom"]},
+        {"name": "seasonal_period", "label": "Seasonal Period", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Period for the 'seasonal' template", "options": null},
+        {"name": "ar_order", "label": "AR Order", "type": "int", "default": 1, "required": false, "advanced": true, "description": "Order for the 'ar1' template (fixed at 1 in this release)", "options": null},
+        {"name": "initialization", "label": "Initialization", "type": "string", "default": "diffuse", "required": false, "advanced": true, "description": "State-space initialization method", "options": ["diffuse", "known", "approximate_diffuse"]},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 20, "required": false, "advanced": false, "description": "Periods to forecast", "options": null},
+        {"name": "alpha", "label": "Alpha (1 - CI)", "type": "float", "default": 0.10, "required": false, "advanced": true, "description": "Significance level for forecast intervals", "options": null}
+      ],
+      "output_tables": ["Forecast", "Filtered State", "Model Summary", "Residual Diagnostics"],
+      "tags": ["state-space", "kalman", "filter", "online-inference", "linear-gaussian"]
+    },
+    {
+      "id": "kalman_smoother",
+      "name": "Kalman Smoother (Direct Access)",
+      "category": "State Space / Filtering",
+      "summary": "Retrospective smoothed-state estimation for a linear Gaussian state-space model, with optional smoothed-disturbance output.",
+      "description_file": "kalman_smoother.md",
+      "min_series": 1, "max_series": 1,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "state_space_model", "label": "State-Space Model", "type": "string", "default": "local_level", "required": false, "advanced": false, "description": "Named template or 'custom' for user-supplied matrices", "options": ["local_level", "local_linear_trend", "seasonal", "ar1", "custom"]},
+        {"name": "seasonal_period", "label": "Seasonal Period", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Period for the 'seasonal' template", "options": null},
+        {"name": "ar_order", "label": "AR Order", "type": "int", "default": 1, "required": false, "advanced": true, "description": "Order for the 'ar1' template (fixed at 1 in this release)", "options": null},
+        {"name": "initialization", "label": "Initialization", "type": "string", "default": "diffuse", "required": false, "advanced": true, "description": "State-space initialization method", "options": ["diffuse", "known", "approximate_diffuse"]},
+        {"name": "disturbance_smoother", "label": "Disturbance Smoother", "type": "bool", "default": true, "required": false, "advanced": true, "description": "Emit the smoothed disturbance table (Balanced/Thorough default True; Fast default False)", "options": null},
+        {"name": "horizon", "label": "Forecast Horizon", "type": "int", "default": 20, "required": false, "advanced": false, "description": "Periods to forecast", "options": null},
+        {"name": "alpha", "label": "Alpha (1 - CI)", "type": "float", "default": 0.10, "required": false, "advanced": true, "description": "Significance level for forecast intervals", "options": null}
+      ],
+      "output_tables": ["Forecast", "Smoothed State", "Smoothed Disturbance", "Model Summary", "Residual Diagnostics"],
+      "tags": ["state-space", "kalman", "smoother", "retrospective", "linear-gaussian", "disturbance-smoother"]
+    },
+    {
       "id": "markov_switching",
       "name": "Markov Switching Model",
       "category": "Regimes / Nonlinear",
