@@ -1695,6 +1695,21 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "fallback_occurred": False,
         "nu_degrees_of_freedom": None,
         "nu_interpretation_band": None,
+        # Follow-up 3a — CAViaR multi-horizon fields. Default to
+        # multi_step_computed=False so spec null-guards via .get()
+        # / None checks. Empty list/dict collections keep render
+        # paths falsy. When multi_step_computed is True, spec renders
+        # the full multi-horizon disclosure.
+        "multi_step_computed": False,
+        "horizons_forecasted": [],
+        "multi_step_quantiles": {},
+        "multi_step_mc_paths": None,
+        "multi_step_mc_noise_std": {},
+        "multi_step_residual_autocorr_lbq": None,
+        "caviar_stationarity_param": None,
+        "caviar_effective_persistence": None,
+        "caviar_stationarity_ok": None,
+        "one_step_ahead_var": None,
         # Follow-up 2b — MCMC inference fields. Default to quasi-ML
         # path (no MCMC run); all MCMC-specific fields populated as
         # None per Q7 null-guard strategy. Spec null-guards via
@@ -1903,6 +1918,17 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         "posterior_mean", "mcmc_backend", "rhat_max", "ess_min",
         "divergent_transitions", "posterior_hdi",
         "mcmc_fallback_occurred", "fast_preset_mcmc_downgrade",
+        # (c11) Follow-up 3a — CAViaR multi-horizon. Programmatic
+        # param names (`n_simulation_paths`) and audit-field
+        # identifiers that may leak into Tier 2 prose or Tier 3
+        # trigger text. Single-word tokens (`horizons`, `bootstrap`,
+        # `paths`, `multistep`, `mc`) don't match the regex.
+        "n_simulation_paths", "one_step_ahead_var",
+        "multi_step_quantiles", "multi_step_mc_paths",
+        "multi_step_mc_noise_std", "multi_step_residual_autocorr_lbq",
+        "multi_step_computed", "horizons_forecasted",
+        "caviar_stationarity_param", "caviar_effective_persistence",
+        "caviar_stationarity_ok",
     }
 
     @staticmethod

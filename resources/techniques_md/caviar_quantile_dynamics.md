@@ -26,7 +26,8 @@ CAViaR (Conditional Autoregressive Value at Risk) directly models the **dynamics
 - **CAViaR parameters**: coefficients governing the autoregressive quantile dynamics
 - **VaR exceedance analysis**: comparing observed violations with the target quantile level
 - **Backtesting results**: Kupiec, Christoffersen, and DQ tests on VaR violations
-- **One-step-ahead VaR forecasts**
+- **One-step-ahead VaR forecast** q_{T+1|T} as a first-class audit field (Follow-up 3a)
+- **Multi-Horizon VaR Forecasts table** at user-specified horizons (default 1 / 5 / 10 / 22 periods) with MC standard errors and 90% bands (Follow-up 3a)
 
 ## Technical Details
 
@@ -71,6 +72,42 @@ This is a non-differentiable, nonlinear optimization problem. The standard appro
 
 **Expected Shortfall extension**: ES cannot be directly estimated by quantile regression. Two-step approaches first estimate VaR via CAViaR, then estimate ES conditional on VaR exceedance. Joint quantile-ES regression methods (Patton, Ziegel, Chen, 2019) estimate both simultaneously.
 
+### Multi-horizon VaR forecasts (Follow-up 3a)
+
+Prior to Follow-up 3a, the wrapper emitted only the in-sample quantile path and backtests — no explicit forecasts. 3a adds two capabilities:
+
+1. **1-step-ahead VaR q_{T+1|T}** as a first-class audit field, computed by applying the CAViaR recursion one step past the last observation.
+
+2. **Multi-horizon VaR forecasts** at user-specified horizons via **Monte Carlo bootstrap simulation**. Default horizons `[1, 5, 10, 22]` correspond to 1-day / 1-week / 2-week / 1-month at daily frequency; override via the `horizons` parameter.
+
+**Algorithm.** At each simulation path, the wrapper:
+
+1. Starts at the last observed state (q_T, y_T).
+2. For h = 1..H_max, computes q_{T+h} via the CAViaR recursion, then simulates y_{T+h} = q_{T+h} + r where r is bootstrap-resampled from the in-sample raw residuals r_t = y_t − q_t (preserves the empirical CDF; Christoffersen 2012).
+3. Records y_{T+h}.
+
+The θ-quantile of simulated y values at each horizon is the multi-horizon VaR. The 5th / 95th percentiles provide the 90% band (shown as "5% Lower" / "95% Upper" in the Multi-Horizon VaR Forecasts table).
+
+**Preset-gated simulation path count:**
+- Fast: 500 paths (fast but noisier tail estimates)
+- Balanced: 2000 paths (balance cost/precision)
+- Thorough: 10000 paths (precise tail estimates)
+
+MC standard error at each horizon is computed via sub-sample bootstrap of the quantile estimator (B = 50 sub-samples of size √N). MC SE scales as 1/√N across presets, so Thorough's SE is ~1/√5 ≈ 0.45× Balanced's.
+
+**Three methodological caveats (disclosed in Tier 2 and via Tier 3 triggers):**
+
+- **(a) MC noise at deep tails (D1 trigger).** For θ = 0.01 with N = 500 paths, the 1%-quantile is estimated from 5 extremes; MC standard error is substantial. D1 fires when MC SE at the longest horizon exceeds 10% of the quantile estimate. Rerun on Thorough preset to reduce noise.
+
+- **(b) Bootstrap independence assumption (D2 trigger).** Resampling r_t iid assumes they're exchangeable. If Ljung-Box on r_t rejects at 5%, the simulation is miscalibrated. D2 fires on LB p < 0.05. Consider fitting a richer CAViaR variant (SAV → AS → IG) or block bootstrap (backlog).
+
+- **(c) Multi-horizon stationarity (D3 trigger).** Simple |β₁| < 1 is **not sufficient** for bootstrap stability. When the left-tail VaR is far from zero, `|y| ≈ |q|` feeds back into the recursion, giving an effective persistence:
+  - SAV: β₁ + |β₂|
+  - AS:  β₁ + max(|β₂|, |β₃|)
+  - IG:  β₁ + β₂ (variance stationarity)
+
+  D3 fires when this effective persistence ≥ 1. The bound is a conservative worst-case; AS in particular can stay empirically bounded under sign-asymmetric residual dynamics even when D3 fires — inspect the MC Std Error column to diagnose.
+
 ## Interpretation
 
 Every CAViaR run emits a two-tier plain-language Interpretation block with a distinct quantile-forecast-with-backtest Tier 1 shape.
@@ -83,4 +120,7 @@ Every CAViaR run emits a two-tier plain-language Interpretation block with a dis
 - Kupiec rejects - realized exceedance rate differs materially from nominal; quantile level miscalibrated.
 - Christoffersen conditional-coverage rejects - violations are clustered; dynamic response too slow. Consider AS variant for leverage-effect responses.
 - DQ joint test rejects - neither well-calibrated nor adequate; consider AS, IG, or more optimization restarts (Thorough preset).
+- **D1 multi-horizon MC noise** (Follow-up 3a) - MC SE at the longest horizon exceeds 10% of the quantile estimate; rerun Thorough preset for more paths.
+- **D2 residual autocorrelation** (Follow-up 3a) - in-sample residuals have Ljung-Box p < 0.05; bootstrap iid assumption violated. Try a richer CAViaR variant.
+- **D3 stationarity violation** (Follow-up 3a) - effective persistence ≥ 1 (per-spec formula). Multi-horizon values may be unreliable. Conservative worst-case bound; AS can stay empirically bounded even when D3 fires — inspect MC Std Error to diagnose.
 

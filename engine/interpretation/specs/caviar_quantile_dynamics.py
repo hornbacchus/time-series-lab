@@ -25,6 +25,20 @@ Results-dict keys consumed:
     christoffersen_stat / christoffersen_pval
     dq_stat / dq_pval
     distribution_free
+
+Follow-up 3a adds forecast capability (wrapper previously emitted no
+explicit forecasts at all):
+
+    one_step_ahead_var                — q_{T+1|T} explicit 1-step VaR
+    multi_step_computed               — bool
+    horizons_forecasted               — list[int]
+    multi_step_quantiles              — dict[h, VaR]
+    multi_step_mc_paths               — N simulation paths
+    multi_step_mc_noise_std           — dict[h, MC std error]
+    multi_step_residual_autocorr_lbq  — Ljung-Box p on residuals
+    caviar_stationarity_param         — β₁
+    caviar_effective_persistence      — β₁ + max(|β_i|, ...) per spec
+    caviar_stationarity_ok            — bool
 """
 
 from typing import Optional
@@ -141,6 +155,25 @@ def _tier1(results: dict) -> str:
         pass
     cov_phrase = f" — {coverage_desc}" if coverage_desc else ""
 
+    # Follow-up 3a — multi-horizon VaR closing clause
+    mh_q = results.get("multi_step_quantiles") or {}
+    multi_step_computed = bool(results.get("multi_step_computed", False))
+    mh_closer = ""
+    if multi_step_computed and mh_q:
+        horizon_parts = []
+        for h in sorted(int(k) for k in mh_q.keys()):
+            try:
+                horizon_parts.append(f"{int(h)}-step = {float(mh_q[h]):.4f}")
+            except Exception:
+                continue
+        if horizon_parts:
+            mh_closer = (
+                f" Multi-horizon {conf_str} VaR at "
+                f"{', '.join(horizon_parts)} (via Monte Carlo bootstrap; "
+                f"see Multi-Horizon VaR Forecasts table for MC standard "
+                f"errors and 90% bands)."
+            )
+
     return (
         f"CAViaR {spec} ({spec_full}) dynamic quantile model at the "
         f"{conf_str} VaR level ({theta_pct} quantile) on "
@@ -149,6 +182,7 @@ def _tier1(results: dict) -> str:
         f"(realized / nominal exceedance ratio {v_ratio_str}"
         f"{cov_phrase}). {kupiec_clause}{dq_clause} The Christoffersen "
         f"conditional coverage test is flagged separately in Tier 3."
+        f"{mh_closer}"
     )
 
 
@@ -243,6 +277,68 @@ def _tier2(results: dict) -> str:
             "(SAV) variant."
         )
 
+    # Follow-up 3a — framing correction paragraph (honestly
+    # acknowledges the prior state rather than rewriting C6
+    # disclosure ahistorically, per user Phase 1 review feedback).
+    framing_paragraph = (
+        " Prior to this capability extension, the wrapper emitted "
+        "no explicit forecasts — only the in-sample quantile path "
+        "and backtests. Users wanting operational VaR had to extract "
+        "the final in-sample quantile themselves. This capability "
+        "adds explicit 1-step-ahead VaR (q_{T+1|T}) as a first-class "
+        "output plus multi-horizon VaR via Monte Carlo bootstrap "
+        "simulation at user-specified horizons."
+    )
+
+    one_step = results.get("one_step_ahead_var")
+    one_step_clause = (
+        f" 1-step-ahead VaR q_{{T+1|T}} = {float(one_step):.4f}."
+        if one_step is not None else ""
+    )
+
+    n_paths = results.get("multi_step_mc_paths")
+    horizons_list = results.get("horizons_forecasted") or []
+    methodology_paragraph = ""
+    limitations_paragraph = ""
+    if horizons_list and n_paths is not None:
+        try:
+            horizons_str = ", ".join(
+                str(int(h)) for h in sorted(horizons_list)
+            )
+            methodology_paragraph = (
+                f" Multi-horizon VaR computed via Monte Carlo "
+                f"bootstrap simulation at horizons "
+                f"{{{horizons_str}}} with {int(n_paths):,} forward "
+                f"paths. Each path simulates y_{{T+h}} by bootstrap-"
+                f"resampling raw residuals r_t = y_t − q_t "
+                f"(preserves empirical CDF; Christoffersen 2012), "
+                f"propagating the CAViaR recursion for q_{{T+h+1|T+h}}. "
+                f"The θ-quantile of simulated y values at each "
+                f"horizon is the multi-horizon VaR; 5% / 95% "
+                f"percentiles provide the 90% band. Monte Carlo "
+                f"noise is estimated by sub-sample bootstrap of the "
+                f"quantile estimator (B = 50 subsamples)."
+            )
+            limitations_paragraph = (
+                " Three methodological caveats: (a) deep-tail MC "
+                "quantiles at finite N have material Monte Carlo "
+                "noise — see the MC Std Error column in the "
+                "Multi-Horizon VaR Forecasts table, and Tier 3 D1 "
+                "when noise exceeds 10% of the quantile estimate; "
+                "(b) bootstrap iid-resampling assumes residuals are "
+                "exchangeable, which Tier 3 D2 flags via Ljung-Box "
+                "on r_t; (c) multi-horizon requires CAViaR dynamical "
+                "stability (effective persistence β₁ + max(|β_k|) < 1 "
+                "for SAV / AS, β₁ + β₂ < 1 for IG); Tier 3 D3 fires "
+                "when the condition fails. D3 uses a conservative "
+                "worst-case bound — the simulation may stay "
+                "empirically bounded even when D3 fires (compare "
+                "MC Std Error for diagnostic)."
+            )
+        except Exception:
+            methodology_paragraph = ""
+            limitations_paragraph = ""
+
     # Convention C — distribution-free opening.
     return (
         f"CAViaR is distribution-free: the quantile loss "
@@ -254,7 +350,9 @@ def _tier2(results: dict) -> str:
         f"restarts (preset-gated). Specification {spec} ({spec_full}) "
         f"at quantile θ = {theta}: {params_str}. Minimized quantile "
         f"loss = {qloss_str}.{spec_color} **Backtests:** "
-        f"{backtests_clause}{followup}"
+        f"{backtests_clause}{followup}{framing_paragraph}"
+        f"{one_step_clause}{methodology_paragraph}"
+        f"{limitations_paragraph}"
     )
 
 
@@ -319,6 +417,116 @@ def _trigger_dq_rejects(results: dict) -> Optional[str]:
     )
 
 
+# ---------------------------------------------------------------------
+# Follow-up 3a — Multi-horizon Tier 3 triggers
+# ---------------------------------------------------------------------
+
+
+def _trigger_mc_noise_warning(results: dict) -> Optional[str]:
+    """D1 — fires when MC noise std at the longest horizon exceeds
+    10% of the (absolute) quantile estimate. Signals that the
+    tail-quantile estimate at the deepest horizon is noisy at the
+    current N; user should increase n_simulation_paths."""
+    if not bool(results.get("multi_step_computed", False)):
+        return None
+    horizons = results.get("horizons_forecasted") or []
+    if not horizons:
+        return None
+    try:
+        h_longest = max(int(h) for h in horizons)
+    except Exception:
+        return None
+    mh_q = results.get("multi_step_quantiles") or {}
+    mh_noise = results.get("multi_step_mc_noise_std") or {}
+    if h_longest not in mh_q or h_longest not in mh_noise:
+        return None
+    try:
+        VaR_h = float(mh_q[h_longest])
+        noise_h = float(mh_noise[h_longest])
+    except Exception:
+        return None
+    if abs(VaR_h) < 1e-12:
+        return None
+    noise_ratio = noise_h / abs(VaR_h)
+    if noise_ratio < 0.10:
+        return None
+    n_paths = results.get("multi_step_mc_paths")
+    n_paths_str = f"{int(n_paths):,}" if n_paths is not None else "unknown"
+    return (
+        f"Monte Carlo standard error at horizon {h_longest} is "
+        f"{noise_ratio:.1%} of the quantile estimate "
+        f"({format_scale_aware(VaR_h)} ± "
+        f"{format_scale_aware(noise_h)}) — the longest-horizon tail "
+        f"is noisy. Increase n_simulation_paths (currently "
+        f"{n_paths_str}) via the Thorough preset to reduce noise."
+    )
+
+
+def _trigger_residual_autocorr_caviar(results: dict) -> Optional[str]:
+    """D2 — fires when in-sample residuals show autocorrelation
+    (Ljung-Box p < 0.05). Bootstrap iid resampling assumes
+    exchangeability; residual dependence mis-calibrates the
+    simulation."""
+    if not bool(results.get("multi_step_computed", False)):
+        return None
+    p = results.get("multi_step_residual_autocorr_lbq")
+    if p is None:
+        return None
+    try:
+        if float(p) >= 0.05:
+            return None
+    except Exception:
+        return None
+    return (
+        f"CAViaR residuals show autocorrelation at lag 10 "
+        f"(Ljung-Box p = {FMT_P_VALUE.format(float(p))}). The "
+        f"multi-horizon bootstrap resamples residuals iid; residual "
+        f"dependence mis-calibrates the simulated VaR paths. "
+        f"Consider fitting a richer CAViaR variant (SAV → AS "
+        f"captures leverage asymmetry; AS → IG captures "
+        f"variance-implied dynamics) or — backlog — block bootstrap "
+        f"for residual dependence."
+    )
+
+
+def _trigger_caviar_non_stationary(results: dict) -> Optional[str]:
+    """D3 — fires when CAViaR effective persistence fails the
+    stability condition for multi-horizon bootstrap. Conservative
+    worst-case bound: the simulation may stay empirically bounded
+    even when this fires (check MC Std Error in the Multi-Horizon
+    table to diagnose)."""
+    ok = results.get("caviar_stationarity_ok")
+    if ok is None or bool(ok):
+        return None
+    eff = results.get("caviar_effective_persistence")
+    beta_1 = results.get("caviar_stationarity_param")
+    if eff is None or beta_1 is None:
+        return None
+    spec = str(results.get("specification", "")).upper()
+    if spec == "IG":
+        cond_str = "β₁ + β₂ < 1 (and β₁ ≥ 0)"
+    elif spec == "AS":
+        cond_str = "β₁ + max(|β₂|, |β₃|) < 1"
+    else:
+        cond_str = "β₁ + |β₂| < 1"
+    return (
+        f"CAViaR effective persistence "
+        f"{FMT_COEF_SIGNED.format(float(eff))} "
+        f"(β₁ = {FMT_COEF_SIGNED.format(float(beta_1))}) fails the "
+        f"multi-horizon stability condition {cond_str}. The bootstrap "
+        f"recursion may diverge as horizon grows because |y| feeds "
+        f"back into |q|; long-horizon VaR values in the Multi-"
+        f"Horizon VaR Forecasts table may be unreliable. This is a "
+        f"conservative worst-case bound — the AS variant in "
+        f"particular can stay empirically bounded under sign-"
+        f"asymmetric residual dynamics even when this check fails. "
+        f"Inspect the MC Std Error column to diagnose whether the "
+        f"simulation actually diverged. Consider re-specifying "
+        f"(switch variant or check for outliers) or restricting "
+        f"forecasts to the 1-step-ahead VaR only."
+    )
+
+
 SPEC = InterpretationSpec(
     technique_id="caviar_quantile_dynamics",
     tier1_builder=_tier1,
@@ -327,6 +535,10 @@ SPEC = InterpretationSpec(
         _trigger_kupiec_rejects,
         _trigger_christoffersen_rejects,
         _trigger_dq_rejects,
+        # Follow-up 3a — Multi-horizon triggers:
+        _trigger_mc_noise_warning,
+        _trigger_residual_autocorr_caviar,
+        _trigger_caviar_non_stationary,
     ),
     mode_aware=False,
 )

@@ -663,10 +663,12 @@
       "presets": ["Balanced", "Thorough"],
       "parameters": [
         {"name": "quantile", "label": "Quantile", "type": "float", "default": 0.05, "required": false, "advanced": false, "description": "Target quantile (e.g., 0.05 for 5% VaR)", "options": null},
-        {"name": "model_type", "label": "CAViaR Type", "type": "string", "default": "symmetric_abs", "required": false, "advanced": true, "description": "CAViaR specification", "options": ["symmetric_abs", "asymmetric_slope", "adaptive"]}
+        {"name": "model_type", "label": "CAViaR Type", "type": "string", "default": "symmetric_abs", "required": false, "advanced": true, "description": "CAViaR specification", "options": ["symmetric_abs", "asymmetric_slope", "adaptive"]},
+        {"name": "horizons", "label": "Forecast Horizons", "type": "string", "default": "[1, 5, 10, 22]", "required": false, "advanced": false, "description": "List of forecast horizons in periods for multi-horizon VaR (default: 1-day / 1-week / 2-week / 1-month at daily frequency).", "options": null},
+        {"name": "n_simulation_paths", "label": "MC Simulation Paths", "type": "int", "default": null, "required": false, "advanced": true, "description": "Monte Carlo bootstrap path count for multi-horizon VaR (preset defaults: Fast=500, Balanced=2000, Thorough=10000).", "options": null}
       ],
-      "output_tables": ["var_series", "model_summary"],
-      "tags": ["risk", "var", "caviar", "quantile"]
+      "output_tables": ["var_series", "model_summary", "multi_horizon_var_forecasts"],
+      "tags": ["risk", "var", "caviar", "quantile", "multi-horizon"]
     },
     {
       "id": "fft_spectrum",
