@@ -812,6 +812,13 @@ class TestT10RegistryGrowth(unittest.TestCase):
         # the custom-matrix path.
         "kalman_filter",
         "kalman_smoother",
+        # Follow-up 3b (1): HAR-CJ jumps-aware realized volatility
+        # (Andersen-Bollerslev-Diebold 2007). Distinct from HAR-RV:
+        # decomposes RV into continuous + jump components via BNS
+        # ratio test and fits a 7-regressor HAR with separate
+        # cascades for C and J. Fulfills the cross-reference
+        # HAR-RV's D19 trigger already makes.
+        "har_cj",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1167,24 +1174,44 @@ class TestT22FollowUp1bRegistryInventory(unittest.TestCase):
 
 
 class TestT23FollowUp2aRegistryInventory(unittest.TestCase):
-    """T23 — After Follow-up 2a lands (kalman_filter and
-    kalman_smoother wrapper creation), the registry contains exactly
-    81 specs (79 post-1b baseline + 2 direct-access Kalman wrappers).
-    Both were deferred from Prompt C3 because no wrapper existed at
-    the time — structural_ts handled the state-space use case via
-    UnobservedComponents, but did not expose filtered states (online)
-    or user-specified state-space matrices. Follow-up 2a created both
-    wrappers with four named templates plus a custom-matrix escape
-    hatch via a zero-free-parameter MLEModel subclass."""
+    """T23 — After Follow-up 2a landed (kalman_filter and
+    kalman_smoother wrapper creation), the registry contained at
+    least 81 specs (79 post-1b baseline + 2 direct-access Kalman
+    wrappers). Both were deferred from Prompt C3 because no wrapper
+    existed at the time. Follow-up 3b grows the set further; T23
+    now pins the post-2a minimum and T24 pins the exact post-3b
+    count."""
 
-    def test_exactly_81_specs_registered(self):
+    def test_at_least_81_specs_registered(self):
+        from interpretation import list_registered
+        registered = list_registered()
+        self.assertGreaterEqual(
+            len(registered), 81,
+            f"Expected at least 81 registered specs (79 post-1b "
+            f"baseline + 2 Follow-up 2a direct-access Kalman specs: "
+            f"kalman_filter, kalman_smoother). Got "
+            f"{len(registered)}: {sorted(registered)}"
+        )
+
+
+class TestT24FollowUp3bRegistryInventory(unittest.TestCase):
+    """T24 — After Follow-up 3b lands (HAR-CJ jumps-aware realized
+    volatility wrapper creation), the registry contains exactly 82
+    specs (81 post-2a baseline + 1 HAR-CJ). HAR-CJ decomposes
+    realized volatility into continuous and jump components per
+    Andersen-Bollerslev-Diebold 2007 and estimates their
+    persistence separately — a distinct model from HAR-RV. Jumps
+    have near-zero persistence while continuous volatility is
+    highly persistent; HAR-CJ exposes this contrast in its Tier 1
+    rendering."""
+
+    def test_exactly_82_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
         self.assertEqual(
-            len(registered), 81,
-            f"Expected exactly 81 registered specs (79 post-1b "
-            f"baseline + 2 Follow-up 2a direct-access Kalman specs: "
-            f"kalman_filter, kalman_smoother). Got "
+            len(registered), 82,
+            f"Expected exactly 82 registered specs (81 post-2a "
+            f"baseline + 1 Follow-up 3b har_cj). Got "
             f"{len(registered)}: {sorted(registered)}"
         )
 
@@ -1695,6 +1722,33 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "fallback_occurred": False,
         "nu_degrees_of_freedom": None,
         "nu_interpretation_band": None,
+        # Follow-up 3b — HAR-CJ jumps-aware audit fields. Default
+        # to non-jump-detected state (jump_days_count=0,
+        # tq_approximated=False, all jump betas None) so spec
+        # null-guards gracefully. When har_cj runs with real data,
+        # these are populated with values per the wrapper.
+        "M_sampling_frequency": None,
+        "jump_detection_threshold": None,
+        "jump_days_count": 0,
+        "jump_days_fraction": 0.0,
+        "mean_jump_contribution": 0.0,
+        "mean_continuous_contribution": 1.0,
+        "bns_test_statistic_max": 0.0,
+        "tq_approximated": False,
+        "beta_cd": None,
+        "beta_cw": None,
+        "beta_cm": None,
+        "beta_jd": None,
+        "beta_jw": None,
+        "beta_jm": None,
+        "beta_jd_pvalue": None,
+        "beta_jw_pvalue": None,
+        "beta_jm_pvalue": None,
+        "continuous_persistence_sum": None,
+        "jump_persistence_sum": None,
+        "n_obs_raw": 100,
+        # `jump_alpha` already present on CAViaR side; reuse — both
+        # specs treat it as their test significance level.
         # Follow-up 3a — CAViaR multi-horizon fields. Default to
         # multi_step_computed=False so spec null-guards via .get()
         # / None checks. Empty list/dict collections keep render
@@ -1929,6 +1983,30 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         "multi_step_computed", "horizons_forecasted",
         "caviar_stationarity_param", "caviar_effective_persistence",
         "caviar_stationarity_ok",
+        # (c12) Follow-up 3b — HAR-CJ jumps-aware realized volatility.
+        # Cross-technique reference `har_cj` is cited in HAR-RV's
+        # spec D19 trigger. Audit-field identifiers that may leak
+        # into Tier 2 prose or Tier 3 trigger text include beta_*
+        # coefficient names, persistence-sum identifiers, and
+        # jump-detection metrics. Single-word tokens (jumps,
+        # continuous, bipower, tripower, quarticity, BNS) don't
+        # match the T15 regex. Math-notation time subscripts
+        # (RV_t, BV_t, C_t, J_t) cited in the HAR-CJ regression
+        # equation belong to the same category as y_t / x_t / s_t
+        # from the Prompt A allowlist.
+        "har_cj",
+        "jump_days_count", "jump_days_fraction",
+        "jump_detection_threshold",
+        "mean_jump_contribution", "mean_continuous_contribution",
+        "bns_test_statistic_max", "tq_approximated",
+        "beta_cd", "beta_cw", "beta_cm",
+        "beta_jd", "beta_jw", "beta_jm",
+        "continuous_persistence_sum", "jump_persistence_sum",
+        "M_sampling_frequency",
+        "RV_t", "BV_t", "C_t", "J_t", "TQ_t", "Z_t",
+        # Function-like math notation in HAR equations:
+        # avg_wk(C), avg_mo(C) denote rolling-window averages.
+        "avg_wk", "avg_mo",
     }
 
     @staticmethod

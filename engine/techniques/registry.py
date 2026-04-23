@@ -125,6 +125,7 @@ TECHNIQUE_REGISTRY = {
     "sv_model": "techniques.stochastic_volatility",
     "har_rv": "techniques.har_rv",
     "har": "techniques.har_rv",
+    "har_cj": "techniques.har_cj",
     "evt_pot_gpd": "techniques.evt_pot_gpd",
     "evt": "techniques.evt_pot_gpd",
     "gpd": "techniques.evt_pot_gpd",

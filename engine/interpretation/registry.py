@@ -195,3 +195,14 @@ from interpretation.specs import tbats_forecast as _tbats_spec                  
 # 79 → 81.
 from interpretation.specs import kalman_filter as _kalman_filter_spec                 # noqa: F401, E402
 from interpretation.specs import kalman_smoother as _kalman_smoother_spec             # noqa: F401, E402
+
+# Follow-up 3b (1 spec, 1 wrapper):
+# HAR-CJ jumps-aware realized volatility (Andersen-Bollerslev-
+# Diebold 2007). Distinct from HAR-RV (Corsi 2009): decomposes
+# realized volatility into continuous and jump components via the
+# Barndorff-Nielsen-Shephard ratio test, then fits a 7-regressor
+# HAR-family regression with separate cascades for C and J.
+# HAR-RV's D19 low-R² trigger already referenced "jumps-aware
+# variants like HAR-CJ" as a recommended extension — 3b fulfills
+# that cross-reference. Registry: 81 → 82.
+from interpretation.specs import har_cj as _har_cj_spec                               # noqa: F401, E402

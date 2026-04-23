@@ -671,6 +671,27 @@
       "tags": ["risk", "var", "caviar", "quantile", "multi-horizon"]
     },
     {
+      "id": "har_cj",
+      "name": "HAR-CJ (Jumps-Aware)",
+      "category": "Volatility / Risk / Tails",
+      "summary": "Heterogeneous autoregressive model with continuous/jump decomposition (Andersen-Bollerslev-Diebold 2007). Separates persistent continuous volatility from transient price jumps via Barndorff-Nielsen-Shephard ratio test.",
+      "description_file": "har_cj.md",
+      "min_series": 2, "max_series": 3,
+      "supports_auto_udf": false, "auto_udf_name": null,
+      "presets": ["Fast", "Balanced", "Thorough"],
+      "parameters": [
+        {"name": "M", "label": "Intraday Sampling M", "type": "int", "default": null, "required": true, "advanced": false, "description": "Intraday sampling frequency (number of intraday return intervals). E.g., 79 for 5-minute returns in a 6.5-hour US equity session. Required \u2014 no default.", "options": null},
+        {"name": "jump_alpha", "label": "Jump Test Alpha", "type": "float", "default": 0.01, "required": false, "advanced": false, "description": "BNS ratio-test significance level (default 0.01 = 99% threshold).", "options": null},
+        {"name": "h_ahead", "label": "Forecast Horizon (days)", "type": "int", "default": 1, "required": false, "advanced": false, "description": "Forward-averaging horizon for the dependent variable (same semantics as HAR-RV).", "options": null},
+        {"name": "daily_lag", "label": "Daily Lag", "type": "int", "default": 1, "required": false, "advanced": true, "description": "Daily component lag (default 1).", "options": null},
+        {"name": "weekly_lag", "label": "Weekly Lag", "type": "int", "default": 5, "required": false, "advanced": true, "description": "Weekly component window (default 5).", "options": null},
+        {"name": "monthly_lag", "label": "Monthly Lag", "type": "int", "default": 22, "required": false, "advanced": true, "description": "Monthly component window (default 22).", "options": null},
+        {"name": "use_log", "label": "Log-HAR-CJ Form", "type": "bool", "default": false, "required": false, "advanced": true, "description": "Apply log transform to RV / C / J before regression. Note: J has many zeros; log(J + \u03b5) introduces large negative spikes. Prefer false unless RV is heavily right-skewed.", "options": null}
+      ],
+      "output_tables": ["HAR-CJ Coefficients", "Jump Detection Summary", "Model Fit", "Residual Diagnostics", "Fitted Values"],
+      "tags": ["volatility", "realized-variance", "jumps", "har", "bns", "andersen-bollerslev-diebold"]
+    },
+    {
       "id": "fft_spectrum",
       "name": "FFT Spectrum",
       "category": "Frequency Domain / Signal",
