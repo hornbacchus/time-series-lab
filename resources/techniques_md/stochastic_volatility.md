@@ -4,6 +4,8 @@
 
 Stochastic volatility (SV) models treat the log-variance as a **latent stochastic process** rather than a deterministic function of past observations (as in GARCH). The volatility evolves according to its own random innovation, separate from the return innovation. This provides a more flexible and theoretically appealing model of time-varying volatility, closely aligned with the continuous-time models used in option pricing.
 
+**Inference options**: Fast quasi-maximum likelihood via Kalman filter on log-squared returns (default), or opt-in full MCMC posterior sampling on the returns likelihood directly (Balanced or Thorough preset; removes the log-squared transformation bias). Both options support Gaussian and Student-t innovations.
+
 ## When to Use It
 
 - You want a volatility model that is more flexible than GARCH and allows independent volatility shocks
@@ -70,10 +72,30 @@ Every Stochastic Volatility run emits a two-tier plain-language Interpretation b
 
 **Plain-Language Finding (Tier 1)** - names the persistence φ with its adjective band (low / moderate / high / very high, shared with GARCH via the 4-band convention), the volatility shock half-life, and the filtered-volatility dynamic range across the sample. Tier 1 cites the *filtered* volatility path as the forward-causal analog of GARCH's σ_t for cross-spec comparability.
 
-**Technical Interpretation (Tier 2)** - discloses the SV AR(1) log-variance model equations, the quasi-maximum likelihood Kalman-filter inference path, the innovation-distribution choice (Gaussian default or Student-t opt-in), AIC/BIC on the adjusted parameter count (k=3 Gaussian, k=4 Student-t), and three honest-disclosure sentences:
-1. **Transformation-bias (D13):** back-transforming filtered/smoothed log-volatility to volatility scale introduces Jensen-inequality bias (E[exp(X)] ≠ exp(E[X])); reported values carry this systematic bias. This applies on both Gaussian and Student-t paths — Student-t does NOT fix this limitation (future follow-up 2b addresses via MCMC).
-2. **Innovation distribution (D12):** the wrapper defaults to Gaussian innovations; set `innovations='student_t'` to use Student-t_ν innovations with ν jointly estimated via quasi-ML (Follow-up 2c). On the Student-t path, Tier 2 renders the digamma/trigamma-based observation offset and variance and a "what Student-t fixes / what it does NOT fix" scope frame.
+**Technical Interpretation (Tier 2)** - discloses the SV AR(1) log-variance model equations, the inference method (quasi-ML default or MCMC opt-in), the innovation-distribution choice (Gaussian default or Student-t opt-in), AIC/BIC on the adjusted parameter count (k=3 Gaussian, k=4 Student-t), and three honest-disclosure sentences:
+1. **Transformation-bias (D13):** on the quasi-ML path, back-transforming filtered/smoothed log-volatility to volatility scale introduces Jensen-inequality bias (E[exp(X)] ≠ exp(E[X])); reported values carry this systematic bias. **Follow-up 2b closes this gap**: set `inference_method='mcmc'` (Balanced or Thorough preset) to sample directly on the returns likelihood, avoiding the log-squared transformation entirely.
+2. **Innovation distribution (D12):** the wrapper defaults to Gaussian innovations; set `innovations='student_t'` to use Student-t_ν innovations with ν jointly estimated (Follow-up 2c). On the Student-t path, Tier 2 renders the digamma/trigamma-based observation offset and variance and a "what Student-t fixes / what it does NOT fix" scope frame.
 3. **No forecast path (D4):** the wrapper does not emit a forecast; historical filtered/smoothed volatility is the deliverable, paralleling the BVAR wrapper's IRF/FEVD absence.
+
+### Inference method (Follow-up 2b)
+
+The `inference_method` parameter toggles the inference backend:
+
+- **`quasi_ml`** (default) — quasi-maximum likelihood via Kalman filter on log-squared returns. Fast (sub-second on n=2500). Works on any preset. Produces point estimates with standard errors; inference is approximate because of the log-squared transformation and its Jensen-inequality bias.
+- **`mcmc`** — full Bayesian posterior sampling directly on the returns likelihood. Supports Balanced (2 chains × 2000 draws, ~30–120 s) and Thorough (4 chains × 4000 draws, ~2–10 min) presets. Removes the transformation bias by construction; produces genuine posterior distributions with 95% HDIs on every parameter. Fast preset + `inference_method='mcmc'` triggers graceful auto-downgrade (D9) — MCMC's compute cost is incompatible with Fast's latency budget.
+
+Both innovation distributions (`gaussian` and `student_t`) are supported on both inference methods (4 combinations total).
+
+**MCMC backends** — the wrapper supports two samplers, chosen automatically:
+
+1. **pymc NUTS** (preferred) — No-U-Turn Sampler via `pymc`/`pytensor`. Best convergence on SV's awkward geometry; produces WAIC and LOO via `arviz`; tracks divergent transitions as a first-class diagnostic. Used when `pymc` and `arviz` are installed.
+2. **Kim-Shephard-Chib Gibbs** (fallback) — classical mixture-of-normals Gibbs sampler, pure `numpy`/`scipy`. Used when `pymc` is unavailable. SV-specialized: FFBS for the latent log-volatility path, conjugate Gibbs for μ and σ_η², Metropolis for φ, and for Student-t innovations a scale-mixture augmentation with per-observation λ_t Gibbs and Metropolis ν slice sampler. No external MCMC dependency. Citation: Kim, S., Shephard, N., & Chib, S. (1998). *Stochastic volatility: likelihood inference and comparison with ARCH models*. Review of Economic Studies, 65(3), 361–393.
+
+Tier 2 always discloses which backend ran for replicability.
+
+**Graceful degradation (D7)**: if MCMC sampling fails (gross convergence failure, library error, compile failure), the wrapper falls back to quasi-ML. Audit fields `requested_inference_method` vs `fitted_inference_method` capture the divergence; Tier 2 renders a 3-cause / 3-remediation diagnostic block; Tier 3 D7 trigger fires.
+
+**Posterior predictive check (PPC)**: on Thorough + MCMC, the wrapper computes `ppc_coverage_90pct` (fraction of observations within the posterior 90% predictive band). Balanced users can opt in via `compute_ppc=True`. D8 trigger fires if coverage falls below 0.80 (model misses important features).
 
 ### Innovation distribution (Follow-up 2c)
 
@@ -95,7 +117,13 @@ where ψ and ψ' are digamma and trigamma (scipy.special). As ν → ∞ these r
 - φ > 0.98 (near-integrated volatility) - shocks decay extremely slowly; forward-looking use beyond a few weeks carries substantial uncertainty. Threshold inherited from GARCH for cross-spec consistency.
 - φ < 0.3 (low persistence) - volatility is essentially iid; SV framing adds little over sample-mean-volatility. Verify the input is returns (not levels) and that the series has volatility clustering.
 - Sample kurtosis > 6 AND `innovations='gaussian'` - input is heavy-tailed and user is on the Gaussian path. Rerun with `innovations='student_t'` to capture tails directly. Suppressed on the Student-t path (user is already handling tails).
-- **Student-t ν < 5** (Follow-up 2c D1) - very heavy tails; even Student-t may struggle with extreme moves. Consider checking for structural breaks, outliers, or mean dynamics beyond the SV model's scope.
-- **Student-t ν ≥ 30** (Follow-up 2c D2) - essentially Gaussian; series does not exhibit heavy tails at the sampling frequency. Consider `innovations='gaussian'` on the next fit (faster, fewer free parameters).
-- **Student-t optimization failed, fell back to Gaussian** (Follow-up 2c D3) - user requested Student-t but the wrapper converged only under Gaussian. Reported parameters are from the Gaussian fit. See Tier 2 for specific remediations.
+- **Student-t ν < 5** (2c D1) - very heavy tails; even Student-t may struggle with extreme moves. Consider checking for structural breaks, outliers, or mean dynamics beyond the SV model's scope.
+- **Student-t ν ≥ 30** (2c D2) - essentially Gaussian; series does not exhibit heavy tails at the sampling frequency. Consider `innovations='gaussian'` on the next fit (faster, fewer free parameters).
+- **Student-t optimization failed, fell back to Gaussian** (2c D3) - user requested Student-t but the wrapper converged only under Gaussian. Reported parameters are from the Gaussian fit. See Tier 2 for specific remediations.
+- **R-hat > 1.01** on any MCMC parameter (2b D4) - chain mixing imperfect (warn at 1.01, fail at 1.05). Posterior summaries should be interpreted with caution; switch to Thorough preset.
+- **Bulk ESS < 400 × chains** on any MCMC parameter (2b D5) - low effective sample size, Monte Carlo error on that parameter is high. Run Thorough preset.
+- **Divergent transitions > 5% of draws** (2b D6, pymc NUTS only) - NUTS struggling with posterior geometry. Switch to Thorough (tighter target-accept) or use the Kim-Shephard-Chib Gibbs backend.
+- **MCMC failed, fell back to quasi-ML** (2b D7) - user requested MCMC but the wrapper fell back. Reported parameters are from the quasi-ML fit and carry the Jensen-inequality transformation bias.
+- **PPC 90% coverage < 0.80** (2b D8, Thorough + MCMC) - model misses features of the data; typically extreme moves on heavy-tailed returns. Switch to Student-t or inspect for structural breaks.
+- **MCMC requested on Fast preset, auto-downgraded** (2b D9) - Fast cannot run MCMC. Reported parameters reflect the quasi-ML approximation. Re-run on Balanced or Thorough for MCMC inference.
 

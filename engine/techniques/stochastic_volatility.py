@@ -26,7 +26,24 @@ fails on all restarts, wrapper falls back to Gaussian fit and flags
 the event via requested_innovations / fitted_innovations audit fields
 (visible to the user through the spec's Tier 2 fallback disclosure
 and Tier 3 D3 trigger).
+
+Follow-up 2b — MCMC option. Users can opt into full Bayesian
+inference via ``inference_method="mcmc"`` (default remains
+``"quasi_ml"`` for backward compatibility). MCMC removes the log-
+squared transformation bias by sampling directly on the returns
+likelihood; see ``_sv_mcmc.py`` for the backend-agnostic dispatcher
+(pymc NUTS preferred, Kim-Shephard-Chib Gibbs fallback).
+
+Three-step graceful-degradation cascade (Follow-up 2b D11):
+  1. Fast preset + MCMC → D9 auto-downgrade to quasi-ML (Fast's
+     latency budget incompatible with MCMC compute cost).
+  2. Balanced/Thorough + MCMC runtime failure (R-hat gross failure,
+     import error, exception) → D7 fallback to quasi-ML.
+  3. Quasi-ML + Student-t MLE failure → 2c D3 fallback to Gaussian
+     (unchanged from 2c).
 """
+
+import math
 
 import numpy as np
 from scipy.optimize import minimize
@@ -193,6 +210,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 ],
             )
 
+        # Resolve inference_method parameter (Follow-up 2b)
+        requested_inference_method = str(
+            ctx.get_param("inference_method", "quasi_ml")
+        ).strip().lower()
+        if requested_inference_method not in ("quasi_ml", "mcmc"):
+            return make_error_response(
+                ctx,
+                f"inference_method must be 'quasi_ml' or 'mcmc', "
+                f"got {requested_inference_method!r}.",
+                error_fixes=[
+                    "Set inference_method='quasi_ml' (default) or "
+                    "inference_method='mcmc' (Balanced/Thorough only).",
+                ],
+            )
+
+        # Cascade step 1 (D11): Fast + MCMC → D9 auto-downgrade.
+        # Decision Q3: graceful auto-downgrade with disclosure.
+        fast_preset_mcmc_downgrade = False
+        if requested_inference_method == "mcmc" and ctx.preset == "Fast":
+            warnings.append(
+                "MCMC requested on Fast preset; Fast preset's latency "
+                "budget is incompatible with MCMC compute cost "
+                "(30-120 s minimum). Auto-downgraded to quasi-ML for "
+                "this fit. Switch to Balanced or Thorough preset to "
+                "perform MCMC inference."
+            )
+            fast_preset_mcmc_downgrade = True
+            effective_inference_method = "quasi_ml"
+        else:
+            effective_inference_method = requested_inference_method
+
         def _attempt_fit(innovations):
             """Run n_restarts optimizations on the chosen innovation
             distribution. Returns (best_result, best_nll, best_x_dim).
@@ -239,51 +287,125 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     continue
             return best_result, best_nll
 
-        progress_callback(
-            f"Estimating SV model ({requested_innovations})", 25,
-        )
-        best_result, best_nll = _attempt_fit(requested_innovations)
+        # ── Inference dispatch (Follow-up 2b) ──────────────────────
+        # Three-step cascade (D11):
+        #   1. Fast + MCMC → D9 auto-downgrade (handled above).
+        #   2. MCMC runtime failure → D7 fallback to quasi-ML.
+        #   3. Quasi-ML + Student-t MLE failure → 2c D3 fallback.
+        mcmc_result = None
+        mcmc_backend = None
+        mcmc_fallback_occurred = False
+        fitted_inference_method = effective_inference_method
         fitted_innovations = requested_innovations
-        fallback_occurred = False
+        fallback_occurred = False  # 2c D13 Student-t → Gaussian flag
 
-        # D13 graceful degradation: if Student-t failed on all
-        # restarts, fall back to Gaussian and flag the event.
-        if (requested_innovations == "student_t"
-                and (best_result is None or not np.isfinite(best_nll))):
-            warnings.append(
-                f"Student-t optimization did not converge after "
-                f"{cfg['n_restarts']} restarts; automatically fell "
-                f"back to Gaussian fit. See Tier 2 interpretation for "
-                f"remediation guidance."
-            )
+        if effective_inference_method == "mcmc":
             progress_callback(
-                "Student-t optimization failed — falling back to Gaussian", 60,
+                f"Running MCMC inference ({requested_innovations})", 20,
             )
-            best_result, best_nll = _attempt_fit("gaussian")
-            fitted_innovations = "gaussian"
-            fallback_occurred = True
+            try:
+                from techniques import _sv_mcmc  # lazy import
+                requested_backend = ctx.get_param("mcmc_backend", None)
+                backend_hint = (
+                    str(requested_backend).strip().lower()
+                    if requested_backend else None
+                )
+                mcmc_result = _sv_mcmc.fit(
+                    y=y,
+                    innovations=requested_innovations,
+                    preset=ctx.preset,
+                    seed=int(ctx.seed),
+                    compute_ppc=bool(ctx.get_param(
+                        "compute_ppc", ctx.preset == "Thorough",
+                    )),
+                    progress_callback=progress_callback,
+                    backend_hint=backend_hint,
+                )
+                mcmc_backend = mcmc_result["backend"]
+            except Exception as mcmc_err:
+                # Cascade step 2: MCMC runtime failure → D7 fallback
+                warnings.append(
+                    f"MCMC sampling failed "
+                    f"({type(mcmc_err).__name__}: {mcmc_err}); "
+                    f"automatically fell back to quasi-ML. See Tier 2 "
+                    f"remediation guidance."
+                )
+                mcmc_fallback_occurred = True
+                fitted_inference_method = "quasi_ml"
+                mcmc_result = None
+                # Fall through to quasi-ML path
 
-        if best_result is None or not np.isfinite(best_nll):
-            return make_error_response(
-                ctx,
-                "SV model optimization failed to converge on all restarts.",
-                error_fixes=[
-                    "Ensure the series represents returns (not prices).",
-                    "Try the 'Thorough' preset for more optimization restarts.",
-                    "Check for extreme outliers or structural breaks.",
-                ],
-            )
-
-        progress_callback("Extracting parameters", 80)
-
-        # Extract parameters from unconstrained space
-        mu_hat = best_result.x[0]
-        phi_hat = 1.0 / (1.0 + np.exp(-best_result.x[1]))
-        sigma_eta_hat = np.exp(best_result.x[2])
-        if fitted_innovations == "student_t":
-            nu_hat = float(_unconstrained_to_nu(best_result.x[3]))
+        # ── Parameter extraction ────────────────────────────────────
+        if mcmc_result is not None:
+            # MCMC path — use posterior means as point estimates
+            progress_callback("Extracting MCMC posterior means", 80)
+            mu_hat = float(mcmc_result["posterior"]["mu"]["mean"])
+            phi_hat = float(mcmc_result["posterior"]["phi"]["mean"])
+            sigma_eta_hat = float(mcmc_result["posterior"]["sigma_eta"]["mean"])
+            if requested_innovations == "student_t":
+                nu_hat = float(mcmc_result["posterior"]["nu"]["mean"])
+            else:
+                nu_hat = None
+            # Compute neg-log-lik at the posterior means for downstream
+            # AIC/BIC reporting (consistent with 2c's interpretation-
+            # field semantics).
+            x_at_post = np.array([
+                mu_hat,
+                math.log(phi_hat / (1.0 - phi_hat)),  # logit(phi) for _neg_log_likelihood
+                math.log(sigma_eta_hat),
+            ])
+            if nu_hat is not None:
+                x_at_post = np.append(x_at_post, _nu_to_unconstrained(nu_hat))
+            try:
+                best_nll = float(_neg_log_likelihood(
+                    x_at_post, y_star, requested_innovations,
+                ))
+            except Exception:
+                best_nll = None
         else:
-            nu_hat = None
+            # Quasi-ML path — 2c behavior preserved including D13
+            # Student-t → Gaussian fallback.
+            progress_callback(
+                f"Estimating SV model ({requested_innovations})", 25,
+            )
+            best_result, best_nll = _attempt_fit(requested_innovations)
+
+            # 2c D13 Student-t → Gaussian fallback (quasi-ML path only)
+            if (requested_innovations == "student_t"
+                    and (best_result is None or not np.isfinite(best_nll))):
+                warnings.append(
+                    f"Student-t optimization did not converge after "
+                    f"{cfg['n_restarts']} restarts; automatically fell "
+                    f"back to Gaussian fit. See Tier 2 interpretation "
+                    f"for remediation guidance."
+                )
+                progress_callback(
+                    "Student-t optimization failed — falling back to Gaussian",
+                    60,
+                )
+                best_result, best_nll = _attempt_fit("gaussian")
+                fitted_innovations = "gaussian"
+                fallback_occurred = True
+
+            if best_result is None or not np.isfinite(best_nll):
+                return make_error_response(
+                    ctx,
+                    "SV model optimization failed to converge on all restarts.",
+                    error_fixes=[
+                        "Ensure the series represents returns (not prices).",
+                        "Try the 'Thorough' preset for more optimization restarts.",
+                        "Check for extreme outliers or structural breaks.",
+                    ],
+                )
+
+            progress_callback("Extracting parameters", 80)
+            mu_hat = best_result.x[0]
+            phi_hat = 1.0 / (1.0 + np.exp(-best_result.x[1]))
+            sigma_eta_hat = np.exp(best_result.x[2])
+            if fitted_innovations == "student_t":
+                nu_hat = float(_unconstrained_to_nu(best_result.x[3]))
+            else:
+                nu_hat = None
 
         # Precompute offset/obs_var at the converged ν so the
         # extraction KF/KS passes don't re-evaluate digamma per step.
@@ -480,7 +602,78 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ),
             "nu_interpretation_band": _nu_band(nu_hat),
             "n_free_params": _k_params,
+            # Follow-up 2b — inference-method path disclosure. The
+            # requested/fitted split captures D7 fallback events
+            # when MCMC runtime failure forces quasi-ML fallback;
+            # fast_preset_mcmc_downgrade captures D9 auto-downgrade.
+            "inference_method": fitted_inference_method,
+            "requested_inference_method": requested_inference_method,
+            "fitted_inference_method": fitted_inference_method,
+            "fast_preset_mcmc_downgrade": bool(fast_preset_mcmc_downgrade),
+            "mcmc_fallback_occurred": bool(mcmc_fallback_occurred),
         }
+
+        # Populate MCMC-specific audit fields when MCMC path succeeded.
+        # Quasi-ML path (incl. post-fallback) gets None on all of them.
+        if mcmc_result is not None:
+            audit["mcmc_backend"] = mcmc_backend
+            audit["mcmc_chains"] = mcmc_result["config"]["chains"]
+            audit["mcmc_draws_per_chain"] = mcmc_result["config"]["draws"]
+            audit["mcmc_tune"] = mcmc_result["config"]["tune"]
+            audit["mcmc_total_draws"] = (
+                mcmc_result["config"]["chains"]
+                * mcmc_result["config"]["draws"]
+            )
+            audit["mcmc_fit_time_seconds"] = mcmc_result["fit_time_seconds"]
+            d = mcmc_result["diagnostics"]
+            audit["rhat_max"] = round(float(d["rhat_max"]), 4) if d["rhat_max"] is not None else None
+            audit["rhat_max_param"] = d["rhat_max_param"]
+            audit["ess_min"] = round(float(d["ess_min"]), 1) if d["ess_min"] is not None else None
+            audit["ess_min_param"] = d["ess_min_param"]
+            audit["divergences_count"] = int(d["divergences_count"])
+            audit["divergences_fraction"] = round(float(d["divergences_fraction"]), 6)
+            for pname in ("mu", "phi", "sigma_eta", "nu"):
+                summ = mcmc_result["posterior"].get(pname)
+                if summ is not None:
+                    audit[f"{pname}_posterior_mean"] = round(float(summ["mean"]), 6)
+                    audit[f"{pname}_posterior_sd"] = round(float(summ["sd"]), 6)
+                    audit[f"{pname}_posterior_hdi_lower"] = round(float(summ["hdi_lower"]), 6)
+                    audit[f"{pname}_posterior_hdi_upper"] = round(float(summ["hdi_upper"]), 6)
+                else:
+                    audit[f"{pname}_posterior_mean"] = None
+                    audit[f"{pname}_posterior_sd"] = None
+                    audit[f"{pname}_posterior_hdi_lower"] = None
+                    audit[f"{pname}_posterior_hdi_upper"] = None
+            audit["ppc_coverage_90pct"] = (
+                round(float(mcmc_result["ppc_coverage_90pct"]), 4)
+                if mcmc_result["ppc_coverage_90pct"] is not None else None
+            )
+            audit["waic"] = (
+                round(float(mcmc_result["waic"]), 2)
+                if mcmc_result["waic"] is not None else None
+            )
+            audit["loo"] = (
+                round(float(mcmc_result["loo"]), 2)
+                if mcmc_result["loo"] is not None else None
+            )
+        else:
+            # Quasi-ML path: all MCMC fields None (Q7 null-guard)
+            for key in (
+                "mcmc_backend", "mcmc_chains", "mcmc_draws_per_chain",
+                "mcmc_tune", "mcmc_total_draws", "mcmc_fit_time_seconds",
+                "rhat_max", "rhat_max_param", "ess_min", "ess_min_param",
+                "divergences_count", "divergences_fraction",
+                "mu_posterior_mean", "mu_posterior_sd",
+                "mu_posterior_hdi_lower", "mu_posterior_hdi_upper",
+                "phi_posterior_mean", "phi_posterior_sd",
+                "phi_posterior_hdi_lower", "phi_posterior_hdi_upper",
+                "sigma_eta_posterior_mean", "sigma_eta_posterior_sd",
+                "sigma_eta_posterior_hdi_lower", "sigma_eta_posterior_hdi_upper",
+                "nu_posterior_mean", "nu_posterior_sd",
+                "nu_posterior_hdi_lower", "nu_posterior_hdi_upper",
+                "ppc_coverage_90pct", "waic", "loo",
+            ):
+                audit[key] = None
 
         try:
             from interpretation import build_interpretation  # type: ignore

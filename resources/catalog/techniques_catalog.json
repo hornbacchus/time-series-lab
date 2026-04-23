@@ -614,10 +614,12 @@
       "supports_auto_udf": false, "auto_udf_name": null,
       "presets": ["Balanced", "Thorough"],
       "parameters": [
-        {"name": "innovations", "label": "Innovation Distribution", "type": "string", "default": "gaussian", "required": false, "advanced": false, "description": "Return-innovation distribution: 'gaussian' (default) or 'student_t' (estimates degrees-of-freedom \u03bd jointly with SV parameters).", "options": ["gaussian", "student_t"]}
+        {"name": "innovations", "label": "Innovation Distribution", "type": "string", "default": "gaussian", "required": false, "advanced": false, "description": "Return-innovation distribution: 'gaussian' (default) or 'student_t' (estimates degrees-of-freedom \u03bd jointly with SV parameters).", "options": ["gaussian", "student_t"]},
+        {"name": "inference_method", "label": "Inference Method", "type": "string", "default": "quasi_ml", "required": false, "advanced": false, "description": "Inference method: 'quasi_ml' (default, fast) or 'mcmc' (Balanced or Thorough preset only; removes the log-squared transformation bias via direct sampling on returns).", "options": ["quasi_ml", "mcmc"]},
+        {"name": "compute_ppc", "label": "Posterior Predictive Check", "type": "bool", "default": false, "required": false, "advanced": true, "description": "Compute posterior predictive 90% coverage. Thorough preset default True; Balanced default False (opt-in). MCMC path only.", "options": null}
       ],
       "output_tables": ["volatility_estimates", "model_summary"],
-      "tags": ["volatility", "stochastic-volatility", "latent", "student-t"]
+      "tags": ["volatility", "stochastic-volatility", "latent", "student-t", "mcmc", "bayesian"]
     },
     {
       "id": "har_rv",

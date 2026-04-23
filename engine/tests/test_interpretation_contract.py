@@ -1695,6 +1695,46 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "fallback_occurred": False,
         "nu_degrees_of_freedom": None,
         "nu_interpretation_band": None,
+        # Follow-up 2b — MCMC inference fields. Default to quasi-ML
+        # path (no MCMC run); all MCMC-specific fields populated as
+        # None per Q7 null-guard strategy. Spec null-guards via
+        # .get() / None checks on each of these keys.
+        "inference_method": "quasi_ml",
+        "requested_inference_method": "quasi_ml",
+        "fitted_inference_method": "quasi_ml",
+        "fast_preset_mcmc_downgrade": False,
+        "mcmc_fallback_occurred": False,
+        "mcmc_backend": None,
+        "mcmc_chains": None,
+        "mcmc_draws_per_chain": None,
+        "mcmc_tune": None,
+        "mcmc_total_draws": None,
+        "mcmc_fit_time_seconds": None,
+        "rhat_max": None,
+        "rhat_max_param": None,
+        "ess_min": None,
+        "ess_min_param": None,
+        "divergences_count": None,
+        "divergences_fraction": None,
+        "mu_posterior_mean": None,
+        "mu_posterior_sd": None,
+        "mu_posterior_hdi_lower": None,
+        "mu_posterior_hdi_upper": None,
+        "phi_posterior_mean": None,
+        "phi_posterior_sd": None,
+        "phi_posterior_hdi_lower": None,
+        "phi_posterior_hdi_upper": None,
+        "sigma_eta_posterior_mean": None,
+        "sigma_eta_posterior_sd": None,
+        "sigma_eta_posterior_hdi_lower": None,
+        "sigma_eta_posterior_hdi_upper": None,
+        "nu_posterior_mean": None,
+        "nu_posterior_sd": None,
+        "nu_posterior_hdi_lower": None,
+        "nu_posterior_hdi_upper": None,
+        "ppc_coverage_90pct": None,
+        "waic": None,
+        "loo": None,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -1850,6 +1890,19 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # underscores and therefore do not match the T15 regex —
         # defensive allowlisting is unnecessary for those.
         "student_t", "nu_degrees_of_freedom",
+        # (c10) Follow-up 2b — MCMC inference. User-facing param value
+        # `quasi_ml` and `inference_method` surface in Tier 2 prose
+        # when disclosing the method / path. Other identifiers that
+        # contain underscores and may leak into tier text:
+        # `posterior_mean`, `mcmc_backend`, `rhat_max`, `ess_min`,
+        # `divergent_transitions`, `posterior_hdi`. Single-word tokens
+        # (`mcmc`, `pymc`, `gibbs`, `arviz`, `rhat`, `ess`, `hdi`,
+        # `posterior`, `nuts`, `divergent`, `divergences`) do not
+        # match the T15 regex.
+        "quasi_ml", "inference_method",
+        "posterior_mean", "mcmc_backend", "rhat_max", "ess_min",
+        "divergent_transitions", "posterior_hdi",
+        "mcmc_fallback_occurred", "fast_preset_mcmc_downgrade",
     }
 
     @staticmethod

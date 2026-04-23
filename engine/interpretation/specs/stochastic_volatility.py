@@ -5,16 +5,21 @@ Inherits the Prompt A/B ``garch_model`` Tier 1 persistence-band
 narrative (Decision D1). Tier 1 cites filtered volatility per D1
 (forward-causal, comparable to GARCH's σ_t).
 
-Tier 2 disclosures:
+Tier 2 disclosures (three conditional axes — innovations × inference
+method × fallback):
 
   D13 — transformation bias (quasi-ML on log-squared returns
         introduces Jensen-inequality bias on back-transform).
+        Applies to quasi-ML path only. MCMC path (Follow-up 2b)
+        removes this bias by sampling directly on returns.
   D12 — innovation distribution (was Gaussian-only in C6;
         Follow-up 2c closes this by adding an opt-in Student-t
         path with jointly-estimated ν degrees of freedom).
   D4  — absence-of-forecast disclosure (wrapper does not emit
         forecast path; historical filtered/smoothed vol is the
         deliverable — parallels C5 BVAR IRF/FEVD absence).
+  Backend disclosure — MCMC path always cites which sampler ran
+        (pymc NUTS or Kim-Shephard-Chib Gibbs) for replicability.
 
 Tier 2 conditional rewrite on Student-t path (Follow-up 2c):
   - Student-t-specific disclosure: observation offset /
@@ -109,6 +114,36 @@ def _innovations_value(results: dict) -> str:
     ).strip().lower()
 
 
+def _inference_method_value(results: dict) -> str:
+    """Return the fitted inference-method value (lowercased).
+
+    Uses `fitted_inference_method` (2b canonical) and falls back to
+    `inference_method`. Defaults to "quasi_ml" when absent.
+    """
+    return str(
+        results.get("fitted_inference_method")
+        or results.get("inference_method")
+        or "quasi_ml"
+    ).strip().lower()
+
+
+def _mcmc_backend_display(results: dict) -> str:
+    """Render backend name for Tier 2 disclosure.
+
+    Accepts "pymc" or "gibbs" from the audit; emits a human-readable
+    phrase. Unknown/None → generic phrase.
+    """
+    backend = str(results.get("mcmc_backend") or "").strip().lower()
+    if backend == "pymc":
+        return "pymc NUTS sampler"
+    if backend == "gibbs":
+        return (
+            "Kim-Shephard-Chib mixture-of-normals Gibbs sampler "
+            "(pure numpy/scipy; no external MCMC dependency)"
+        )
+    return "MCMC sampler"
+
+
 def _tier1(results: dict) -> str:
     name = str(results.get("series_name", "the series"))
     n = int(results.get("n_obs", 0))
@@ -158,6 +193,29 @@ def _tier1(results: dict) -> str:
                 f"{_nu_band_phrase(band_tok)}). "
             )
 
+    # Follow-up 2b: MCMC posterior-φ closer (Q5). Features φ
+    # (persistence) per Q5 — matches quasi-ML Tier 1 band.
+    mcmc_clause = ""
+    if _inference_method_value(results) == "mcmc":
+        phi_mean = results.get("phi_posterior_mean")
+        phi_lo = results.get("phi_posterior_hdi_lower")
+        phi_hi = results.get("phi_posterior_hdi_upper")
+        chains = results.get("mcmc_chains")
+        draws = results.get("mcmc_draws_per_chain")
+        if phi_mean is not None and phi_lo is not None and phi_hi is not None:
+            backend = str(results.get("mcmc_backend", "")).lower()
+            backend_short = (
+                "pymc NUTS" if backend == "pymc"
+                else "Kim-Shephard-Chib Gibbs" if backend == "gibbs"
+                else "MCMC"
+            )
+            chains_str = f"{chains}×{draws}" if chains and draws else "posterior"
+            mcmc_clause = (
+                f"Posterior mean φ = {float(phi_mean):.3f} with "
+                f"95% HDI [{float(phi_lo):.3f}, {float(phi_hi):.3f}] "
+                f"({chains_str} draws via {backend_short}). "
+            )
+
     # Actionable closer keyed on persistence band.
     if band in ("very high",):
         closer = (
@@ -186,7 +244,7 @@ def _tier1(results: dict) -> str:
         f"Stochastic volatility model fitted to "
         f"{format_series_reference(name)} ({n} observations). Latent "
         f"volatility persistence φ = {phi_str} ({band}); {hl_clause}"
-        f"{vol_range_clause}{innov_clause}{closer}"
+        f"{vol_range_clause}{innov_clause}{mcmc_clause}{closer}"
     )
 
 
@@ -250,63 +308,208 @@ def _tier2(results: dict) -> str:
     else:
         ic_clause = f"AIC = {aic_str}"
 
-    # ── Conditional D12 — innovation-distribution disclosure ─────
+    # Follow-up 2b — inference method (3rd Tier 2 conditional axis)
+    inference = _inference_method_value(results)
+    is_mcmc = (inference == "mcmc")
+
+    # ── Estimation clause (quasi-ML vs MCMC) ─────────────────────
+    if is_mcmc:
+        backend_display = _mcmc_backend_display(results)
+        chains = results.get("mcmc_chains")
+        draws = results.get("mcmc_draws_per_chain")
+        tune = results.get("mcmc_tune")
+        total_draws = results.get("mcmc_total_draws")
+        rhat_max = results.get("rhat_max")
+        rhat_param = results.get("rhat_max_param")
+        ess_min = results.get("ess_min")
+        ess_param = results.get("ess_min_param")
+        div_count = results.get("divergences_count")
+        div_fraction = results.get("divergences_fraction")
+
+        cfg_clause = (
+            f"{chains} chains × {draws} draws (after {tune} warmup); "
+            f"{total_draws} total posterior draws"
+            if chains and draws and tune
+            else "posterior sampling"
+        )
+
+        # Divergence disclosure — pymc has it, Gibbs does not
+        div_clause = ""
+        if div_count is not None:
+            if div_fraction is not None and div_fraction > 0:
+                div_clause = (
+                    f"; {int(div_count)} divergent transitions "
+                    f"({100 * float(div_fraction):.2f}% of draws)"
+                )
+            elif int(div_count) == 0 and str(results.get("mcmc_backend", "")).lower() == "gibbs":
+                div_clause = "; divergent transitions not tracked by the Gibbs sampler"
+            elif int(div_count) == 0:
+                div_clause = "; no divergent transitions"
+
+        rhat_clause = (
+            f"max R-hat {float(rhat_max):.3f} over parameters "
+            f"({rhat_param})"
+            if rhat_max is not None and rhat_param else "convergence metrics not reported"
+        )
+        ess_clause = (
+            f"minimum ESS {int(float(ess_min))} at parameter {ess_param}"
+            if ess_min is not None and ess_param else ""
+        )
+
+        # Posterior summaries per parameter
+        summary_parts = []
+        for pname, pdisplay in (("mu", "μ"), ("phi", "φ"),
+                                 ("sigma_eta", "σ_η"), ("nu", "ν")):
+            pm = results.get(f"{pname}_posterior_mean")
+            lo = results.get(f"{pname}_posterior_hdi_lower")
+            hi = results.get(f"{pname}_posterior_hdi_upper")
+            if pm is not None and lo is not None and hi is not None:
+                summary_parts.append(
+                    f"{pdisplay} = {float(pm):.3f} "
+                    f"[HDI {float(lo):.3f}, {float(hi):.3f}]"
+                )
+        posterior_clause = (
+            "Posterior: " + ", ".join(summary_parts) + "."
+            if summary_parts else ""
+        )
+
+        # Information criteria (pymc only)
+        waic = results.get("waic")
+        loo = results.get("loo")
+        ic_extra = ""
+        if waic is not None:
+            ic_extra += f" WAIC {format_scale_aware(float(waic))}"
+            if loo is not None:
+                ic_extra += f", LOO {format_scale_aware(float(loo))}."
+            else:
+                ic_extra += "."
+        elif str(results.get("mcmc_backend", "")).lower() == "gibbs":
+            ic_extra = (
+                " WAIC and LOO not computed by the Gibbs sampler "
+                "(pymc backend required for these information criteria)."
+            )
+
+        # Backend disclosure (full sentence)
+        estimation_clause = (
+            f" Estimation: MCMC sampling via {backend_display} with "
+            f"{cfg_clause}. Direct likelihood on returns — the log-"
+            f"squared transformation bias that affects quasi-ML is "
+            f"fully avoided. Convergence diagnostics: {rhat_clause}; "
+            f"{ess_clause}{div_clause}. {posterior_clause}{ic_extra}"
+        )
+    else:
+        # quasi-ML path
+        estimation_clause = (
+            f" Estimation: quasi-maximum likelihood via Kalman filter "
+            f"on log-squared returns on {n} observations (neg log-"
+            f"likelihood = {nll_str}, {ic_clause}). For publication-"
+            f"quality work or posterior uncertainty quantification, "
+            f"set inference_method='mcmc' on Balanced or Thorough "
+            f"preset to bypass the Jensen-inequality transformation "
+            f"bias via direct sampling on returns."
+        )
+
+    # ── D13 transformation-bias disclosure ───────────────────────
+    # Gated to quasi-ML path (MCMC removes this bias by construction)
+    if is_mcmc:
+        bias_block = ""  # MCMC removes the bias; no disclosure needed
+    else:
+        bias_block = (
+            " Back-transforming filtered/smoothed log-volatility to "
+            "volatility scale introduces Jensen-inequality bias "
+            "(E[exp(X)] ≠ exp(E[X])); reported volatility values carry "
+            "this systematic bias. For unbiased volatility estimates, "
+            "set inference_method='mcmc' (Balanced or Thorough preset)."
+        )
+
+    # ── D12 innovation-distribution disclosure ──────────────────
     if innov == "student_t" and nu is not None:
         nu_f = float(nu)
         band_phrase = _nu_band_phrase(nu_band)
-        innov_block = (
-            f" Innovations ε_t ~ Student-t(ν = {nu_f:.2f}, {band_phrase}); "
-            f"ν is jointly estimated with SV parameters via quasi-ML. "
-            f"The Student-t path shifts the Kalman filter's "
-            f"observation-equation offset to ψ(1/2) − ψ(ν/2) + log(ν) "
-            f"and variance to ψ'(1/2) + ψ'(ν/2) (digamma and trigamma); "
-            f"as ν → ∞ these recover the Gaussian log-χ²₁ values."
-        )
-        # "What Student-t fixes / what it does NOT fix" scope frame
-        # (Follow-up 2c per-user-feedback refinement).
-        scope_block = (
-            " What Student-t fixes: the Gaussian-only innovation "
-            "assumption (Convention C from the C6 disclosure); the "
-            "wrapper now captures heavy tails explicitly. What "
-            "Student-t does NOT fix: back-transforming filtered/"
-            "smoothed log-volatility to volatility scale still "
-            "introduces Jensen-inequality bias (E[exp(X)] ≠ exp(E[X])); "
-            "reported volatility values carry this systematic bias "
-            "regardless of innovation distribution. For unbiased "
-            "volatility estimates, MCMC-based SV inference is "
-            "preferable if available (future follow-up 2b addresses "
-            "this)."
-        )
+        if is_mcmc:
+            innov_block = (
+                f" Innovations ε_t ~ Student-t(ν = {nu_f:.2f}, "
+                f"{band_phrase}); ν was jointly estimated with SV "
+                f"parameters via MCMC."
+            )
+        else:
+            innov_block = (
+                f" Innovations ε_t ~ Student-t(ν = {nu_f:.2f}, "
+                f"{band_phrase}); ν is jointly estimated with SV "
+                f"parameters via quasi-ML. The Student-t path shifts "
+                f"the Kalman filter's observation-equation offset to "
+                f"ψ(1/2) − ψ(ν/2) + log(ν) and variance to ψ'(1/2) + "
+                f"ψ'(ν/2) (digamma and trigamma); as ν → ∞ these "
+                f"recover the Gaussian log-χ²₁ values."
+            )
+        # Scope frame — only on Student-t quasi-ML path (on MCMC,
+        # both limitations are addressed, so no "what doesn't" needed)
+        if is_mcmc:
+            scope_block = ""
+        else:
+            scope_block = (
+                " What Student-t fixes: the Gaussian-only innovation "
+                "assumption (Convention C from the C6 disclosure); "
+                "the wrapper now captures heavy tails explicitly. "
+                "What Student-t does NOT fix: back-transforming "
+                "filtered/smoothed log-volatility to volatility scale "
+                "still introduces Jensen-inequality bias (E[exp(X)] "
+                "≠ exp(E[X])); reported volatility values carry this "
+                "systematic bias regardless of innovation distribution. "
+                "For unbiased volatility estimates, set "
+                "inference_method='mcmc' (Balanced or Thorough preset)."
+            )
     else:
-        # Gaussian path (incl. D13 fallback) — C6 disclosure with
-        # a softer pointer to the Student-t opt-in (Follow-up 2c).
+        # Gaussian path — softer pointer to Student-t opt-in
         innov_block = (
             " Wrapper fits Gaussian innovations; Student-t innovations "
             "are available for heavy-tailed return series (set "
             "innovations='student_t' on the next fit)."
         )
-        scope_block = (
-            " Back-transforming filtered/smoothed log-volatility to "
-            "volatility scale introduces Jensen-inequality bias "
-            "(E[exp(X)] ≠ exp(E[X])); reported volatility values carry "
-            "this systematic bias. For unbiased volatility estimates, "
-            "MCMC-based SV inference is preferable if available."
-        )
+        scope_block = ""
 
-    # ── Fallback disclosure (Follow-up 2c D13) ───────────────────
+    # ── Fallback disclosures ────────────────────────────────────
     fallback_block = ""
+    # Follow-up 2b D9 — Fast + MCMC auto-downgrade
+    if bool(results.get("fast_preset_mcmc_downgrade", False)):
+        fallback_block += (
+            " MCMC was requested on Fast preset; Fast preset's latency "
+            "budget is incompatible with MCMC compute cost (30-120 s "
+            "minimum). Auto-downgraded to quasi-ML for this fit. "
+            "Switch to Balanced or Thorough preset to perform MCMC "
+            "inference."
+        )
+    # Follow-up 2b D7 — MCMC runtime failure → quasi-ML fallback
+    if bool(results.get("mcmc_fallback_occurred", False)):
+        fallback_block += (
+            " MCMC sampling did not converge on the requested path; "
+            "the wrapper automatically fell back to quasi-ML "
+            "(reported below). Possible causes: (a) sampler "
+            "divergences exceeded threshold (R-hat > 1.10 or too many "
+            "divergent transitions); (b) library or runtime error "
+            "during sampling (pymc/arviz import failure, pytensor "
+            "compile failure, memory exhaustion); (c) input data has "
+            "pathological features (non-stationarity, extreme "
+            "outliers, regime shifts) that MCMC cannot fit without "
+            "additional structural assumptions. Remediation: (i) try "
+            "Thorough preset for longer chains and tighter target-"
+            "accept; (ii) inspect data for stationarity and outliers; "
+            "(iii) file an issue with a reproducible example if the "
+            "problem persists on clean data."
+        )
+    # Follow-up 2c D13 — Student-t → Gaussian fallback (unchanged)
     if fallback_occurred or (requested == "student_t" and innov == "gaussian"):
-        fallback_block = (
-            f" Student-t optimization did not converge on the requested "
-            f"path; the wrapper automatically fell back to Gaussian fit "
-            f"(reported below). Possible causes: (a) data is genuinely "
-            f"Gaussian (ν ≈ ∞ — Student-t likelihood surface has no "
-            f"well-defined maximum); (b) data is too short for the "
-            f"4-parameter model to identify ν stably; (c) data has "
-            f"outliers that destabilize ν estimation. Remediation: "
-            f"(i) run innovations='gaussian' explicitly to verify (a); "
-            f"(ii) provide a longer series for (b); (iii) inspect / "
-            f"winsorize outliers for (c)."
+        fallback_block += (
+            " Student-t optimization did not converge on the requested "
+            "path; the wrapper automatically fell back to Gaussian fit "
+            "(reported below). Possible causes: (a) data is genuinely "
+            "Gaussian (ν ≈ ∞ — Student-t likelihood surface has no "
+            "well-defined maximum); (b) data is too short for the "
+            "4-parameter model to identify ν stably; (c) data has "
+            "outliers that destabilize ν estimation. Remediation: "
+            "(i) run innovations='gaussian' explicitly to verify (a); "
+            "(ii) provide a longer series for (b); (iii) inspect / "
+            "winsorize outliers for (c)."
         )
 
     # D4 — no-forecast disclosure (parallel to C5 BVAR IRF/FEVD).
@@ -324,10 +527,8 @@ def _tier2(results: dict) -> str:
         f"innovation std σ_η = {sig_str}, long-run log-variance "
         f"μ = {mu_str}. Filtered volatility from the Kalman filter is "
         f"the forward-causal conditional estimate; smoothed volatility "
-        f"is the retrospective-view estimate.{smoothed_clause}{unc_clause} "
-        f"Estimation: quasi-maximum likelihood via Kalman filter on "
-        f"log-squared returns on {n} observations (neg log-likelihood "
-        f"= {nll_str}, {ic_clause}).{scope_block}{innov_block}"
+        f"is the retrospective-view estimate.{smoothed_clause}{unc_clause}"
+        f"{estimation_clause}{scope_block}{innov_block}{bias_block}"
         f"{fallback_block}{no_forecast}"
     )
 
@@ -480,17 +681,192 @@ def _trigger_student_t_optimization_failed_fallback(results: dict) -> Optional[s
     )
 
 
+# ---------------------------------------------------------------------
+# Follow-up 2b — 6 new MCMC-related Tier 3 triggers
+# ---------------------------------------------------------------------
+
+
+def _trigger_rhat_failure(results: dict) -> Optional[str]:
+    """D4 — fires when max R-hat > 1.01 (warn band) or > 1.05 (fail).
+
+    MCMC path only. R-hat > 1.01 indicates chains haven't fully mixed;
+    > 1.05 indicates a real problem. The wrapper's internal threshold
+    (1.10 pymc, 1.25 Gibbs) triggers D7 fallback; this D4 trigger
+    surfaces sub-threshold values to the user.
+    """
+    if _inference_method_value(results) != "mcmc":
+        return None
+    rhat = results.get("rhat_max")
+    rhat_param = results.get("rhat_max_param")
+    if rhat is None:
+        return None
+    try:
+        v = float(rhat)
+    except Exception:
+        return None
+    if v <= 1.01:
+        return None
+    severity = "warning" if v <= 1.05 else "failure"
+    return (
+        f"Convergence {severity}: max R-hat {v:.3f} on parameter "
+        f"{rhat_param or '(unspecified)'} exceeds the 1.01 "
+        f"convergence threshold. Chain mixing is imperfect — posterior "
+        f"summaries should be interpreted with caution. Remediation: "
+        f"switch to Thorough preset (longer chains, tighter target-"
+        f"accept)."
+    )
+
+
+def _trigger_low_ess(results: dict) -> Optional[str]:
+    """D5 — fires when minimum bulk ESS < 400 (warn) or < 200 (fail).
+
+    MCMC path only. Low ESS means few effectively independent draws;
+    posterior uncertainty estimates become unreliable.
+    """
+    if _inference_method_value(results) != "mcmc":
+        return None
+    ess = results.get("ess_min")
+    ess_param = results.get("ess_min_param")
+    chains = results.get("mcmc_chains") or 1
+    if ess is None:
+        return None
+    try:
+        v = float(ess)
+    except Exception:
+        return None
+    # Threshold scaled per-chain: expect ESS ≥ 400 * chains for
+    # reasonable precision.
+    per_chain_threshold = 400
+    total_threshold = per_chain_threshold * int(chains)
+    if v >= total_threshold:
+        return None
+    severity = (
+        "failure" if v < per_chain_threshold * int(chains) / 2
+        else "warning"
+    )
+    return (
+        f"Effective sample size {severity}: bulk ESS {int(v)} on "
+        f"parameter {ess_param or '(unspecified)'} falls below the "
+        f"{total_threshold} threshold ({per_chain_threshold} per "
+        f"chain × {int(chains)} chains). Posterior summaries for this "
+        f"parameter have wider Monte Carlo error than the other "
+        f"parameters. Remediation: run Thorough preset for more draws."
+    )
+
+
+def _trigger_divergent_transitions(results: dict) -> Optional[str]:
+    """D6 — fires when divergent transitions exceed 5% of draws.
+
+    Applies to pymc NUTS only — Gibbs sampler has no divergence
+    concept (divergences_count=0 by construction on Gibbs path).
+    """
+    if _inference_method_value(results) != "mcmc":
+        return None
+    backend = str(results.get("mcmc_backend", "")).lower()
+    if backend != "pymc":
+        return None
+    frac = results.get("divergences_fraction")
+    if frac is None:
+        return None
+    try:
+        v = float(frac)
+    except Exception:
+        return None
+    if v <= 0.05:
+        return None
+    count = int(results.get("divergences_count", 0) or 0)
+    return (
+        f"Divergent transitions: {count} divergences ({100 * v:.1f}% "
+        f"of draws) exceed the 5% threshold. NUTS is struggling with "
+        f"the posterior geometry — posterior estimates may be biased. "
+        f"Remediation: switch to Thorough preset (higher target-"
+        f"accept), or re-run with the Kim-Shephard-Chib Gibbs backend "
+        f"(which samples SV's awkward geometry via conjugate updates "
+        f"rather than Hamiltonian dynamics)."
+    )
+
+
+def _trigger_mcmc_fallback_to_quasi_ml(results: dict) -> Optional[str]:
+    """D7 — fires when MCMC was requested but wrapper fell back to
+    quasi-ML (mcmc_fallback_occurred=True)."""
+    if not bool(results.get("mcmc_fallback_occurred", False)):
+        return None
+    return (
+        "MCMC optimization failed — the wrapper fell back to quasi-ML. "
+        "Reported parameters and volatility paths are from the quasi-"
+        "ML approximation, NOT from MCMC. See Tier 2 for the three "
+        "possible causes (sampler divergences, library/runtime error, "
+        "pathological input) and their specific remediations. The "
+        "Jensen-inequality transformation bias that MCMC would have "
+        "removed applies to these results."
+    )
+
+
+def _trigger_ppc_undercoverage(results: dict) -> Optional[str]:
+    """D8 — fires when PPC 90% coverage < 0.80 (Thorough + MCMC only).
+
+    Posterior predictive should cover ~90% of observations by
+    construction if the model fits; coverage < 0.80 indicates the
+    model misses important features (outliers, tail behavior).
+    """
+    if _inference_method_value(results) != "mcmc":
+        return None
+    cov = results.get("ppc_coverage_90pct")
+    if cov is None:
+        return None
+    try:
+        v = float(cov)
+    except Exception:
+        return None
+    if v >= 0.80:
+        return None
+    return (
+        f"Posterior predictive check flags model mis-fit: 90% PPC "
+        f"band covers only {100 * v:.1f}% of observations (target "
+        f"~90%). The model misses features of the data — commonly "
+        f"extreme moves on heavy-tailed return series. Remediation: "
+        f"switch to innovations='student_t' (if currently Gaussian) "
+        f"to capture tails, or inspect for structural breaks / "
+        f"regime shifts beyond the SV model's scope."
+    )
+
+
+def _trigger_fast_preset_mcmc_downgrade(results: dict) -> Optional[str]:
+    """D9 — fires when Fast preset + MCMC auto-downgraded to quasi-ML.
+
+    Parallel to 2c's D3 disclosure pattern; surfaces the event at
+    Tier 3 for visibility (Tier 2 already carries the full sentence).
+    """
+    if not bool(results.get("fast_preset_mcmc_downgrade", False)):
+        return None
+    return (
+        "MCMC requested on Fast preset — Fast cannot run MCMC. The "
+        "wrapper fitted quasi-ML instead; reported parameters and "
+        "volatility paths reflect the quasi-ML approximation. To "
+        "perform MCMC inference, re-run on Balanced (2 chains × 2000 "
+        "draws) or Thorough (4 chains × 4000 draws) preset."
+    )
+
+
 SPEC = InterpretationSpec(
     technique_id="stochastic_volatility",
     tier1_builder=_tier1,
     tier2_builder=_tier2,
     tier3_triggers=(
+        # Existing (C6 + 2c):
         _trigger_near_integrated_volatility,
         _trigger_low_persistence,
         _trigger_gaussian_on_fat_tails,
         _trigger_student_t_very_heavy_tails,
         _trigger_near_gaussian_on_student_t_path,
         _trigger_student_t_optimization_failed_fallback,
+        # Follow-up 2b (D4–D9):
+        _trigger_rhat_failure,
+        _trigger_low_ess,
+        _trigger_divergent_transitions,
+        _trigger_mcmc_fallback_to_quasi_ml,
+        _trigger_ppc_undercoverage,
+        _trigger_fast_preset_mcmc_downgrade,
     ),
     mode_aware=False,
 )
