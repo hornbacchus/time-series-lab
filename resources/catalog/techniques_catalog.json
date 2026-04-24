@@ -290,10 +290,11 @@
       "presets": ["Fast", "Balanced", "Thorough"],
       "parameters": [
         {"name": "det_order", "label": "Deterministic Order", "type": "int", "default": 0, "required": false, "advanced": true, "description": "Deterministic term order (-1, 0, 1)", "options": null},
-        {"name": "k_ar_diff", "label": "AR Lags", "type": "int", "default": 2, "required": false, "advanced": false, "description": "Number of lagged differences", "options": null}
+        {"name": "k_ar_diff", "label": "AR Lags", "type": "int", "default": 2, "required": false, "advanced": false, "description": "Number of lagged differences", "options": null},
+        {"name": "finite_sample_correction", "label": "Finite-Sample Correction", "type": "bool", "default": false, "required": false, "advanced": false, "description": "Apply Reimers (1992) Bartlett-type finite-sample correction to the trace and maximum-eigenvalue statistics. Recommended for samples below 100 observations where the asymptotic MacKinnon critical values over-reject. Reports both uncorrected and corrected statistics. Default false for backward compatibility.", "options": null}
       ],
-      "output_tables": ["johansen_results", "eigenvalues", "cointegration_vectors"],
-      "tags": ["test", "cointegration", "johansen", "multivariate"]
+      "output_tables": ["johansen_results", "eigenvalues", "cointegration_vectors", "finite_sample_correction"],
+      "tags": ["test", "cointegration", "johansen", "multivariate", "bartlett", "finite-sample"]
     },
     {
       "id": "bvar",

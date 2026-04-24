@@ -3,6 +3,23 @@ Johansen Cointegration Test for Time Series Lab.
 
 Tests for the number of cointegrating relations among 2+ I(1) time series
 using the Johansen trace and maximum eigenvalue statistics.
+
+Follow-up 3d: opt-in `finite_sample_correction=True` applies the
+Reimers (1992) modified likelihood-ratio correction — a Bartlett-type
+finite-sample adjustment widely used in VECM practice (R urca
+``ca.jo(..., small_sample=TRUE)``, Stata vecrank). The correction
+factor is
+
+    B(T, n, p, d) = (T − n*p − d(det_order)) / T
+
+where T is sample size, n is VAR dimension, p is VECM lag order
+(k_ar_diff), and d ∈ {0, 1, 2} is the number of deterministic
+regressors implied by det_order ∈ {−1, 0, 1}. Corrected statistics
+are Q_corrected = B * Q_asymptotic. Comparison against statsmodels's
+existing MacKinnon asymptotic critical values is arithmetically
+equivalent to comparing uncorrected statistics against MHM 1999
+response-surface CVs at the decision level. Johansen (2002)
+provides more refined higher-order terms not implemented here.
 """
 
 import numpy as np
@@ -17,6 +34,60 @@ from techniques.base import (
     make_error_response,
     format_significance_disclosure,
 )
+
+
+# Deterministic-regressor count per statsmodels det_order convention.
+# det_order = -1: no deterministic → d = 0
+# det_order =  0: unrestricted constant → d = 1
+# det_order =  1: unrestricted linear trend → d = 2
+_DET_ORDER_D = {-1: 0, 0: 1, 1: 2}
+
+
+def _bartlett_factor(T: int, n: int, p: int, det_order: int) -> float | None:
+    """Reimers (1992) modified likelihood-ratio Bartlett-type factor.
+
+    Follow-up 3d finite-sample correction. The same factor applies to
+    both trace and maximum-eigenvalue statistics.
+
+    Parameters
+    ----------
+    T : int
+        Sample size (observations) after data cleaning.
+    n : int
+        VAR dimension (number of series).
+    p : int
+        VECM lag order (k_ar_diff).
+    det_order : int
+        statsmodels deterministic order ∈ {-1, 0, 1}.
+
+    Returns
+    -------
+    float or None
+        B ∈ (0, 1] with Q_corrected = B * Q_asymptotic. Returns None on
+        degenerate inputs (non-positive T, uncovered det_order, or
+        degrees-of-freedom exhaustion).
+    """
+    try:
+        T_i = int(T)
+        n_i = int(n)
+        p_i = int(p)
+        d = _DET_ORDER_D.get(int(det_order))
+    except Exception:
+        return None
+    if d is None:
+        return None
+    if T_i <= 0 or n_i <= 0 or p_i < 0:
+        return None
+    # Degrees-of-freedom consumed by the VECM fit.
+    dof_consumed = n_i * p_i + d
+    numerator = T_i - dof_consumed
+    if numerator <= 0:
+        # Degrees-of-freedom exhausted — correction is degenerate.
+        return None
+    B = numerator / float(T_i)
+    # Guard: clamp to (0, 1]. The Reimers formula naturally produces
+    # values in this range for reasonable T, n, p.
+    return max(1e-6, min(B, 1.0))
 
 
 def run(ctx: RunContext, progress_callback) -> dict:
@@ -170,6 +241,118 @@ def run(ctx: RunContext, progress_callback) -> dict:
             eig_rows,
         )
 
+        # ── Follow-up 3d — Reimers Bartlett-type finite-sample correction ──
+        correction_requested = bool(
+            ctx.get_param("finite_sample_correction", False)
+        )
+        correction_applied = False
+        correction_fallback_reason = None
+        bartlett_factor = None
+        trace_stat_corrected = None
+        trace_rank_corrected = None
+        max_eig_stat_corrected = None
+        max_eig_rank_corrected = None
+        correction_impact_material = False
+        correction_pct_reduction = None
+        correction_table = None
+
+        if correction_requested:
+            progress_callback(
+                "Applying Reimers finite-sample correction", 70
+            )
+            try:
+                B = _bartlett_factor(
+                    T=n, n=k, p=p, det_order=det_order,
+                )
+                if B is None:
+                    raise ValueError(
+                        f"Bartlett factor is degenerate for "
+                        f"T={n}, n={k}, p={p}, det_order={det_order} "
+                        f"(degrees of freedom exhausted or uncovered "
+                        f"det_order)"
+                    )
+
+                # Apply factor to both test statistics.
+                tr_stats_c = [float(trace_stats[i]) * B for i in range(k)]
+                me_stats_c = [
+                    float(max_eig_stats[i]) * B for i in range(k)
+                ]
+
+                # Re-determine rank under corrected statistics vs
+                # existing statsmodels CVs (Bartlett-on-statistic
+                # approach; arithmetically equivalent to MHM 1999
+                # response-surface CVs at the decision level).
+                tr_rank_c = 0
+                for i in range(k):
+                    if tr_stats_c[i] > float(trace_cvs[i, sig_col]):
+                        tr_rank_c = i + 1
+                me_rank_c = 0
+                for i in range(k):
+                    if me_stats_c[i] > float(max_eig_cvs[i, sig_col]):
+                        me_rank_c = i + 1
+
+                bartlett_factor = float(B)
+                trace_stat_corrected = [round(v, 4) for v in tr_stats_c]
+                trace_rank_corrected = int(tr_rank_c)
+                max_eig_stat_corrected = [round(v, 4) for v in me_stats_c]
+                max_eig_rank_corrected = int(me_rank_c)
+                correction_impact_material = bool(
+                    tr_rank_c != determined_rank_trace
+                    or me_rank_c != determined_rank_eig
+                )
+                correction_pct_reduction = float(1.0 - B)
+                correction_applied = True
+
+                # Build correction output table (per-H0 side-by-side
+                # uncorrected / factor / corrected / decisions).
+                corr_rows = []
+                for i in range(k):
+                    tr_u = float(trace_stats[i])
+                    tr_c = tr_stats_c[i]
+                    me_u = float(max_eig_stats[i])
+                    me_c = me_stats_c[i]
+                    cv_tr = float(trace_cvs[i, sig_col])
+                    cv_me = float(max_eig_cvs[i, sig_col])
+                    corr_rows.append([
+                        f"r <= {i}",
+                        round(tr_u, 4),
+                        round(B, 4),
+                        round(tr_c, 4),
+                        round(cv_tr, 4),
+                        "Reject" if tr_c > cv_tr else "Fail to Reject",
+                        round(me_u, 4),
+                        round(me_c, 4),
+                        round(cv_me, 4),
+                        "Reject" if me_c > cv_me else "Fail to Reject",
+                    ])
+                cv_name_for_cols = cv_labels[sig_col]
+                correction_table = make_table(
+                    "Finite-Sample Correction (Reimers 1992)",
+                    [
+                        "H0",
+                        "Trace Stat (uncorrected)",
+                        "Bartlett Factor",
+                        "Trace Stat (corrected)",
+                        f"Trace CV {cv_name_for_cols}",
+                        "Trace Decision (corrected)",
+                        "Max-Eig Stat (uncorrected)",
+                        "Max-Eig Stat (corrected)",
+                        f"Max-Eig CV {cv_name_for_cols}",
+                        "Max-Eig Decision (corrected)",
+                    ],
+                    corr_rows,
+                )
+            except Exception as corr_err:
+                correction_fallback_reason = (
+                    f"runtime_error: {type(corr_err).__name__}: "
+                    f"{corr_err}"
+                )
+                warn_list.append(
+                    f"Finite-sample correction raised "
+                    f"{type(corr_err).__name__}: {corr_err}. "
+                    f"Reverted to uncorrected asymptotic inference."
+                )
+
         # Eigenvalues
         eigenvalues = result.eig
         eig_val_rows = []
@@ -286,6 +469,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
         except Exception:
             first_cointegrating_vector = None
 
+        # Follow-up 3d: identification-field label correction.
+        # statsmodels actually uses MacKinnon (1996) asymptotic tables
+        # from the FORTRAN program johdist.f, not the MHM 1999 response-
+        # surface formulas (confirmed by audit of
+        # statsmodels.tsa.coint_tables). When finite_sample_correction
+        # is applied, note the Reimers / Johansen 2002 addition.
+        if correction_applied:
+            _cv_formula = (
+                "MacKinnon (1996) asymptotic tables via "
+                "statsmodels.tsa.vector_ar.vecm.coint_johansen; "
+                "Reimers (1992) Bartlett-type finite-sample correction "
+                "applied to test statistics (see also Johansen 2002 for "
+                "higher-order refinements)"
+            )
+        else:
+            _cv_formula = (
+                "MacKinnon (1996) asymptotic tables via "
+                "statsmodels.tsa.vector_ar.vecm.coint_johansen"
+            )
+
         audit = {
             "n_variables": k,
             "variable_names": names,
@@ -301,12 +504,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "first_cointegrating_vector": first_cointegrating_vector,
             "n_observations": n,
             "tests_agree": bool(determined_rank_trace == determined_rank_eig),
+            # Follow-up 3d — finite-sample correction audit fields
+            "finite_sample_correction_requested": correction_requested,
+            "finite_sample_correction_applied": correction_applied,
+            "finite_sample_correction_fallback_reason": correction_fallback_reason,
+            "correction_method": (
+                "reimers_1992" if correction_applied else None
+            ),
+            "bartlett_factor": (
+                round(bartlett_factor, 6)
+                if bartlett_factor is not None else None
+            ),
+            "trace_stat_corrected": trace_stat_corrected,
+            "trace_rank_corrected": trace_rank_corrected,
+            "max_eig_stat_corrected": max_eig_stat_corrected,
+            "max_eig_rank_corrected": max_eig_rank_corrected,
+            "correction_impact_material": bool(correction_impact_material),
+            "correction_pct_reduction": (
+                round(correction_pct_reduction, 6)
+                if correction_pct_reduction is not None else None
+            ),
             **format_significance_disclosure(
                 test_name="Johansen trace and max-eigenvalue tests",
-                critical_value_formula=(
-                    "MacKinnon-Haug-Michelis (1999) critical values via "
-                    "statsmodels.tsa.vector_ar.vecm.coint_johansen"
-                ),
+                critical_value_formula=_cv_formula,
                 ac_corrected=True,
             ),
         }
@@ -319,9 +539,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
         _interp_dict = dict(audit)
         interp = build_interpretation("johansen_cointegration", _interp_dict)
 
+        tables_out = [summary_table, trace_table, eig_table]
+        if correction_table is not None:
+            tables_out.append(correction_table)
+        tables_out.extend([eig_val_table, evec_table])
+
         return make_response(
             ctx,
-            tables=[summary_table, trace_table, eig_table, eig_val_table, evec_table],
+            tables=tables_out,
             plain_english_summary=plain,
             warnings=warn_list,
             charting_suggestions=charting,

@@ -1492,6 +1492,21 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "rank_implication_label": "VECM",
         "first_cointegrating_vector": [1.0, -0.5, 0.2],
         "tests_agree": True,
+        # Follow-up 3d — Johansen finite-sample correction fields
+        # (None-safe defaults; wrapper default finite_sample_correction
+        # =False, so all *_corrected fields are None and the legacy
+        # D8 small-sample trigger still fires on the opt-out path).
+        "finite_sample_correction_requested": False,
+        "finite_sample_correction_applied": False,
+        "finite_sample_correction_fallback_reason": None,
+        "correction_method": None,
+        "bartlett_factor": None,
+        "trace_stat_corrected": None,
+        "trace_rank_corrected": None,
+        "max_eig_stat_corrected": None,
+        "max_eig_rank_corrected": None,
+        "correction_impact_material": False,
+        "correction_pct_reduction": None,
         # transfer_function
         "y_series": "Y",
         "x_series": "X",
@@ -2048,6 +2063,18 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # trailing `_2003` digits (regex requires alpha-only in the
         # second position and no trailing `_` / digit).
         "threshold_quantile", "runtime_error", "T_i",
+        # (c14) Follow-up 3d — Johansen finite-sample correction.
+        # `finite_sample_correction` is the programmatic param name
+        # users type (same category as threshold_quantile /
+        # changepoint_prior_scale). It is cited verbatim in the
+        # re-gated _trigger_small_sample text and in the Tier 2
+        # honest-disclosure clause pointing users to the new opt-in.
+        # Single-word tokens (`bartlett`, `corrected`, `uncorrected`,
+        # `johansen`, `reimers`, `reinsel`, `cheung`, `mackinnon`,
+        # `vecm`, `urca`, `vecrank`) don't match the T15 regex.
+        # Author-year tokens like `johansen_2002`, `reimers_1992`,
+        # `mackinnon_1996` are disqualified by the trailing digits.
+        "finite_sample_correction",
     }
 
     @staticmethod

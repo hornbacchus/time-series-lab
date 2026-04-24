@@ -64,6 +64,25 @@ The choice affects the critical values and the interpretation of the cointegrati
 
 **Normalization**: The cointegrating vectors `beta` are identified only up to a non-singular transformation. Normalization (e.g., setting the coefficient of one variable to 1 in each vector) is needed for interpretation. The loading matrix `alpha` adjusts accordingly.
 
+## Finite-Sample Correction (Reimers 1992, opt-in)
+
+The wrapper's default path uses statsmodels's asymptotic MacKinnon (1996) critical-value tables (via `statsmodels.tsa.coint_tables`). Asymptotic critical values are known to over-reject the no-cointegration null on small samples — at T < 100 the nominal 5% rejection rate can run to 10–20% in truth, systematically overstating cointegration evidence.
+
+Set `finite_sample_correction=True` to apply the **Reimers (1992) modified likelihood-ratio correction** — a Bartlett-type factor widely used in practice (R `urca::ca.jo(..., small_sample=TRUE)`, Stata `vecrank`):
+
+```
+B(T, n, p, d) = (T - n*p - d) / T
+Q_corrected = B * Q_asymptotic
+```
+
+where `T` is the effective sample size, `n` is the VAR dimension, `p` is the VECM lag order (`k_ar_diff`), and `d ∈ {0, 1, 2}` is the number of deterministic regressors implied by `det_order ∈ {-1, 0, 1}`. The same factor applies to both trace and maximum-eigenvalue statistics. Corrected statistics are compared against the same statsmodels critical values; the Bartlett-on-statistic approach is arithmetically equivalent to applying MHM 1999 response-surface CVs to uncorrected statistics at the decision level.
+
+When the correction is applied, the wrapper emits a dedicated **Finite-Sample Correction (Reimers 1992)** output table showing per-rank uncorrected statistic, Bartlett factor, corrected statistic, critical value, and decision side-by-side for both tests. Audit fields expose `bartlett_factor`, `correction_pct_reduction`, `trace_rank_corrected`, `max_eig_rank_corrected`, and `correction_impact_material` (True when the correction flips rank inference). Four Tier 3 triggers cover rank-flipping corrections (D1), material reductions without flip (D2, >5%), very small samples T < 50 (D3, residual distortion possible), and runtime-error graceful fallback (D4).
+
+Johansen (2002) provides refined higher-order terms for this correction that are not implemented here. The Reimers form captures the leading-order correction and matches the industry-standard R and Stata implementations. Reinsel-Ahn (1988) and Cheung-Lai (1993) are alternative finite-sample corrections not implemented in this wrapper.
+
+Default `False` preserves backward compatibility — existing users get the uncorrected asymptotic inference unchanged. The legacy small-sample honest-disclosure trigger (C5 D8) is re-gated to fire only on the opt-out path with updated text pointing at `finite_sample_correction=True` as the actionable option.
+
 ## Interpretation
 
 Every Johansen cointegration run emits a two-tier plain-language Interpretation block with a rank-centric Tier 1 shape.
@@ -74,6 +93,12 @@ Every Johansen cointegration run emits a two-tier plain-language Interpretation 
 
 **Caveats (Tier 3, conditional)**:
 - Trace and max-eigenvalue tests select different ranks - borderline case; trace-test decision is cited for robustness.
-- Sample size n < 100 - MacKinnon-Haug-Michelis asymptotic CVs over-reject; consider Reinsel-Ahn or Cheung-Lai finite-sample corrections.
+- Sample size n < 100 with `finite_sample_correction=False` - MacKinnon asymptotic CVs over-reject; trigger text points at `finite_sample_correction=True` as the actionable opt-in. Suppressed when the user has opted in.
 - Rank >= k-1 - series may all be stationary; verify with per-series ADF / KPSS / PP triage before committing to a VECM.
+
+**Follow-up 3d triggers (fire only when `finite_sample_correction=True`)**:
+- Correction flips rank inference - the corrected rank differs from the uncorrected rank for either test. The asymptotic test over-rejects; the corrected rank is the reliable estimate for downstream VECM / VAR specification decisions.
+- Correction material (>5%) but no rank flip - the Bartlett factor reduces statistics materially, but rank inference is stable under correction. Small-sample size distortion would have been notable; the corrected rank is the reliable estimate.
+- Sample T < 50 - very small sample; Bartlett is asymptotic in T and residual size distortion is plausible. Consider bootstrap-based rank inference (Cavaliere-Rahbek-Taylor 2012) for more reliable estimates.
+- Runtime error during correction - graceful fallback to uncorrected asymptotic inference with disclosure of the exception cause.
 
