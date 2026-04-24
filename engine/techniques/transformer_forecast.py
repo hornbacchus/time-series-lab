@@ -4,6 +4,26 @@ Transformer Forecast for Time Series Lab.
 Uses PyTorch to implement a Transformer encoder for time series forecasting.
 Falls back to sklearn MLPRegressor with lag features when PyTorch is not installed.
 Full training only under Thorough preset.
+
+Follow-up 3f: opt-in ``attention_exposure=True`` captures per-layer
+attention weights during the t+1 forecast forward pass and exposes
+two views (last-layer and cross-layer mean) with top-K ranked
+forecast-position attention plus summary statistics (normalized
+Shannon entropy, effective context length, dominant lag).
+
+Capture mechanism — per-layer ``_sa_block`` patch. PyTorch's
+``nn.TransformerEncoderLayer._sa_block`` hardcodes
+``need_weights=False`` internally, so a forward hook on
+``self_attn`` sees ``(output, None)``. The standard fix is to
+patch ``layer._sa_block`` at capture time with a version that
+forces ``need_weights=True, average_attn_weights=True``, stashes
+the returned weights tensor, and is torn down via try/finally
+(D15). Patching also disables PyTorch's fused fast-path,
+guaranteeing the slow path is taken and hooks fire.
+
+PyTorch-only. Graceful fallback on the sklearn MLP path:
+``attention_exposure_applied=False`` with
+``fallback_reason="sklearn_fallback_no_attention"``.
 """
 
 import numpy as np
@@ -16,12 +36,179 @@ from techniques.base import (
 )
 
 
+# Follow-up 3f: seasonal lags recognized by D3
+# ``dominant_lag_matches_seasonal``. Static set; wrapper does not
+# read ``ctx.frequency``. Informational only — D3 is not a warning.
+_SEASONAL_LAGS = (4, 7, 12, 24, 52, 365)
+
+
 def _has_torch():
     try:
         import torch
         return True
     except ImportError:
         return False
+
+
+def _patch_sa_blocks_for_capture(encoder, captured):
+    """Patch each TransformerEncoderLayer's ``_sa_block`` to force
+    ``need_weights=True, average_attn_weights=True`` and stash the
+    returned (head-averaged) attention weights into ``captured``.
+
+    Follow-up 3f helper. D15: must be called inside a try/finally
+    with guaranteed teardown via ``_restore_sa_blocks``.
+
+    Important implementation note: PyTorch's
+    ``nn.TransformerEncoderLayer.forward`` has a *sparsity fast
+    path* that dispatches to a fused CUDA/CPU kernel
+    (``torch._transformer_encoder_layer_fwd``) bypassing
+    ``_sa_block`` entirely when the model is in eval mode with no
+    masks and no hooks. Patching ``_sa_block`` alone is therefore
+    insufficient — we ALSO register a no-op forward hook on each
+    layer to disable the fast path.
+
+    Parameters
+    ----------
+    encoder : torch.nn.TransformerEncoder
+        Holds the list of ``TransformerEncoderLayer`` instances as
+        ``encoder.layers``.
+    captured : list
+        Mutable list that will be appended with ``(layer_idx,
+        weights_tensor)`` tuples per forward pass per layer.
+
+    Returns
+    -------
+    list of (layer, original_sa_block, hook_handle)
+        For teardown via ``_restore_sa_blocks``.
+    """
+    originals = []
+
+    def _noop_hook(_module, _inputs, output):
+        # No-op hook: its mere presence disables the
+        # sparsity fast path in TransformerEncoderLayer.forward.
+        return None
+
+    for layer_idx, layer in enumerate(encoder.layers):
+        orig_sa = layer._sa_block
+
+        def _make_patched(_layer, _idx):
+            def _patched_sa(
+                x,
+                attn_mask,
+                key_padding_mask,
+                is_causal=False,
+            ):
+                out, weights = _layer.self_attn(
+                    x, x, x,
+                    attn_mask=attn_mask,
+                    key_padding_mask=key_padding_mask,
+                    need_weights=True,
+                    average_attn_weights=True,
+                    is_causal=is_causal,
+                )
+                captured.append(
+                    (_idx, weights.detach().clone())
+                )
+                return _layer.dropout1(out)
+            return _patched_sa
+
+        layer._sa_block = _make_patched(layer, layer_idx)
+        hook_handle = layer.register_forward_hook(_noop_hook)
+        originals.append((layer, orig_sa, hook_handle))
+    return originals
+
+
+def _restore_sa_blocks(originals):
+    """Restore original ``_sa_block`` methods + remove fast-path-
+    disabling forward hooks (D15 teardown)."""
+    for entry in originals:
+        # Tuple is (layer, orig_sa, hook_handle). Tolerate 2-tuple
+        # form defensively for forward compatibility.
+        try:
+            if len(entry) == 3:
+                layer, orig_sa, hook_handle = entry
+            else:
+                layer, orig_sa = entry[0], entry[1]
+                hook_handle = None
+            try:
+                layer._sa_block = orig_sa
+            except Exception:
+                pass
+            if hook_handle is not None:
+                try:
+                    hook_handle.remove()
+                except Exception:
+                    pass
+        except Exception:
+            # Defensive: if teardown of one layer fails, continue
+            # restoring the others rather than short-circuit.
+            pass
+
+
+def _compute_attention_summaries(forecast_row, context_length):
+    """Compute (H_norm, effective_context_length, dominant_lag).
+
+    Parameters
+    ----------
+    forecast_row : array-like
+        Length-``context_length`` attention vector (weights over
+        past positions when predicting t+1).
+    context_length : int
+        Sequence length L. Last row's position index is L-1;
+        position i has lag ``(L-1) - i`` from the forecast position.
+
+    Returns
+    -------
+    (entropy_norm, eff_context_length, dominant_lag)
+        All floats except dominant_lag which is int. Any component
+        may be None on degenerate input.
+    """
+    try:
+        a = np.asarray(forecast_row, dtype=np.float64)
+    except Exception:
+        return None, None, None
+    if a.size == 0:
+        return None, None, None
+    total = float(a.sum())
+    if total <= 0:
+        return None, None, None
+    a = a / total
+    eps = 1e-12
+    a_safe = np.clip(a, eps, 1.0)
+    H = -float(np.sum(a_safe * np.log(a_safe)))
+    denom = float(np.log(max(int(context_length), 2)))
+    H_norm = (H / denom) if denom > 0 else None
+    positions = np.arange(int(context_length))
+    lags = (int(context_length) - 1) - positions
+    eff_cl = float(np.sum(lags * a))
+    dom_lag = int(lags[int(np.argmax(a))])
+    return (
+        float(H_norm) if H_norm is not None else None,
+        eff_cl,
+        dom_lag,
+    )
+
+
+def _build_attention_top_k(forecast_row, K_effective):
+    """Build a top-K ranked list of dicts sorted by attention weight.
+
+    Each entry: ``{"rank": int, "position": int, "lag": int, "weight": float}``.
+    ``lag`` is the distance back from the forecast position.
+    """
+    a = np.asarray(forecast_row, dtype=np.float64)
+    L = len(a)
+    K = int(max(1, min(int(K_effective), L)))
+    idx_desc = np.argsort(-a)[:K]
+    out = []
+    for rank, pos in enumerate(idx_desc, start=1):
+        lag = int((L - 1) - int(pos))
+        out.append({
+            "rank": int(rank),
+            "position": int(pos),
+            "lag": lag,
+            "weight": round(float(a[int(pos)]), 6),
+        })
+    return out
 
 
 _PRESET_CONFIG = {
@@ -309,6 +496,53 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 f"Transformer (PyTorch, d={d_model}, heads={n_heads}, "
                 f"layers={n_encoder_layers}, params={n_params})"
             )
+
+            # ── Follow-up 3f — attention weight exposure (opt-in) ──
+            # Only attempted on the PyTorch path. sklearn fallback
+            # handled separately in the else branch below (Q9).
+            _attn_request_pt = bool(
+                ctx.get_param("attention_exposure", False)
+            )
+            if _attn_request_pt:
+                progress_callback(
+                    "Capturing attention weights (t+1)", 85
+                )
+                _captured_pt = []
+                _originals_pt = []
+                try:
+                    _originals_pt = _patch_sa_blocks_for_capture(
+                        model.encoder, _captured_pt,
+                    )
+                    # Q3/D16: single t+1 forward pass over the last
+                    # n_lags context. Do not re-run the recursive
+                    # horizon loop — we captured weights that drive
+                    # the first forecast step, which is the
+                    # practitioner-relevant question.
+                    with torch.no_grad():
+                        _x0 = torch.FloatTensor(
+                            normalized[-n_lags:]
+                        ).unsqueeze(0).unsqueeze(-1)
+                        _ = model(_x0)
+                    if len(_captured_pt) != n_encoder_layers:
+                        raise ValueError(
+                            f"Captured {len(_captured_pt)} attention "
+                            f"tensors from encoder but expected "
+                            f"{n_encoder_layers} (one per layer); "
+                            f"single-pass capture invariant violated"
+                        )
+                    _attn_capture_ok = True
+                    _attn_capture_err = None
+                except Exception as _attn_err:
+                    _attn_capture_ok = False
+                    _attn_capture_err = _attn_err
+                finally:
+                    # D15: guaranteed teardown — restore original
+                    # _sa_block for every layer, even on exception.
+                    _restore_sa_blocks(_originals_pt)
+            else:
+                _attn_capture_ok = False
+                _attn_capture_err = None
+                _captured_pt = None
         else:
             progress_callback("Creating lag features", 15)
             X, y_arr = _create_lag_features(normalized, n_lags)
@@ -349,6 +583,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
             n_params = sum(c.size for c in model.coefs_) + sum(b.size for b in model.intercepts_)
             model_desc = f"MLPRegressor (sklearn, layers={hidden_sizes}, params={n_params})"
 
+            # Follow-up 3f — Q9 sklearn fallback branch. Attention
+            # capture is structurally impossible on the MLP path.
+            _attn_request_pt = bool(
+                ctx.get_param("attention_exposure", False)
+            )
+            _attn_capture_ok = False
+            _attn_capture_err = None
+            _captured_pt = None
+
         # Denormalize
         fc_values = fc_norm * y_std + y_mean
         y_actual = y_arr * y_std + y_mean
@@ -361,6 +604,128 @@ def run(ctx: RunContext, progress_callback) -> dict:
         ss_res = float(np.sum(residuals ** 2))
         ss_tot = float(np.sum((y_actual - np.mean(y_actual)) ** 2))
         r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
+
+        # ── Follow-up 3f — attention post-processing ──────────────
+        # Consolidates the PyTorch capture result (_captured_pt,
+        # _attn_capture_ok, _attn_capture_err) and the sklearn
+        # fallback into a unified set of audit fields plus an
+        # optional "Attention Weights" output table.
+        attn_request = bool(_attn_request_pt)
+        attn_applied = False
+        attn_fallback_reason = None
+        attn_top_k_req = int(ctx.get_param("attention_top_k", 10))
+        attn_audit = {}
+        attn_table = None
+
+        if attn_request:
+            if backend == "sklearn_mlp":
+                attn_fallback_reason = "sklearn_fallback_no_attention"
+                warn_list.append(
+                    "Attention exposure requested but backend is "
+                    "sklearn MLPRegressor; attention weights are "
+                    "undefined for the fallback architecture. "
+                    "Install PyTorch to enable."
+                )
+            elif not _attn_capture_ok:
+                err = _attn_capture_err
+                attn_fallback_reason = (
+                    f"runtime_error: "
+                    f"{type(err).__name__ if err is not None else 'Exception'}: "
+                    f"{err}"
+                )
+                warn_list.append(
+                    f"Attention exposure raised "
+                    f"{type(err).__name__ if err is not None else 'Exception'}: "
+                    f"{err}. Baseline forecast preserved."
+                )
+            else:
+                # Successful capture — process into two views.
+                try:
+                    # Stack captured tensors by layer index.
+                    _layer_mats = [
+                        w.squeeze(0).cpu().numpy()
+                        for _, w in sorted(
+                            _captured_pt, key=lambda t: t[0]
+                        )
+                    ]
+                    _last_mat = _layer_mats[-1]
+                    _cross_mat = np.mean(
+                        np.stack(_layer_mats, axis=0), axis=0,
+                    )
+                    _last_row = _last_mat[-1]
+                    _cross_row = _cross_mat[-1]
+
+                    # Q5: silent clip to min(K, n_lags).
+                    K_eff = int(max(1, min(attn_top_k_req, n_lags)))
+
+                    _ll_topk = _build_attention_top_k(_last_row, K_eff)
+                    _cl_topk = _build_attention_top_k(_cross_row, K_eff)
+                    _ll_H, _ll_ecl, _ll_dom = (
+                        _compute_attention_summaries(_last_row, n_lags)
+                    )
+                    _cl_H, _cl_ecl, _cl_dom = (
+                        _compute_attention_summaries(_cross_row, n_lags)
+                    )
+
+                    attn_audit = {
+                        "attention_n_layers": int(n_encoder_layers),
+                        "attention_n_heads": int(n_heads),
+                        "attention_context_length": int(n_lags),
+                        "attention_top_k": int(attn_top_k_req),
+                        "attention_top_k_effective": int(K_eff),
+                        "attention_last_layer_top_k": _ll_topk,
+                        "attention_cross_layer_top_k": _cl_topk,
+                        "attention_last_layer_entropy_normalized": (
+                            round(_ll_H, 6) if _ll_H is not None else None
+                        ),
+                        "attention_last_layer_effective_context_length": (
+                            round(_ll_ecl, 6)
+                            if _ll_ecl is not None else None
+                        ),
+                        "attention_last_layer_dominant_lag": _ll_dom,
+                        "attention_cross_layer_entropy_normalized": (
+                            round(_cl_H, 6) if _cl_H is not None else None
+                        ),
+                        "attention_cross_layer_effective_context_length": (
+                            round(_cl_ecl, 6)
+                            if _cl_ecl is not None else None
+                        ),
+                        "attention_cross_layer_dominant_lag": _cl_dom,
+                    }
+
+                    # Build "Attention Weights" output table
+                    # (fulfills C7 catalog placeholder).
+                    _rows = []
+                    for r in range(K_eff):
+                        _ll = _ll_topk[r]
+                        _cl = _cl_topk[r]
+                        _rows.append([
+                            r + 1,
+                            _ll["position"], _ll["lag"], _ll["weight"],
+                            _cl["position"], _cl["lag"], _cl["weight"],
+                        ])
+                    attn_table = make_table(
+                        "Attention Weights",
+                        [
+                            "Rank",
+                            "Last-Layer Position", "Last-Layer Lag",
+                            "Last-Layer Weight",
+                            "Cross-Layer Position", "Cross-Layer Lag",
+                            "Cross-Layer Weight",
+                        ],
+                        _rows,
+                    )
+                    attn_applied = True
+                except Exception as _post_err:
+                    attn_fallback_reason = (
+                        f"runtime_error: "
+                        f"{type(_post_err).__name__}: {_post_err}"
+                    )
+                    warn_list.append(
+                        f"Attention post-processing raised "
+                        f"{type(_post_err).__name__}: {_post_err}. "
+                        f"Baseline forecast preserved."
+                    )
 
         progress_callback("Building output", 90)
 
@@ -393,6 +758,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
         summary_table = make_table("Model Summary", ["Metric", "Value"], summary_rows)
 
         tables = [fc_table, summary_table]
+        # Follow-up 3f: insert Attention Weights table before
+        # Training Loss so it reads naturally after Model Summary.
+        if attn_table is not None:
+            tables.append(attn_table)
 
         if use_torch and len(losses) > 0:
             step_size = max(1, len(losses) // 20)
@@ -471,7 +840,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "n_train": _n_train,
             "n_obs": n,
             "series_name": name,
+            # Follow-up 3f — attention exposure audit fields
+            "attention_exposure_requested": bool(attn_request),
+            "attention_exposure_applied": bool(attn_applied),
+            "attention_exposure_fallback_reason": attn_fallback_reason,
         }
+        # Populate per-view attention audit fields (all None if not
+        # applied; present as None-safe defaults regardless).
+        for _k in (
+            "attention_n_layers",
+            "attention_n_heads",
+            "attention_context_length",
+            "attention_top_k",
+            "attention_top_k_effective",
+            "attention_last_layer_top_k",
+            "attention_cross_layer_top_k",
+            "attention_last_layer_entropy_normalized",
+            "attention_last_layer_effective_context_length",
+            "attention_last_layer_dominant_lag",
+            "attention_cross_layer_entropy_normalized",
+            "attention_cross_layer_effective_context_length",
+            "attention_cross_layer_dominant_lag",
+        ):
+            audit[_k] = attn_audit.get(_k)
 
         try:
             from interpretation import build_interpretation  # type: ignore

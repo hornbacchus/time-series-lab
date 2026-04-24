@@ -1196,10 +1196,12 @@
         {"name": "horizon", "label": "Horizon", "type": "int", "default": 12, "required": false, "advanced": false, "description": "Forecast horizon", "options": null},
         {"name": "d_model", "label": "Model Dimension", "type": "int", "default": 32, "required": false, "advanced": true, "description": "Transformer model dimension", "options": null},
         {"name": "n_heads", "label": "Attention Heads", "type": "int", "default": 4, "required": false, "advanced": true, "description": "Number of attention heads", "options": null},
-        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null}
+        {"name": "epochs", "label": "Epochs", "type": "int", "default": 50, "required": false, "advanced": true, "description": "Training epochs", "options": null},
+        {"name": "attention_exposure", "label": "Expose Attention Weights", "type": "bool", "default": false, "required": false, "advanced": false, "description": "Capture per-layer attention weights during the t+1 forecast forward pass and expose two views (last-layer and cross-layer mean). Emits an Attention Weights output table plus summary statistics (entropy, effective context length, dominant lag). PyTorch backend only; graceful fallback on sklearn path.", "options": null},
+        {"name": "attention_top_k", "label": "Attention Top-K", "type": "int", "default": 10, "required": false, "advanced": false, "description": "Number of most-attended past positions to report per view. Silently clipped to n_lags when larger.", "options": null}
       ],
       "output_tables": ["forecasts", "attention_weights", "training_log", "model_summary"],
-      "tags": ["deep-learning", "transformer", "attention", "forecasting"]
+      "tags": ["deep-learning", "transformer", "attention", "forecasting", "interpretability"]
     },
     {
       "id": "prophet_forecast",

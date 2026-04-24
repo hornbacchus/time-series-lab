@@ -1630,6 +1630,25 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "n_encoder_layers": 1,
         "dim_feedforward": 64,
         "n_params": 1000,
+        # Follow-up 3f — Transformer attention exposure fields
+        # (None-safe defaults; wrapper default attention_exposure=
+        # False, so all *_corrected fields are None).
+        "attention_exposure_requested": False,
+        "attention_exposure_applied": False,
+        "attention_exposure_fallback_reason": None,
+        "attention_n_layers": None,
+        "attention_n_heads": None,
+        "attention_context_length": None,
+        "attention_top_k": None,
+        "attention_top_k_effective": None,
+        "attention_last_layer_top_k": None,
+        "attention_cross_layer_top_k": None,
+        "attention_last_layer_entropy_normalized": None,
+        "attention_last_layer_effective_context_length": None,
+        "attention_last_layer_dominant_lag": None,
+        "attention_cross_layer_entropy_normalized": None,
+        "attention_cross_layer_effective_context_length": None,
+        "attention_cross_layer_dominant_lag": None,
         # Neural decomposition cohort
         "stack_types": ["generic"],
         "n_blocks": 2,
@@ -2075,6 +2094,21 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # Author-year tokens like `johansen_2002`, `reimers_1992`,
         # `mackinnon_1996` are disqualified by the trailing digits.
         "finite_sample_correction",
+        # (c15) Follow-up 3f — Transformer attention exposure.
+        # Programmatic tokens cited verbatim in Tier 2 methodology
+        # prose when attention_exposure=True and capture succeeds:
+        # `need_weights` and `average_attn_weights` are PyTorch API
+        # kwargs that users type as literals when scripting against
+        # the MHA module (same category as seasonal_periods /
+        # box_cox_lambda / n_jobs from TBATS, c7 block). The param
+        # name `attention_exposure` is cited in the re-gated Tier 2
+        # honest-disclosure pointer when NOT applied (same category
+        # as finite_sample_correction from 3d). Single-word tokens
+        # (`attention`, `entropy`, `bartlett`, `reimers`, `transformer`)
+        # don't match the T15 regex. Audit-field names with
+        # underscores that appear only inside quoted strings or
+        # table column headers don't leak into prose.
+        "attention_exposure", "need_weights", "average_attn_weights",
     }
 
     @staticmethod

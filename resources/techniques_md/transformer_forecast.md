@@ -99,6 +99,44 @@ and produces distribution-free intervals via a held-out calibration
 set. See also **Quantile Regression Forecast** for directly
 modeling conditional quantiles.
 
+## Attention Weights Exposure (Follow-up 3f, opt-in)
+
+Self-attention is the defining interpretability axis of Transformer models: each prediction is a weighted average over past time steps, and the weights themselves answer the practitioner question "which past positions drove this forecast?" Prior to Follow-up 3f the wrapper's Tier 2 explicitly acknowledged attention-weight extraction as *"backlog for future enhancement"* and the C7 catalog declared `attention_weights` in `output_tables` as an aspirational placeholder — 3f fulfills both commitments.
+
+Set `attention_exposure=True` (default `False`, backward compat) to capture per-layer attention matrices during the t+1 forecast forward pass and expose two complementary views:
+
+- **Last-layer view** — per-head attention from the final encoder layer, head-averaged to produce a single `(n_lags × n_lags)` matrix. The final layer is most directly responsible for the prediction.
+- **Cross-layer mean view** — averaged across all encoder layers and heads for the aggregate attention pattern.
+
+For each view the wrapper extracts the **forecast-position row** (the last row of the matrix — what past positions the model attends to when predicting t+1) and reports:
+
+- **Top-K ranked list** (default K=10, user-configurable via `attention_top_k`, silently clipped to `n_lags` if larger). Each entry records rank, position index, lag from forecast position, and attention weight.
+- **Normalized Shannon entropy** `H / log(n_lags) ∈ [0, 1]`. Low (< 0.3) ⇒ concentrated attention on few lags; high (> 0.8) ⇒ diffuse, near-uniform attention.
+- **Effective context length** `Σ lag_i · w_i`. Small ⇒ model focuses on recent past; large ⇒ model uses deep history.
+- **Dominant lag** — argmax of the attention row.
+
+The output is surfaced in the "Attention Weights" table and in Tier 2 methodology prose.
+
+### Capture mechanism
+
+PyTorch's `nn.TransformerEncoderLayer._sa_block` hardcodes `need_weights=False`, so a naïve forward hook on `self_attn` would see `(output, None)`. Additionally, `TransformerEncoderLayer.forward` has a "sparsity fast path" that dispatches to a fused kernel, bypassing `_sa_block` entirely when no hooks are registered. Follow-up 3f uses the standard PyTorch interpretability pattern:
+
+1. Register a no-op `forward_hook` on each encoder layer to disable the fast path.
+2. Patch `layer._sa_block` with a version that forces `need_weights=True, average_attn_weights=True` and stashes the returned (head-averaged) weights tensor.
+3. Wrap the capture forward pass in `try / except / finally` with **guaranteed teardown** — every patched `_sa_block` is restored and every hook is removed regardless of downstream outcome.
+
+### Graceful degradation
+
+- **sklearn fallback.** If PyTorch is unavailable and the wrapper falls back to `MLPRegressor`, attention weights are not defined for the MLP architecture. `attention_exposure_applied=False`, `fallback_reason="sklearn_fallback_no_attention"`, Tier 3 D5 fires with the sklearn-fallback branch message.
+- **Runtime error.** If the capture cascade raises for any reason, `try/finally` restores all patched `_sa_block` methods and removes all hooks, `fallback_reason="runtime_error: ..."`, D5 fires with the runtime-error branch. Baseline forecast is always preserved.
+
+### Tier 3 triggers (fire only when `attention_exposure=True` and capture succeeded, except D5)
+
+- **D1 attention_highly_concentrated** — last-layer normalized entropy < 0.3. Very few past positions drive the prediction; may indicate lag-1 dominance (AR structure), spurious reliance, or insufficient capacity.
+- **D2 attention_highly_diffuse** — last-layer normalized entropy > 0.8. Near-uniform attention; may indicate undertrained model or a series with no strong lag structure.
+- **D3 dominant_lag_matches_seasonal** — informational heuristic. Fires when dominant lag ∈ {4, 7, 12, 24, 52, 365} (quarterly, weekly, monthly, daily-hourly, annual-weekly, annual-daily). The model may have learned seasonal structure at this lag.
+- **D4 last_layer_cross_layer_disagreement** — strict exact-position top-1 mismatch between the two views. Research-relevant signal that the final layer uses different information than earlier layers on average.
+- **D5 attention_exposure_runtime_error** — fires on graceful fallback (both sklearn-fallback and runtime-error branches).
 
 ## Interpretation
 
@@ -106,6 +144,6 @@ Every Transformer run emits a two-tier Interpretation block with neural-sequence
 
 **Tier 1** - names d_model, attention heads, encoder layers, feed-forward dim, total parameter count.
 
-**Tier 2** - explains self-attention structure (query/key/value projections). Attention weights COULD be extracted as an interpretability axis but are NOT currently exposed at the wrapper level (backlog).
+**Tier 2** - explains self-attention structure (query/key/value projections). When `attention_exposure=True`, adds a methodology block describing the `_sa_block` patch, two-view reporting, and summary statistics; when NOT opted in, includes a pointer to the opt-in parameter.
 
-**Caveats (Tier 3, conditional)**: shared neural-sequence triggers; params-exceed-samples fires frequently on short series given Transformer's typical parameter count.
+**Caveats (Tier 3, conditional)**: shared neural-sequence triggers (backend fallback, insufficient training, non-convergence, over-parameterization) plus 5 new Follow-up 3f triggers (D1-D5) covering attention concentration, diffusion, seasonal-match, layer disagreement, and graceful-fallback cases.
