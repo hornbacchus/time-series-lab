@@ -1474,6 +1474,33 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "primary_method_fell_back": False,
         "base_forecaster": "naive",
         "relative_incoherence": 0.0,
+        # Follow-up 3e — MinT family audit fields (None-safe defaults;
+        # primary_method="bottom_up" in this fixture so the spec's
+        # MinT methodology block no-ops, and all *_post/*_pre coherence
+        # metrics are None).
+        "reconciliation_mode": None,
+        "reconciliation_method_requested": None,
+        "reconciliation_method_applied": None,
+        "reconciliation_fallback_reason": None,
+        "method_was_default": False,
+        "n_total": None,
+        "n_horizons": None,
+        "residuals_T": None,
+        "hierarchy_levels": None,
+        "w_matrix_condition_number": None,
+        "w_matrix_is_diagonal": None,
+        "w_matrix_rank": None,
+        "w_matrix_ill_conditioned": False,
+        "shrinkage_lambda": None,
+        "reconciliation_change_rmse": None,
+        "top_level_change_magnitude": None,
+        "bottom_level_change_rmse": None,
+        "coherence_pre_reconciliation_L2": None,
+        "coherence_pre_reconciliation_max": None,
+        "coherence_post_reconciliation_L2": None,
+        "coherence_post_reconciliation_max": None,
+        "nonnegative_requested": False,
+        "nonnegative_constraint_binding": False,
         # johansen_cointegration
         "variable_names": ["A", "B", "C"],
         "lag_order": 2,
@@ -2109,6 +2136,22 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # underscores that appear only inside quoted strings or
         # table column headers don't leak into prose.
         "attention_exposure", "need_weights", "average_attn_weights",
+        # (c16) Follow-up 3e — MinT family method names cited
+        # verbatim in Tier 3 trigger prose when fallback occurs
+        # (D1 cause text, D2 suggestion to try mint_shrinkage, D3
+        # suggestion to consider mint_sample, D5 requires T > n_total
+        # phrasing). These are industry-standard method identifiers
+        # (R hts, fable, statsforecast, Stata vecrank) that users
+        # type as the `method` parameter value. Same category as
+        # use_log / threshold_quantile / finite_sample_correction
+        # from earlier blocks. Single-word tokens (`bottom`, `top`,
+        # `hierarchy`, `coherence`, `shrinkage`, `covariance`) don't
+        # match the T15 regex. Chained-underscore tokens
+        # (`mint_sample_requires_T_gt_n`, `cascade_exhausted`,
+        # `runtime_error_in_*`) are disqualified by the adjacent-
+        # underscore lookaround requirement. `n_total` is a standard
+        # dimensional token cited in "T > n_total" prose.
+        "mint_sample", "mint_shrinkage", "wls_variance", "n_total",
     }
 
     @staticmethod

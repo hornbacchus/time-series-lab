@@ -357,11 +357,15 @@
       "supports_auto_udf": false, "auto_udf_name": null,
       "presets": ["Balanced", "Thorough"],
       "parameters": [
-        {"name": "method", "label": "Reconciliation Method", "type": "string", "default": "ols", "required": false, "advanced": false, "description": "Reconciliation approach", "options": ["bottom_up", "top_down", "ols", "wls"]},
-        {"name": "hierarchy_table", "label": "Hierarchy Table", "type": "string", "default": "TSL_HIERARCHY", "required": false, "advanced": false, "description": "Name of hierarchy mapping table", "options": null}
+        {"name": "method", "label": "Reconciliation Method", "type": "string", "default": "ols", "required": false, "advanced": false, "description": "Reconciliation approach. MinT family (Wickramasuriya-Athanasopoulos-Hyndman 2019): ols, wls_variance (alias wls), mint_shrinkage (Schafer-Strimmer 2005, WAH recommended), mint_sample (full sample covariance, requires T > n_total). Classical: bottom_up, top_down. Default ols for backward compatibility; Tier 2 recommends mint_shrinkage upgrade when defaulted.", "options": ["bottom_up", "top_down", "ols", "wls", "wls_variance", "mint_shrinkage", "mint_sample"]},
+        {"name": "hierarchy_table", "label": "Hierarchy Table", "type": "string", "default": "TSL_HIERARCHY", "required": false, "advanced": false, "description": "Name of hierarchy mapping table", "options": null},
+        {"name": "S_matrix", "label": "Summing Matrix S", "type": "string", "default": null, "required": false, "advanced": true, "description": "Optional explicit n-level summing matrix as list-of-lists, shape (n_total, n_bottom). Presence activates explicit n-level mode (hts / fable / statsforecast API); absence uses auto 2-level construction from series order.", "options": null},
+        {"name": "y_hat_matrix", "label": "Base Forecasts Matrix", "type": "string", "default": null, "required": false, "advanced": true, "description": "Optional explicit base-forecast matrix as list-of-lists, shape (n_total, h). Only used in explicit n-level mode; overrides internal base_forecaster computation.", "options": null},
+        {"name": "residuals_matrix", "label": "Residuals Matrix", "type": "string", "default": null, "required": false, "advanced": true, "description": "Optional explicit in-sample residuals matrix as list-of-lists, shape (n_total, T_train). Only used in explicit n-level mode; overrides internal base_forecaster residuals.", "options": null},
+        {"name": "nonnegative", "label": "Nonnegative Reconciliation", "type": "bool", "default": false, "required": false, "advanced": true, "description": "Apply NNLS projection to bottom-level forecasts so all reconciled values are non-negative. Useful for count / positive-only data. Forfeits the MinT minimum-trace optimality when the constraint binds.", "options": null}
       ],
-      "output_tables": ["reconciled_forecasts", "reconciliation_summary"],
-      "tags": ["multivariate", "hierarchical", "reconciliation"]
+      "output_tables": ["reconciled_forecasts", "reconciliation_summary", "mint_reconciliation_summary", "w_matrix_characterization", "reconciliation_impact"],
+      "tags": ["multivariate", "hierarchical", "reconciliation", "mint", "schafer-strimmer"]
     },
     {
       "id": "local_level",

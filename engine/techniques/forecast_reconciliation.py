@@ -1,12 +1,44 @@
 """
 Hierarchical Forecast Reconciliation for Time Series Lab.
 
-Implements bottom-up, top-down, and OLS (MinT-like) reconciliation
-of hierarchical or grouped time series forecasts.
+Implements bottom-up, top-down, and the full MinT (Minimum Trace)
+family — OLS, WLS-variance, MinT-shrinkage (Schäfer-Strimmer 2005),
+MinT-sample — per Wickramasuriya-Athanasopoulos-Hyndman 2019.
 
 The user provides series in a hierarchy: the first series is the
 top-level aggregate, and the remaining series are the bottom-level
 components that should sum to the top level.
+
+Follow-up 3e: full MinT family. Two operating modes:
+
+**Auto 2-level mode** (default, backward compat): S is constructed
+internally as a 2-level summing matrix from ``ctx.get_all_series()``.
+Base forecasts and residuals are computed internally from the
+chosen ``base_forecaster`` ∈ {naive, drift, ets}.
+
+**Explicit n-level mode** (opt-in): user provides
+``ctx.params["S_matrix"]`` (list-of-lists, shape n_total × n_bottom).
+Optionally also provides ``ctx.params["y_hat_matrix"]`` and
+``ctx.params["residuals_matrix"]`` for general n-level
+reconciliation outside the 2-level assumption. Follows the
+hts/fable/statsforecast API convention.
+
+MinT variants:
+
+- ``ols``: W = I. No residual-based weighting.
+- ``wls_variance`` (alias ``wls``): W = diag(Var(residuals)).
+- ``mint_shrinkage``: W = Schäfer-Strimmer 2005 shrunk sample
+  covariance (shrinks correlations toward 0; preserves variances).
+- ``mint_sample``: W = full sample covariance. Requires T > n_total.
+
+Graceful fallback cascade (D22): mint_sample → mint_shrinkage →
+wls_variance → ols; mint_shrinkage → mint_sample → wls_variance →
+ols. OLS (W=I) never falls back.
+
+Nonnegative reconciliation: opt-in via ``ctx.params["nonnegative"]``.
+Uses ``scipy.optimize.nnls`` to solve the whitened bottom-level
+NNLS problem, then maps to all levels via S. Ensures bottom ≥ 0
+(and hence all aggregates ≥ 0 since S is binary).
 """
 
 import numpy as np
@@ -18,6 +50,22 @@ from techniques.base import (
     make_response,
     make_error_response,
 )
+
+
+# Follow-up 3e: MinT family method names. `wls` is a backward-
+# compatible alias for `wls_variance` (the catalog already declares
+# `wls` as an option).
+_MINT_METHODS = ("ols", "wls_variance", "wls", "mint_shrinkage", "mint_sample")
+
+
+# Fallback cascade order per D22.
+_FALLBACK_CHAIN = {
+    "mint_sample": ("mint_shrinkage", "wls_variance", "ols"),
+    "mint_shrinkage": ("mint_sample", "wls_variance", "ols"),
+    "wls_variance": ("ols",),
+    "wls": ("ols",),
+    "ols": (),
+}
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +155,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         horizon = max(1, int(ctx.get_param("horizon", cfg["horizon"])))
         methods_param = ctx.get_param("method")
+        # Follow-up 3e D23: track whether method was defaulted so
+        # the spec can emit a Tier 2 OLS-upgrade recommendation
+        # without nagging users who explicitly chose ols.
+        method_was_default = methods_param is None
         if methods_param is not None:
             if isinstance(methods_param, str):
                 methods = [methods_param.lower()]
@@ -116,6 +168,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
             methods = cfg["methods"]
         base_fc_type = ctx.get_param("base_forecaster", "naive")
         td_weights = ctx.get_param("top_down_weights", "proportions_avg")
+
+        # Follow-up 3e: optional MinT family params.
+        nonnegative = bool(ctx.get_param("nonnegative", False))
+        # Mode detection: presence of S_matrix activates explicit
+        # n-level mode. y_hat_matrix and residuals_matrix are
+        # optional even in explicit mode (wrapper falls back to
+        # internal base-forecaster computation for missing ones).
+        s_matrix_param = ctx.get_param("S_matrix")
+        y_hat_matrix_param = ctx.get_param("y_hat_matrix")
+        residuals_matrix_param = ctx.get_param("residuals_matrix")
+        explicit_mode = s_matrix_param is not None
+        reconciliation_mode = (
+            "explicit_n_level" if explicit_mode else "auto_2_level"
+        )
 
         progress_callback("Generating base forecasts", 20)
 
@@ -132,11 +198,125 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Reconciling forecasts", 45)
 
-        # S matrix: maps bottom-level to all levels
-        # For 2-level hierarchy: S = [[1, 1, ..., 1], I_n_bottom]
-        S = np.vstack([np.ones((1, n_bottom)), np.eye(n_bottom)])  # (n_total, n_bottom)
+        # S matrix: maps bottom-level to all levels.
+        # Follow-up 3e: in explicit mode, use user-provided S.
+        # In auto 2-level mode (default), construct as before:
+        # S = [[1, 1, ..., 1], I_n_bottom].
+        if explicit_mode:
+            try:
+                S = np.asarray(s_matrix_param, dtype=np.float64)
+                if S.ndim != 2:
+                    raise ValueError(
+                        f"S_matrix must be 2D; got ndim={S.ndim}"
+                    )
+                # Shape consistency: rows must equal n_total from
+                # the aligned series (but in explicit n-level mode
+                # n_total from S may differ from n_total deduced
+                # from series). We trust S and override base_fc /
+                # base_residuals shapes below.
+            except Exception as e:
+                return make_error_response(
+                    ctx,
+                    f"Invalid S_matrix parameter: {e}",
+                    error_fixes=[
+                        "S_matrix must be a 2D nested list / ndarray "
+                        "with shape (n_total, n_bottom).",
+                    ],
+                )
+        else:
+            S = np.vstack([np.ones((1, n_bottom)), np.eye(n_bottom)])  # (n_total, n_bottom)
+
+        # Follow-up 3e: overrides for y_hat and residuals when
+        # user provides them explicitly (explicit n-level mode).
+        if explicit_mode and y_hat_matrix_param is not None:
+            try:
+                _user_y_hat = np.asarray(y_hat_matrix_param, dtype=np.float64)
+                if _user_y_hat.ndim == 1:
+                    # Single-horizon; expand to (n_total, 1)
+                    _user_y_hat = _user_y_hat.reshape(-1, 1)
+                # Convention: user passes (n_total, h); base_fc stores
+                # (horizon, n_total). Transpose if needed based on
+                # S.shape[0].
+                if _user_y_hat.shape[0] != S.shape[0]:
+                    if _user_y_hat.shape[1] == S.shape[0]:
+                        _user_y_hat = _user_y_hat.T
+                    else:
+                        return make_error_response(
+                            ctx,
+                            f"y_hat_matrix shape {_user_y_hat.shape} "
+                            f"does not align with S_matrix rows "
+                            f"({S.shape[0]}).",
+                        )
+                # base_fc convention: (horizon, n_total)
+                base_fc_override = _user_y_hat.T  # (h, n_total)
+                horizon_from_y = base_fc_override.shape[0]
+            except Exception as e:
+                return make_error_response(
+                    ctx,
+                    f"Invalid y_hat_matrix parameter: {e}",
+                )
+        else:
+            base_fc_override = None
+            horizon_from_y = None
+
+        if explicit_mode and residuals_matrix_param is not None:
+            try:
+                _user_residuals = np.asarray(
+                    residuals_matrix_param, dtype=np.float64,
+                )
+                if _user_residuals.ndim != 2:
+                    raise ValueError(
+                        f"residuals_matrix must be 2D; got "
+                        f"ndim={_user_residuals.ndim}"
+                    )
+                if _user_residuals.shape[0] != S.shape[0]:
+                    if _user_residuals.shape[1] == S.shape[0]:
+                        _user_residuals = _user_residuals.T
+                    else:
+                        return make_error_response(
+                            ctx,
+                            f"residuals_matrix shape "
+                            f"{_user_residuals.shape} does not align "
+                            f"with S_matrix rows ({S.shape[0]}).",
+                        )
+                # Expected shape (n_total, T_train)
+                base_residuals_override = _user_residuals
+            except Exception as e:
+                return make_error_response(
+                    ctx,
+                    f"Invalid residuals_matrix parameter: {e}",
+                )
+        else:
+            base_residuals_override = None
+
+        # Apply overrides (if any). Note: n_total, bottom/top series
+        # names remain as inferred from ctx.get_all_series(). In
+        # explicit n-level mode we derive display names from the
+        # summing-matrix structure.
+        if base_fc_override is not None:
+            base_fc = base_fc_override
+            horizon = horizon_from_y
+        if base_residuals_override is not None:
+            # base_residuals stored as (T, n_total) in existing code;
+            # override is (n_total, T_train). Transpose to match.
+            base_residuals = base_residuals_override.T
+        # Update n_total derived from S for explicit mode
+        if explicit_mode:
+            n_total = int(S.shape[0])
+            n_bottom = int(S.shape[1])
+            # Generate synthetic names if needed
+            if len(all_series) != n_total:
+                # User did not supply aligned series count;
+                # synthesise names for display.
+                synth_names = [f"series_{i}" for i in range(n_total)]
+                all_names = synth_names
+                top_name = synth_names[0]
+                bottom_names = synth_names[-n_bottom:]
 
         results = {}
+        # Follow-up 3e: capture MinT-specific audit sub-fields per
+        # method as cascade runs.
+        mint_audit_per_method = {}
 
         for method in methods:
             if method == "bottom_up":
@@ -171,19 +351,64 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
                 results["top_down"] = fc_reconciled
 
-            elif method == "ols":
-                # OLS reconciliation (Wickramasuriya et al. MinT with OLS shrinkage)
-                # Reconciled = S @ (S'S)^{-1} S' @ base_fc
+            elif method in _MINT_METHODS:
+                # Follow-up 3e: MinT family dispatch via cascade.
+                # base_fc stored (horizon, n_total); convert to
+                # (n_total, horizon) for matrix math.
+                y_hat_matrix = base_fc.T  # (n_total, horizon)
+                # base_residuals stored (T, n_total); transpose to
+                # (n_total, T). Drop leading zero-padding rows if
+                # any (the existing wrapper zero-pads residuals from
+                # the front of base_residuals when resid is shorter
+                # than T — this pad reflects positions we don't
+                # have true residuals for).
+                R_full = base_residuals.T  # (n_total, T)
+                # Determine effective T_effective: drop leading
+                # all-zero columns (which are the pad positions).
+                col_is_zero = np.all(R_full == 0, axis=0)
+                if col_is_zero.any():
+                    first_nonzero = int(
+                        np.argmax(~col_is_zero) if (~col_is_zero).any()
+                        else R_full.shape[1]
+                    )
+                    R_effective = R_full[:, first_nonzero:]
+                else:
+                    R_effective = R_full
                 try:
-                    StS_inv = np.linalg.inv(S.T @ S)
-                    P = S @ StS_inv @ S.T  # projection matrix (n_total, n_total)
-                    fc_reconciled = (P @ base_fc.T).T  # (horizon, n_total)
-                except np.linalg.LinAlgError:
-                    warnings.append("OLS reconciliation failed (singular S'S). Falling back to bottom-up.")
-                    fc_bottom = base_fc[:, 1:]
+                    (
+                        y_tilde, W, applied, fallback_reason,
+                        extras, constraint_binding,
+                    ) = _reconcile_with_fallback(
+                        y_hat_matrix, S, R_effective, method,
+                        nonnegative,
+                    )
+                    fc_reconciled = y_tilde.T  # back to (horizon, n_total)
+                except Exception as e:
+                    warnings.append(
+                        f"Reconciliation method '{method}' failed and "
+                        f"entire fallback cascade exhausted: {e}. "
+                        f"Falling back to bottom-up sum."
+                    )
+                    fc_bottom = base_fc[:, 1:] if not explicit_mode else base_fc
                     fc_reconciled = (S @ fc_bottom.T).T
+                    applied = method
+                    fallback_reason = f"cascade_exhausted: {e}"
+                    extras = {"is_diagonal": True, "shrinkage_lambda": None}
+                    W = np.eye(n_total)
+                    constraint_binding = False
 
-                results["ols"] = fc_reconciled
+                # Store results under REQUESTED method name (so
+                # table / audit keys match user input), but track
+                # applied in per-method audit.
+                results[method] = fc_reconciled
+                mint_audit_per_method[method] = {
+                    "applied": applied,
+                    "fallback_reason": fallback_reason,
+                    "W": W,
+                    "extras": extras,
+                    "constraint_binding": constraint_binding,
+                    "y_tilde": y_tilde if 'y_tilde' in locals() else None,
+                }
 
             else:
                 warnings.append(f"Unknown method '{method}' skipped.")
@@ -270,6 +495,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["Forecast Horizon", horizon],
             ["Base Forecaster", base_fc_type],
             ["Methods Applied", ", ".join(results.keys())],
+            ["Reconciliation Mode", reconciliation_mode],
         ]
         tables.append(make_table("Summary", ["Metric", "Value"], summary_rows))
 
@@ -296,11 +522,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # ── Interpretation layer (Prompt C5) ──────────────────────────
         # Primary-method citation convention (Decision D5):
         # MinT-OLS preferred when available; fall back to bottom_up
-        # when OLS fails (detected via fallback warning at line 182).
+        # when OLS fails (detected via cascade-exhausted warning).
         _methods_ran = list(results.keys())
-        if "ols" in _methods_ran:
-            _ols_fell_back = any("OLS reconciliation failed" in w for w in warnings)
-            primary_method = "bottom_up" if _ols_fell_back else "ols"
+        # Prefer the newer MinT variants, then ols, then others.
+        if "mint_shrinkage" in _methods_ran:
+            primary_method = "mint_shrinkage"
+        elif "mint_sample" in _methods_ran:
+            primary_method = "mint_sample"
+        elif "wls_variance" in _methods_ran:
+            primary_method = "wls_variance"
+        elif "wls" in _methods_ran:
+            primary_method = "wls"
+        elif "ols" in _methods_ran:
+            primary_method = "ols"
         elif "bottom_up" in _methods_ran:
             primary_method = "bottom_up"
         elif "top_down" in _methods_ran:
@@ -308,18 +542,245 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             primary_method = _methods_ran[0] if _methods_ran else None
 
+        # Follow-up 3e: pull primary-method MinT sub-audit (if any).
+        _primary_mint = (
+            mint_audit_per_method.get(primary_method)
+            if primary_method in mint_audit_per_method else None
+        )
+        _primary_applied = (
+            _primary_mint["applied"] if _primary_mint else primary_method
+        )
+        _primary_fallback_reason = (
+            _primary_mint["fallback_reason"] if _primary_mint else None
+        )
+        _primary_W = _primary_mint["W"] if _primary_mint else None
+        _primary_extras = (
+            _primary_mint["extras"] if _primary_mint else {}
+        )
+        _primary_constraint_binding = bool(
+            _primary_mint["constraint_binding"] if _primary_mint else False
+        )
+
+        # W matrix characterization (only for MinT primary)
+        if _primary_W is not None:
+            _w_cond, _w_rank, _w_is_diag = _w_matrix_characterize(_primary_W)
+        else:
+            _w_cond, _w_rank, _w_is_diag = None, None, None
+
+        # Coherence pre/post (only for MinT primary — other methods
+        # like bottom_up / top_down are coherent by construction).
+        _coh_pre_L2, _coh_pre_max = None, None
+        _coh_post_L2, _coh_post_max = None, None
+        _recon_change_rmse = None
+        _top_level_change = None
+        _bottom_level_change_rmse = None
+        if primary_method in _MINT_METHODS and primary_method in results:
+            try:
+                _y_hat_primary = base_fc.T  # (n_total, horizon)
+                _y_tilde_primary = results[primary_method].T
+                _coh_pre_L2, _coh_pre_max = _coherence_metrics(
+                    _y_hat_primary, S,
+                )
+                _coh_post_L2, _coh_post_max = _coherence_metrics(
+                    _y_tilde_primary, S,
+                )
+                _recon_change_rmse = float(np.sqrt(np.mean(
+                    (_y_tilde_primary - _y_hat_primary) ** 2
+                )))
+                _top_level_change = float(np.max(np.abs(
+                    _y_tilde_primary[0] - _y_hat_primary[0]
+                )))
+                if n_bottom > 0:
+                    _bot_idx = slice(-n_bottom, None)
+                    _bottom_level_change_rmse = float(np.sqrt(np.mean(
+                        (_y_tilde_primary[_bot_idx]
+                         - _y_hat_primary[_bot_idx]) ** 2
+                    )))
+            except Exception:
+                pass
+
+        # D1 "primary method fell back" (new broader definition):
+        # fires whenever the primary method's fallback_reason is
+        # populated. Back-compat: legacy trigger re-gated to
+        # suppress when this is True.
+        _primary_fell_back = bool(_primary_fallback_reason)
+
         audit = {
             "top_series": top_name,
             "bottom_series": bottom_names,
             "n_bottom": n_bottom,
             "methods": _methods_ran,
             "primary_method": primary_method,
-            "primary_method_fell_back": bool("ols" in _methods_ran and any("OLS reconciliation failed" in w for w in warnings)),
+            "primary_method_fell_back": _primary_fell_back,
             "base_forecaster": base_fc_type,
             "horizon": horizon,
             "n_observations": T,
             "relative_incoherence": round(relative_incoherence, 4),
+            # Follow-up 3e — MinT family audit additions
+            "reconciliation_mode": reconciliation_mode,
+            "reconciliation_method_requested": primary_method,
+            "reconciliation_method_applied": _primary_applied,
+            "reconciliation_fallback_reason": _primary_fallback_reason,
+            "method_was_default": bool(method_was_default),
+            "n_total": int(n_total),
+            "n_horizons": int(horizon),
+            "residuals_T": int(T),
+            "hierarchy_levels": int(_infer_hierarchy_levels(S)),
+            "w_matrix_condition_number": (
+                round(_w_cond, 4) if _w_cond is not None else None
+            ),
+            "w_matrix_is_diagonal": _w_is_diag,
+            "w_matrix_rank": _w_rank,
+            "w_matrix_ill_conditioned": (
+                bool(_w_cond is not None and _w_cond > 1e12)
+                if _w_cond is not None else False
+            ),
+            "shrinkage_lambda": _primary_extras.get("shrinkage_lambda"),
+            "reconciliation_change_rmse": (
+                round(_recon_change_rmse, 6)
+                if _recon_change_rmse is not None else None
+            ),
+            "top_level_change_magnitude": (
+                round(_top_level_change, 6)
+                if _top_level_change is not None else None
+            ),
+            "bottom_level_change_rmse": (
+                round(_bottom_level_change_rmse, 6)
+                if _bottom_level_change_rmse is not None else None
+            ),
+            "coherence_pre_reconciliation_L2": (
+                round(_coh_pre_L2, 6)
+                if _coh_pre_L2 is not None else None
+            ),
+            "coherence_pre_reconciliation_max": (
+                round(_coh_pre_max, 6)
+                if _coh_pre_max is not None else None
+            ),
+            "coherence_post_reconciliation_L2": (
+                round(_coh_post_L2, 6)
+                if _coh_post_L2 is not None else None
+            ),
+            "coherence_post_reconciliation_max": (
+                round(_coh_post_max, 6)
+                if _coh_post_max is not None else None
+            ),
+            "nonnegative_requested": bool(nonnegative),
+            "nonnegative_constraint_binding": _primary_constraint_binding,
         }
+
+        # Follow-up 3e: MinT-family output tables (appended AFTER
+        # audit dict is built so we can read primary_method and
+        # derived audit fields). Only when a MinT variant was the
+        # primary method.
+        if primary_method in _MINT_METHODS and primary_method in results:
+            mint_summary_rows = [
+                ["Method Requested", primary_method],
+                ["Method Applied", _primary_applied],
+                ["Mode", reconciliation_mode],
+                ["n_total", int(n_total)],
+                ["n_bottom", int(n_bottom)],
+                ["n_horizons", int(horizon)],
+                ["Residuals T", int(T)],
+                ["Hierarchy Levels", int(audit["hierarchy_levels"])],
+                [
+                    "Shrinkage Lambda",
+                    (round(float(audit["shrinkage_lambda"]), 6)
+                     if audit["shrinkage_lambda"] is not None else "N/A"),
+                ],
+                [
+                    "Coherence Pre-Reconciliation (L2)",
+                    (f"{audit['coherence_pre_reconciliation_L2']:.2e}"
+                     if audit["coherence_pre_reconciliation_L2"] is not None
+                     else "N/A"),
+                ],
+                [
+                    "Coherence Post-Reconciliation (L2)",
+                    (f"{audit['coherence_post_reconciliation_L2']:.2e}"
+                     if audit["coherence_post_reconciliation_L2"] is not None
+                     else "N/A"),
+                ],
+                [
+                    "Coherence Post-Reconciliation (max)",
+                    (f"{audit['coherence_post_reconciliation_max']:.2e}"
+                     if audit["coherence_post_reconciliation_max"] is not None
+                     else "N/A"),
+                ],
+                [
+                    "Fallback Reason",
+                    (str(_primary_fallback_reason)
+                     if _primary_fallback_reason else "None"),
+                ],
+            ]
+            tables.append(make_table(
+                "MinT Reconciliation Summary",
+                ["Metric", "Value"],
+                mint_summary_rows,
+            ))
+
+            w_char_rows = [
+                ["Condition Number", (
+                    f"{audit['w_matrix_condition_number']:.4e}"
+                    if audit["w_matrix_condition_number"] is not None
+                    else "N/A"
+                )],
+                ["Rank", (
+                    int(audit["w_matrix_rank"])
+                    if audit["w_matrix_rank"] is not None else "N/A"
+                )],
+                [
+                    "Is Diagonal",
+                    (bool(audit["w_matrix_is_diagonal"])
+                     if audit["w_matrix_is_diagonal"] is not None else "N/A"),
+                ],
+                [
+                    "Ill-Conditioned (cond > 1e12)",
+                    bool(audit["w_matrix_ill_conditioned"]),
+                ],
+                [
+                    "Shrinkage Lambda",
+                    (round(float(audit["shrinkage_lambda"]), 6)
+                     if audit["shrinkage_lambda"] is not None else "N/A"),
+                ],
+            ]
+            tables.append(make_table(
+                "W Matrix Characterization",
+                ["Metric", "Value"],
+                w_char_rows,
+            ))
+
+            impact_rows = [
+                [
+                    "Reconciliation Change RMSE",
+                    (round(float(audit["reconciliation_change_rmse"]), 6)
+                     if audit["reconciliation_change_rmse"] is not None
+                     else "N/A"),
+                ],
+                [
+                    "Top-Level Change (max magnitude)",
+                    (round(float(audit["top_level_change_magnitude"]), 6)
+                     if audit["top_level_change_magnitude"] is not None
+                     else "N/A"),
+                ],
+                [
+                    "Bottom-Level Change RMSE",
+                    (round(float(audit["bottom_level_change_rmse"]), 6)
+                     if audit["bottom_level_change_rmse"] is not None
+                     else "N/A"),
+                ],
+                [
+                    "Nonnegative Requested",
+                    bool(audit["nonnegative_requested"]),
+                ],
+                [
+                    "Nonnegative Constraint Binding",
+                    bool(audit["nonnegative_constraint_binding"]),
+                ],
+            ]
+            tables.append(make_table(
+                "Reconciliation Impact",
+                ["Metric", "Value"],
+                impact_rows,
+            ))
 
         try:
             from interpretation import build_interpretation  # type: ignore
@@ -391,3 +852,303 @@ def _base_forecast(y, horizon, method="naive"):
         resid = y[1:] - y[:-1]
 
     return fc, resid
+
+
+# ---------------------------------------------------------------------------
+# Follow-up 3e — MinT family helpers
+# ---------------------------------------------------------------------------
+
+
+def _schafer_strimmer_shrinkage(residuals):
+    """Schäfer-Strimmer (2005) optimal shrinkage of the sample
+    correlation toward identity, preserving diagonal variances.
+
+    Parameters
+    ----------
+    residuals : ndarray, shape (n_total, T)
+        Rows are series; columns are time points.
+
+    Returns
+    -------
+    W_shrunk : ndarray, shape (n_total, n_total)
+        Shrunk covariance = D + (1 - lambda) * (S_sample - D)
+        where D is diag(S_sample) and lambda ∈ [0, 1]. Equivalent
+        form: correlations shrunk toward 0 by factor (1 - lambda).
+    lambda_hat : float
+        Optimal shrinkage intensity in [0, 1].
+    """
+    R = np.asarray(residuals, dtype=np.float64)
+    n, T = R.shape
+    if T < 2:
+        # Degenerate: can't estimate variance; return identity.
+        return np.eye(n), 1.0
+
+    # Centered residuals
+    R_c = R - R.mean(axis=1, keepdims=True)
+    # Sample covariance (unbiased)
+    S_sample = (R_c @ R_c.T) / max(T - 1, 1)
+    # Variances and diagonal matrix
+    var_diag = np.diag(S_sample).copy()
+    var_diag_safe = np.where(var_diag > 0, var_diag, 1.0)
+    d = np.sqrt(var_diag_safe)
+    # Sample correlation
+    corr = S_sample / np.outer(d, d)
+    np.fill_diagonal(corr, 1.0)
+
+    # Standardized residuals (per row)
+    R_std = R_c / d[:, None]
+
+    # Compute Var(r_ij) for i != j per Schäfer-Strimmer eq 2.4
+    # Var(r_ij) = (T / (T-1)^3) * sum_t (w_ij,t - w_ij_bar)^2
+    # where w_ij,t = x_it * x_jt (standardized).
+    # Build w_ij tensor only off-diagonal contributions.
+    # Efficient: compute elementwise product of R_std with its rows,
+    # accumulate variance across time.
+    sum_var_r = 0.0
+    sum_r_sq = 0.0
+    # Loop over off-diagonal pairs. For small n this is fine;
+    # matrices larger than ~50 we still have quadratic cost but
+    # it's manageable for typical reconciliation problem sizes.
+    if n <= 1:
+        return S_sample, 0.0
+    scale_var = T / max((T - 1) ** 3, 1)
+    for i in range(n):
+        for j in range(i + 1, n):
+            w_ij = R_std[i] * R_std[j]
+            w_ij_mean = w_ij.mean()
+            var_r_ij = scale_var * float(np.sum((w_ij - w_ij_mean) ** 2))
+            sum_var_r += 2.0 * var_r_ij  # (i,j) + (j,i) both count
+            sum_r_sq += 2.0 * (corr[i, j] ** 2)
+
+    if sum_r_sq <= 1e-12:
+        lambda_hat = 1.0
+    else:
+        lambda_hat = float(sum_var_r / sum_r_sq)
+    # Clamp to [0, 1]
+    lambda_hat = max(0.0, min(1.0, lambda_hat))
+
+    # Shrunk covariance: shrink off-diagonal correlations toward 0,
+    # preserve diagonal variances. Equivalent to:
+    #   corr_shrunk = (1 - lambda) * corr + lambda * I_n
+    # W_shrunk = diag(d) * corr_shrunk * diag(d)
+    corr_shrunk = (1.0 - lambda_hat) * corr
+    np.fill_diagonal(corr_shrunk, 1.0)
+    W_shrunk = corr_shrunk * np.outer(d, d)
+    return W_shrunk, lambda_hat
+
+
+def _estimate_W_matrix(residuals, method):
+    """Estimate the MinT covariance weight matrix W.
+
+    Parameters
+    ----------
+    residuals : ndarray, shape (n_total, T)
+    method : str in {'ols', 'wls_variance', 'wls', 'mint_shrinkage', 'mint_sample'}
+
+    Returns
+    -------
+    W : ndarray, shape (n_total, n_total)
+    extras : dict
+        Keys: 'is_diagonal' (bool), 'shrinkage_lambda' (float or None).
+    """
+    n, T = residuals.shape
+    if method == "ols":
+        return np.eye(n), {"is_diagonal": True, "shrinkage_lambda": None}
+    if method in ("wls_variance", "wls"):
+        variances = residuals.var(axis=1, ddof=1) if T > 1 else np.ones(n)
+        variances = np.maximum(variances, 1e-12)
+        return np.diag(variances), {"is_diagonal": True, "shrinkage_lambda": None}
+    if method == "mint_sample":
+        if T <= n:
+            raise ValueError(
+                f"mint_sample requires T > n_total "
+                f"(T={T}, n_total={n})"
+            )
+        R_c = residuals - residuals.mean(axis=1, keepdims=True)
+        W = (R_c @ R_c.T) / (T - 1)
+        return W, {"is_diagonal": False, "shrinkage_lambda": None}
+    if method == "mint_shrinkage":
+        W, lam = _schafer_strimmer_shrinkage(residuals)
+        return W, {"is_diagonal": False, "shrinkage_lambda": float(lam)}
+    raise ValueError(f"Unknown MinT method: {method}")
+
+
+def _mint_reconcile(y_hat, S, W):
+    """Reconcile via y_tilde = S · G · y_hat,
+    G = (S' W^{-1} S)^{-1} S' W^{-1}.
+
+    y_hat shape (n_total,) or (n_total, h).
+    """
+    W_inv = np.linalg.inv(W)
+    # Use solve for numerical stability
+    StWinv = S.T @ W_inv          # (n_bottom, n_total)
+    A = StWinv @ S                # (n_bottom, n_bottom)
+    G = np.linalg.solve(A, StWinv)  # (n_bottom, n_total)
+    return S @ (G @ y_hat)
+
+
+def _mint_reconcile_nonneg(y_hat, S, W):
+    """Nonnegative reconciliation via NNLS.
+
+    Solve per horizon:
+        min_b || W^{-1/2} (S b - y_hat) ||_2    s.t.  b >= 0
+    Then return y_tilde = S b. Since S is binary (summing matrix),
+    b >= 0 implies all aggregates are >= 0 too.
+
+    Returns (y_tilde, constraint_binding) where constraint_binding
+    is True if any NNLS bottom value was pinned to 0.
+    """
+    from scipy.optimize import nnls
+    # Whitening: W^{-1/2}. Use eigen-decomposition (W is symmetric
+    # PSD). Regularise tiny eigenvalues to avoid blow-up.
+    eigvals, eigvecs = np.linalg.eigh(W)
+    eigvals_safe = np.maximum(eigvals, 1e-12)
+    W_inv_sqrt = eigvecs @ np.diag(1.0 / np.sqrt(eigvals_safe)) @ eigvecs.T
+    A = W_inv_sqrt @ S                 # (n_total, n_bottom)
+    if y_hat.ndim == 1:
+        rhs = W_inv_sqrt @ y_hat
+        b, _ = nnls(A, rhs)
+        constraint_binding = bool(np.any(b < 1e-10))
+        y_tilde = S @ b
+    else:
+        n_bottom = S.shape[1]
+        h = y_hat.shape[1]
+        b_mat = np.zeros((n_bottom, h))
+        binding = False
+        for j in range(h):
+            rhs = W_inv_sqrt @ y_hat[:, j]
+            b_j, _ = nnls(A, rhs)
+            b_mat[:, j] = b_j
+            if np.any(b_j < 1e-10):
+                binding = True
+        constraint_binding = bool(binding)
+        y_tilde = S @ b_mat
+    return y_tilde, constraint_binding
+
+
+def _w_matrix_characterize(W):
+    """Return (condition_number, rank, is_diagonal)."""
+    W = np.asarray(W, dtype=np.float64)
+    try:
+        cond = float(np.linalg.cond(W))
+    except Exception:
+        cond = float("inf")
+    try:
+        rank = int(np.linalg.matrix_rank(W))
+    except Exception:
+        rank = W.shape[0]
+    eps = 1e-10
+    off_diag = W - np.diag(np.diag(W))
+    is_diagonal = bool(np.max(np.abs(off_diag)) < eps)
+    return cond, rank, is_diagonal
+
+
+def _coherence_metrics(y_vec, S):
+    """Return (L2_rmse, max_violation) for the aggregation residual
+    y - S S^+ y. Zero iff y lies in the column space of S
+    (perfectly coherent).
+
+    y_vec shape (n_total,) or (n_total, h).
+    """
+    y_arr = np.asarray(y_vec, dtype=np.float64)
+    S_pinv = np.linalg.pinv(S)
+    if y_arr.ndim == 1:
+        b_hat = S_pinv @ y_arr
+        residual = y_arr - S @ b_hat
+    else:
+        b_hat = S_pinv @ y_arr
+        residual = y_arr - S @ b_hat
+    L2 = float(np.sqrt(np.mean(residual ** 2)))
+    max_abs = float(np.max(np.abs(residual)))
+    return L2, max_abs
+
+
+def _infer_hierarchy_levels(S):
+    """Count distinct aggregation levels in a binary summing matrix.
+
+    The number of levels equals the number of distinct "column-sum
+    counts" across rows, plus 1 (bottom level). For the simple
+    2-level matrix [[1..1], I_n_bottom], rows sum to {n_bottom, 1}
+    → 2 levels. For a 3-level matrix with top=1, middle=3, bottom=9,
+    rows sum to {9, 3, 3, 3, 1,1,...,1} → 3 levels.
+    """
+    S_arr = np.asarray(S)
+    row_sums = S_arr.sum(axis=1)
+    distinct = set(int(s) for s in row_sums.tolist())
+    return len(distinct)
+
+
+def _reconcile_with_fallback(
+    y_hat, S, residuals, method, nonnegative,
+):
+    """Execute MinT reconciliation with the 3e fallback cascade.
+
+    Parameters
+    ----------
+    y_hat : ndarray, shape (n_total,) or (n_total, h)
+    S : ndarray, shape (n_total, n_bottom)
+    residuals : ndarray, shape (n_total, T)
+    method : str, requested method
+    nonnegative : bool
+
+    Returns
+    -------
+    y_tilde : ndarray, reconciled forecast
+    W : ndarray, the W matrix actually used
+    applied : str, method actually applied (may differ on fallback)
+    fallback_reason : str or None
+    extras : dict from _estimate_W_matrix
+    constraint_binding : bool (only meaningful if nonnegative=True)
+    """
+    n, T = residuals.shape
+    requested = method
+    applied = method
+    fallback_reason = None
+
+    # Pre-flight: mint_sample requires T > n
+    if method == "mint_sample" and T <= n:
+        fallback_reason = "mint_sample_requires_T_gt_n"
+        applied = "mint_shrinkage"
+
+    # Attempt cascade
+    chain = [applied] + list(_FALLBACK_CHAIN.get(applied, ()))
+    y_tilde = None
+    W = None
+    extras = {}
+    constraint_binding = False
+    last_err = None
+    for idx, try_method in enumerate(chain):
+        try:
+            W_try, extras_try = _estimate_W_matrix(residuals, try_method)
+            if nonnegative:
+                y_tilde_try, binding = _mint_reconcile_nonneg(
+                    y_hat, S, W_try,
+                )
+            else:
+                y_tilde_try = _mint_reconcile(y_hat, S, W_try)
+                binding = False
+            # Success
+            applied = try_method
+            W = W_try
+            extras = extras_try
+            y_tilde = y_tilde_try
+            constraint_binding = binding
+            if idx > 0 and fallback_reason is None:
+                # Fell back due to exception on primary
+                fallback_reason = (
+                    f"runtime_error_in_{requested}: "
+                    f"{type(last_err).__name__ if last_err else 'Exception'}: "
+                    f"{last_err}"
+                )
+            break
+        except Exception as e:
+            last_err = e
+            continue
+
+    if y_tilde is None:
+        raise RuntimeError(
+            f"All reconciliation methods in cascade failed; "
+            f"last error: {last_err}"
+        )
+
+    return y_tilde, W, applied, fallback_reason, extras, constraint_binding
