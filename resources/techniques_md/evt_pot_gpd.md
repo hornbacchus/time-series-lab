@@ -67,6 +67,27 @@ Defined for `y > 0` and `(1 + xi y / sigma) > 0`.
 
 **Conditional EVT**: Fit a GARCH model to capture time-varying volatility, then apply GPD to the standardized residuals. VaR and ES are then `sigma_t * VaR_{standardized}`, combining dynamic volatility with extreme tail estimation.
 
+## Declustering (Ferro-Segers 2003, opt-in)
+
+Financial-returns POT wrappers violate the independence assumption because volatility clustering produces runs of consecutive exceedances belonging to a single event. Standard GPD MLE on clustered exceedances treats dependent observations as though they carried fresh information and therefore underestimates tail risk.
+
+Set `decluster=True` to apply the **Ferro-Segers (2003) intervals** method. The estimator is parameter-free (no fixed run-gap choice) and proceeds in three steps:
+
+1. **Extremal-index estimation**. Given inter-exceedance times `T_i = t_{i+1} - t_i`, Ferro-Segers estimate the extremal index theta via a branching formula:
+   - If `max(T_i) <= 2`: `theta_hat = 2 * (sum T_i)^2 / ((N_u - 1) * sum T_i^2)`
+   - Else: `theta_hat = 2 * (sum (T_i - 1))^2 / ((N_u - 1) * sum (T_i - 1) * (T_i - 2))`
+   The estimator is clamped to the interval `[1e-6, 1.0]`. An extremal index of 1.0 indicates independent exceedances; values near zero indicate severe clustering.
+
+2. **Cluster identification**. The number of independent clusters is `K = ceil(theta_hat * N_u)`, capped at `N_u`. The `K - 1` largest inter-exceedance gaps partition the exceedance sequence into `K` segments; the **cluster peak** is the maximum exceedance within each segment.
+
+3. **Re-fit GPD on cluster peaks**. The `K` peak excesses (cluster_peak - u) are treated as independent observations and passed to `scipy.stats.genpareto.fit`. Post-declustering VaR / ES use the cluster-peak rate `zeta_u = K / n` (Coles 2001 standard) in place of the pre-declustering exceedance rate.
+
+The wrapper emits both the pre- and post-declustering fits in a dedicated **Declustering Summary** output table, along with the 99% VaR bias correction (post minus pre, both absolute and percent). The Tier 2 rendering contrasts the two fits and names the severity of clustering (mild / notable / severe). Five Tier 3 triggers cover severe clustering (`theta < 0.3`), extreme reduction ratio (`K / N_u < 0.3`), few cluster peaks for reliable MLE (`K < 30`), material VaR bias correction (`|delta| > 20%` at 99%), and graceful fallback when declustering is requested but insufficient exceedances or a runtime error forces the pre-declustering fit.
+
+Additionally, the wrapper always renders a **Mean Residual Life (MRL) diagnostic** comparing the empirical mean excess at the threshold against the GPD-implied value `(sigma + xi * u) / (1 - xi)`. A notable mismatch flags possible threshold or model mis-specification independent of the declustering path.
+
+When `decluster=False` (default), the legacy time-series honest-disclosure fires with updated actionable text pointing at `decluster=True` as the remedy.
+
 ## Interpretation
 
 Every EVT-POT-GPD run emits a two-tier plain-language Interpretation block with a distribution-fit-with-tail-parameters Tier 1 shape.
@@ -78,6 +99,13 @@ Every EVT-POT-GPD run emits a two-tier plain-language Interpretation block with 
 **Caveats (Tier 3, conditional)**:
 - ξ > 0 (heavy tail) - moments of order ≥ 1/ξ are infinite; higher-moment estimates from finite samples are unreliable.
 - 10 ≤ n_exceedances < 30 - above the wrapper's hard minimum but below the reliable-fit rule of thumb; tail-parameter standard errors are wide.
-- Time-indexed input (always-fires on time series) - POT assumes independent exceedances; clustering can produce violation runs that violate this assumption. Consider declustered POT or block-maxima for production risk measurement.
+- Time-indexed input with `decluster=False` - POT assumes independent exceedances; volatility clustering can produce runs that violate independence. Points at the `decluster=True` opt-in or a block-maxima (GEV) fit.
 - Kolmogorov-Smirnov rejects the GPD fit - threshold may be too low; try raising the threshold quantile or inspecting the mean excess function for a stable-linear region.
+
+**Follow-up 3c triggers (fire only when `decluster=True`)**:
+- Extremal index θ < 0.3 - severe clustering; pre-declustering tail estimates substantially underestimate true tail risk. Use the post-declustering VaR / ES from the Declustering Summary table.
+- Reduction ratio K / N_u < 0.3 - more than 70% of exceedances were redundant cluster members; declustered sample is small. Consider lowering `threshold_quantile`.
+- K < 30 cluster peaks - below the 30-observation rule of thumb for reliable GPD MLE; consider lowering `threshold_quantile` or a GEV fit.
+- |99% VaR bias correction| > 20% - material bias. Users reporting regulatory or risk-management VaR should use the post-declustering estimate.
+- Declustering requested but fell back - either N_u < 10 (Ferro-Segers unreliable) or a runtime error occurred; wrapper reverts to the pre-declustering fit and discloses the cause.
 

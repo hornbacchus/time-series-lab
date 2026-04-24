@@ -12,6 +12,18 @@ Method:
 3. Fit GPD(xi, sigma) to exceedances via MLE (scipy.stats.genpareto).
 4. Compute VaR_p and ES_p using the GPD tail estimator.
 
+Follow-up 3c (decluster=True): Optional Ferro-Segers 2003 intervals
+declustering applied before GPD re-fit on cluster peaks. Extremal
+index θ estimated from inter-exceedance times; K = ceil(θ · N_u)
+cluster peaks identified via the intervals method (K-1 largest gaps
+between exceedance times). Post-declustering VaR uses ζ_u = K/n
+(cluster-peak rate; Coles 2001) as the tail-scale driver, correcting
+the bias that volatility-clustered exceedances introduce into
+standard POT/GPD. Default decluster=False preserves backward
+compatibility; the existing Tier 3 D5 `_trigger_declustering_
+timeseries` pointer at "consider a declustered POT approach" now
+has an actionable target.
+
 Confidence-interval caveat
 ==========================
 The bootstrap confidence intervals reported here use the non-parametric
@@ -266,6 +278,232 @@ def run(ctx: RunContext, progress_callback) -> dict:
             gof_rows,
         )
 
+        # ── Follow-up 3c — Mean residual life diagnostic (always-on) ─
+        # Empirical e(u) vs GPD-implied (σ + ξu)/(1 − ξ). 30% match
+        # threshold per Q8. Uses the u used internally (may be negated
+        # for lower tail; the check is scale-invariant since both
+        # sides use the same u).
+        mrl_e_emp, mrl_e_imp, mrl_verdict = _mean_residual_life_diagnostic(
+            exceedances, xi_hat, sigma_hat, u,
+        )
+
+        # ── Follow-up 3c — Declustering cascade ─────────────────────
+        decluster_requested = bool(ctx.get_param("decluster", False))
+        decluster_applied = False
+        decluster_fallback_reason = None
+        extremal_index_theta = None
+        extremal_index_method = None
+        n_clusters_post = None
+        decluster_reduction_ratio = None
+        xi_post = None
+        sigma_post = None
+        ks_stat_post = None
+        ks_pval_post = None
+        var_values_post = None
+        es_values_post = None
+        var_bias_corr = None
+        var_bias_corr_pct = None
+        xi_ci_post = [None, None]
+        sigma_ci_post = [None, None]
+
+        if decluster_requested:
+            progress_callback("Declustering via Ferro-Segers intervals", 68)
+            if n_exceed < 10:
+                # Defensive: pre-decluster already enforces n_exceed >= 10,
+                # but if the cascade is reached with fewer, flag cleanly.
+                decluster_fallback_reason = "insufficient_exceedances"
+                warnings.append(
+                    f"Declustering requested but only {n_exceed} "
+                    f"exceedances above threshold; Ferro-Segers "
+                    f"intervals estimator is unreliable with fewer "
+                    f"than 10 exceedances. Reverting to pre-"
+                    f"declustering GPD fit."
+                )
+            else:
+                try:
+                    exceed_positions = np.where(exceedance_mask)[0]
+                    T_gaps = np.diff(exceed_positions)
+                    theta_hat, ei_branch = _ferro_segers_extremal_index(T_gaps)
+                    extremal_index_theta = theta_hat
+                    extremal_index_method = (
+                        f"ferro_segers_2003 ({ei_branch})"
+                    )
+                    peaks, K, cluster_assn = _identify_clusters(
+                        exceed_positions, exceedances, theta_hat, n_exceed,
+                    )
+                    n_clusters_post = int(K)
+                    decluster_reduction_ratio = float(K) / float(n_exceed)
+
+                    # GPD re-fit on cluster-peak excesses (peaks are
+                    # already excesses over u in `exceedances` space)
+                    xi_p, _loc_p, sigma_p = sp_stats.genpareto.fit(
+                        peaks, floc=0,
+                    )
+                    if sigma_p <= 0:
+                        raise ValueError(
+                            f"Post-declustering GPD scale non-positive "
+                            f"(sigma={sigma_p:.4g})"
+                        )
+                    xi_post = float(xi_p)
+                    sigma_post = float(sigma_p)
+
+                    # KS goodness-of-fit on cluster peaks
+                    ks_stat_p, ks_pval_p = sp_stats.kstest(
+                        peaks, 'genpareto',
+                        args=(xi_post, 0, sigma_post),
+                    )
+                    ks_stat_post = float(ks_stat_p)
+                    ks_pval_post = float(ks_pval_p)
+
+                    # Post-declustering VaR/ES with ζ_u = K/n
+                    zeta_u_post = K / n
+                    var_values_post = []
+                    es_values_post = []
+                    for p in conf_levels:
+                        if abs(xi_post) > 1e-10:
+                            var_p_post = u + (sigma_post / xi_post) * (
+                                ((1 - p) / zeta_u_post) ** (-xi_post) - 1
+                            )
+                        else:
+                            var_p_post = u + sigma_post * np.log(
+                                zeta_u_post / (1 - p)
+                            )
+                        if xi_post < 1.0:
+                            es_p_post = var_p_post / (1 - xi_post) + (
+                                sigma_post - xi_post * u
+                            ) / (1 - xi_post)
+                        else:
+                            es_p_post = np.inf
+                        # Negate for lower tail (display scale)
+                        if tail == "lower":
+                            var_display_post = -var_p_post
+                            es_display_post = -es_p_post
+                        else:
+                            var_display_post = var_p_post
+                            es_display_post = es_p_post
+                        var_values_post.append(float(var_display_post))
+                        es_values_post.append(
+                            float(es_display_post)
+                            if np.isfinite(es_display_post) else None
+                        )
+
+                    # Bias correction at 99% (or closest)
+                    target = 0.99
+                    best_idx = None
+                    for i, p in enumerate(conf_levels):
+                        if abs(float(p) - target) < 1e-9:
+                            best_idx = i
+                            break
+                    if best_idx is None and conf_levels:
+                        diffs = [abs(float(p) - target) for p in conf_levels]
+                        best_idx = int(np.argmin(diffs))
+                    if best_idx is not None:
+                        try:
+                            # risk_rows: [conf_str, VaR_display, ES_display]
+                            var_pre = float(risk_rows[best_idx][1])
+                            var_post_at = float(var_values_post[best_idx])
+                            var_bias_corr = var_post_at - var_pre
+                            if abs(var_pre) > 1e-12:
+                                var_bias_corr_pct = var_bias_corr / abs(var_pre)
+                        except Exception:
+                            pass
+
+                    # Post-declustering bootstrap CIs (D11)
+                    if cfg["bootstrap_samples"] > 0 and K >= 10:
+                        progress_callback(
+                            "Post-decluster bootstrap", 75,
+                        )
+                        xi_boot_post = []
+                        sigma_boot_post = []
+                        for b in range(cfg["bootstrap_samples"]):
+                            idx_b = np.random.randint(0, K, size=K)
+                            peaks_b = peaks[idx_b]
+                            try:
+                                xi_bp, _, sigma_bp = sp_stats.genpareto.fit(
+                                    peaks_b, floc=0,
+                                )
+                                xi_boot_post.append(xi_bp)
+                                sigma_boot_post.append(sigma_bp)
+                            except Exception:
+                                continue
+                        if len(xi_boot_post) > 10:
+                            xi_ci_post = [
+                                round(float(np.percentile(xi_boot_post, 2.5)), 6),
+                                round(float(np.percentile(xi_boot_post, 97.5)), 6),
+                            ]
+                            sigma_ci_post = [
+                                round(float(np.percentile(sigma_boot_post, 2.5)), 6),
+                                round(float(np.percentile(sigma_boot_post, 97.5)), 6),
+                            ]
+
+                    decluster_applied = True
+                except Exception as decl_err:
+                    decluster_fallback_reason = (
+                        f"runtime_error: {type(decl_err).__name__}: {decl_err}"
+                    )
+                    warnings.append(
+                        f"Declustering raised "
+                        f"{type(decl_err).__name__}: {decl_err}. "
+                        f"Reverting to pre-declustering GPD fit."
+                    )
+                    extremal_index_theta = None
+                    n_clusters_post = None
+                    decluster_reduction_ratio = None
+                    xi_post = None
+                    sigma_post = None
+                    ks_stat_post = None
+                    ks_pval_post = None
+                    var_values_post = None
+                    es_values_post = None
+                    var_bias_corr = None
+                    var_bias_corr_pct = None
+
+        # Declustering Summary output table (Q9)
+        decl_table = None
+        if decluster_applied:
+            def _fmt_ci(lo, hi):
+                if lo is None or hi is None:
+                    return "N/A"
+                return f"[{lo}, {hi}]"
+            decl_rows = [
+                ["Extremal index θ (Ferro-Segers 2003)",
+                 round(float(extremal_index_theta), 6)],
+                ["Estimator branch", extremal_index_method],
+                ["N exceedances pre-decluster", int(n_exceed)],
+                ["N clusters post-decluster (K)",
+                 int(n_clusters_post)],
+                ["Reduction ratio K / N_u",
+                 round(float(decluster_reduction_ratio), 6)],
+                ["GPD shape ξ pre-decluster", round(float(xi_hat), 6)],
+                ["GPD shape ξ post-decluster",
+                 round(float(xi_post), 6)],
+                ["GPD shape ξ pre 95% CI",
+                 _fmt_ci(xi_ci[0], xi_ci[1])],
+                ["GPD shape ξ post 95% CI",
+                 _fmt_ci(xi_ci_post[0], xi_ci_post[1])],
+                ["GPD scale σ pre-decluster",
+                 round(float(sigma_hat), 6)],
+                ["GPD scale σ post-decluster",
+                 round(float(sigma_post), 6)],
+                ["GPD scale σ pre 95% CI",
+                 _fmt_ci(sigma_ci[0], sigma_ci[1])],
+                ["GPD scale σ post 95% CI",
+                 _fmt_ci(sigma_ci_post[0], sigma_ci_post[1])],
+                ["KS p-value post-decluster",
+                 round(float(ks_pval_post), 6)],
+                ["99% VaR bias correction (post − pre)",
+                 round(float(var_bias_corr), 6)
+                 if var_bias_corr is not None else None],
+                ["99% VaR bias correction %",
+                 f"{var_bias_corr_pct * 100:+.2f}%"
+                 if var_bias_corr_pct is not None else None],
+            ]
+            decl_table = make_table(
+                "Declustering Summary",
+                ["Metric", "Value"],
+                decl_rows,
+            )
+
         # Mean excess function table for threshold selection diagnostics
         if cfg["n_thresholds_plot"] > 0:
             thresholds = np.linspace(
@@ -346,6 +584,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
         )
 
         tables = [risk_table, param_table, gof_table, exc_table]
+        if decl_table is not None:
+            # Declustering Summary placed just after gof_table for
+            # user-facing salience (Q9 / D8 placement)
+            tables.insert(3, decl_table)
         if mef_table is not None:
             tables.append(mef_table)
 
@@ -393,6 +635,54 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "is_time_series_input": _is_time_series,
             "exceedances_below_30": _exceedances_below_30,
             "series_name": name,
+            # Follow-up 3c — declustering fields (None on
+            # decluster=False or fallback)
+            "decluster_requested": bool(decluster_requested),
+            "decluster_applied": bool(decluster_applied),
+            "decluster_fallback_reason": decluster_fallback_reason,
+            "extremal_index_theta": (
+                round(float(extremal_index_theta), 6)
+                if extremal_index_theta is not None else None
+            ),
+            "extremal_index_method": extremal_index_method,
+            "n_clusters_post_decluster": n_clusters_post,
+            "decluster_reduction_ratio": (
+                round(float(decluster_reduction_ratio), 6)
+                if decluster_reduction_ratio is not None else None
+            ),
+            "xi_post_decluster": (
+                round(float(xi_post), 6) if xi_post is not None else None
+            ),
+            "sigma_post_decluster": (
+                round(float(sigma_post), 6)
+                if sigma_post is not None else None
+            ),
+            "ks_stat_post_decluster": (
+                round(float(ks_stat_post), 6)
+                if ks_stat_post is not None else None
+            ),
+            "ks_pval_post_decluster": (
+                round(float(ks_pval_post), 6)
+                if ks_pval_post is not None else None
+            ),
+            "var_values_post_decluster": var_values_post,
+            "es_values_post_decluster": es_values_post,
+            "var_bias_correction_at_99pct": (
+                round(float(var_bias_corr), 6)
+                if var_bias_corr is not None else None
+            ),
+            "var_bias_correction_pct_at_99pct": (
+                round(float(var_bias_corr_pct), 6)
+                if var_bias_corr_pct is not None else None
+            ),
+            # Mean residual life diagnostic (always-on, Q8)
+            "mean_excess_at_threshold": (
+                round(float(mrl_e_emp), 6) if mrl_e_emp is not None else None
+            ),
+            "mean_excess_implied_by_gpd": (
+                round(float(mrl_e_imp), 6) if mrl_e_imp is not None else None
+            ),
+            "mean_excess_match_verdict": mrl_verdict,
         }
 
         try:
@@ -424,3 +714,128 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "For loss data, make sure the tail parameter is set correctly.",
             ],
         )
+
+
+# ---------------------------------------------------------------------
+# Follow-up 3c — Ferro-Segers (2003) intervals declustering helpers
+# ---------------------------------------------------------------------
+
+
+def _ferro_segers_extremal_index(inter_times):
+    """Ferro & Segers (2003) intervals estimator for the extremal
+    index θ.
+
+    Branching formula per the paper:
+      - If max(T_i) ≤ 2 (all inter-exceedance times are 1 or 2),
+        use the simple (Σ T²)-based form.
+      - Otherwise, use the bias-corrected (T-1)(T-2)-based form.
+
+    Returns (theta, branch_label). theta is clamped to [1e-6, 1.0].
+    """
+    T = np.asarray(inter_times, dtype=np.float64)
+    n_T = len(T)
+    if n_T < 2:
+        return 1.0, "degenerate"
+
+    if T.max() > 2:
+        num = 2.0 * (np.sum(T - 1.0)) ** 2
+        den = n_T * np.sum((T - 1.0) * (T - 2.0))
+        branch = "(T_i-1)(T_i-2)"
+    else:
+        num = 2.0 * (np.sum(T)) ** 2
+        den = n_T * np.sum(T ** 2)
+        branch = "T_i"
+
+    if den <= 0:
+        # Degenerate — fallback to θ=1 (no clustering signal from data)
+        return 1.0, branch + "_degenerate"
+    theta = num / den
+    theta = max(1e-6, min(theta, 1.0))
+    return float(theta), branch
+
+
+def _identify_clusters(exceedance_positions, exceedance_values,
+                       theta, n_exceed):
+    """Cluster-peak identification via the intervals method.
+
+    1. K = ceil(theta * N_u), capped at N_u.
+    2. Find K-1 largest inter-exceedance gaps.
+    3. Walk through exceedances, crossing those gaps to partition
+       into K clusters.
+    4. Each cluster's peak = max excess value within that cluster.
+
+    Returns (cluster_peaks, K, cluster_assignment).
+    """
+    K = int(np.ceil(theta * n_exceed))
+    K = max(1, min(K, n_exceed))
+
+    if K == n_exceed:
+        # No meaningful reduction — each exceedance is its own cluster
+        return exceedance_values.copy(), K, np.arange(n_exceed)
+    if K == 1:
+        # Single cluster — sample max
+        return np.array([float(exceedance_values.max())]), 1, np.zeros(n_exceed, dtype=int)
+
+    # Inter-exceedance gaps
+    T = np.diff(exceedance_positions)  # length N_u - 1
+    if len(T) < K - 1:
+        # Degenerate — too few gaps to separate K clusters
+        return exceedance_values.copy(), n_exceed, np.arange(n_exceed)
+
+    # Indices of the K-1 largest gaps (deterministic via argpartition)
+    gap_indices = np.argpartition(T, -(K - 1))[-(K - 1):]
+    is_boundary = np.zeros(len(T), dtype=bool)
+    is_boundary[gap_indices] = True
+
+    cluster_assignment = np.zeros(n_exceed, dtype=int)
+    current_cluster = 0
+    for i in range(1, n_exceed):
+        if is_boundary[i - 1]:
+            current_cluster += 1
+        cluster_assignment[i] = current_cluster
+
+    actual_K = int(cluster_assignment.max() + 1)
+    cluster_peaks = np.zeros(actual_K, dtype=np.float64)
+    for c in range(actual_K):
+        mask = cluster_assignment == c
+        if mask.any():
+            cluster_peaks[c] = float(exceedance_values[mask].max())
+    return cluster_peaks, actual_K, cluster_assignment
+
+
+def _mean_residual_life_diagnostic(exceedances, xi, sigma, threshold):
+    """Compare empirical mean excess vs GPD-implied mean excess at
+    threshold u.
+
+    Empirical: e_hat(u) = mean(X - u | X > u) = mean(exceedances).
+    GPD-implied: e(u) = (σ + ξu) / (1 - ξ) for ξ < 1.
+
+    Returns (e_empirical, e_implied, verdict_str).
+    30% match threshold per Q8 / Phase 2 D14.
+    """
+    try:
+        e_emp = float(np.mean(exceedances))
+    except Exception:
+        return None, None, "unavailable"
+    if xi is None or sigma is None:
+        return e_emp, None, "implied value unavailable (xi/sigma missing)"
+    try:
+        xi_f = float(xi)
+        if xi_f >= 1.0:
+            return e_emp, None, (
+                "GPD mean residual life is infinite for ξ ≥ 1; "
+                "diagnostic not meaningful"
+            )
+        e_imp = float((float(sigma) + xi_f * float(threshold)) / (1.0 - xi_f))
+        diff = abs(e_imp - e_emp)
+        denom = max(abs(e_emp), 1e-9)
+        if diff / denom < 0.30:
+            verdict = "consistent with GPD"
+        else:
+            verdict = (
+                "notable mismatch — possible threshold or model "
+                "mis-specification"
+            )
+        return e_emp, e_imp, verdict
+    except Exception:
+        return e_emp, None, "implied value computation failed"

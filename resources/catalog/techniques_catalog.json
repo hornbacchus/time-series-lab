@@ -647,10 +647,11 @@
       "presets": ["Fast", "Balanced", "Thorough"],
       "parameters": [
         {"name": "threshold_quantile", "label": "Threshold Quantile", "type": "float", "default": 0.975, "required": false, "advanced": false, "description": "Quantile for threshold (default p97.5)", "options": null},
-        {"name": "confidence_levels", "label": "VaR Levels", "type": "string", "default": "0.95,0.99", "required": false, "advanced": false, "description": "Comma-separated VaR confidence levels", "options": null}
+        {"name": "confidence_levels", "label": "VaR Levels", "type": "string", "default": "0.95,0.99", "required": false, "advanced": false, "description": "Comma-separated VaR confidence levels", "options": null},
+        {"name": "decluster", "label": "Decluster Exceedances", "type": "bool", "default": false, "required": false, "advanced": false, "description": "Apply Ferro-Segers 2003 intervals declustering to exceedances before GPD fitting. Recommended for time-series data with volatility clustering; produces extremal index theta and bias-corrected VaR / ES on cluster peaks. Default false for backward compatibility.", "options": null}
       ],
-      "output_tables": ["gpd_fit", "var_es_estimates", "diagnostics"],
-      "tags": ["risk", "extreme-value", "pot", "gpd", "tail"]
+      "output_tables": ["gpd_fit", "var_es_estimates", "diagnostics", "declustering_summary"],
+      "tags": ["risk", "extreme-value", "pot", "gpd", "tail", "declustering"]
     },
     {
       "id": "caviar_quantile_dynamics",

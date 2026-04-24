@@ -1518,6 +1518,28 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "es_values": [2.0, 4.0, 8.0],
         "is_time_series_input": True,
         "exceedances_below_30": False,
+        # Follow-up 3c — EVT declustering fields (None-safe defaults:
+        # wrapper default decluster=False, so all *_post_decluster
+        # fields are None and only the always-on MRL diagnostic
+        # fields are populated in the real run path).
+        "decluster_requested": False,
+        "decluster_applied": False,
+        "decluster_fallback_reason": None,
+        "extremal_index_theta": None,
+        "extremal_index_method": None,
+        "n_clusters_post_decluster": None,
+        "decluster_reduction_ratio": None,
+        "xi_post_decluster": None,
+        "sigma_post_decluster": None,
+        "ks_stat_post_decluster": None,
+        "ks_pval_post_decluster": None,
+        "var_values_post_decluster": None,
+        "es_values_post_decluster": None,
+        "var_bias_correction_at_99pct": None,
+        "var_bias_correction_pct_at_99pct": None,
+        "mean_excess_at_threshold": None,
+        "mean_excess_implied_by_gpd": None,
+        "mean_excess_match_verdict": None,
         # stochastic_volatility (phi already above; mu already above
         # from markov_switching shared key — compatible semantically
         # with SV as log-variance level, both are numeric)
@@ -2007,6 +2029,25 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # Function-like math notation in HAR equations:
         # avg_wk(C), avg_mo(C) denote rolling-window averages.
         "avg_wk", "avg_mo",
+        # (c13) Follow-up 3c — EVT declustering. Programmatic tokens
+        # that legitimately appear in user-facing Tier 2 / Tier 3
+        # prose when the Ferro-Segers 2003 declustering cascade is
+        # active. `threshold_quantile` is cited verbatim in the D5
+        # fallback trigger (same category as changepoint_prior_scale
+        # / seasonal_periods from earlier allowlist blocks — API-
+        # surface param names users type). `runtime_error` appears
+        # in the fallback-disclosure block when the cascade catches
+        # an exception and re-renders the `decluster_fallback_reason`
+        # audit value in prose. `T_i` is the inter-exceedance-time
+        # subscript in the extremal-index method label
+        # (`ferro_segers_2003 (T_i)`); same category as y_t / x_t /
+        # s_t / RV_t from the Prompt A / C6 math-notation subscripts.
+        # Single-word tokens (`decluster`, `theta`, `intervals`,
+        # `clusters`, `exceedances`, `empirical`) don't match the
+        # T15 regex. `ferro_segers_2003` is disqualified by the
+        # trailing `_2003` digits (regex requires alpha-only in the
+        # second position and no trailing `_` / digit).
+        "threshold_quantile", "runtime_error", "T_i",
     }
 
     @staticmethod
