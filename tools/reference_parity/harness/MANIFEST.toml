@@ -41,6 +41,12 @@ patch-level drift since the Phase 1 Stage A install date.
 # to Phase 1 versions and rerun the audit, or (b) document the
 # drift as expected and lock the parity tolerance against the
 # current-version baseline with explicit rationale.
+#
+# Future enhancement: FixtureLoader currently assumes .npz
+# format. Session 3b's 3f Transformer check uses .pt fixture
+# loaded bespoke. If future sessions need multiple non-.npz
+# fixture types, generalize FixtureLoader to dispatch on file
+# extension rather than hardcoding np.load.
 notes = "see comment block above"
 
 [r]
@@ -77,6 +83,10 @@ pmdarima = "2.1.1"
 statsmodels = "0.14.6"
 pymc = "5.28.4"
 arviz = "0.23.4"
+# Session 3b: torch added for 3f Transformer attention parity check
+# (PyTorch native nn.MultiheadAttention as the reference; no R
+# subprocess used for this technique).
+torch = "2.11.0+cpu"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this

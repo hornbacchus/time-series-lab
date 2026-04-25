@@ -359,6 +359,57 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             ),
         },
     },
+
+    # Phase 2 Session 3b — 3f Transformer attention capture parity.
+    # First check using PyTorch native reference (no R subprocess).
+    # Bitwise-parity assertion: TSL's _sa_block patch +
+    # no-op forward-hook mechanism must produce attention matrices
+    # bitwise-identical to a clean nn.MultiheadAttention call on a
+    # cloned-weights model. Failure = TSL bug, not tolerance question.
+    "3f_transformer_attention": {
+        "type": "absolute",
+        "attention_weights_per_layer_vs_native_mha": {
+            "ladder": "absolute",
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "justification": (
+                "Phase 1 audit 3f: TSL's _sa_block patch + no-op "
+                "forward-hook mechanism disables PyTorch's "
+                "sparsity fast path and threads need_weights=True "
+                "through the same nn.MultiheadAttention.forward "
+                "call as the native path. Given identical model "
+                "weights and identical input, both paths must "
+                "produce bitwise-identical attention matrices. "
+                "FAILURE MODE: if this assertion fails, TSL's "
+                "_sa_block patch mechanism is producing different "
+                "outputs than PyTorch native MHA. This is a TSL "
+                "production bug in the attention-capture path, "
+                "NOT a parity tolerance question. Do not relax — "
+                "investigate and fix the patch."
+            ),
+        },
+        "per_layer_attention_consistency": {
+            "ladder": "absolute",
+            "abs_tol": 1e-12,
+            "justification": (
+                "Same assertion, applied per-layer for bug "
+                "localization. If layer N's attention matrix "
+                "differs while other layers match, the bug is in "
+                "layer N's _sa_block patch specifically. "
+                "Tolerance identical to aggregate metric."
+            ),
+        },
+        "attention_matrix_shape_consistency": {
+            "ladder": "absolute",
+            "abs_tol": 0,
+            "justification": (
+                "Both paths must produce attention matrices of "
+                "shape (1, n_lags, n_lags) per layer. Shape "
+                "mismatch is a structural bug, not a tolerance "
+                "question — assert exact shape match."
+            ),
+        },
+    },
 }
 
 
