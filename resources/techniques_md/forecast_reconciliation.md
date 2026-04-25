@@ -108,6 +108,12 @@ If the requested method fails (numerically or due to `T ≤ n_total` for `mint_s
 
 The audit field `reconciliation_fallback_reason` records which step in the cascade succeeded (and the reason the primary step failed). Tier 3 D1 `method_fallback_occurred` fires on any fallback with diagnostic disambiguation.
 
+### Rank-deficient W matrix (Follow-up B1)
+
+If the requested method is `mint_sample` and the input hierarchy is **perfectly coherent** (top residual exactly equals the sum of bottom residuals), the sample covariance W_sam is rank-deficient (its rank is `n_bottom`, not `n_total`). `np.linalg.solve` against a rank-deficient W produces numerically-unstable output rather than NaN. The wrapper detects this via a pre-solve rank check; on failure, the cascade advances to `mint_shrinkage`, which adds Schäfer-Strimmer regularization and is rank-deficient-safe by construction.
+
+The fallback fires the existing **D1 `method_fallback_occurred`** trigger with `reconciliation_fallback_reason = "w_matrix_rank_deficient"`. No user action is typically required — perfect coherence is a property of the input, and the regularized estimator is the mathematically appropriate choice.
+
 ### Nonnegative reconciliation
 
 Opt-in via `ctx.params["nonnegative"] = True`. The wrapper solves the whitened bottom-level NNLS problem via `scipy.optimize.nnls`:

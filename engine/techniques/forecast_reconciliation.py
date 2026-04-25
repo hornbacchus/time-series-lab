@@ -68,6 +68,19 @@ _FALLBACK_CHAIN = {
 }
 
 
+# Follow-up B1 — custom exception for rank-deficient W matrix.
+class RankDeficientWMatrixError(np.linalg.LinAlgError):
+    """W matrix has rank < n_total; mint_sample produces
+    numerically-unstable solve. Raised by ``_mint_reconcile`` to
+    trigger the D22 cascade with the distinct
+    ``w_matrix_rank_deficient`` fallback_reason. Inherits from
+    ``np.linalg.LinAlgError`` so the cascade's existing
+    ``except Exception`` branch continues to catch it; a more
+    specific ``except RankDeficientWMatrixError`` branch in
+    ``_reconcile_with_fallback`` populates the distinct reason
+    string before falling through to the generic handler."""
+
+
 # ---------------------------------------------------------------------------
 # Preset configurations
 # ---------------------------------------------------------------------------
@@ -978,7 +991,43 @@ def _mint_reconcile(y_hat, S, W):
     G = (S' W^{-1} S)^{-1} S' W^{-1}.
 
     y_hat shape (n_total,) or (n_total, h).
+
+    Raises
+    ------
+    RankDeficientWMatrixError
+        If W is rank-deficient (rank < n_total), which makes
+        ``np.linalg.solve`` numerically unstable. Caller's cascade
+        (``_reconcile_with_fallback``) catches this and advances
+        to the next method (typically mint_shrinkage, which adds
+        Schaefer-Strimmer regularization and is rank-deficient-
+        safe). Defensive: any internal exception in the rank
+        check itself is treated as rank-deficient (conservative
+        — fall back to a more stable method rather than risk a
+        numerically-unstable solve).
     """
+    # Follow-up B1 — pre-solve rank check. On perfectly coherent
+    # hierarchies (top residual = exact sum of bottom residuals)
+    # the sample covariance W_sam has rank n_bottom < n_total,
+    # making np.linalg.solve produce numerically-unstable output
+    # rather than NaN. Detect early and raise so the cascade
+    # falls back to a regularised method.
+    n_total = W.shape[0]
+    try:
+        rank = int(np.linalg.matrix_rank(W))
+    except Exception:
+        # Conservative: treat any rank-check exception as
+        # rank-deficient and fall back.
+        raise RankDeficientWMatrixError(
+            "W matrix rank check raised; treating as "
+            "rank-deficient (fallback to next cascade method)."
+        )
+    if rank < n_total:
+        raise RankDeficientWMatrixError(
+            f"W matrix rank {rank} < n_total {n_total} "
+            f"(rank-deficient; np.linalg.solve would produce "
+            f"numerically unstable output)."
+        )
+
     W_inv = np.linalg.inv(W)
     # Use solve for numerical stability
     StWinv = S.T @ W_inv          # (n_bottom, n_total)
@@ -1141,6 +1190,20 @@ def _reconcile_with_fallback(
                     f"{last_err}"
                 )
             break
+        except RankDeficientWMatrixError as e:
+            # Follow-up B1 — distinct reason string for the
+            # rank-deficient case (vs the generic
+            # ``runtime_error_in_<method>: ...`` pattern). The
+            # success branch above guards on
+            # ``fallback_reason is None``, so this assignment
+            # is preserved through the next-method retry. The
+            # ``idx == 0`` gate ensures we attribute rank-
+            # deficiency to the originally-requested method,
+            # not to a downstream cascade attempt.
+            last_err = e
+            if fallback_reason is None and idx == 0:
+                fallback_reason = "w_matrix_rank_deficient"
+            continue
         except Exception as e:
             last_err = e
             continue

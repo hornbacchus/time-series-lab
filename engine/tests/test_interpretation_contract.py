@@ -2168,6 +2168,17 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # underscore lookaround requirement. `n_total` is a standard
         # dimensional token cited in "T > n_total" prose.
         "mint_sample", "mint_shrinkage", "wls_variance", "n_total",
+        # (c16b) Follow-up B1 — w_matrix_rank_deficient is the
+        # programmatic reason string emitted by the cascade when
+        # the requested method's W matrix is rank-deficient
+        # (perfectly coherent hierarchy → singular sample
+        # covariance). Surfaces in D1 trigger cause text and
+        # Tier 2 prose verbatim. Strictly the chained-underscore
+        # token is already disqualified by the adjacent-
+        # underscore lookaround on the T15 regex, but
+        # allowlisting keeps the intent explicit and is
+        # defensive against a future regex tightening.
+        "w_matrix_rank_deficient",
     }
 
     @staticmethod

@@ -569,10 +569,80 @@ def canonical_6():
                    _checks)
 
 
+def canonical_7():
+    """C7 (Follow-up B1): Perfectly coherent hierarchy forces
+    W_sam to be rank-deficient. mint_sample's pre-solve rank
+    check raises RankDeficientWMatrixError; cascade falls back
+    to mint_shrinkage (rank-deficient-safe via Schäfer-Strimmer
+    regularization); fallback_reason = 'w_matrix_rank_deficient';
+    D1 fires with the new rank-deficient cause text.
+    """
+    # _synth_2level(noise_on_top=False) produces top = sum(bottoms)
+    # exactly. Naive base-forecaster residuals will then satisfy
+    # top_resid = sum(bottom_resid), making W_sam rank-deficient
+    # (rank n_bottom < n_total).
+    time_, nv = _synth_2level(T=200, n_bottom=4, seed=42,
+                               noise_on_top=False)
+    ctx = _build_ctx(
+        time_, nv, preset="Balanced",
+        params={"method": "mint_sample", "horizon": 5,
+                "base_forecaster": "drift"},
+    )
+    t0 = time.time()
+    result = fr.run(ctx, _null_progress)
+    print(f"\n(wall clock: {time.time() - t0:.1f}s)")
+
+    def _checks(res):
+        a = res.get("audit_fields", {})
+        if a.get("reconciliation_method_requested") != "mint_sample":
+            print(f"  !!! requested != mint_sample: "
+                  f"{a.get('reconciliation_method_requested')}")
+            return False
+        applied = a.get("reconciliation_method_applied")
+        if applied == "mint_sample":
+            print(f"  !!! cascade did not fire; applied still "
+                  f"'mint_sample' on a rank-deficient fixture")
+            return False
+        reason = str(a.get("reconciliation_fallback_reason") or "")
+        if reason != "w_matrix_rank_deficient":
+            print(f"  !!! fallback_reason {reason!r} != "
+                  f"'w_matrix_rank_deficient'")
+            return False
+        # Coherence still maintained post-fallback
+        coh = a.get("coherence_post_reconciliation_L2")
+        if coh is None or coh > 1e-10:
+            print(f"  !!! post-reconciliation coherence "
+                  f"{coh} > 1e-10 (incoherent output)")
+            return False
+        # D1 trigger fires with the new rank-deficient cause
+        tier3 = (res.get("interpretation") or {}).get("tier3", [])
+        if isinstance(tier3, list):
+            tier3_text = " ".join(str(t) for t in tier3)
+        else:
+            tier3_text = str(tier3)
+        d1_fires = (
+            "rank-deficient" in tier3_text.lower()
+            and "schaefer-strimmer" in tier3_text.lower()
+        )
+        if not d1_fires:
+            print(f"  !!! D1 with rank-deficient cause did not "
+                  f"fire. Tier 3 text: {tier3_text!r}")
+            return False
+        print(f"  ✓ Cascade fell back to '{applied}' with "
+              f"reason 'w_matrix_rank_deficient'")
+        print(f"  ✓ Coherence maintained: post-L2 = {coh:.2e}")
+        print(f"  ✓ D1 fires with rank-deficient explanation "
+              f"(Schäfer-Strimmer regularization cited)")
+        return True
+
+    return _render(result, "C7 Rank-deficient W (B1 fix)", _checks)
+
+
 def main():
     results = []
     for fn in (canonical_1, canonical_2, canonical_3,
-               canonical_4, canonical_5, canonical_6):
+               canonical_4, canonical_5, canonical_6,
+               canonical_7):
         try:
             ok = fn()
         except Exception as e:

@@ -360,6 +360,23 @@ def _trigger_method_fallback_occurred(results: dict) -> Optional[str]:
             f"runtime error in the requested method's W estimation; "
             f"cascade advanced to the next fallback tier"
         )
+    elif reason_str == "w_matrix_rank_deficient":
+        # Follow-up B1 — rank-deficient W cascade reason.
+        cause = (
+            "the requested method's W matrix is rank-deficient "
+            "(rank < n_total). This typically arises when the "
+            "input hierarchy is perfectly coherent — the top "
+            "residual is the exact sum of bottom residuals — "
+            "making the sample covariance singular. The cascade "
+            "advanced to mint_shrinkage, which adds Schaefer-"
+            "Strimmer regularization (a convex combination of "
+            "the sample covariance and a diagonal target matrix) "
+            "and is rank-deficient-safe by construction. No user "
+            "action is typically required: perfect coherence is "
+            "a feature of the input, not a data error, and the "
+            "regularized estimator is mathematically appropriate "
+            "for that case"
+        )
     elif reason_str.startswith("cascade_exhausted"):
         cause = (
             "the entire MinT fallback cascade failed; wrapper "
