@@ -410,6 +410,110 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             ),
         },
     },
+
+    # Phase 2 Session 4 — 2b MCMC SV Gaussian parity. First slow-
+    # tier check; three-outcome PASS/CAVEAT/BLOCK with seed+1
+    # re-roll. MC error O(1/sqrt(N_eff)) requires 5-10% rel-diff
+    # bands rather than machine-precision absolute floors.
+    "2b_mcmc_sv_gaussian": {
+        "type": "three_outcome",
+        "mu_posterior_mean_vs_stochvol": {
+            "ladder": "three_outcome",
+            "metric": "rel_diff",
+            "thresholds": {"PASS": 0.05, "CAVEAT": 0.10},
+            "justification": (
+                "Phase 1 Stage B locked tolerance: MC error "
+                "O(1/sqrt(N_eff)) ~5%% at N=10k draws with "
+                "N_eff 500-2000. PASS-with-CAVEAT band 5-10%% "
+                "accommodates MC noise; >10%% indicates "
+                "methodology divergence requiring "
+                "investigation."
+            ),
+        },
+        "phi_posterior_mean_vs_stochvol": {
+            "ladder": "three_outcome",
+            "metric": "rel_diff",
+            "thresholds": {"PASS": 0.10, "CAVEAT": 0.15},
+            "justification": (
+                "Phase 1 audit 2b observed 6.6%% phi divergence "
+                "— within CAVEAT band on Phase 1 fixture. Phi "
+                "is more sensitive to MCMC mixing than mu; "
+                "widened thresholds accommodate this without "
+                "losing regression detection."
+            ),
+        },
+        "h_posterior_pearson_corr_vs_stochvol": {
+            "ladder": "correlation",
+            "thresholds": {"PASS": 0.95, "CAVEAT": 0.85},
+            "justification": (
+                "B7 Phase 4.5 protocol: Pearson correlation "
+                "between TSL h_post_mean and stochvol $latent "
+                "posterior mean. >0.95 PASS; 0.85-0.95 CAVEAT "
+                "(re-roll); <0.85 BLOCK. Correlation metric "
+                "robust to absolute level shifts from prior "
+                "divergence on mu/sigma_eta."
+            ),
+        },
+    },
+
+    # Phase 2 Session 4 — 2c Student-t SV parity. Same as 2b
+    # plus nu (degrees of freedom) parity.
+    "2c_mcmc_sv_student_t": {
+        "type": "three_outcome",
+        "mu_posterior_mean_vs_stochvol": {
+            "ladder": "three_outcome",
+            "metric": "rel_diff",
+            "thresholds": {"PASS": 0.05, "CAVEAT": 0.10},
+            "justification": (
+                "Same MC-noise rationale as 2b. nu estimation "
+                "in Student-t SV does not change mu-posterior "
+                "noise floor; thresholds identical."
+            ),
+        },
+        "phi_posterior_mean_vs_stochvol": {
+            "ladder": "three_outcome",
+            "metric": "rel_diff",
+            "thresholds": {"PASS": 0.10, "CAVEAT": 0.15},
+            "justification": (
+                "Same as 2b. Phi-posterior mixing properties "
+                "carry over from Gaussian to Student-t SV."
+            ),
+        },
+        "h_posterior_pearson_corr_vs_stochvol": {
+            "ladder": "correlation",
+            "thresholds": {"PASS": 0.95, "CAVEAT": 0.85},
+            "justification": (
+                "Same B7 Phase 4.5 protocol as 2b. Student-t "
+                "innovations don't change the latent-h "
+                "comparison strategy."
+            ),
+        },
+        "nu_posterior_mean_vs_stochvol": {
+            "ladder": "three_outcome",
+            "metric": "rel_diff",
+            "thresholds": {"PASS": 0.10, "CAVEAT": 0.20},
+            "justification": (
+                "Phase 1 audit 2c classified nu divergence as "
+                "methodology, NOT bug — driven by prior mismatch "
+                "between TSL (TruncatedNormal(10, 10, [2.01, 200])) "
+                "and stochvol (Exponential rate priornu=0.1, "
+                "truncated at 2). These produce materially different "
+                "posteriors on nu under identical data. Phase 1 "
+                "baseline rel_diff was 13.24%; Session 4 first run "
+                "measured 16.44% (within MCMC sampling variation of "
+                "Phase 1 baseline). Threshold widened from the 5%/10% "
+                "mu/phi convention to 10%/20% to accommodate this "
+                "documented prior divergence while preserving "
+                "regression detection: substantial drift beyond ~20% "
+                "would indicate either a TSL nu sampling regression "
+                "or a stochvol environment shift requiring "
+                "investigation. ESS_min on nu typically 15-50 in "
+                "this configuration (nu posteriors are inherently "
+                "noisy at T=500); tighter tolerance is statistically "
+                "meaningless given that ESS floor."
+            ),
+        },
+    },
 }
 
 
