@@ -617,6 +617,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Quasi-ML path (incl. post-fallback) gets None on all of them.
         if mcmc_result is not None:
             audit["mcmc_backend"] = mcmc_backend
+            # Follow-up B6 — backend-resolution disclosure fields.
+            # backend_requested captures the user's pinned choice
+            # ("pymc" / "gibbs") or "auto" when unspecified;
+            # backend_applied records what actually ran;
+            # backend_fallback_reason explains any cascade event;
+            # c_backend_available exposes the probe result.
+            audit["mcmc_backend_requested"] = mcmc_result.get(
+                "backend_requested"
+            )
+            audit["mcmc_backend_applied"] = mcmc_result.get(
+                "backend_applied"
+            )
+            audit["mcmc_backend_fallback_reason"] = mcmc_result.get(
+                "backend_fallback_reason"
+            )
+            audit["c_backend_available"] = mcmc_result.get(
+                "c_backend_available"
+            )
             audit["mcmc_chains"] = mcmc_result["config"]["chains"]
             audit["mcmc_draws_per_chain"] = mcmc_result["config"]["draws"]
             audit["mcmc_tune"] = mcmc_result["config"]["tune"]
@@ -661,6 +679,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
             for key in (
                 "mcmc_backend", "mcmc_chains", "mcmc_draws_per_chain",
                 "mcmc_tune", "mcmc_total_draws", "mcmc_fit_time_seconds",
+                # Follow-up B6 — backend-resolution disclosure fields
+                # default to None on the quasi-ML path (no MCMC fit
+                # was attempted, so no probe was run and no cascade
+                # decision was made).
+                "mcmc_backend_requested", "mcmc_backend_applied",
+                "mcmc_backend_fallback_reason", "c_backend_available",
                 "rhat_max", "rhat_max_param", "ess_min", "ess_min_param",
                 "divergences_count", "divergences_fraction",
                 "mu_posterior_mean", "mu_posterior_sd",

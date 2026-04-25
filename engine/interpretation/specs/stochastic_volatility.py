@@ -470,6 +470,23 @@ def _tier2(results: dict) -> str:
 
     # ── Fallback disclosures ────────────────────────────────────
     fallback_block = ""
+    # Follow-up B6 D10 — MCMC backend auto-downgrade (g++ absent).
+    # Fires before D7 / D9 because the cascade resolves at the
+    # backend-selection stage (pre-sampling).
+    if (results.get("mcmc_backend_fallback_reason")
+            == "c_compiler_unavailable"):
+        fallback_block += (
+            " The PyMC NUTS path required a C++ compiler that is not "
+            "available on this machine (pytensor falls back to pure-"
+            "Python execution without one, which is roughly 100x "
+            "slower and unusable on moderate-T series). The wrapper "
+            "auto-downgraded to the Kim-Shephard-Chib Gibbs sampler — "
+            "pure numpy/scipy, no compilation needed. NUTS and Gibbs "
+            "are mathematically equivalent for SV inference; only "
+            "sampler mixing characteristics differ. To enable NUTS "
+            "specifically, install gxx — see Tier 3 for platform-"
+            "specific instructions."
+        )
     # Follow-up 2b D9 — Fast + MCMC auto-downgrade
     if bool(results.get("fast_preset_mcmc_downgrade", False)):
         fallback_block += (
@@ -848,6 +865,46 @@ def _trigger_fast_preset_mcmc_downgrade(results: dict) -> Optional[str]:
     )
 
 
+def _trigger_backend_downgraded_no_c_compiler(
+    results: dict,
+) -> Optional[str]:
+    """D10 (Follow-up B6) — fires when MCMC was selected but the
+    wrapper auto-downgraded the backend from PyMC NUTS to the
+    Kim-Shephard-Chib Gibbs sampler because no C++ compiler is
+    available on the machine for pytensor's JIT compilation.
+
+    Distinct from D7 (which fires when MCMC ran and failed mid-
+    sample). D10 fires at the cascade-resolution stage, before
+    sampling begins.
+
+    Condition: ``mcmc_backend_fallback_reason`` is exactly
+    ``"c_compiler_unavailable"``.
+    """
+    if _inference_method_value(results) != "mcmc":
+        return None
+    reason = results.get("mcmc_backend_fallback_reason")
+    if reason != "c_compiler_unavailable":
+        return None
+    requested = results.get("mcmc_backend_requested") or "auto"
+    requested_clause = (
+        "explicitly requested" if str(requested).lower() == "pymc"
+        else "auto-selected as the preferred MCMC backend"
+    )
+    return (
+        f"PyMC NUTS was {requested_clause}, but this machine lacks a "
+        f"working C++ compiler (g++ / clang++ / MSVC) that pytensor "
+        f"needs to JIT-compile the sampler. Without compilation, NUTS "
+        f"would fall back to pure-Python execution and run roughly "
+        f"100× slower (typically 25+ minutes vs ~10 seconds on T=500 "
+        f"SV). The wrapper auto-downgraded to the Kim-Shephard-Chib "
+        f"Gibbs sampler — mathematically equivalent for SV inference, "
+        f"runs in pure numpy without compilation. To enable NUTS "
+        f"specifically, install a C++ compiler: Windows: "
+        f"`conda install -c conda-forge gxx` or MSVC Build Tools; "
+        f"macOS: `xcode-select --install`; Linux: `apt install g++`."
+    )
+
+
 SPEC = InterpretationSpec(
     technique_id="stochastic_volatility",
     tier1_builder=_tier1,
@@ -867,6 +924,8 @@ SPEC = InterpretationSpec(
         _trigger_mcmc_fallback_to_quasi_ml,
         _trigger_ppc_undercoverage,
         _trigger_fast_preset_mcmc_downgrade,
+        # Follow-up B6:
+        _trigger_backend_downgraded_no_c_compiler,
     ),
     mode_aware=False,
 )

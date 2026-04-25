@@ -26,8 +26,52 @@ fallback threshold and D4 Tier 3 warnings when R-hat > 1.01.
 
 from __future__ import annotations
 
+import functools
 import time
+from typing import Optional
+
 import numpy as np
+
+
+# ---------------------------------------------------------------------
+# C-compiler availability probe (Follow-up B6)
+# ---------------------------------------------------------------------
+#
+# pytensor (the JIT layer under PyMC) populates ``pytensor.config.cxx``
+# at its own import time via subprocess testing of available compilers
+# (g++, clang++, MSVC, conda mingw-w64). Empty string means no compiler
+# was found and pytensor will fall back to pure-Python execution
+# (~100x slower than compiled, rendering NUTS unusable on T>=500 SV).
+#
+# The probe runs once per process and is cached via lru_cache; canonical
+# tests can clear the cache via ``_check_c_compiler_available.cache_clear()``
+# and monkey-patch the function to simulate either branch.
+
+@functools.lru_cache(maxsize=1)
+def _check_c_compiler_available() -> bool:
+    """Detect whether pytensor will use compiled C backend.
+
+    Returns
+    -------
+    bool
+        True if g++/clang++/MSVC is available (pytensor will JIT-compile
+        and run NUTS at full speed).
+        False if pytensor falls back to pure-Python execution. The B6
+        cascade auto-downgrades the MCMC path to the Kim-Shephard-Chib
+        Gibbs sampler in this case to avoid 25+ minute hangs.
+
+    Notes
+    -----
+    Reads ``pytensor.config.cxx`` (a string populated by pytensor at
+    its own import time). Empty string means no compiler was found.
+    Defensive: any exception during pytensor import or attribute access
+    returns False (conservative fallback).
+    """
+    try:
+        import pytensor
+        return bool(pytensor.config.cxx)
+    except Exception:
+        return False
 
 
 # ---------------------------------------------------------------------
@@ -99,8 +143,36 @@ def fit(*, y, innovations, preset, seed, compute_ppc, progress_callback,
     use_gibbs = hint == "gibbs"
     use_pymc_only = hint == "pymc"
 
+    # Canonical name for backend_requested audit field. "auto" denotes
+    # that the user did not pin a backend; the cascade decides.
+    backend_requested = hint or "auto"
+    fallback_reason: Optional[str] = None
+
     backend = None
     result = None
+
+    # Follow-up B6 — Probe for C compiler availability BEFORE attempting
+    # to import pymc. pymc/pytensor without a compiler falls back to
+    # pure-Python execution which is ~100x slower than compiled NUTS;
+    # on T>=500 SV the fallback is unusable (>25 min unfinished sampling
+    # observed in audit 2b). The Kim-Shephard-Chib Gibbs backend is
+    # mathematically equivalent for SV inference and runs in pure
+    # numpy/scipy without compilation.
+    if not use_gibbs:
+        if not _check_c_compiler_available():
+            fallback_reason = "c_compiler_unavailable"
+            use_gibbs = True
+            if use_pymc_only:
+                progress_callback(
+                    "PyMC NUTS requires a C++ compiler "
+                    "(g++/clang++/MSVC); none detected. Auto-"
+                    "downgrading to Kim-Shephard-Chib Gibbs "
+                    "sampler — mathematically equivalent for SV "
+                    "inference. To enable NUTS specifically, "
+                    "install gxx (Windows: `conda install -c "
+                    "conda-forge gxx`).",
+                    25,
+                )
 
     if not use_gibbs:
         try:
@@ -115,7 +187,8 @@ def fit(*, y, innovations, preset, seed, compute_ppc, progress_callback,
         except ImportError:
             if use_pymc_only:
                 raise  # user forced pymc; propagate failure
-            # Tier C fallback on ImportError only
+            # Existing path: pymc not installed at all
+            fallback_reason = "pymc_not_installed"
             use_gibbs = True
 
     if use_gibbs:
@@ -133,6 +206,11 @@ def fit(*, y, innovations, preset, seed, compute_ppc, progress_callback,
         )
 
     result["backend"] = backend
+    # Follow-up B6 audit-trail fields
+    result["backend_requested"] = backend_requested
+    result["backend_applied"] = backend
+    result["backend_fallback_reason"] = fallback_reason
+    result["c_backend_available"] = _check_c_compiler_available()
     result["config"] = dict(cfg)
     result["fit_time_seconds"] = round(time.time() - t0, 2)
     return result

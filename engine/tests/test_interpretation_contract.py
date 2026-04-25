@@ -1857,6 +1857,14 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "fast_preset_mcmc_downgrade": False,
         "mcmc_fallback_occurred": False,
         "mcmc_backend": None,
+        # Follow-up B6 — backend-resolution disclosure fields. Default
+        # to None on the quasi-ML path; T14 ensures the spec null-
+        # guards these via .get() / None checks in D10 trigger and
+        # Tier 2 disclosure block.
+        "mcmc_backend_requested": None,
+        "mcmc_backend_applied": None,
+        "mcmc_backend_fallback_reason": None,
+        "c_backend_available": None,
         "mcmc_chains": None,
         "mcmc_draws_per_chain": None,
         "mcmc_tune": None,
@@ -2055,6 +2063,14 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         "posterior_mean", "mcmc_backend", "rhat_max", "ess_min",
         "divergent_transitions", "posterior_hdi",
         "mcmc_fallback_occurred", "fast_preset_mcmc_downgrade",
+        # (c10b) Follow-up B6 — backend-resolution disclosure
+        # surfaces in spec D10 trigger text and Tier 2 fallback
+        # block. Identifiers contain underscores so T15 needs
+        # explicit allowlisting. Single-word tokens (`pytensor`,
+        # `gxx`, `MSVC`, `clang`, `mingw`) don't match the regex.
+        "mcmc_backend_requested", "mcmc_backend_applied",
+        "mcmc_backend_fallback_reason", "c_backend_available",
+        "c_compiler_unavailable", "pymc_not_installed",
         # (c11) Follow-up 3a — CAViaR multi-horizon. Programmatic
         # param names (`n_simulation_paths`) and audit-field
         # identifiers that may leak into Tier 2 prose or Tier 3

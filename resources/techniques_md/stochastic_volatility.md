@@ -126,4 +126,50 @@ where ψ and ψ' are digamma and trigamma (scipy.special). As ν → ∞ these r
 - **MCMC failed, fell back to quasi-ML** (2b D7) - user requested MCMC but the wrapper fell back. Reported parameters are from the quasi-ML fit and carry the Jensen-inequality transformation bias.
 - **PPC 90% coverage < 0.80** (2b D8, Thorough + MCMC) - model misses features of the data; typically extreme moves on heavy-tailed returns. Switch to Student-t or inspect for structural breaks.
 - **MCMC requested on Fast preset, auto-downgraded** (2b D9) - Fast cannot run MCMC. Reported parameters reflect the quasi-ML approximation. Re-run on Balanced or Thorough for MCMC inference.
+- **MCMC backend auto-downgraded — no C++ compiler** (B6 D10) - the PyMC NUTS path requires a C++ compiler that is not available on this machine; the wrapper auto-downgraded to the Kim-Shephard-Chib Gibbs sampler. NUTS and Gibbs are mathematically equivalent for SV inference. To enable NUTS specifically, install gxx (see "Backend Selection and C-Compiler Detection" below).
+
+## Backend Selection and C-Compiler Detection (Follow-up B6)
+
+The MCMC inference path supports two backends, controlled via the `mcmc_backend` parameter:
+
+- **PyMC NUTS** — preferred when available. Uses pytensor's JIT compilation to generate fast compiled samplers. Requires a C++ compiler (g++, clang++, or MSVC) on the machine.
+- **Kim-Shephard-Chib (KSC) Gibbs** — pure numpy/scipy implementation. No compilation needed; runs on any Python install. Mathematically equivalent for SV inference; mixing characteristics differ marginally.
+
+### Auto-detection (default `mcmc_backend="auto"`)
+
+The wrapper inspects `pytensor.config.cxx` at MCMC dispatch to determine whether a C++ compiler is available:
+
+| Compiler available? | Action |
+|---|---|
+| Yes | Use PyMC NUTS at full compiled speed |
+| No | Auto-downgrade to KSC Gibbs; fire D10 Tier 3 trigger |
+
+**Why auto-downgrade matters.** Without a compiler, pytensor falls back to pure-Python execution which is ~100× slower than compiled NUTS. On T=500 SV (a typical daily-returns sample), this means 25+ minutes of unfinished sampling vs ~10 seconds compiled. The auto-downgrade prevents users from waiting on what looks like a hung wrapper.
+
+### Explicit backend requests
+
+- `mcmc_backend="pymc"` — explicitly request NUTS. If no compiler is found, the wrapper still downgrades to Gibbs but emits a loud progress-callback warning explaining why. The workflow continues; no error is raised.
+- `mcmc_backend="gibbs"` — skip the probe entirely and run KSC Gibbs directly. Predictable performance; no compiler dependency.
+
+### Installing a C++ compiler for NUTS
+
+If you specifically need NUTS sampling (e.g., for divergent-transition diagnostics or WAIC/LOO information criteria — neither is computed on the Gibbs backend), install a compiler matching your platform:
+
+| Platform | Command |
+|---|---|
+| Windows (conda) | `conda install -c conda-forge gxx` |
+| Windows (system) | Install MSVC Build Tools, or RTools / MSYS2 mingw-w64 for the toolchain pytensor expects |
+| macOS | `xcode-select --install` |
+| Linux (Debian/Ubuntu) | `apt install build-essential` |
+
+After installation, restart Python so pytensor re-detects the compiler at its next import.
+
+### Audit-trail fields
+
+The wrapper exposes four fields tracking the backend cascade:
+
+- `mcmc_backend_requested` — the user's pinned choice (`"pymc"` / `"gibbs"`) or `"auto"` when unspecified.
+- `mcmc_backend_applied` — what actually ran (`"pymc"` or `"gibbs"`).
+- `mcmc_backend_fallback_reason` — `None` on the requested path; `"c_compiler_unavailable"` on the B6 D10 cascade; `"pymc_not_installed"` when the existing ImportError fallback fires.
+- `c_backend_available` — the probe's bool result (read from `pytensor.config.cxx`).
 
