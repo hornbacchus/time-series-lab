@@ -213,6 +213,152 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             ),
         },
     },
+
+    # Phase 2 Session 3a — 3d Johansen Bartlett/Reimers correction.
+    # Multi-component ladder: raw trace stats vs urca + statsmodels
+    # triangulation, Bartlett factor pure-arithmetic check,
+    # corrected-stat internal consistency.
+    "3d_johansen_bartlett": {
+        "type": "absolute",
+        "trace_stat_raw_vs_urca": {
+            "ladder": "absolute",
+            "abs_tol": 1e-8,
+            "rel_tol": 1e-8,
+            "justification": (
+                "Phase 1 audit 3d (reports/3d_johansen_audit.md): "
+                "closed-form Johansen test statistic from "
+                "generalized eigenvalue problem on the same data. "
+                "TSL uses statsmodels coint_johansen; R urca::"
+                "ca.jo implements the same Johansen 1991 procedure. "
+                "Phase 1 evidence: small cross-package divergence "
+                "due to different reduced-rank-regression "
+                "parametrizations. 1e-8 floor catches gross "
+                "regressions while accepting modest cross-package "
+                "drift."
+            ),
+        },
+        "trace_stat_raw_vs_statsmodels": {
+            "ladder": "absolute",
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "justification": (
+                "TSL uses statsmodels coint_johansen internally; "
+                "TSL vs statsmodels should agree at machine "
+                "precision since they're the same implementation. "
+                "1e-10 floor catches any wrapper-introduced "
+                "numerical artifacts."
+            ),
+        },
+        "urca_vs_statsmodels_xref": {
+            "ladder": "absolute",
+            "abs_tol": 50.0,
+            "justification": (
+                "Cross-reference check: urca and statsmodels both "
+                "implement Johansen's procedure but differ in "
+                "reduced-rank regression parametrization. Phase 1 "
+                "audit 3d documented this as a real cross-package "
+                "divergence (TSL=42.67 vs urca=42.95 on r=0; "
+                "ratio 1.007 to 1.27 across rank hypotheses; 10-"
+                "30%% divergence on small T per Phase 1 'vibes "
+                "check'). 50.0 absolute tolerance accommodates the "
+                "documented divergence on this fixture (T=100); "
+                "catches gross regressions where urca and "
+                "statsmodels diverge by orders of magnitude."
+            ),
+        },
+        "bartlett_factor_arithmetic": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": (
+                "Phase 1 audit 3d: Reimers correction factor is "
+                "pure arithmetic (T - n*p - d) / T. TSL must "
+                "produce exactly this value. Note: TSL's audit "
+                "field rounds bartlett_factor to 6 decimals (per "
+                "johansen_cointegration.py:514), so the floor is "
+                "1e-6 — anything tighter would compare to TSL's "
+                "rounded value and fail spuriously. The harness "
+                "computes the formula independently and checks "
+                "TSL's reported value against the formula."
+            ),
+        },
+        "trace_stat_corrected_consistency": {
+            "ladder": "absolute",
+            "abs_tol": 1e-3,
+            "justification": (
+                "Phase 1 audit 3d: TSL applies the Reimers factor "
+                "consistently (corrected_stat = raw_stat * "
+                "bartlett_factor). TSL's audit field rounds "
+                "trace_stat_corrected to 4 decimals (per "
+                "johansen_cointegration.py:295), so the floor is "
+                "1e-3 — comparison is to TSL's rounded value. The "
+                "harness recomputes corrected_stat from full-"
+                "precision raw_stat and bartlett_factor and "
+                "checks TSL's rounded value matches at the "
+                "rounding floor."
+            ),
+        },
+    },
+
+    # Phase 2 Session 3a — 3c EVT Ferro-Segers extremal-index parity.
+    "3c_evt_ferro_segers": {
+        "type": "absolute",
+        "theta_garch_vs_extremes": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-6,
+            "justification": (
+                "Phase 1 audit 3c (reports/3c_ferro_segers_audit.md): "
+                "Ferro-Segers 2003 intervals estimator is closed-"
+                "form given inter-exceedance times. R extRemes::"
+                "extremalindex(method='intervals') is the canonical "
+                "implementation. Phase 1 measured 0.000e+00 abs "
+                "diff (bitwise match) on GARCH fixture. Note: "
+                "TSL's audit field rounds extremal_index_theta to "
+                "6 decimals; harness floor is 1e-6 to match."
+            ),
+        },
+        "theta_iid_vs_extremes": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-6,
+            "justification": (
+                "Same closed-form math on iid baseline. Theta "
+                "should be near 1.0 (no clustering); TSL/extRemes "
+                "should agree at FP precision. Phase 1 measured "
+                "0.000e+00 abs diff. 1e-6 floor matches TSL's "
+                "audit-field rounding precision."
+            ),
+        },
+        "polynomial_branch_consistency_garch": {
+            "ladder": "absolute",
+            "abs_tol": 0,
+            "justification": (
+                "Phase 1 audit 3c flagged formula-branching edge "
+                "case: TSL and extRemes must select the same "
+                "Ferro-Segers polynomial branch (driven by "
+                "max(T_i) <= 2 vs > 2). Branch disagreement is a "
+                "structural bug, not a tolerance question — "
+                "assert exact match. NOTE: current GARCH fixture "
+                "lands on the (T_i-1)(T_i-2) bias-corrected branch; "
+                "this assertion does NOT verify branch-decision "
+                "rule equivalence on the T_i (raw) branch. Adding "
+                "a fixture engineered for the T_i branch (very "
+                "dense exceedances) is future work."
+            ),
+        },
+        "polynomial_branch_consistency_iid": {
+            "ladder": "absolute",
+            "abs_tol": 0,
+            "justification": (
+                "Same branch-consistency assertion for the iid "
+                "fixture. NOTE: current iid fixture also lands on "
+                "the (T_i-1)(T_i-2) bias-corrected branch; the "
+                "T_i (raw) branch is not exercised by either "
+                "current fixture. See garch entry for future "
+                "work note."
+            ),
+        },
+    },
 }
 
 
