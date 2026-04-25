@@ -22,10 +22,11 @@ See [`follow_up_workflow.md`](follow_up_workflow.md) for usage.
 | johansen_cointegration.py | 3d_johansen_bartlett | fast | mixed (helper + wrapper) |
 | forecast_reconciliation.py | 3e_mint_family | fast | helper-level direct import |
 | transformer_forecast.py | 3f_transformer_attention | fast | helper-level direct import |
+| critical_slowing_down.py | critical_slowing_down | fast | full wrapper via run(ctx) |
 
-**Coverage summary:** 10 wrappers covered by 11 checks across
-9 fast-tier + 2 slow-tier. The `_smoke_test` check exercises no
-wrapper (harness end-to-end smoke test).
+**Coverage summary:** 11 wrappers covered by 12 checks across
+10 fast-tier + 2 slow-tier. The `_smoke_test` check exercises
+no wrapper (harness end-to-end smoke test).
 
 **Partial-coverage caveats:**
 

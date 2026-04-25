@@ -819,6 +819,14 @@ class TestT10RegistryGrowth(unittest.TestCase):
         # cascades for C and J. Fulfills the cross-reference
         # HAR-RV's D19 trigger already makes.
         "har_cj",
+        # New technique post-verification-initiative (Stage 1 of
+        # deraAI deck). Univariate Critical Slowing Down detector:
+        # detrending + 6 rolling indicators + Kendall tau trend
+        # statistic + composite EWS scoring. 5 D-triggers
+        # (composite-elevated, consistent-tau-pattern,
+        # post-transition, insufficient-data, non-stationary-
+        # residuals).
+        "critical_slowing_down",
     }
 
     def test_registry_contains_expected_techniques(self):
@@ -1195,23 +1203,20 @@ class TestT23FollowUp2aRegistryInventory(unittest.TestCase):
 
 
 class TestT24FollowUp3bRegistryInventory(unittest.TestCase):
-    """T24 — After Follow-up 3b lands (HAR-CJ jumps-aware realized
-    volatility wrapper creation), the registry contains exactly 82
-    specs (81 post-2a baseline + 1 HAR-CJ). HAR-CJ decomposes
-    realized volatility into continuous and jump components per
-    Andersen-Bollerslev-Diebold 2007 and estimates their
-    persistence separately — a distinct model from HAR-RV. Jumps
-    have near-zero persistence while continuous volatility is
-    highly persistent; HAR-CJ exposes this contrast in its Tier 1
-    rendering."""
+    """T24 — registry inventory invariant. Updated 2026-04-25:
+    bumped from 82 → 83 to account for the critical_slowing_down
+    spec added as the first new technique after the verification
+    initiative closed (commit ee44ee4). Prior baseline:
+    81 post-2a + 1 HAR-CJ + 1 critical_slowing_down = 83.
+    """
 
-    def test_exactly_82_specs_registered(self):
+    def test_exactly_83_specs_registered(self):
         from interpretation import list_registered
         registered = list_registered()
         self.assertEqual(
-            len(registered), 82,
-            f"Expected exactly 82 registered specs (81 post-2a "
-            f"baseline + 1 Follow-up 3b har_cj). Got "
+            len(registered), 83,
+            f"Expected exactly 83 registered specs (82 post-3b "
+            f"baseline + 1 critical_slowing_down). Got "
             f"{len(registered)}: {sorted(registered)}"
         )
 
@@ -1901,6 +1906,51 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "ppc_coverage_90pct": None,
         "waic": None,
         "loo": None,
+        # ─────────────────────────────────────────────
+        # critical_slowing_down (Stage 1 of deraAI deck;
+        # first new technique post verification-initiative
+        # closure at commit ee44ee4). 33 None-default keys.
+        # ─────────────────────────────────────────────
+        # Composite scoring (3)
+        "ews_composite_score": None,
+        "ews_state": None,
+        "composite_method": None,
+        # Detrending (4)
+        "detrending_method": None,
+        "detrending_bandwidth": None,
+        "detrending_residuals_stationary": None,
+        "detrending_residuals_adf_pvalue": None,
+        # Per-indicator Kendall taus (6)
+        "tau_ar1": None,
+        "tau_variance": None,
+        "tau_skewness": None,
+        "tau_kurtosis": None,
+        "tau_return_rate": None,
+        "tau_density_ratio": None,
+        # Per-indicator p-values (6)
+        "tau_ar1_pvalue": None,
+        "tau_variance_pvalue": None,
+        "tau_skewness_pvalue": None,
+        "tau_kurtosis_pvalue": None,
+        "tau_return_rate_pvalue": None,
+        "tau_density_ratio_pvalue": None,
+        # Post-transition (3)
+        "tail_skewness": None,
+        "tail_kurtosis": None,
+        "post_transition_indicated": None,
+        # Methodology (5)
+        "rolling_window": None,
+        "kendall_lookback": None,
+        "compute_pvalues": None,
+        "n_surrogates": None,
+        "series_length": None,
+        # Rolling-indicator series (6)
+        "rolling_ar1_series": None,
+        "rolling_variance_series": None,
+        "rolling_skewness_series": None,
+        "rolling_kurtosis_series": None,
+        "rolling_return_rate_series": None,
+        "rolling_density_ratio_series": None,
     }
 
     def test_all_registered_specs_no_raise(self):
@@ -2193,6 +2243,20 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # allowlisting keeps the intent explicit and is
         # defensive against a future regex tightening.
         "w_matrix_rank_deficient",
+        # (c17) critical_slowing_down — programmatic identifiers
+        # appearing in spec text. Detrending method names,
+        # indicator names, EWS state values, surrogate-method
+        # nouns, audit-field names cited in prose.
+        "first_diff", "compute_pvalues", "n_surrogates",
+        "kendall_lookback", "rolling_window",
+        "post_transition_indicated", "ews_composite_score",
+        "ews_state", "tau_ar1", "tau_variance",
+        "tau_skewness", "tau_kurtosis", "tau_return_rate",
+        "tau_density_ratio", "rolling_ar1_series",
+        "rolling_variance_series", "rolling_skewness_series",
+        "rolling_kurtosis_series", "rolling_return_rate_series",
+        "rolling_density_ratio_series",
+        "fisher_combined", "equal_weight_zscore",
     }
 
     @staticmethod

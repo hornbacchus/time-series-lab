@@ -206,3 +206,12 @@ from interpretation.specs import kalman_smoother as _kalman_smoother_spec       
 # variants like HAR-CJ" as a recommended extension — 3b fulfills
 # that cross-reference. Registry: 81 → 82.
 from interpretation.specs import har_cj as _har_cj_spec                               # noqa: F401, E402
+
+# Critical Slowing Down (Scheffer 2009, Dakos 2012, Bury 2023).
+# Univariate v1: detrending + 6 rolling indicators + Kendall tau
+# trend statistic + composite EWS scoring. 5 D-triggers covering
+# composite-elevated, consistent-AR(1)+variance trend,
+# post-transition disambiguation, insufficient-data, and
+# non-stationary residuals. First new technique addition since the
+# verification initiative closed (commit ee44ee4). Registry: 82 → 83.
+from interpretation.specs import critical_slowing_down as _csd_spec                   # noqa: F401, E402
