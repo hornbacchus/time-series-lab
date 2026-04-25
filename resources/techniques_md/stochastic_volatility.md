@@ -173,3 +173,18 @@ The wrapper exposes four fields tracking the backend cascade:
 - `mcmc_backend_fallback_reason` — `None` on the requested path; `"c_compiler_unavailable"` on the B6 D10 cascade; `"pymc_not_installed"` when the existing ImportError fallback fires.
 - `c_backend_available` — the probe's bool result (read from `pytensor.config.cxx`).
 
+## Latent Posterior Summary (Follow-up B7)
+
+In addition to the population-parameter posteriors (μ, φ, σ_η, ν), the MCMC inference path now exposes the **latent log-volatility posterior summary**:
+
+- `h_posterior_mean` — list of T floats. The posterior mean of `h_t` at each timepoint, computed via Welford online accumulators across all chains × post-tune draws (Gibbs backend) or extracted from `idata.posterior["h"]` (PyMC NUTS backend).
+- `h_posterior_std` — list of T floats. The posterior standard deviation of `h_t` at each timepoint, suitable for ±2σ confidence-band visualization.
+
+To convert to volatility scale, practitioners typically apply `σ_t = exp(h_t / 2)`. The transformation is monotonic but introduces Jensen-inequality bias on the mean (`E[exp(h/2)] ≠ exp(E[h]/2)`); for unbiased volatility estimates use the per-draw transformation `exp(h_draw[t] / 2)` followed by averaging — but this requires full draw retention beyond what audit_fields exposes.
+
+Both fields are `None` on the quasi-ML inference path (`inference_method='quasi_ml'`).
+
+### Storage strategy
+
+The Gibbs backend uses **Welford online accumulators** (Welford 1962 / Knuth Vol 2 §4.2.2) per chain, with parallel-Welford pooling (Chan, Golub & LeVeque 1979) across chains. Memory cost is **O(T)** per chain regardless of draw count — 16 KB on T=10000, vs 1.28 GB for naive full-draw retention on Thorough × T=10000. The PyMC NUTS backend retains draws in `idata.posterior["h"]` natively (NUTS samples h as a first-class variable), so no Welford storage is needed there.
+

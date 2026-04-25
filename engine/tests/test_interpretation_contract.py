@@ -1865,6 +1865,12 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "mcmc_backend_applied": None,
         "mcmc_backend_fallback_reason": None,
         "c_backend_available": None,
+        # Follow-up B7 — latent log-volatility posterior summary
+        # fields. Default to None on the quasi-ML path; T14
+        # ensures the spec null-guards these via .get() / None
+        # checks in the Tier 2 estimation_clause block.
+        "h_posterior_mean": None,
+        "h_posterior_std": None,
         "mcmc_chains": None,
         "mcmc_draws_per_chain": None,
         "mcmc_tune": None,
@@ -2071,6 +2077,14 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         "mcmc_backend_requested", "mcmc_backend_applied",
         "mcmc_backend_fallback_reason", "c_backend_available",
         "c_compiler_unavailable", "pymc_not_installed",
+        # (c10c) Follow-up B7 — latent posterior summary field
+        # names surface in the MCMC-path estimation_clause prose
+        # verbatim. Strictly the chained-underscore form is
+        # already disqualified by the adjacent-underscore
+        # lookaround on the T15 regex, but allowlisting keeps
+        # the intent explicit and is defensive against a future
+        # regex tightening.
+        "h_posterior_mean", "h_posterior_std",
         # (c11) Follow-up 3a — CAViaR multi-horizon. Programmatic
         # param names (`n_simulation_paths`) and audit-field
         # identifiers that may leak into Tier 2 prose or Tier 3

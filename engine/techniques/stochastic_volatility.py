@@ -674,6 +674,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 round(float(mcmc_result["loo"]), 2)
                 if mcmc_result["loo"] is not None else None
             )
+            # Follow-up B7 — latent log-volatility posterior
+            # summary. Lists of T floats from the posterior
+            # mean/std of h_t at each timepoint, suitable for
+            # ±2σ confidence-band visualization. Stored as
+            # native Python lists to keep the audit dict
+            # JSON-serializable.
+            audit["h_posterior_mean"] = mcmc_result.get(
+                "h_posterior_mean"
+            )
+            audit["h_posterior_std"] = mcmc_result.get(
+                "h_posterior_std"
+            )
         else:
             # Quasi-ML path: all MCMC fields None (Q7 null-guard)
             for key in (
@@ -696,6 +708,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "nu_posterior_mean", "nu_posterior_sd",
                 "nu_posterior_hdi_lower", "nu_posterior_hdi_upper",
                 "ppc_coverage_90pct", "waic", "loo",
+                # Follow-up B7 — latent posterior summary defaults
+                # to None on the quasi-ML inference path.
+                "h_posterior_mean", "h_posterior_std",
             ):
                 audit[key] = None
 

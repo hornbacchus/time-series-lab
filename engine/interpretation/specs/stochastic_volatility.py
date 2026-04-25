@@ -397,6 +397,19 @@ def _tier2(results: dict) -> str:
             f"fully avoided. Convergence diagnostics: {rhat_clause}; "
             f"{ess_clause}{div_clause}. {posterior_clause}{ic_extra}"
         )
+        # Follow-up B7 — latent posterior summary disclosure.
+        # Surfaces the new audit fields so users know they are
+        # available for downstream confidence-band visualization.
+        if results.get("h_posterior_mean") is not None:
+            estimation_clause += (
+                " The latent log-volatility posterior mean and "
+                "standard deviation at each timepoint are exposed "
+                "in audit_fields as h_posterior_mean and "
+                "h_posterior_std (length-T arrays); these "
+                "summarize the Bayesian inference on the latent "
+                "series and are the practitioner-relevant output "
+                "for downstream volatility forecasts."
+            )
     else:
         # quasi-ML path
         estimation_clause = (

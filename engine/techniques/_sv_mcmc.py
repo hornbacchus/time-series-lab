@@ -287,6 +287,21 @@ def _fit_pymc(*, y, innovations, cfg, seed, compute_ppc, progress_callback):
             progressbar=False,
         )
 
+    # Follow-up B7 — extract per-position posterior mean and std
+    # of the latent log-volatility series h_t. ``idata.posterior
+    # ["h"]`` has shape (chain, draw, T); reduce over (chain, draw)
+    # to obtain (T,) arrays for downstream audit-field exposure.
+    # Defensive: any extraction failure (missing variable, shape
+    # surprise) yields None — the spec/Tier 2 already null-guards.
+    try:
+        h_arr = idata.posterior["h"].values  # (chain, draw, T)
+        h_flat = h_arr.reshape(-1, h_arr.shape[-1])
+        h_mean_pymc = h_flat.mean(axis=0).astype(np.float64)
+        h_std_pymc = h_flat.std(axis=0, ddof=1).astype(np.float64)
+    except Exception:
+        h_mean_pymc = None
+        h_std_pymc = None
+
     progress_callback("Extracting posterior summaries", 80)
     summary = az.summary(
         idata, var_names=param_names, hdi_prob=0.95, kind="all",
@@ -364,4 +379,11 @@ def _fit_pymc(*, y, innovations, cfg, seed, compute_ppc, progress_callback):
         "ppc_coverage_90pct": ppc_coverage,
         "waic": waic,
         "loo": loo,
+        # Follow-up B7 — latent log-volatility posterior summary
+        "h_posterior_mean": (
+            h_mean_pymc.tolist() if h_mean_pymc is not None else None
+        ),
+        "h_posterior_std": (
+            h_std_pymc.tolist() if h_std_pymc is not None else None
+        ),
     }

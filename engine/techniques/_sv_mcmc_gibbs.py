@@ -118,6 +118,66 @@ _NU_PRIOR_SD = 10.0
 
 
 # ---------------------------------------------------------------------
+# Follow-up B7 — parallel-Welford combiner for latent h-summaries
+# ---------------------------------------------------------------------
+
+
+def _pool_h_chains(chains):
+    """Pool per-chain Welford summaries into a single
+    (h_posterior_mean, h_posterior_std) pair via the Chan, Golub
+    & LeVeque 1979 parallel algorithm.
+
+    Each chain dict carries:
+        h_mean (T,)   : per-position posterior mean for that chain
+        h_M2 (T,)     : per-position sum of squared deviations
+        h_n_kept (int): number of post-tune draws contributing
+
+    Pooling rule for two groups (a, b) with sizes (n_a, n_b),
+    means (mu_a, mu_b), and squared-deviation sums (M2_a, M2_b):
+
+        n_total   = n_a + n_b
+        delta     = mu_b - mu_a
+        mu_pooled = mu_a + delta * n_b / n_total
+        M2_pooled = M2_a + M2_b + delta**2 * n_a * n_b / n_total
+
+    Generalises to k chains by sequential reduction.
+
+    Returns
+    -------
+    (mu_pooled, std_pooled) as (T,) numpy arrays, or (None, None)
+    if no chains supplied / total n < 1.
+    """
+    if not chains:
+        return None, None
+    n_total = int(chains[0].get("h_n_kept", 0) or 0)
+    if n_total == 0 and len(chains) == 1:
+        return None, None
+    mu_pool = np.asarray(chains[0]["h_mean"], dtype=np.float64).copy()
+    M2_pool = np.asarray(chains[0]["h_M2"], dtype=np.float64).copy()
+    for c in chains[1:]:
+        n_b = int(c.get("h_n_kept", 0) or 0)
+        if n_b == 0:
+            continue
+        mu_b = np.asarray(c["h_mean"], dtype=np.float64)
+        M2_b = np.asarray(c["h_M2"], dtype=np.float64)
+        if n_total == 0:
+            n_total = n_b
+            mu_pool = mu_b.copy()
+            M2_pool = M2_b.copy()
+            continue
+        n_new = n_total + n_b
+        delta = mu_b - mu_pool
+        mu_pool = mu_pool + delta * (n_b / n_new)
+        M2_pool = M2_pool + M2_b + (delta ** 2) * (n_total * n_b / n_new)
+        n_total = n_new
+    if n_total < 2:
+        std_pool = np.zeros_like(mu_pool)
+    else:
+        std_pool = np.sqrt(M2_pool / (n_total - 1))
+    return mu_pool, std_pool
+
+
+# ---------------------------------------------------------------------
 # Gibbs steps
 # ---------------------------------------------------------------------
 
@@ -395,6 +455,14 @@ def _run_one_chain(*, y, innovations, draws, tune, rng, progress_callback=None,
     phi_accept_count = 0
     nu_accept_count = 0
 
+    # Follow-up B7 — Welford online accumulators for h_t. Memory
+    # O(T), constant in draws (vs naive (D, T) which would be
+    # 1.28 GB on Thorough × T=10000). Pooled across chains via
+    # _pool_h_chains.
+    h_mean_acc = np.zeros(T, dtype=np.float64)
+    h_M2_acc = np.zeros(T, dtype=np.float64)
+    h_n_kept = 0
+
     total_iters = tune + draws
 
     for it in range(total_iters):
@@ -452,12 +520,27 @@ def _run_one_chain(*, y, innovations, draws, tune, rng, progress_callback=None,
             keep_sigma_eta[k] = math.sqrt(sigma_eta2)
             if innovations == "student_t":
                 keep_nu[k] = nu
+            # Follow-up B7 — Welford online update on h
+            # (Welford 1962 / Knuth Vol 2 §4.2.2):
+            #   delta  = x_n - mean_{n-1}
+            #   mean_n = mean_{n-1} + delta / n
+            #   M2_n   = M2_{n-1} + delta * (x_n - mean_n)
+            h_n_kept += 1
+            delta = h - h_mean_acc
+            h_mean_acc = h_mean_acc + delta / h_n_kept
+            h_M2_acc = h_M2_acc + delta * (h - h_mean_acc)
 
     out = {
         "mu": keep_mu,
         "phi": keep_phi,
         "sigma_eta": keep_sigma_eta,
         "_phi_accept_rate": phi_accept_count / max(1, draws),
+        # Follow-up B7 — per-chain Welford summary; pooled
+        # across chains in _sv_mcmc_gibbs.fit() via
+        # _pool_h_chains.
+        "h_mean": h_mean_acc,
+        "h_M2": h_M2_acc,
+        "h_n_kept": int(h_n_kept),
     }
     if innovations == "student_t":
         out["nu"] = keep_nu
@@ -679,10 +762,19 @@ def fit(*, y, innovations, cfg, seed, compute_ppc, progress_callback):
         ppc_rng = np.random.default_rng(seed + 9999)
         ppc_coverage = _ppc_coverage(y, chains, innovations, ppc_rng)
 
+    # Follow-up B7 — pool per-chain Welford summaries into the
+    # joint posterior latent-h summary.
+    h_mean_pooled, h_std_pooled = _pool_h_chains(chains)
     return {
         "posterior": posterior,
         "diagnostics": diag,
         "ppc_coverage_90pct": ppc_coverage,
         "waic": None,  # Gibbs backend does not compute these
         "loo": None,
+        "h_posterior_mean": (
+            h_mean_pooled.tolist() if h_mean_pooled is not None else None
+        ),
+        "h_posterior_std": (
+            h_std_pooled.tolist() if h_std_pooled is not None else None
+        ),
     }
