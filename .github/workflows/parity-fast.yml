@@ -1,0 +1,50 @@
+name: Reference Parity (fast)
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  fast:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.5.3"
+
+      - name: Install fast-tier R packages
+        # Subset matching the fast tier of MANIFEST.toml. Slow
+        # tier (full 15 packages) lives in parity-slow.yml.
+        shell: Rscript {0}
+        run: |
+          install.packages(c("hts", "forecast"), repos = "https://cloud.r-project.org")
+
+      - name: Run fast-tier parity checks
+        shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/tools
+        run: |
+          python -m reference_parity --tier fast --json > parity-fast.json
+          cat parity-fast.json
+
+      - name: Upload parity result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-fast-results
+          path: parity-fast.json
