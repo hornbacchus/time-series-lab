@@ -514,6 +514,133 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             ),
         },
     },
+
+    # Phase 2 Session 5 — 3a CAViaR-SAV parity vs from-scratch
+    # Engle-Manganelli 2004 reimplementation. Three-tier
+    # comparison per Phase 1 audit B9 finding (Nelder-Mead non-
+    # uniqueness on the non-smooth quantile loss): tier 1 strict
+    # on recursion math given fixed beta, tier 2 lenient three-
+    # outcome on optimum-quality (loss ratio), tier 3 record-only
+    # diagnostic on converged beta.
+    "3a_caviar_sav": {
+        "type": "absolute",
+        "q_path_given_fixed_beta_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-10,
+            "justification": (
+                "Phase 1 audit B9: Nelder-Mead local-optimum "
+                "non-uniqueness on CAViaR objective. The recursion "
+                "math given fixed beta is bitwise identical "
+                "between TSL and reimpl. This metric isolates the "
+                "recursion: pass TSL's converged beta to BOTH "
+                "TSL's recursion path AND the reimpl's recursion; "
+                "compare element-wise q-path. Machine precision "
+                "expected; BLOCK on divergence (would indicate "
+                "real bug in one of the two implementations of "
+                "the same recursion). Phase 1 observed 0.0 max "
+                "abs diff on this metric. NOTE: TSL does not "
+                "expose the q-path directly in audit_fields; the "
+                "harness reconstructs 'TSL q-path' inline using "
+                "TSL's converged beta against the SAV recursion "
+                "form, then compares to the reimpl recursion. This "
+                "is therefore a recursion-correctness defensive "
+                "check (both arms compute the same closed-form), "
+                "and the supplementary "
+                "``one_step_ahead_var_vs_reimpl`` metric provides "
+                "the non-tautological TSL-output comparison."
+            ),
+        },
+        "loss_ratio_tsl_to_reimpl": {
+            "ladder": "three_outcome",
+            "metric": "ratio",
+            "thresholds": {"PASS": 1.05, "CAVEAT": 1.10},
+            "justification": (
+                "Phase 1 audit B9: TSL and reimpl converge to "
+                "similar-quality but distinct local optima "
+                "(Phase 1: TSL loss 0.040479 vs reimpl 0.041073, "
+                "ratio 1.0147). Loss-ratio captures whether both "
+                "implementations find similar-quality optima "
+                "despite different beta values. Beta divergence "
+                "is documented diagnostic, not asserted. Note: "
+                "TSL rounds quantile_loss to 6 decimals (B8); "
+                "ratio metric is robust to this floor since "
+                "denominator scale is ~0.04 and rounding "
+                "perturbation is ~2.5e-5 in ratio terms — well "
+                "below the 5%% PASS band."
+            ),
+        },
+    },
+
+    # Phase 2 Session 5 — 3b HAR-CJ parity vs from-scratch
+    # Andersen-Bollerslev-Diebold 2007 + Huang-Tauchen 2005
+    # reimplementation. OLS is closed-form deterministic given
+    # identical design matrix; both implementations should match
+    # modulo Phase 1 audit B8 6-decimal rounding floor on TSL's
+    # output table coefficients.
+    "3b_har_cj": {
+        "type": "absolute",
+        "beta_intercept_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": (
+                "Phase 1 audit B8: TSL rounds 'Estimate' column "
+                "of the HAR-CJ Coefficients output table to 6 "
+                "decimals. Cannot assert tighter than 1e-6 "
+                "absolute. OLS is closed-form deterministic given "
+                "identical design matrix; both implementations "
+                "should match exactly modulo the rounding floor."
+            ),
+        },
+        "beta_rv_daily_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": "Same B8 rounding floor as intercept.",
+        },
+        "beta_rv_weekly_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": "Same B8 rounding floor as intercept.",
+        },
+        "beta_rv_monthly_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": "Same B8 rounding floor as intercept.",
+        },
+        "beta_j_daily_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": "Same B8 rounding floor as intercept.",
+        },
+        "beta_j_weekly_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": "Same B8 rounding floor as intercept.",
+        },
+        "beta_j_monthly_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": "Same B8 rounding floor as intercept.",
+        },
+        "r_squared_abs_diff": {
+            "ladder": "absolute",
+            "abs_tol": 1e-6,
+            "justification": (
+                "Same B8 rounding floor on R^2 audit field "
+                "(``R2`` rounded to 6 decimals in audit_fields)."
+            ),
+        },
+        "jump_count_match": {
+            "ladder": "absolute",
+            "abs_tol": 0,
+            "justification": (
+                "BNS jump-detection test deterministic given "
+                "identical RV/BV/threshold. Counts must match "
+                "exactly — divergence indicates a bug in one of "
+                "the two BNS implementations, not a tolerance "
+                "question."
+            ),
+        },
+    },
 }
 
 
