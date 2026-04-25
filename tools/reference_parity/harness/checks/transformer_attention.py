@@ -29,9 +29,11 @@ Architectural decisions (locked in Session 3b design):
   separately; report which layer fails if any. Bug-localization
   > simplicity.
 - **Q4.** Custom .pt fixture (PyTorch model state_dict + input
-  tensor). FixtureLoader assumes .npz; this check does
-  bespoke load + SHA verification matching the harness
-  hash-discipline pattern.
+  tensor). Phase 3.3 generalized FixtureLoader to dispatch by
+  file extension (.npz, .pt) — this check now uses the standard
+  ``fixture_id`` pattern; the runner auto-loads the .pt fixture
+  with the harness's standard SHA verification, removing the
+  prior bespoke loader.
 
 **Phase 1 audit 3f baseline:** max abs diff 0.000e+00 (bitwise)
 on layers 0 and 1 of a small Transformer (d_model=32, n_heads=4,
@@ -42,7 +44,6 @@ for FP-precision drift.
 
 from __future__ import annotations
 
-import hashlib
 import pathlib
 import sys
 from typing import Any
@@ -50,14 +51,7 @@ from typing import Any
 import numpy as np
 
 from reference_parity.harness.base import ParityCheck, ParityResult
-from reference_parity.harness.fixtures import FixtureHashMismatchError
 from reference_parity.harness.tolerances import get_ladder
-
-
-_FIXTURE_ROOT = (
-    pathlib.Path(__file__).resolve().parent.parent.parent
-    / "fixtures"
-)
 
 
 def _ensure_engine_on_path() -> None:
@@ -76,44 +70,6 @@ def _ensure_engine_on_path() -> None:
     eng_path = str(repo_root / "engine")
     if eng_path not in sys.path:
         sys.path.insert(0, eng_path)
-
-
-def _compute_sha(path: pathlib.Path) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(64 * 1024), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-def _load_pt_fixture_with_sha(
-    fixture_id: str,
-) -> tuple[dict[str, Any], str]:
-    """Bespoke .pt fixture loader with SHA-256 verification.
-
-    FixtureLoader.load assumes .npz — this is the parallel for
-    PyTorch .pt files. Mirrors the harness pattern (verify SHA
-    before loading; raise FixtureHashMismatchError on drift).
-    """
-    import torch
-
-    pt_path = _FIXTURE_ROOT / f"{fixture_id}.pt"
-    sha_path = _FIXTURE_ROOT / f"{fixture_id}.sha256"
-
-    if not pt_path.exists():
-        raise FileNotFoundError(f"Fixture not found: {pt_path}")
-    if not sha_path.exists():
-        raise FileNotFoundError(
-            f"Fixture sidecar SHA not found: {sha_path}"
-        )
-
-    expected = sha_path.read_text(encoding="utf-8").strip()
-    actual = _compute_sha(pt_path)
-    if actual != expected:
-        raise FixtureHashMismatchError(pt_path, expected, actual)
-
-    data = torch.load(pt_path, weights_only=False)
-    return data, actual
 
 
 def _clone_model_with_same_weights(config: dict[str, Any], state_dict):
@@ -147,28 +103,18 @@ class TransformerAttentionParity(ParityCheck):
 
     technique_id = "3f_transformer_attention"
     tier = "fast"
-    # Note: fixture_id is empty so runner skips auto-load via
-    # FixtureLoader (which assumes .npz). The .pt fixture is
-    # loaded bespoke inside setup_fixture() with manual SHA
-    # verification. Future check classes using non-.npz fixture
-    # formats (.pt, .pkl, custom) follow this pattern: empty
-    # fixture_id at class level, manual hash verification in
-    # setup_fixture(). See harness extension TODO in
-    # MANIFEST.toml for eventual FixtureLoader generalization.
-    fixture_id = ""
-    PT_FIXTURE_ID = "3f_transformer"
+    # Phase 3.3: standard fixture_id; runner auto-loads the .pt
+    # fixture via FixtureLoader's format dispatch. Replaced the
+    # prior fixture_id="" + bespoke _load_pt_fixture_with_sha
+    # pattern from Session 3b.
+    fixture_id = "3f_transformer_attention"
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
-        # Bespoke .pt loader (FixtureLoader assumes .npz).
-        # Hash-verifies before loading; raises
-        # FixtureHashMismatchError on drift.
-        data, sha = _load_pt_fixture_with_sha(self.PT_FIXTURE_ID)
-        return {
-            "model_state_dict": data["model_state_dict"],
-            "model_config": data["model_config"],
-            "input": data["input"],
-            "fixture_sha": sha,
-        }
+        # No supplementary state needed; runner already loaded
+        # the .pt fixture (model_state_dict, model_config,
+        # input) and merges it into the fixture dict before
+        # passing to run_tsl / run_reference.
+        return {}
 
     # -----------------------------------------------------------------
     # TSL side — apply _patch_sa_blocks_for_capture, run forward,

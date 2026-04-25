@@ -71,22 +71,16 @@ class McmcSvStudentTParity(ParityCheck):
 
     R_TIMEOUT_SEC = 240
 
-    # SEED_OFFSET = 1: 2c fixture was generated at
-    # canonical seed=43 per Phase 1 audit (vs default
-    # harness seed=42). When runner invokes with
-    # --seed 42, this offset routes 2c to its canonical
-    # seed=43 baseline; CAVEAT-reroll's seed+1 then
-    # bumps to seed=44. Pattern: future MCMC checks with
-    # non-default fixture seeds should declare their own
-    # SEED_OFFSET to maintain Phase 1 reproducibility.
-    # See FixtureLoader generalization TODO in
-    # MANIFEST.toml — eventual harness redesign should
-    # store the canonical seed alongside the fixture
-    # rather than requiring per-check offset constants.
-    SEED_OFFSET = 1
-
+    # Phase 3.3: canonical seed=43 is now stored in the fixture
+    # metadata (``_canonical_seed`` array inside the .npz). The
+    # runner extracts it during load and passes it as the
+    # effective seed to setup_fixture; CAVEAT-reroll bumps the
+    # effective seed by +1 (canonical+1 = 44 here). This
+    # replaces the prior SEED_OFFSET=1 class-attribute
+    # workaround. setup_fixture is the same shape as 2b's
+    # (just stash _seed for downstream TSL/R use).
     def setup_fixture(self, seed: int) -> dict[str, Any]:
-        return {"_seed": int(seed) + self.SEED_OFFSET}
+        return {"_seed": int(seed)}
 
     # -----------------------------------------------------------------
     # TSL side — force Gibbs cascade via B6 monkey-patch

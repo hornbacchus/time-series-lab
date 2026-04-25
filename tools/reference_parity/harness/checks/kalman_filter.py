@@ -113,7 +113,10 @@ class KalmanFilterParity(ParityCheck):
         # KFAS log-lik parity assertion.
         from reference_parity.harness.fixtures import FixtureLoader
         loader = FixtureLoader()
-        phase1_data, phase1_sha = loader.load(self.PHASE1_FIXTURE_ID)
+        # Phase 3.3: load() returns (data, metadata, sha).
+        phase1_data, _phase1_metadata, phase1_sha = loader.load(
+            self.PHASE1_FIXTURE_ID,
+        )
         return {
             "phase1": phase1_data,
             "phase1_sha": phase1_sha,

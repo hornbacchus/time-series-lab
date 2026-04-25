@@ -42,11 +42,16 @@ patch-level drift since the Phase 1 Stage A install date.
 # drift as expected and lock the parity tolerance against the
 # current-version baseline with explicit rationale.
 #
-# Future enhancement: FixtureLoader currently assumes .npz
-# format. Session 3b's 3f Transformer check uses .pt fixture
-# loaded bespoke. If future sessions need multiple non-.npz
-# fixture types, generalize FixtureLoader to dispatch on file
-# extension rather than hardcoding np.load.
+# Resolved in Phase 3.3 (commit pending):
+# - FixtureLoader generalized to dispatch on file extension
+#   (.npz, .pt). The 3f Transformer check now uses standard
+#   fixture_id; the bespoke .pt loader was removed.
+# - SEED_OFFSET per-check workaround replaced by
+#   ``_canonical_seed`` field inside the .npz fixture data.
+#   The runner extracts canonical_seed from FixtureLoader's
+#   metadata return and uses it as the effective seed for
+#   first-attempt + CAVEAT-reroll seed bumping. The 2c
+#   Student-t SV check no longer needs SEED_OFFSET=1.
 notes = "see comment block above"
 
 [r]

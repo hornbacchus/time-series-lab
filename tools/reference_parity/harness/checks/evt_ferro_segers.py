@@ -83,7 +83,10 @@ class EvtFerroSegersParity(ParityCheck):
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         loader = FixtureLoader()
-        iid_data, iid_sha = loader.load(self.IID_FIXTURE_ID)
+        # Phase 3.3: load() returns (data, metadata, sha).
+        iid_data, _iid_metadata, iid_sha = loader.load(
+            self.IID_FIXTURE_ID,
+        )
         return {"iid": iid_data, "iid_sha": iid_sha}
 
     # -----------------------------------------------------------------

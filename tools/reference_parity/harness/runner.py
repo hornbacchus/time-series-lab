@@ -116,15 +116,26 @@ def run_check(
     fixture_sha = ""
 
     try:
-        # 1. Load fixture (with hash verify if on-disk)
+        # 1. Load fixture (with hash verify if on-disk).
+        # Phase 3.3: loader now returns (data, metadata, sha).
+        # If the fixture provides ``canonical_seed`` in metadata,
+        # use it as the effective seed for setup_fixture and for
+        # CAVEAT-reroll (which bumps effective_seed + 1).
+        # Replaces the per-check ``SEED_OFFSET`` workaround.
+        effective_seed = seed
+        fixture_data: dict = {}
         if check.fixture_id:
             loader = FixtureLoader()
-            fixture_data, fixture_sha = loader.load(check.fixture_id)
+            fixture_data, metadata, fixture_sha = loader.load(
+                check.fixture_id,
+            )
+            if "canonical_seed" in metadata:
+                effective_seed = int(metadata["canonical_seed"])
             # Allow setup_fixture to merge / supplement
-            fixture = check.setup_fixture(seed)
+            fixture = check.setup_fixture(effective_seed)
             fixture.update(fixture_data)
         else:
-            fixture = check.setup_fixture(seed)
+            fixture = check.setup_fixture(effective_seed)
 
         # 2. Run TSL
         tsl_out = check.run_tsl(fixture)
@@ -138,33 +149,37 @@ def run_check(
                 technique_id=tid, outcome="SKIP",
                 error=f"R unavailable: {e}",
                 duration_sec=round(time.monotonic() - t0, 3),
-                seed_used=seed, fixture_sha=fixture_sha,
+                seed_used=effective_seed, fixture_sha=fixture_sha,
             )
         except RPackageMissingError as e:
             return ParityResult(
                 technique_id=tid, outcome="SKIP",
                 error=f"R package missing: {e}",
                 duration_sec=round(time.monotonic() - t0, 3),
-                seed_used=seed, fixture_sha=fixture_sha,
+                seed_used=effective_seed, fixture_sha=fixture_sha,
             )
         except ImportError as e:
             return ParityResult(
                 technique_id=tid, outcome="SKIP",
                 error=f"Python reference import failed: {e}",
                 duration_sec=round(time.monotonic() - t0, 3),
-                seed_used=seed, fixture_sha=fixture_sha,
+                seed_used=effective_seed, fixture_sha=fixture_sha,
             )
 
         # 4. Compare → first ParityResult
         first_result = check.compare(tsl_out, ref_out)
         first_result.duration_sec = round(time.monotonic() - t0, 3)
-        first_result.seed_used = seed
+        first_result.seed_used = effective_seed
         first_result.fixture_sha = fixture_sha
 
-        # 5. CAVEAT re-roll
+        # 5. CAVEAT re-roll. Bumps the EFFECTIVE seed by +1
+        # (Phase 3.3): for fixtures with canonical_seed metadata
+        # this is canonical_seed+1, NOT runner_seed+1. Without
+        # canonical_seed, effective_seed == runner seed so this
+        # behaves identically to the pre-3.3 path.
         if first_result.outcome == "CAVEAT" and check.on_caveat_reroll(first_result):
             try:
-                seed_b = seed + 1
+                seed_b = effective_seed + 1
                 fixture_b = check.setup_fixture(seed_b)
                 if check.fixture_id:
                     fixture_b.update(fixture_data)

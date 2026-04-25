@@ -84,8 +84,11 @@ class TestFixtureLoader(unittest.TestCase):
             npz_p, sha_p, sha = loader.write_with_sha("t1", data)
             self.assertTrue(npz_p.exists())
             self.assertTrue(sha_p.exists())
-            loaded, sha2 = loader.load("t1")
+            # Phase 3.3: load() returns (data, metadata, sha).
+            loaded, metadata, sha2 = loader.load("t1")
             self.assertEqual(sha, sha2)
+            self.assertEqual(metadata["format"], "npz")
+            self.assertNotIn("canonical_seed", metadata)
             np.testing.assert_array_equal(loaded["x"], data["x"])
             np.testing.assert_array_equal(loaded["y"], data["y"])
 
