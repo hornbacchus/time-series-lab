@@ -392,13 +392,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
             y_pred_norm = y_pred_all[:, 0]
             y_actual_norm = y_seq[:, 0]
 
-            n_params = sum(p.numel() for p in model.parameters())
+            n_params = int(sum(p.numel() for p in model.parameters()))
             model_desc = (
                 f"N-HiTS (PyTorch, stacks={n_stacks}, "
                 f"blocks={n_blocks}, hidden={hidden_size}, "
                 f"pooling={pooling_sizes}, params={n_params})"
             )
         else:
+            # Follow-up B10 — n_params is meaningful only on the
+            # PyTorch path (a single torch.nn.Module with a defined
+            # parameter count). The sklearn fallback uses an
+            # ensemble of {Ridge, GradientBoostingRegressor,
+            # MLPRegressor}; counting parameters across a
+            # heterogeneous ensemble is ambiguous, so audit-field
+            # n_params stays None on this branch (matches the
+            # 1a-fix convention for LSTM/GRU/TCN sklearn
+            # fallbacks).
+            n_params = None
             progress_callback("Creating lag features", 15)
             X, y_arr = _create_lag_features(normalized, n_lags)
             if len(X) < 5:
@@ -525,6 +535,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "pooling_sizes": pooling_sizes,
             "n_lags": n_lags,
             "epochs": epochs,
+            # Follow-up B10 — surface the trained model's parameter
+            # count on the PyTorch path (already computed during
+            # training; previously embedded in model_desc only).
+            # None on the sklearn ensemble fallback path.
+            "n_params": n_params,
             "final_loss": round(final_loss, 6),
             "initial_loss": round(_initial_loss, 6) if _initial_loss is not None else None,
             "loss_curve_summary": _loss_curve_summary,

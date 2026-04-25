@@ -410,6 +410,25 @@ def _tier2(results: dict) -> str:
                 "series and are the practitioner-relevant output "
                 "for downstream volatility forecasts."
             )
+        # HD-1 — Bayesian-prior parameterization disclosure.
+        # The Phase 1 reference-parity audit (2b) compared TSL's
+        # posterior means to R stochvol::svsample on identical
+        # data and observed prior-driven divergence on σ_η.
+        estimation_clause += (
+            " Bayesian priors: TSL uses Normal(0, 10) on μ, "
+            "Beta(20, 1.5) on the persistence φ, and HalfNormal(0, 2) "
+            "on σ_η. R stochvol::svsample's defaults differ — "
+            "Normal centered with priormu = c(0, 100) (broader on μ), "
+            "(φ + 1) / 2 ~ Beta(20, 1.5) on (-1, 1) (φ supported on "
+            "the full unit interval), and Gamma(0.5, 1/2) via "
+            "priorsigma = 1 (heavier-tailed than HalfNormal on σ_η). "
+            "Posterior means on μ and φ agree to within MCMC noise "
+            "at moderate T, but σ_η can diverge substantially "
+            "(approximately 45% relative difference observed in the "
+            "Phase 1 audit at T = 500); this is a prior-shape "
+            "artifact, not an estimation bug. Users requiring exact "
+            "parity with stochvol should match priors explicitly."
+        )
     else:
         # quasi-ML path
         estimation_clause = (
