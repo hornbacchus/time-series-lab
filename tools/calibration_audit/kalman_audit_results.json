@@ -1,0 +1,358 @@
+{
+  "date": "2026-04-25",
+  "wrapper": "kalman_filter / kalman_smoother",
+  "technique_1": {
+    "sweep_1_template": [
+      {
+        "template": "local_level",
+        "status": "success",
+        "elapsed_s": 0.2,
+        "log_likelihood": -274.18,
+        "log_likelihood_finite": "True"
+      },
+      {
+        "template": "local_linear_trend",
+        "status": "success",
+        "elapsed_s": 0.07,
+        "log_likelihood": -275.95,
+        "log_likelihood_finite": "True"
+      },
+      {
+        "template": "ar1",
+        "status": "success",
+        "elapsed_s": 0.02,
+        "log_likelihood": -259.08,
+        "log_likelihood_finite": "True"
+      },
+      {
+        "template": "seasonal",
+        "status": "success",
+        "elapsed_s": 0.05,
+        "log_likelihood": -277.94,
+        "log_likelihood_finite": "True"
+      }
+    ],
+    "sweep_2_initialization": [
+      {
+        "init": "diffuse",
+        "status": "success",
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.03
+      },
+      {
+        "init": "known",
+        "status": "success",
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.03
+      },
+      {
+        "init": "approximate_diffuse",
+        "status": "success",
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.02
+      }
+    ],
+    "sweep_3_maxiter": [
+      {
+        "maxiter": 10,
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.02
+      },
+      {
+        "maxiter": 50,
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.02
+      },
+      {
+        "maxiter": 100,
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.02
+      },
+      {
+        "maxiter": 250,
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.02
+      },
+      {
+        "maxiter": 1000,
+        "log_likelihood": -274.18,
+        "elapsed_s": 0.02
+      }
+    ],
+    "sweep_4_Q_process_noise": [
+      {
+        "Q": 0.01,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -317.43,
+        "elapsed_s": 0.0
+      },
+      {
+        "Q": 0.1,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -306.17,
+        "elapsed_s": 0.0
+      },
+      {
+        "Q": 1.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -318.54,
+        "elapsed_s": 0.0
+      },
+      {
+        "Q": 10.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -438.4,
+        "elapsed_s": 0.0
+      }
+    ],
+    "sweep_5_H_observation_noise": [
+      {
+        "H": 0.01,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -275.62,
+        "elapsed_s": 0.0
+      },
+      {
+        "H": 0.1,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -278.63,
+        "elapsed_s": 0.0
+      },
+      {
+        "H": 1.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -318.54,
+        "elapsed_s": 0.0
+      },
+      {
+        "H": 10.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -454.34,
+        "elapsed_s": 0.0
+      }
+    ],
+    "sweep_6_initial_state": [
+      {
+        "label": "zero",
+        "x0": 0.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -318.54
+      },
+      {
+        "label": "mean",
+        "x0": -0.10285684618418398,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -318.53
+      },
+      {
+        "label": "median",
+        "x0": -0.02737694775339433,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -318.54
+      },
+      {
+        "label": "far_off",
+        "x0": 1000000.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -309017144587.42
+      }
+    ],
+    "sweep_7_initial_covariance": [
+      {
+        "cov": 0.01,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -318.1
+      },
+      {
+        "cov": 1.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -318.54
+      },
+      {
+        "cov": 100.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -320.59
+      },
+      {
+        "cov": 1000000.0,
+        "wrapper_status": "success",
+        "wrapper_error_message": null,
+        "log_likelihood": -325.19
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baseline_stats": [
+      {
+        "series": "DGS10",
+        "T": 2501,
+        "status": "success",
+        "elapsed_s": 0.31,
+        "log_likelihood": 3745.62,
+        "log_likelihood_finite": "True",
+        "audit_state_keys": [
+          "filter_final_state",
+          "filter_final_state_se",
+          "log_likelihood",
+          "state_dim",
+          "state_labels",
+          "state_space_model"
+        ],
+        "input_mean": 2.5572930827668934,
+        "input_std": 1.100634758182643
+      },
+      {
+        "series": "DGS2",
+        "T": 2501,
+        "status": "success",
+        "elapsed_s": 0.3,
+        "log_likelihood": 3814.35,
+        "log_likelihood_finite": "True",
+        "audit_state_keys": [
+          "filter_final_state",
+          "filter_final_state_se",
+          "log_likelihood",
+          "state_dim",
+          "state_labels",
+          "state_space_model"
+        ],
+        "input_mean": 2.1086365453818474,
+        "input_std": 1.5904352820826453
+      },
+      {
+        "series": "DEXUSEU",
+        "T": 2499,
+        "status": "success",
+        "elapsed_s": 0.38,
+        "log_likelihood": 9476.03,
+        "log_likelihood_finite": "True",
+        "audit_state_keys": [
+          "filter_final_state",
+          "filter_final_state_se",
+          "log_likelihood",
+          "state_dim",
+          "state_labels",
+          "state_space_model"
+        ],
+        "input_mean": 1.117421968787515,
+        "input_std": 0.05282114401323937
+      },
+      {
+        "series": "GSPC",
+        "T": 2515,
+        "status": "success",
+        "elapsed_s": 0.28,
+        "log_likelihood": -12897.34,
+        "log_likelihood_finite": "True",
+        "audit_state_keys": [
+          "filter_final_state",
+          "filter_final_state_se",
+          "log_likelihood",
+          "state_dim",
+          "state_labels",
+          "state_space_model"
+        ],
+        "input_mean": 3469.9061313758075,
+        "input_std": 1136.4736072742983
+      },
+      {
+        "series": "GOLD",
+        "T": 2513,
+        "status": "success",
+        "elapsed_s": 0.27,
+        "log_likelihood": -10680.29,
+        "log_likelihood_finite": "True",
+        "audit_state_keys": [
+          "filter_final_state",
+          "filter_final_state_se",
+          "log_likelihood",
+          "state_dim",
+          "state_labels",
+          "state_space_model"
+        ],
+        "input_mean": 1656.953719710241,
+        "input_std": 450.68349004473146
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "case": "T=5 minimum-viable",
+        "status": "failure",
+        "error": null,
+        "elapsed_s": 0.0
+      },
+      {
+        "id": "C-CAL-2",
+        "case": "T=200 with 5% NaN gaps",
+        "status": "success",
+        "error": null,
+        "elapsed_s": 0.03
+      },
+      {
+        "id": "C-CAL-3",
+        "case": "T=200 with 10sigma outlier at t=100",
+        "status": "success",
+        "error": null,
+        "elapsed_s": 0.03
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "T=200 near-unit-root AR(1) (phi=0.99)",
+        "status": "success",
+        "error": null,
+        "elapsed_s": 0.04
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 2,
+    "cosmetic": 0
+  },
+  "all_findings": [
+    {
+      "id": "F-K-EXTRA-1",
+      "severity": "operational",
+      "title": "Pre-existing Windows cp1252 console UnicodeEncodeError in tools/validate_kalman_canonicals.py",
+      "details": "All 6 pre-existing canonicals failed to print Tier 2 prose containing Greek (mu, epsilon) or math (<=) symbols on Windows default console. Wrappers themselves succeed; failure is in the validation script's print statements only. Fixed in this session via stdout.reconfigure(utf-8) at script top (4 LOC, same pattern as parity_b7_h_latent_vs_stochvol.py).",
+      "fix_applied": true,
+      "fix_loc": 4,
+      "fix_files": [
+        "tools/validate_kalman_canonicals.py"
+      ]
+    },
+    {
+      "id": "F-K-EXTRA-2",
+      "severity": "operational",
+      "title": "Same Windows cp1252 UnicodeEncodeError in SV validate scripts",
+      "details": "tools/validate_sv_mcmc_canonicals.py and tools/validate_sv_student_t_canonicals.py have the same pre-existing pattern as F-K-EXTRA-1. SV-specific Tier 2 prose contains phi (the persistence parameter) and check-mark symbols which fail to encode on Windows. Surfaced during K6 regression sweep on this session. Fixed inline at 6 LOC per file = 12 LOC, 2 files; satisfies CAL-R6 threshold.",
+      "fix_applied": true,
+      "fix_loc": 12,
+      "fix_files": [
+        "tools/validate_sv_mcmc_canonicals.py",
+        "tools/validate_sv_student_t_canonicals.py"
+      ]
+    }
+  ]
+}
