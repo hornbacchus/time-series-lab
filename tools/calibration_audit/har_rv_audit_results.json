@@ -1,0 +1,236 @@
+{
+  "date": "2026-04-26",
+  "wrapper": "har_rv",
+  "technique_1": {
+    "sweep_1_1_lags": [
+      {
+        "label": "classic_(1,5,22)",
+        "lags": "(1, 5, 22)",
+        "wrapper_status": "success",
+        "R2": 0.692267,
+        "beta_d": 0.57895,
+        "beta_w": 0.327397,
+        "beta_m": -0.030232,
+        "persistence_sum": 0.8761,
+        "elapsed_s": 0.39
+      },
+      {
+        "label": "calendar_(1,5,21)",
+        "lags": "(1, 5, 21)",
+        "wrapper_status": "success",
+        "R2": 0.692282,
+        "beta_d": 0.578027,
+        "beta_w": 0.331131,
+        "beta_m": -0.033849,
+        "persistence_sum": 0.8753,
+        "elapsed_s": 0.08
+      },
+      {
+        "label": "longer_(1,7,30)",
+        "lags": "(1, 7, 30)",
+        "wrapper_status": "success",
+        "R2": 0.689086,
+        "beta_d": 0.638951,
+        "beta_w": 0.263984,
+        "beta_m": -0.024006,
+        "persistence_sum": 0.8789,
+        "elapsed_s": 0.07
+      },
+      {
+        "label": "short_(1,3,15)",
+        "lags": "(1, 3, 15)",
+        "wrapper_status": "success",
+        "R2": 0.692857,
+        "beta_d": 0.482039,
+        "beta_w": 0.38156,
+        "beta_m": 0.020405,
+        "persistence_sum": 0.884,
+        "elapsed_s": 0.07
+      }
+    ],
+    "sweep_1_2_h_ahead": [
+      {
+        "h_ahead": 1,
+        "wrapper_status": "success",
+        "R2": 0.692267,
+        "elapsed_s": 0.07
+      },
+      {
+        "h_ahead": 5,
+        "wrapper_status": "success",
+        "R2": 0.632088,
+        "elapsed_s": 0.09
+      },
+      {
+        "h_ahead": 10,
+        "wrapper_status": "success",
+        "R2": 0.515398,
+        "elapsed_s": 0.08
+      },
+      {
+        "h_ahead": 22,
+        "wrapper_status": "success",
+        "R2": 0.289044,
+        "elapsed_s": 0.08
+      }
+    ],
+    "sweep_1_3_use_log": [
+      {
+        "use_log": false,
+        "wrapper_status": "success",
+        "R2": 0.692267,
+        "elapsed_s": 0.08
+      },
+      {
+        "use_log": true,
+        "wrapper_status": "success",
+        "R2": 0.686447,
+        "elapsed_s": 0.08
+      }
+    ],
+    "sweep_1_4_T": [
+      {
+        "T": 200,
+        "wrapper_status": "success",
+        "R2": 0.60454,
+        "persistence_sum": 0.9131,
+        "elapsed_s": 0.04
+      },
+      {
+        "T": 500,
+        "wrapper_status": "success",
+        "R2": 0.655986,
+        "persistence_sum": 0.8495,
+        "elapsed_s": 0.05
+      },
+      {
+        "T": 1000,
+        "wrapper_status": "success",
+        "R2": 0.681094,
+        "persistence_sum": 0.8542,
+        "elapsed_s": 0.08
+      },
+      {
+        "T": 2000,
+        "wrapper_status": "success",
+        "R2": 0.709157,
+        "persistence_sum": 0.887,
+        "elapsed_s": 0.13
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "preprocessing": "daily_only_proxy: RV=r^2 on 100*log returns",
+        "T": 2514,
+        "wrapper_status": "success",
+        "elapsed_s": 0.17,
+        "R2": 0.277934,
+        "R2_adj": 0.276772,
+        "beta_0": 0.349153,
+        "beta_d": 0.191219,
+        "beta_w": 0.46184,
+        "beta_m": 0.094529,
+        "persistence_sum": 0.7476,
+        "aic": 14919.71,
+        "bic": 14942.99,
+        "fit_rmse": 4.817107,
+        "baseline_rmse": 5.350533,
+        "ljung_box_lag10_pvalue": 0.0
+      },
+      {
+        "series": "DGS10",
+        "preprocessing": "daily_only_proxy: RV=(diff yield)^2",
+        "T": 2500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.18,
+        "R2": 0.105063,
+        "R2_adj": 0.103616,
+        "beta_0": 0.000987,
+        "beta_d": 0.044043,
+        "beta_w": 0.361098,
+        "beta_m": 0.258356,
+        "persistence_sum": 0.6635,
+        "aic": -18737.56,
+        "bic": -18714.3,
+        "fit_rmse": 0.005505,
+        "baseline_rmse": 0.005676,
+        "ljung_box_lag10_pvalue": 0.226902
+      },
+      {
+        "series": "DEXUSEU",
+        "preprocessing": "daily_only_proxy: RV=r^2 on 100*log returns",
+        "T": 2498,
+        "wrapper_status": "success",
+        "elapsed_s": 0.16,
+        "R2": 0.049123,
+        "R2_adj": 0.047584,
+        "beta_0": 0.09078,
+        "beta_d": 0.032399,
+        "beta_w": 0.063363,
+        "beta_m": 0.521414,
+        "persistence_sum": 0.6172,
+        "aic": 3441.37,
+        "bic": 3464.63,
+        "fit_rmse": 0.483639,
+        "baseline_rmse": 0.48891,
+        "ljung_box_lag10_pvalue": 0.95071
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "case": "Constant variance (no temporal structure)",
+        "status": "success",
+        "R2": 0.007671,
+        "persistence_sum": 0.0638,
+        "beta_d": 0.054522,
+        "beta_w": 0.116009,
+        "beta_m": -0.106706,
+        "elapsed_s": 0.05
+      },
+      {
+        "id": "C-CAL-2",
+        "case": "With-jumps DGP; HAR-RV is jump-blind",
+        "status": "success",
+        "R2": 0.003472,
+        "persistence_sum": 0.2272,
+        "elapsed_s": 0.07
+      },
+      {
+        "id": "C-CAL-3",
+        "case": "T=80 short series; tests hard-guard",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.03
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "T=1500 white-noise RV (B8 6-decimal floor)",
+        "status": "success",
+        "R2": 0.000513,
+        "betas_displayed": {
+          "beta_0": 0.001035,
+          "beta_d": -0.014889,
+          "beta_w": 0.055749,
+          "beta_m": -0.081337
+        },
+        "all_below_floor": false,
+        "elapsed_s": 0.11
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}

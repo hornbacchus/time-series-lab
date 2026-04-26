@@ -23,8 +23,9 @@ that route to a single `garch_model.py` wrapper).
 | 3 | evt_pot_gpd | 47848e0 | 0 | 0 | 1 |
 | 4 | johansen_cointegration | 340a714 | 0 | 0 | 2 |
 | 5 | stochastic_volatility | a2464ac | 0 | 0 | 2 |
-| 6 | garch + gjr_garch + egarch (batch; first extension) | (this commit) | 2 (both fixed inline) | 0 | 0 |
-| **Total** | **9 wrappers AUDITED** | — | **2 (all fixed)** | **3 (all fixed)** | **6** |
+| 6 | garch + gjr_garch + egarch (batch; first extension) | fcc73b3 | 2 (both fixed inline) | 0 | 0 |
+| 7 | har_rv (second extension) | (this commit) | 0 | 0 | 0 |
+| **Total** | **10 wrappers AUDITED** | — | **2 (all fixed)** | **3 (all fixed)** | **6** |
 
 **Sessions 1-5 produced zero severe wrapper findings** — all
 3 operational fixes were Windows cp1252 console encoding bugs
@@ -64,7 +65,7 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 9 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26)
+- AUDITED: 10 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
@@ -217,7 +218,7 @@ extensions are operationally valuable.
 | garch | AUDITED | [garch_family_findings_2026_04_26.md](calibration_audit/garch_family_findings_2026_04_26.md) | 1 (fixed inline; shared) | 0 | 0 |
 | gjr_garch | AUDITED | [garch_family_findings_2026_04_26.md](calibration_audit/garch_family_findings_2026_04_26.md) | 1 (fixed inline; shared) | 0 | 0 |
 | har_cj | AUDITED | [har_cj_findings_2026_04_26.md](calibration_audit/har_cj_findings_2026_04_26.md) | 0 | 1 (fixed inline) | 1 |
-| har_rv | UNAUDITED | — | — | — | — |
+| har_rv | AUDITED | [har_rv_findings_2026_04_26.md](calibration_audit/har_rv_findings_2026_04_26.md) | 0 | 0 | 0 |
 | stochastic_volatility | AUDITED | [stochastic_volatility_findings_2026_04_26.md](calibration_audit/stochastic_volatility_findings_2026_04_26.md) | 0 | 0 | 2 |
 
 ## Notes
