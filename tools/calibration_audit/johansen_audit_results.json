@@ -1,0 +1,446 @@
+{
+  "date": "2026-04-26",
+  "wrapper": "johansen_cointegration",
+  "technique_1": {
+    "sweep_1_reimers_T": [
+      {
+        "T": 50,
+        "fsc": false,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 16.203,
+        "bartlett_factor": null,
+        "trace_rank_corrected": null,
+        "max_eig_rank_corrected": null,
+        "elapsed_s": 0.09
+      },
+      {
+        "T": 50,
+        "fsc": true,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 16.203,
+        "bartlett_factor": 0.94,
+        "trace_rank_corrected": 0,
+        "max_eig_rank_corrected": 1,
+        "elapsed_s": 0.01
+      },
+      {
+        "T": 100,
+        "fsc": false,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 42.6693,
+        "bartlett_factor": null,
+        "trace_rank_corrected": null,
+        "max_eig_rank_corrected": null,
+        "elapsed_s": 0.01
+      },
+      {
+        "T": 100,
+        "fsc": true,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 42.6693,
+        "bartlett_factor": 0.97,
+        "trace_rank_corrected": 1,
+        "max_eig_rank_corrected": 1,
+        "elapsed_s": 0.01
+      },
+      {
+        "T": 200,
+        "fsc": false,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 92.1505,
+        "bartlett_factor": null,
+        "trace_rank_corrected": null,
+        "max_eig_rank_corrected": null,
+        "elapsed_s": 0.01
+      },
+      {
+        "T": 200,
+        "fsc": true,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 92.1505,
+        "bartlett_factor": 0.985,
+        "trace_rank_corrected": 1,
+        "max_eig_rank_corrected": 1,
+        "elapsed_s": 0.01
+      },
+      {
+        "T": 500,
+        "fsc": false,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "trace_stat_at_decision": 7.3329,
+        "bartlett_factor": null,
+        "trace_rank_corrected": null,
+        "max_eig_rank_corrected": null,
+        "elapsed_s": 0.02
+      },
+      {
+        "T": 500,
+        "fsc": true,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "trace_stat_at_decision": 7.3329,
+        "bartlett_factor": 0.994,
+        "trace_rank_corrected": 2,
+        "max_eig_rank_corrected": 2,
+        "elapsed_s": 0.02
+      },
+      {
+        "T": 1000,
+        "fsc": false,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 391.4999,
+        "bartlett_factor": null,
+        "trace_rank_corrected": null,
+        "max_eig_rank_corrected": null,
+        "elapsed_s": 0.03
+      },
+      {
+        "T": 1000,
+        "fsc": true,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "trace_stat_at_decision": 391.4999,
+        "bartlett_factor": 0.997,
+        "trace_rank_corrected": 1,
+        "max_eig_rank_corrected": 1,
+        "elapsed_s": 0.03
+      }
+    ],
+    "sweep_2_det_order": [
+      {
+        "det_order": -1,
+        "wrapper_status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "lag_order": 1,
+        "trace_stat_at_decision": 211.8255,
+        "elapsed_s": 0.01
+      },
+      {
+        "det_order": 0,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "lag_order": 1,
+        "trace_stat_at_decision": 7.3329,
+        "elapsed_s": 0.02
+      },
+      {
+        "det_order": 1,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "lag_order": 1,
+        "trace_stat_at_decision": 7.589,
+        "elapsed_s": 0.02
+      }
+    ],
+    "sweep_3_lag": [
+      {
+        "lag": 1,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "trace_stat_at_decision": 7.3329,
+        "elapsed_s": 0.0
+      },
+      {
+        "lag": 2,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "trace_stat_at_decision": 7.5027,
+        "elapsed_s": 0.0
+      },
+      {
+        "lag": 5,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "trace_stat_at_decision": 6.1916,
+        "elapsed_s": 0.0
+      },
+      {
+        "lag": 10,
+        "wrapper_status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "trace_stat_at_decision": 4.9492,
+        "elapsed_s": 0.0
+      }
+    ],
+    "findings": [
+      {
+        "id": "F-J-T1-FSC-FLIP",
+        "severity": "cosmetic",
+        "title": "Reimers correction changes trace rank decision at 1 T-value(s); 0 are at T > 200",
+        "details": [
+          {
+            "T": 50,
+            "uncorrected_rank": 1,
+            "corrected_rank": 0
+          }
+        ]
+      },
+      {
+        "id": "F-J-T1-DET",
+        "severity": "cosmetic",
+        "title": "trace_rank varies across det_order on the rank-1 fixture (DGP has no constant): {1, 2}",
+        "details": "The rank-1 fixture's DGP has no constant or trend (y_t = y_{t-1} + eps_t; x_t = beta*y_t + nu_t). Specifying det_order=0 (constant in cointegration space) or det_order=1 (linear trend) on a drift-free DGP is a model misspecification; in finite samples, the extra deterministic parameter creates a spurious second cointegrating direction that the trace test may detect. With det_order=-1 (correctly specified), the wrapper returns rank=1 as expected. This is standard Johansen behavior and is documented as user-facing guidance in the findings doc: 'Choose det_order to match the deterministic structure of your data; wrong choice can over- or under-detect rank.'",
+        "sweep": [
+          {
+            "det_order": -1,
+            "wrapper_status": "success",
+            "trace_rank": 1,
+            "max_eig_rank": 1,
+            "lag_order": 1,
+            "trace_stat_at_decision": 211.8255,
+            "elapsed_s": 0.01
+          },
+          {
+            "det_order": 0,
+            "wrapper_status": "success",
+            "trace_rank": 2,
+            "max_eig_rank": 2,
+            "lag_order": 1,
+            "trace_stat_at_decision": 7.3329,
+            "elapsed_s": 0.02
+          },
+          {
+            "det_order": 1,
+            "wrapper_status": "success",
+            "trace_rank": 2,
+            "max_eig_rank": 2,
+            "lag_order": 1,
+            "trace_stat_at_decision": 7.589,
+            "elapsed_s": 0.02
+          }
+        ]
+      }
+    ],
+    "rank_flips_in_reimers_sweep": [
+      {
+        "T": 50,
+        "uncorrected_rank": 1,
+        "corrected_rank": 0
+      }
+    ]
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "test": "rates_pair",
+        "series": [
+          "DGS2",
+          "DGS10"
+        ],
+        "T": 2501,
+        "fsc": false,
+        "wrapper_status": "success",
+        "lag_order": 5,
+        "trace_rank": 0,
+        "max_eig_rank": 0,
+        "trace_stat_at_decision": 6.0813,
+        "trace_cv_at_decision": 15.4943,
+        "bartlett_factor": null,
+        "trace_rank_corrected": null,
+        "first_cointegrating_vector": null,
+        "rank_implication_label": "differenced-VAR",
+        "elapsed_s": 0.07
+      },
+      {
+        "test": "rates_pair",
+        "series": [
+          "DGS2",
+          "DGS10"
+        ],
+        "T": 2501,
+        "fsc": true,
+        "wrapper_status": "success",
+        "lag_order": 5,
+        "trace_rank": 0,
+        "max_eig_rank": 0,
+        "trace_stat_at_decision": 6.0813,
+        "trace_cv_at_decision": 15.4943,
+        "bartlett_factor": 0.995602,
+        "trace_rank_corrected": 0,
+        "first_cointegrating_vector": null,
+        "rank_implication_label": "differenced-VAR",
+        "elapsed_s": 0.07
+      },
+      {
+        "test": "fx_pair",
+        "status": "SKIPPED",
+        "reason": "only_one_fx_series_in_fixture"
+      },
+      {
+        "test": "triplet",
+        "series": [
+          "DGS2",
+          "DGS10",
+          "GSPC_log"
+        ],
+        "T": 2501,
+        "det_order_sweep": [
+          {
+            "det_order": -1,
+            "wrapper_status": "success",
+            "lag_order": 8,
+            "trace_rank": 0,
+            "max_eig_rank": 0,
+            "trace_stat_at_decision": 12.692,
+            "rank_implication_label": "differenced-VAR",
+            "elapsed_s": 0.06
+          },
+          {
+            "det_order": 0,
+            "wrapper_status": "success",
+            "lag_order": 8,
+            "trace_rank": 0,
+            "max_eig_rank": 0,
+            "trace_stat_at_decision": 10.7231,
+            "rank_implication_label": "differenced-VAR",
+            "elapsed_s": 0.08
+          },
+          {
+            "det_order": 1,
+            "wrapper_status": "success",
+            "lag_order": 8,
+            "trace_rank": 0,
+            "max_eig_rank": 1,
+            "trace_stat_at_decision": 32.18,
+            "rank_implication_label": "differenced-VAR",
+            "elapsed_s": 0.08
+          }
+        ]
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "case": "Known rank-1 bivariate VAR T=500; expected rank=1",
+        "status": "success",
+        "trace_rank": 1,
+        "max_eig_rank": 1,
+        "first_cointegrating_vector": null,
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-2",
+        "case": "Two independent random walks T=500; expected rank=0",
+        "status": "success",
+        "trace_rank": 0,
+        "max_eig_rank": 0,
+        "elapsed_s": 0.02
+      },
+      {
+        "id": "C-CAL-3",
+        "case": "Near-unit-root cointegration T=80 (\u03c6_adj=0.98); documents Reimers small-sample value",
+        "results": [
+          {
+            "fsc": false,
+            "trace_rank": 0,
+            "trace_rank_corrected": null,
+            "bartlett_factor": null,
+            "trace_stat_at_decision": 6.2476,
+            "elapsed_s": 0.01
+          },
+          {
+            "fsc": true,
+            "trace_rank": 0,
+            "trace_rank_corrected": 0,
+            "bartlett_factor": 0.9625,
+            "trace_stat_at_decision": 6.2476,
+            "elapsed_s": 0.01
+          }
+        ]
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "3-variable system with rank=2 T=500",
+        "status": "success",
+        "trace_rank": 2,
+        "max_eig_rank": 2,
+        "lag_order": 1,
+        "first_cointegrating_vector": null,
+        "elapsed_s": 0.02
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 2
+  },
+  "all_findings": [
+    {
+      "id": "F-J-T1-FSC-FLIP",
+      "severity": "cosmetic",
+      "title": "Reimers correction changes trace rank decision at 1 T-value(s); 0 are at T > 200",
+      "details": [
+        {
+          "T": 50,
+          "uncorrected_rank": 1,
+          "corrected_rank": 0
+        }
+      ]
+    },
+    {
+      "id": "F-J-T1-DET",
+      "severity": "cosmetic",
+      "title": "trace_rank varies across det_order on the rank-1 fixture (DGP has no constant): {1, 2}",
+      "details": "The rank-1 fixture's DGP has no constant or trend (y_t = y_{t-1} + eps_t; x_t = beta*y_t + nu_t). Specifying det_order=0 (constant in cointegration space) or det_order=1 (linear trend) on a drift-free DGP is a model misspecification; in finite samples, the extra deterministic parameter creates a spurious second cointegrating direction that the trace test may detect. With det_order=-1 (correctly specified), the wrapper returns rank=1 as expected. This is standard Johansen behavior and is documented as user-facing guidance in the findings doc: 'Choose det_order to match the deterministic structure of your data; wrong choice can over- or under-detect rank.'",
+      "sweep": [
+        {
+          "det_order": -1,
+          "wrapper_status": "success",
+          "trace_rank": 1,
+          "max_eig_rank": 1,
+          "lag_order": 1,
+          "trace_stat_at_decision": 211.8255,
+          "elapsed_s": 0.01
+        },
+        {
+          "det_order": 0,
+          "wrapper_status": "success",
+          "trace_rank": 2,
+          "max_eig_rank": 2,
+          "lag_order": 1,
+          "trace_stat_at_decision": 7.3329,
+          "elapsed_s": 0.02
+        },
+        {
+          "det_order": 1,
+          "wrapper_status": "success",
+          "trace_rank": 2,
+          "max_eig_rank": 2,
+          "lag_order": 1,
+          "trace_stat_at_decision": 7.589,
+          "elapsed_s": 0.02
+        }
+      ]
+    }
+  ]
+}

@@ -22,8 +22,8 @@ Phase 1 design audit and methodology.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 4 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26)
-- PENDING: 2 (johansen_cointegration, stochastic_volatility)
+- AUDITED: 5 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26)
+- PENDING: 1 (stochastic_volatility)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
 - UNAUDITED: 76
@@ -130,7 +130,7 @@ Phase 1 design audit and methodology.
 | bvar | UNAUDITED | — | — | — | — |
 | dynamic_factor_model | UNAUDITED | — | — | — | — |
 | forecast_reconciliation | UNAUDITED | — | — | — | — |
-| johansen_cointegration | PENDING | — | — | — | — |
+| johansen_cointegration | AUDITED | [johansen_findings_2026_04_26.md](calibration_audit/johansen_findings_2026_04_26.md) | 0 | 0 | 2 |
 | pca_analysis | UNAUDITED | — | — | — | — |
 | var | UNAUDITED | — | — | — | — |
 | vecm | UNAUDITED | — | — | — | — |

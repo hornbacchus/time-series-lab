@@ -328,10 +328,184 @@ def canonical_5():
     return ok
 
 
+# ─────────────────────────────────────────────────────────
+# Calibration Audit Phase 2 Session 4 — adversarial canonicals
+# C-CAL-1 .. C-CAL-4 per CAI Phase 1 §3.4 (numbered as
+# canonical_6 .. canonical_9 per CAL-R4 numbering convention).
+# Findings doc: docs/calibration_audit/
+# johansen_findings_2026_04_26.md
+# ─────────────────────────────────────────────────────────
+
+
+def _synthetic_indep_random_walks(T, seed=43, noise=0.5):
+    """Two independent random walks (no cointegration; rank=0)."""
+    rng = np.random.default_rng(seed)
+    y = np.cumsum(rng.standard_normal(T) * noise)
+    x = np.cumsum(rng.standard_normal(T) * noise)
+    time_ = [f"d_{i+1}" for i in range(T)]
+    return time_, ["y", "x"], [y.tolist(), x.tolist()]
+
+
+def _synthetic_triplet_rank2(T, seed=45):
+    """3-variable system with rank=2 (one common stochastic trend)."""
+    rng = np.random.default_rng(seed)
+    z = np.cumsum(rng.standard_normal(T) * 0.5)
+    y = z + rng.standard_normal(T) * 0.3
+    x = 0.5 * z + rng.standard_normal(T) * 0.3
+    time_ = [f"d_{i+1}" for i in range(T)]
+    return time_, ["z", "y", "x"], [z.tolist(), y.tolist(), x.tolist()]
+
+
+def _synthetic_near_unit_root(T, seed=44, phi_adj=0.98, noise=0.4):
+    """Bivariate rank-1 with near-unit-root adjustment (slow ECM).
+
+    The slow adjustment makes finite-sample inference much harder;
+    this is the case where Reimers correction is theoretically most
+    valuable.
+    """
+    rng = np.random.default_rng(seed)
+    eps = rng.standard_normal(T) * noise
+    nu = rng.standard_normal(T) * noise
+    y = np.cumsum(eps)
+    x = np.zeros(T)
+    for t in range(1, T):
+        x[t] = phi_adj * x[t - 1] + (1 - phi_adj) * y[t] + nu[t]
+    time_ = [f"d_{i+1}" for i in range(T)]
+    return time_, ["y", "x"], [y.tolist(), x.tolist()]
+
+
+def canonical_6():
+    """C-CAL-1: Known rank-1 bivariate VAR T=500.
+
+    DGP has no constant (y_t = y_{t-1} + eps_t; x_t = 0.5*y_t + nu_t),
+    so canonical specifies det_order=-1 to match. Verifies wrapper
+    correctly recovers rank=1 under correctly-specified deterministic
+    structure.
+    """
+    print("\n" + "=" * 60)
+    print("C-CAL-1 (canonical_6): Known rank-1 T=500, det_order=-1")
+    print("=" * 60)
+    time_, names, values = _synthetic_cointegrated_var(
+        T=500, seed=42, beta=0.5,
+    )
+    ctx = _build_ctx(
+        time_, names, values, preset="Balanced",
+        params={"det_order": -1},
+    )
+    res = jc.run(ctx, _null_progress)
+    if res.get("status") != "success":
+        print(f"  FAIL: status={res.get('status')}")
+        return False
+    a = res.get("audit_fields", {}) or {}
+    rank = a.get("trace_rank")
+    if rank != 1:
+        print(f"  FAIL: trace_rank={rank}, expected 1")
+        return False
+    print(f"  PASS trace_rank={rank} (correctly specified det_order=-1)")
+    return True
+
+
+def canonical_7():
+    """C-CAL-2: Two independent random walks T=500.
+
+    Verifies wrapper does NOT spuriously detect cointegration. Rank
+    must be 0 (false-positive control).
+    """
+    print("\n" + "=" * 60)
+    print("C-CAL-2 (canonical_7): Two indep RW T=500")
+    print("=" * 60)
+    time_, names, values = _synthetic_indep_random_walks(
+        T=500, seed=43,
+    )
+    ctx = _build_ctx(
+        time_, names, values, preset="Balanced",
+        params={"det_order": 0},
+    )
+    res = jc.run(ctx, _null_progress)
+    if res.get("status") != "success":
+        print(f"  FAIL: status={res.get('status')}")
+        return False
+    a = res.get("audit_fields", {}) or {}
+    rank = a.get("trace_rank")
+    if rank != 0:
+        print(f"  FAIL: trace_rank={rank}, expected 0 (no spurious detection)")
+        return False
+    print(f"  PASS trace_rank={rank} (no spurious detection)")
+    return True
+
+
+def canonical_8():
+    """C-CAL-3: Near-unit-root small-sample T=80.
+
+    Tests Reimers correction's small-sample value: with phi_adj=0.98
+    (very slow ECM adjustment), finite-sample inference is hardest at
+    T=80. Whether the correction changes the rank decision in this
+    fixture depends on the realization; the canonical only verifies
+    the wrapper runs cleanly under both fsc=False and fsc=True and
+    produces a reasonable Bartlett factor when fsc=True.
+    """
+    print("\n" + "=" * 60)
+    print("C-CAL-3 (canonical_8): Near-unit-root T=80 (Reimers test)")
+    print("=" * 60)
+    time_, names, values = _synthetic_near_unit_root(
+        T=80, seed=44, phi_adj=0.98,
+    )
+    for fsc in [False, True]:
+        ctx = _build_ctx(
+            time_, names, values, preset="Balanced",
+            params={"finite_sample_correction": fsc, "det_order": 0},
+        )
+        res = jc.run(ctx, _null_progress)
+        if res.get("status") != "success":
+            print(f"  FAIL fsc={fsc}: status={res.get('status')}")
+            return False
+        a = res.get("audit_fields", {}) or {}
+        if fsc:
+            bart = a.get("bartlett_factor")
+            if bart is None or bart <= 0 or bart > 1.0:
+                print(f"  FAIL fsc=True: bartlett_factor={bart} not in (0, 1]")
+                return False
+            print(f"  PASS fsc=True: bartlett={bart}, "
+                  f"corrected_rank={a.get('trace_rank_corrected')}")
+        else:
+            print(f"  PASS fsc=False: trace_rank={a.get('trace_rank')}")
+    return True
+
+
+def canonical_9():
+    """C-CAL-4: Triplet rank-2 T=500.
+
+    3-variable system with one common stochastic trend → rank=2.
+    DGP has no constant → det_order=-1. Verifies wrapper handles
+    multi-rank cointegration correctly.
+    """
+    print("\n" + "=" * 60)
+    print("C-CAL-4 (canonical_9): Triplet rank-2 T=500, det_order=-1")
+    print("=" * 60)
+    time_, names, values = _synthetic_triplet_rank2(T=500, seed=45)
+    ctx = _build_ctx(
+        time_, names, values, preset="Balanced",
+        params={"det_order": -1},
+    )
+    res = jc.run(ctx, _null_progress)
+    if res.get("status") != "success":
+        print(f"  FAIL: status={res.get('status')}")
+        return False
+    a = res.get("audit_fields", {}) or {}
+    rank = a.get("trace_rank")
+    if rank != 2:
+        print(f"  FAIL: trace_rank={rank}, expected 2")
+        return False
+    print(f"  PASS trace_rank={rank}, max_eig_rank={a.get('max_eig_rank')}, "
+          f"lag={a.get('lag_order')}")
+    return True
+
+
 def main():
     results = []
     for fn in (canonical_1, canonical_2, canonical_3,
-               canonical_4, canonical_5):
+               canonical_4, canonical_5,
+               canonical_6, canonical_7, canonical_8, canonical_9):
         try:
             ok = fn()
         except Exception as e:
