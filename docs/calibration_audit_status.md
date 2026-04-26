@@ -26,8 +26,9 @@ that route to a single `garch_model.py` wrapper).
 | 6 | garch + gjr_garch + egarch (batch; first extension) | fcc73b3 | 2 (both fixed inline) | 0 | 0 |
 | 7 | har_rv (second extension) | d32dd75 | 0 | 0 | 0 |
 | 8 | caviar_quantile_dynamics (closes vol/risk batch) | 757a354 | 0 | 0 | 0 |
-| 9 | var + vecm (multivariate batch) | (this commit) | 1 (fixed inline) | 0 | 0 |
-| **Total** | **13 wrappers AUDITED** | — | **3 (all fixed)** | **3 (all fixed)** | **6** |
+| 9 | var + vecm (multivariate batch) | a2b7872 | 1 (fixed inline) | 0 | 0 |
+| 10 | arima + auto_arima + sarima (forecasting classical batch) | (this commit) | 1 (fixed inline) | 0 | 0 |
+| **Total** | **16 wrappers AUDITED** | — | **4 (all fixed)** | **3 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -81,7 +82,7 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 13 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26)
+- AUDITED: 16 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26; arima + auto_arima + sarima — Session 10 forecasting classical batch, 2026-04-26)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
@@ -133,12 +134,12 @@ extensions are operationally valuable.
 
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
-| arima | UNAUDITED | — | — | — | — |
+| arima | AUDITED | [arima_family_findings_2026_04_26.md](calibration_audit/arima_family_findings_2026_04_26.md) | 0 | 0 | 0 |
 | arimax_sarimax | UNAUDITED | — | — | — | — |
-| auto_arima | UNAUDITED | — | — | — | — |
+| auto_arima | AUDITED | [arima_family_findings_2026_04_26.md](calibration_audit/arima_family_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
 | ets_hw | UNAUDITED | — | — | — | — |
 | intermittent_demand | UNAUDITED | — | — | — | — |
-| sarima | UNAUDITED | — | — | — | — |
+| sarima | AUDITED | [arima_family_findings_2026_04_26.md](calibration_audit/arima_family_findings_2026_04_26.md) | 0 | 0 | 0 |
 | theta_forecast | UNAUDITED | — | — | — | — |
 | transfer_function | UNAUDITED | — | — | — | — |
 

@@ -140,6 +140,28 @@ def _run_auto_arima(ctx, clean, name, horizon, warnings, progress_callback):
     def _trace_print(msg):
         _trace_log.append(str(msg))
 
+    # CAI Phase 2 Session 10 fix (F-AR-AUTO-SEASONAL-START):
+    # pmdarima 2.1.1 enforces start_P <= max_P (and similarly for
+    # Q, D). Default start_P=1, start_Q=1, start_D=0. When the
+    # wrapper sets max_P=0/max_Q=0 to disable seasonal search,
+    # pmdarima raises ValueError "max_P must be >= start_P". The
+    # bug affected ALL auto_arima invocations because the wrapper
+    # always passes the seasonal-disabled overrides under
+    # seasonal=False (the default for non-seasonal use). Fix:
+    # also set start_P=0/start_Q=0 when seasonal=False so the
+    # constraint holds. seasonal=True path is unchanged.
+    if seasonal:
+        _max_P = cfg["max_P"]
+        _max_Q = cfg["max_Q"]
+        _max_D = cfg["max_D"]
+        _start_P = 1
+        _start_Q = 1
+    else:
+        _max_P = 0
+        _max_Q = 0
+        _max_D = 0
+        _start_P = 0
+        _start_Q = 0
     model = pm.auto_arima(
         clean,
         d=d,
@@ -148,9 +170,11 @@ def _run_auto_arima(ctx, clean, name, horizon, warnings, progress_callback):
         max_d=max_d,
         seasonal=seasonal,
         m=m if seasonal else 1,
-        max_P=cfg["max_P"] if seasonal else 0,
-        max_Q=cfg["max_Q"] if seasonal else 0,
-        max_D=cfg["max_D"] if seasonal else 0,
+        start_P=_start_P,
+        max_P=_max_P,
+        start_Q=_start_Q,
+        max_Q=_max_Q,
+        max_D=_max_D,
         stepwise=cfg["stepwise"],
         information_criterion=ic,
         suppress_warnings=True,

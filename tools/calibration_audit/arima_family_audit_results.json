@@ -1,0 +1,400 @@
+{
+  "date": "2026-04-26",
+  "wrappers": [
+    "arima",
+    "auto_arima",
+    "sarima"
+  ],
+  "sweep_0": {
+    "arima_invalid_order": "status=failure, err_msg=invalid literal for int() with base 10: 'abc'",
+    "sarima_invalid_trend": "status=failure, audit_trend=None, err_msg=Must include nonzero seasonal periodicity if including seasonal AR, MA, or differencing.",
+    "sarima_invalid_order": "status=success, audit_order='(1,1,1)', warnings=[\"Invalid order 'abc'. Using default (1,1,1).\", 'Residual autocorrelation at lag 10 (p=0.0061).']",
+    "auto_arima_invalid_ic": "status=failure, err_msg=auto_arima not defined for information_criteria=xyz. Valid information criteria include: {'oob', 'hqic', 'aic', 'bic', 'aicc'}",
+    "findings": []
+  },
+  "technique_1": {
+    "sweep_1_1_manual_order": [
+      {
+        "order_label": "(1,0,1)_truth",
+        "order": [
+          1,
+          0,
+          1
+        ],
+        "wrapper_status": "success",
+        "aic": 1381.3,
+        "bic": 1398.16,
+        "elapsed_s": 0.09
+      },
+      {
+        "order_label": "(2,0,1)",
+        "order": [
+          2,
+          0,
+          1
+        ],
+        "wrapper_status": "success",
+        "aic": 1380.24,
+        "bic": 1401.31,
+        "elapsed_s": 0.14
+      },
+      {
+        "order_label": "(1,0,2)",
+        "order": [
+          1,
+          0,
+          2
+        ],
+        "wrapper_status": "success",
+        "aic": 1381.08,
+        "bic": 1402.16,
+        "elapsed_s": 0.15
+      },
+      {
+        "order_label": "(2,0,2)",
+        "order": [
+          2,
+          0,
+          2
+        ],
+        "wrapper_status": "success",
+        "aic": 1380.64,
+        "bic": 1405.93,
+        "elapsed_s": 0.39
+      },
+      {
+        "order_label": "(3,0,3)_overparam",
+        "order": [
+          3,
+          0,
+          3
+        ],
+        "wrapper_status": "success",
+        "aic": 1384.56,
+        "bic": 1418.27,
+        "elapsed_s": 0.91
+      }
+    ],
+    "sweep_1_2_ic_selection": [
+      {
+        "ic": "aic",
+        "wrapper_status": "success",
+        "selected_order": "(2,0,0)",
+        "aic": 1377.72,
+        "bic": 1390.37,
+        "elapsed_s": 0.69
+      },
+      {
+        "ic": "bic",
+        "wrapper_status": "success",
+        "selected_order": "(2,0,0)",
+        "aic": 1377.72,
+        "bic": 1390.37,
+        "elapsed_s": 0.75
+      },
+      {
+        "ic": "aicc",
+        "wrapper_status": "success",
+        "selected_order": "(2,0,0)",
+        "aic": 1377.72,
+        "bic": 1390.37,
+        "elapsed_s": 0.76
+      }
+    ],
+    "sweep_1_3_seasonal_D": [
+      {
+        "seasonal_D": 0,
+        "wrapper_status": "success",
+        "aic": 1450.86,
+        "bic": 1467.72,
+        "rmse": 1.0253,
+        "elapsed_s": 0.99
+      },
+      {
+        "seasonal_D": 1,
+        "wrapper_status": "success",
+        "aic": 1415.12,
+        "bic": 1431.88,
+        "rmse": 1.0311,
+        "elapsed_s": 1.09
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "wrapper": "arima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(1,0,1)",
+        "aic": 1431.47,
+        "bic": 1448.32,
+        "rmse": 1.0046,
+        "method": "manual",
+        "elapsed_s": 0.13
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "auto_arima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(0,0,0)",
+        "aic": 1430.42,
+        "bic": 1434.64,
+        "rmse": 1.0095,
+        "method": "auto_arima",
+        "elapsed_s": 0.26
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "sarima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(1,0,1)",
+        "aic": 1431.35,
+        "bic": 1444.0,
+        "rmse": 1.0064,
+        "method": null,
+        "elapsed_s": 0.08
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "arima",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "order": "(1,1,1)",
+        "aic": -1331.42,
+        "bic": -1318.78,
+        "rmse": 0.1659,
+        "method": "manual",
+        "elapsed_s": 0.13
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "auto_arima",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "order": "(0,1,0)",
+        "aic": -1334.47,
+        "bic": -1330.25,
+        "rmse": 0.166,
+        "method": "auto_arima",
+        "elapsed_s": 0.73
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "sarima",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "order": "(1,1,1)",
+        "aic": -1331.42,
+        "bic": -1318.78,
+        "rmse": 0.1659,
+        "method": null,
+        "elapsed_s": 0.13
+      },
+      {
+        "series": "DGS2",
+        "wrapper": "arima",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "order": "(1,1,1)",
+        "aic": -1288.85,
+        "bic": -1276.21,
+        "rmse": 0.1865,
+        "method": "manual",
+        "elapsed_s": 0.11
+      },
+      {
+        "series": "DGS2",
+        "wrapper": "auto_arima",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "order": "(0,1,0)",
+        "aic": -1287.87,
+        "bic": -1283.66,
+        "rmse": 0.1866,
+        "method": "auto_arima",
+        "elapsed_s": 0.95
+      },
+      {
+        "series": "DGS2",
+        "wrapper": "sarima",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "order": "(1,1,1)",
+        "aic": -1288.85,
+        "bic": -1276.21,
+        "rmse": 0.1865,
+        "method": null,
+        "elapsed_s": 0.12
+      },
+      {
+        "series": "DEXUSEU",
+        "wrapper": "arima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(1,0,1)",
+        "aic": 625.44,
+        "bic": 642.3,
+        "rmse": 0.4487,
+        "method": "manual",
+        "elapsed_s": 0.14
+      },
+      {
+        "series": "DEXUSEU",
+        "wrapper": "auto_arima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(0,0,0)",
+        "aic": 621.2,
+        "bic": 625.42,
+        "rmse": 0.4494,
+        "method": "auto_arima",
+        "elapsed_s": 0.64
+      },
+      {
+        "series": "DEXUSEU",
+        "wrapper": "sarima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(1,0,1)",
+        "aic": 623.52,
+        "bic": 636.16,
+        "rmse": 0.4487,
+        "method": null,
+        "elapsed_s": 0.09
+      },
+      {
+        "series": "GOLD",
+        "wrapper": "arima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(1,0,1)",
+        "aic": 1362.15,
+        "bic": 1379.01,
+        "rmse": 0.9373,
+        "method": "manual",
+        "elapsed_s": 0.1
+      },
+      {
+        "series": "GOLD",
+        "wrapper": "auto_arima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(0,0,0)",
+        "aic": 1358.31,
+        "bic": 1366.74,
+        "rmse": 0.9374,
+        "method": "auto_arima",
+        "elapsed_s": 0.66
+      },
+      {
+        "series": "GOLD",
+        "wrapper": "sarima",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "order": "(1,0,1)",
+        "aic": 1366.3,
+        "bic": 1378.95,
+        "rmse": 0.9431,
+        "method": null,
+        "elapsed_s": 0.03
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "wrapper": "arima",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.22
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "auto_arima",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "sarima",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.32
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "auto_arima",
+        "case": "white noise (expect order \u2248 (0,0,0))",
+        "status": "success",
+        "selected_order": "(2,0,2)",
+        "aic": 806.36,
+        "elapsed_s": 1.49
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "auto_arima",
+        "case": "random walk (expect d=1)",
+        "status": "success",
+        "selected_order": "(0,2,2)",
+        "elapsed_s": 3.46
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "arima",
+        "case": "short series T=30",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.03
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "auto_arima",
+        "case": "short series T=30",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.17
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "sarima",
+        "case": "short series T=30",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.02
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}
