@@ -29,8 +29,9 @@ that route to a single `garch_model.py` wrapper).
 | 9 | var + vecm (multivariate batch) | a2b7872 | 1 (fixed inline) | 0 | 0 |
 | 10 | arima + auto_arima + sarima (forecasting classical batch) | 696181a | 1 (fixed inline) | 0 | 0 |
 | 11 | arimax_sarimax + intermittent_demand + theta_forecast (closes forecasting classical) | 8743512 | 0 | 0 | 0 |
-| 12 | hmm + markov_switching + tar_setar + star + nar_narx (Markov/regime batch) | (this commit) | 1 (fixed inline) | 0 | 0 |
-| **Total** | **24 wrappers AUDITED** | — | **5 (all fixed)** | **3 (all fixed)** | **6** |
+| 12 | hmm + markov_switching + tar_setar + star + nar_narx (Markov/regime batch) | a21bcd0 | 1 (fixed inline) | 0 | 0 |
+| 13 | fft + periodogram + lomb_scargle + wavelet_transform + wavelet_coherence + emd_hht + ssa (Frequency Domain batch) | (this commit) | 3 (all fixed inline) | 0 | 0 |
+| **Total** | **31 wrappers AUDITED** | — | **8 (all fixed)** | **3 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -84,7 +85,7 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 24 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26; arima + auto_arima + sarima — Session 10 forecasting classical batch, 2026-04-26; arimax_sarimax + intermittent_demand + theta_forecast — Session 11 closes forecasting classical, 2026-04-26; hmm + markov_switching + tar_setar + star + nar_narx — Session 12 Markov/regime batch, 2026-04-26)
+- AUDITED: 31 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26; arima + auto_arima + sarima — Session 10 forecasting classical batch, 2026-04-26; arimax_sarimax + intermittent_demand + theta_forecast — Session 11 closes forecasting classical, 2026-04-26; hmm + markov_switching + tar_setar + star + nar_narx — Session 12 Markov/regime batch, 2026-04-26; fft_spectrum + periodogram_spectral_density + lomb_scargle + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + ssa — Session 13 Frequency Domain batch, 2026-04-26)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
@@ -149,13 +150,13 @@ extensions are operationally valuable.
 
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
-| emd_hht | UNAUDITED | — | — | — | — |
-| fft_spectrum | UNAUDITED | — | — | — | — |
-| lomb_scargle | UNAUDITED | — | — | — | — |
-| periodogram_spectral_density | UNAUDITED | — | — | — | — |
-| ssa | UNAUDITED | — | — | — | — |
-| wavelet_coherence_phase_lag | UNAUDITED | — | — | — | — |
-| wavelet_transform | UNAUDITED | — | — | — | — |
+| emd_hht | AUDITED | [frequency_domain_batch_findings_2026_04_26.md](calibration_audit/frequency_domain_batch_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
+| fft_spectrum | AUDITED | [frequency_domain_batch_findings_2026_04_26.md](calibration_audit/frequency_domain_batch_findings_2026_04_26.md) | 2 (fixed inline) | 0 | 0 |
+| lomb_scargle | AUDITED | [frequency_domain_batch_findings_2026_04_26.md](calibration_audit/frequency_domain_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| periodogram_spectral_density | AUDITED | [frequency_domain_batch_findings_2026_04_26.md](calibration_audit/frequency_domain_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| ssa | AUDITED | [frequency_domain_batch_findings_2026_04_26.md](calibration_audit/frequency_domain_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| wavelet_coherence_phase_lag | AUDITED | [frequency_domain_batch_findings_2026_04_26.md](calibration_audit/frequency_domain_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| wavelet_transform | AUDITED | [frequency_domain_batch_findings_2026_04_26.md](calibration_audit/frequency_domain_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
 
 ### ML / Deep Learning
 

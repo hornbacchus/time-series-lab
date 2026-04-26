@@ -231,6 +231,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
         max_imfs = int(ctx.get_param("max_imfs", preset_cfg["max_imfs"]))
         max_sift = preset_cfg["max_sift_iterations"]
         method = ctx.get_param("method", preset_cfg.get("method", "emd")).lower()
+        # CAI Phase 2 Session 13 fix (F-FD-EMD-METHOD): explicit
+        # allowlist for `method`. Pre-fix, invalid method strings
+        # (e.g., "zzz") were silently accepted because the
+        # downstream `if method == "eemd": ... else: emd_lib.sift.
+        # sift(...)` chain fell through to the standard EMD branch
+        # without raising. audit_fields["method"] reported the
+        # user's invalid value.
+        _METHOD_OPTS = ("emd", "eemd", "ceemdan")
+        if method not in _METHOD_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown method '{method}'. Must be one of: "
+                f"{', '.join(_METHOD_OPTS)}.",
+                error_fixes=[
+                    "Use 'emd' (standard EMD), 'eemd' (Ensemble "
+                    "EMD), or 'ceemdan' (Complete EEMD with "
+                    "Adaptive Noise).",
+                ],
+            )
         ensemble_size = int(ctx.get_param("ensemble_size", preset_cfg.get("ensemble_size", 100)))
         noise_width = float(ctx.get_param("noise_width", preset_cfg.get("noise_width", 0.05)))
 

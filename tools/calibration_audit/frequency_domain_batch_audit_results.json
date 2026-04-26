@@ -1,0 +1,233 @@
+{
+  "date": "2026-04-26",
+  "wrappers": [
+    "fft_spectrum",
+    "periodogram_spectral_density",
+    "lomb_scargle",
+    "wavelet_transform",
+    "wavelet_coherence",
+    "emd_hht",
+    "ssa_model"
+  ],
+  "sweep_0": {
+    "fft_inv_window": "status=failure, audit_window=None, err=Unknown window 'zzz'. Must be one of: none, hann, hamming, blackman, bartlett.",
+    "fft_inv_detrend": "status=failure, audit_detrend=None, err=Unknown detrend 'zzz'. Must be one of: mean, linear, none.",
+    "pgm_inv_window": "status=failure, audit_window=None, err=Invalid window name 'zzz' in parameter window='zzz'!",
+    "wt_inv_wave": "status=failure, err=Unknown wavelet 'zzz'. Some valid options: ['bior1.1', 'bior1.3', 'bior1.5', 'bi",
+    "wt_inv_mode": "status=failure, audit_mode=None, err=Unknown mode name 'zzz'.",
+    "wc_inv_wave": "status=failure, audit_wavelet=None, err=CWT computation failed: Unknown wavelet name 'zzz', check wavelist() for the lis",
+    "emd_inv_method": "status=failure, audit_method=None, err=Unknown method 'zzz'. Must be one of: emd, eemd, ceemdan.",
+    "ssa_inv_wl": "status=failure, err=negative dimensions are not allowed",
+    "findings": []
+  },
+  "technique_1": {
+    "fft_detrend": [
+      {
+        "detrend": "mean",
+        "status": "success",
+        "elapsed_s": 0.0
+      },
+      {
+        "detrend": "linear",
+        "status": "success",
+        "elapsed_s": 0.0
+      },
+      {
+        "detrend": "none",
+        "status": "success",
+        "elapsed_s": 0.01
+      }
+    ],
+    "wavelet_family": [
+      {
+        "wavelet": "db4",
+        "status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "wavelet": "sym4",
+        "status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "wavelet": "coif1",
+        "status": "success",
+        "elapsed_s": 0.01
+      }
+    ],
+    "ssa_window_length": [
+      {
+        "wl": 50,
+        "status": "success",
+        "elapsed_s": 0.3
+      },
+      {
+        "wl": 100,
+        "status": "success",
+        "elapsed_s": 0.52
+      },
+      {
+        "wl": 200,
+        "status": "success",
+        "elapsed_s": 0.95
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "wrapper": "fft_spectrum",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "periodogram",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "wavelet_transform",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.02
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "emd_hht",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.11
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "ssa",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.64
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "fft_spectrum",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "periodogram",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "wavelet_transform",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "emd_hht",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.09
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "ssa",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.55
+      },
+      {
+        "series": "pair",
+        "wrapper": "wavelet_coherence",
+        "wrapper_status": "success",
+        "elapsed_s": 0.03
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "wrapper": "fft_spectrum",
+        "case": "constant series",
+        "status": "success",
+        "elapsed_s": 0.0
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "periodogram",
+        "case": "constant series",
+        "status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "wavelet_transform",
+        "case": "constant series",
+        "status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "ssa",
+        "case": "constant series",
+        "status": "success",
+        "elapsed_s": 0.12
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "fft_spectrum",
+        "status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "periodogram",
+        "status": "success",
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "fft_spectrum",
+        "status": "success",
+        "error_message": null
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "wavelet_transform",
+        "status": "success",
+        "error_message": null
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "emd_hht",
+        "status": "success",
+        "elapsed_s": 0.09
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "ssa",
+        "status": "success",
+        "elapsed_s": 0.59
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}

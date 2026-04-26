@@ -76,7 +76,42 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         detrend = ctx.get_param("detrend", "mean")
+        # CAI Phase 2 Session 13 fix (F-FD-FFT-DETREND): explicit
+        # allowlist. Pre-fix, invalid detrend strings (e.g.,
+        # "zzz") were silently treated as "none" because the
+        # downstream `if detrend == "mean": ... elif detrend ==
+        # "linear": ...` chain fell through to the no-op branch
+        # without raising. audit_fields["detrend"] reported the
+        # user's invalid value.
+        _DETREND_OPTS = ("mean", "linear", "none")
+        if str(detrend) not in _DETREND_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown detrend '{detrend}'. Must be one of: "
+                f"{', '.join(_DETREND_OPTS)}.",
+                error_fixes=[
+                    "Use 'mean' (subtract mean), 'linear' "
+                    "(subtract linear trend), or 'none' (no "
+                    "detrending).",
+                ],
+            )
         window_type = ctx.get_param("window", "none").lower()
+        # CAI Phase 2 Session 13 fix (F-FD-FFT-WINDOW): explicit
+        # allowlist. Pre-fix, invalid window strings fell through
+        # the `elif` chain to the no-window default, and
+        # audit_fields["window"] reported the user's invalid
+        # value.
+        _WINDOW_OPTS = ("none", "hann", "hamming", "blackman", "bartlett")
+        if window_type not in _WINDOW_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown window '{window_type}'. Must be one of: "
+                f"{', '.join(_WINDOW_OPTS)}.",
+                error_fixes=[
+                    "Use 'none' (rectangular), 'hann', 'hamming', "
+                    "'blackman', or 'bartlett'.",
+                ],
+            )
         n_top = int(ctx.get_param("n_top", 10))
         min_period = float(ctx.get_param("min_period", 2.0))
 
