@@ -1,0 +1,411 @@
+{
+  "date": "2026-04-26",
+  "wrapper": "evt_pot_gpd",
+  "technique_1": {
+    "sweep_1_threshold_quantile": [
+      {
+        "q": 0.8,
+        "wrapper_status": "success",
+        "xi": 0.175729,
+        "sigma": 0.544102,
+        "n_exceedances": 400,
+        "ks_pval": 0.747047,
+        "elapsed_s": 5.34
+      },
+      {
+        "q": 0.85,
+        "wrapper_status": "success",
+        "xi": 0.209649,
+        "sigma": 0.539048,
+        "n_exceedances": 300,
+        "ks_pval": 0.819721,
+        "elapsed_s": 6.93
+      },
+      {
+        "q": 0.9,
+        "wrapper_status": "success",
+        "xi": 0.208224,
+        "sigma": 0.589983,
+        "n_exceedances": 200,
+        "ks_pval": 0.541395,
+        "elapsed_s": 7.11
+      },
+      {
+        "q": 0.925,
+        "wrapper_status": "success",
+        "xi": 0.271909,
+        "sigma": 0.554243,
+        "n_exceedances": 150,
+        "ks_pval": 0.656621,
+        "elapsed_s": 9.11
+      },
+      {
+        "q": 0.95,
+        "wrapper_status": "success",
+        "xi": 0.436509,
+        "sigma": 0.479338,
+        "n_exceedances": 100,
+        "ks_pval": 0.880532,
+        "elapsed_s": 8.01
+      },
+      {
+        "q": 0.975,
+        "wrapper_status": "success",
+        "xi": 0.210572,
+        "sigma": 0.888868,
+        "n_exceedances": 50,
+        "ks_pval": 0.954039,
+        "elapsed_s": 7.07
+      },
+      {
+        "q": 0.99,
+        "wrapper_status": "success",
+        "xi": 0.485423,
+        "sigma": 0.704293,
+        "n_exceedances": 20,
+        "ks_pval": 0.957113,
+        "elapsed_s": 7.75
+      },
+      {
+        "q": 0.995,
+        "wrapper_status": "success",
+        "xi": 0.238768,
+        "sigma": 1.351538,
+        "n_exceedances": 10,
+        "ks_pval": 0.765148,
+        "elapsed_s": 12.11
+      }
+    ],
+    "sweep_2_tail": [
+      {
+        "tail": "upper",
+        "wrapper_status": "success",
+        "xi": 0.210572,
+        "sigma": 0.888868,
+        "n_exceedances": 50,
+        "elapsed_s": 6.99
+      },
+      {
+        "tail": "lower",
+        "wrapper_status": "success",
+        "xi": 0.02168,
+        "sigma": 0.813229,
+        "n_exceedances": 50,
+        "elapsed_s": 7.25
+      }
+    ],
+    "sweep_3_decluster": [
+      {
+        "decluster": false,
+        "wrapper_status": "success",
+        "decluster_applied": false,
+        "extremal_index_theta": null,
+        "xi": 0.436509,
+        "xi_post": null,
+        "n_clusters_post": null,
+        "elapsed_s": 7.15
+      },
+      {
+        "decluster": true,
+        "wrapper_status": "success",
+        "decluster_applied": true,
+        "extremal_index_theta": 0.774899,
+        "xi": 0.436509,
+        "xi_post": 0.42864,
+        "n_clusters_post": 78,
+        "elapsed_s": 12.96
+      }
+    ],
+    "sweep_4_confidence_levels": [
+      {
+        "label": "default",
+        "confidence_levels": [
+          0.95,
+          0.99,
+          0.999
+        ],
+        "wrapper_status": "success",
+        "var_values": [
+          1.199468,
+          2.671073,
+          5.865406
+        ],
+        "es_values": [
+          2.172521,
+          4.036663,
+          8.083053
+        ],
+        "elapsed_s": 6.7
+      },
+      {
+        "label": "conservative",
+        "confidence_levels": [
+          0.99,
+          0.999,
+          0.9999
+        ],
+        "wrapper_status": "success",
+        "var_values": [
+          2.671073,
+          5.865406,
+          11.052838
+        ],
+        "es_values": [
+          4.036663,
+          8.083053,
+          14.654183
+        ],
+        "elapsed_s": 6.8
+      },
+      {
+        "label": "liberal",
+        "confidence_levels": [
+          0.9,
+          0.95,
+          0.99
+        ],
+        "wrapper_status": "success",
+        "var_values": [
+          0.704058,
+          1.199468,
+          2.671073
+        ],
+        "es_values": [
+          1.544964,
+          2.172521,
+          4.036663
+        ],
+        "elapsed_s": 5.69
+      },
+      {
+        "label": "single_99",
+        "confidence_levels": [
+          0.99
+        ],
+        "wrapper_status": "success",
+        "var_values": [
+          2.671073
+        ],
+        "es_values": [
+          4.036663
+        ],
+        "elapsed_s": 6.23
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baseline_stats": [
+      {
+        "series": "GSPC",
+        "preprocessing": "log_returns",
+        "tail": "lower",
+        "T": 2514,
+        "wrapper_status": "success",
+        "elapsed_s": 6.15,
+        "xi": 0.255298,
+        "sigma": 0.939441,
+        "n_exceedances": 63,
+        "exceedance_rate": 0.02506,
+        "ks_pval": 0.75355,
+        "var_values": [
+          -1.860533,
+          -3.428112,
+          -7.150549
+        ],
+        "es_values": [
+          -2.918079,
+          -5.023054,
+          -10.021616
+        ]
+      },
+      {
+        "series": "DGS10",
+        "preprocessing": "yield_changes",
+        "tail": "upper",
+        "T": 2500,
+        "wrapper_status": "success",
+        "elapsed_s": 8.19,
+        "xi": 0.059027,
+        "sigma": 0.031467,
+        "n_exceedances": 58,
+        "exceedance_rate": 0.0232,
+        "ks_pval": 0.135368,
+        "var_values": [
+          0.086377,
+          0.13715,
+          0.218713
+        ],
+        "es_values": [
+          0.118336,
+          0.172294,
+          0.258973
+        ]
+      },
+      {
+        "series": "DGS2",
+        "preprocessing": "yield_changes",
+        "tail": "upper",
+        "T": 2500,
+        "wrapper_status": "success",
+        "elapsed_s": 7.76,
+        "xi": -0.163404,
+        "sigma": 0.063375,
+        "n_exceedances": 61,
+        "exceedance_rate": 0.0244,
+        "ks_pval": 0.560411,
+        "var_values": [
+          0.05176,
+          0.152603,
+          0.257724
+        ],
+        "es_values": [
+          0.113009,
+          0.199689,
+          0.290045
+        ]
+      },
+      {
+        "series": "DEXUSEU",
+        "preprocessing": "log_returns",
+        "tail": "lower",
+        "T": 2498,
+        "wrapper_status": "success",
+        "elapsed_s": 6.74,
+        "xi": 0.009808,
+        "sigma": 0.293255,
+        "n_exceedances": 63,
+        "exceedance_rate": 0.02522,
+        "ks_pval": 0.896067,
+        "var_values": [
+          -0.819352,
+          -1.29189,
+          -1.981042
+        ],
+        "es_values": [
+          -1.113531,
+          -1.590749,
+          -2.286727
+        ]
+      },
+      {
+        "series": "GOLD",
+        "preprocessing": "log_returns",
+        "tail": "upper",
+        "T": 2512,
+        "wrapper_status": "success",
+        "elapsed_s": 6.15,
+        "xi": 0.071616,
+        "sigma": 0.713493,
+        "n_exceedances": 63,
+        "exceedance_rate": 0.02508,
+        "ks_pval": 0.996448,
+        "var_values": [
+          1.327979,
+          2.486418,
+          4.394088
+        ],
+        "es_values": [
+          2.059459,
+          3.307261,
+          5.362089
+        ]
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "case": "Gaussian N(0,1) T=2000; expected xi near 0",
+        "status": "success",
+        "xi": -0.302475,
+        "sigma": 0.505352,
+        "n_exceedances": 50,
+        "ks_pval": 0.994366,
+        "elapsed_s": 7.5
+      },
+      {
+        "id": "C-CAL-2",
+        "case": "Pareto a=2 T=2000; expected xi=0.5",
+        "status": "success",
+        "xi": 0.156083,
+        "xi_truth": 0.5,
+        "xi_abs_err": 0.34391700000000003,
+        "xi_ci_95": [
+          -0.274346,
+          0.526233
+        ],
+        "truth_in_ci_95": true,
+        "sigma": 3.013834,
+        "n_exceedances": 50,
+        "ks_pval": 0.953707,
+        "elapsed_s": 6.91
+      },
+      {
+        "id": "C-CAL-3",
+        "case": "Mixture 95% N(0,1) + 5% Pareto T=1500; demonstrates threshold-dependence",
+        "status": "success",
+        "threshold_results": [
+          {
+            "q": 0.85,
+            "xi": 0.262951,
+            "sigma": 0.832444,
+            "n_exceedances": 225,
+            "ks_pval": 8e-06,
+            "elapsed_s": 6.83
+          },
+          {
+            "q": 0.99,
+            "xi": 0.287121,
+            "sigma": 1.07995,
+            "n_exceedances": 15,
+            "ks_pval": 0.918789,
+            "elapsed_s": 7.48
+          }
+        ]
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "T=150 Pareto(1.5) at q=0.95; tests short-series guard / overconfidence absence",
+        "status": "failure",
+        "xi": null,
+        "n_exceedances": null,
+        "ks_pval": null,
+        "elapsed_s": 0.0
+      }
+    ],
+    "findings": [
+      {
+        "id": "F-E-T3-2-COSMETIC",
+        "severity": "cosmetic",
+        "title": "Pareto recovery point xi=0.156083 off truth=0.5 by 0.344 at default q=0.975 / N_exc=50; bootstrap 95% CI [-0.274346, 0.526233] correctly contains truth",
+        "details": "GPD MLE shape parameter is known to have large small-sample bias (Castillo & Padilla 2015). At N_exc=50 with truth xi=0.5, point estimates in the 0.10-0.30 range are within typical bias envelope. The wrapper's bootstrap CI correctly spans the truth, indicating the uncertainty estimate is calibrated even when the point is biased. User-facing guidance: cite point xi alongside CI when N_exc < 100.",
+        "xi_point": 0.156083,
+        "ci_95": [
+          -0.274346,
+          0.526233
+        ]
+      }
+    ]
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 1
+  },
+  "all_findings": [
+    {
+      "id": "F-E-T3-2-COSMETIC",
+      "severity": "cosmetic",
+      "title": "Pareto recovery point xi=0.156083 off truth=0.5 by 0.344 at default q=0.975 / N_exc=50; bootstrap 95% CI [-0.274346, 0.526233] correctly contains truth",
+      "details": "GPD MLE shape parameter is known to have large small-sample bias (Castillo & Padilla 2015). At N_exc=50 with truth xi=0.5, point estimates in the 0.10-0.30 range are within typical bias envelope. The wrapper's bootstrap CI correctly spans the truth, indicating the uncertainty estimate is calibrated even when the point is biased. User-facing guidance: cite point xi alongside CI when N_exc < 100.",
+      "xi_point": 0.156083,
+      "ci_95": [
+        -0.274346,
+        0.526233
+      ]
+    }
+  ]
+}
