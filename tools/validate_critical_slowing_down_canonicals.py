@@ -28,6 +28,17 @@ import os
 import sys
 import time as _time
 
+# Reconfigure stdout/stderr for UTF-8 on Windows (Tier 2 prose
+# may contain Greek (alpha, sigma) and math symbols that cp1252
+# can't encode). Same fix pattern as kalman / SV / har_cj
+# canonical scripts; closes F-K-EXTRA-2 deferred item from CAI
+# Session 1 (kalman audit 2026-04-25).
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "engine"))
 
