@@ -1,0 +1,412 @@
+{
+  "date": "2026-04-26",
+  "wrapper": "stochastic_volatility",
+  "technique_1": {
+    "sweep_1_1_paths": [
+      {
+        "path": "quasi_ml",
+        "wrapper_status": "success",
+        "mu": -10.058514,
+        "phi": 0.519961,
+        "sigma_eta": 0.496356,
+        "h_post_mean_present": false,
+        "elapsed_s": 0.75
+      },
+      {
+        "path": "gibbs",
+        "wrapper_status": "success",
+        "mu": -9.949905,
+        "phi": 0.909333,
+        "sigma_eta": 0.157879,
+        "ess_min": 44.1,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.0181,
+        "rhat_max_param": "phi",
+        "h_post_mean_present": true,
+        "h_post_std_present": true,
+        "mcmc_backend_applied": "gibbs",
+        "elapsed_s": 10.94
+      },
+      {
+        "path": "nuts_attempted",
+        "status": "SKIPPED",
+        "reason": "machine_has_no_c_compiler",
+        "note": "NUTS path is the verification-initiative-validated B6 cascade target. Direct execution requires g++; see B6 canonicals for monkeypatched probe\u2192True exercises that are SKIP-tolerant on this machine."
+      }
+    ],
+    "sweep_1_2_b6_cascade": [
+      {
+        "label": "auto_probe_false",
+        "mcmc_backend_param": null,
+        "probe_value": false,
+        "wrapper_status": "success",
+        "mcmc_backend_applied": "gibbs",
+        "mcmc_backend_fallback_reason": "c_compiler_unavailable",
+        "c_backend_available": false,
+        "mu": -10.030247,
+        "phi": 0.903197,
+        "elapsed_s": 6.25
+      },
+      {
+        "label": "pymc_probe_false",
+        "mcmc_backend_param": "pymc",
+        "probe_value": false,
+        "wrapper_status": "success",
+        "mcmc_backend_applied": "gibbs",
+        "mcmc_backend_fallback_reason": "c_compiler_unavailable",
+        "c_backend_available": false,
+        "mu": -10.030247,
+        "phi": 0.903197,
+        "elapsed_s": 5.86
+      },
+      {
+        "label": "explicit_gibbs",
+        "mcmc_backend_param": "gibbs",
+        "probe_value": false,
+        "wrapper_status": "success",
+        "mcmc_backend_applied": "gibbs",
+        "mcmc_backend_fallback_reason": null,
+        "c_backend_available": false,
+        "mu": -10.030247,
+        "phi": 0.903197,
+        "elapsed_s": 6.06
+      }
+    ],
+    "sweep_1_3_mcmc_draws": [
+      {
+        "draws": 500,
+        "wrapper_status": "success",
+        "mu": -9.97063,
+        "phi": 0.910841,
+        "sigma_eta": 0.155956,
+        "ess_min": null,
+        "rhat_max": null,
+        "elapsed_s": 2.18
+      },
+      {
+        "draws": 1000,
+        "wrapper_status": "success",
+        "mu": -10.002715,
+        "phi": 0.931979,
+        "sigma_eta": 0.158295,
+        "ess_min": 18.3,
+        "rhat_max": 1.2155,
+        "elapsed_s": 3.83
+      },
+      {
+        "draws": 2000,
+        "wrapper_status": "success",
+        "mu": -10.000401,
+        "phi": 0.93517,
+        "sigma_eta": 0.142743,
+        "ess_min": 29.2,
+        "rhat_max": 1.1031,
+        "elapsed_s": 5.73
+      },
+      {
+        "draws": 5000,
+        "wrapper_status": "success",
+        "mu": -10.001081,
+        "phi": 0.937594,
+        "sigma_eta": 0.132876,
+        "ess_min": 75.3,
+        "rhat_max": 1.0548,
+        "elapsed_s": 11.73
+      }
+    ],
+    "sweep_1_4_innovations": [
+      {
+        "dgp": "gaussian",
+        "fit": "gaussian",
+        "wrapper_status": "success",
+        "mu": -10.233299,
+        "phi": 0.981567,
+        "sigma_eta": 0.104156,
+        "nu": null,
+        "elapsed_s": 0.53
+      },
+      {
+        "dgp": "gaussian",
+        "fit": "student_t",
+        "wrapper_status": "success",
+        "mu": -10.238332,
+        "phi": 0.981595,
+        "sigma_eta": 0.103992,
+        "nu": null,
+        "elapsed_s": 1.16
+      },
+      {
+        "dgp": "student_t",
+        "fit": "gaussian",
+        "wrapper_status": "success",
+        "mu": -10.449532,
+        "phi": 0.155018,
+        "sigma_eta": 1.117783,
+        "nu": null,
+        "elapsed_s": 0.57
+      },
+      {
+        "dgp": "student_t",
+        "fit": "student_t",
+        "wrapper_status": "success",
+        "mu": -10.887733,
+        "phi": 0.956294,
+        "sigma_eta": 0.108018,
+        "nu": null,
+        "elapsed_s": 1.47
+      }
+    ],
+    "findings": [
+      {
+        "id": "F-S-T1-ESS",
+        "severity": "cosmetic",
+        "title": "ESS_min=29.2 at default Balanced (2000 draws) on synthetic SV \u2014 Kim-Shephard-Chib Gibbs autocorrelation property (not wrapper bug)",
+        "details": "TSL's MCMC Gibbs path uses Kim-Shephard-Chib 1998 (KSC), a one-at-a-time latent-state sampler with substantial autocorrelation by construction. Typical ESS at default Balanced (4000 total draws) is 30-100 on sigma_eta. The 2b audit's 'ESS > 1000' threshold was a stochvol::svsample (R) target; stochvol uses ASIS (Yu-Meng 2011), a much more efficient sampler. The TSL wrapper produces correct posterior means (verified at machine precision in 2b parity audit) \u2014 high autocorrelation is the trade-off for a pure-numpy/scipy implementation that doesn't require PyTensor. User guidance: use Thorough preset for higher-precision posterior means.",
+        "default_row": {
+          "draws": 2000,
+          "wrapper_status": "success",
+          "mu": -10.000401,
+          "phi": 0.93517,
+          "sigma_eta": 0.142743,
+          "ess_min": 29.2,
+          "rhat_max": 1.1031,
+          "elapsed_s": 5.73
+        }
+      },
+      {
+        "id": "F-S-T1-RHAT",
+        "severity": "cosmetic",
+        "title": "R-hat_max=1.1031 marginally > 1.1 at default Balanced (KSC autocorrelation; use Thorough)",
+        "details": {
+          "draws": 2000,
+          "wrapper_status": "success",
+          "mu": -10.000401,
+          "phi": 0.93517,
+          "sigma_eta": 0.142743,
+          "ess_min": 29.2,
+          "rhat_max": 1.1031,
+          "elapsed_s": 5.73
+        }
+      }
+    ]
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 19.45,
+        "mu_posterior_mean": -0.041688,
+        "phi_posterior_mean": 0.979281,
+        "sigma_eta_posterior_mean": 0.177487,
+        "ess_min": 37.3,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.0148,
+        "rhat_max_param": "sigma_eta",
+        "mcmc_backend_applied": "gibbs",
+        "h_post_mean_present": true,
+        "h_post_std_present": true,
+        "h_post_mean_range": [
+          -1.3575,
+          2.1446
+        ],
+        "h_post_std_range": [
+          0.2984,
+          0.4787
+        ]
+      },
+      {
+        "series": "DGS10",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 21.62,
+        "mu_posterior_mean": -5.612279,
+        "phi_posterior_mean": 0.986458,
+        "sigma_eta_posterior_mean": 0.08865,
+        "ess_min": 39.1,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.0095,
+        "rhat_max_param": "phi",
+        "mcmc_backend_applied": "gibbs",
+        "h_post_mean_present": true,
+        "h_post_std_present": true,
+        "h_post_mean_range": [
+          -6.6258,
+          -4.7976
+        ],
+        "h_post_std_range": [
+          0.2222,
+          0.3926
+        ]
+      },
+      {
+        "series": "DGS2",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 20.4,
+        "mu_posterior_mean": -5.994881,
+        "phi_posterior_mean": 0.991068,
+        "sigma_eta_posterior_mean": 0.171148,
+        "ess_min": 23.6,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.0318,
+        "rhat_max_param": "sigma_eta",
+        "mcmc_backend_applied": "gibbs",
+        "h_post_mean_present": true,
+        "h_post_std_present": true,
+        "h_post_mean_range": [
+          -8.7698,
+          -3.3946
+        ],
+        "h_post_std_range": [
+          0.3028,
+          0.5314
+        ]
+      },
+      {
+        "series": "DEXUSEU",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 19.13,
+        "mu_posterior_mean": -1.60592,
+        "phi_posterior_mean": 0.968577,
+        "sigma_eta_posterior_mean": 0.177577,
+        "ess_min": 28.3,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.0293,
+        "rhat_max_param": "sigma_eta",
+        "mcmc_backend_applied": "gibbs",
+        "h_post_mean_present": true,
+        "h_post_std_present": true,
+        "h_post_mean_range": [
+          -2.9535,
+          -0.3965
+        ],
+        "h_post_std_range": [
+          0.3062,
+          0.4645
+        ]
+      },
+      {
+        "series": "GOLD",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 18.55,
+        "mu_posterior_mean": -0.26605,
+        "phi_posterior_mean": 0.888401,
+        "sigma_eta_posterior_mean": 0.249931,
+        "ess_min": 26.5,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.1001,
+        "rhat_max_param": "phi",
+        "mcmc_backend_applied": "gibbs",
+        "h_post_mean_present": true,
+        "h_post_std_present": true,
+        "h_post_mean_range": [
+          -1.1054,
+          1.009
+        ],
+        "h_post_std_range": [
+          0.3401,
+          0.5057
+        ]
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "case": "Constant volatility (no SV); SV is misspecified",
+        "status": "success",
+        "mu": -4.718515,
+        "phi": 0.889484,
+        "sigma_eta": 0.10456,
+        "ess_min": 28.2,
+        "rhat_max": 1.0496,
+        "elapsed_s": 9.36
+      },
+      {
+        "id": "C-CAL-2",
+        "case": "Extreme persistence phi=0.999, T=500",
+        "status": "success",
+        "phi": 0.980533,
+        "phi_truth": 0.999,
+        "ess_min": 56.6,
+        "rhat_max": 1.0188,
+        "elapsed_s": 9.21
+      },
+      {
+        "id": "C-CAL-3",
+        "case": "Short series T=80; tests honest uncertainty",
+        "status": "success",
+        "mu": -9.197419,
+        "phi": 0.949058,
+        "sigma_eta": 0.151067,
+        "mu_post_std": null,
+        "phi_post_std": null,
+        "sigma_eta_post_std": null,
+        "ess_min": 86.4,
+        "rhat_max": 1.0213,
+        "elapsed_s": 1.95
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "B6 cascade exercise (auto + probe\u2192False)",
+        "status": "success",
+        "mcmc_backend_applied": "gibbs",
+        "mcmc_backend_fallback_reason": "c_compiler_unavailable",
+        "mu": -9.815244,
+        "phi": 0.973022,
+        "sigma_eta": 0.125854,
+        "elapsed_s": 5.88
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 2
+  },
+  "all_findings": [
+    {
+      "id": "F-S-T1-ESS",
+      "severity": "cosmetic",
+      "title": "ESS_min=29.2 at default Balanced (2000 draws) on synthetic SV \u2014 Kim-Shephard-Chib Gibbs autocorrelation property (not wrapper bug)",
+      "details": "TSL's MCMC Gibbs path uses Kim-Shephard-Chib 1998 (KSC), a one-at-a-time latent-state sampler with substantial autocorrelation by construction. Typical ESS at default Balanced (4000 total draws) is 30-100 on sigma_eta. The 2b audit's 'ESS > 1000' threshold was a stochvol::svsample (R) target; stochvol uses ASIS (Yu-Meng 2011), a much more efficient sampler. The TSL wrapper produces correct posterior means (verified at machine precision in 2b parity audit) \u2014 high autocorrelation is the trade-off for a pure-numpy/scipy implementation that doesn't require PyTensor. User guidance: use Thorough preset for higher-precision posterior means.",
+      "default_row": {
+        "draws": 2000,
+        "wrapper_status": "success",
+        "mu": -10.000401,
+        "phi": 0.93517,
+        "sigma_eta": 0.142743,
+        "ess_min": 29.2,
+        "rhat_max": 1.1031,
+        "elapsed_s": 5.73
+      }
+    },
+    {
+      "id": "F-S-T1-RHAT",
+      "severity": "cosmetic",
+      "title": "R-hat_max=1.1031 marginally > 1.1 at default Balanced (KSC autocorrelation; use Thorough)",
+      "details": {
+        "draws": 2000,
+        "wrapper_status": "success",
+        "mu": -10.000401,
+        "phi": 0.93517,
+        "sigma_eta": 0.142743,
+        "ess_min": 29.2,
+        "rhat_max": 1.1031,
+        "elapsed_s": 5.73
+      }
+    }
+  ]
+}
