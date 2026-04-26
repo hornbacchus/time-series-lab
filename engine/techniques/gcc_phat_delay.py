@@ -90,6 +90,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
         max_lag = min(max_lag, n - 1)
 
         weighting = ctx.get_param("weighting", "phat").lower()
+        # CAI Phase 2 Session 14 fix (F-CL-GCC-WEIGHTING):
+        # explicit allowlist. Pre-fix, invalid weighting strings
+        # fell through the if/elif chain to the unfiltered W=ones
+        # default branch, and audit_fields["weighting"] reported
+        # the user's invalid input.
+        _WEIGHTING_OPTS = ("phat", "scot", "roth", "unfiltered")
+        if weighting not in _WEIGHTING_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown weighting '{weighting}'. Must be one of: "
+                f"{', '.join(_WEIGHTING_OPTS)}.",
+                error_fixes=[
+                    "Use 'phat' (phase transform; default), "
+                    "'scot' (smoothed coherence transform), "
+                    "'roth' (Roth processor), or 'unfiltered' "
+                    "(plain cross-correlation).",
+                ],
+            )
         fs = float(ctx.get_param("fs", 1.0))
         interp_factor = cfg["interp_factor"]
 

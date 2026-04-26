@@ -98,6 +98,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
         window_frac = float(ctx.get_param("window_frac", cfg["window_frac"]))
         do_normalize = bool(ctx.get_param("normalize", True))
         step_pattern = ctx.get_param("step_pattern", "symmetric2")
+        # CAI Phase 2 Session 14 fix (F-CL-DTW-STEP): explicit
+        # allowlist. Pre-fix, invalid step_pattern strings fell
+        # through the `if step_pattern == "symmetric1": ... else:
+        # # symmetric2` chain to the symmetric2 default, and
+        # audit_fields["step_pattern"] reported the user's
+        # invalid input.
+        _STEP_PATTERN_OPTS = ("symmetric1", "symmetric2")
+        if step_pattern not in _STEP_PATTERN_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown step_pattern '{step_pattern}'. Must be one "
+                f"of: {', '.join(_STEP_PATTERN_OPTS)}.",
+                error_fixes=[
+                    "Use 'symmetric2' (default; allows diagonal, "
+                    "horizontal, and vertical steps) or "
+                    "'symmetric1' (only diagonal steps; no "
+                    "repeated indices).",
+                ],
+            )
         subsample = cfg["subsample"]
 
         # Subsample for large series

@@ -1,0 +1,166 @@
+{
+  "date": "2026-04-26",
+  "wrappers": [
+    "granger_causality",
+    "cross_correlation_lag",
+    "gcc_phat_delay",
+    "prewhitened_ccf_lag",
+    "rolling_ccf_lag",
+    "dtw_alignment_lag"
+  ],
+  "sweep_0": {
+    "gcc_invalid_weighting": "status=failure, audit_weighting=None, err=Unknown weighting 'zzz'. Must be one of: phat, scot, roth, unfiltered.",
+    "dtw_invalid_step_pattern": "status=failure, audit_step_pattern=None, err=Unknown step_pattern 'zzz'. Must be one of: symmetric1, symmetric2.",
+    "pwccf_baseline_status": "status=success, t=1.58s",
+    "findings": []
+  },
+  "technique_1": {
+    "gcc_weighting": [
+      {
+        "weighting": "phat",
+        "wrapper_status": "success",
+        "delay": null,
+        "elapsed_s": 0.09
+      },
+      {
+        "weighting": "scot",
+        "wrapper_status": "success",
+        "delay": null,
+        "elapsed_s": 0.07
+      },
+      {
+        "weighting": "roth",
+        "wrapper_status": "success",
+        "delay": null,
+        "elapsed_s": 0.08
+      }
+    ],
+    "ccf_normalize": [
+      {
+        "normalize": true,
+        "wrapper_status": "success",
+        "elapsed_s": 0.0
+      },
+      {
+        "normalize": false,
+        "wrapper_status": "success",
+        "elapsed_s": 0.0
+      }
+    ],
+    "dtw_step_pattern": [
+      {
+        "step_pattern": "symmetric1",
+        "wrapper_status": "success",
+        "elapsed_s": 0.08
+      },
+      {
+        "step_pattern": "symmetric2",
+        "wrapper_status": "success",
+        "elapsed_s": 0.12
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "wrapper": "granger_causality",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.02
+      },
+      {
+        "wrapper": "cross_correlation_lag",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.0
+      },
+      {
+        "wrapper": "gcc_phat_delay",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.08
+      },
+      {
+        "wrapper": "prewhitened_ccf_lag",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 1.37
+      },
+      {
+        "wrapper": "rolling_ccf_lag",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.22
+      },
+      {
+        "wrapper": "dtw_alignment_lag",
+        "T": 500,
+        "wrapper_status": "success",
+        "elapsed_s": 0.14
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "wrapper": "granger_causality",
+        "status": "success",
+        "elapsed_s": 0.02
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "cross_correlation_lag",
+        "status": "success",
+        "elapsed_s": 0.0
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "gcc_phat_delay",
+        "status": "success",
+        "elapsed_s": 0.06
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "cross_correlation_lag",
+        "status": "success",
+        "elapsed_s": 0.0
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "gcc_phat_delay",
+        "status": "success",
+        "elapsed_s": 0.08
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "cross_correlation_lag",
+        "status": "failure"
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "dtw_alignment_lag",
+        "status": "success"
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "granger_causality",
+        "status": "success"
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "cross_correlation_lag",
+        "status": "success"
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}
