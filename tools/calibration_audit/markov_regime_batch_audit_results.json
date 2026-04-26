@@ -1,0 +1,280 @@
+{
+  "date": "2026-04-26",
+  "wrappers": [
+    "hmm",
+    "markov_switching",
+    "tar_setar",
+    "star",
+    "nar_narx"
+  ],
+  "sweep_0": {
+    "hmm_invalid_covariance": "status=failure, audit_cov=None, err=HMM fitting failed across all restarts.",
+    "star_invalid_type": "status=failure, audit_star_type=None, err=Unknown star_type 'ZZZ'. Must be one of: LSTAR, ESTAR, both.",
+    "narx_with_exog": "status=success, err=None",
+    "findings": []
+  },
+  "technique_1": {
+    "sweep_1_1_hmm_n": [
+      {
+        "n_components": 2,
+        "wrapper_status": "success",
+        "log_likelihood": -651.25,
+        "aic": 1316.49,
+        "bic": null,
+        "elapsed_s": 0.85
+      },
+      {
+        "n_components": 3,
+        "wrapper_status": "success",
+        "log_likelihood": -646.75,
+        "aic": 1321.5,
+        "bic": null,
+        "elapsed_s": 1.82
+      }
+    ],
+    "sweep_1_2_ms_k": [
+      {
+        "k_regimes": 2,
+        "wrapper_status": "success",
+        "aic": 1313.7,
+        "bic": 1345.61,
+        "elapsed_s": 0.52
+      },
+      {
+        "k_regimes": 3,
+        "wrapper_status": "success",
+        "aic": 1319.39,
+        "bic": 1379.22,
+        "elapsed_s": 4.29
+      }
+    ],
+    "sweep_1_3_tar_n": [
+      {
+        "n_regimes": 2,
+        "wrapper_status": "success",
+        "aic": -29.27,
+        "bic": 14.52,
+        "elapsed_s": 0.06
+      },
+      {
+        "n_regimes": 3,
+        "wrapper_status": "success",
+        "aic": -26.19,
+        "bic": 41.5,
+        "elapsed_s": 0.12
+      }
+    ],
+    "sweep_1_4_star_type": [
+      {
+        "star_type": "LSTAR",
+        "wrapper_status": "success",
+        "aic": -30.9,
+        "bic": -6.97,
+        "elapsed_s": 1.15
+      },
+      {
+        "star_type": "ESTAR",
+        "wrapper_status": "success",
+        "aic": -30.9,
+        "bic": -6.97,
+        "elapsed_s": 1.27
+      }
+    ],
+    "sweep_1_5_nar_lags": [
+      {
+        "ar_lags": 2,
+        "wrapper_status": "success",
+        "elapsed_s": 0.84
+      },
+      {
+        "ar_lags": 5,
+        "wrapper_status": "success",
+        "elapsed_s": 0.78
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "wrapper": "hmm",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": 1274.38,
+        "bic": null,
+        "elapsed_s": 0.74
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "markov_switching",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": 1267.3,
+        "bic": 1301.0,
+        "elapsed_s": 0.63
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "setar",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": -75.35,
+        "bic": -29.08,
+        "elapsed_s": 0.04
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "star",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": 2.16,
+        "bic": 27.44,
+        "elapsed_s": 0.72
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "nar",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": null,
+        "bic": null,
+        "elapsed_s": 0.7
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "hmm",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": -196.77,
+        "bic": null,
+        "elapsed_s": 0.5
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "markov_switching",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": -198.33,
+        "bic": -177.25,
+        "elapsed_s": 0.46
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "setar",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": -2738.69,
+        "bic": -2692.42,
+        "elapsed_s": 0.05
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "star",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": -2750.54,
+        "bic": -2725.27,
+        "elapsed_s": 0.82
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "nar",
+        "T": 500,
+        "wrapper_status": "success",
+        "aic": null,
+        "bic": null,
+        "elapsed_s": 0.83
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "wrapper": "hmm",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.41
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "markov_switching",
+        "case": "constant series",
+        "status": "failure",
+        "error_message": "Markov-switching model failed: SVD did not converge",
+        "elapsed_s": 0.12
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "setar",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.02
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "star",
+        "case": "constant series",
+        "status": "failure",
+        "error_message": "Transition variable has near-zero variance. STAR model requires variability.",
+        "elapsed_s": 0.0
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "nar",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.51
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "hmm",
+        "case": "3-state HMM on 2-regime DGP",
+        "status": "success",
+        "elapsed_s": 1.43
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "hmm",
+        "case": "short series T=80",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 1.03
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "setar",
+        "case": "short series T=80",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.03
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "setar",
+        "case": "random walk (no nonlinear structure)",
+        "status": "success",
+        "elapsed_s": 0.05
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "star",
+        "case": "random walk (no nonlinear structure)",
+        "status": "success",
+        "elapsed_s": 0.81
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}

@@ -85,6 +85,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         ar_order = int(ctx.get_param("ar_order", min(cfg["max_ar"], max(1, n // 15))))
         star_type = ctx.get_param("star_type", cfg["star_type"]).upper()
+        # CAI Phase 2 Session 12 fix (F-MR-STAR-TYPE): explicit
+        # allowlist for star_type. Pre-fix the wrapper uppercased
+        # any string and threaded it through `types_to_fit`,
+        # ultimately fitting whichever transition function the
+        # internal `_fit_star` defaulted to (typically LSTAR) and
+        # reporting the user's invalid string in audit_fields. Add
+        # an explicit check parallel to caviar's specification
+        # validation pattern.
+        _STAR_TYPES = ("LSTAR", "ESTAR", "BOTH")
+        if star_type not in _STAR_TYPES:
+            return make_error_response(
+                ctx,
+                f"Unknown star_type '{star_type}'. Must be one of: "
+                f"LSTAR, ESTAR, both.",
+                error_fixes=[
+                    "Use 'LSTAR' (logistic transition), 'ESTAR' "
+                    "(exponential transition), or 'both' (fit both "
+                    "and report best by IC).",
+                ],
+            )
         delay = int(ctx.get_param("delay", 1))
         horizon = max(1, int(ctx.get_param("horizon", 10)))
         maxiter = cfg["maxiter"]
