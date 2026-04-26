@@ -89,8 +89,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Provide a longer time series, ideally 100+ observations."],
             )
 
-        # Model specification
-        vol_type = ctx.get_param("vol", "GARCH").upper().replace("-", "")
+        # Model specification.
+        #
+        # CAI Phase 2 Session 6 fix (F-G-DISPATCH): the catalog
+        # exposes garch / gjr_garch / egarch as 3 separate technique
+        # IDs but does NOT include `vol` in any variant's user-param
+        # list. Without an explicit `vol` in ctx.params the wrapper
+        # would default to "GARCH" — silently routing gjr_garch and
+        # egarch invocations through vanilla GARCH math. Resolve
+        # technique_id → variant-default for `vol` BEFORE reading the
+        # user param so an explicit user `vol` still wins.
+        _TID_VOL_MAP = {"gjr_garch": "GJR-GARCH", "egarch": "EGARCH"}
+        if "vol" not in ctx.params and ctx.technique_id in _TID_VOL_MAP:
+            vol_type = _TID_VOL_MAP[ctx.technique_id].upper().replace("-", "")
+        else:
+            vol_type = ctx.get_param("vol", "GARCH").upper().replace("-", "")
         if vol_type in ("GJRGARCH", "GJR"):
             vol_type = "GARCH"
             o_default = 1
@@ -236,9 +249,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["Forecast Horizon", horizon],
         ]
 
-        # Persistence: sum of alpha + beta (for GARCH). Captured as locals
-        # so the interpretation spec can read them without re-deriving from
+        # Persistence calculation. Captured as locals so the
+        # interpretation spec can read them without re-deriving from
         # the raw params index.
+        #
+        # CAI Phase 2 Session 6 fix (F-G-T2-EGARCH-PERSIST): the
+        # formula alpha + beta + 0.5*gamma is GARCH-family-specific
+        # (variance-level dynamics). EGARCH parameterizes
+        # log-variance: log(sigma2_t) = omega + beta*log(sigma2_{t-1})
+        # + alpha*g(z_{t-1}). Stationarity for EGARCH requires only
+        # |beta| < 1; alpha is a magnitude-of-news coefficient, not a
+        # variance lag. Pre-fix, the wrapper applied the GARCH formula
+        # universally, which made EGARCH persistence appear > 1.0 on
+        # 4 of 5 macro real-data series and triggered a misleading
+        # IGARCH-style warning. Post-fix, EGARCH persistence reports
+        # |beta| with a model-appropriate label.
         alpha_sum = None
         beta_sum = None
         persistence = None
@@ -246,14 +271,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
             alpha_sum = sum(float(params[p]) for p in params.index if p.startswith("alpha"))
             beta_sum = sum(float(params[p]) for p in params.index if p.startswith("beta"))
             gamma_sum = sum(float(params[p]) for p in params.index if p.startswith("gamma"))
-            persistence = alpha_sum + beta_sum + 0.5 * gamma_sum
-            diag_rows.append(["Persistence (alpha+beta+0.5*gamma)", round(persistence, 6)])
-            if persistence >= 1.0:
-                warn_list.append(
-                    f"Volatility persistence ({persistence:.4f}) >= 1. "
-                    "The model implies integrated (IGARCH) behaviour; shocks never fully decay."
-                )
-            elif persistence > 0.95:
+            if model_label == "EGARCH":
+                # EGARCH: persistence is the log-variance AR coefficient
+                # (sum of beta[i]); |beta| < 1 implies stationarity.
+                persistence = beta_sum
+                _persist_label = "Persistence (beta, EGARCH log-variance)"
+            else:
+                persistence = alpha_sum + beta_sum + 0.5 * gamma_sum
+                _persist_label = "Persistence (alpha+beta+0.5*gamma)"
+            diag_rows.append([_persist_label, round(persistence, 6)])
+            if abs(persistence) >= 1.0:
+                if model_label == "EGARCH":
+                    warn_list.append(
+                        f"EGARCH log-variance persistence |beta|="
+                        f"{abs(persistence):.4f} >= 1. The fitted model "
+                        "implies near-integrated log-variance dynamics; "
+                        "shocks decay very slowly."
+                    )
+                else:
+                    warn_list.append(
+                        f"Volatility persistence ({persistence:.4f}) >= 1. "
+                        "The model implies integrated (IGARCH) behaviour; shocks never fully decay."
+                    )
+            elif abs(persistence) > 0.95:
                 warn_list.append(
                     f"High volatility persistence ({persistence:.4f}). "
                     "Shocks to volatility are very long-lived."

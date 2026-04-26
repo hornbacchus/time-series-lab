@@ -1,0 +1,731 @@
+{
+  "date": "2026-04-26",
+  "wrapper": "garch_model (3 technique IDs: garch, gjr_garch, egarch)",
+  "sweep_0_dispatch": {
+    "catalog_probes": [
+      {
+        "tid": "garch",
+        "vol_in_params": null,
+        "model_label": "GARCH",
+        "o": 0,
+        "aic": 2721.9,
+        "elapsed_s": 0.2
+      },
+      {
+        "tid": "gjr_garch",
+        "vol_in_params": null,
+        "model_label": "GJR-GARCH",
+        "o": 1,
+        "aic": 2718.19,
+        "elapsed_s": 0.08
+      },
+      {
+        "tid": "egarch",
+        "vol_in_params": null,
+        "model_label": "EGARCH",
+        "o": 1,
+        "aic": 2723.19,
+        "elapsed_s": 0.06
+      }
+    ],
+    "override_probes": [
+      {
+        "vol": "GARCH",
+        "model_label": "GARCH",
+        "o": 0
+      },
+      {
+        "vol": "GJR-GARCH",
+        "model_label": "GJR-GARCH",
+        "o": 1
+      },
+      {
+        "vol": "EGARCH",
+        "model_label": "EGARCH",
+        "o": 1
+      }
+    ],
+    "findings": [],
+    "fix_status": "applied_in_garch_model.py_session_6"
+  },
+  "technique_1": {
+    "sweep_1_1_order": [
+      {
+        "tid": "garch",
+        "p": 1,
+        "q": 1,
+        "o": 0,
+        "model": "GARCH",
+        "aic": 2691.9,
+        "bic": 2711.53,
+        "log_likelihood": -1341.95,
+        "alpha_sum": 0.142208,
+        "beta_sum": 0.742226,
+        "gamma_sum": null,
+        "persistence": 0.884433,
+        "elapsed_s": 0.03
+      },
+      {
+        "tid": "garch",
+        "p": 1,
+        "q": 1,
+        "o": 1,
+        "model": "GARCH",
+        "aic": 2693.84,
+        "bic": 2718.38,
+        "log_likelihood": -1341.92,
+        "alpha_sum": 0.134152,
+        "beta_sum": 0.746953,
+        "gamma_sum": 0.011458,
+        "persistence": 0.886835,
+        "elapsed_s": 0.04
+      },
+      {
+        "tid": "garch",
+        "p": 2,
+        "q": 1,
+        "o": 1,
+        "model": "GARCH",
+        "aic": 2695.6,
+        "bic": 2725.05,
+        "log_likelihood": -1341.8,
+        "alpha_sum": 0.15124200000000002,
+        "beta_sum": 0.714826,
+        "gamma_sum": 0.004992,
+        "persistence": 0.868564,
+        "elapsed_s": 0.05
+      },
+      {
+        "tid": "gjr_garch",
+        "p": 1,
+        "q": 1,
+        "o": 0,
+        "model": "GJR-GARCH",
+        "aic": 2693.87,
+        "bic": 2718.41,
+        "log_likelihood": -1341.94,
+        "alpha_sum": 0.141343,
+        "beta_sum": 0.7421,
+        "gamma_sum": null,
+        "persistence": 0.883443,
+        "elapsed_s": 0.05
+      },
+      {
+        "tid": "gjr_garch",
+        "p": 1,
+        "q": 1,
+        "o": 1,
+        "model": "GJR-GARCH",
+        "aic": 2695.86,
+        "bic": 2725.31,
+        "log_likelihood": -1341.93,
+        "alpha_sum": 0.132417,
+        "beta_sum": 0.747648,
+        "gamma_sum": 0.012401,
+        "persistence": 0.886265,
+        "elapsed_s": 0.06
+      },
+      {
+        "tid": "gjr_garch",
+        "p": 2,
+        "q": 1,
+        "o": 1,
+        "model": "GJR-GARCH",
+        "aic": 2697.61,
+        "bic": 2731.96,
+        "log_likelihood": -1341.8,
+        "alpha_sum": 0.14915,
+        "beta_sum": 0.71461,
+        "gamma_sum": 0.006302,
+        "persistence": 0.866911,
+        "elapsed_s": 0.07
+      },
+      {
+        "tid": "egarch",
+        "p": 1,
+        "q": 1,
+        "o": 0,
+        "model": "EGARCH",
+        "aic": 2696.4,
+        "bic": 2720.93,
+        "log_likelihood": -1343.2,
+        "alpha_sum": 0.2613,
+        "beta_sum": 0.875941,
+        "gamma_sum": null,
+        "persistence": 0.875941,
+        "elapsed_s": 0.05
+      },
+      {
+        "tid": "egarch",
+        "p": 1,
+        "q": 1,
+        "o": 1,
+        "model": "EGARCH",
+        "aic": 2698.38,
+        "bic": 2727.83,
+        "log_likelihood": -1343.19,
+        "alpha_sum": 0.262491,
+        "beta_sum": 0.874823,
+        "gamma_sum": 0.00157,
+        "persistence": 0.874823,
+        "elapsed_s": 0.07
+      },
+      {
+        "tid": "egarch",
+        "p": 2,
+        "q": 1,
+        "o": 1,
+        "model": "EGARCH",
+        "aic": 2700.34,
+        "bic": 2734.69,
+        "log_likelihood": -1343.17,
+        "alpha_sum": 0.271361,
+        "beta_sum": 0.867073,
+        "gamma_sum": 0.003231,
+        "persistence": 0.867073,
+        "elapsed_s": 0.07
+      }
+    ],
+    "sweep_1_2_distribution": [
+      {
+        "tid": "garch",
+        "dist": "normal",
+        "model": "GARCH",
+        "aic": 2691.9,
+        "log_likelihood": -1341.95,
+        "elapsed_s": 0.03
+      },
+      {
+        "tid": "garch",
+        "dist": "t",
+        "model": "GARCH",
+        "aic": 2693.87,
+        "log_likelihood": -1341.94,
+        "elapsed_s": 0.05
+      },
+      {
+        "tid": "garch",
+        "dist": "skewt",
+        "model": "GARCH",
+        "aic": 2695.59,
+        "log_likelihood": -1341.79,
+        "elapsed_s": 0.07
+      },
+      {
+        "tid": "garch",
+        "dist": "ged",
+        "model": "GARCH",
+        "aic": 2693.38,
+        "log_likelihood": -1341.69,
+        "elapsed_s": 0.04
+      },
+      {
+        "tid": "gjr_garch",
+        "dist": "normal",
+        "model": "GJR-GARCH",
+        "aic": 2693.84,
+        "log_likelihood": -1341.92,
+        "elapsed_s": 0.03
+      },
+      {
+        "tid": "gjr_garch",
+        "dist": "t",
+        "model": "GJR-GARCH",
+        "aic": 2695.86,
+        "log_likelihood": -1341.93,
+        "elapsed_s": 0.06
+      },
+      {
+        "tid": "gjr_garch",
+        "dist": "skewt",
+        "model": "GJR-GARCH",
+        "aic": 2697.52,
+        "log_likelihood": -1341.76,
+        "elapsed_s": 0.1
+      },
+      {
+        "tid": "gjr_garch",
+        "dist": "ged",
+        "model": "GJR-GARCH",
+        "aic": 2695.32,
+        "log_likelihood": -1341.66,
+        "elapsed_s": 0.05
+      },
+      {
+        "tid": "egarch",
+        "dist": "normal",
+        "model": "EGARCH",
+        "aic": 2696.64,
+        "log_likelihood": -1343.32,
+        "elapsed_s": 0.03
+      },
+      {
+        "tid": "egarch",
+        "dist": "t",
+        "model": "EGARCH",
+        "aic": 2698.38,
+        "log_likelihood": -1343.19,
+        "elapsed_s": 0.06
+      },
+      {
+        "tid": "egarch",
+        "dist": "skewt",
+        "model": "EGARCH",
+        "aic": 2700.21,
+        "log_likelihood": -1343.11,
+        "elapsed_s": 0.09
+      },
+      {
+        "tid": "egarch",
+        "dist": "ged",
+        "model": "EGARCH",
+        "aic": 2697.91,
+        "log_likelihood": -1342.96,
+        "elapsed_s": 0.04
+      }
+    ],
+    "sweep_1_3_leverage": [
+      {
+        "tid": "garch",
+        "model": "GARCH",
+        "aic": 2721.9,
+        "alpha_sum": 0.172636,
+        "beta_sum": 0.70626,
+        "gamma_sum": null,
+        "persistence": 0.878896,
+        "elapsed_s": 0.03
+      },
+      {
+        "tid": "gjr_garch",
+        "model": "GJR-GARCH",
+        "aic": 2718.19,
+        "alpha_sum": 0.065482,
+        "beta_sum": 0.78295,
+        "gamma_sum": 0.13384,
+        "persistence": 0.915352,
+        "elapsed_s": 0.07
+      },
+      {
+        "tid": "egarch",
+        "model": "EGARCH",
+        "aic": 2723.19,
+        "alpha_sum": 0.247635,
+        "beta_sum": 0.899834,
+        "gamma_sum": -0.076315,
+        "persistence": 0.899834,
+        "elapsed_s": 0.06
+      }
+    ],
+    "sweep_1_4_near_igarch": [
+      {
+        "tid": "garch",
+        "persistence": 0.983389,
+        "near_igarch_trigger_fires": false,
+        "alpha_sum": 0.047785,
+        "beta_sum": 0.935603,
+        "elapsed_s": 0.04
+      },
+      {
+        "tid": "gjr_garch",
+        "persistence": 0.982591,
+        "near_igarch_trigger_fires": false,
+        "alpha_sum": 0.05047,
+        "beta_sum": 0.934176,
+        "elapsed_s": 0.08
+      },
+      {
+        "tid": "egarch",
+        "persistence": 0.983395,
+        "near_igarch_trigger_fires": false,
+        "alpha_sum": 0.101061,
+        "beta_sum": 0.983395,
+        "elapsed_s": 0.07
+      }
+    ],
+    "findings": [],
+    "sym_best_per_variant": {
+      "garch": "(1, 1, 0, 2691.9)",
+      "gjr_garch": "(1, 1, 0, 2693.87)",
+      "egarch": "(1, 1, 0, 2696.4)"
+    }
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "variant": "garch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GARCH",
+        "aic": 2823.26,
+        "bic": 2842.89,
+        "log_likelihood": -1407.63,
+        "alpha_sum": 0.096669,
+        "beta_sum": 0.888421,
+        "gamma_sum": null,
+        "persistence": 0.98509,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.05
+      },
+      {
+        "series": "GSPC",
+        "variant": "gjr_garch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GJR-GARCH",
+        "aic": 2756.29,
+        "bic": 2785.74,
+        "log_likelihood": -1372.15,
+        "alpha_sum": null,
+        "beta_sum": 0.89198,
+        "gamma_sum": 0.181327,
+        "persistence": 0.982644,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.07
+      },
+      {
+        "series": "GSPC",
+        "variant": "egarch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "EGARCH",
+        "aic": 2746.65,
+        "bic": 2776.1,
+        "log_likelihood": -1367.33,
+        "alpha_sum": 0.084776,
+        "beta_sum": 0.973577,
+        "gamma_sum": -0.175918,
+        "persistence": 0.973577,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.07
+      },
+      {
+        "series": "DGS10",
+        "variant": "garch",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GARCH",
+        "aic": 1934.97,
+        "bic": 1954.6,
+        "log_likelihood": -963.48,
+        "alpha_sum": 0.019124,
+        "beta_sum": 0.976065,
+        "gamma_sum": null,
+        "persistence": 0.995189,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.06
+      },
+      {
+        "series": "DGS10",
+        "variant": "gjr_garch",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GJR-GARCH",
+        "aic": 1932.46,
+        "bic": 1961.9,
+        "log_likelihood": -960.23,
+        "alpha_sum": 0.027157,
+        "beta_sum": 0.979346,
+        "gamma_sum": -0.022813,
+        "persistence": 0.995096,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.11
+      },
+      {
+        "series": "DGS10",
+        "variant": "egarch",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "EGARCH",
+        "aic": 1928.4,
+        "bic": 1957.85,
+        "log_likelihood": -958.2,
+        "alpha_sum": 0.021809,
+        "beta_sum": 0.991942,
+        "gamma_sum": 0.029396,
+        "persistence": 0.991942,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.11
+      },
+      {
+        "series": "DGS2",
+        "variant": "garch",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GARCH",
+        "aic": 1889.64,
+        "bic": 1909.27,
+        "log_likelihood": -940.82,
+        "alpha_sum": 0.069512,
+        "beta_sum": 0.930488,
+        "gamma_sum": null,
+        "persistence": 1.0,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.05
+      },
+      {
+        "series": "DGS2",
+        "variant": "gjr_garch",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GJR-GARCH",
+        "aic": 1807.43,
+        "bic": 1836.88,
+        "log_likelihood": -897.72,
+        "alpha_sum": 0.048798,
+        "beta_sum": 0.954009,
+        "gamma_sum": -0.005614,
+        "persistence": 1.0,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.11
+      },
+      {
+        "series": "DGS2",
+        "variant": "egarch",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "EGARCH",
+        "aic": 1802.54,
+        "bic": 1831.99,
+        "log_likelihood": -895.27,
+        "alpha_sum": 0.140533,
+        "beta_sum": 0.989081,
+        "gamma_sum": 0.004861,
+        "persistence": 0.989081,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.09
+      },
+      {
+        "series": "DEXUSEU",
+        "variant": "garch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GARCH",
+        "aic": 1346.9,
+        "bic": 1366.53,
+        "log_likelihood": -669.45,
+        "alpha_sum": 0.039522,
+        "beta_sum": 0.951425,
+        "gamma_sum": null,
+        "persistence": 0.990947,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.04
+      },
+      {
+        "series": "DEXUSEU",
+        "variant": "gjr_garch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GJR-GARCH",
+        "aic": 1296.48,
+        "bic": 1325.93,
+        "log_likelihood": -642.24,
+        "alpha_sum": 0.031896,
+        "beta_sum": 0.953801,
+        "gamma_sum": 0.028605,
+        "persistence": 1.0,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.08
+      },
+      {
+        "series": "DEXUSEU",
+        "variant": "egarch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "EGARCH",
+        "aic": 1294.11,
+        "bic": 1323.55,
+        "log_likelihood": -641.05,
+        "alpha_sum": 0.091603,
+        "beta_sum": 0.9965,
+        "gamma_sum": -0.029725,
+        "persistence": 0.9965,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.07
+      },
+      {
+        "series": "GOLD",
+        "variant": "garch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GARCH",
+        "aic": 2704.68,
+        "bic": 2724.31,
+        "log_likelihood": -1348.34,
+        "alpha_sum": 0.036534,
+        "beta_sum": 0.897996,
+        "gamma_sum": null,
+        "persistence": 0.934529,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.04
+      },
+      {
+        "series": "GOLD",
+        "variant": "gjr_garch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "GJR-GARCH",
+        "aic": 2648.09,
+        "bic": 2677.54,
+        "log_likelihood": -1318.04,
+        "alpha_sum": 0.072883,
+        "beta_sum": 0.931912,
+        "gamma_sum": -0.072883,
+        "persistence": 0.968353,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.08
+      },
+      {
+        "series": "GOLD",
+        "variant": "egarch",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "model": "EGARCH",
+        "aic": 2645.81,
+        "bic": 2675.26,
+        "log_likelihood": -1316.91,
+        "alpha_sum": 0.064329,
+        "beta_sum": 0.969583,
+        "gamma_sum": 0.053438,
+        "persistence": 0.969583,
+        "half_life": null,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.07
+      }
+    ],
+    "cross_variant_ic": {
+      "GSPC": {
+        "best_variant": "egarch",
+        "best_aic": 2746.65,
+        "all_aics": {
+          "garch": 2823.26,
+          "gjr_garch": 2756.29,
+          "egarch": 2746.65
+        }
+      },
+      "DGS10": {
+        "best_variant": "egarch",
+        "best_aic": 1928.4,
+        "all_aics": {
+          "garch": 1934.97,
+          "gjr_garch": 1932.46,
+          "egarch": 1928.4
+        }
+      },
+      "DGS2": {
+        "best_variant": "egarch",
+        "best_aic": 1802.54,
+        "all_aics": {
+          "garch": 1889.64,
+          "gjr_garch": 1807.43,
+          "egarch": 1802.54
+        }
+      },
+      "DEXUSEU": {
+        "best_variant": "egarch",
+        "best_aic": 1294.11,
+        "all_aics": {
+          "garch": 1346.9,
+          "gjr_garch": 1296.48,
+          "egarch": 1294.11
+        }
+      },
+      "GOLD": {
+        "best_variant": "egarch",
+        "best_aic": 2645.81,
+        "all_aics": {
+          "garch": 2704.68,
+          "gjr_garch": 2648.09,
+          "egarch": 2645.81
+        }
+      }
+    },
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "case": "Constant variance (no GARCH effect) T=500",
+        "status": "success",
+        "alpha_sum": 0.085837,
+        "beta_sum": null,
+        "persistence": 0.085837,
+        "ljung_box_sq_p": null,
+        "elapsed_s": 0.03
+      },
+      {
+        "id": "C-CAL-2",
+        "case": "GJR-GARCH on T=80 short series",
+        "status": "success",
+        "model": "GJR-GARCH",
+        "alpha_sum": null,
+        "gamma_sum": 0.127979,
+        "warnings_count": 2,
+        "elapsed_s": 0.05
+      },
+      {
+        "id": "C-CAL-3",
+        "case": "Heavy-tail (Student-t df=4) DGP + EGARCH normal fit",
+        "status": "success",
+        "model": "EGARCH",
+        "ljung_box_sq_p": null,
+        "lb_sq_trigger_fires": false,
+        "elapsed_s": 0.04
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "GARCH technique_id with o=1 (redundant asymmetry)",
+        "status": "success",
+        "model": "GARCH",
+        "o": 1,
+        "elapsed_s": 0.04
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 1,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": [
+    {
+      "id": "F-G-DISPATCH",
+      "severity": "severe",
+      "title": "Catalog techniques garch / gjr_garch / egarch did not auto-inject `vol` based on technique_id; egarch UI invocations silently produced vanilla GARCH math",
+      "details": "Phase 1 exploration found that resources/catalog/techniques_catalog.json defines 3 separate techniques (garch, gjr_garch, egarch) but none expose `vol` as a user-visible param. The wrapper's run() function read ctx.get_param('vol', 'GARCH') and defaulted to plain GARCH when `vol` was absent. Sweep 0 verified pre-fix: technique_id='egarch' with catalog-default params {p:1, q:1, dist:'t'} produced model='GARCH' (not 'EGARCH') with o=0 and AIC=2723.80 \u2014 identical to vanilla GARCH math, NOT EGARCH. Same cell post-fix produces model='EGARCH' with o=1 and AIC=2723.19. GJR-GARCH was less affected because the catalog passes o=1 explicitly so the math (asymmetry-leverage term) was correct via arch_model's o param even with vol defaulting; but the displayed model_label was 'GARCH' not 'GJR-GARCH', a labeling inconsistency. Fix applied inline in this session: 5 LOC at top of engine/techniques/garch_model.py:run() that resolves technique_id \u2192 variant default for `vol` BEFORE the user-param read, so explicit user `vol` still wins. Within CAL-R6 (\u226450 LOC \u22642 files inline).",
+      "fix_status": "fixed_inline",
+      "fix_location": "engine/techniques/garch_model.py lines 92-105 (_TID_VOL_MAP injection)"
+    }
+  ]
+}

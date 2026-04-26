@@ -9,10 +9,12 @@ calibration-audit status: parameter-sweep + real-data stress
 See `plans/calibration_audit_phase1_2026_04_25.md` for the
 Phase 1 design audit and methodology.
 
-## CAI Phase 2 cycle: COMPLETE (2026-04-26)
+## CAI Phase 2: 5-session core cycle COMPLETE; extension cycle ACTIVE
 
-All 5 selected wrapper audits shipped clean across 5 sessions
-on 2026-04-25 / 2026-04-26:
+The 5-session core cycle closed cleanly on 2026-04-26
+(Session 5 commit `a2464ac`). Session 6 begins the extension
+cycle by batching the GARCH family (3 catalog technique IDs
+that route to a single `garch_model.py` wrapper).
 
 | Session | Wrapper(s) | Commit | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
@@ -20,25 +22,34 @@ on 2026-04-25 / 2026-04-26:
 | 2 | har_cj | 4b06eab | 0 | 1 (fixed inline) | 1 |
 | 3 | evt_pot_gpd | 47848e0 | 0 | 0 | 1 |
 | 4 | johansen_cointegration | 340a714 | 0 | 0 | 2 |
-| 5 | stochastic_volatility | (this commit) | 0 | 0 | 2 |
-| **Total** | **6 wrappers AUDITED** | — | **0** | **3 (all fixed)** | **6** |
+| 5 | stochastic_volatility | a2464ac | 0 | 0 | 2 |
+| 6 | garch + gjr_garch + egarch (batch; first extension) | (this commit) | 2 (both fixed inline) | 0 | 0 |
+| **Total** | **9 wrappers AUDITED** | — | **2 (all fixed)** | **3 (all fixed)** | **6** |
 
-**Zero severe findings on any wrapper.** All 3 operational
-findings were Windows cp1252 console UnicodeEncodeError in
-canonical validation scripts (audit-infrastructure issues, not
-wrapper bugs); fixed inline within CAL-R6 thresholds. The 6
-cosmetic findings document well-known methodological properties
-(EVT small-N MLE bias, Johansen det_order sensitivity, KSC
-Gibbs autocorrelation, etc.) — not wrapper bugs but
-user-facing calibration guidance worth preserving.
+**Sessions 1-5 produced zero severe wrapper findings** — all
+3 operational fixes were Windows cp1252 console encoding bugs
+in canonical validation scripts (audit infrastructure, not
+wrapper bugs).
 
-CAI Phase 2 demonstrated that the verification-initiative-
-validated wrappers are **operationally sound at default
-parameters** across realistic synthetic + real-data sweep
-matrices, complementing the verification initiative's math-
-correctness focus. Future CAI cycles may extend coverage to
-the 76 currently-UNAUDITED wrappers if calibration concerns
-arise from production usage.
+**Session 6 surfaced 2 SEVERE wrapper findings** — both fixed
+inline within the same commit (15 LOC total in
+`engine/techniques/garch_model.py`):
+- F-G-DISPATCH: 3 catalog technique IDs (garch, gjr_garch,
+  egarch) routed to vanilla GARCH math because no code path
+  injected `vol` based on technique_id. EGARCH UI invocations
+  silently produced GARCH(1,1) fits.
+- F-G-PERSIST-FORMULA: EGARCH persistence formula misapplied
+  the GARCH-family formula (alpha+beta+0.5*gamma) instead of
+  the EGARCH-correct |beta|. 4 of 5 macro real-data EGARCH
+  cells reported spurious persistence > 1 with misleading
+  IGARCH-style warnings.
+
+The Session 6 finding shape (real wrapper bugs, fixed inline)
+contrasts with the Sessions 1-5 pattern (mostly cosmetic
+methodology documentation). This validates the extension cycle's
+hypothesis from Session 5's recommendations: **non-core
+wrappers may surface real findings**; calibration audit
+extensions are operationally valuable.
 
 ## Status legend
 
@@ -53,8 +64,8 @@ arise from production usage.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 6 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26)
-- PENDING: 0 (CAI Phase 2 cycle COMPLETE)
+- AUDITED: 9 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26)
+- PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
 - UNAUDITED: 76
@@ -201,10 +212,10 @@ arise from production usage.
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
 | caviar_quantile_dynamics | UNAUDITED | — | — | — | — |
-| egarch | UNAUDITED | — | — | — | — |
+| egarch | AUDITED | [garch_family_findings_2026_04_26.md](calibration_audit/garch_family_findings_2026_04_26.md) | 1 (fixed inline; shared with garch/gjr_garch) | 0 | 0 |
 | evt_pot_gpd | AUDITED | [evt_pot_gpd_findings_2026_04_26.md](calibration_audit/evt_pot_gpd_findings_2026_04_26.md) | 0 | 0 | 1 |
-| garch | UNAUDITED | — | — | — | — |
-| gjr_garch | UNAUDITED | — | — | — | — |
+| garch | AUDITED | [garch_family_findings_2026_04_26.md](calibration_audit/garch_family_findings_2026_04_26.md) | 1 (fixed inline; shared) | 0 | 0 |
+| gjr_garch | AUDITED | [garch_family_findings_2026_04_26.md](calibration_audit/garch_family_findings_2026_04_26.md) | 1 (fixed inline; shared) | 0 | 0 |
 | har_cj | AUDITED | [har_cj_findings_2026_04_26.md](calibration_audit/har_cj_findings_2026_04_26.md) | 0 | 1 (fixed inline) | 1 |
 | har_rv | UNAUDITED | — | — | — | — |
 | stochastic_volatility | AUDITED | [stochastic_volatility_findings_2026_04_26.md](calibration_audit/stochastic_volatility_findings_2026_04_26.md) | 0 | 0 | 2 |
