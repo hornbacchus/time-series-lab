@@ -37,9 +37,21 @@ jobs:
       - name: Install fast-tier R packages
         # Subset matching the fast tier of MANIFEST.toml. Slow
         # tier (full 15 packages) lives in parity-slow.yml.
+        # Per-check R dependencies:
+        #   hts       -> 3e_mint_family
+        #   vars      -> 1c_bvar_irf_fevd
+        #   urca      -> 3d_johansen_bartlett
+        #   extRemes  -> 3c_evt_ferro_segers
+        #   dlm,KFAS  -> 2a_kalman_filter_smoother (dual ref)
+        #   forecast  -> not currently used by any fast-tier
+        #                check; kept for future expansion (1b).
         shell: Rscript {0}
         run: |
-          install.packages(c("hts", "forecast"), repos = "https://cloud.r-project.org")
+          install.packages(
+            c("hts", "forecast", "vars", "urca", "extRemes",
+              "dlm", "KFAS"),
+            repos = "https://cloud.r-project.org"
+          )
 
       - name: Run fast-tier parity checks
         # set +e + capture exit code so JSON contents are visible in

@@ -226,6 +226,54 @@ class RBridge:
         )
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        # Cache the libs_user resolution so the diagnostic stderr
+        # line fires at most once per RBridge instance lifetime.
+        self._libs_user_warned: bool = False
+
+    def _resolve_libs_user(self) -> tuple[str | None, bool]:
+        """Resolve manifest's R libs_user against the running
+        environment.
+
+        Returns
+        -------
+        (manifest_libs, valid) : tuple
+            ``manifest_libs`` is the manifest's configured value
+            (may be empty string or None). ``valid`` is True iff
+            the path is non-empty AND exists on disk.
+
+        When ``valid`` is False we deliberately do NOT export
+        ``R_LIBS_USER`` and do NOT prepend the manifest path to
+        ``.libPaths()`` in the R prolog — letting the runner's own
+        ``R_LIBS_USER`` (set by ``r-lib/setup-r`` on CI, system
+        default elsewhere) take effect. This unblocks CI runners
+        and other environments where the developer-local
+        ``C:/Users/matth/R-library`` doesn't exist while
+        preserving the manifest-pinned behavior on the dev machine.
+
+        Logs the fallback decision to stderr at most once per
+        RBridge instance for debuggability.
+        """
+        manifest_libs = self.manifest.r.libs_user
+        valid = bool(manifest_libs) and pathlib.Path(
+            manifest_libs,
+        ).exists()
+        if not valid and not self._libs_user_warned:
+            import sys
+            if manifest_libs:
+                print(
+                    f"[r_bridge] manifest libs_user "
+                    f"{manifest_libs!r} does not exist; "
+                    f"using runner R_LIBS_USER instead.",
+                    file=sys.stderr,
+                )
+            else:
+                print(
+                    "[r_bridge] manifest libs_user empty; "
+                    "using runner R_LIBS_USER.",
+                    file=sys.stderr,
+                )
+            self._libs_user_warned = True
+        return manifest_libs, valid
 
     # -----------------------------------------------------------------
     # Environment probe
@@ -248,9 +296,14 @@ class RBridge:
                 f"installed."
             )
         # Build a tiny R script that prints package versions
+        manifest_libs, libs_valid = self._resolve_libs_user()
         pkgs = list(self.manifest.r.packages.keys())
+        if libs_valid:
+            libs_arg = f'c("{manifest_libs}", .libPaths())'
+        else:
+            libs_arg = '.libPaths()'  # keep current paths
         r_lines = [
-            f'.libPaths(c("{self.manifest.r.libs_user}", .libPaths()))',
+            f'.libPaths({libs_arg})',
             f'cat(sprintf("R=%s.%s\\n", '
             f'R.version[["major"]], R.version[["minor"]]))',
         ]
@@ -264,7 +317,9 @@ class RBridge:
         script_path = self._unique_tmpfile("envcheck", ".R")
         script_path.write_text(script, encoding="utf-8")
         env = os.environ.copy()
-        env["R_LIBS_USER"] = self.manifest.r.libs_user
+        if libs_valid:
+            env["R_LIBS_USER"] = manifest_libs
+        # else: inherit runner R_LIBS_USER unchanged
         try:
             result = subprocess.run(
                 [self.manifest.r.rscript_exe, str(script_path)],
@@ -353,9 +408,16 @@ class RBridge:
             r_code, input_paths, output_paths,
         )
 
-        # Prolog: libpaths + version-capture lines
+        # Prolog: libpaths + version-capture lines.
+        # Conditional on whether manifest libs_user is valid on
+        # this machine (defensive fallback for CI / non-dev envs).
+        manifest_libs, libs_valid = self._resolve_libs_user()
+        if libs_valid:
+            libs_arg = f'c("{manifest_libs}", .libPaths())'
+        else:
+            libs_arg = '.libPaths()'  # keep current paths
         prolog_lines = [
-            f'.libPaths(c("{self.manifest.r.libs_user}", .libPaths()))',
+            f'.libPaths({libs_arg})',
             'options(warn = 1)',
         ]
         for p in capture_pkgs:
@@ -372,7 +434,9 @@ class RBridge:
         all_tempfiles = input_files + output_files + [script_path]
 
         env = os.environ.copy()
-        env["R_LIBS_USER"] = self.manifest.r.libs_user
+        if libs_valid:
+            env["R_LIBS_USER"] = manifest_libs
+        # else: inherit runner R_LIBS_USER unchanged
 
         t0 = time.monotonic()
         try:
