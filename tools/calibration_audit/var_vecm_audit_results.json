@@ -1,0 +1,332 @@
+{
+  "date": "2026-04-26",
+  "wrappers": [
+    "var",
+    "vecm"
+  ],
+  "sweep_0": {
+    "var_dispatch": "OK",
+    "vecm_dispatch": "OK",
+    "var_invalid_trend_behavior": "status=failure, err_msg=trend 'zzz' not supported for VAR",
+    "vecm_invalid_deterministic_behavior": "status=failure, err_msg=Unknown deterministic 'zzz'. Must be one of: n, co, ci, lo, li.",
+    "vecm_invalid_rank_behavior": "status=failure, err_msg=VECM failed: index 3 is out of bounds for axis 1 with size 3",
+    "findings": []
+  },
+  "technique_1": {
+    "sweep_1_1_var_lag": [
+      {
+        "lag_param": 1,
+        "wrapper_status": "success",
+        "var_order_selected": 1,
+        "aic": -0.0533,
+        "bic": -0.0027,
+        "max_root_modulus": 0.6574,
+        "elapsed_s": 0.01
+      },
+      {
+        "lag_param": 2,
+        "wrapper_status": "success",
+        "var_order_selected": 2,
+        "aic": -0.0415,
+        "bic": 0.043,
+        "max_root_modulus": 0.6229,
+        "elapsed_s": 0.01
+      },
+      {
+        "lag_param": 5,
+        "wrapper_status": "success",
+        "var_order_selected": 5,
+        "aic": -0.0331,
+        "bic": 0.1538,
+        "max_root_modulus": 0.7316,
+        "elapsed_s": 0.01
+      },
+      {
+        "lag_param": 10,
+        "wrapper_status": "success",
+        "var_order_selected": 10,
+        "aic": 0.0191,
+        "bic": 0.3786,
+        "max_root_modulus": 0.8331,
+        "elapsed_s": 0.01
+      },
+      {
+        "lag_param": null,
+        "wrapper_status": "success",
+        "var_order_selected": 1,
+        "aic": -0.0533,
+        "bic": -0.0027,
+        "max_root_modulus": 0.6574,
+        "elapsed_s": 0.02
+      }
+    ],
+    "sweep_1_2_var_trend": [
+      {
+        "trend": "n",
+        "wrapper_status": "success",
+        "aic": -0.0586,
+        "bic": -0.0248,
+        "max_root_modulus": 0.6617,
+        "elapsed_s": 0.01
+      },
+      {
+        "trend": "c",
+        "wrapper_status": "success",
+        "aic": -0.0533,
+        "bic": -0.0027,
+        "max_root_modulus": 0.6574,
+        "elapsed_s": 0.01
+      },
+      {
+        "trend": "ct",
+        "wrapper_status": "success",
+        "aic": -0.0454,
+        "bic": 0.0221,
+        "max_root_modulus": 0.6574,
+        "elapsed_s": 0.01
+      },
+      {
+        "trend": "ctt",
+        "wrapper_status": "success",
+        "aic": -0.0379,
+        "bic": 0.0465,
+        "max_root_modulus": 0.6571,
+        "elapsed_s": 0.01
+      }
+    ],
+    "sweep_1_3_vecm_rank": [
+      {
+        "rank_param": null,
+        "wrapper_status": "success",
+        "coint_rank_applied": 1,
+        "lag_order": 1,
+        "trace_stat": 219.6024,
+        "trace_cv_5pct": 15.4943,
+        "half_life_periods": 9.2,
+        "beta_normalized": [
+          [
+            1.0
+          ],
+          [
+            -2.0288145331550824
+          ]
+        ],
+        "elapsed_s": 0.01
+      },
+      {
+        "rank_param": 1,
+        "wrapper_status": "success",
+        "coint_rank_applied": 1,
+        "lag_order": 1,
+        "trace_stat": 219.6024,
+        "trace_cv_5pct": 15.4943,
+        "half_life_periods": 9.2,
+        "beta_normalized": [
+          [
+            1.0
+          ],
+          [
+            -2.0288145331550824
+          ]
+        ],
+        "elapsed_s": 0.01
+      },
+      {
+        "rank_param": 2,
+        "wrapper_status": "success",
+        "coint_rank_applied": 2,
+        "lag_order": 1,
+        "trace_stat": 219.6024,
+        "trace_cv_5pct": 15.4943,
+        "half_life_periods": 6.77,
+        "beta_normalized": [
+          [
+            1.0,
+            -5.2470916834582675e-17
+          ],
+          [
+            -4.379539804989397e-18,
+            1.0
+          ]
+        ],
+        "elapsed_s": 0.01
+      }
+    ],
+    "sweep_1_4_realdata_lag": [
+      {
+        "lag_param": null,
+        "wrapper_status": "success",
+        "var_order_selected": 8,
+        "aic": -12.3297,
+        "bic": -12.1545,
+        "max_root_modulus": 0.8483,
+        "elapsed_s": 0.07
+      },
+      {
+        "lag_param": 1,
+        "wrapper_status": "success",
+        "var_order_selected": 1,
+        "aic": -12.2963,
+        "bic": -12.2684,
+        "max_root_modulus": 0.1487,
+        "elapsed_s": 0.02
+      },
+      {
+        "lag_param": 5,
+        "wrapper_status": "success",
+        "var_order_selected": 5,
+        "aic": -12.314,
+        "bic": -12.202,
+        "max_root_modulus": 0.6125,
+        "elapsed_s": 0.02
+      },
+      {
+        "lag_param": 10,
+        "wrapper_status": "success",
+        "var_order_selected": 10,
+        "aic": -12.3396,
+        "bic": -12.1222,
+        "max_root_modulus": 0.8864,
+        "elapsed_s": 0.02
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "system": "rates_pair",
+        "wrapper": "var",
+        "T": 2501,
+        "wrapper_status": "success",
+        "lag_order": 5,
+        "aic": -12.5853,
+        "bic": -12.534,
+        "max_root_modulus": 0.9996,
+        "coint_rank": null,
+        "trace_stat": null,
+        "trace_cv_5pct": null,
+        "half_life_periods": null,
+        "beta_normalized": null,
+        "elapsed_s": 0.05
+      },
+      {
+        "system": "rates_pair",
+        "wrapper": "vecm",
+        "T": 2501,
+        "wrapper_status": "success",
+        "lag_order": 5,
+        "aic": null,
+        "bic": null,
+        "max_root_modulus": null,
+        "coint_rank": 1,
+        "trace_stat": 6.0813,
+        "trace_cv_5pct": 15.4943,
+        "half_life_periods": 560.48,
+        "beta_normalized": [
+          [
+            1.0
+          ],
+          [
+            -1.3750223019414367
+          ]
+        ],
+        "elapsed_s": 1.12
+      },
+      {
+        "system": "trivariate",
+        "wrapper": "var",
+        "T": 2501,
+        "wrapper_status": "success",
+        "lag_order": 8,
+        "aic": -12.33,
+        "bic": -12.1549,
+        "max_root_modulus": 0.9995,
+        "coint_rank": null,
+        "trace_stat": null,
+        "trace_cv_5pct": null,
+        "elapsed_s": 0.08
+      },
+      {
+        "system": "trivariate",
+        "wrapper": "vecm",
+        "T": 2501,
+        "wrapper_status": "success",
+        "lag_order": 8,
+        "aic": null,
+        "bic": null,
+        "max_root_modulus": null,
+        "coint_rank": 1,
+        "trace_stat": 258.905,
+        "trace_cv_5pct": 29.7961,
+        "elapsed_s": 0.94
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "wrapper": "var",
+        "case": "Independent N(0,1) iid (no dynamics)",
+        "status": "success",
+        "max_root_modulus": 0.0853,
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "var",
+        "case": "Independent random walks",
+        "status": "success",
+        "coint_rank": null,
+        "trace_stat": null,
+        "trace_cv_5pct": null,
+        "rank0_coercion_warning": null,
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "vecm",
+        "case": "Independent random walks",
+        "status": "success",
+        "coint_rank": 1,
+        "trace_stat": 5.5161,
+        "trace_cv_5pct": 15.4943,
+        "rank0_coercion_warning": true,
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "var",
+        "case": "Short series T=50",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "vecm",
+        "case": "Short series T=50",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.0
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "VAR lag=15 on T=100 (over-parameterized)",
+        "status": "success",
+        "var_order": 15,
+        "max_root_modulus": 0.9684,
+        "elapsed_s": 0.01
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}

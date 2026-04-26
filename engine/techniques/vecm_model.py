@@ -88,6 +88,30 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         horizon = int(ctx.get_param("horizon", 10))
         deterministic = ctx.get_param("deterministic", "ci")
+        # CAI Phase 2 Session 9 fix (F-VV-DETERMINISTIC):
+        # statsmodels VECM silently accepts any string for
+        # `deterministic` and treats unknown values as "n" (no
+        # constant, no trend). Without explicit validation, the
+        # wrapper would pass invalid values through, fit a model
+        # different from what the user requested, and report the
+        # invalid string in audit_fields — falsely claiming the
+        # invalid spec was honored. Add an explicit allowlist
+        # check up-front (parallel to caviar's `specification`
+        # validation pattern) so invalid input is rejected with
+        # an actionable error before any fit is attempted.
+        _VECM_DETERMINISTIC = ("n", "co", "ci", "lo", "li")
+        if str(deterministic) not in _VECM_DETERMINISTIC:
+            return make_error_response(
+                ctx,
+                f"Unknown deterministic '{deterministic}'. "
+                f"Must be one of: {', '.join(_VECM_DETERMINISTIC)}.",
+                error_fixes=[
+                    "Use 'n' (no deterministic), 'co' (constant "
+                    "outside cointegration space), 'ci' (constant "
+                    "inside; default), 'lo' (linear trend outside), "
+                    "or 'li' (linear inside).",
+                ],
+            )
         significance = ctx.get_param("significance_level", 0.05)
 
         # Lag order selection
