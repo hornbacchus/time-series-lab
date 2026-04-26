@@ -1,0 +1,319 @@
+{
+  "date": "2026-04-26",
+  "wrappers": [
+    "arimax_sarimax",
+    "intermittent_demand",
+    "theta_forecast"
+  ],
+  "sweep_0": {
+    "ax_invalid_trend": "status=failure, audit_trend=None, err_msg=Valid trend inputs are 'c' (constant), 't' (linear trend in time), 'ct' (both), ",
+    "id_invalid_method": "status=failure, warning_about_xxx=False, err_msg=No valid method could be fitted.",
+    "findings": []
+  },
+  "technique_1": {
+    "sweep_1_1_ax_order": [
+      {
+        "order": [
+          1,
+          0,
+          1
+        ],
+        "wrapper_status": "success",
+        "aic": 1381.3,
+        "bic": 1398.16,
+        "elapsed_s": 0.06
+      },
+      {
+        "order": [
+          2,
+          0,
+          1
+        ],
+        "wrapper_status": "success",
+        "aic": 1380.24,
+        "bic": 1401.31,
+        "elapsed_s": 0.13
+      },
+      {
+        "order": [
+          1,
+          0,
+          2
+        ],
+        "wrapper_status": "success",
+        "aic": 1381.08,
+        "bic": 1402.16,
+        "elapsed_s": 0.15
+      },
+      {
+        "order": [
+          2,
+          0,
+          2
+        ],
+        "wrapper_status": "success",
+        "aic": 1380.64,
+        "bic": 1405.93,
+        "elapsed_s": 0.5
+      }
+    ],
+    "sweep_1_2_id_method": [
+      {
+        "method": "croston",
+        "wrapper_status": "success",
+        "best_method": "CROSTON",
+        "best_alpha": null,
+        "mse": 4.093,
+        "demand_density": null,
+        "elapsed_s": 0.0
+      },
+      {
+        "method": "sba",
+        "wrapper_status": "success",
+        "best_method": "SBA",
+        "best_alpha": null,
+        "mse": 4.0689,
+        "demand_density": null,
+        "elapsed_s": 0.02
+      },
+      {
+        "method": "tsb",
+        "wrapper_status": "success",
+        "best_method": "TSB",
+        "best_alpha": null,
+        "mse": 2.7145,
+        "demand_density": null,
+        "elapsed_s": 0.0
+      }
+    ],
+    "sweep_1_3_th_horizon": [
+      {
+        "horizon": 1,
+        "wrapper_status": "success",
+        "n_obs": 500,
+        "elapsed_s": 7.79
+      },
+      {
+        "horizon": 5,
+        "wrapper_status": "success",
+        "n_obs": 500,
+        "elapsed_s": 7.94
+      },
+      {
+        "horizon": 10,
+        "wrapper_status": "success",
+        "n_obs": 500,
+        "elapsed_s": 7.85
+      },
+      {
+        "horizon": 22,
+        "wrapper_status": "success",
+        "n_obs": 500,
+        "elapsed_s": 8.5
+      }
+    ],
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "wrapper": "sarimax",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "aic": 1431.47,
+        "bic": 1448.32,
+        "rmse": 1.0046,
+        "elapsed_s": 0.12
+      },
+      {
+        "series": "GSPC",
+        "wrapper": "theta_forecast",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "aic": null,
+        "bic": null,
+        "rmse": null,
+        "elapsed_s": 4.3
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "sarimax",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "aic": -1328.95,
+        "bic": -1312.1,
+        "rmse": 0.1659,
+        "elapsed_s": 0.1
+      },
+      {
+        "series": "DGS10",
+        "wrapper": "theta_forecast",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "aic": null,
+        "bic": null,
+        "rmse": null,
+        "elapsed_s": 8.01
+      },
+      {
+        "series": "DGS2",
+        "wrapper": "sarimax",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "aic": -1286.87,
+        "bic": -1270.02,
+        "rmse": 0.1865,
+        "elapsed_s": 0.25
+      },
+      {
+        "series": "DGS2",
+        "wrapper": "theta_forecast",
+        "T": 500,
+        "preprocessing": "level",
+        "wrapper_status": "success",
+        "aic": null,
+        "bic": null,
+        "rmse": null,
+        "elapsed_s": 9.03
+      },
+      {
+        "series": "DEXUSEU",
+        "wrapper": "sarimax",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "aic": 625.44,
+        "bic": 642.3,
+        "rmse": 0.4487,
+        "elapsed_s": 0.14
+      },
+      {
+        "series": "DEXUSEU",
+        "wrapper": "theta_forecast",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "aic": null,
+        "bic": null,
+        "rmse": null,
+        "elapsed_s": 2.55
+      },
+      {
+        "series": "GOLD",
+        "wrapper": "sarimax",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "aic": 1362.15,
+        "bic": 1379.01,
+        "rmse": 0.9373,
+        "elapsed_s": 0.06
+      },
+      {
+        "series": "GOLD",
+        "wrapper": "theta_forecast",
+        "T": 500,
+        "preprocessing": "log_returns",
+        "wrapper_status": "success",
+        "aic": null,
+        "bic": null,
+        "rmse": null,
+        "elapsed_s": 8.12
+      },
+      {
+        "label": "low_density_30",
+        "wrapper": "intermittent_demand",
+        "zero_density_dgp": 0.3,
+        "wrapper_status": "success",
+        "best_method": "SBA",
+        "demand_density": null,
+        "mse": 5.2047,
+        "elapsed_s": 0.0
+      },
+      {
+        "label": "typical_60",
+        "wrapper": "intermittent_demand",
+        "zero_density_dgp": 0.6,
+        "wrapper_status": "success",
+        "best_method": "SBA",
+        "demand_density": null,
+        "mse": 4.9464,
+        "elapsed_s": 0.0
+      },
+      {
+        "label": "sparse_85",
+        "wrapper": "intermittent_demand",
+        "zero_density_dgp": 0.85,
+        "wrapper_status": "success",
+        "best_method": "SBA",
+        "demand_density": null,
+        "mse": 2.1875,
+        "elapsed_s": 0.0
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "wrapper": "sarimax",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 0.23
+      },
+      {
+        "id": "C-CAL-1",
+        "wrapper": "theta_forecast",
+        "case": "constant series",
+        "status": "success",
+        "error_message": null,
+        "elapsed_s": 3.6
+      },
+      {
+        "id": "C-CAL-2",
+        "wrapper": "sarimax",
+        "case": "random walk + ARIMA(0,1,0)",
+        "status": "success",
+        "aic": 860.35,
+        "elapsed_s": 0.01
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "sarimax",
+        "case": "short series T=30",
+        "status": "success",
+        "elapsed_s": 0.05
+      },
+      {
+        "id": "C-CAL-3",
+        "wrapper": "theta_forecast",
+        "case": "short series T=30",
+        "status": "success",
+        "elapsed_s": 0.15
+      },
+      {
+        "id": "C-CAL-4",
+        "wrapper": "intermittent_demand",
+        "case": "all-zeros (degenerate)",
+        "status": "failure",
+        "error_message": "All demand values are zero. Cannot fit intermittent demand model.",
+        "elapsed_s": 0.0
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}
