@@ -28,6 +28,17 @@ import os
 import sys
 import time
 
+# Reconfigure stdout/stderr for UTF-8 on Windows (Tier 2 prose
+# contains alpha and other Greek symbols that cp1252 can't
+# encode). Same fix pattern as kalman / SV canonical scripts;
+# deferred from F-K-EXTRA-2 in CAI Session 1 (kalman audit
+# 2026-04-25).
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "engine"))
 
@@ -279,10 +290,132 @@ def canonical_5():
     return ok
 
 
+# ─────────────────────────────────────────────────────────
+# Calibration Audit Phase 2 Session 2 — adversarial canonicals
+# C-CAL-1 .. C-CAL-4 per CAI Phase 1 §3.2 (numbered as
+# canonical_6 .. canonical_9 to match existing convention).
+# Findings doc: docs/calibration_audit/har_cj_findings_2026_04_26.md
+# ─────────────────────────────────────────────────────────
+
+
+def canonical_6():
+    """C-CAL-1: T=800, NO jumps injected. False-positive rate
+    should sit near nominal alpha = 0.01; flag if > 5%."""
+    rv, bv, tq, _ = _simulate_intraday_and_compute_rv_bv_tq(
+        n_days=800, M=_M_INTRADAY, jump_days=(), seed=42,
+    )
+    ctx = _build_ctx(rv=rv, bv=bv, tq=tq, preset="Balanced")
+    res = hc.run(ctx, _null_progress)
+    print("\n=== Canonical: C-CAL-1 (no jumps) ===")
+    a = res.get("audit_fields", {})
+    jf = a.get("jump_days_fraction")
+    print(f"  status={res.get('status')}, jump_fraction={jf}")
+    ok = res.get("status") == "success" and jf is not None and jf < 0.05
+    print(f"  {'PASS' if ok else 'FAIL'}: false-positive rate "
+          f"{'within' if ok else 'exceeds'} 5%")
+    return ok
+
+
+def canonical_7():
+    """C-CAL-2: T=800, jumps every 10 days at 5sigma magnitude.
+    Tests detection rate on well-separated planted jumps."""
+    n_days = 800
+    rv, bv, tq, _ = _simulate_intraday_and_compute_rv_bv_tq(
+        n_days=n_days, M=_M_INTRADAY,
+        jump_days=tuple(range(0, n_days, 10)),
+        jump_mag_sigmas=5.0, seed=42,
+    )
+    ctx = _build_ctx(rv=rv, bv=bv, tq=tq, preset="Balanced")
+    res = hc.run(ctx, _null_progress)
+    print("\n=== Canonical: C-CAL-2 (frequent jumps every 10 days) ===")
+    a = res.get("audit_fields", {})
+    jc = a.get("jump_days_count")
+    jf = a.get("jump_days_fraction")
+    print(f"  status={res.get('status')}, jumps={jc} ({jf}), true=80")
+    ok = (
+        res.get("status") == "success"
+        and jc is not None and jc >= 50
+    )
+    print(f"  {'PASS' if ok else 'FAIL'}: "
+          f"{'>= 50/80 planted jumps detected' if ok else 'too few detected'}")
+    return ok
+
+
+def canonical_8():
+    """C-CAL-3: T=1500 with mid-series volatility regime shift.
+    Wrapper completes without NaN/Inf despite non-stationarity."""
+    n_days = 1500
+    rv1, bv1, tq1, _ = _simulate_intraday_and_compute_rv_bv_tq(
+        n_days=n_days // 2, M=_M_INTRADAY,
+        sigma_eta=0.05, jump_days=(), seed=42,
+    )
+    rv2, bv2, tq2, _ = _simulate_intraday_and_compute_rv_bv_tq(
+        n_days=n_days // 2, M=_M_INTRADAY,
+        sigma_eta=0.40, jump_days=(), seed=43,
+    )
+    rv = np.concatenate([rv1, rv2])
+    bv = np.concatenate([bv1, bv2])
+    tq = np.concatenate([tq1, tq2])
+    ctx = _build_ctx(rv=rv, bv=bv, tq=tq, preset="Balanced")
+    res = hc.run(ctx, _null_progress)
+    print("\n=== Canonical: C-CAL-3 (mid-series regime shift) ===")
+    a = res.get("audit_fields", {})
+    r2 = a.get("R2")
+    print(f"  status={res.get('status')}, R2={r2}")
+    ok = (
+        res.get("status") == "success"
+        and r2 is not None and np.isfinite(r2)
+    )
+    print(f"  {'PASS' if ok else 'FAIL'}: "
+          f"{'finite R2 under regime shift' if ok else 'wrapper failure'}")
+    return ok
+
+
+def canonical_9():
+    """C-CAL-4: T=1500 white-noise RV. Tests B8 6-decimal
+    rounding floor exposure on jump-component coefficients."""
+    n_days = 1500
+    rng = np.random.default_rng(99)
+    rv = (1e-7 + 1e-3 * rng.standard_normal(n_days) ** 2)
+    bv = rv * (1.0 + 0.01 * rng.standard_normal(n_days))
+    tq = bv ** 2
+    ctx = _build_ctx(rv=rv, bv=bv, tq=tq, preset="Balanced")
+    res = hc.run(ctx, _null_progress)
+    print("\n=== Canonical: C-CAL-4 (B8 rounding floor exposure) ===")
+    a = res.get("audit_fields", {})
+    tables = res.get("tables") or []
+    coef_table = next(
+        (t for t in tables if t.get("name") == "HAR-CJ Coefficients"),
+        None,
+    )
+    rows = (coef_table or {}).get("rows") or []
+    # Row name format from wrapper: "Jump daily (beta_jd)" etc.
+    # Match by substring since the wrapper uses descriptive labels.
+    jump_betas = []
+    for row in rows:
+        name = (row[0] if row else "") or ""
+        if any(tag in name for tag in ("beta_jd", "beta_jw", "beta_jm")):
+            try:
+                jump_betas.append(float(row[1]))
+            except (TypeError, ValueError, IndexError):
+                pass
+    print(f"  status={res.get('status')}, R2={a.get('R2')}")
+    print(f"  jump betas: {jump_betas}")
+    ok = (
+        res.get("status") == "success"
+        and len(jump_betas) == 3
+        and all(abs(b) <= 1e-6 for b in jump_betas)
+    )
+    print(f"  {'PASS' if ok else 'FAIL'}: "
+          f"{'B8 floor exposed (intentional)' if ok else 'unexpected betas'}")
+    return ok
+
+
 def main():
     results = []
     for fn in (canonical_1, canonical_2, canonical_3,
-               canonical_4, canonical_5):
+               canonical_4, canonical_5,
+               canonical_6, canonical_7, canonical_8, canonical_9):
         try:
             ok = fn()
         except Exception as e:

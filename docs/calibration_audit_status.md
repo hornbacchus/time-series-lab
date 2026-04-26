@@ -22,8 +22,8 @@ Phase 1 design audit and methodology.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 2 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25)
-- PENDING: 4 (har_cj, evt_pot_gpd, johansen_cointegration, stochastic_volatility)
+- AUDITED: 3 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26)
+- PENDING: 3 (evt_pot_gpd, johansen_cointegration, stochastic_volatility)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
 - UNAUDITED: 76
@@ -174,7 +174,7 @@ Phase 1 design audit and methodology.
 | evt_pot_gpd | PENDING | — | — | — | — |
 | garch | UNAUDITED | — | — | — | — |
 | gjr_garch | UNAUDITED | — | — | — | — |
-| har_cj | PENDING | — | — | — | — |
+| har_cj | AUDITED | [har_cj_findings_2026_04_26.md](calibration_audit/har_cj_findings_2026_04_26.md) | 0 | 1 (fixed inline) | 1 |
 | har_rv | UNAUDITED | — | — | — | — |
 | stochastic_volatility | PENDING | — | — | — | — |
 
