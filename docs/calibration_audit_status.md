@@ -24,8 +24,23 @@ that route to a single `garch_model.py` wrapper).
 | 4 | johansen_cointegration | 340a714 | 0 | 0 | 2 |
 | 5 | stochastic_volatility | a2464ac | 0 | 0 | 2 |
 | 6 | garch + gjr_garch + egarch (batch; first extension) | fcc73b3 | 2 (both fixed inline) | 0 | 0 |
-| 7 | har_rv (second extension) | (this commit) | 0 | 0 | 0 |
-| **Total** | **10 wrappers AUDITED** | — | **2 (all fixed)** | **3 (all fixed)** | **6** |
+| 7 | har_rv (second extension) | d32dd75 | 0 | 0 | 0 |
+| 8 | caviar_quantile_dynamics (closes vol/risk batch) | (this commit) | 0 | 0 | 0 |
+| **Total** | **11 wrappers AUDITED** | — | **2 (all fixed)** | **3 (all fixed)** | **6** |
+
+### Volatility/risk extension batch closure (Sessions 6-8)
+
+Original recommended extension target was the volatility/risk
+family. Across 3 sessions the batch covered 5 wrappers:
+garch + gjr_garch + egarch (Session 6 batch), har_rv (Session
+7), caviar_quantile_dynamics (Session 8). Aggregate:
+**2 severe (both fixed) / 0 operational / 0 cosmetic** — all
+findings concentrated in Session 6's GARCH dispatch + EGARCH
+persistence-formula bugs. Sessions 7 and 8 each produced
+zero findings, validating the refined pattern: real wrapper
+findings concentrate in wrappers with high math complexity
+AND specification ambiguity. The `vol_garch_risk_ext` cycle
+arc is now CLOSED.
 
 **Sessions 1-5 produced zero severe wrapper findings** — all
 3 operational fixes were Windows cp1252 console encoding bugs
@@ -65,7 +80,7 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 10 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26)
+- AUDITED: 11 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
@@ -212,7 +227,7 @@ extensions are operationally valuable.
 
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
-| caviar_quantile_dynamics | UNAUDITED | — | — | — | — |
+| caviar_quantile_dynamics | AUDITED | [caviar_findings_2026_04_26.md](calibration_audit/caviar_findings_2026_04_26.md) | 0 | 0 | 0 |
 | egarch | AUDITED | [garch_family_findings_2026_04_26.md](calibration_audit/garch_family_findings_2026_04_26.md) | 1 (fixed inline; shared with garch/gjr_garch) | 0 | 0 |
 | evt_pot_gpd | AUDITED | [evt_pot_gpd_findings_2026_04_26.md](calibration_audit/evt_pot_gpd_findings_2026_04_26.md) | 0 | 0 | 1 |
 | garch | AUDITED | [garch_family_findings_2026_04_26.md](calibration_audit/garch_family_findings_2026_04_26.md) | 1 (fixed inline; shared) | 0 | 0 |

@@ -1,0 +1,354 @@
+{
+  "date": "2026-04-26",
+  "wrapper": "caviar_quantile_dynamics",
+  "technique_1": {
+    "sweep_1_1_specification": [
+      {
+        "specification": "SAV",
+        "wrapper_status": "success",
+        "parameters": [
+          -0.134194,
+          0.836122,
+          -0.149288
+        ],
+        "parameter_names": [
+          "beta_0",
+          "beta_1",
+          "beta_2"
+        ],
+        "quantile_loss": 0.087216,
+        "n_violations": 26,
+        "kupiec_pval": 0.838415,
+        "one_step_ahead_var": -1.596633,
+        "elapsed_s": 1.25
+      },
+      {
+        "specification": "AS",
+        "wrapper_status": "success",
+        "parameters": [
+          -0.02644,
+          0.948665,
+          -0.102446,
+          0.042297
+        ],
+        "parameter_names": [
+          "beta_0",
+          "beta_1",
+          "beta_2 (positive)",
+          "beta_3 (negative)"
+        ],
+        "quantile_loss": 0.086999,
+        "n_violations": 25,
+        "kupiec_pval": 1.0,
+        "one_step_ahead_var": -1.446653,
+        "elapsed_s": 3.86
+      },
+      {
+        "specification": "IG",
+        "wrapper_status": "success",
+        "parameters": [
+          0.229857,
+          0.777673,
+          0.314023
+        ],
+        "parameter_names": [
+          "beta_0",
+          "beta_1",
+          "beta_2"
+        ],
+        "quantile_loss": 0.087222,
+        "n_violations": 25,
+        "kupiec_pval": 1.0,
+        "one_step_ahead_var": -1.658236,
+        "elapsed_s": 3.83
+      }
+    ],
+    "sweep_1_2_theta": [
+      {
+        "theta": 0.01,
+        "wrapper_status": "success",
+        "one_step_ahead_var": -2.655102,
+        "violation_ratio": 1.0,
+        "kupiec_pval": 1.0,
+        "elapsed_s": 1.93
+      },
+      {
+        "theta": 0.025,
+        "wrapper_status": "success",
+        "one_step_ahead_var": -2.32612,
+        "violation_ratio": 0.96,
+        "kupiec_pval": 0.885367,
+        "elapsed_s": 1.85
+      },
+      {
+        "theta": 0.05,
+        "wrapper_status": "success",
+        "one_step_ahead_var": -1.596633,
+        "violation_ratio": 1.04,
+        "kupiec_pval": 0.838415,
+        "elapsed_s": 1.35
+      },
+      {
+        "theta": 0.1,
+        "wrapper_status": "success",
+        "one_step_ahead_var": -1.390316,
+        "violation_ratio": 1.02,
+        "kupiec_pval": 0.881843,
+        "elapsed_s": 1.61
+      }
+    ],
+    "sweep_1_3_n_restarts": [
+      {
+        "preset": "Fast",
+        "n_restarts": 3,
+        "parameters": [
+          -0.134194,
+          0.836122,
+          -0.149288
+        ],
+        "quantile_loss": 0.087216,
+        "one_step_ahead_var": -1.596633,
+        "elapsed_s": 0.43
+      },
+      {
+        "preset": "Balanced",
+        "n_restarts": 10,
+        "parameters": [
+          -0.134194,
+          0.836122,
+          -0.149288
+        ],
+        "quantile_loss": 0.087216,
+        "one_step_ahead_var": -1.596633,
+        "elapsed_s": 1.78
+      },
+      {
+        "preset": "Thorough",
+        "n_restarts": 30,
+        "parameters": [
+          -0.134194,
+          0.836122,
+          -0.149288
+        ],
+        "quantile_loss": 0.087216,
+        "one_step_ahead_var": -1.596633,
+        "elapsed_s": 5.55
+      }
+    ],
+    "sweep_1_4_horizon": {
+      "horizons": [
+        1,
+        5,
+        10,
+        22
+      ],
+      "multi_step_quantiles": {
+        "1": -1.596792,
+        "5": -1.523332,
+        "10": -1.533894,
+        "22": -1.482874
+      },
+      "multi_step_mc_noise_std": {
+        "1": 0.200016,
+        "5": 0.155281,
+        "10": 0.177063,
+        "22": 0.197167
+      },
+      "elapsed_s": 1.71
+    },
+    "findings": []
+  },
+  "technique_2": {
+    "baselines": [
+      {
+        "series": "GSPC",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 2.92,
+        "parameters": [
+          -0.132987,
+          0.77498,
+          -0.34968
+        ],
+        "quantile_loss": 0.122028,
+        "n_violations": 50,
+        "expected_violations": 50.0,
+        "violation_ratio": 1.0,
+        "kupiec_pval": 1.0,
+        "christoffersen_pval": 0.747476,
+        "dq_pval": 0.655656,
+        "one_step_ahead_var": -3.591979,
+        "caviar_effective_persistence": 1.124659,
+        "caviar_stationarity_ok": false
+      },
+      {
+        "series": "DGS10",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 5.32,
+        "parameters": [
+          -0.000563,
+          0.949899,
+          -0.090868
+        ],
+        "quantile_loss": 0.006924,
+        "n_violations": 50,
+        "expected_violations": 50.0,
+        "violation_ratio": 1.0,
+        "kupiec_pval": 1.0,
+        "christoffersen_pval": 0.355156,
+        "dq_pval": 0.565408,
+        "one_step_ahead_var": -0.112045,
+        "caviar_effective_persistence": 1.040767,
+        "caviar_stationarity_ok": false
+      },
+      {
+        "series": "DGS2",
+        "preprocessing": "yield_diffs",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 4.07,
+        "parameters": [
+          -0.000932,
+          0.898074,
+          -0.196241
+        ],
+        "quantile_loss": 0.00812,
+        "n_violations": 50,
+        "expected_violations": 50.0,
+        "violation_ratio": 1.0,
+        "kupiec_pval": 1.0,
+        "christoffersen_pval": 0.137943,
+        "dq_pval": 0.693228,
+        "one_step_ahead_var": -0.113226,
+        "caviar_effective_persistence": 1.094315,
+        "caviar_stationarity_ok": false
+      },
+      {
+        "series": "DEXUSEU",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 3.3,
+        "parameters": [
+          -0.00932,
+          0.97301,
+          -0.033367
+        ],
+        "quantile_loss": 0.052299,
+        "n_violations": 51,
+        "expected_violations": 50.0,
+        "violation_ratio": 1.02,
+        "kupiec_pval": 0.884994,
+        "christoffersen_pval": 0.394207,
+        "dq_pval": 0.307936,
+        "one_step_ahead_var": -0.940684,
+        "caviar_effective_persistence": 1.006378,
+        "caviar_stationarity_ok": false
+      },
+      {
+        "series": "GOLD",
+        "preprocessing": "log_returns",
+        "T": 1000,
+        "wrapper_status": "success",
+        "elapsed_s": 4.53,
+        "parameters": [
+          -0.284001,
+          0.772489,
+          -0.10642
+        ],
+        "quantile_loss": 0.1121,
+        "n_violations": 49,
+        "expected_violations": 50.0,
+        "violation_ratio": 0.98,
+        "kupiec_pval": 0.884271,
+        "christoffersen_pval": 0.778661,
+        "dq_pval": 0.794582,
+        "one_step_ahead_var": -2.141845,
+        "caviar_effective_persistence": 0.878909,
+        "caviar_stationarity_ok": true
+      }
+    ],
+    "findings": []
+  },
+  "technique_3": {
+    "canonicals": [
+      {
+        "id": "C-CAL-1",
+        "case": "Constant volatility (no GARCH effect) T=500",
+        "status": "success",
+        "parameters": [
+          -2.116782,
+          -0.502234,
+          -0.312603
+        ],
+        "quantile_loss": 0.095124,
+        "violation_ratio": 1.0,
+        "elapsed_s": 3.48
+      },
+      {
+        "id": "C-CAL-2",
+        "case": "Mid-series regime change low->high vol T=1000",
+        "status": "success",
+        "parameters": [
+          0.0133,
+          0.919321,
+          -0.201068
+        ],
+        "quantile_loss": 0.165288,
+        "violation_ratio": 0.98,
+        "elapsed_s": 3.45
+      },
+      {
+        "id": "C-CAL-3",
+        "case": "T=100 (just above guard) + extreme theta=0.01",
+        "status": "success",
+        "parameters": [
+          -0.345504,
+          0.694816,
+          -0.365622
+        ],
+        "n_violations": 1,
+        "expected_violations": 1.0,
+        "elapsed_s": 1.04
+      },
+      {
+        "id": "C-CAL-4",
+        "case": "B9 lens: Fast (n_restarts=3) vs Thorough (30)",
+        "results": [
+          {
+            "preset": "Fast",
+            "n_restarts": 3,
+            "parameters": [
+              -0.017357,
+              0.950039,
+              -0.088677
+            ],
+            "quantile_loss": 0.103204,
+            "elapsed_s": 0.76
+          },
+          {
+            "preset": "Thorough",
+            "n_restarts": 30,
+            "parameters": [
+              -0.01907,
+              0.948787,
+              -0.089467
+            ],
+            "quantile_loss": 0.103193,
+            "elapsed_s": 5.32
+          }
+        ]
+      }
+    ],
+    "findings": []
+  },
+  "findings_by_severity": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  },
+  "all_findings": []
+}
