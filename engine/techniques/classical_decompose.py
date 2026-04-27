@@ -104,11 +104,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         model_type = ctx.get_param("model", "additive").lower()
-        if model_type not in ("additive", "multiplicative"):
-            warnings.append(
-                f"Unknown model '{model_type}'. Falling back to 'additive'."
+        # CAI Phase 2 Session 16 fix (F-CD-CLASSIC-MODEL): explicit
+        # allowlist gate. Pre-fix, invalid `model` strings emitted
+        # a warning but silently coerced to "additive". User who
+        # typed e.g. "multplicative" (typo) silently got additive
+        # while believing they got multiplicative. Now: any
+        # unknown model returns make_error_response.
+        _MODEL_OPTS = ("additive", "multiplicative")
+        if model_type not in _MODEL_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown model '{model_type}'. Must be one of: "
+                f"{', '.join(_MODEL_OPTS)}.",
+                error_fixes=[
+                    "Use 'additive' (default; Y = T + S + R) for "
+                    "series whose seasonal swing is roughly "
+                    "constant in absolute terms, or "
+                    "'multiplicative' (Y = T * S * R) for series "
+                    "whose seasonal swing scales with the level "
+                    "(requires all-positive values).",
+                ],
             )
-            model_type = "additive"
 
         # For multiplicative, all values must be positive
         if model_type == "multiplicative":

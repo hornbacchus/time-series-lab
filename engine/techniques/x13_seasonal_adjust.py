@@ -352,6 +352,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         transform = ctx.get_param("transform", preset_cfg["transform"])
         outlier = ctx.get_param("outlier", preset_cfg["outlier"])
+        # CAI Phase 2 Session 16 fix (F-CD-X13-TRANSFORM): explicit
+        # allowlist gate. Pre-fix, invalid `transform` strings fell
+        # through silently — _write_x13_spec emitted no transform
+        # block (X-13 default), the X-11 mode block stayed
+        # multiplicative, and audit_fields["transform"] recorded
+        # the user's invalid value. Result: garbage decomposition
+        # with no signal to the user.
+        if isinstance(transform, str):
+            transform = transform.strip().lower()
+        _TRANSFORM_OPTS = ("auto", "log", "none")
+        if transform not in _TRANSFORM_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown transform '{transform}'. Must be one of: "
+                f"{', '.join(_TRANSFORM_OPTS)}.",
+                error_fixes=[
+                    "Use 'auto' (default; X-13 picks log/none "
+                    "based on the data), 'log' (force "
+                    "log-transform; requires all-positive "
+                    "values), or 'none' (no transform; X-11 "
+                    "decomposition runs in additive mode).",
+                ],
+            )
         start_year = int(ctx.get_param("start_year", 2000))
         start_period = int(ctx.get_param("start_period", 1))
 

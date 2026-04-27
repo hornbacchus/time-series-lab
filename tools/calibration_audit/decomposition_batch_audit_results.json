@@ -1,0 +1,126 @@
+{
+  "session": 16,
+  "started": 1777250872.9160435,
+  "sweep_0_findings": [],
+  "technique_1": [
+    {
+      "wrapper": "stl",
+      "param": "p=12",
+      "F_s": 0.9742
+    },
+    {
+      "wrapper": "stl",
+      "param": "p=6",
+      "F_s": 0.0397
+    },
+    {
+      "wrapper": "stl",
+      "param": "p=4",
+      "F_s": 0.0871
+    },
+    {
+      "wrapper": "mstl",
+      "param": "p=[12]",
+      "F_t": 0.1255
+    },
+    {
+      "wrapper": "mstl",
+      "param": "p=[7, 365]",
+      "F_t": 0.9882
+    },
+    {
+      "wrapper": "classic",
+      "param": "m=additive",
+      "F_s": 0.9678
+    },
+    {
+      "wrapper": "classic",
+      "param": "m=multiplicative",
+      "F_s": 0.9149
+    },
+    {
+      "wrapper": "x13",
+      "param": "tr=auto",
+      "F_s": 0.9191
+    },
+    {
+      "wrapper": "x13",
+      "param": "tr=log",
+      "F_s": 0.9101
+    },
+    {
+      "wrapper": "x13",
+      "param": "tr=none",
+      "F_s": 0.9191
+    }
+  ],
+  "technique_2": [
+    {
+      "series": "synthetic",
+      "wrapper": "stl_decompose",
+      "F_s": 0.9742,
+      "runtime": 0.014111042022705078
+    },
+    {
+      "series": "synthetic",
+      "wrapper": "mstl_decompose",
+      "F_s": "?",
+      "runtime": 0.005640745162963867
+    },
+    {
+      "series": "synthetic",
+      "wrapper": "classical_decompose",
+      "F_s": 0.9678,
+      "runtime": 0.003206014633178711
+    },
+    {
+      "series": "synthetic",
+      "wrapper": "x13_seasonal_adjust",
+      "F_s": 0.9664,
+      "runtime": 0.359360933303833
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "stl_decompose",
+      "F_s": 0.2166,
+      "runtime": 0.01628422737121582
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "mstl_decompose",
+      "F_s": "?",
+      "runtime": 0.00826716423034668
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "classical_decompose",
+      "F_s": 0.0069,
+      "runtime": 0.006531476974487305
+    },
+    {
+      "series": "DGS10",
+      "wrapper": "stl_decompose",
+      "F_s": 0.1681,
+      "runtime": 0.016275644302368164
+    },
+    {
+      "series": "DGS10",
+      "wrapper": "mstl_decompose",
+      "F_s": "?",
+      "runtime": 0.008071660995483398
+    },
+    {
+      "series": "DGS10",
+      "wrapper": "classical_decompose",
+      "F_s": 0.0031,
+      "runtime": 0.007666110992431641
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777250876.0236824,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}
