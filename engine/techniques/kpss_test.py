@@ -142,6 +142,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
             nlags = str(nlags_param)
         significance = float(ctx.get_param("significance_level", 0.05))
 
+        # CAI Phase 2 Session 17 fix (F-ST-KPSS-REGRESSION,
+        # F-ST-KPSS-NLAGS): explicit allowlist gates. Pre-fix,
+        # invalid `regression` / `nlags` strings flowed into
+        # statsmodels.kpss which raised ValueError caught inside
+        # _run_kpss_single — wrapper still returned status=success
+        # with audit_fields recording user's invalid value.
+        _REGRESSION_OPTS = ("c", "ct")
+        if regression not in _REGRESSION_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown regression '{regression}'. Must be one "
+                f"of: {', '.join(_REGRESSION_OPTS)}.",
+                error_fixes=[
+                    "Use 'c' (level stationarity; default) or "
+                    "'ct' (trend stationarity).",
+                ],
+            )
+        # nlags accepts: int, "auto", or "legacy"
+        if isinstance(nlags, str) and nlags not in ("auto", "legacy"):
+            return make_error_response(
+                ctx,
+                f"Unknown nlags '{nlags}'. Must be 'auto', "
+                "'legacy', or an integer.",
+                error_fixes=[
+                    "Use 'auto' (default; data-driven bandwidth "
+                    "via Hobijn-Franses-Ooms 1998), 'legacy' "
+                    "(Schwert-style int(12*(n/100)^(1/4))), or "
+                    "supply an explicit integer bandwidth.",
+                ],
+            )
+
         warn_list = []
         result_rows = []
         all_summaries = []

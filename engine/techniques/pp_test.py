@@ -240,6 +240,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
             lags = nlags_param
         significance = float(ctx.get_param("significance_level", 0.05))
 
+        # CAI Phase 2 Session 17 fix (F-ST-PP-REGRESSION):
+        # explicit allowlist gate. Pre-fix, invalid `regression`
+        # strings flowed through to the backend dispatcher
+        # (_run_pp_test) where arch.unitroot.PhillipsPerron
+        # silently coerces invalid values to "c" via
+        # `trend = regression if regression in ("n","c","ct") else "c"`
+        # at line 92, AND the manual fallback at line 118-119
+        # also silently fell through to "c" critical values.
+        # audit_fields["regression"] still recorded the user's
+        # invalid value.
+        _REGRESSION_OPTS = ("c", "ct", "n", "nc")
+        if regression not in _REGRESSION_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown regression '{regression}'. Must be one "
+                f"of: {', '.join(_REGRESSION_OPTS)}.",
+                error_fixes=[
+                    "Use 'c' (constant only; default), 'ct' "
+                    "(constant + linear trend), or 'n'/'nc' (no "
+                    "deterministic term).",
+                ],
+            )
+
         warn_list = []
         result_rows = []
         all_summaries = []

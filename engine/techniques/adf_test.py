@@ -279,6 +279,52 @@ def run(ctx: RunContext, progress_callback) -> dict:
             autolag = autolag_param
         significance = float(ctx.get_param("significance_level", 0.05))
 
+        # CAI Phase 2 Session 17 fix (F-ST-ADF-REGRESSION,
+        # F-ST-ADF-AUTOLAG): explicit allowlist gates. Pre-fix,
+        # invalid `regression` and `autolag` strings flowed into
+        # statsmodels.adfuller, which raised ValueError that was
+        # caught inside _run_adf_single and stored as a per-series
+        # error — but the wrapper still returned status=success
+        # with audit_fields recording the user's invalid value
+        # and an error row in the table. Now: allowlist-reject
+        # BEFORE entering the run path so the user gets a clear
+        # error message instead of a "successful" run with no
+        # actual test result.
+        _REGRESSION_OPTS = ("c", "ct", "ctt", "n", "nc")
+        if regression not in _REGRESSION_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown regression '{regression}'. Must be one "
+                f"of: {', '.join(_REGRESSION_OPTS)}.",
+                error_fixes=[
+                    "Use 'c' (constant only; default), 'ct' "
+                    "(constant + linear trend), 'ctt' (constant + "
+                    "linear + quadratic trend), or 'n'/'nc' (no "
+                    "deterministic term).",
+                ],
+            )
+        _AUTOLAG_OPTS = ("AIC", "BIC", "t-stat", None)
+        # Statsmodels accepts case-insensitive strings; normalize
+        # for the allowlist check while preserving the original
+        # value for downstream display.
+        _autolag_check = (
+            autolag.upper() if isinstance(autolag, str) and autolag.upper() in ("AIC", "BIC")
+            else autolag.lower() if isinstance(autolag, str) and autolag.lower() == "t-stat"
+            else autolag
+        )
+        if _autolag_check not in _AUTOLAG_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown autolag '{autolag}'. Must be one of: "
+                "AIC, BIC, t-stat, or None.",
+                error_fixes=[
+                    "Use 'AIC' (default; Akaike information "
+                    "criterion), 'BIC' (Bayesian information "
+                    "criterion), 't-stat' (t-statistic-based "
+                    "selection), or None (use max_lag directly).",
+                ],
+            )
+
         if _is_triage_mode(ctx):
             return _run_triage(
                 ctx, progress_callback, all_series, regression, max_lag_param,

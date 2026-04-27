@@ -1,0 +1,57 @@
+{
+  "session": 17,
+  "started": 1777253144.015536,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "wrapper": "adf_test",
+      "stat": -12.8504,
+      "pvalue": 0.0,
+      "runtime": 0.010065078735351562
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "kpss_test",
+      "stat": 0.2083,
+      "pvalue": 0.1,
+      "runtime": 0.0005967617034912109
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "pp_test",
+      "stat": -23.4133,
+      "pvalue": 0.0,
+      "runtime": 0.00411224365234375
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "adf_test",
+      "stat": -2.8931,
+      "pvalue": 0.046162,
+      "runtime": 0.012936115264892578
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "kpss_test",
+      "stat": 0.5336,
+      "pvalue": 0.034104,
+      "runtime": 0.0006947517395019531
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "pp_test",
+      "stat": -2.8922,
+      "pvalue": 0.046268,
+      "runtime": 0.005748271942138672
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777253145.4039235,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}
