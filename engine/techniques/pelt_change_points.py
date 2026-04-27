@@ -102,6 +102,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             penalty_method = str(penalty_param).lower()
 
+        # CAI Phase 2 Session 15 fix (F-CP-PELT-PENALTY): explicit
+        # allowlist gate. Pre-fix, invalid string penalties (e.g.
+        # "zzz") fell through the if/elif/else chain at the
+        # algo.predict() call site to the `else: # bic` branch
+        # silently. audit_fields["penalty"] still reported the
+        # user's invalid string, misrepresenting the model.
+        _PENALTY_METHOD_OPTS = ("bic", "aic", "mbic")
+        if isinstance(penalty_method, str) and penalty_method not in _PENALTY_METHOD_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown penalty method '{penalty_method}'. Must "
+                f"be one of: {', '.join(_PENALTY_METHOD_OPTS)} "
+                f"(or supply a numeric penalty value).",
+                error_fixes=[
+                    "Use 'bic' (default; log(n)·sigma² penalty), "
+                    "'aic' (2·sigma² penalty), or 'mbic' (modified "
+                    "BIC; 3·log(n)·sigma² penalty), OR pass a "
+                    "numeric value for a manual penalty.",
+                ],
+            )
+
         progress_callback("Running change point detection", 20)
 
         signal = clean.reshape(-1, 1)

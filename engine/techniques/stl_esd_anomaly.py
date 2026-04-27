@@ -104,6 +104,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
         max_anomalies_pct = float(ctx.get_param("max_anomalies_pct", 0.10))
         alpha = float(ctx.get_param("alpha", 0.05))
         direction = ctx.get_param("direction", "both").lower()
+        # CAI Phase 2 Session 15 fix (F-CP-STL-DIRECTION): explicit
+        # allowlist gate. Pre-fix, invalid `direction` strings
+        # fell through the if/elif/else chain in
+        # _generalized_esd to the `else:  # lower` branch
+        # silently. audit_fields["direction"] still reported the
+        # user's invalid string, misrepresenting the test that
+        # actually ran.
+        _DIRECTION_OPTS = ("both", "upper", "lower")
+        if direction not in _DIRECTION_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown direction '{direction}'. Must be one "
+                f"of: {', '.join(_DIRECTION_OPTS)}.",
+                error_fixes=[
+                    "Use 'both' (default; two-sided test "
+                    "detecting both upper and lower anomalies), "
+                    "'upper' (one-sided; flags only unusually "
+                    "high values), or 'lower' (one-sided; flags "
+                    "only unusually low values).",
+                ],
+            )
 
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
 

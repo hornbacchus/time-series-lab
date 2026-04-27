@@ -109,6 +109,33 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Building intervention dummies", 15)
 
+        # CAI Phase 2 Session 15 fix (F-CP-INT-TYPE): explicit
+        # allowlist gate. Pre-fix, invalid intervention `type`
+        # strings fell through the if/elif/else chain to a silent
+        # coercion to "step" (with a warning). The audit_fields
+        # `interventions` list still recorded the user's invalid
+        # type, misrepresenting the model that actually ran.
+        # Now: any unknown type returns make_error_response with
+        # the allowlist enumerated.
+        _INTERVENTION_TYPE_OPTS = ("pulse", "step", "ramp")
+        for i, intv in enumerate(interventions):
+            itype = intv.get("type")
+            if itype not in _INTERVENTION_TYPE_OPTS:
+                iname = intv.get("name", f"Intervention_{i+1}")
+                return make_error_response(
+                    ctx,
+                    f"Unknown intervention type '{itype}' for "
+                    f"{iname}. Must be one of: "
+                    f"{', '.join(_INTERVENTION_TYPE_OPTS)}.",
+                    error_fixes=[
+                        "Use 'pulse' (one-time shock at the "
+                        "intervention index), 'step' (permanent "
+                        "level shift starting at the index), or "
+                        "'ramp' (linearly increasing effect from "
+                        "the index onward).",
+                    ],
+                )
+
         # Build dummy variables
         X_interventions = np.zeros((n, len(interventions)))
         dummy_names = []
@@ -124,14 +151,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
             elif itype == "step":
                 X_interventions[idx:, i] = 1.0
                 dummy_names.append(f"{iname} (step@{idx})")
-            elif itype == "ramp":
+            else:  # itype == "ramp" (allowlist guarantees this)
                 for t in range(idx, n):
                     X_interventions[t, i] = t - idx + 1
                 dummy_names.append(f"{iname} (ramp@{idx})")
-            else:
-                warnings.append(f"Unknown intervention type '{itype}' for {iname}, treating as step.")
-                X_interventions[idx:, i] = 1.0
-                dummy_names.append(f"{iname} (step@{idx})")
 
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
 

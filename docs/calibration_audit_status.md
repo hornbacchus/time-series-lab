@@ -31,8 +31,9 @@ that route to a single `garch_model.py` wrapper).
 | 11 | arimax_sarimax + intermittent_demand + theta_forecast (closes forecasting classical) | 8743512 | 0 | 0 | 0 |
 | 12 | hmm + markov_switching + tar_setar + star + nar_narx (Markov/regime batch) | a21bcd0 | 1 (fixed inline) | 0 | 0 |
 | 13 | fft + periodogram + lomb_scargle + wavelet_transform + wavelet_coherence + emd_hht + ssa (Frequency Domain batch) | 1090ac5 | 3 (all fixed inline) | 0 | 0 |
-| 14 | granger_causality + cross_correlation_lag + gcc_phat_delay + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag (Causality/Lead-Lag batch) | (this commit) | 2 (both fixed inline) | 0 | 0 |
-| **Total** | **37 wrappers AUDITED** | — | **10 (all fixed)** | **3 (all fixed)** | **6** |
+| 14 | granger_causality + cross_correlation_lag + gcc_phat_delay + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag (Causality/Lead-Lag batch) | ff0aefa | 2 (both fixed inline) | 0 | 0 |
+| 15 | bocpd + cusum_page_hinkley + intervention_analysis + pelt_change_points + stl_esd_anomaly (Change Points/Anomalies batch) | (this commit) | 3 (all fixed inline) | 0 | 0 |
+| **Total** | **42 wrappers AUDITED** | — | **13 (all fixed)** | **3 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -86,11 +87,11 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 37 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26; arima + auto_arima + sarima — Session 10 forecasting classical batch, 2026-04-26; arimax_sarimax + intermittent_demand + theta_forecast — Session 11 closes forecasting classical, 2026-04-26; hmm + markov_switching + tar_setar + star + nar_narx — Session 12 Markov/regime batch, 2026-04-26; fft_spectrum + periodogram_spectral_density + lomb_scargle + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + ssa — Session 13 Frequency Domain batch, 2026-04-26; granger_causality + cross_correlation_lag + gcc_phat_delay + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag — Session 14 Causality/Lead-Lag batch, 2026-04-26)
+- AUDITED: 42 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26; arima + auto_arima + sarima — Session 10 forecasting classical batch, 2026-04-26; arimax_sarimax + intermittent_demand + theta_forecast — Session 11 closes forecasting classical, 2026-04-26; hmm + markov_switching + tar_setar + star + nar_narx — Session 12 Markov/regime batch, 2026-04-26; fft_spectrum + periodogram_spectral_density + lomb_scargle + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + ssa — Session 13 Frequency Domain batch, 2026-04-26; granger_causality + cross_correlation_lag + gcc_phat_delay + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag — Session 14 Causality/Lead-Lag batch, 2026-04-26; bocpd + cusum_page_hinkley + intervention_analysis + pelt_change_points + stl_esd_anomaly — Session 15 Change Points/Anomalies batch, 2026-04-26)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
-- UNAUDITED: 70
+- UNAUDITED: 65
 
 ## Per-wrapper status
 
@@ -109,11 +110,11 @@ extensions are operationally valuable.
 
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
-| bocpd | UNAUDITED | — | — | — | — |
-| cusum_page_hinkley | UNAUDITED | — | — | — | — |
-| intervention_analysis | UNAUDITED | — | — | — | — |
-| pelt_change_points | UNAUDITED | — | — | — | — |
-| stl_esd_anomaly | UNAUDITED | — | — | — | — |
+| bocpd | AUDITED | [change_points_batch_findings_2026_04_26.md](calibration_audit/change_points_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| cusum_page_hinkley | AUDITED | [change_points_batch_findings_2026_04_26.md](calibration_audit/change_points_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| intervention_analysis | AUDITED | [change_points_batch_findings_2026_04_26.md](calibration_audit/change_points_batch_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
+| pelt_change_points | AUDITED | [change_points_batch_findings_2026_04_26.md](calibration_audit/change_points_batch_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
+| stl_esd_anomaly | AUDITED | [change_points_batch_findings_2026_04_26.md](calibration_audit/change_points_batch_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
 
 ### Decomposition & Seasonal Adjustment
 
@@ -249,6 +250,6 @@ extensions are operationally valuable.
 - `critical_slowing_down` deferred because it shipped on
   2026-04-25 (commit `94742fe`); too new for the calibration
   audit cycle. Will be candidate for next CAI cycle.
-- The 70 UNAUDITED wrappers are documented for awareness;
+- The 65 UNAUDITED wrappers are documented for awareness;
   not in this initiative's scope. Future calibration cycles
   may extend coverage.

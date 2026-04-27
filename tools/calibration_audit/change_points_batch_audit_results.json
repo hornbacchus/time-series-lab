@@ -1,0 +1,166 @@
+{
+  "session": 15,
+  "started": 1777248885.0558672,
+  "sweep_0_findings": [],
+  "technique_1": [
+    {
+      "wrapper": "bocpd",
+      "param": "hl=50",
+      "n_cps": 0,
+      "runtime": 0.07773923873901367
+    },
+    {
+      "wrapper": "bocpd",
+      "param": "hl=200",
+      "n_cps": 0,
+      "runtime": 0.07587671279907227
+    },
+    {
+      "wrapper": "bocpd",
+      "param": "hl=500",
+      "n_cps": 0,
+      "runtime": 0.07887673377990723
+    },
+    {
+      "wrapper": "cph",
+      "param": "pl=10",
+      "n_alarms": 108,
+      "runtime": 0.09375762939453125
+    },
+    {
+      "wrapper": "cph",
+      "param": "pl=50",
+      "n_alarms": 83,
+      "runtime": 0.0913245677947998
+    },
+    {
+      "wrapper": "cph",
+      "param": "pl=100",
+      "n_alarms": 43,
+      "runtime": 0.09310173988342285
+    },
+    {
+      "wrapper": "int",
+      "param": "type=pulse",
+      "n_sig": 1,
+      "runtime": 4.630311012268066
+    },
+    {
+      "wrapper": "int",
+      "param": "type=step",
+      "n_sig": 1,
+      "runtime": 5.155585050582886
+    },
+    {
+      "wrapper": "int",
+      "param": "type=ramp",
+      "n_sig": 1,
+      "runtime": 5.5152435302734375
+    },
+    {
+      "wrapper": "pelt",
+      "param": "model=l1",
+      "n_cps": 2,
+      "runtime": 0.2653632164001465
+    },
+    {
+      "wrapper": "pelt",
+      "param": "model=l2",
+      "n_cps": 2,
+      "runtime": 0.18091106414794922
+    },
+    {
+      "wrapper": "pelt",
+      "param": "model=rbf",
+      "n_cps": 2,
+      "runtime": 0.19352293014526367
+    },
+    {
+      "wrapper": "stl",
+      "param": "alpha=0.01",
+      "n_anom": 4,
+      "runtime": 0.015286445617675781
+    },
+    {
+      "wrapper": "stl",
+      "param": "alpha=0.05",
+      "n_anom": 4,
+      "runtime": 0.01563096046447754
+    },
+    {
+      "wrapper": "stl",
+      "param": "alpha=0.1",
+      "n_anom": 4,
+      "runtime": 0.015323877334594727
+    }
+  ],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "wrapper": "bocpd",
+      "metric": "n_cps=0",
+      "runtime": 0.4503757953643799
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "cusum_page_hinkley",
+      "metric": "n_alarms=2",
+      "runtime": 0.24070239067077637
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "intervention_analysis",
+      "metric": "n_sig=1, n_int=1",
+      "runtime": 8.586622953414917
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "pelt_change_points",
+      "metric": "n_cps=2",
+      "runtime": 0.8321890830993652
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "stl_esd_anomaly",
+      "metric": "n_anom=17",
+      "runtime": 0.02542734146118164
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "bocpd",
+      "metric": "n_cps=0",
+      "runtime": 0.49181628227233887
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "cusum_page_hinkley",
+      "metric": "n_alarms=353",
+      "runtime": 0.2712233066558838
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "intervention_analysis",
+      "metric": "n_sig=1, n_int=1",
+      "runtime": 11.023695707321167
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "pelt_change_points",
+      "metric": "n_cps=12",
+      "runtime": 0.3031156063079834
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "stl_esd_anomaly",
+      "metric": "n_anom=8",
+      "runtime": 0.02158498764038086
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777248956.9343753,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}
