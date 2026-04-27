@@ -89,6 +89,88 @@ def run(ctx: RunContext, progress_callback) -> dict:
         poly_type = ctx.get_param("polynomial", "unrestricted")
         almon_deg = int(ctx.get_param("almon_degree", 2))
 
+        # CAI Phase 2 Session 20 fix (F-TF-POLYNOMIAL): explicit
+        # allowlist gate. Pre-fix, invalid `polynomial` strings
+        # silently fell through the if/else chain at line 113-128
+        # to the unrestricted default; audit_fields recorded user's
+        # invalid value, misrepresenting the model that ran.
+        # Session 18 silent-fall-through pattern.
+        _POLYNOMIAL_OPTS = ("unrestricted", "almon")
+        if poly_type not in _POLYNOMIAL_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown polynomial '{poly_type}'. Must be one "
+                f"of: {', '.join(_POLYNOMIAL_OPTS)}.",
+                error_fixes=[
+                    "Use 'unrestricted' (default; one OLS "
+                    "coefficient per lag) or 'almon' (Almon "
+                    "polynomial-restricted lag distribution; "
+                    "use almon_degree to control polynomial "
+                    "order).",
+                ],
+            )
+
+        # CAI Phase 2 Session 20 fix (F-TF-MAXLAG-NEG /
+        # F-TF-AR-ORDER-NEG): explicit range gates. Pre-fix,
+        # negative max_lag produced an empty lag matrix and crashed
+        # with a non-actionable "need at least one array to
+        # concatenate" error; negative ar_order silently produced
+        # an empty Y_ar matrix and ran without AR terms.
+        if max_lag < 0:
+            return make_error_response(
+                ctx,
+                f"max_lag must be >= 0. Got {max_lag}.",
+                error_fixes=[
+                    "Use max_lag=0 for contemporaneous-only "
+                    "transfer (just X_t), or any positive integer "
+                    "for distributed-lag terms up to that lag.",
+                ],
+            )
+        if ar_order < 0:
+            return make_error_response(
+                ctx,
+                f"ar_order must be >= 0. Got {ar_order}.",
+                error_fixes=[
+                    "Use ar_order=0 for no AR noise component, or "
+                    "a positive integer for AR(p) noise dynamics.",
+                ],
+            )
+        if almon_deg < 0:
+            return make_error_response(
+                ctx,
+                f"almon_degree must be >= 0. Got {almon_deg}.",
+                error_fixes=[
+                    "Use almon_degree=2 (default; quadratic Almon "
+                    "polynomial) or any non-negative integer.",
+                ],
+            )
+
+        # CAI Phase 2 Session 20 fix (F-TF-ALMON-DEGREE): explicit
+        # check that almon_degree leaves room for the polynomial
+        # restriction to bind. Pre-fix, requesting polynomial=
+        # 'almon' with almon_degree >= n_lags - 1 silently fell
+        # through to unrestricted via the line 113 condition
+        # `len(lag_indices) > almon_deg + 1`. audit_fields.polynomial
+        # = 'almon' but actual model was unrestricted.
+        if poly_type == "almon":
+            _lag_start = 0 if include_contemp else 1
+            _n_lags_planned = max_lag + 1 - _lag_start
+            if _n_lags_planned <= almon_deg + 1:
+                return make_error_response(
+                    ctx,
+                    f"polynomial='almon' requires more lags than "
+                    f"almon_degree+1. Got n_lags={_n_lags_planned} "
+                    f"(max_lag={max_lag}, include_contemp="
+                    f"{include_contemp}) and almon_degree="
+                    f"{almon_deg}.",
+                    error_fixes=[
+                        "Increase max_lag, or decrease "
+                        "almon_degree, or use polynomial="
+                        "'unrestricted' to drop the Almon "
+                        "polynomial restriction.",
+                    ],
+                )
+
         min_start = max(max_lag, ar_order)
         if n_orig <= min_start + 5:
             return make_error_response(

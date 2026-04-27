@@ -1,0 +1,58 @@
+{
+  "session": 20,
+  "started": 1777314849.539971,
+  "sweep_0_findings": [],
+  "technique_1": [
+    {
+      "sweep": "max_lag",
+      "param": 2,
+      "peak_lag": 2,
+      "r_squared": 0.8609
+    },
+    {
+      "sweep": "max_lag",
+      "param": 4,
+      "peak_lag": 2,
+      "r_squared": 0.8696
+    },
+    {
+      "sweep": "max_lag",
+      "param": 8,
+      "peak_lag": 2,
+      "r_squared": 0.8698
+    },
+    {
+      "sweep": "max_lag",
+      "param": 12,
+      "peak_lag": 2,
+      "r_squared": 0.872
+    }
+  ],
+  "technique_2": [
+    {
+      "pair": "Equity \u2192 Rates",
+      "peak_lag": 0,
+      "r_squared": 0.0415,
+      "long_run": -0.018988
+    },
+    {
+      "pair": "Yield curve transmission",
+      "peak_lag": 0,
+      "r_squared": 0.6333,
+      "long_run": 0.881906
+    },
+    {
+      "pair": "FX \u2192 Commodity",
+      "peak_lag": 1,
+      "r_squared": 0.0643,
+      "long_run": 0.894025
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777314849.818255,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}
