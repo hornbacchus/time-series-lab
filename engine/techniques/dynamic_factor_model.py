@@ -127,6 +127,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
         #   "diff":     apply simple first difference to all series.
         #   "none":     use input as-is (original behavior).
         transform_param = str(ctx.get_param("transform", "auto")).strip().lower()
+        # CAI Phase 2 Session 22 fix (F-MV-DFM-TRANSFORM): explicit
+        # allowlist gate. Pre-fix, invalid `transform` strings
+        # silently fell through the if/elif chain at line 141-167
+        # to the implicit "none" default; audit_fields didn't even
+        # track which transform actually applied. Session 18
+        # silent-fall-through pattern.
+        _TRANSFORM_OPTS = ("auto", "log_diff", "diff", "none")
+        if transform_param not in _TRANSFORM_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown transform '{transform_param}'. Must be one "
+                f"of: {', '.join(_TRANSFORM_OPTS)}.",
+                error_fixes=[
+                    "Use 'auto' (default; ADF-based detection), "
+                    "'log_diff' (% MoM change; requires positive "
+                    "data), 'diff' (first difference), or 'none' "
+                    "(use input as-is).",
+                ],
+            )
         applied_transform = "none"
 
         def _is_nonstationary(col):

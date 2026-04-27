@@ -38,8 +38,9 @@ that route to a single `garch_model.py` wrapper).
 | 18 | local_level + local_linear_trend + structural_ts + particle_filter (State Space batch) | f2ebd94 | 1 (fixed inline) | 0 | 0 |
 | 19 | denton_chowlin_disaggregation + kalman_imputation + loess_interpolation (Missing Data batch) | 3c9c56e | 2 (both fixed inline) | 3 (all fixed inline) | 0 |
 | 20 | transfer_function (solo; closes S11 deferred items) | 72cb4a1 | 1 (fixed inline) | 3 (all fixed inline) | 0 |
-| 21 | block_bootstrap + conformal_intervals + forecast_combination + robust_estimators + rolling_origin_cv (Evaluation/Uncertainty batch) + INVENTORY SURVEY | (this commit) | 0 | 4 (all fixed inline) | 0 |
-| **Total** | **62 wrappers AUDITED** | — | **24 (all fixed)** | **13 (all fixed)** | **6** |
+| 21 | block_bootstrap + conformal_intervals + forecast_combination + robust_estimators + rolling_origin_cv (Evaluation/Uncertainty batch) + INVENTORY SURVEY | 3ea6114 | 0 | 4 (all fixed inline) | 0 |
+| 22 | bvar + dynamic_factor_model + forecast_reconciliation + pca_analysis (Multivariate Systems batch) | (this commit) | 4 (all fixed inline) | 1 (fixed inline) | 0 |
+| **Total** | **66 wrappers AUDITED** | — | **28 (all fixed)** | **14 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -93,11 +94,11 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 62 (Sessions 1-21; see cycle table above for full enumeration; Session 21 added block_bootstrap, conformal_intervals, forecast_combination, robust_estimators, rolling_origin_cv via Evaluation/Uncertainty batch)
+- AUDITED: 66 (Sessions 1-22; Session 22 added bvar, dynamic_factor_model, forecast_reconciliation, pca_analysis via Multivariate Systems batch)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
-- UNAUDITED: 21 (per `inventory_survey_2026_04_27.md`: 15 ML/DL, 4 Multivariate, 1 Forecasting-Classical residual `ets_hw` — estimated 6 more sessions to complete)
+- UNAUDITED: 17 (15 ML/DL + 1 Forecasting-Classical residual `ets_hw` — estimated 5 more sessions to complete)
 
 ## Per-wrapper status
 
@@ -198,11 +199,11 @@ extensions are operationally valuable.
 
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
-| bvar | UNAUDITED | — | — | — | — |
-| dynamic_factor_model | UNAUDITED | — | — | — | — |
-| forecast_reconciliation | UNAUDITED | — | — | — | — |
+| bvar | AUDITED | [multivariate_systems_batch_findings_2026_04_27.md](calibration_audit/multivariate_systems_batch_findings_2026_04_27.md) | 0 | 1 (fixed inline) | 0 |
+| dynamic_factor_model | AUDITED | [multivariate_systems_batch_findings_2026_04_27.md](calibration_audit/multivariate_systems_batch_findings_2026_04_27.md) | 1 (fixed inline) | 0 | 0 |
+| forecast_reconciliation | AUDITED | [multivariate_systems_batch_findings_2026_04_27.md](calibration_audit/multivariate_systems_batch_findings_2026_04_27.md) | 2 (both fixed inline) | 0 | 0 |
 | johansen_cointegration | AUDITED | [johansen_findings_2026_04_26.md](calibration_audit/johansen_findings_2026_04_26.md) | 0 | 0 | 2 |
-| pca_analysis | UNAUDITED | — | — | — | — |
+| pca_analysis | AUDITED | [multivariate_systems_batch_findings_2026_04_27.md](calibration_audit/multivariate_systems_batch_findings_2026_04_27.md) | 1 (fixed inline) | 0 | 0 |
 | var | AUDITED | [var_vecm_findings_2026_04_26.md](calibration_audit/var_vecm_findings_2026_04_26.md) | 0 | 0 | 0 |
 | vecm | AUDITED | [var_vecm_findings_2026_04_26.md](calibration_audit/var_vecm_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
 
@@ -256,6 +257,6 @@ extensions are operationally valuable.
 - `critical_slowing_down` deferred because it shipped on
   2026-04-25 (commit `94742fe`); too new for the calibration
   audit cycle. Will be candidate for next CAI cycle.
-- The 21 UNAUDITED wrappers are documented for awareness;
+- The 17 UNAUDITED wrappers are documented for awareness;
   not in this initiative's scope. Future calibration cycles
   may extend coverage.

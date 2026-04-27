@@ -180,7 +180,39 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             methods = cfg["methods"]
         base_fc_type = ctx.get_param("base_forecaster", "naive")
+        # CAI Phase 2 Session 22 fix (F-MV-FR-BASEFC): explicit
+        # allowlist gate. Pre-fix, invalid `base_forecaster`
+        # silently fell through the if/elif/else chain in
+        # _base_forecast at line 842-867 to the "naive" default.
+        _BASE_FC_OPTS = ("naive", "drift", "ets")
+        if base_fc_type not in _BASE_FC_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown base_forecaster '{base_fc_type}'. Must be "
+                f"one of: {', '.join(_BASE_FC_OPTS)}.",
+                error_fixes=[
+                    "Use 'naive' (default; random walk), 'drift' "
+                    "(random walk with drift), or 'ets' (simple "
+                    "exponential smoothing with alpha=0.3).",
+                ],
+            )
         td_weights = ctx.get_param("top_down_weights", "proportions_avg")
+        # CAI Phase 2 Session 22 fix (F-MV-FR-TDWEIGHTS): explicit
+        # allowlist gate. Pre-fix, invalid `top_down_weights`
+        # silently fell through the if/else at line 344 to the
+        # "proportions_avg" default.
+        _TD_WEIGHTS_OPTS = ("proportions_avg", "proportions_last")
+        if td_weights not in _TD_WEIGHTS_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown top_down_weights '{td_weights}'. Must be "
+                f"one of: {', '.join(_TD_WEIGHTS_OPTS)}.",
+                error_fixes=[
+                    "Use 'proportions_avg' (default; ratio of "
+                    "historical means) or 'proportions_last' "
+                    "(ratio at the last observation).",
+                ],
+            )
 
         # Follow-up 3e: optional MinT family params.
         nonnegative = bool(ctx.get_param("nonnegative", False))

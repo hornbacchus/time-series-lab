@@ -1,0 +1,31 @@
+{
+  "session": 22,
+  "started": 1777319637.1319542,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "wrapper": "bvar",
+      "runtime": 0.046323537826538086
+    },
+    {
+      "wrapper": "dfm",
+      "runtime": 0.35582780838012695
+    },
+    {
+      "wrapper": "fr",
+      "runtime": 0.0005309581756591797
+    },
+    {
+      "wrapper": "pca",
+      "runtime": 0.00491023063659668
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777319656.2469923,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

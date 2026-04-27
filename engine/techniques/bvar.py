@@ -268,6 +268,46 @@ def run(ctx: RunContext, progress_callback) -> dict:
         horizon = max(1, int(ctx.get_param("horizon", 10)))
         include_const = ctx.get_param("include_constant", True)
         n_draws = int(ctx.get_param("n_draws", cfg["n_draws"]))
+        # CAI Phase 2 Session 22 fix (F-MV-BVAR-LAMBDA): explicit
+        # range gates. Pre-fix, negative lambda shrinkage values
+        # were silently accepted (Minnesota prior undefined for
+        # non-positive shrinkage; fitter produced garbage).
+        if lambda1 <= 0:
+            return make_error_response(
+                ctx,
+                f"lambda1 must be > 0. Got {lambda1}.",
+                error_fixes=[
+                    "Use a positive value; typical Minnesota prior "
+                    "values are 0.1-0.3 (smaller = more shrinkage).",
+                ],
+            )
+        if lambda2 <= 0:
+            return make_error_response(
+                ctx,
+                f"lambda2 must be > 0. Got {lambda2}.",
+                error_fixes=[
+                    "Use a positive value (cross-equation shrinkage; "
+                    "typical 0.5-1.0).",
+                ],
+            )
+        if lambda3 <= 0:
+            return make_error_response(
+                ctx,
+                f"lambda3 must be > 0. Got {lambda3}.",
+                error_fixes=[
+                    "Use a positive value (lag-decay parameter; "
+                    "typical 1.0 harmonic, 2.0 quadratic).",
+                ],
+            )
+        if p < 1:
+            return make_error_response(
+                ctx,
+                f"lags must be >= 1. Got {p}.",
+                error_fixes=[
+                    "Use a positive integer; typical macro VAR "
+                    "lag orders are 1-12 monthly / 1-4 quarterly.",
+                ],
+            )
 
         if T_full < p + 5:
             return make_error_response(

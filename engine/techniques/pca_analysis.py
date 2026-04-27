@@ -239,6 +239,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
         if isinstance(standardize, str):
             standardize = standardize.lower() in ("true", "1", "yes")
         rotation = ctx.get_param("rotation", preset_cfg["rotation"])
+        # CAI Phase 2 Session 22 fix (F-MV-PCA-ROTATION): explicit
+        # allowlist gate. Pre-fix, invalid `rotation` strings were
+        # silently skipped (rotation only applied if value ==
+        # "varimax"); audit_fields recorded user's invalid value
+        # verbatim, but no rotation was actually performed.
+        _ROTATION_OPTS = (None, "varimax", "none")
+        if isinstance(rotation, str) and rotation.strip().lower() not in (
+            "varimax", "none", "",
+        ):
+            return make_error_response(
+                ctx,
+                f"Unknown rotation '{rotation}'. Must be one of: "
+                "'varimax', 'none', or None.",
+                error_fixes=[
+                    "Use 'varimax' (orthogonal rotation maximizing "
+                    "variance of squared loadings), 'none' / None "
+                    "(no rotation; raw PCA loadings).",
+                ],
+            )
         compute_recon = preset_cfg["compute_reconstruction"]
 
         max_components = min(n_obs, n_series)
