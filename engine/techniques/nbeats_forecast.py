@@ -282,27 +282,58 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 10))
+        # CAI Phase 2 Session 24 fix (F-NN-NB-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        # Honor user-supplied stack_types override (Follow-up 1a fix).
-        # The param accepts a list of stack-type strings; whitelist
-        # against valid N-BEATS stack names to prevent downstream
-        # _build_nbeats_model failure.
+        # CAI Phase 2 Session 24 fix (F-NN-NB-STACKTYPES): explicit
+        # allowlist gate. Pre-fix, invalid stack_types silently
+        # fell through to preset default (the `if all(s in _valid ...)`
+        # check at line 297-305 silently reverted on any invalid
+        # entry); audit_fields recorded the coerced value. Session 18
+        # silent-fall-through pattern.
         _stack_user = ctx.get_param("stack_types", None)
+        _STACK_TYPES_VALID = {"generic", "trend", "seasonality"}
         if _stack_user is None:
             stack_types = preset_cfg["stack_types"]
         else:
             try:
                 _candidate = list(_stack_user)
-                _valid = {"generic", "trend", "seasonality"}
-                if all(str(s) in _valid for s in _candidate) and _candidate:
-                    stack_types = [str(s) for s in _candidate]
-                else:
-                    stack_types = preset_cfg["stack_types"]
             except (TypeError, ValueError):
-                stack_types = preset_cfg["stack_types"]
+                return make_error_response(
+                    ctx,
+                    f"stack_types must be a list of strings. "
+                    f"Got {_stack_user!r}.",
+                    error_fixes=[
+                        "Provide a list like ['generic'] or "
+                        "['trend', 'seasonality'].",
+                    ],
+                )
+            if not _candidate:
+                return make_error_response(
+                    ctx,
+                    "stack_types must be a non-empty list.",
+                    error_fixes=["Provide at least one stack type."],
+                )
+            _invalid = [str(s) for s in _candidate if str(s) not in _STACK_TYPES_VALID]
+            if _invalid:
+                return make_error_response(
+                    ctx,
+                    f"Unknown stack_types {_invalid}. Must be from: "
+                    f"{sorted(_STACK_TYPES_VALID)}.",
+                    error_fixes=[
+                        "Use 'generic' (free-form basis), 'trend' "
+                        "(polynomial trend basis), or 'seasonality' "
+                        "(Fourier seasonal basis).",
+                    ],
+                )
+            stack_types = [str(s) for s in _candidate]
         n_blocks = int(ctx.get_param("n_blocks", preset_cfg["n_blocks"]))
         hidden_size = int(ctx.get_param("hidden_size", preset_cfg["hidden_size"]))
         theta_size = int(ctx.get_param("theta_size", preset_cfg["theta_size"]))

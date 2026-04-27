@@ -425,8 +425,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 10))
+        # CAI Phase 2 Session 24 fix (F-NN-TF-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         d_model = int(ctx.get_param("d_model", preset_cfg["d_model"]))
@@ -438,12 +444,23 @@ def run(ctx: RunContext, progress_callback) -> dict:
         lr = float(ctx.get_param("learning_rate", preset_cfg["lr"]))
         dropout = float(ctx.get_param("dropout", preset_cfg["dropout"]))
 
-        # Ensure d_model is divisible by n_heads
+        # CAI Phase 2 Session 24 fix (F-NN-TF-DMODEL): explicit
+        # multi-parameter consistency gate. Pre-fix, d_model not
+        # divisible by n_heads was silently adjusted (loud-and-
+        # coerced with warning). Now reject so the user can fix
+        # the spec rather than train a different model than asked.
         if d_model % n_heads != 0:
-            d_model = n_heads * (d_model // n_heads)
-            if d_model == 0:
-                d_model = n_heads
-            warn_list.append(f"d_model adjusted to {d_model} (must be divisible by n_heads={n_heads}).")
+            return make_error_response(
+                ctx,
+                f"d_model ({d_model}) must be divisible by n_heads "
+                f"({n_heads}). PyTorch nn.MultiheadAttention requires "
+                "this for tensor reshaping.",
+                error_fixes=[
+                    f"Choose d_model as a multiple of n_heads "
+                    f"(e.g., d_model={n_heads * (d_model // n_heads + 1)} "
+                    f"or n_heads={max(1, d_model // (d_model // n_heads or 1))}).",
+                ],
+            )
 
         n_lags = min(n_lags, n // 3)
 

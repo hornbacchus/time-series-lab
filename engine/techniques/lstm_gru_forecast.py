@@ -223,10 +223,33 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 10))
+        # CAI Phase 2 Session 24 fix (F-NN-LG-HORIZON): explicit
+        # range gate.
+        if horizon < 1:
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
         if horizon < 1:
             horizon = 1
 
         model_type = ctx.get_param("model_type", "lstm").lower()
+        # CAI Phase 2 Session 24 fix (F-NN-LG-MODELTYPE): explicit
+        # allowlist gate. Pre-fix, invalid `model_type` silently
+        # fell through to LSTM via if/else at the model dispatch.
+        # Session 18 silent-fall-through pattern.
+        _MODEL_TYPE_OPTS = ("lstm", "gru")
+        if model_type not in _MODEL_TYPE_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown model_type '{model_type}'. Must be one "
+                f"of: {', '.join(_MODEL_TYPE_OPTS)}.",
+                error_fixes=[
+                    "Use 'lstm' (default; LSTM cell with forget gate) "
+                    "or 'gru' (Gated Recurrent Unit; simpler and faster).",
+                ],
+            )
         if model_type not in ("lstm", "gru"):
             model_type = "lstm"
 

@@ -1,0 +1,35 @@
+{
+  "session": 24,
+  "started": 1777325297.4810286,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "wrapper": "lg",
+      "status": "success",
+      "runtime": 0.006885051727294922
+    },
+    {
+      "wrapper": "tcn",
+      "status": "success",
+      "runtime": 0.006258964538574219
+    },
+    {
+      "wrapper": "tf",
+      "status": "success",
+      "runtime": 0.009311676025390625
+    },
+    {
+      "wrapper": "nb",
+      "status": "success",
+      "runtime": 0.19298243522644043
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777325300.7919881,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}
