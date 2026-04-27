@@ -156,6 +156,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
             if m_val <= 1:
                 m_val = 12
         holdout_frac = float(ctx.get_param("holdout_fraction", 0.2))
+        # CAI Phase 2 Session 21 fix (F-EU-FC-HOLDOUT): explicit
+        # range gate. Pre-fix, out-of-range holdout_fraction
+        # silently accepted; downstream split logic produces
+        # bizarre splits.
+        if not (0.0 < holdout_frac < 1.0):
+            return make_error_response(
+                ctx,
+                f"holdout_fraction must be in (0, 1). Got {holdout_frac}.",
+                error_fixes=[
+                    "Use a value strictly between 0 and 1 — typical "
+                    "values are 0.1-0.3 for weight-estimation "
+                    "holdout splits.",
+                ],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
 

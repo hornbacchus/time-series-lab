@@ -145,10 +145,41 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             tf = float(ctx.get_param("trim_fraction", 0.10))
             wf = float(ctx.get_param("winsor_fraction", 0.10))
+            # CAI Phase 2 Session 21 fix (F-EU-RE-TRIM): explicit
+            # range gate. Pre-fix, user-supplied fractions out of
+            # (0, 0.5) were silently filtered to empty list and
+            # then defaulted to [0.10]; user got default behavior
+            # without knowing.
+            if not (0.0 < tf < 0.5):
+                return make_error_response(
+                    ctx,
+                    f"trim_fraction must be in (0, 0.5). Got {tf}.",
+                    error_fixes=[
+                        "Use a value strictly between 0 and 0.5 — "
+                        "typical values are 0.05-0.20. Two-sided "
+                        "trimming with fraction f removes the "
+                        "lowest f and highest f of observations, "
+                        "so f >= 0.5 would remove everything.",
+                    ],
+                )
+            if not (0.0 < wf < 0.5):
+                return make_error_response(
+                    ctx,
+                    f"winsor_fraction must be in (0, 0.5). Got {wf}.",
+                    error_fixes=[
+                        "Use a value strictly between 0 and 0.5 — "
+                        "typical values are 0.05-0.20. Two-sided "
+                        "winsorization with fraction f clips the "
+                        "lowest f and highest f to the threshold "
+                        "values; f >= 0.5 collapses the data.",
+                    ],
+                )
             trim_fracs = [tf]
             winsor_fracs = [wf]
 
-        # Validate fractions
+        # Defensive belt-and-braces filter: should be no-op given
+        # the explicit gate above, but covers Thorough preset's
+        # hardcoded list shapes.
         trim_fracs = [f for f in trim_fracs if 0 < f < 0.5]
         winsor_fracs = [f for f in winsor_fracs if 0 < f < 0.5]
         if not trim_fracs:

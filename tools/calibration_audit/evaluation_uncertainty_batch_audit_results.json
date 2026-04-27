@@ -1,0 +1,75 @@
+{
+  "session": 21,
+  "started": 1777316570.7553382,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "wrapper": "block_bootstrap",
+      "status": "success",
+      "runtime": 0.15575718879699707
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "conformal_intervals",
+      "status": "success",
+      "runtime": 1.2746844291687012
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "forecast_combination",
+      "status": "success",
+      "runtime": 1.8616232872009277
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "robust_estimators",
+      "status": "success",
+      "runtime": 0.019991636276245117
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "rolling_origin_cv",
+      "status": "success",
+      "runtime": 1.04134202003479
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "block_bootstrap",
+      "status": "success",
+      "runtime": 0.12058234214782715
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "conformal_intervals",
+      "status": "success",
+      "runtime": 3.317607879638672
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "forecast_combination",
+      "status": "success",
+      "runtime": 2.01418137550354
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "robust_estimators",
+      "status": "success",
+      "runtime": 0.02846550941467285
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "rolling_origin_cv",
+      "status": "success",
+      "runtime": 1.9106659889221191
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777316740.1930468,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

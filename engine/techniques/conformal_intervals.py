@@ -143,6 +143,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         cal_frac = float(ctx.get_param("cal_fraction", preset_cfg["cal_fraction"]))
+        # CAI Phase 2 Session 21 fix (F-EU-CI-CALFRAC): explicit
+        # range gate. Pre-fix, out-of-range cal_fraction silently
+        # accepted.
+        if not (0.0 < cal_frac < 1.0):
+            return make_error_response(
+                ctx,
+                f"cal_fraction must be in (0, 1). Got {cal_frac}.",
+                error_fixes=[
+                    "Use a value strictly between 0 and 1 — typical "
+                    "values are 0.1-0.3 for the calibration split. "
+                    "The calibration set holds residuals used to "
+                    "calibrate conformal coverage.",
+                ],
+            )
+        if not (0.0 < conf_level < 1.0):
+            return make_error_response(
+                ctx,
+                f"confidence_level must be in (0, 1). Got {conf_level}.",
+                error_fixes=[
+                    "Use a value strictly between 0 and 1; typical "
+                    "choices are 0.90, 0.95 (default), 0.99.",
+                ],
+            )
 
         # Split data: training | calibration | (future)
         n_cal = max(10, int(n * cal_frac))

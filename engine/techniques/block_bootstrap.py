@@ -154,6 +154,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         n_bootstrap = int(ctx.get_param("n_bootstrap", preset_cfg["n_bootstrap"]))
         conf_level = float(ctx.get_param("confidence_level", 0.95))
+        # CAI Phase 2 Session 21 fix (F-EU-BB-CONFLEVEL): explicit
+        # range gate on confidence_level.
+        if not (0.0 < conf_level < 1.0):
+            return make_error_response(
+                ctx,
+                f"confidence_level must be in (0, 1). Got {conf_level}.",
+                error_fixes=[
+                    "Use a value strictly between 0 and 1; typical "
+                    "choices are 0.90, 0.95 (default), 0.99.",
+                ],
+            )
+        if n_bootstrap < 10:
+            return make_error_response(
+                ctx,
+                f"n_bootstrap must be >= 10. Got {n_bootstrap}.",
+                error_fixes=[
+                    "Use at least 10 bootstrap replications; typical "
+                    "values are 500-5000 for usable confidence intervals.",
+                ],
+            )
         alpha = 1.0 - conf_level
 
         bl_param = ctx.get_param("block_length", preset_cfg["block_length"])
@@ -177,8 +197,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 )
         else:
             block_length = int(bl_param)
+            # CAI Phase 2 Session 21 fix (F-EU-BB-BLOCKLEN): explicit
+            # range gate. Pre-fix, block_length<1 was silently
+            # coerced to 1 with no warning.
             if block_length < 1:
-                block_length = 1
+                return make_error_response(
+                    ctx,
+                    f"block_length must be >= 1. Got {block_length}.",
+                    error_fixes=[
+                        "Use a positive integer (typical values 5-20 "
+                        "for moderately persistent macro data), or "
+                        "block_length='auto' for n^(1/3)-based "
+                        "selection.",
+                    ],
+                )
             if block_length > n:
                 warn_list.append(
                     f"Block length ({block_length}) exceeds series length ({n}). "
