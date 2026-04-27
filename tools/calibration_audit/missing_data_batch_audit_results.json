@@ -1,0 +1,64 @@
+{
+  "session": 19,
+  "started": 1777282168.7484746,
+  "sweep_0_findings": [],
+  "technique_1": [
+    {
+      "wrapper": "dcd",
+      "param": "denton",
+      "max_disc": 0.0,
+      "runtime": 0.0014514923095703125
+    },
+    {
+      "wrapper": "dcd",
+      "param": "chowlin",
+      "max_disc": 0.0,
+      "runtime": 0.01663351058959961
+    }
+  ],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "wrapper": "kalman_imputation",
+      "rmse": 1.105343,
+      "runtime": 0.12427520751953125
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "loess_interpolation",
+      "rmse": 1.095152,
+      "runtime": 0.017673254013061523
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "kalman_imputation",
+      "rmse": 0.0,
+      "runtime": 0.15515732765197754
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "loess_interpolation",
+      "rmse": 0.0993,
+      "runtime": 0.016301631927490234
+    },
+    {
+      "series": "synthetic_Q",
+      "wrapper": "dcd_denton",
+      "max_disc": 0.0,
+      "runtime": 0.0009710788726806641
+    },
+    {
+      "series": "synthetic_Q",
+      "wrapper": "dcd_chowlin",
+      "max_disc": 0.0,
+      "runtime": 0.016694068908691406
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777282170.4526029,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

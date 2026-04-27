@@ -278,14 +278,38 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         method = ctx.get_param("method", "chowlin").lower()
-        if method not in ("denton", "chowlin"):
-            warn_list.append(f"Unknown method '{method}'. Using 'chowlin'.")
-            method = "chowlin"
+        # CAI Phase 2 Session 19 fix (F-MD-DENTON-METHOD): explicit
+        # allowlist gate. Pre-fix, invalid `method` was silently
+        # coerced to 'chowlin' with warning; now rejects explicitly.
+        _METHOD_OPTS = ("denton", "chowlin")
+        if method not in _METHOD_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown method '{method}'. Must be one of: "
+                f"{', '.join(_METHOD_OPTS)}.",
+                error_fixes=[
+                    "Use 'denton' (Denton proportional first "
+                    "differences; preserves indicator shape; "
+                    "non-negative output) or 'chowlin' (default; "
+                    "Chow-Lin GLS regression-based; uses indicator "
+                    "as regressor with AR(1) residuals).",
+                ],
+            )
 
         conversion_ratio = int(ctx.get_param("conversion_ratio", 3))
+        # CAI Phase 2 Session 19 fix (F-MD-DENTON-CONVRATIO):
+        # explicit range gate. Pre-fix, conversion_ratio < 2 was
+        # silently reset to 3.
         if conversion_ratio < 2:
-            conversion_ratio = 3
-            warn_list.append("conversion_ratio must be >= 2. Reset to 3.")
+            return make_error_response(
+                ctx,
+                f"conversion_ratio must be >= 2. Got {conversion_ratio}.",
+                error_fixes=[
+                    "Use conversion_ratio=3 for quarterly-to-monthly, "
+                    "conversion_ratio=4 for annual-to-quarterly, "
+                    "conversion_ratio=12 for annual-to-monthly.",
+                ],
+            )
 
         n_high = n_low * conversion_ratio
 
@@ -321,9 +345,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     rho = _estimate_rho(lo_clean, z_high, conversion_ratio, n_grid=n_grid)
             else:
                 rho = float(rho_param)
+                # CAI Phase 2 Session 19 fix (F-MD-DENTON-RHO):
+                # explicit range gate. Pre-fix, out-of-range rho
+                # was silently reset to 0.5.
                 if not (0 < rho < 1):
-                    rho = 0.5
-                    warn_list.append("rho must be in (0, 1). Reset to 0.5.")
+                    return make_error_response(
+                        ctx,
+                        f"rho must be in (0, 1). Got {rho}.",
+                        error_fixes=[
+                            "Use a value in the open interval (0, 1) "
+                            "for the AR(1) parameter, or rho='auto' "
+                            "to estimate via maximum likelihood.",
+                        ],
+                    )
 
             x_high, reg_info = _chowlin(lo_clean, z_high, conversion_ratio, rho=rho)
             reg_info["rho"] = round(rho, 4)

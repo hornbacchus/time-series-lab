@@ -136,9 +136,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
             warn_list.append(f"Auto-selected LOESS fraction = {frac:.2f} via LOO-CV.")
         else:
             frac = float(frac_param)
+            # CAI Phase 2 Session 19 fix (F-MD-LOESS-FRAC):
+            # explicit range gate. Pre-fix, out-of-range frac was
+            # silently reset to 0.3.
             if frac <= 0 or frac > 1:
-                frac = 0.3
-                warn_list.append("LOESS fraction must be in (0, 1]. Reset to 0.3.")
+                return make_error_response(
+                    ctx,
+                    f"LOESS fraction must be in (0, 1]. Got {frac}.",
+                    error_fixes=[
+                        "Use a value in (0, 1] — typical values "
+                        "are 0.1-0.5; smaller = more local "
+                        "(wigglier), larger = more smoothing. "
+                        "Pass None to auto-select via LOO-CV "
+                        "(Thorough preset default).",
+                    ],
+                )
 
         it = int(ctx.get_param("it", preset_cfg["it"]))
 

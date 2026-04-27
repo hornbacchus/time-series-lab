@@ -86,6 +86,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         model_type = ctx.get_param("model_type", preset_cfg["model"])
+        # CAI Phase 2 Session 19 fix (F-MD-KALMAN-MODELTYPE):
+        # explicit allowlist gate. Pre-fix, invalid `model_type`
+        # silently fell through the if/else chain to "local linear
+        # trend" default; audit_fields recorded user's invalid
+        # value verbatim. Session 18 silent-fall-through pattern.
+        _MODEL_TYPE_OPTS = ("local level", "local linear trend")
+        if model_type not in _MODEL_TYPE_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown model_type '{model_type}'. Must be one "
+                f"of: {', '.join(_MODEL_TYPE_OPTS)}.",
+                error_fixes=[
+                    "Use 'local level' (random walk + noise; "
+                    "minimal model) or 'local linear trend' "
+                    "(default for non-Fast presets; adds "
+                    "stochastic slope state).",
+                ],
+            )
 
         progress_callback("Fitting state-space model", 20)
 
