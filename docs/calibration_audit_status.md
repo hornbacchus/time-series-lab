@@ -39,8 +39,9 @@ that route to a single `garch_model.py` wrapper).
 | 19 | denton_chowlin_disaggregation + kalman_imputation + loess_interpolation (Missing Data batch) | 3c9c56e | 2 (both fixed inline) | 3 (all fixed inline) | 0 |
 | 20 | transfer_function (solo; closes S11 deferred items) | 72cb4a1 | 1 (fixed inline) | 3 (all fixed inline) | 0 |
 | 21 | block_bootstrap + conformal_intervals + forecast_combination + robust_estimators + rolling_origin_cv (Evaluation/Uncertainty batch) + INVENTORY SURVEY | 3ea6114 | 0 | 4 (all fixed inline) | 0 |
-| 22 | bvar + dynamic_factor_model + forecast_reconciliation + pca_analysis (Multivariate Systems batch) | (this commit) | 4 (all fixed inline) | 1 (fixed inline) | 0 |
-| **Total** | **66 wrappers AUDITED** | — | **28 (all fixed)** | **14 (all fixed)** | **6** |
+| 22 | bvar + dynamic_factor_model + forecast_reconciliation + pca_analysis (Multivariate Systems batch) | 854c832 | 4 (all fixed inline) | 1 (fixed inline) | 0 |
+| 23 | gradient_boosting_forecast + lightgbm_forecast + random_forest_forecast + xgboost_forecast (Tree Forecasters batch) | (this commit) | 0 | 9 (all fixed inline) | 0 |
+| **Total** | **70 wrappers AUDITED** | — | **28 (all fixed)** | **23 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -94,11 +95,11 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 66 (Sessions 1-22; Session 22 added bvar, dynamic_factor_model, forecast_reconciliation, pca_analysis via Multivariate Systems batch)
+- AUDITED: 70 (Sessions 1-23; Session 23 added gradient_boosting_forecast, lightgbm_forecast, random_forest_forecast, xgboost_forecast via Tree Forecasters batch)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
-- UNAUDITED: 17 (15 ML/DL + 1 Forecasting-Classical residual `ets_hw` — estimated 5 more sessions to complete)
+- UNAUDITED: 13 (11 ML/DL + 1 Forecasting-Classical residual `ets_hw` — estimated 4 more sessions to complete)
 
 ## Per-wrapper status
 
@@ -174,18 +175,18 @@ extensions are operationally valuable.
 | autoencoder_anomaly | UNAUDITED | — | — | — | — |
 | echo_state_network | UNAUDITED | — | — | — | — |
 | gaussian_process_forecast | UNAUDITED | — | — | — | — |
-| gradient_boosting_forecast | UNAUDITED | — | — | — | — |
-| lightgbm_forecast | UNAUDITED | — | — | — | — |
+| gradient_boosting_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
+| lightgbm_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
 | lstm_gru_forecast | UNAUDITED | — | — | — | — |
 | nbeats_forecast | UNAUDITED | — | — | — | — |
 | nhits_forecast | UNAUDITED | — | — | — | — |
 | prophet_forecast | UNAUDITED | — | — | — | — |
 | quantile_regression | UNAUDITED | — | — | — | — |
-| random_forest_forecast | UNAUDITED | — | — | — | — |
+| random_forest_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
 | svr_forecast | UNAUDITED | — | — | — | — |
 | tcn_forecast | UNAUDITED | — | — | — | — |
 | transformer_forecast | UNAUDITED | — | — | — | — |
-| xgboost_forecast | UNAUDITED | — | — | — | — |
+| xgboost_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 3 (all fixed inline) | 0 |
 
 ### Missing Data / Temporal Disaggregation
 
@@ -257,6 +258,6 @@ extensions are operationally valuable.
 - `critical_slowing_down` deferred because it shipped on
   2026-04-25 (commit `94742fe`); too new for the calibration
   audit cycle. Will be candidate for next CAI cycle.
-- The 17 UNAUDITED wrappers are documented for awareness;
+- The 13 UNAUDITED wrappers are documented for awareness;
   not in this initiative's scope. Future calibration cycles
   may extend coverage.

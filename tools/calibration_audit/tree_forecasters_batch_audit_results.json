@@ -1,0 +1,63 @@
+{
+  "session": 23,
+  "started": 1777323327.7732484,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "wrapper": "gbm",
+      "rmse": null,
+      "runtime": 0.283217191696167
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "lgbm",
+      "rmse": null,
+      "runtime": 0.2894465923309326
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "rf",
+      "rmse": null,
+      "runtime": 0.7542426586151123
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "xgb",
+      "rmse": null,
+      "runtime": 0.14375543594360352
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "gbm",
+      "rmse": null,
+      "runtime": 0.17353558540344238
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "lgbm",
+      "rmse": null,
+      "runtime": 0.19464111328125
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "rf",
+      "rmse": null,
+      "runtime": 0.725017786026001
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "xgb",
+      "rmse": null,
+      "runtime": 0.12779521942138672
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777323343.2978652,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

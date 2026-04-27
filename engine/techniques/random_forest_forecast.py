@@ -203,11 +203,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 12))
+        # CAI Phase 2 Session 23 fix (F-TR-RF-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=[
+                    "Use a positive integer for the forecast horizon "
+                    "(typical values 1-24).",
+                ],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         n_lags = int(ctx.get_param("max_lag", preset_cfg["n_lags"]))
+        # CAI Phase 2 Session 23 fix (F-TR-RF-NLAGS): explicit
+        # range gate.
+        if n_lags < 1:
+            return make_error_response(
+                ctx,
+                f"max_lag must be >= 1. Got {n_lags}.",
+                error_fixes=[
+                    "Use a positive integer for the number of lagged "
+                    "features (typical values 4-24).",
+                ],
+            )
         n_estimators = int(ctx.get_param("n_estimators", preset_cfg["n_estimators"]))
         max_depth = int(ctx.get_param("max_depth", preset_cfg["max_depth"]))
         min_samples_leaf = preset_cfg["min_samples_leaf"]
