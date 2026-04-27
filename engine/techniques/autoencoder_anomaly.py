@@ -187,9 +187,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         contamination = float(ctx.get_param("contamination", 0.05))
+        # CAI Phase 2 Session 25 fix (F-SN-AE-CONTAMINATION):
+        # explicit range gate. Pre-fix, contamination out of
+        # (0, 1) silently reset to 0.05 with warning.
         if contamination <= 0 or contamination >= 1:
-            contamination = 0.05
-            warn_list.append("Contamination must be in (0, 1). Defaulting to 0.05.")
+            return make_error_response(
+                ctx,
+                f"contamination must be in (0, 1). Got {contamination}.",
+                error_fixes=[
+                    "Use a value in (0, 1); typical values 0.01-0.10. "
+                    "This represents the expected fraction of "
+                    "anomalies in the data.",
+                ],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         hidden_dim = int(ctx.get_param("hidden_dim", preset_cfg["hidden_dim"]))

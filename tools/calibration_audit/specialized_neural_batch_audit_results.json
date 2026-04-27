@@ -1,0 +1,20 @@
+{
+  "session": 25,
+  "started": 1777331750.5152116,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "wrapper": "ae",
+      "n_anomalies": 0,
+      "runtime": 0.007424831390380859
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777331753.80496,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

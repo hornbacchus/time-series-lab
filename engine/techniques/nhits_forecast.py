@@ -319,23 +319,56 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 12))
+        # CAI Phase 2 Session 25 fix (F-SN-NHITS-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         n_stacks = int(ctx.get_param("n_stacks", preset_cfg["n_stacks"]))
         n_blocks = int(ctx.get_param("n_blocks", preset_cfg["n_blocks"]))
-        # Honor user-supplied pooling_sizes override (Follow-up 1a
-        # fix — was silently ignored, always using preset default).
+        # CAI Phase 2 Session 25 fix (F-SN-NHITS-POOLING +
+        # F-SN-NHITS-POOLING-NEG): explicit allowlist gate. Pre-fix,
+        # invalid `pooling_sizes` (non-list, non-positive entries)
+        # silently fell through to preset default via try/except
+        # pass (line 337-338). Session 24 N-BEATS stack_types
+        # pattern — propagated to N-HiTS sibling. Now rejects
+        # explicitly with actionable error.
         _pooling_user = ctx.get_param("pooling_sizes", None)
         if _pooling_user is not None:
             try:
                 _candidate = list(_pooling_user)
-                if all(isinstance(p, (int, float)) and p >= 1 for p in _candidate) and _candidate:
-                    preset_cfg = dict(preset_cfg)
-                    preset_cfg["pooling_sizes"] = [int(p) for p in _candidate]
             except (TypeError, ValueError):
-                pass
+                return make_error_response(
+                    ctx,
+                    f"pooling_sizes must be a list of positive integers. "
+                    f"Got {_pooling_user!r}.",
+                    error_fixes=[
+                        "Provide a list like [2, 2, 1] specifying "
+                        "pooling factor per stack.",
+                    ],
+                )
+            if not _candidate:
+                return make_error_response(
+                    ctx,
+                    "pooling_sizes must be a non-empty list.",
+                    error_fixes=["Provide at least one pooling size."],
+                )
+            if not all(isinstance(p, (int, float)) and p >= 1 for p in _candidate):
+                return make_error_response(
+                    ctx,
+                    f"pooling_sizes entries must all be >= 1. Got {_candidate}.",
+                    error_fixes=[
+                        "All pooling sizes must be positive integers; "
+                        "1 means no pooling, 2+ means downsampling.",
+                    ],
+                )
+            preset_cfg = dict(preset_cfg)
+            preset_cfg["pooling_sizes"] = [int(p) for p in _candidate]
         hidden_size = int(ctx.get_param("hidden_size", preset_cfg["hidden_size"]))
         epochs = int(ctx.get_param("epochs", preset_cfg["epochs"]))
         n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))

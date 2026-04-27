@@ -342,13 +342,43 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 12))
+        # CAI Phase 2 Session 25 fix (F-SN-ESN-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         reservoir_size = int(ctx.get_param("reservoir_size", preset_cfg["reservoir_size"]))
         spectral_radius = float(ctx.get_param("spectral_radius", preset_cfg["spectral_radius"]))
+        # CAI Phase 2 Session 25 fix (F-SN-ESN-SPECTRAL): explicit
+        # range gate. Negative spectral_radius makes no sense for
+        # eigenvalue-magnitude scaling.
+        if spectral_radius <= 0:
+            return make_error_response(
+                ctx,
+                f"spectral_radius must be > 0. Got {spectral_radius}.",
+                error_fixes=[
+                    "Use a positive value; typical 0.5-1.0 for "
+                    "stable echo state property.",
+                ],
+            )
         leak_rate = float(ctx.get_param("leak_rate", preset_cfg["leak_rate"]))
+        # CAI Phase 2 Session 25 fix (F-SN-ESN-LEAK): explicit
+        # range gate. Leaky-integrator parameter only meaningful
+        # in [0, 1].
+        if not (0.0 <= leak_rate <= 1.0):
+            return make_error_response(
+                ctx,
+                f"leak_rate must be in [0, 1]. Got {leak_rate}.",
+                error_fixes=[
+                    "Use a value in [0, 1]; typical 0.1-0.5. "
+                    "1.0 means no leak (standard ESN).",
+                ],
+            )
         input_scaling = float(ctx.get_param("input_scaling", preset_cfg["input_scaling"]))
         ridge_alpha = float(ctx.get_param("ridge_alpha", preset_cfg["ridge_alpha"]))
         warmup = int(ctx.get_param("warmup", preset_cfg["warmup"]))
