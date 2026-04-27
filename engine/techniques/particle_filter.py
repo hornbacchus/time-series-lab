@@ -83,6 +83,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
         n_particles = int(ctx.get_param("n_particles", cfg["n_particles"]))
         resample_thresh = float(ctx.get_param("resample_threshold", cfg["resample_threshold"]))
         model_type = ctx.get_param("model", "local_level")
+        # CAI Phase 2 Session 18 fix (F-SS-PF-MODEL): explicit
+        # allowlist gate. Pre-fix, invalid `model` strings fell
+        # through the if/elif/else chain in _get_model_functions
+        # (line 357-415) to the `else: # Default: local_level`
+        # branch silently. audit_fields["model"] still recorded
+        # the user's invalid value, misrepresenting the model
+        # that ran.
+        _MODEL_OPTS = (
+            "local_level", "local_level_sv",
+            "nonlinear_growth", "random_walk_sv",
+        )
+        if model_type not in _MODEL_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown model '{model_type}'. Must be one of: "
+                f"{', '.join(_MODEL_OPTS)}.",
+                error_fixes=[
+                    "Use 'local_level' (default; random walk + "
+                    "Gaussian noise), 'local_level_sv' (local "
+                    "level with stochastic volatility), "
+                    "'nonlinear_growth' (Kitagawa 1996 nonlinear "
+                    "benchmark), or 'random_walk_sv' (random walk "
+                    "log-volatility process).",
+                ],
+            )
         sigma_state = float(ctx.get_param("sigma_state", 1.0))
         sigma_obs = float(ctx.get_param("sigma_obs", 1.0))
         horizon = max(1, int(ctx.get_param("horizon", 10)))

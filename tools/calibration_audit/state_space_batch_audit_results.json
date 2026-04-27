@@ -1,0 +1,100 @@
+{
+  "session": 18,
+  "started": 1777255199.995843,
+  "sweep_0_findings": [],
+  "technique_1": [
+    {
+      "wrapper": "ll",
+      "param": "h=5",
+      "rmse": 0.376,
+      "runtime": 0.01745891571044922
+    },
+    {
+      "wrapper": "ll",
+      "param": "h=10",
+      "rmse": 0.376,
+      "runtime": 0.018541336059570312
+    },
+    {
+      "wrapper": "ll",
+      "param": "h=20",
+      "rmse": 0.376,
+      "runtime": 0.017159700393676758
+    },
+    {
+      "wrapper": "pf",
+      "param": "n=100",
+      "rmse": 0.3842,
+      "runtime": 0.00938558578491211
+    },
+    {
+      "wrapper": "pf",
+      "param": "n=500",
+      "rmse": 0.3481,
+      "runtime": 0.01314854621887207
+    },
+    {
+      "wrapper": "pf",
+      "param": "n=1000",
+      "rmse": 0.3477,
+      "runtime": 0.021389245986938477
+    }
+  ],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "wrapper": "local_level",
+      "rmse": 1.1659,
+      "runtime": 0.02111959457397461
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "local_linear_trend",
+      "rmse": 1.1982,
+      "runtime": 0.09089255332946777
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "structural_ts",
+      "rmse": 1.5946,
+      "runtime": 0.1348564624786377
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "particle_filter",
+      "rmse": 0.5976,
+      "runtime": 0.029172420501708984
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "local_level",
+      "rmse": 0.2552,
+      "runtime": 0.026622772216796875
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "local_linear_trend",
+      "rmse": 0.2553,
+      "runtime": 0.08019638061523438
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "structural_ts",
+      "rmse": 0.4422,
+      "runtime": 0.33951401710510254
+    },
+    {
+      "series": "DGS10_level",
+      "wrapper": "particle_filter",
+      "rmse": 0.0214,
+      "runtime": 0.02750682830810547
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777255204.2236528,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

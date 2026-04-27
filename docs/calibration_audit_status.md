@@ -34,8 +34,9 @@ that route to a single `garch_model.py` wrapper).
 | 14 | granger_causality + cross_correlation_lag + gcc_phat_delay + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag (Causality/Lead-Lag batch) | ff0aefa | 2 (both fixed inline) | 0 | 0 |
 | 15 | bocpd + cusum_page_hinkley + intervention_analysis + pelt_change_points + stl_esd_anomaly (Change Points/Anomalies batch) | 7711045 | 3 (all fixed inline) | 0 | 0 |
 | 16 | stl_decompose + mstl_decompose + classical_decompose + x13_seasonal_adjust (Decomposition batch) | c24de96 | 2 (both fixed inline) | 0 | 0 |
-| 17 | adf_test + kpss_test + pp_test (Stationarity Tests batch) | (this commit) | 5 (all fixed inline) | 0 | 0 |
-| **Total** | **49 wrappers AUDITED** | — | **20 (all fixed)** | **3 (all fixed)** | **6** |
+| 17 | adf_test + kpss_test + pp_test (Stationarity Tests batch) | ff36cef | 5 (all fixed inline) | 0 | 0 |
+| 18 | local_level + local_linear_trend + structural_ts + particle_filter (State Space batch) | (this commit) | 1 (fixed inline) | 0 | 0 |
+| **Total** | **53 wrappers AUDITED** | — | **21 (all fixed)** | **3 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -89,11 +90,11 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 49 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26; arima + auto_arima + sarima — Session 10 forecasting classical batch, 2026-04-26; arimax_sarimax + intermittent_demand + theta_forecast — Session 11 closes forecasting classical, 2026-04-26; hmm + markov_switching + tar_setar + star + nar_narx — Session 12 Markov/regime batch, 2026-04-26; fft_spectrum + periodogram_spectral_density + lomb_scargle + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + ssa — Session 13 Frequency Domain batch, 2026-04-26; granger_causality + cross_correlation_lag + gcc_phat_delay + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag — Session 14 Causality/Lead-Lag batch, 2026-04-26; bocpd + cusum_page_hinkley + intervention_analysis + pelt_change_points + stl_esd_anomaly — Session 15 Change Points/Anomalies batch, 2026-04-26; stl_decompose + mstl_decompose + classical_decompose + x13_seasonal_adjust — Session 16 Decomposition batch, 2026-04-26; adf_test + kpss_test + pp_test — Session 17 Stationarity Tests batch, 2026-04-26)
+- AUDITED: 53 (kalman_filter + kalman_smoother — co-audited Session 1, 2026-04-25; har_cj — Session 2, 2026-04-26; evt_pot_gpd — Session 3, 2026-04-26; johansen_cointegration — Session 4, 2026-04-26; stochastic_volatility — Session 5, 2026-04-26; garch + gjr_garch + egarch — Session 6 extension batch, 2026-04-26; har_rv — Session 7 extension, 2026-04-26; caviar_quantile_dynamics — Session 8 extension, 2026-04-26; var + vecm — Session 9 multivariate batch, 2026-04-26; arima + auto_arima + sarima — Session 10 forecasting classical batch, 2026-04-26; arimax_sarimax + intermittent_demand + theta_forecast — Session 11 closes forecasting classical, 2026-04-26; hmm + markov_switching + tar_setar + star + nar_narx — Session 12 Markov/regime batch, 2026-04-26; fft_spectrum + periodogram_spectral_density + lomb_scargle + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + ssa — Session 13 Frequency Domain batch, 2026-04-26; granger_causality + cross_correlation_lag + gcc_phat_delay + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag — Session 14 Causality/Lead-Lag batch, 2026-04-26; bocpd + cusum_page_hinkley + intervention_analysis + pelt_change_points + stl_esd_anomaly — Session 15 Change Points/Anomalies batch, 2026-04-26; stl_decompose + mstl_decompose + classical_decompose + x13_seasonal_adjust — Session 16 Decomposition batch, 2026-04-26; adf_test + kpss_test + pp_test — Session 17 Stationarity Tests batch, 2026-04-26; local_level + local_linear_trend + structural_ts + particle_filter — Session 18 State Space batch, 2026-04-26)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
-- UNAUDITED: 58
+- UNAUDITED: 54
 
 ## Per-wrapper status
 
@@ -219,10 +220,10 @@ extensions are operationally valuable.
 |---|---|---|---|---|---|
 | kalman_filter | AUDITED | [kalman_findings_2026_04_25.md](calibration_audit/kalman_findings_2026_04_25.md) | 0 | 2 (both fixed inline) | 0 |
 | kalman_smoother | AUDITED | [kalman_findings_2026_04_25.md](calibration_audit/kalman_findings_2026_04_25.md) | 0 | 2 (shared with kalman_filter) | 0 |
-| local_level | UNAUDITED | — | — | — | — |
-| local_linear_trend | UNAUDITED | — | — | — | — |
-| particle_filter | UNAUDITED | — | — | — | — |
-| structural_ts | UNAUDITED | — | — | — | — |
+| local_level | AUDITED | [state_space_batch_findings_2026_04_26.md](calibration_audit/state_space_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| local_linear_trend | AUDITED | [state_space_batch_findings_2026_04_26.md](calibration_audit/state_space_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
+| particle_filter | AUDITED | [state_space_batch_findings_2026_04_26.md](calibration_audit/state_space_batch_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
+| structural_ts | AUDITED | [state_space_batch_findings_2026_04_26.md](calibration_audit/state_space_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
 
 ### Stationarity / Tests
 
@@ -252,6 +253,6 @@ extensions are operationally valuable.
 - `critical_slowing_down` deferred because it shipped on
   2026-04-25 (commit `94742fe`); too new for the calibration
   audit cycle. Will be candidate for next CAI cycle.
-- The 58 UNAUDITED wrappers are documented for awareness;
+- The 54 UNAUDITED wrappers are documented for awareness;
   not in this initiative's scope. Future calibration cycles
   may extend coverage.
