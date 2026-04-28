@@ -1,0 +1,251 @@
+{
+  "started": 1777403501.2324123,
+  "data_summary": {
+    "n_levels": 2499,
+    "n_returns": 2498,
+    "fixture_start": "2015-04-25",
+    "fixture_end": "2025-04-25",
+    "return_mean_pct": 0.001758075399849459,
+    "return_std_pct": 0.49326394686620045
+  },
+  "inv2_reproduction": {
+    "T": 2000,
+    "ews_composite_score": 6.409992303172955,
+    "ews_state": "critical",
+    "rolling_window": 1000,
+    "kendall_lookback": 300,
+    "detrending_method": "gaussian",
+    "composite_method": "equal_weight_zscore",
+    "kendall_tau_ar1": null,
+    "kendall_tau_variance": null,
+    "kendall_tau_skewness": null,
+    "kendall_tau_kurtosis": null,
+    "runtime_s": 27.38
+  },
+  "inv3_sensitivity": {
+    "cells": [
+      {
+        "axis": "rolling_window",
+        "value": 100,
+        "ews": 2.67253166518943,
+        "state": "critical"
+      },
+      {
+        "axis": "rolling_window",
+        "value": 200,
+        "ews": 4.0926071313905075,
+        "state": "critical"
+      },
+      {
+        "axis": "rolling_window",
+        "value": 500,
+        "ews": 3.397693953521049,
+        "state": "critical"
+      },
+      {
+        "axis": "rolling_window",
+        "value": 1000,
+        "ews": 6.409992303172955,
+        "state": "critical"
+      },
+      {
+        "axis": "detrending_method",
+        "value": "gaussian",
+        "ews": 6.409992303172955,
+        "state": "critical"
+      },
+      {
+        "axis": "detrending_method",
+        "value": "first_diff",
+        "ews": 6.166761987266391,
+        "state": "critical"
+      },
+      {
+        "axis": "detrending_method",
+        "value": "linear",
+        "ews": 5.708329473939735,
+        "state": "critical"
+      },
+      {
+        "axis": "composite_method",
+        "value": "equal_weight_zscore",
+        "ews": 6.409992303172955,
+        "state": "critical"
+      },
+      {
+        "axis": "composite_method",
+        "value": "fisher_combined",
+        "ews": 0.939316437419854,
+        "state": "normal"
+      },
+      {
+        "axis": "kendall_lookback",
+        "value": 30,
+        "ews": 1.7424740280086537,
+        "state": "critical"
+      },
+      {
+        "axis": "kendall_lookback",
+        "value": 60,
+        "ews": 4.379510588450526,
+        "state": "critical"
+      },
+      {
+        "axis": "kendall_lookback",
+        "value": 100,
+        "ews": 4.991323736102572,
+        "state": "critical"
+      }
+    ],
+    "n_cells": 12,
+    "frac_high_ews": 0.75
+  },
+  "inv4_autocorr": {
+    "ews_a_original": 6.409992303172955,
+    "ews_b_shuffled": -2.3290214621771272,
+    "ews_c_synthetic_ar1": 0.8999713661957122,
+    "ews_d_ar1_residuals": 6.614635962807047,
+    "ac1_empirical": 0.04995390745082942,
+    "phi_hat": 0.04986744343480777,
+    "verdict": "WEAK SIGNAL \u2014 original EWS not striking enough to diagnose"
+  },
+  "inv5_rolling": {
+    "rows": [
+      {
+        "window_start": 0,
+        "window_end": 1999,
+        "ews": 3.8849659850048233,
+        "state": "critical"
+      },
+      {
+        "window_start": 50,
+        "window_end": 2049,
+        "ews": 2.07196906044162,
+        "state": "critical"
+      },
+      {
+        "window_start": 100,
+        "window_end": 2099,
+        "ews": 2.2919705932189847,
+        "state": "critical"
+      },
+      {
+        "window_start": 150,
+        "window_end": 2149,
+        "ews": 2.6859000393438994,
+        "state": "critical"
+      },
+      {
+        "window_start": 200,
+        "window_end": 2199,
+        "ews": 1.6609539804448155,
+        "state": "critical"
+      },
+      {
+        "window_start": 250,
+        "window_end": 2249,
+        "ews": 1.2432198309478297,
+        "state": "elevated"
+      },
+      {
+        "window_start": 300,
+        "window_end": 2299,
+        "ews": -0.2583962156355435,
+        "state": "normal"
+      },
+      {
+        "window_start": 350,
+        "window_end": 2349,
+        "ews": -1.8515835808356733,
+        "state": "normal"
+      },
+      {
+        "window_start": 400,
+        "window_end": 2399,
+        "ews": -0.13188573561784503,
+        "state": "normal"
+      },
+      {
+        "window_start": 450,
+        "window_end": 2449,
+        "ews": 1.3545644112365496,
+        "state": "elevated"
+      }
+    ],
+    "first_cross_2sigma_obs": 1999,
+    "first_cross_5sigma_obs": null,
+    "peak_ews": 3.8849659850048233,
+    "peak_obs": 1999,
+    "final_ews": 1.3545644112365496
+  },
+  "inv6_cross_methods": {
+    "markov_switching": {
+      "status": "success",
+      "n_regimes": 2,
+      "smoothed_prob_regime_0_end": null,
+      "regime_means": null,
+      "regime_stds": null,
+      "runtime_s": 1.11
+    },
+    "bocpd": {
+      "status": "success",
+      "n_change_points": 0,
+      "n_recent_cp_post_1500": 0,
+      "recent_cp_indices": [],
+      "runtime_s": 7.23
+    },
+    "pelt": {
+      "status": "success",
+      "n_change_points": 14,
+      "n_recent_cp_post_1500": 2,
+      "recent_cp_positions": [
+        1961,
+        1966
+      ],
+      "runtime_s": 7.04
+    },
+    "stl_esd": {
+      "status": "success",
+      "n_anomalies": 0,
+      "n_recent_anom_post_1500": 0,
+      "runtime_s": 0.22
+    },
+    "egarch": {
+      "status": "success",
+      "persistence": null,
+      "alpha": null,
+      "beta": null,
+      "loglik": null,
+      "runtime_s": 0.1
+    },
+    "caviar": {
+      "status": "success",
+      "specification": "SAV",
+      "tail_var": null,
+      "runtime_s": 1.83
+    }
+  },
+  "inv7_other_macro": {
+    "GSPC_logret": {
+      "ews": 0.8302850168081175,
+      "state": "normal",
+      "runtime_s": 24.3
+    },
+    "DGS10_level": {
+      "ews": -5.089023239437313,
+      "state": "normal",
+      "runtime_s": 21.6
+    },
+    "DGS2_level": {
+      "ews": -6.963835603402181,
+      "state": "normal",
+      "runtime_s": 23.5
+    },
+    "GOLD_logret": {
+      "ews": -2.441517882951592,
+      "state": "normal",
+      "runtime_s": 20.1
+    }
+  },
+  "finished": 1777404337.4940348
+}
