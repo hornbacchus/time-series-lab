@@ -9,6 +9,22 @@ calibration-audit status: parameter-sweep + real-data stress
 See `plans/calibration_audit_phase1_2026_04_25.md` for the
 Phase 1 design audit and methodology.
 
+> **Engineering reference (post-Session 29 consolidation):**
+> CAI's institutional knowledge is now consolidated into three
+> engineering documents under `docs/engineering/`:
+>
+> - **[Wrapper Development Standard](engineering/wrapper_development_standard.md)** —
+>   directive ("must"); binding for new wrapper PRs.
+> - **[Validation Patterns Reference](engineering/validation_patterns_reference.md)** —
+>   diagnostic tests + fix patterns + per-finding cross-reference.
+> - **[CAI Phase 2 Empirical Findings](engineering/cai_empirical_findings.md)** —
+>   descriptive synthesis of "what we learned" across 28 sessions.
+>
+> Per-session findings docs under `docs/calibration_audit/`
+> remain as the audit trail for future re-investigation.
+> The three engineering docs are the primary reference for
+> day-to-day wrapper development.
+
 ## CAI Phase 2: 28 sessions COMPLETE — TRUE CYCLE CLOSURE 2026-04-28
 
 **FINAL STATE:** 83 / 83 wrappers AUDITED (100%); 0 deferred.
