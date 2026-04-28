@@ -31,7 +31,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -82,7 +83,7 @@ def _generate_arimax_dgp(
     return y[burn:], x[burn:]
 
 
-class ArimaxSarimaxParity(ParityCheck):
+class ArimaxSarimaxParity(P3ParityCheck):
     """ARIMAX parity vs R forecast::Arima with xreg.
 
     DGP: ARIMAX(1,0,1) with phi=0.6, theta=0.4, beta=1.5,
@@ -92,6 +93,15 @@ class ArimaxSarimaxParity(ParityCheck):
     technique_id = "p3_arimax_sarimax"
     tier = "fast"
     fixture_id = ""
+
+    verdict_class = "mle_fit"
+    verdict_class_rationale = (
+        "Same MLE-fit class as p3_arima_manual; ARIMAX adds "
+        "exogenous regressors but uses the same Gaussian-"
+        "innovation MLE backbone (statsmodels SARIMAX with "
+        "exog vs R forecast::Arima with xreg). Achieved "
+        "tolerance 3e-8 abs on AR coef, 5.5e-6 on exog beta."
+    )
 
     DGP_PHI = 0.6
     DGP_THETA = 0.4

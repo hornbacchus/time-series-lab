@@ -34,7 +34,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -49,7 +50,7 @@ from reference_parity.harness.checks.p3_theta import (
 )
 
 
-class TbatsParity(ParityCheck):
+class TbatsParity(P3ParityCheck):
     """TBATS parity vs R forecast::tbats.
 
     DGP: seasonal AR(1) with trend + sin seasonality, phi=0.6,
@@ -59,6 +60,17 @@ class TbatsParity(ParityCheck):
     technique_id = "p3_tbats"
     tier = "slow"  # tbats fitting 8-30s; slow-tier eligible
     fixture_id = ""
+
+    verdict_class = "mle_fit"
+    verdict_class_rationale = (
+        "Python tbats 1.1.3 (Skorupa) and R forecast::tbats "
+        "are independent implementations of the De Livera-"
+        "Hyndman-Snyder 2011 TBATS framework. Both fit "
+        "Gaussian-innovation MLE on the state-space form; "
+        "different optimizer initialization produces 1e-3 to "
+        "1e-2 abs divergence on smoothing parameters and Box-"
+        "Cox lambda. Achieved alpha 1.4e-4 abs."
+    )
 
     DGP_PHI = 0.6
     DGP_SIGMA = 1.0

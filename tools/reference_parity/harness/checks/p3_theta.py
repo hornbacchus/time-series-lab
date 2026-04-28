@@ -28,7 +28,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -71,7 +72,7 @@ def _generate_seasonal_ar_dgp(
     return y[burn:]
 
 
-class ThetaParity(ParityCheck):
+class ThetaParity(P3ParityCheck):
     """Theta parity vs R forecast::thetaf.
 
     DGP: seasonal AR(1) with trend + sin seasonality. T=120,
@@ -81,6 +82,18 @@ class ThetaParity(ParityCheck):
     technique_id = "p3_theta"
     tier = "fast"
     fixture_id = ""
+
+    verdict_class = "state_space_reform"
+    verdict_class_rationale = (
+        "R forecast::thetaf implements Assimakopoulos-"
+        "Nikolopoulos 2000 original; statsmodels ThetaModel "
+        "implements Hyndman-Billah 2003 state-space "
+        "reformulation. Equivalent for theta=2 SES applied to "
+        "differenced series (Hyndman-Billah Theorem 1) but "
+        "small-sample deviations possible. Achieved 6.76e-04 "
+        "abs on forecast — 3 orders of magnitude tighter than "
+        "the widened band; band could be tightened in Phase 3.5."
+    )
 
     DGP_PHI = 0.7
     DGP_SIGMA = 1.0

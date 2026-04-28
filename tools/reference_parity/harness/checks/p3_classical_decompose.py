@@ -29,7 +29,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -43,7 +44,7 @@ from reference_parity.harness.checks.p3_theta import (
 )
 
 
-class ClassicalDecomposeParity(ParityCheck):
+class ClassicalDecomposeParity(P3ParityCheck):
     """Classical additive decomposition parity vs R stats::decompose.
 
     DGP: seasonal AR(1) with linear trend + sin seasonality;
@@ -53,6 +54,16 @@ class ClassicalDecomposeParity(ParityCheck):
     technique_id = "p3_classical_decompose"
     tier = "fast"
     fixture_id = ""
+
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "Classical decomposition is closed-form arithmetic: "
+        "centered moving average -> trend; detrend -> group "
+        "seasonal averages; residual = y - trend - seasonal. "
+        "statsmodels seasonal_decompose and R stats::decompose "
+        "implement the same algorithm; achieved 7.1e-14 abs "
+        "across all three components (machine precision)."
+    )
 
     DGP_M = 12
     DGP_N = 120

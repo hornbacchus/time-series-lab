@@ -26,7 +26,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -40,7 +41,7 @@ from reference_parity.harness.checks.p3_theta import (
 )
 
 
-class StlParity(ParityCheck):
+class StlParity(P3ParityCheck):
     """STL parity vs R stats::stl.
 
     DGP: seasonal AR(1) with linear trend + sin seasonality;
@@ -54,6 +55,22 @@ class StlParity(ParityCheck):
     technique_id = "p3_stl"
     tier = "fast"
     fixture_id = ""
+
+    verdict_class = "iterative_loess"
+    verdict_class_rationale = (
+        "STL is iterative LOESS decomposition (Cleveland et al. "
+        "1990). statsmodels STL and R stats::stl implement the "
+        "canonical algorithm but differ in default LOESS "
+        "internals + inner-iteration convergence path. Per-"
+        "index divergence ~9e-2 abs is reproducible across "
+        "seeds (deterministic; not MC noise). reroll_on_caveat "
+        "= False (class default) prevents the runner's "
+        "CAVEAT-reroll-and-bump-to-BLOCK protocol from firing "
+        "on what is a structural implementation difference."
+    )
+    # reroll_on_caveat = False (class default; previously this
+    # check overrode on_caveat_reroll() explicitly — now the
+    # default itself per Session 5 lock)
 
     DGP_M = 12
     DGP_N = 120
@@ -205,21 +222,11 @@ class StlParity(ParityCheck):
             },
         )
 
-    def on_caveat_reroll(self, first_result: ParityResult) -> bool:
-        """Disable CAVEAT-reroll for STL.
-
-        STL is a deterministic computation; CAVEAT here reflects
-        a structural implementation difference between
-        statsmodels and R stats::stl (LOESS internals, inner-
-        iteration convergence path, trend-extraction convention),
-        NOT Monte Carlo noise that a seed re-roll could resolve.
-        Per master plan §3.1, CAVEAT is the appropriate verdict
-        for "matches except in stated regime" — here, the regime
-        is "implementations differ at the per-index level by ~1e-1
-        absolute, but agree at the structural level (seasonal +
-        trend + resid sum to y; period m == 12; component shapes
-        consistent)". Re-rolling with seed+1 reproduces the same
-        per-index divergence pattern; escalating to BLOCK would
-        be misleading.
-        """
-        return False
+    # Phase 3 Session 5: explicit ``on_caveat_reroll`` override
+    # removed because ``reroll_on_caveat = False`` is now the
+    # P3ParityCheck class default. Pre-Session-5, this method
+    # body was the canonical example of the deterministic-CAVEAT
+    # discipline pattern; Session 5 promoted it to default,
+    # leaving deterministic checks free of override boilerplate.
+    # MC / EM-stochastic checks opt in via
+    # ``reroll_on_caveat = True``.

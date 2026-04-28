@@ -30,40 +30,29 @@ remaining 7 Batch 1 wrappers.
 
 from __future__ import annotations
 
-import sys
 from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+# Phase 3 Session 5: imports migrated to shared harness modules.
+# Pre-Session-5, this file defined `_ensure_engine_on_path`,
+# `_compare_scalar`, and `_compare_vector` inline; sibling Batch 1
+# checks re-imported them from this module. Session 5 lifted them
+# into harness/path_setup.py and harness/compare.py respectively.
+# Re-exports are preserved at the bottom of this file so the sibling
+# checks' `from reference_parity.harness.checks.p3_arima import (
+# _compare_scalar, _compare_vector, _ensure_engine_on_path)` lines
+# continue to resolve unchanged (zero-diff dependency on this file).
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
+from reference_parity.harness.compare import (
+    _compare_scalar,
+    _compare_vector,
+)
 from reference_parity.harness.manifest import Manifest
+from reference_parity.harness.path_setup import _ensure_engine_on_path
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
-
-
-# ---------------------------------------------------------------------
-# Path setup helper (replicated across harness/checks/* per the
-# established pattern; Session 5 generator abstraction will factor
-# out into a shared module)
-# ---------------------------------------------------------------------
-
-def _ensure_engine_on_path() -> None:
-    """Add ``engine/`` to sys.path so we can import TSL's arima
-    wrapper."""
-    import pathlib
-    p = pathlib.Path(__file__).resolve()
-    repo_root = None
-    for parent in p.parents:
-        if (parent / "engine").is_dir():
-            repo_root = parent
-            break
-    if repo_root is None:
-        raise RuntimeError(
-            "Cannot locate engine/ from harness check module"
-        )
-    eng_path = str(repo_root / "engine")
-    if eng_path not in sys.path:
-        sys.path.insert(0, eng_path)
 
 
 # ---------------------------------------------------------------------
@@ -108,7 +97,7 @@ def _generate_arima_dgp(
 # ParityCheck subclass
 # ---------------------------------------------------------------------
 
-class ArimaManualParity(ParityCheck):
+class ArimaManualParity(P3ParityCheck):
     """ARIMA manual-order parity vs R forecast::Arima.
 
     DGP: ARIMA(1,1,1) with phi=0.6, theta=0.4, sigma=1.0,
@@ -120,6 +109,18 @@ class ArimaManualParity(ParityCheck):
     technique_id = "p3_arima_manual"
     tier = "fast"
     fixture_id = ""  # generated at runtime from seed
+
+    # Phase 3 Session 5 locked metadata.
+    verdict_class = "mle_fit"
+    verdict_class_rationale = (
+        "Both statsmodels ARIMA and R forecast::Arima fit "
+        "Gaussian-innovation MLE on identical fixtures via "
+        "deterministic optimizers (L-BFGS-B and BFGS "
+        "respectively). Convergence-criterion difference "
+        "produces 1e-5 to 1e-4 abs divergence on coefs; "
+        "well within the §7.1 1e-3 abs / 1e-2 rel band."
+    )
+    # reroll_on_caveat = False (default); deterministic optimizer.
 
     # DGP parameters (also used as fitted order)
     DGP_PHI = 0.6
@@ -443,85 +444,15 @@ class ArimaManualParity(ParityCheck):
 
 
 # ---------------------------------------------------------------------
-# Comparison helpers (Session 2 manual-pattern lock — duplicated in
-# p3_sarima.py and p3_arimax_sarimax.py; Session 5 generator
-# abstraction will factor into compare.py)
+# Phase 3 Session 5: comparison helpers `_compare_scalar` and
+# `_compare_vector` lifted from this file into
+# `tools/reference_parity/harness/compare.py`. Re-exported via
+# top-of-file imports so sibling Batch 1 checks' lines like
+# `from reference_parity.harness.checks.p3_arima import (
+#     _compare_scalar, _compare_vector, _ensure_engine_on_path,
+# )` continue to resolve unchanged. This zero-diff approach avoids
+# touching p3_sarima / p3_arimax_sarimax / p3_ets / p3_theta /
+# p3_intermittent / p3_classical_decompose / p3_stl / p3_mstl /
+# p3_tbats — each can migrate to direct `from harness.compare
+# import ...` at its discretion (or never).
 # ---------------------------------------------------------------------
-
-def _compare_scalar(
-    a: float, b: float, tol: dict[str, float],
-) -> dict[str, Any]:
-    """Compare two scalars within an absolute/relative tolerance
-    band. Returns a metric dict with status PASS / CAVEAT /
-    BLOCK and the achieved abs/rel diff."""
-    abs_tol = float(tol.get("abs_tol", 1e-3))
-    rel_tol = float(tol.get("rel_tol", 1e-2))
-    block_abs_tol = float(tol.get("block_abs_tol", 10 * abs_tol))
-    block_rel_tol = float(tol.get("block_rel_tol", 10 * rel_tol))
-    a, b = float(a), float(b)
-    diff = abs(a - b)
-    denom = max(abs(a), abs(b), 1e-300)
-    rel = diff / denom
-    if diff <= abs_tol or rel <= rel_tol:
-        status = "PASS"
-    elif diff <= block_abs_tol or rel <= block_rel_tol:
-        status = "CAVEAT"
-    else:
-        status = "BLOCK"
-    return {
-        "status": status,
-        "abs_diff": diff,
-        "rel_diff": rel,
-        "tsl": a,
-        "ref": b,
-    }
-
-
-def _compare_vector(
-    a: np.ndarray, b: np.ndarray, tol: dict[str, float],
-) -> dict[str, Any]:
-    """Compare two 1-D vectors within an absolute/relative
-    tolerance band. PASS iff every element passes; CAVEAT if any
-    element CAVEATs but none BLOCK; BLOCK if any element BLOCKs."""
-    a = np.asarray(a, dtype=np.float64).reshape(-1)
-    b = np.asarray(b, dtype=np.float64).reshape(-1)
-    if a.shape != b.shape:
-        return {
-            "status": "BLOCK",
-            "shape_mismatch": True,
-            "tsl_shape": list(a.shape),
-            "ref_shape": list(b.shape),
-        }
-    if a.size == 0:
-        return {
-            "status": "PASS",
-            "max_abs_diff": 0.0,
-            "max_rel_diff": 0.0,
-            "n_compared": 0,
-        }
-    abs_tol = float(tol.get("abs_tol", 1e-3))
-    rel_tol = float(tol.get("rel_tol", 1e-2))
-    block_abs_tol = float(tol.get("block_abs_tol", 10 * abs_tol))
-    block_rel_tol = float(tol.get("block_rel_tol", 10 * rel_tol))
-    diff = np.abs(a - b)
-    denom = np.maximum(np.maximum(np.abs(a), np.abs(b)), 1e-300)
-    rel = diff / denom
-    max_abs = float(np.max(diff))
-    max_rel = float(np.max(rel))
-    # PASS iff max_abs <= abs_tol OR max_rel <= rel_tol (per element
-    # OR aggregate; we use aggregate here since shape parity has
-    # already been checked).
-    if max_abs <= abs_tol or max_rel <= rel_tol:
-        status = "PASS"
-    elif max_abs <= block_abs_tol or max_rel <= block_rel_tol:
-        status = "CAVEAT"
-    else:
-        status = "BLOCK"
-    return {
-        "status": status,
-        "max_abs_diff": max_abs,
-        "max_rel_diff": max_rel,
-        "n_compared": int(a.size),
-        "tsl_first": float(a.flat[0]) if a.size > 0 else None,
-        "ref_first": float(b.flat[0]) if b.size > 0 else None,
-    }

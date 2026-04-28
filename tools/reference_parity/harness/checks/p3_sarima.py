@@ -36,7 +36,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -91,7 +92,7 @@ def _generate_sarima_dgp(
     return y[burn:]
 
 
-class SarimaParity(ParityCheck):
+class SarimaParity(P3ParityCheck):
     """SARIMA parity vs R forecast::Arima with seasonal arg.
 
     DGP: SARIMA(1,0,1)x(1,0,1)[12] with phi=0.6, theta=0.4,
@@ -101,6 +102,15 @@ class SarimaParity(ParityCheck):
     technique_id = "p3_sarima"
     tier = "fast"
     fixture_id = ""
+
+    verdict_class = "mle_fit"
+    verdict_class_rationale = (
+        "Same MLE-fit class as p3_arima_manual; SARIMA "
+        "extends to seasonal AR/MA factors via the same "
+        "Kalman-filter state-space MLE backbone "
+        "(statsmodels SARIMAX vs R forecast::Arima with "
+        "seasonal arg). Achieved tolerance 1e-5 abs on coefs."
+    )
 
     DGP_PHI = 0.6
     DGP_THETA = 0.4

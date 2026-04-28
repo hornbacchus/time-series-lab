@@ -34,7 +34,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -101,7 +102,7 @@ def _generate_hw_dgp(
     return y[burn:]
 
 
-class EtsParity(ParityCheck):
+class EtsParity(P3ParityCheck):
     """ETS / Holt-Winters parity vs R forecast::ets.
 
     DGP: Holt-Winters AAA (additive trend + additive seasonal),
@@ -112,6 +113,20 @@ class EtsParity(ParityCheck):
     technique_id = "p3_ets"
     tier = "fast"
     fixture_id = ""
+
+    verdict_class = "state_space_reform"
+    verdict_class_rationale = (
+        "statsmodels ExponentialSmoothing implements the "
+        "classical Holt-Winters smoothing recursion; R "
+        "forecast::ets implements the state-space "
+        "reformulation per Hyndman-Khandakar 2008. Both are "
+        "mathematically equivalent for the deterministic-state "
+        "case but the optimizers see different objective "
+        "surfaces and can land at different local optima with "
+        "smoothing-parameter divergence ~1e-2 abs. AIC scale "
+        "offset (~1070 abs) is methodology-equivalent (Secondary "
+        "tier; non-blocking)."
+    )
 
     DGP_ALPHA = 0.3
     DGP_BETA = 0.1

@@ -28,7 +28,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -62,7 +63,7 @@ def _generate_dual_seasonal_dgp(
     return y
 
 
-class MstlParity(ParityCheck):
+class MstlParity(P3ParityCheck):
     """MSTL parity vs R forecast::mstl.
 
     DGP: dual-seasonal m1=7, m2=30, T=300, seed=42.
@@ -71,6 +72,27 @@ class MstlParity(ParityCheck):
     technique_id = "p3_mstl"
     tier = "fast"
     fixture_id = ""
+
+    verdict_class = "iterative_loess"
+    verdict_class_rationale = (
+        "MSTL applies STL iteratively across multiple seasonal "
+        "periods (Bandara, Hyndman, Bergmeir 2021). "
+        "statsmodels MSTL and R forecast::mstl differ in "
+        "default inner-iteration counts, LOESS bandwidths, and "
+        "period-iteration ordering. Per-component decomposition "
+        "is non-unique within the constraint y = trend + sum"
+        "(seasonal_k) + resid; each implementation picks a "
+        "different feasible point. Per-component divergence "
+        "~1.0 abs but structural identity verified at 7.1e-14 "
+        "abs (recon_cross_max_abs_diff diagnostic — Pattern F "
+        "Session 4). reroll_on_caveat = False (class default)."
+    )
+    # Per user-locked refinement 2 (Session 5 plan):
+    # ``structural_invariants`` declaration deferred to Batch 7
+    # when wavelet/FFT class invariants populate. The
+    # recon_cross_max_abs_diff diagnostic in compare() below
+    # remains as a per-check inline computation — it does NOT
+    # go through the structural_invariants registry this session.
 
     DGP_M1 = 7
     DGP_M2 = 30
@@ -268,8 +290,6 @@ class MstlParity(ParityCheck):
             },
         )
 
-    def on_caveat_reroll(self, first_result: ParityResult) -> bool:
-        """Disable CAVEAT-reroll for MSTL — same rationale as
-        p3_stl: deterministic computation, divergences are
-        structural implementation differences not MC noise."""
-        return False
+    # Phase 3 Session 5: explicit ``on_caveat_reroll`` override
+    # removed; ``reroll_on_caveat = False`` is now the class
+    # default. Same rationale as p3_stl.
