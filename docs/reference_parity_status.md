@@ -47,12 +47,12 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 | 4 | `ets_hw.py` | `p3_ets` | R `forecast::ets` | MLE-fit (widened) | fast | **PASS** (with documented AIC scale offset) | `reports/p3_ets_audit.md` | `harness/checks/p3_ets.py` | S3 |
 | 5 | `theta_forecast.py` | `p3_theta` | R `forecast::thetaf` | Closed-form (widened band, observed tight) | fast | **PASS** | `reports/p3_theta_audit.md` | `harness/checks/p3_theta.py` | S3 |
 | 6 | `intermittent_demand.py` (Croston) | `p3_intermittent` | R `forecast::croston` | Closed-form | fast | **PASS** (3.77e-15 abs diff on forecast value) | `reports/p3_intermittent_audit.md` | `harness/checks/p3_intermittent.py` | S3 |
-| 7 | `mstl_decompose.py` | `p3_mstl` | R `forecast::mstl` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
-| 8 | `classical_decompose.py` | `p3_classical_decompose` | R `stats::decompose` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
-| 9 | `stl_decompose.py` | `p3_stl` | R `stats::stl` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
+| 7 | `mstl_decompose.py` | `p3_mstl` | R `forecast::mstl` | Iterative-LOESS (widened) | fast | **CAVEAT** (non-unique decomp; structural identity bit-exact) | `reports/p3_mstl_audit.md` | `harness/checks/p3_mstl.py` | S4 |
+| 8 | `classical_decompose.py` | `p3_classical_decompose` | R `stats::decompose` | Closed-form | fast | **PASS** (bit-exact 7e-14) | `reports/p3_classical_decompose_audit.md` | `harness/checks/p3_classical_decompose.py` | S4 |
+| 9 | `stl_decompose.py` | `p3_stl` | R `stats::stl` | Iterative-LOESS (widened) | fast | **CAVEAT** (per-index 9e-2 abs; impl-diff) | `reports/p3_stl_audit.md` | `harness/checks/p3_stl.py` | S4 |
 | 10 | `tbats_forecast.py` | `p3_tbats` (harness promotion) | R `forecast::tbats` | MLE-fit | slow | **PASS** | `reports/p3_tbats_audit.md` | `harness/checks/p3_tbats.py` | S3 |
 
-**Batch 1 Session 3 status:** 7/10 PASS (ARIMA family + ETS + Theta + Intermittent + TBATS harness promotion complete). Remaining 3 deliverables (STL family) in Session 4.
+**Batch 1 Session 4 status: COMPLETE.** 10/10 deliverables (8 PASS + 2 CAVEAT + 0 BLOCK). Per-batch summary: `tools/reference_parity/reports/p3_batch_1_summary.md`.
 
 ---
 
@@ -80,8 +80,9 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **7 PASS** (S2: ARIMA family ×3, S3: ETS + Theta + Intermittent + TBATS) |
-| Phase 3 remaining | 63 |
-| Phase 3 BLOCK / DOCUMENTED-DIVERGENCE | 0 (1 documented Secondary-tier AIC scale offset on ETS, non-blocking) |
+| Phase 3 covered as of latest update | **10** (8 PASS + 2 CAVEAT — Batch 1 complete) |
+| Phase 3 remaining | 60 |
+| Phase 3 BLOCK | 0 |
+| Documented Secondary-tier divergences (non-blocking) | 1 (ETS AIC scale offset, methodology-equivalent) |
 
-**Last updated:** 2026-04-28 (Phase 3 Session 3 close).
+**Last updated:** 2026-04-28 (Phase 3 Session 4 close — Batch 1 complete).

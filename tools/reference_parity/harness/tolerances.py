@@ -836,6 +836,97 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_classical_decompose": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Classical decomposition is closed-form arithmetic: "
+            "centered moving average → trend → detrend → group "
+            "seasonal averages → residual. statsmodels and R "
+            "stats::decompose implement the same algorithm. "
+            "Bit-exact parity expected (Session 3 Observation 1: "
+            "closed-form recursion → machine-precision agreement)."
+        ),
+    },
+
+    "p3_stl": {
+        "type": "tiered_outputs",
+        "primary": {
+            # STL is iterative LOESS-based decomposition (Cleveland
+            # et al. 1990). statsmodels STL and R stats::stl both
+            # implement the canonical algorithm; differences in
+            # default convergence criteria + LOESS internals
+            # produce small (1e-3 to 1e-2) divergences in
+            # individual components.
+            "abs_tol": 5e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 5e-1,
+            "block_rel_tol": 2e-1,
+        },
+        "secondary": {
+            "abs_tol": 5e-2,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 5e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "STL is iterative LOESS decomposition. statsmodels' "
+            "STL implementation and R's stats::stl differ in "
+            "(a) inner/outer iteration counts, (b) LOESS "
+            "smoothing-window defaults, and (c) trend extraction "
+            "convention. Per-component values diverge by ~1e-2 "
+            "absolute on synthetic fixtures even when default "
+            "configuration is matched. Master plan §7.1 widened "
+            "for iterative-algorithm convergence-criterion "
+            "differences."
+        ),
+    },
+
+    "p3_mstl": {
+        "type": "tiered_outputs",
+        "primary": {
+            # MSTL has *two* sources of non-uniqueness: (i) STL's
+            # iterative LOESS, (ii) the seasonal-period iteration
+            # ordering. Both implementations satisfy the structural
+            # identity y = trend + sum(seasonal_k) + resid but may
+            # decompose into different non-unique components.
+            # Per-component divergence on synthetic dual-seasonal
+            # fixture observed at 1.0+ absolute. Tolerance widened
+            # accordingly; CAVEAT verdict expected; on_caveat_reroll
+            # override prevents BLOCK escalation.
+            "abs_tol": 5e-1,
+            "rel_tol": 5e-1,
+            "block_abs_tol": 5.0,
+            "block_rel_tol": 5.0,
+        },
+        "secondary": {
+            "abs_tol": 5e-1,
+            "rel_tol": 5e-1,
+            "block_abs_tol": 5.0,
+            "block_rel_tol": 5.0,
+        },
+        "justification": (
+            "MSTL is iterative multi-period STL (Bandara, "
+            "Hyndman, Bergmeir 2021). statsmodels MSTL and R "
+            "forecast::mstl apply STL sequentially across periods "
+            "with different default inner-iteration counts, LOESS "
+            "bandwidths, and period-iteration ordering. The "
+            "seasonal decomposition is non-unique within the "
+            "constraint y = trend + sum(seasonal) + resid; each "
+            "implementation picks a different feasible point. "
+            "Per-component divergence ~1.0 absolute observed on "
+            "dual-seasonal fixtures; tolerance bands widened to "
+            "place this in CAVEAT not BLOCK. Structural identity "
+            "(sum equals input) verified separately and is "
+            "expected to PASS at bit-exactness."
+        ),
+    },
+
     "p3_tbats": {
         "type": "tiered_outputs",
         "primary": {
