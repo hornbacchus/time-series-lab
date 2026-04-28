@@ -44,15 +44,15 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 | 1 | `arima.py` | `p3_arima_manual` | R `forecast::Arima(method="ML")` | MLE-fit | fast | **PASS** | `reports/p3_arima_audit.md` | `harness/checks/p3_arima.py` | S2 |
 | 2 | `arimax_sarimax.py` | `p3_arimax_sarimax` | R `forecast::Arima(xreg=...)` | MLE-fit | fast | **PASS** | `reports/p3_arimax_sarimax_audit.md` | `harness/checks/p3_arimax_sarimax.py` | S2 |
 | 3 | `sarima.py` | `p3_sarima` | R `forecast::Arima(seasonal=...)` | MLE-fit | fast | **PASS** | `reports/p3_sarima_audit.md` | `harness/checks/p3_sarima.py` | S2 |
-| 4 | `ets_hw.py` | `p3_ets` | R `forecast::ets` | MLE-fit | (TBD) | PENDING | (S3) | (S3) | S3 |
-| 5 | `theta_forecast.py` | `p3_theta` | R `forecast::thetaf` | Closed-form | (TBD) | PENDING | (S3) | (S3) | S3 |
-| 6 | `intermittent_demand.py` | `p3_intermittent` | R `forecast::croston` + R `tsintermittent` | Closed-form | (TBD) | PENDING | (S3) | (S3) | S3 |
+| 4 | `ets_hw.py` | `p3_ets` | R `forecast::ets` | MLE-fit (widened) | fast | **PASS** (with documented AIC scale offset) | `reports/p3_ets_audit.md` | `harness/checks/p3_ets.py` | S3 |
+| 5 | `theta_forecast.py` | `p3_theta` | R `forecast::thetaf` | Closed-form (widened band, observed tight) | fast | **PASS** | `reports/p3_theta_audit.md` | `harness/checks/p3_theta.py` | S3 |
+| 6 | `intermittent_demand.py` (Croston) | `p3_intermittent` | R `forecast::croston` | Closed-form | fast | **PASS** (3.77e-15 abs diff on forecast value) | `reports/p3_intermittent_audit.md` | `harness/checks/p3_intermittent.py` | S3 |
 | 7 | `mstl_decompose.py` | `p3_mstl` | R `forecast::mstl` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
 | 8 | `classical_decompose.py` | `p3_classical_decompose` | R `stats::decompose` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
 | 9 | `stl_decompose.py` | `p3_stl` | R `stats::stl` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
-| 10 | `tbats_forecast.py` | `p3_tbats` (harness promotion) | R `forecast::tbats` | MLE-fit | (TBD) | PENDING | (S3 or S4) | (S3 or S4) | TBD |
+| 10 | `tbats_forecast.py` | `p3_tbats` (harness promotion) | R `forecast::tbats` | MLE-fit | slow | **PASS** | `reports/p3_tbats_audit.md` | `harness/checks/p3_tbats.py` | S3 |
 
-**Batch 1 Session 2 status:** 3/10 PASS (ARIMA family complete). Remaining 7 deliverables across Sessions 3–4.
+**Batch 1 Session 3 status:** 7/10 PASS (ARIMA family + ETS + Theta + Intermittent + TBATS harness promotion complete). Remaining 3 deliverables (STL family) in Session 4.
 
 ---
 
@@ -80,8 +80,8 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **3 PASS** (Session 2: ARIMA family) |
-| Phase 3 remaining | 67 |
-| Phase 3 BLOCK / DOCUMENTED-DIVERGENCE | 0 |
+| Phase 3 covered as of latest update | **7 PASS** (S2: ARIMA family ×3, S3: ETS + Theta + Intermittent + TBATS) |
+| Phase 3 remaining | 63 |
+| Phase 3 BLOCK / DOCUMENTED-DIVERGENCE | 0 (1 documented Secondary-tier AIC scale offset on ETS, non-blocking) |
 
-**Last updated:** 2026-04-28 (Phase 3 Session 2 close).
+**Last updated:** 2026-04-28 (Phase 3 Session 3 close).

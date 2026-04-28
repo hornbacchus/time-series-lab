@@ -726,6 +726,148 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "with xreg). Master plan §7.1 MLE-fit class."
         ),
     },
+
+    # ------------------------------------------------------------------
+    # Phase 3 Session 3 — additional Batch 1 entries.
+    # ETS / TBATS use the §7.1 MLE-fit band (deterministic optimizer);
+    # Theta is closed-form post-deseasonalization; intermittent demand
+    # is closed-form Croston/SBA/TSB exponential-smoothing recursion.
+    # ------------------------------------------------------------------
+
+    "p3_ets": {
+        "type": "tiered_outputs",
+        "primary": {
+            # ETS state-space representation in R `forecast::ets`
+            # vs Holt-Winters smoothing recursion in statsmodels
+            # `ExponentialSmoothing`. Mathematically equivalent for
+            # deterministic-state case but optimizers (R's BFGS on
+            # likelihood vs statsmodels' L-BFGS-B on SSE) converge
+            # to numerically nearby smoothing parameters with
+            # tolerance-class divergence in the 1e-2 range.
+            "abs_tol": 5e-2,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 2e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "secondary": {
+            "abs_tol": 5.0,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 50.0,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Master plan §7.1 MLE-fit band, widened from the strict "
+            "1e-3 / 1e-2 baseline because R `forecast::ets` and "
+            "statsmodels `ExponentialSmoothing` parameterize the "
+            "state-space form differently (state-space innovation "
+            "vs SSE-minimizing classical recursion). Hyndman-Khandakar "
+            "2008 §6.4 documents the equivalence is mathematical, "
+            "not implementational. Smoothing-parameter tolerance "
+            "5e-2 absolute / 1e-1 relative; AIC tolerance 5.0 abs "
+            "(state-space likelihood vs SSE-based AIC differ by an "
+            "additive constant of -n*log(2*pi)/2 in the standard "
+            "form). DOCUMENTED-DIVERGENCE candidate if observed "
+            "divergence exceeds these widened thresholds; CAVEAT if "
+            "in the block band; PASS otherwise."
+        ),
+    },
+
+    "p3_theta": {
+        "type": "tiered_outputs",
+        "primary": {
+            # R `forecast::thetaf` uses Assimakopoulos-Nikolopoulos
+            # 2000 algorithm; statsmodels `ThetaModel` uses Hyndman-
+            # Billah 2003 state-space reformulation. Forecasts
+            # converge for theta=2 in the limit but small-sample
+            # deviations are documented in the literature.
+            "abs_tol": 1e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 2e-1,
+        },
+        "secondary": {
+            "abs_tol": 1e-1,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Theta has a documented methodology divergence between "
+            "R `forecast::thetaf` (Assimakopoulos-Nikolopoulos 2000 "
+            "original) and statsmodels `ThetaModel` (Hyndman-Billah "
+            "2003 state-space reformulation). Hyndman-Billah show "
+            "the two are equivalent for theta=2 SES applied to "
+            "differenced series, but small-sample deviations exist. "
+            "Tolerance band widened to 1e-2 abs / 5e-2 rel on "
+            "forecasts to accommodate. CAVEAT/DOCUMENTED-DIVERGENCE "
+            "expected on some seeds. Master plan §7.1."
+        ),
+    },
+
+    "p3_intermittent": {
+        "type": "tiered_outputs",
+        "primary": {
+            # Croston's method is closed-form exponential smoothing
+            # recursion; given identical alpha and identical
+            # initialization, TSL and R should agree at machine
+            # precision. The forecast::croston function uses simple
+            # exponential smoothing with default alpha=0.1; TSL also
+            # supports alpha=0.1 explicitly. Tight tolerance.
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "secondary": {
+            "abs_tol": 1e-4,
+            "rel_tol": 1e-3,
+            "block_abs_tol": 1e-2,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "Croston's method is closed-form exponential smoothing "
+            "on demand sizes and inter-arrival intervals. Given "
+            "identical alpha and identical initialization, TSL's "
+            "_croston and R `forecast::croston` should agree at "
+            "machine precision. Documented divergence: R uses the "
+            "default initialization (first non-zero demand); TSL "
+            "matches. Tight tolerance at 1e-6 abs / 1e-4 rel on "
+            "forecast value."
+        ),
+    },
+
+    "p3_tbats": {
+        "type": "tiered_outputs",
+        "primary": {
+            # Python tbats 1.1.3 (Skorupa) and R forecast::tbats
+            # are independent implementations of De Livera-Hyndman-
+            # Snyder 2011 with different optimizer initialization.
+            # Box-Cox lambda + smoothing parameters may differ by
+            # 1e-3 to 1e-2 absolute depending on convergence path.
+            "abs_tol": 1e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 2e-1,
+        },
+        "secondary": {
+            "abs_tol": 5.0,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 50.0,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Phase 1 audit-script `audit_1b_tbats.py` (deprecated) "
+            "documented Python tbats 1.1.3 and R forecast::tbats "
+            "as independent implementations of De Livera-Hyndman-"
+            "Snyder 2011 TBATS with different optimizer init. "
+            "Smoothing params (alpha, beta, gamma) and Box-Cox "
+            "lambda may differ by 1e-3 to 1e-2 absolute due to "
+            "convergence-path divergence. Forecast values typically "
+            "agree at 1e-2 abs / 5e-2 rel. Master plan §7.1 MLE-fit "
+            "class. Harness promotion of pre-existing Phase 1 "
+            "audit-script tolerance findings."
+        ),
+    },
 }
 
 
