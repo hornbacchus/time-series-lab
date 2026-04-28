@@ -1,0 +1,63 @@
+{
+  "session": 26,
+  "started": 1777334381.8789005,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "series": "DGS10",
+      "wrapper": "gp",
+      "status": "success",
+      "runtime": 0.22075939178466797
+    },
+    {
+      "series": "DGS10",
+      "wrapper": "p",
+      "status": "success",
+      "runtime": 0.2970595359802246
+    },
+    {
+      "series": "DGS10",
+      "wrapper": "qr",
+      "status": "success",
+      "runtime": 0.5897552967071533
+    },
+    {
+      "series": "DGS10",
+      "wrapper": "svr",
+      "status": "success",
+      "runtime": 0.02608799934387207
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "gp",
+      "status": "success",
+      "runtime": 0.3450956344604492
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "p",
+      "status": "success",
+      "runtime": 0.35244226455688477
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "qr",
+      "status": "success",
+      "runtime": 0.7148470878601074
+    },
+    {
+      "series": "GSPC_logret",
+      "wrapper": "svr",
+      "status": "success",
+      "runtime": 0.021477222442626953
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777334393.2562332,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

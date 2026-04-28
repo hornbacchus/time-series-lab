@@ -171,11 +171,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 10))
+        # CAI Phase 2 Session 26 fix (F-ML-QR-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
+        # CAI Phase 2 Session 26 fix (F-ML-QR-NLAGS): explicit
+        # range gate.
+        if n_lags < 1:
+            return make_error_response(
+                ctx,
+                f"n_lags must be >= 1. Got {n_lags}.",
+                error_fixes=["Use a positive integer for lagged features."],
+            )
         n_estimators = int(ctx.get_param("n_estimators", preset_cfg["n_estimators"]))
         max_depth = int(ctx.get_param("max_depth", preset_cfg["max_depth"]))
         lr = float(ctx.get_param("learning_rate", preset_cfg["learning_rate"]))

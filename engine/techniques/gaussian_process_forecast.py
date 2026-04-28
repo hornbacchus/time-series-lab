@@ -87,12 +87,40 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 10))
+        # CAI Phase 2 Session 26 fix (F-ML-GP-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
         conf_level = float(ctx.get_param("confidence_level", 0.95))
+        # CAI Phase 2 Session 26 fix (F-ML-GP-CONFLEVEL): explicit
+        # range gate.
+        if not (0.0 < conf_level < 1.0):
+            return make_error_response(
+                ctx,
+                f"confidence_level must be in (0, 1). Got {conf_level}.",
+                error_fixes=["Use a value strictly between 0 and 1."],
+            )
         alpha_ci = 1.0 - conf_level
         normalize = ctx.get_param("normalize", True)
         kernel_type = ctx.get_param("kernel", "rbf").lower()
+        # CAI Phase 2 Session 26 fix (F-ML-GP-KERNEL): explicit
+        # allowlist gate. Pre-fix, invalid kernel silently fell
+        # through to RBF via if/elif/else.
+        _KERNEL_OPTS = ("rbf", "matern", "rational_quadratic")
+        if kernel_type not in _KERNEL_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown kernel '{kernel_type}'. Must be one of: "
+                f"{', '.join(_KERNEL_OPTS)}.",
+                error_fixes=[
+                    "Use 'rbf' (default; squared exponential), "
+                    "'matern' (Matern 2.5), or 'rational_quadratic'.",
+                ],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         n_restarts = preset_cfg["n_restarts"]

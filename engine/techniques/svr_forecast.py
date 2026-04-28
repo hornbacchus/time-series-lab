@@ -204,8 +204,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 12))
+        # CAI Phase 2 Session 26 fix (F-ML-SVR-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         n_lags = int(ctx.get_param("max_lag", preset_cfg["n_lags"]))
@@ -215,11 +221,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
         gamma = preset_cfg["gamma"]
         rolling_windows = preset_cfg["rolling_windows"]
 
-        # Validate kernel
+        # CAI Phase 2 Session 26 fix (F-ML-SVR-KERNEL): explicit
+        # allowlist gate. Pre-fix, invalid kernel was loud-and-
+        # coerced to 'rbf' with warning. Per Session 16 protocol
+        # (loud-and-coerced is severe because user's intended
+        # computation differs from what ran).
         valid_kernels = ("rbf", "linear", "poly", "sigmoid")
         if kernel not in valid_kernels:
-            warn_list.append(f"Unknown kernel '{kernel}', defaulting to 'rbf'.")
-            kernel = "rbf"
+            return make_error_response(
+                ctx,
+                f"Unknown kernel '{kernel}'. Must be one of: "
+                f"{', '.join(valid_kernels)}.",
+                error_fixes=[
+                    "Use 'rbf' (default; radial basis function), "
+                    "'linear', 'poly' (polynomial), or 'sigmoid'.",
+                ],
+            )
 
         # Cap lags to reasonable size
         n_lags = min(n_lags, n // 3)

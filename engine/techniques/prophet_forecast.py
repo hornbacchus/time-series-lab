@@ -162,8 +162,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 12))
+        # CAI Phase 2 Session 26 fix (F-ML-P-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         yearly_seasonality = ctx.get_param("yearly_seasonality", "auto")
         weekly_seasonality = ctx.get_param("weekly_seasonality", "auto")

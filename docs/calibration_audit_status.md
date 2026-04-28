@@ -42,8 +42,9 @@ that route to a single `garch_model.py` wrapper).
 | 22 | bvar + dynamic_factor_model + forecast_reconciliation + pca_analysis (Multivariate Systems batch) | 854c832 | 4 (all fixed inline) | 1 (fixed inline) | 0 |
 | 23 | gradient_boosting_forecast + lightgbm_forecast + random_forest_forecast + xgboost_forecast (Tree Forecasters batch) | d614dda | 0 | 9 (all fixed inline) | 0 |
 | 24 | lstm_gru_forecast + tcn_forecast + transformer_forecast + nbeats_forecast (Neural Sequence batch) | 9d03923 | 2 (both fixed inline) | 4 (all fixed inline) | 0 |
-| 25 | nhits_forecast + autoencoder_anomaly + echo_state_network (Specialized Neural batch) | (this commit) | 2 (both fixed inline) | 5 (all fixed inline) | 0 |
-| **Total** | **77 wrappers AUDITED** | — | **32 (all fixed)** | **32 (all fixed)** | **6** |
+| 25 | nhits_forecast + autoencoder_anomaly + echo_state_network (Specialized Neural batch) | 002c86c | 2 (both fixed inline) | 5 (all fixed inline) | 0 |
+| 26 | gaussian_process_forecast + prophet_forecast + quantile_regression_model + svr_forecast (Statistical ML batch) | (this commit) | 2 (both fixed inline) | 6 (all fixed inline) | 0 |
+| **Total** | **81 wrappers AUDITED** | — | **34 (all fixed)** | **38 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -97,11 +98,11 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 77 (Sessions 1-25; Session 25 added nhits_forecast, autoencoder_anomaly, echo_state_network via Specialized Neural batch)
+- AUDITED: 81 (Sessions 1-26; Session 26 added gaussian_process_forecast, prophet_forecast, quantile_regression_model, svr_forecast via Statistical ML batch)
 - PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
   (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
-- UNAUDITED: 6 (4 statistical ML + 1 Forecasting-Classical residual `ets_hw` + 1 deferred — estimated 2 more sessions to complete)
+- UNAUDITED: 2 (1 Forecasting-Classical residual `ets_hw` + 1 deferred — estimated 1 more session to complete)
 
 ## Per-wrapper status
 
@@ -176,16 +177,16 @@ extensions are operationally valuable.
 |---|---|---|---|---|---|
 | autoencoder_anomaly | AUDITED | [specialized_neural_batch_findings_2026_04_27.md](calibration_audit/specialized_neural_batch_findings_2026_04_27.md) | 0 | 1 (fixed inline) | 0 |
 | echo_state_network | AUDITED | [specialized_neural_batch_findings_2026_04_27.md](calibration_audit/specialized_neural_batch_findings_2026_04_27.md) | 0 | 3 (all fixed inline) | 0 |
-| gaussian_process_forecast | UNAUDITED | — | — | — | — |
+| gaussian_process_forecast | AUDITED | [statistical_ml_batch_findings_2026_04_27.md](calibration_audit/statistical_ml_batch_findings_2026_04_27.md) | 1 (fixed inline) | 2 (both fixed inline) | 0 |
 | gradient_boosting_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
 | lightgbm_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
 | lstm_gru_forecast | AUDITED | [neural_sequence_batch_findings_2026_04_27.md](calibration_audit/neural_sequence_batch_findings_2026_04_27.md) | 1 (fixed inline) | 1 (fixed inline) | 0 |
 | nbeats_forecast | AUDITED | [neural_sequence_batch_findings_2026_04_27.md](calibration_audit/neural_sequence_batch_findings_2026_04_27.md) | 1 (fixed inline) | 0 | 0 |
 | nhits_forecast | AUDITED | [specialized_neural_batch_findings_2026_04_27.md](calibration_audit/specialized_neural_batch_findings_2026_04_27.md) | 2 (both fixed inline) | 1 (fixed inline) | 0 |
-| prophet_forecast | UNAUDITED | — | — | — | — |
-| quantile_regression | UNAUDITED | — | — | — | — |
+| prophet_forecast | AUDITED | [statistical_ml_batch_findings_2026_04_27.md](calibration_audit/statistical_ml_batch_findings_2026_04_27.md) | 0 | 1 (fixed inline) | 0 |
+| quantile_regression | AUDITED | [statistical_ml_batch_findings_2026_04_27.md](calibration_audit/statistical_ml_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
 | random_forest_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
-| svr_forecast | UNAUDITED | — | — | — | — |
+| svr_forecast | AUDITED | [statistical_ml_batch_findings_2026_04_27.md](calibration_audit/statistical_ml_batch_findings_2026_04_27.md) | 1 (fixed inline) | 1 (fixed inline) | 0 |
 | tcn_forecast | AUDITED | [neural_sequence_batch_findings_2026_04_27.md](calibration_audit/neural_sequence_batch_findings_2026_04_27.md) | 0 | 1 (fixed inline) | 0 |
 | transformer_forecast | AUDITED | [neural_sequence_batch_findings_2026_04_27.md](calibration_audit/neural_sequence_batch_findings_2026_04_27.md) | 0 | 2 (both fixed inline) | 0 |
 | xgboost_forecast | AUDITED | [tree_forecasters_batch_findings_2026_04_27.md](calibration_audit/tree_forecasters_batch_findings_2026_04_27.md) | 0 | 3 (all fixed inline) | 0 |
@@ -260,6 +261,6 @@ extensions are operationally valuable.
 - `critical_slowing_down` deferred because it shipped on
   2026-04-25 (commit `94742fe`); too new for the calibration
   audit cycle. Will be candidate for next CAI cycle.
-- The 6 UNAUDITED wrappers are documented for awareness;
+- The 2 UNAUDITED wrappers are documented for awareness;
   not in this initiative's scope. Future calibration cycles
   may extend coverage.
