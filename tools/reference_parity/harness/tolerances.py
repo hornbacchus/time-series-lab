@@ -641,6 +641,91 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             ),
         },
     },
+
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 1 — R `forecast` family.
+    # Tolerance class per master plan §7.1: "MLE-fit (deterministic
+    # optimizer)" → abs_tol=1e-3, rel_tol=1e-2 on Primary outputs;
+    # 5–10× looser on Secondary (master plan §7.2). Shared `primary` /
+    # `secondary` sub-key shape across the three Batch 1 / Session 2
+    # checks (p3_arima_manual, p3_sarima, p3_arimax_sarimax) — Session
+    # 5 generator abstraction will factor this into a "MLE_FIT_BAND"
+    # constant.
+    # ------------------------------------------------------------------
+
+    "p3_arima_manual": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-2,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Master plan §7.1 MLE-fit deterministic-optimizer band. "
+            "Primary outputs (AR/MA coefs, log-likelihood, h-step "
+            "forecast) compared at abs_tol=1e-3 / rel_tol=1e-2. "
+            "Secondary (sigma2, AIC, BIC) at 10x looser per §7.2. "
+            "statsmodels (L-BFGS-B-derived MLE) and R forecast::Arima "
+            "(method='ML', BFGS) both optimize the same Gaussian "
+            "innovation likelihood; the tolerance band accommodates "
+            "the optimizer-convergence-criterion difference (each "
+            "stops when its own gradient norm or function-value "
+            "delta falls below an internal threshold). Session 2 "
+            "manual-pattern lock: this ladder is the template for "
+            "the rest of Batch 1 MLE-class wrappers."
+        ),
+    },
+
+    "p3_sarima": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-2,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Same band as p3_arima_manual. SARIMA adds seasonal "
+            "factors but uses the same Kalman-filter-on-state-space "
+            "MLE backbone (statsmodels SARIMAX vs R forecast::Arima "
+            "with seasonal arg). Master plan §7.1 MLE-fit class."
+        ),
+    },
+
+    "p3_arimax_sarimax": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-2,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Same band as p3_arima_manual. ARIMAX/SARIMAX adds "
+            "exogenous regressors but uses the same MLE backbone "
+            "(statsmodels SARIMAX with exog vs R forecast::Arima "
+            "with xreg). Master plan §7.1 MLE-fit class."
+        ),
+    },
 }
 
 

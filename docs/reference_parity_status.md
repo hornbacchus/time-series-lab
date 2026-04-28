@@ -1,0 +1,87 @@
+# TSL Reference Parity — Per-Wrapper Status Tracker (P-4)
+
+**Authoritative tracker for Phase 3 execution.**
+Updated per session per master plan §3.2 and §15.
+
+**Status legend (per master plan §3.1):**
+
+- `PASS` — Output matches reference within stated tolerance on stated fixtures.
+- `CAVEAT` — Matches except in stated regime (boundary, near-singular, etc.).
+- `DOCUMENTED-DIVERGENCE` — Does not match; divergence is methodology-equivalent (different optimizer / prior / default), not a bug.
+- `NO-REFERENCE` — No clean external reference; internal-consistency only (Tier C).
+- `PENDING` — Audit not yet started.
+- `IN-PROGRESS` — Audit in flight (mid-session).
+
+CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` verdicts.
+
+---
+
+## Verification Initiative coverage (Phase 1/2; pre-Phase-3)
+
+| # | Wrapper | Audit ID | Reference | Tolerance class | Tier | Verdict | Audit report | Audit script |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `bvar.py` (IRF / FEVD given coefs) | `1c_bvar_irf_fevd` | R `vars` | Closed-form analytical | fast | **PASS** | `reports/1c_bvar_irf_audit.md` | `harness/checks/bvar_irf_fevd.py` |
+| 2 | `caviar_quantile_dynamics.py` | `3a_caviar_sav` | Engle-Manganelli paper reimpl + R `quantreg` | MLE-fit (3-tier) | fast | PASS (with documented β non-uniqueness) | `reports/3a_caviar_audit.md` | `harness/checks/caviar_sav.py` |
+| 3 | `critical_slowing_down.py` | `critical_slowing_down` | Python `ewstools` 2.1.2 | MLE-fit / closed-form | fast | **PASS** | (Phase 2 cleanup; check-only) | `harness/checks/critical_slowing_down.py` |
+| 4 | `evt_pot_gpd.py` (Ferro-Segers) | `3c_evt_ferro_segers` | R `extRemes` | Closed-form | fast | **PASS** | `reports/3c_ferro_segers_audit.md` | `harness/checks/evt_ferro_segers.py` |
+| 5 | `forecast_reconciliation.py` (4 methods: ols, wls_variance, mint_shrinkage, mint_sample) | `3e_mint_family` | R `hts` + Python `hierarchicalforecast` | Closed-form analytical | fast | **PASS** (≤ 4.66e-15 vs hts) | `reports/3e_mint_audit.md` | `harness/checks/mint_family.py` |
+| 6 | `har_cj.py` | `3b_har_cj` | From-scratch reimpl per ABD 2007 paper | OLS / closed-form | fast | **PASS** | `reports/3b_har_cj_audit.md` | `harness/checks/har_cj.py` |
+| 7 | `johansen_cointegration.py` | `3d_johansen_bartlett` | R `urca::ca.jo` (Reimers correction) | Closed-form | fast | **PASS** | `reports/3d_johansen_audit.md` | `harness/checks/johansen_bartlett.py` |
+| 8 | `kalman_filter.py` + `kalman_smoother.py` | `2a_kalman_filter_smoother` | R `dlm` + R `KFAS` | Closed-form (drift-banded) | fast | PASS (with documented dlm-vs-KFAS log-lik methodology offset) | `reports/2a_kalman_audit.md` | `harness/checks/kalman_filter.py` |
+| 9 | `stochastic_volatility.py` (Gaussian) | `2b_mcmc_sv_gaussian` | R `stochvol::svsample` | MCMC samplers | slow | PASS (with caveat on sigma_eta prior divergence) | `reports/2b_mcmc_sv_audit.md` | `harness/checks/mcmc_sv_gaussian.py` |
+| 10 | `stochastic_volatility.py` (Student-t) | `2c_mcmc_sv_student_t` | R `stochvol::svtsample` | MCMC samplers | slow | PASS (with caveat on ν posterior divergence) | `reports/2c_student_t_sv_audit.md` | `harness/checks/mcmc_sv_student_t.py` |
+| 11 | `tbats_forecast.py` | `1b_tbats` (audit-script only) | R `forecast::tbats` + Python `tbats` | MLE-fit | (TBD) | PENDING (harness promotion) — Phase 3 Batch 1 | `reports/1b_tbats_audit.md` | (deprecated `scripts/audit_1b_tbats.py`; needs harness check) |
+| 12 | `transformer_forecast.py` (attention-capture only) | `3f_transformer_attention` | PyTorch native `nn.MultiheadAttention(need_weights=True)` | DL deterministic-flag | fast | **PASS** | `reports/3f_attention_audit.md` | `harness/checks/transformer_attention.py` |
+
+**Verification Initiative summary:** 12 wrappers covered; 11 PASS, 1 PENDING harness promotion (`tbats_forecast.py`).
+
+---
+
+## Phase 3 — Batch 1: R `forecast` family (10 deliverables)
+
+| # | Wrapper | Audit ID | Reference | Tolerance class | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | `arima.py` | `p3_arima_manual` | R `forecast::Arima(method="ML")` | MLE-fit | fast | **PASS** | `reports/p3_arima_audit.md` | `harness/checks/p3_arima.py` | S2 |
+| 2 | `arimax_sarimax.py` | `p3_arimax_sarimax` | R `forecast::Arima(xreg=...)` | MLE-fit | fast | **PASS** | `reports/p3_arimax_sarimax_audit.md` | `harness/checks/p3_arimax_sarimax.py` | S2 |
+| 3 | `sarima.py` | `p3_sarima` | R `forecast::Arima(seasonal=...)` | MLE-fit | fast | **PASS** | `reports/p3_sarima_audit.md` | `harness/checks/p3_sarima.py` | S2 |
+| 4 | `ets_hw.py` | `p3_ets` | R `forecast::ets` | MLE-fit | (TBD) | PENDING | (S3) | (S3) | S3 |
+| 5 | `theta_forecast.py` | `p3_theta` | R `forecast::thetaf` | Closed-form | (TBD) | PENDING | (S3) | (S3) | S3 |
+| 6 | `intermittent_demand.py` | `p3_intermittent` | R `forecast::croston` + R `tsintermittent` | Closed-form | (TBD) | PENDING | (S3) | (S3) | S3 |
+| 7 | `mstl_decompose.py` | `p3_mstl` | R `forecast::mstl` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
+| 8 | `classical_decompose.py` | `p3_classical_decompose` | R `stats::decompose` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
+| 9 | `stl_decompose.py` | `p3_stl` | R `stats::stl` | OLS / closed-form | (TBD) | PENDING | (S4) | (S4) | S4 |
+| 10 | `tbats_forecast.py` | `p3_tbats` (harness promotion) | R `forecast::tbats` | MLE-fit | (TBD) | PENDING | (S3 or S4) | (S3 or S4) | TBD |
+
+**Batch 1 Session 2 status:** 3/10 PASS (ARIMA family complete). Remaining 7 deliverables across Sessions 3–4.
+
+---
+
+## Phase 3 — Batches 2–10 (PENDING)
+
+(Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
+
+| Batch | Theme | Wrapper count | Sessions | Status |
+|---|---|---:|---|---|
+| 2 | R volatility | 2 | S6–S7 | PENDING |
+| 3 | R multivariate | 4 | S8–S9 | PENDING |
+| 4 | R Markov / nonlinear | 5 | S10–S11 | PENDING |
+| 5 | R state space | 5 | S12 | PENDING |
+| 6 | R change-points / stationarity | 9 | S13–S14 | PENDING |
+| 7 | Python spectral | 7 | S15–S16 | PENDING |
+| 8 | Python ML | 7 | S17–S18 | PENDING |
+| 9 | Python DL | 9 | S19–S21 | PENDING |
+| 10 | Misc + Tier C | 12 | S22–S23 | PENDING |
+
+---
+
+## Aggregate progress
+
+| Metric | Value |
+|---|---:|
+| Phase 1+2 covered (Verification Initiative) | 12 wrappers |
+| Phase 3 in-scope total | 70 audit deliverables |
+| Phase 3 covered as of latest update | **3 PASS** (Session 2: ARIMA family) |
+| Phase 3 remaining | 67 |
+| Phase 3 BLOCK / DOCUMENTED-DIVERGENCE | 0 |
+
+**Last updated:** 2026-04-28 (Phase 3 Session 2 close).
