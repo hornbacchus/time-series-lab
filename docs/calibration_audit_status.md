@@ -9,11 +9,10 @@ calibration-audit status: parameter-sweep + real-data stress
 See `plans/calibration_audit_phase1_2026_04_25.md` for the
 Phase 1 design audit and methodology.
 
-## CAI Phase 2: 27 sessions COMPLETE — extension cycle CLOSED 2026-04-27
+## CAI Phase 2: 28 sessions COMPLETE — TRUE CYCLE CLOSURE 2026-04-28
 
-**FINAL STATE:** 82 / 83 wrappers AUDITED (98.8%); 1 wrapper
-DEFERRED (`critical_slowing_down` — too new at audit start).
-38 severe + 40 operational findings (ALL FIXED INLINE) +
+**FINAL STATE:** 83 / 83 wrappers AUDITED (100%); 0 deferred.
+40 severe + 42 operational findings (ALL FIXED INLINE) +
 6 cosmetic across 5 failure modes:
 1. String acceptance via if/elif/else default
 2. HARMFUL try/except suppression
@@ -59,8 +58,9 @@ that route to a single `garch_model.py` wrapper).
 | 24 | lstm_gru_forecast + tcn_forecast + transformer_forecast + nbeats_forecast (Neural Sequence batch) | 9d03923 | 2 (both fixed inline) | 4 (all fixed inline) | 0 |
 | 25 | nhits_forecast + autoencoder_anomaly + echo_state_network (Specialized Neural batch) | 002c86c | 2 (both fixed inline) | 5 (all fixed inline) | 0 |
 | 26 | gaussian_process_forecast + prophet_forecast + quantile_regression_model + svr_forecast (Statistical ML batch) | 9cac0f7 | 2 (both fixed inline) | 6 (all fixed inline) | 0 |
-| 27 | ets_hw (solo; FINAL session — CYCLE CLOSURE) | (this commit) | 4 (all fixed inline) | 2 (both fixed inline) | 0 |
-| **Total** | **82 wrappers AUDITED (98.8% of 83)** | — | **38 (all fixed)** | **40 (all fixed)** | **6** |
+| 27 | ets_hw (solo; closes Forecasting-Classical residual) | 40e80be | 4 (all fixed inline) | 2 (both fixed inline) | 0 |
+| 28 | critical_slowing_down (deferred-wrapper closure; TRUE CYCLE CLOSURE 83/83) | (this commit) | 2 (both fixed inline) | 2 (both fixed inline) | 0 |
+| **Total** | **83 wrappers AUDITED (100%)** | — | **40 (all fixed)** | **42 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -114,10 +114,10 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 82 (Sessions 1-27; Session 27 closed CAI extension cycle by auditing ets_hw)
-- PENDING: 0 (CAI Phase 2 EXTENSION CYCLE CLOSED 2026-04-27)
-- DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
-- UNAUDITED: 0 (one DEFERRED wrapper remains technically unaudited but explicitly out of scope)
+- AUDITED: 83 (Sessions 1-28; Session 28 closed deferred CSD wrapper after deferral rationale resolved)
+- PENDING: 0 (CAI Phase 2 TRUE CYCLE CLOSURE 2026-04-28)
+- DEFERRED: 0 (CSD deferral lifted Session 28)
+- UNAUDITED: 0
 
 ## Per-wrapper status
 
@@ -230,7 +230,7 @@ extensions are operationally valuable.
 
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
-| critical_slowing_down | DEFERRED | — | — | — | — |
+| critical_slowing_down | AUDITED | [critical_slowing_down_findings_2026_04_28.md](calibration_audit/critical_slowing_down_findings_2026_04_28.md) | 2 (both fixed inline) | 2 (both fixed inline) | 0 |
 | hmm | AUDITED | [markov_regime_batch_findings_2026_04_26.md](calibration_audit/markov_regime_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
 | markov_switching | AUDITED | [markov_regime_batch_findings_2026_04_26.md](calibration_audit/markov_regime_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
 | nar_narx | AUDITED | [markov_regime_batch_findings_2026_04_26.md](calibration_audit/markov_regime_batch_findings_2026_04_26.md) | 0 | 0 | 0 |
@@ -273,9 +273,12 @@ extensions are operationally valuable.
 
 - Phase 2 ships ~5 commits, one per audit session, per CAI
   Phase 1 §5.1 sequencing.
-- `critical_slowing_down` deferred because it shipped on
-  2026-04-25 (commit `94742fe`); too new for the calibration
-  audit cycle. Will be candidate for next CAI cycle.
+- `critical_slowing_down` was originally deferred because it
+  shipped on 2026-04-25 (commit `94742fe`); too new for the
+  calibration audit cycle. Deferral lifted 2026-04-28 in
+  Session 28 after wrapper stabilized. 4 findings fixed inline
+  (2 severe + 2 operational). See findings doc for full
+  details.
 - All 82 in-scope wrappers AUDITED;
   not in this initiative's scope. Future calibration cycles
   may extend coverage.

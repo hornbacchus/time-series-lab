@@ -1,0 +1,50 @@
+{
+  "session": 28,
+  "started": 1777368490.8786554,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "ews": 0.6160426864594791,
+      "state": "normal",
+      "runtime": 21.366092681884766
+    },
+    {
+      "series": "DGS10_level",
+      "ews": -5.089023239437313,
+      "state": "normal",
+      "runtime": 24.834736347198486
+    },
+    {
+      "series": "DGS2_level",
+      "ews": -6.963835603402181,
+      "state": "normal",
+      "runtime": 24.79756259918213
+    },
+    {
+      "series": "DEXUSEU_logret",
+      "ews": 6.571057997763016,
+      "state": "critical",
+      "runtime": 25.22139573097229
+    },
+    {
+      "series": "GOLD_logret",
+      "ews": -2.3545539262778163,
+      "state": "normal",
+      "runtime": 24.192211151123047
+    },
+    {
+      "series": "approaching_bif",
+      "ews": 3.42504320261869,
+      "state": "critical"
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777368651.8257222,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}

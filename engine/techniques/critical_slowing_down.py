@@ -256,15 +256,66 @@ def run(ctx: RunContext, progress_callback) -> dict:
         )
 
     rolling_window_param = ctx.get_param("rolling_window", None)
-    rolling_window = int(rolling_window_param) if rolling_window_param else max(
-        50, int(cfg["window_fraction"] * T),
-    )
+    # CAI Phase 2 Session 28 fix (F-CSD-ROLLINGWIN +
+    # F-CSD-ROLLINGWIN-NEG): explicit range gate. Pre-fix,
+    # rolling_window=0 silently fell back to default (truthy
+    # check at line 258); negative values flowed through to
+    # int() conversion and downstream rolling helpers with
+    # undefined behavior.
+    if rolling_window_param is not None:
+        try:
+            _rw_int = int(rolling_window_param)
+        except (TypeError, ValueError):
+            return make_error_response(
+                ctx,
+                f"rolling_window must be a positive integer. "
+                f"Got {rolling_window_param!r}.",
+                error_fixes=[
+                    "Use a positive integer (typical 50-200).",
+                ],
+            )
+        if _rw_int < 1:
+            return make_error_response(
+                ctx,
+                f"rolling_window must be >= 1. Got {_rw_int}.",
+                error_fixes=[
+                    "Use a positive integer (typical 50-200). "
+                    "Pass None to use the preset-based default.",
+                ],
+            )
+        rolling_window = _rw_int
+    else:
+        rolling_window = max(50, int(cfg["window_fraction"] * T))
 
     indicator_axis_len_default = max(1, T - rolling_window + 1)
     kendall_lookback_param = ctx.get_param("kendall_lookback", None)
-    kendall_lookback = int(kendall_lookback_param) if kendall_lookback_param else max(
-        30, int(cfg["kendall_lookback_fraction"] * indicator_axis_len_default),
-    )
+    # CAI Phase 2 Session 28 fix (F-CSD-KENDALL): explicit
+    # range gate.
+    if kendall_lookback_param is not None:
+        try:
+            _kl_int = int(kendall_lookback_param)
+        except (TypeError, ValueError):
+            return make_error_response(
+                ctx,
+                f"kendall_lookback must be a positive integer. "
+                f"Got {kendall_lookback_param!r}.",
+                error_fixes=[
+                    "Use a positive integer (typical 30-100).",
+                ],
+            )
+        if _kl_int < 1:
+            return make_error_response(
+                ctx,
+                f"kendall_lookback must be >= 1. Got {_kl_int}.",
+                error_fixes=[
+                    "Use a positive integer (typical 30-100).",
+                ],
+            )
+        kendall_lookback = _kl_int
+    else:
+        kendall_lookback = max(
+            30, int(cfg["kendall_lookback_fraction"] * indicator_axis_len_default),
+        )
 
     compute_pvalues = bool(
         ctx.get_param("compute_pvalues", cfg["default_compute_pvalues"])
@@ -275,6 +326,25 @@ def run(ctx: RunContext, progress_callback) -> dict:
     composite_method = str(
         ctx.get_param("composite_method", "equal_weight_zscore")
     )
+    # CAI Phase 2 Session 28 fix (F-CSD-COMPOSITE): explicit
+    # allowlist gate. Pre-fix, invalid composite_method silently
+    # fell through to "equal_weight_zscore" via if/else at
+    # _csd_helpers.py:_composite_ews_score line 492/513.
+    # Session 18 silent-fall-through pattern.
+    _COMPOSITE_OPTS = ("equal_weight_zscore", "fisher_combined")
+    if composite_method not in _COMPOSITE_OPTS:
+        return make_error_response(
+            ctx,
+            f"Unknown composite_method '{composite_method}'. Must "
+            f"be one of: {', '.join(_COMPOSITE_OPTS)}.",
+            error_fixes=[
+                "Use 'equal_weight_zscore' (default; averages "
+                "z-scored Kendall taus across indicators) or "
+                "'fisher_combined' (combines per-indicator "
+                "p-values via Fisher's method; requires "
+                "compute_pvalues=True).",
+            ],
+        )
     expose_rolling_series = bool(
         ctx.get_param("expose_rolling_series", True)
     )
