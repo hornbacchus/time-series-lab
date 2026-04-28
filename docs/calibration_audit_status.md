@@ -9,7 +9,22 @@ calibration-audit status: parameter-sweep + real-data stress
 See `plans/calibration_audit_phase1_2026_04_25.md` for the
 Phase 1 design audit and methodology.
 
-## CAI Phase 2: 5-session core cycle COMPLETE; extension cycle ACTIVE
+## CAI Phase 2: 27 sessions COMPLETE — extension cycle CLOSED 2026-04-27
+
+**FINAL STATE:** 82 / 83 wrappers AUDITED (98.8%); 1 wrapper
+DEFERRED (`critical_slowing_down` — too new at audit start).
+38 severe + 40 operational findings (ALL FIXED INLINE) +
+6 cosmetic across 5 failure modes:
+1. String acceptance via if/elif/else default
+2. HARMFUL try/except suppression
+3. Numeric range silent coercion
+4. String-handling chain fall-through
+5. Multi-parameter consistency violation
+
+Validation-presence pattern: 100% predictive across 76
+extension wrappers. See
+`docs/calibration_audit/ets_hw_findings_2026_04_27.md`
+for full cycle closure summary.
 
 The 5-session core cycle closed cleanly on 2026-04-26
 (Session 5 commit `a2464ac`). Session 6 begins the extension
@@ -43,8 +58,9 @@ that route to a single `garch_model.py` wrapper).
 | 23 | gradient_boosting_forecast + lightgbm_forecast + random_forest_forecast + xgboost_forecast (Tree Forecasters batch) | d614dda | 0 | 9 (all fixed inline) | 0 |
 | 24 | lstm_gru_forecast + tcn_forecast + transformer_forecast + nbeats_forecast (Neural Sequence batch) | 9d03923 | 2 (both fixed inline) | 4 (all fixed inline) | 0 |
 | 25 | nhits_forecast + autoencoder_anomaly + echo_state_network (Specialized Neural batch) | 002c86c | 2 (both fixed inline) | 5 (all fixed inline) | 0 |
-| 26 | gaussian_process_forecast + prophet_forecast + quantile_regression_model + svr_forecast (Statistical ML batch) | (this commit) | 2 (both fixed inline) | 6 (all fixed inline) | 0 |
-| **Total** | **81 wrappers AUDITED** | — | **34 (all fixed)** | **38 (all fixed)** | **6** |
+| 26 | gaussian_process_forecast + prophet_forecast + quantile_regression_model + svr_forecast (Statistical ML batch) | 9cac0f7 | 2 (both fixed inline) | 6 (all fixed inline) | 0 |
+| 27 | ets_hw (solo; FINAL session — CYCLE CLOSURE) | (this commit) | 4 (all fixed inline) | 2 (both fixed inline) | 0 |
+| **Total** | **82 wrappers AUDITED (98.8% of 83)** | — | **38 (all fixed)** | **40 (all fixed)** | **6** |
 
 ### Volatility/risk extension batch closure (Sessions 6-8)
 
@@ -98,11 +114,10 @@ extensions are operationally valuable.
 ## Counts
 
 - Total wrappers: 83
-- AUDITED: 81 (Sessions 1-26; Session 26 added gaussian_process_forecast, prophet_forecast, quantile_regression_model, svr_forecast via Statistical ML batch)
-- PENDING: 0 (CAI Phase 2 core cycle COMPLETE; extension cycle active)
-  (Note: 6 selected wrapper IDs map to 5 logical audit sessions; kalman_filter + kalman_smoother were co-audited in Session 1.)
+- AUDITED: 82 (Sessions 1-27; Session 27 closed CAI extension cycle by auditing ets_hw)
+- PENDING: 0 (CAI Phase 2 EXTENSION CYCLE CLOSED 2026-04-27)
 - DEFERRED: 1 (critical_slowing_down — too new, shipped 2026-04-25)
-- UNAUDITED: 2 (1 Forecasting-Classical residual `ets_hw` + 1 deferred — estimated 1 more session to complete)
+- UNAUDITED: 0 (one DEFERRED wrapper remains technically unaudited but explicitly out of scope)
 
 ## Per-wrapper status
 
@@ -153,7 +168,7 @@ extensions are operationally valuable.
 | arima | AUDITED | [arima_family_findings_2026_04_26.md](calibration_audit/arima_family_findings_2026_04_26.md) | 0 | 0 | 0 |
 | arimax_sarimax | AUDITED | [forecasting_classical_batch2_findings_2026_04_26.md](calibration_audit/forecasting_classical_batch2_findings_2026_04_26.md) | 0 | 0 | 0 |
 | auto_arima | AUDITED | [arima_family_findings_2026_04_26.md](calibration_audit/arima_family_findings_2026_04_26.md) | 1 (fixed inline) | 0 | 0 |
-| ets_hw | UNAUDITED | — | — | — | — |
+| ets_hw | AUDITED | [ets_hw_findings_2026_04_27.md](calibration_audit/ets_hw_findings_2026_04_27.md) | 4 (all fixed inline) | 2 (both fixed inline) | 0 |
 | intermittent_demand | AUDITED | [forecasting_classical_batch2_findings_2026_04_26.md](calibration_audit/forecasting_classical_batch2_findings_2026_04_26.md) | 0 | 0 | 0 |
 | sarima | AUDITED | [arima_family_findings_2026_04_26.md](calibration_audit/arima_family_findings_2026_04_26.md) | 0 | 0 | 0 |
 | theta_forecast | AUDITED | [forecasting_classical_batch2_findings_2026_04_26.md](calibration_audit/forecasting_classical_batch2_findings_2026_04_26.md) | 0 | 0 | 0 |
@@ -261,6 +276,6 @@ extensions are operationally valuable.
 - `critical_slowing_down` deferred because it shipped on
   2026-04-25 (commit `94742fe`); too new for the calibration
   audit cycle. Will be candidate for next CAI cycle.
-- The 2 UNAUDITED wrappers are documented for awareness;
+- All 82 in-scope wrappers AUDITED;
   not in this initiative's scope. Future calibration cycles
   may extend coverage.

@@ -102,41 +102,81 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 10))
+        # CAI Phase 2 Session 27 fix (F-ETS-HORIZON): explicit
+        # range gate.
         if horizon < 1:
-            horizon = 1
+            return make_error_response(
+                ctx,
+                f"horizon must be >= 1. Got {horizon}.",
+                error_fixes=["Use a positive integer for forecast horizon."],
+            )
 
         # Trend
+        # CAI Phase 2 Session 27 fix (F-ETS-TREND): explicit
+        # allowlist gate. Pre-fix, invalid `trend` strings
+        # silently fell through to "add" via if/else at line
+        # 113-115. Session 18 silent-fall-through pattern.
         trend_param = ctx.get_param("trend", "add")
         if trend_param and str(trend_param).lower() in ("none", "null", "false"):
             trend_param = None
         elif trend_param:
-            trend_param = str(trend_param).lower()[:3]
-            if trend_param not in ("add", "mul"):
-                trend_param = "add"
+            _t_normalized = str(trend_param).lower()[:3]
+            if _t_normalized not in ("add", "mul"):
+                return make_error_response(
+                    ctx,
+                    f"Unknown trend '{trend_param}'. Must be one "
+                    "of: None, 'add', 'mul'.",
+                    error_fixes=[
+                        "Use None (no trend), 'add' (additive; "
+                        "default), or 'mul' (multiplicative; "
+                        "requires positive data).",
+                    ],
+                )
+            trend_param = _t_normalized
 
         damped = ctx.get_param("damped_trend", False)
+        # CAI Phase 2 Session 27 fix (F-ETS-DAMPED-NOTREND):
+        # multi-parameter consistency. Pre-fix, damped_trend=True
+        # was silently disabled when trend=None (line 182:
+        # damped if trend_param else False).
+        if damped and trend_param is None:
+            return make_error_response(
+                ctx,
+                "damped_trend=True requires trend to be set "
+                "('add' or 'mul'). Got trend=None.",
+                error_fixes=[
+                    "Set trend='add' or 'mul' to use damped "
+                    "trend, or set damped_trend=False.",
+                ],
+            )
 
         # Seasonal.
-        # Distinguish three cases for the ``seasonal`` param (Fix 4,
-        # post-C2 corrections batch):
-        #   (a) absent from params dict → auto-detect based on n and period
-        #   (b) present with value None (or string "none"/"null"/"false")
-        #       → explicit disable; respect user intent
-        #   (c) present with value "add"/"mul" → use as specified
         period = _infer_period(ctx)
         user_supplied_seasonal = "seasonal" in ctx.params
         seasonal_param = ctx.get_param("seasonal")
         if seasonal_param and str(seasonal_param).lower() in ("none", "null", "false"):
-            seasonal_param = None  # explicit string disable (case b)
+            seasonal_param = None  # explicit string disable
         elif seasonal_param:
-            seasonal_param = str(seasonal_param).lower()[:3]
-            if seasonal_param not in ("add", "mul"):
-                seasonal_param = "add"
+            # CAI Phase 2 Session 27 fix (F-ETS-SEASONAL):
+            # explicit allowlist gate. Pre-fix, invalid
+            # `seasonal` silently fell through to "add" via
+            # if/else at line 132-134. Session 18 pattern.
+            _s_normalized = str(seasonal_param).lower()[:3]
+            if _s_normalized not in ("add", "mul"):
+                return make_error_response(
+                    ctx,
+                    f"Unknown seasonal '{seasonal_param}'. Must "
+                    "be one of: None, 'add', 'mul'.",
+                    error_fixes=[
+                        "Use None (no seasonal), 'add' (additive "
+                        "seasonal), or 'mul' (multiplicative; "
+                        "requires positive data).",
+                    ],
+                )
+            seasonal_param = _s_normalized
         elif user_supplied_seasonal:
-            # User explicitly passed Python None — respect it (case b).
             seasonal_param = None
         else:
-            # Param absent entirely (case a) — auto-detect.
             if period >= 2 and n >= 2 * period:
                 seasonal_param = "add"
             else:
@@ -149,17 +189,35 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
             seasonal_param = None
 
-        # Multiplicative requires all-positive values
+        # CAI Phase 2 Session 27 fix (F-ETS-MUL-NEG-SEAS,
+        # F-ETS-MUL-NEG-TREND): multi-parameter consistency.
+        # Pre-fix, mul + non-positive data silently switched to
+        # add (with warning). Session 16 loud-and-coerced is
+        # severe — user's intended computation differs from what
+        # ran. Reject explicitly.
         if seasonal_param == "mul" and np.any(clean <= 0):
-            warn_list.append(
-                "Multiplicative seasonal requires positive values. Switching to additive."
+            return make_error_response(
+                ctx,
+                "seasonal='mul' requires strictly positive "
+                "observations; series contains non-positive "
+                "values.",
+                error_fixes=[
+                    "Use seasonal='add' for series with "
+                    "non-positive values, or transform the "
+                    "series (e.g. log) so all values are > 0.",
+                ],
             )
-            seasonal_param = "add"
         if trend_param == "mul" and np.any(clean <= 0):
-            warn_list.append(
-                "Multiplicative trend requires positive values. Switching to additive."
+            return make_error_response(
+                ctx,
+                "trend='mul' requires strictly positive "
+                "observations; series contains non-positive "
+                "values.",
+                error_fixes=[
+                    "Use trend='add' for series with "
+                    "non-positive values, or transform.",
+                ],
             )
-            trend_param = "add"
 
         use_boxcox = ctx.get_param("use_boxcox", False)
         if use_boxcox and np.any(clean <= 0):

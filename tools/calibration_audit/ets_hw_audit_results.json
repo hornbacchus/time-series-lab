@@ -1,0 +1,40 @@
+{
+  "session": 27,
+  "started": 1777337235.9366162,
+  "sweep_0_findings": [],
+  "technique_1": [],
+  "technique_2": [
+    {
+      "series": "GSPC_logret",
+      "aic": 102.36,
+      "runtime": 0.3361973762512207
+    },
+    {
+      "series": "DGS10_level",
+      "aic": -1710.8,
+      "runtime": 0.29245686531066895
+    },
+    {
+      "series": "DGS2_level",
+      "aic": -1688.28,
+      "runtime": 0.28450942039489746
+    },
+    {
+      "series": "DEXUSEU_logret",
+      "aic": -459.08,
+      "runtime": 0.32469940185546875
+    },
+    {
+      "series": "GOLD_logret",
+      "aic": 37.66,
+      "runtime": 0.3454000949859619
+    }
+  ],
+  "technique_3_findings": [],
+  "finished": 1777337239.5636685,
+  "summary": {
+    "severe": 0,
+    "operational": 0,
+    "cosmetic": 0
+  }
+}
