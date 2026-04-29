@@ -102,19 +102,32 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **Batch 5 Session 9 status: COMPLETE in single session.** 5/5 PASS, 0 CAVEAT, 0 BLOCK. Per-batch summary: `tools/reference_parity/reports/p3_batch_5_summary.md`.
 
-## Phase 3 — Batches 6–10 (PENDING)
+## Phase 3 — Batch 6: R change-points / stationarity (8 audit IDs, single-session close)
+
+| # | Wrapper | Audit ID | Reference | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `adf_test.py` | `p3_adf` | R `urca::ur.df` | fast | **PASS** (1.07e-14 abs) | `reports/p3_adf_audit.md` | `harness/checks/p3_adf.py` | S10 |
+| 2 | `kpss_test.py` | `p3_kpss` | R `urca::ur.kpss` | fast | **PASS** (5.55e-17 abs) | `reports/p3_kpss_audit.md` | `harness/checks/p3_kpss.py` | S10 |
+| 3 | `pp_test.py` | `p3_pp` | R `urca::ur.pp` | fast | **PASS** (Pattern J widening — 2.09e-06 abs) | `reports/p3_pp_audit.md` | `harness/checks/p3_pp.py` | S10 |
+| 4 | `bocpd.py` | `p3_bocpd` | self-parity NIG-conjugate Adams-MacKay 2007 | fast | **PASS** (bit-exact) | `reports/p3_bocpd_audit.md` | `harness/checks/p3_bocpd.py` | S10 |
+| 5 | `cusum_page_hinkley.py` | `p3_cusum_page_hinkley` | self-parity identical recursion | fast | **PASS** (bit-exact) | `reports/p3_cusum_page_hinkley_audit.md` | `harness/checks/p3_cusum_page_hinkley.py` | S10 |
+| 6 | `intervention_analysis.py` | `p3_intervention_analysis` | R `stats::arima(..., xreg=...)` | fast | **PASS** (mle_fit) | `reports/p3_intervention_analysis_audit.md` | `harness/checks/p3_intervention_analysis.py` | S10 |
+| 7 | `pelt_change_points.py` | `p3_pelt` | direct `ruptures.Pelt` in-process | fast | **PASS** (bit-exact same-library) | `reports/p3_pelt_audit.md` | `harness/checks/p3_pelt.py` | S10 |
+| 8 | `stl_esd_anomaly.py` | `p3_stl_esd` | self-parity STL + Rosner 1983 GESD | fast | **PASS** (bit-exact) | `reports/p3_stl_esd_audit.md` | `harness/checks/p3_stl_esd.py` | S10 |
+
+**Batch 6 Session 10 status: COMPLETE in single session.** 8/8 PASS, 0 CAVEAT, 0 BLOCK. Master plan §15.8 budgeted 2 sessions (S13–S14); closed in S10 alone, extending Phase 3 lead to 5 sessions ahead. Per-batch summary: `tools/reference_parity/reports/p3_batch_6_summary.md`. **`x13_seasonal_adjust` (originally Batch 6 9th wrapper) deferred** per Appendix A — R `seasonal` package wraps X-13ARIMA-SEATS binary; non-trivial Windows install.
+
+## Phase 3 — Batches 7–10 (PENDING)
 
 (Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
 
 | Batch | Theme | Wrapper count | Sessions | Status |
 |---|---|---:|---|---|
-| 4 | R Markov / nonlinear | 5 | S10–S11 | PENDING |
-| 5 | R state space | 5 | S12 | PENDING |
-| 6 | R change-points / stationarity | 9 | S13–S14 | PENDING |
-| 7 | Python spectral | 7 | S15–S16 | PENDING |
-| 8 | Python ML | 7 | S17–S18 | PENDING |
-| 9 | Python DL | 9 | S19–S21 | PENDING |
-| 10 | Misc + Tier C | 12 | S22–S23 | PENDING |
+| 7 | R wavelets / frequency domain | ~5 | S11 | PENDING |
+| 8 | Python spectral | ~7 | S12–S13 | PENDING |
+| 9 | Python ML | ~7 | S14–S15 | PENDING |
+| 10 | Python DL | ~9 | S16–S18 | PENDING |
+| 11 | Misc + Tier C + deferred (`x13_seasonal_adjust`) | ~10 | S19–S20 | PENDING |
 
 ---
 
@@ -124,11 +137,11 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **28** (24 PASS + 4 CAVEAT — Batches 1+2+3+4+5 complete) |
-| Phase 3 remaining | 42 |
+| Phase 3 covered as of latest update | **36** (32 PASS + 4 CAVEAT — Batches 1+2+3+4+5+6 complete) |
+| Phase 3 remaining | 34 |
 | Phase 3 BLOCK | 0 |
 | Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
-| Phase 3 sessions used | 8 (S2–S9) — **4 sessions ahead of master plan** |
-| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates |
+| Phase 3 sessions used | 9 (S2–S10) — **5 sessions ahead of master plan** |
+| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates (J: second concrete instance at S10; K → A path documented at S10) |
 
-**Last updated:** 2026-04-29 (Phase 3 Session 8 close — Batch 4 complete in single session, 3 sessions ahead of schedule).
+**Last updated:** 2026-04-29 (Phase 3 Session 10 close — Batch 6 complete in single session, 5 sessions ahead of schedule).

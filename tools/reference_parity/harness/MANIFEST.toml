@@ -98,6 +98,11 @@ torch = "2.11.0+cpu"
 # the post-CAI-Session-2 cleanup to align MANIFEST with the pin
 # already present in .github/workflows/parity-fast.yml.
 ewstools = "2.1.2"
+# Session 10 (Batch 6 entry): ruptures added for p3_pelt parity
+# (TSL pelt_change_points.py uses ruptures.Pelt; reference is a
+# direct in-process invocation of ruptures.Pelt with identical
+# arguments — same-library self-test). Pin matches local install.
+ruptures = "1.1.9"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this

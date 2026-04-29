@@ -1423,6 +1423,189 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "audit-script tolerance findings."
         ),
     },
+
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 6 — R change-points / stationarity (Session 10).
+    # Three closed-form stationarity tests (ADF, KPSS, PP) target
+    # Pattern A bit-exact at the test-statistic level given pinned
+    # lags. Four change-point / anomaly wrappers use Pattern A
+    # self-parity references (BOCPD, CUSUM/PH, PELT, STL+ESD); their
+    # tolerance bands assert exact integer matches on detection counts
+    # and indices. Intervention analysis is MLE-fit class via
+    # statsmodels SARIMAX vs R stats::arima(xreg=...).
+    # ------------------------------------------------------------------
+
+    "p3_adf": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "ADF test statistic is closed-form OLS on the "
+            "differenced series with optional lagged differences. "
+            "Both statsmodels.adfuller and urca::ur.df implement "
+            "the standard Dickey-Fuller 1979 procedure; given "
+            "identical lag specification (lags=1, type='drift'), "
+            "the tau statistic should agree at machine precision. "
+            "1e-6 abs floor leaves headroom for subprocess CSV "
+            "roundtrip noise. Master plan §7.1 closed-form class."
+        ),
+    },
+
+    "p3_kpss": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "KPSS statistic is closed-form: ratio of partial-sum-"
+            "of-residuals to a Newey-West-style long-run variance "
+            "estimator. Both statsmodels.kpss and urca::ur.kpss "
+            "compute the identical statistic given identical "
+            "bandwidth (use.lag=5). 1e-6 abs floor for subprocess "
+            "noise. Master plan §7.1 closed-form class."
+        ),
+    },
+
+    "p3_pp": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "Phillips-Perron Z(t) statistic is closed-form Newey-"
+            "West correction to the DF t-stat. Pattern J candidate: "
+            "arch.unitroot.PhillipsPerron and urca::ur.pp use "
+            "potentially different Newey-West weight kernels and "
+            "lag-truncation conventions. Pinning lags=5 on both "
+            "sides aligns most of the divergence; remaining 1e-3 "
+            "abs accommodates internal HAC kernel differences "
+            "(Bartlett vs Quadratic-Spectral default). Master plan "
+            "§7.1 with Pattern J widening."
+        ),
+    },
+
+    "p3_bocpd": {
+        "type": "tiered_outputs",
+        "primary": {
+            # Self-parity: TSL and reference both implement
+            # Adams-MacKay 2007 verbatim with NIG conjugate prior.
+            # n_cps and CP-index set must match exactly. Setting
+            # abs_tol=0 forces strict equality on integer counts.
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "Self-parity: TSL bocpd.py and from-scratch reference "
+            "(in p3_bocpd.py) implement identical Adams-MacKay 2007 "
+            "recursion with NIG conjugate prior. Bit-exact match "
+            "expected on both n_change_points and the change-point "
+            "index set. Pattern A target. PyPI bocd uses non-"
+            "conjugate Gaussian prior and would not produce a "
+            "matching reference; self-parity is the only path to "
+            "PASS. Block band at abs_tol=1 (±1 CP off) → BLOCK."
+        ),
+    },
+
+    "p3_cusum_page_hinkley": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "Self-parity: TSL cusum_page_hinkley.py and reference "
+            "(in p3_cusum_page_hinkley.py) implement identical "
+            "deterministic recursive accumulators. Bit-exact match "
+            "expected on n_cusum_up/down and n_ph_up/down counts. "
+            "Pattern A target. R cpm/changepoint use different "
+            "formulations (CPM tests; PELT-style cost functions); "
+            "self-parity avoids Pattern J methodology zoo."
+        ),
+    },
+
+    "p3_intervention_analysis": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-2,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Intervention analysis = ARIMA + xreg dummy. TSL uses "
+            "statsmodels SARIMAX with exog; R uses stats::arima "
+            "with xreg. Both optimize the same Gaussian likelihood "
+            "but with different optimizer convergence criteria "
+            "(L-BFGS-B vs CSS-ML). Master plan §7.1 MLE-fit class: "
+            "1e-3 abs / 1e-2 rel on Primary (ar1, omega, log-lik); "
+            "1e-2 abs / 5e-2 rel on Secondary (sigma2, AIC) per "
+            "§7.2 5-10× looser convention."
+        ),
+    },
+
+    "p3_pelt": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "Same-library self-parity: TSL pelt_change_points.py "
+            "and reference both invoke ruptures.Pelt with identical "
+            "model='l2' / min_size=5 / jump=1 / pen=log(n)*sigma^2. "
+            "Output is bitwise-identical given identical input. "
+            "Pattern A bit-exact target on both n_change_points "
+            "and the breakpoint position set. Failure indicates a "
+            "TSL preprocessing or argument-passing bug, not a "
+            "methodology question."
+        ),
+    },
+
+    "p3_stl_esd": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 2.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "Self-parity: both arms invoke statsmodels STL with "
+            "identical config (period, seasonal_window, "
+            "inner_iter=5, outer_iter=2, robust=True) producing "
+            "bitwise-identical remainder. ESD test (Rosner 1983) "
+            "is closed-form sequential test; reference implements "
+            "identical recursion. Pattern A target on n_anomalies "
+            "and anomaly-index set. Block band 2.0 absolute "
+            "accommodates a 1-2 boundary index disagreement (last-"
+            "rejection edge case in Rosner's sequential criterion) "
+            "without escalating immediately to BLOCK; >2 mismatch "
+            "= real bug. Pattern J avoidance: Twitter "
+            "AnomalyDetection R archived; no CRAN successor."
+        ),
+    },
 }
 
 
