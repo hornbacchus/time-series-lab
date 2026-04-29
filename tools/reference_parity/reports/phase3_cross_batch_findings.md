@@ -493,3 +493,141 @@ Carried from S8 (1–10) plus:
 ---
 
 **End of Session 10 entry.**
+
+---
+
+## Session 11 entry (Batch 7 — Python spectral)
+
+**Date:** 2026-04-29
+**Wrappers covered:** 7 (fft, periodogram, lomb_scargle, wavelet_transform, wavelet_coherence, emd_hht, ssa)
+**Verdicts:** 6 PASS / 1 CAVEAT / 0 BLOCK
+**Cumulative Phase 3 covered:** 43 / 70
+
+### Pattern A — closed-form expansion to **20 wrappers**
+
+Six of the seven Batch 7 wrappers achieved bit-exact parity
+(many at exactly 0.0 abs diff). Pattern A wrapper count is
+now 20:
+
+- 14 from Batches 1–6
+- **NEW Session 11:** `p3_fft_spectrum` (2.84e-14 abs vs
+  numpy.fft), `p3_periodogram` (0.0 same-library),
+  `p3_lomb_scargle` (peak-freq 0.0 exact),
+  `p3_wavelet_transform` (0.0 same-library),
+  `p3_wavelet_coherence` (0.0 self-parity),
+  `p3_ssa` (0.0 self-parity).
+
+### Pattern F — first concrete population beyond GARCH/Kalman/HMM/VAR
+
+**FOUR new concrete invariants populated** (replaces Session
+5 NotImplementedError stubs):
+
+| Invariant type | Status | Wrapper |
+|---|---|---|
+| `fft_roundtrip` | PASS (6.66e-16) | `p3_fft_spectrum` |
+| `fft_energy_conservation` | PASS (0.0 exact) | `p3_fft_spectrum` |
+| `wavelet_inverse_roundtrip` | PASS (3.11e-15) | `p3_wavelet_transform` |
+| `wavelet_energy_conservation` | PASS (5e-16 rel) | `p3_wavelet_transform` |
+
+**Twelve concrete invariants in production** (was 8 at Batch 6
+close).
+
+Lesson: wavelet energy conservation requires `mode='periodization'`
+on power-of-2 lengths to hold at machine precision. Other modes
+(symmetric, zero) duplicate boundary samples and break Parseval
+by O(boundary_extension_size). The fixture choice and the
+invariant's tolerance interact — document this in P-2.
+
+### Pattern J — third concrete instance + alignment-via-metric
+
+`p3_lomb_scargle` is the third Pattern J instance, but with a
+new resolution mechanism:
+
+| Wrapper | Pattern J source | Resolution |
+|---|---|---|
+| `p3_egarch` (S6) | arch / rugarch alpha-vs-gamma name swap | name-mapping in compare() |
+| `p3_pp` (S10) | arch / urca internal HAC kernel weights | tolerance widening (1e-3 abs) |
+| `p3_lomb_scargle` (S11) | scipy / astropy normalization convention | **alignment-via-metric** (peak freq, not power) |
+
+The "alignment-via-metric" resolution is cleaner than tolerance
+widening when the math agrees on SHAPE but differs on output
+SCALE. Banked Pattern J formalization at check-in 2 should
+include this as a third resolution sub-pattern.
+
+### Pattern K → Pattern A path expansion
+
+`p3_wavelet_coherence` and `p3_ssa` both followed the Session
+10 Pattern K → Pattern A path: no canonical R / Python
+reference matched the wrapper math, so inline self-parity
+references (~30–50 LOC each) were shipped. Cumulatively now
+**5 wrappers** resolved via this path (BOCPD, CUSUM/PH,
+STL+ESD from Batch 6 + wavelet_coherence + SSA from Batch 7).
+The pattern is empirically locked.
+
+### PyBridge consumption — first production batch
+
+Batch 7 was the FIRST batch consuming PyBridge primitives in
+production. Observation for check-in 1.5 triage:
+
+1. All 7 checks used direct `import` + call (matching the
+   p3_pca / p3_dfm precedent). PyBridge.py_invoke shim was
+   NOT actually invoked by any check.
+2. The `isolate=True` subprocess path is untouched — that's
+   Batch 9 territory.
+3. **Possible simplification candidate:** PyBridge's
+   `isolate=False` path is over-engineered for what Batch 7–8
+   need. Reserve PyBridge purely for the subprocess-isolation
+   path (`isolate=True`); document direct-import as the
+   established pattern for Python references at-rest.
+
+Banked: Session 5 PyBridge `isolate=False` path simplification
+candidate at check-in 1.5.
+
+### Tier C / em_stochastic — `p3_emd_hht` joins `p3_nar_narx`
+
+Second em_stochastic Tier C wrapper. Pattern locked: when TSL
+and reference are independent implementations of the same
+underlying iterative algorithm (Huang 1998 sifting; neural
+fitting), per-output bitwise parity is intractable.
+Comparison via:
+
+1. Reconstruction identity (machine precision on both arms).
+2. Output-count agreement (within ±1 PASS, ±2 CAVEAT, ±3+
+   BLOCK).
+3. Energy/output-curve correlation (>= 0.85 PASS).
+
+The convention is now **2 wrappers** strong (NAR/NARX +
+EMD/HHT). Banked Pattern K formalization at check-in 2 should
+include this as the dominant Tier C resolution.
+
+### §10.3 criteria — second consecutive batch passing both 1 and 2
+
+| Batch | Criterion 1 | Criterion 2 |
+|---|---|---|
+| Batch 6 (S10) | 80% improvement | 30–40% reduction |
+| **Batch 7 (S11)** | 70% improvement | 35–45% reduction |
+
+The empirical pattern is locked: distinct-wrapper batches
+using mostly self-parity OR Python-in-process references
+achieve both criteria. The 10–15% LOC-reduction baseline
+(from earlier S7–S9) was driven by R-subprocess overhead;
+Batch 7's all-Python references avoid that.
+
+### Banked items (cumulative through S11)
+
+Carried from S10 (1–14) plus:
+
+15. **Pattern J alignment-via-metric** as third resolution
+    sub-pattern (peak frequency vs absolute power).
+16. **Pattern K Tier C convention** — 2 wrappers strong;
+    formalize at check-in 2.
+17. **PyBridge isolate=False simplification** — first
+    production batch evidence shows the shim is unused.
+18. **Pattern F — wavelet mode interaction with energy
+    invariant** — document in P-2 that periodization mode is
+    required for orthogonal wavelet Parseval at machine
+    precision.
+
+---
+
+**End of Session 11 entry.**

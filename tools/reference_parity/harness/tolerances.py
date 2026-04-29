@@ -1606,6 +1606,155 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "AnomalyDetection R archived; no CRAN successor."
         ),
     },
+
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 7 — Python spectral (Session 11).
+    # First all-Python-reference batch; PyBridge primitives exercised
+    # in-process (isolate=False default — no DL state to isolate).
+    # FFT / periodogram / wavelets are closed-form numpy/scipy
+    # operations; Pattern A bit-exact target. Lomb-Scargle is Pattern J
+    # (scipy vs astropy normalization conventions). EMD/HHT is Tier C
+    # NO-REFERENCE (different sifting libraries).
+    # ------------------------------------------------------------------
+
+    "p3_fft_spectrum": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "FFT is closed-form linear-algebra. scipy.fft and "
+            "numpy.fft both wrap pocketfft (since numpy 1.17); "
+            "given identical real-valued input, output is "
+            "bit-identical at machine precision. 1e-10 floor "
+            "leaves headroom for any future BLAS-implementation "
+            "drift. Master plan section 7.1 closed-form class."
+        ),
+    },
+
+    "p3_periodogram": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "scipy.signal.periodogram is deterministic; both "
+            "arms invoke the same scipy primitive with identical "
+            "(window, detrend, fs, scaling) arguments. Same-"
+            "library self-test verifies wrapper preprocessing + "
+            "parameter resolution round-trip the reference "
+            "output without wrapper-introduced bugs. Pattern A "
+            "bit-exact target."
+        ),
+    },
+
+    "p3_lomb_scargle": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "Pattern J: scipy.signal.lombscargle and "
+            "astropy.timeseries.LombScargle use DIFFERENT "
+            "normalization conventions; absolute power values "
+            "differ expectedly. Comparison aligned by peak-"
+            "frequency LOCATION (normalization-invariant) "
+            "against the same frequency grid. Bit-exact "
+            "expected on the peak-bin index. Master plan "
+            "section 7.1 with Pattern J alignment via metric "
+            "selection."
+        ),
+    },
+
+    "p3_wavelet_transform": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Same-library self-test: TSL and reference both "
+            "invoke pywt.wavedec with identical wavelet (db4), "
+            "level (4), and mode (symmetric). DWT is "
+            "deterministic; bit-exact parity at machine "
+            "precision. Pattern A target. Pattern F invariants "
+            "(roundtrip + energy conservation) populated and "
+            "verified inline."
+        ),
+    },
+
+    "p3_wavelet_coherence": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Self-parity: both arms invoke pywt.cwt with "
+            "identical wavelet (morl) + identical scipy "
+            "smoothing kernel. Coherence is closed-form ratio "
+            "of smoothed spectra; bit-exact expected. R "
+            "biwavelet uses Liu-Liang-Weisberg 2007 estimator "
+            "+ Monte Carlo significance - different "
+            "methodology, not directly comparable. Self-parity "
+            "catches TSL preprocessing / smoothing-application "
+            "regressions."
+        ),
+    },
+
+    "p3_emd_hht": {
+        "type": "tiered_outputs",
+        "primary": {
+            "corr_pass": 0.85,
+            "corr_caveat": 0.6,
+            "abs_tol": 1.0,
+            "rel_tol": 1.0,
+            "block_abs_tol": 5.0,
+            "block_rel_tol": 5.0,
+        },
+        "justification": (
+            "Tier C NO-REFERENCE-class: TSL emd (AOE Quinn) / "
+            "numpy fallback and PyEMD (Laszuk) are independent "
+            "implementations of Huang 1998 sifting; per-IMF "
+            "bitwise parity is mathematically intractable. "
+            "Comparison via reconstruction identity (machine "
+            "precision on both sides), IMF count agreement "
+            "(within +/-1), and cumulative-energy-curve Pearson "
+            "correlation (>= 0.85 PASS; 0.6-0.85 CAVEAT). "
+            "Pattern K-style correlation-based check."
+        ),
+    },
+
+    "p3_ssa": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "SSA is closed-form: SVD of Hankel trajectory "
+            "matrix. Both TSL and reference call numpy.linalg."
+            "svd on identical Hankel construction; eigenvalues "
+            "are unique (sign-invariant) and singular vectors "
+            "agree after sign-canonicalization. Pattern A "
+            "bit-exact target at machine precision."
+        ),
+    },
 }
 
 

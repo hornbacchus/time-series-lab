@@ -588,19 +588,133 @@ def _check_hmm_emission_normalization(tsl, ref, fixture, inv):
 _REGISTRY["hmm_row_sums"] = _check_hmm_row_sums
 _REGISTRY["hmm_emission_normalization"] = _check_hmm_emission_normalization
 
-# Wavelet (Batch 7)
-_REGISTRY["wavelet_energy_conservation"] = _stub(
-    "wavelet_energy_conservation", 7,
-)
-_REGISTRY["wavelet_inverse_roundtrip"] = _stub(
-    "wavelet_inverse_roundtrip", 7,
-)
+# Wavelet — populated at Phase 3 Session 11 (Batch 7 entry).
 
-# FFT / periodogram (Batch 7)
-_REGISTRY["fft_energy_conservation"] = _stub(
-    "fft_energy_conservation", 7,
-)
-_REGISTRY["fft_roundtrip"] = _stub("fft_roundtrip", 7)
+
+def _check_wavelet_inverse_roundtrip(tsl, ref, fixture, inv):
+    """DWT/IDWT roundtrip identity: waverec(wavedec(x)) == x.
+
+    For orthogonal/biorthogonal wavelet families, the discrete
+    wavelet transform is exactly invertible (modulo boundary-
+    extension noise). Per-element max-abs residual should be
+    at machine precision (~1e-15 for db4/sym4/coif*).
+    """
+    import numpy as np
+    residual = tsl.get("roundtrip_max_abs")
+    if residual is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'roundtrip_max_abs' field",
+        }
+    threshold = float(inv.tolerance)
+    abs_residual = float(abs(residual))
+    if abs_residual <= threshold:
+        status = "PASS"
+    elif abs_residual <= 10 * threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "max_abs_residual": abs_residual,
+    }
+
+
+def _check_wavelet_energy_conservation(tsl, ref, fixture, inv):
+    """Parseval-like identity for orthogonal wavelets:
+    sum(coeff_i^2) == sum(signal_i^2). Holds at machine
+    precision for orthogonal families (db*, sym*, coif*);
+    boundary-extension introduces small drift on biorthogonal
+    families.
+    """
+    signal_energy = tsl.get("signal_energy")
+    coeff_energy = tsl.get("coeff_energy")
+    if signal_energy is None or coeff_energy is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": (
+                "TSL output missing signal_energy / coeff_energy"
+            ),
+        }
+    abs_diff = float(abs(coeff_energy - signal_energy))
+    rel_diff = abs_diff / max(abs(signal_energy), 1e-12)
+    threshold = float(inv.tolerance)
+    if rel_diff <= threshold:
+        status = "PASS"
+    elif rel_diff <= 100 * threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "abs_diff": abs_diff, "rel_diff": rel_diff,
+        "signal_energy": signal_energy, "coeff_energy": coeff_energy,
+    }
+
+
+_REGISTRY["wavelet_energy_conservation"] = _check_wavelet_energy_conservation
+_REGISTRY["wavelet_inverse_roundtrip"] = _check_wavelet_inverse_roundtrip
+
+
+# FFT / periodogram — populated at Phase 3 Session 11 (Batch 7 entry).
+
+
+def _check_fft_roundtrip(tsl, ref, fixture, inv):
+    """ifft(fft(x)) == x at machine precision. The numpy /
+    scipy FFT pair is bitwise invertible up to floating-point
+    accumulation noise; ~1e-13 on T=512 typical."""
+    residual = tsl.get("roundtrip_max_abs")
+    if residual is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'roundtrip_max_abs' field",
+        }
+    abs_residual = float(abs(residual))
+    threshold = float(inv.tolerance)
+    if abs_residual <= threshold:
+        status = "PASS"
+    elif abs_residual <= 100 * threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "max_abs_residual": abs_residual,
+    }
+
+
+def _check_fft_energy_conservation(tsl, ref, fixture, inv):
+    """Parseval theorem for DFT:
+    sum(|x|^2) == (1/N) * sum(|X|^2). Holds exactly modulo
+    floating-point accumulation noise (~1e-10 relative on T=512).
+    """
+    energy_time = tsl.get("energy_time")
+    energy_freq = tsl.get("energy_freq")
+    if energy_time is None or energy_freq is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": (
+                "TSL output missing energy_time / energy_freq"
+            ),
+        }
+    abs_diff = float(abs(energy_time - energy_freq))
+    rel_diff = abs_diff / max(abs(energy_time), 1e-12)
+    threshold = float(inv.tolerance)
+    if rel_diff <= threshold:
+        status = "PASS"
+    elif rel_diff <= 100 * threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "abs_diff": abs_diff, "rel_diff": rel_diff,
+        "energy_time": energy_time, "energy_freq": energy_freq,
+    }
+
+
+_REGISTRY["fft_energy_conservation"] = _check_fft_energy_conservation
+_REGISTRY["fft_roundtrip"] = _check_fft_roundtrip
 
 # Bootstrap (Batch 10)
 _REGISTRY["bootstrap_block_preservation"] = _stub(

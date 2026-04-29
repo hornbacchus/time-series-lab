@@ -117,17 +117,29 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **Batch 6 Session 10 status: COMPLETE in single session.** 8/8 PASS, 0 CAVEAT, 0 BLOCK. Master plan §15.8 budgeted 2 sessions (S13–S14); closed in S10 alone, extending Phase 3 lead to 5 sessions ahead. Per-batch summary: `tools/reference_parity/reports/p3_batch_6_summary.md`. **`x13_seasonal_adjust` (originally Batch 6 9th wrapper) deferred** per Appendix A — R `seasonal` package wraps X-13ARIMA-SEATS binary; non-trivial Windows install.
 
-## Phase 3 — Batches 7–10 (PENDING)
+## Phase 3 — Batch 7: Python spectral (7 audit IDs, single-session close)
+
+| # | Wrapper | Audit ID | Reference | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `fft_spectrum.py` | `p3_fft_spectrum` | Python `numpy.fft` | fast | **PASS** (2.84e-14 abs) | `reports/p3_fft_spectrum_audit.md` | `harness/checks/p3_fft_spectrum.py` | S11 |
+| 2 | `periodogram_spectral_density.py` | `p3_periodogram` | Python `scipy.signal.periodogram` | fast | **PASS** (0.0 abs same-library) | `reports/p3_periodogram_audit.md` | `harness/checks/p3_periodogram.py` | S11 |
+| 3 | `lomb_scargle.py` | `p3_lomb_scargle` | Python `astropy.timeseries.LombScargle` | fast | **PASS** (Pattern J alignment-via-metric) | `reports/p3_lomb_scargle_audit.md` | `harness/checks/p3_lomb_scargle.py` | S11 |
+| 4 | `wavelet_transform.py` | `p3_wavelet_transform` | direct `pywt.wavedec` in-process | fast | **PASS** (0.0 same-library; Pattern F invariants populated) | `reports/p3_wavelet_transform_audit.md` | `harness/checks/p3_wavelet_transform.py` | S11 |
+| 5 | `wavelet_coherence.py` | `p3_wavelet_coherence` | self-parity reference (Pattern K → A) | fast | **PASS** (0.0 abs) | `reports/p3_wavelet_coherence_audit.md` | `harness/checks/p3_wavelet_coherence.py` | S11 |
+| 6 | `emd_hht.py` | `p3_emd_hht` | Python `PyEMD.EMD` (Laszuk) | fast | **CAVEAT** (Tier C — n_imfs ±2; ρ=0.991) | `reports/p3_emd_hht_audit.md` | `harness/checks/p3_emd_hht.py` | S11 |
+| 7 | `ssa_model.py` | `p3_ssa` | from-scratch numpy SVD reference | fast | **PASS** (0.0 abs; Pattern K → A) | `reports/p3_ssa_audit.md` | `harness/checks/p3_ssa.py` | S11 |
+
+**Batch 7 Session 11 status: COMPLETE in single session.** 6/7 PASS + 1/7 CAVEAT, 0 BLOCK. Master plan §15.9 budgeted 2 sessions; closed in 1, extending Phase 3 lead to 5–6 sessions ahead. Per-batch summary: `tools/reference_parity/reports/p3_batch_7_summary.md`. **Pattern F first concrete population beyond GARCH/Kalman/HMM/VAR**: 4 new invariants (fft_roundtrip, fft_energy_conservation, wavelet_inverse_roundtrip, wavelet_energy_conservation) replace Session 5 NotImplementedError stubs. **PyBridge first production batch**: all 7 checks used direct import (PyBridge.py_invoke shim NOT invoked); banked for check-in 1.5 simplification triage.
+
+## Phase 3 — Batches 8–10 (PENDING)
 
 (Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
 
 | Batch | Theme | Wrapper count | Sessions | Status |
 |---|---|---:|---|---|
-| 7 | R wavelets / frequency domain | ~5 | S11 | PENDING |
-| 8 | Python spectral | ~7 | S12–S13 | PENDING |
-| 9 | Python ML | ~7 | S14–S15 | PENDING |
-| 10 | Python DL | ~9 | S16–S18 | PENDING |
-| 11 | Misc + Tier C + deferred (`x13_seasonal_adjust`) | ~10 | S19–S20 | PENDING |
+| 8 | Python ML | ~7 | S12 | PENDING |
+| 9 | Python DL | ~9 | S13–S15 | PENDING |
+| 10 | Misc + Tier C + deferred (`x13_seasonal_adjust`) | ~10 | S16–S17 | PENDING |
 
 ---
 
@@ -137,11 +149,13 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **36** (32 PASS + 4 CAVEAT — Batches 1+2+3+4+5+6 complete) |
-| Phase 3 remaining | 34 |
+| Phase 3 covered as of latest update | **43** (38 PASS + 5 CAVEAT — Batches 1+2+3+4+5+6+7 complete) |
+| Phase 3 remaining | 27 |
 | Phase 3 BLOCK | 0 |
 | Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
-| Phase 3 sessions used | 9 (S2–S10) — **5 sessions ahead of master plan** |
-| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates (J: second concrete instance at S10; K → A path documented at S10) |
+| Phase 3 sessions used | 10 (S2–S11) — **5–6 sessions ahead of master plan** |
+| Pattern A wrappers | **20** (was 14 at Batch 6 close) |
+| Pattern F concrete invariants | **12** (was 8 at Batch 6 close) |
+| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates (J: 3 concrete instances + 3 resolution sub-patterns; K → A path documented for 5 wrappers) |
 
-**Last updated:** 2026-04-29 (Phase 3 Session 10 close — Batch 6 complete in single session, 5 sessions ahead of schedule).
+**Last updated:** 2026-04-29 (Phase 3 Session 11 close — Batch 7 complete in single session, 5–6 sessions ahead of schedule).

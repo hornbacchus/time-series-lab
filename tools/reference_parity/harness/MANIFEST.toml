@@ -103,6 +103,15 @@ ewstools = "2.1.2"
 # direct in-process invocation of ruptures.Pelt with identical
 # arguments — same-library self-test). Pin matches local install.
 ruptures = "1.1.9"
+# Session 11 (Batch 7 entry — Python spectral): astropy for
+# p3_lomb_scargle reference (Pattern J normalization-convention
+# divergence); PyWavelets for p3_wavelet_transform + p3_wavelet_
+# coherence; EMD-signal (PyPI package, imports as PyEMD) for
+# p3_emd_hht reference; pyts documented for potential Batch 8.
+astropy = "7.2.0"
+PyWavelets = "1.8.0"
+EMD-signal = "1.9.0"
+pyts = "0.13.0"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this
