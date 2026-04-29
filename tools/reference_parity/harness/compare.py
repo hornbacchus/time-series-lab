@@ -30,6 +30,56 @@ from typing import Any
 import numpy as np
 
 
+def _get_metric_tol(
+    ladder: dict[str, Any],
+    metric_name: str,
+    fallback_key: str = "primary",
+) -> dict[str, float]:
+    """Look up tolerance band for a specific metric, with
+    optional per-metric override.
+
+    Phase 3.5 Session 4 (Item 2) addition. Tolerance ladders
+    may declare a per-metric band override via the optional
+    ``per_metric`` sub-dict, falling back to the canonical
+    ``primary`` (or named ``fallback_key``) band when no
+    override exists.
+
+    Use case: ``em_stochastic`` wrappers where some metrics
+    (e.g., transition matrix in HMM) are wider than the
+    wrapper's canonical band due to documented Pattern H
+    DSCD-EM divergence, while others (emission means, log-
+    likelihood) achieve much tighter agreement and benefit
+    from a narrower band per-metric.
+
+    Parameters
+    ----------
+    ladder : dict
+        Tolerance ladder for the technique (from
+        ``get_ladder()``).
+    metric_name : str
+        Name of the metric being compared. If
+        ``ladder["per_metric"][metric_name]`` exists, that
+        band is returned; otherwise ``ladder[fallback_key]``.
+    fallback_key : str
+        Default band key to use when no per-metric override
+        exists. Default ``"primary"``.
+
+    Returns
+    -------
+    dict
+        Tolerance band dict (``abs_tol`` / ``rel_tol`` /
+        ``block_abs_tol`` / ``block_rel_tol``).
+
+    Backward-compat: ladders without ``per_metric`` always
+    return ``ladder[fallback_key]``. Adding ``per_metric``
+    is opt-in per wrapper.
+    """
+    per_metric = ladder.get("per_metric", {})
+    if metric_name in per_metric:
+        return per_metric[metric_name]
+    return ladder[fallback_key]
+
+
 def _compare_scalar(
     a: float,
     b: float,

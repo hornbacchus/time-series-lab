@@ -1145,11 +1145,9 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
     "p3_hmm": {
         "type": "tiered_outputs",
         "primary": {
-            # HMM EM divergence on transition matrix is large
-            # on synthetic fixtures (~0.2 abs typical) even when
-            # emission means + log-likelihood agree at 1e-5.
-            # Widen abs_tol to 0.3 / rel_tol to 1.0 to acknowledge
-            # this. Pattern H DSCD instance for HMM.
+            # Default band — used for any metric not in
+            # `per_metric`. Wide because transition_matrix is
+            # the most-divergent emission EM-stochastic metric.
             "abs_tol": 0.3,
             "rel_tol": 1.0,
             "block_abs_tol": 0.7,
@@ -1161,34 +1159,128 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "block_abs_tol": 5e-1,
             "block_rel_tol": 5e-1,
         },
+        "per_metric": {
+            # Phase 3.5 Session 4 — em_stochastic per-metric
+            # heterogeneity. Achieved tolerances in S2 fast-tier
+            # were heterogeneous: transition_matrix 0.237 abs,
+            # emission_means 1.48e-5, emission_covars 7.74e-5,
+            # log_likelihood 5.46e-6. Keeping a single primary
+            # band of 0.3 abs would swallow 4 orders of
+            # achievable headroom on the three tight metrics.
+            # Tightening only the metrics with demonstrated
+            # headroom; transition_matrix retains the wide
+            # Pattern H DSCD-EM band via the primary fallback.
+            "transition_matrix": {
+                # Pattern H DSCD-EM — kept wide because hmmlearn
+                # and R depmixS4 routinely converge to different
+                # transition matrices on the same likelihood
+                # surface (state-label permutation +
+                # initialization sensitivity).
+                "abs_tol": 0.3,
+                "rel_tol": 1.0,
+                "block_abs_tol": 0.7,
+                "block_rel_tol": 2.0,
+            },
+            "emission_means": {
+                # Achieved 1.48e-5 abs in S2; 1e-3 preserves
+                # 1.8 orders of headroom (67x safety).
+                "abs_tol": 1e-3,
+                "rel_tol": 1e-3,
+                "block_abs_tol": 1e-2,
+                "block_rel_tol": 1e-2,
+            },
+            "emission_covars": {
+                # Achieved 7.74e-5 abs in S2; 1e-3 preserves
+                # 1.1 orders of headroom (13x safety).
+                "abs_tol": 1e-3,
+                "rel_tol": 1e-3,
+                "block_abs_tol": 1e-2,
+                "block_rel_tol": 1e-2,
+            },
+            "log_likelihood": {
+                # Achieved 5.46e-6 abs in S2; 1e-3 preserves
+                # 2.3 orders of headroom (180x safety).
+                "abs_tol": 1e-3,
+                "rel_tol": 1e-3,
+                "block_abs_tol": 1e-2,
+                "block_rel_tol": 1e-2,
+            },
+        },
         "justification": (
             "HMM Baum-Welch EM. hmmlearn (Python) and R "
             "depmixS4 are independent EM implementations; "
             "both can converge to different local optima of "
-            "the same likelihood surface. Master plan §7.1 "
-            "EM-stochastic class (1e-2 abs / 5e-2 rel) "
-            "widened slightly to 5e-2 abs / 1e-1 rel because "
-            "HMM has multiple sources of identifiability "
-            "ambiguity (state-label permutation, "
-            "transition-matrix initialization)."
+            "the same likelihood surface. Phase 3.5 Session 4 "
+            "split the canonical em_stochastic single-band "
+            "(1e-2 abs / 5e-2 rel) into per-metric tiers: "
+            "transition_matrix retains the wide Pattern H "
+            "DSCD-EM band (0.3 abs / 1.0 rel) because EM "
+            "label-permutation produces 0.2-0.3 abs divergence "
+            "as a baseline; emission_means / emission_covars / "
+            "log_likelihood tighten to 1e-3 abs (S2 measured "
+            "1.5e-5 / 7.7e-5 / 5.5e-6 abs respectively, "
+            "preserving 1.1-2.3 orders of headroom). The split "
+            "exposes per-metric agreement that the single-band "
+            "approach concealed."
         ),
     },
 
     "p3_markov_switching": {
         "type": "tiered_outputs",
         "primary": {
-            # Markov switching is the most fragile EM-stochastic
-            # case in Phase 3 — statsmodels MarkovRegression and
-            # R MSwM converge to genuinely different local optima
-            # on synthetic fixtures (different mean estimates,
-            # transition matrices, log-likelihoods with opposite
-            # signs in the log-lik formula). Widened to 2 abs /
-            # 1 rel; CAVEAT/BLOCK expected; documents Pattern H
-            # DSCD instance.
+            # Default band — used for any metric not in
+            # `per_metric`. Wide because the most-divergent
+            # metrics (transition_matrix, log_likelihood)
+            # routinely produce 0.3-2.0 abs divergence between
+            # statsmodels and MSwM.
             "abs_tol": 2.0,
             "rel_tol": 1.0,
             "block_abs_tol": 5.0,
             "block_rel_tol": 5.0,
+        },
+        "per_metric": {
+            # Phase 3.5 Session 4 — em_stochastic per-metric
+            # heterogeneity. Achieved in S2 fast-tier:
+            # regime_means 5.90e-5 abs, transition_matrix
+            # 5.46e-2 abs, log_likelihood 0.348 abs. Only
+            # regime_means has enough headroom to safely
+            # tighten; the other two metrics stay at the wide
+            # Pattern H DSCD band.
+            "regime_means": {
+                # Achieved 5.90e-5 abs in S2; 1e-2 preserves
+                # 2.2 orders of headroom (170x safety). Most
+                # informative metric for downstream
+                # interpretation; tightening exposes that
+                # statsmodels and MSwM agree on regime means
+                # to ~5 orders, even when transition matrices
+                # and log-likelihoods diverge.
+                "abs_tol": 1e-2,
+                "rel_tol": 1e-2,
+                "block_abs_tol": 1e-1,
+                "block_rel_tol": 1e-1,
+            },
+            "transition_matrix": {
+                # Pattern H DSCD-EM — kept at primary band.
+                # Achieved 5.46e-2 abs in S2; tightening below
+                # 0.5 risks regression on the EM label-
+                # permutation noise floor.
+                "abs_tol": 2.0,
+                "rel_tol": 1.0,
+                "block_abs_tol": 5.0,
+                "block_rel_tol": 5.0,
+            },
+            "log_likelihood": {
+                # Pattern H DSCD-EM — kept at primary band.
+                # Achieved 0.348 abs in S2; only 0.76 orders
+                # of headroom to a 2.0 band, too risky to
+                # tighten given MSwM's different log-lik sign
+                # convention and statsmodels' filtering vs
+                # smoothed-state ambiguity.
+                "abs_tol": 2.0,
+                "rel_tol": 1.0,
+                "block_abs_tol": 5.0,
+                "block_rel_tol": 5.0,
+            },
         },
         "justification": (
             "Markov switching mean model. statsmodels "
@@ -1197,9 +1289,16 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "but on synthetic fixtures they routinely converge "
             "to different local optima with substantially "
             "different mean estimates. MSwM uses a different "
-            "log-likelihood sign convention. Pattern H DSCD "
-            "instance. Tolerance band wide; verdict often "
-            "CAVEAT, documenting the methodology divergence."
+            "log-likelihood sign convention. Phase 3.5 Session "
+            "4 split the canonical em_stochastic single-band "
+            "into per-metric tiers: regime_means tightens to "
+            "1e-2 abs (S2 achieved 5.9e-5; 2.2 orders of "
+            "headroom), exposing that the two backends agree "
+            "on regime means to ~5 orders even when transition "
+            "matrices and log-likelihoods diverge under "
+            "Pattern H DSCD-EM. transition_matrix and "
+            "log_likelihood retain the wide 2.0 abs / 1.0 rel "
+            "Pattern H DSCD-EM band."
         ),
     },
 

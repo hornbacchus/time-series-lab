@@ -19,6 +19,7 @@ from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.compare import (
     _compare_scalar,
     _compare_vector,
+    _get_metric_tol,
 )
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.path_setup import _ensure_engine_on_path
@@ -237,14 +238,15 @@ class MarkovSwitchingParity(P3ParityCheck):
             )
 
         primary["regime_means"] = _compare_vector(
-            tsl["regime_means"], ref["regime_means"], ladder["primary"],
+            tsl["regime_means"], ref["regime_means"],
+            _get_metric_tol(ladder, "regime_means"),
         )
         statuses.append(primary["regime_means"]["status"])
 
         primary["transition_matrix"] = _compare_vector(
             np.asarray(tsl["transition_matrix"]).reshape(-1),
             np.asarray(ref["transition_matrix"]).reshape(-1),
-            ladder["primary"],
+            _get_metric_tol(ladder, "transition_matrix"),
         )
         statuses.append(primary["transition_matrix"]["status"])
 
@@ -252,7 +254,7 @@ class MarkovSwitchingParity(P3ParityCheck):
         # statsmodels' fit.llf. Compare via |log-lik| to align.
         primary["log_likelihood"] = _compare_scalar(
             abs(tsl["log_likelihood"]), abs(ref["log_likelihood"]),
-            ladder["primary"],
+            _get_metric_tol(ladder, "log_likelihood"),
         )
         statuses.append(primary["log_likelihood"]["status"])
 

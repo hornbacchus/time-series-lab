@@ -46,6 +46,7 @@ from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.compare import (
     _compare_scalar,
     _compare_vector,
+    _get_metric_tol,
 )
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.path_setup import _ensure_engine_on_path
@@ -356,30 +357,35 @@ class HmmParity(P3ParityCheck):
 
         # Both sides already sorted states by emission mean
         # ascending. Direct comparison.
+        # Phase 3.5 Session 4 (Item 2): per-metric bands.
+        # transition_matrix retains widened DSCD-EM band
+        # (0.3 abs / 1.0 rel); emission_means / emission_covars
+        # / log_likelihood get tightened bands per Pattern H
+        # DSCD per-metric heterogeneity finding.
         primary["transition_matrix"] = _compare_vector(
             np.asarray(tsl["transition_matrix"]).reshape(-1),
             np.asarray(ref["transition_matrix"]).reshape(-1),
-            ladder["primary"],
+            _get_metric_tol(ladder, "transition_matrix"),
         )
         statuses.append(primary["transition_matrix"]["status"])
 
         primary["emission_means"] = _compare_vector(
             np.asarray(tsl["emission_means"]).reshape(-1),
             np.asarray(ref["emission_means"]).reshape(-1),
-            ladder["primary"],
+            _get_metric_tol(ladder, "emission_means"),
         )
         statuses.append(primary["emission_means"]["status"])
 
         primary["emission_covars"] = _compare_vector(
             np.asarray(tsl["emission_covars"]).reshape(-1),
             np.asarray(ref["emission_covars"]).reshape(-1),
-            ladder["primary"],
+            _get_metric_tol(ladder, "emission_covars"),
         )
         statuses.append(primary["emission_covars"]["status"])
 
         primary["log_likelihood"] = _compare_scalar(
             tsl["log_likelihood"], ref["log_likelihood"],
-            ladder["primary"],
+            _get_metric_tol(ladder, "log_likelihood"),
         )
         statuses.append(primary["log_likelihood"]["status"])
 

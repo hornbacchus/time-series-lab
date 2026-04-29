@@ -254,7 +254,27 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-29 (**Phase 3.5 Session 3 close** — Item 1: `single_impl_mle` verdict_class production-locked. Added to `_REGISTERED_VERDICT_CLASSES` + `VerdictClass` Literal (band 1e-5 abs / 1e-4 rel). Migrated `p3_vecm` from `mle_fit` (1e-2 abs band) → `single_impl_mle` (1e-5 abs band) based on Phase 3 Session 7 audit evidence: 9.99e-16 abs achieved (13 orders inside old band; 9 orders preserved inside new band). Audit of remaining mle_fit wrappers found no other candidates (≥3 orders headroom required): p3_arima_manual / p3_sarima / p3_arimax_sarimax / p3_intervention_analysis / 3a_caviar_sav all <3 orders headroom; p3_var / p3_pca already classified `closed_form` (tighter band than single_impl_mle would offer). Fast-tier 76/76 unchanged (71 PASS + 5 CAVEAT, 0 BLOCK); §8.1 risk 4 (regression) NOT triggered. P-1 §5.1 + P-2 §A.10 documentation updates banked for Phase 3.5 Session 11.
+**Last updated:** 2026-04-29 (**Phase 3.5 Session 4 close** — Item 2: em_stochastic per-metric bands.
+Targeted refinement (outcome b per session prompt) on 2 wrappers
+where empirical heterogeneity warranted per-metric tier
+splits: `p3_hmm` (transition_matrix kept wide at 0.3 abs /
+1.0 rel; emission_means + emission_covars + log_likelihood
+tightened to 1e-3 abs / 1e-3 rel — preserves 1.1-2.3 orders
+of measured headroom) and `p3_markov_switching`
+(regime_means tightened to 1e-2 abs; transition_matrix +
+log_likelihood kept wide at 2.0 abs / 1.0 rel per Pattern H
+DSCD-EM). Tolerance ladder schema extended with optional
+`per_metric` block; `_get_metric_tol(ladder, metric_name)`
+helper added to `compare.py`. Other em_stochastic wrappers
+(`p3_dfm`, `p3_particle_filter`, `p3_conformal`) audited
+during S4 entry — no per-metric heterogeneity sufficient to
+justify a split (single-band tolerance bound by lowest metric
+or aligned across metrics). Fast-tier 76/76 unchanged
+(71 PASS + 5 CAVEAT, 0 BLOCK); §8.1 risk 4 not triggered.
+Schema documentation updates for P-1 §5.2 / P-2 banked for
+Phase 3.5 Session 11.
+
+**Phase 3.5 Session 3 close** — Item 1: `single_impl_mle` verdict_class production-locked. Added to `_REGISTERED_VERDICT_CLASSES` + `VerdictClass` Literal (band 1e-5 abs / 1e-4 rel). Migrated `p3_vecm` from `mle_fit` (1e-2 abs band) → `single_impl_mle` (1e-5 abs band) based on Phase 3 Session 7 audit evidence: 9.99e-16 abs achieved (13 orders inside old band; 9 orders preserved inside new band). Audit of remaining mle_fit wrappers found no other candidates (≥3 orders headroom required): p3_arima_manual / p3_sarima / p3_arimax_sarimax / p3_intervention_analysis / 3a_caviar_sav all <3 orders headroom; p3_var / p3_pca already classified `closed_form` (tighter band than single_impl_mle would offer). Fast-tier 76/76 unchanged (71 PASS + 5 CAVEAT, 0 BLOCK); §8.1 risk 4 (regression) NOT triggered. P-1 §5.1 + P-2 §A.10 documentation updates banked for Phase 3.5 Session 11.
 
 **Phase 3.5 Session 2 close** — Item 8: 12 pre-Phase-3 inherited checks migrated from `ParityCheck` to `P3ParityCheck` contract per S5 lock. All 82 active checks now satisfy P-1 §8.1 (`verdict_class` + `verdict_class_rationale` declared on every check). 11-class verdict_class taxonomy validated empirically. Fast-tier 76/76 unchanged from Phase 3 close. Slow-tier checks compile clean post-migration. Banked: structural_invariants declarations for 12 inherited checks deferred to Phase 3.5 Session 9 candidate.
 
