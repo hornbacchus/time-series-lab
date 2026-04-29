@@ -68,13 +68,14 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
 
 
-class KalmanFilterParity(ParityCheck):
+class KalmanFilterParity(P3ParityCheck):
     """Kalman filter / smoother + log-likelihood parity vs R dlm + KFAS.
 
     **Dual-fixture architecture** (Session 2 Path B Option 2):
@@ -101,6 +102,17 @@ class KalmanFilterParity(ParityCheck):
     technique_id = "2a_kalman_filter_smoother"
     tier = "fast"
     fixture_id = "2a_kalman"  # main fixture; runner hash-verifies
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "Kalman filter / smoother are closed-form recursions on "
+        "linear-Gaussian state-space models. R dlm + KFAS and "
+        "statsmodels UnobservedComponents implement identical "
+        "math; only diffuse-prior initialization conventions "
+        "differ slightly. Phase 1 audit 2a achieved 3.64e-7 abs "
+        "log-likelihood vs KFAS on Phase 1 fixture."
+    )
 
     # Second fixture used only for KFAS log-lik parity (loaded
     # explicitly in setup_fixture; runner does not auto-load

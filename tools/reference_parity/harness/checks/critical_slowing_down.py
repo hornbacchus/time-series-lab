@@ -44,7 +44,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 
 
 # Conversion factor: ewstools applies sigma = (0.25/0.675) * bandwidth.
@@ -73,12 +74,21 @@ def _ensure_engine_on_path() -> None:
         sys.path.insert(0, eng_path)
 
 
-class CriticalSlowingDownParity(ParityCheck):
+class CriticalSlowingDownParity(P3ParityCheck):
     """CSD parity vs ewstools on saddle-node SDE fixture."""
 
     technique_id = "critical_slowing_down"
     tier = "fast"
     fixture_id = "critical_slowing_down_saddle_node"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "Critical-slowing-down EWS detection is closed-form: "
+        "rolling AR(1) coefficient + variance + autocorrelation. "
+        "TSL and ewstools 2.1.2 implement identical rolling-"
+        "window stats; bit-exact at machine precision."
+    )
 
     # Tier 1 strict tolerances
     ROLLING_AR1_ABS_TOL = 1e-8

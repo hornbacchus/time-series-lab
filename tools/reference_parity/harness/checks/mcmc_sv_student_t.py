@@ -38,7 +38,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -55,7 +56,7 @@ from reference_parity.harness.checks.mcmc_sv_gaussian import (
 )
 
 
-class McmcSvStudentTParity(ParityCheck):
+class McmcSvStudentTParity(P3ParityCheck):
     """MCMC SV Student-t-innovations parity vs R ``stochvol::svtsample``.
 
     Same protocol as the Gaussian sibling (2b) plus a nu (degrees
@@ -68,6 +69,19 @@ class McmcSvStudentTParity(ParityCheck):
     technique_id = "2c_mcmc_sv_student_t"
     tier = "slow"
     fixture_id = "2c_sv_student_t"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "mcmc"
+    verdict_class_rationale = (
+        "MCMC posterior means + nu (df) inference under Student-t "
+        "innovations. Phase 1 audit 2c documented nu divergence "
+        "as methodology (different priors), NOT bug — TSL uses "
+        "TruncatedNormal vs stochvol's Exponential rate. "
+        "Three-outcome ladder per Phase 1 Stage B; nu band widened "
+        "to 10%%/20%% per nu noise floor at T=500."
+    )
+
+    reroll_on_caveat = True
 
     R_TIMEOUT_SEC = 240
 

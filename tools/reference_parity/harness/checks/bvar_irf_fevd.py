@@ -36,7 +36,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -74,12 +75,22 @@ class _ZeroRng:
         return np.zeros(shape)
 
 
-class BvarIrfFevdParity(ParityCheck):
+class BvarIrfFevdParity(P3ParityCheck):
     """BVAR IRF / FEVD vs R vars triangulation."""
 
     technique_id = "1c_bvar_irf_fevd"
     tier = "fast"
     fixture_id = "1c_bvar"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "BVAR IRF / FEVD given coefficients is closed-form matrix "
+        "algebra (Phi_h = sum A_j Phi_{h-j} VMA recursion; FEVD "
+        "from cumulative squared orthogonalized IRF). R vars::Phi "
+        "and TSL VMA recursion are bitwise-equivalent given "
+        "identical inputs. Phase 1 audit measured 4.58e-16 abs."
+    )
 
     HORIZONS = (0, 1, 2, 5, 10)
     FEVD_HORIZON = 10

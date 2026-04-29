@@ -42,7 +42,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.fixtures import FixtureLoader
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
@@ -73,13 +74,23 @@ def _branch_from_max_t(max_t: int) -> str:
     return "T_i_form" if max_t <= 2 else "T_i_minus_1_T_i_minus_2_form"
 
 
-class EvtFerroSegersParity(ParityCheck):
+class EvtFerroSegersParity(P3ParityCheck):
     """EVT extremal-index Ferro-Segers vs extRemes parity."""
 
     technique_id = "3c_evt_ferro_segers"
     tier = "fast"
     fixture_id = "3c_evt_garch"
     IID_FIXTURE_ID = "3c_evt_iid"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "Ferro-Segers 2003 intervals estimator is closed-form "
+        "given inter-exceedance times. R extRemes::extremalindex "
+        "(method='intervals') and TSL `_ferro_segers_extremal_index` "
+        "implement identical formula. Phase 1 audit measured "
+        "0.0 abs diff on GARCH + iid fixtures."
+    )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         loader = FixtureLoader()

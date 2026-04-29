@@ -15,18 +15,28 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
 
 
-class SmokeTestParity(ParityCheck):
+class SmokeTestParity(P3ParityCheck):
     """Trivial mean-of-100-normals parity. End-to-end harness probe."""
 
     technique_id = "_smoke_test"
     tier = "fast"
     fixture_id = ""  # generated at runtime; no on-disk hash
+
+    # Phase 3.5 Session 2 (Item 8): migrated from base ParityCheck
+    # to P3ParityCheck. verdict_class declaration mandatory.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "Mean of N(0,1) is closed-form arithmetic. R base mean() "
+        "and numpy mean() use IEEE 754 double-precision FP with "
+        "identical input; bit-exact agreement at machine precision."
+    )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         rng = np.random.default_rng(seed)

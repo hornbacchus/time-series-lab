@@ -50,7 +50,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -93,7 +94,7 @@ def _clone_model_with_same_weights(config: dict[str, Any], state_dict):
     return model
 
 
-class TransformerAttentionParity(ParityCheck):
+class TransformerAttentionParity(P3ParityCheck):
     """Transformer attention capture parity vs native MHA.
 
     See module docstring for the full failure-mode contract:
@@ -103,6 +104,17 @@ class TransformerAttentionParity(ParityCheck):
 
     technique_id = "3f_transformer_attention"
     tier = "fast"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "dl_seed_pinned"
+    verdict_class_rationale = (
+        "PyTorch nn.MultiheadAttention attention-capture vs "
+        "native MHA forward-pass with cloned weights and frozen "
+        "model.eval(). Both paths invoke the same forward; "
+        "bit-exact attention matrices expected. Failure indicates "
+        "TSL's _sa_block patch mechanism bug — strict bit-exact "
+        "BLOCK-class assertion (not tolerance question)."
+    )
     # Phase 3.3: standard fixture_id; runner auto-loads the .pt
     # fixture via FixtureLoader's format dispatch. Replaced the
     # prior fixture_id="" + bespoke _load_pt_fixture_with_sha

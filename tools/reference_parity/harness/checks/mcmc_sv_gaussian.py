@@ -46,7 +46,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -137,7 +138,7 @@ def _aggregate_outcome(per_metric: list[str]) -> str:
     return "PASS"
 
 
-class McmcSvGaussianParity(ParityCheck):
+class McmcSvGaussianParity(P3ParityCheck):
     """MCMC SV Gaussian-innovations parity vs R ``stochvol::svsample``.
 
     First slow-tier check; validates the three-outcome PASS/
@@ -147,6 +148,20 @@ class McmcSvGaussianParity(ParityCheck):
     technique_id = "2b_mcmc_sv_gaussian"
     tier = "slow"
     fixture_id = "2b_sv_gaussian"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "mcmc"
+    verdict_class_rationale = (
+        "MCMC posterior means with O(1/sqrt(N_eff)) MC error. "
+        "TSL PyMC NUTS + Gibbs cascade vs R stochvol::svsample. "
+        "Three-outcome ladder per Phase 1 Stage B: <5%% rel-diff "
+        "PASS; 5-10%% CAVEAT (re-roll); >10%% methodology "
+        "investigation. reroll_on_caveat=True (MC noise re-roll)."
+    )
+
+    # MC error makes single-seed CAVEAT ambiguous; re-roll
+    # with seed+1 to distinguish noise from systematic divergence.
+    reroll_on_caveat = True
 
     # Subprocess timeout (seconds). svsample on T=500 with
     # 10000 draws + 1000 burn typically completes in ~30s on

@@ -99,7 +99,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -245,7 +246,7 @@ def _reimpl_fit_sav(
 # Parity check class
 # ---------------------------------------------------------------------
 
-class CaviarSavParity(ParityCheck):
+class CaviarSavParity(P3ParityCheck):
     """CAViaR-SAV parity vs from-scratch Engle-Manganelli 2004
     reimplementation.
 
@@ -259,6 +260,18 @@ class CaviarSavParity(ParityCheck):
     technique_id = "3a_caviar_sav"
     tier = "fast"
     fixture_id = "3a_caviar_sav"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "mle_fit"
+    verdict_class_rationale = (
+        "CAViaR-SAV uses Nelder-Mead optimization on a non-smooth "
+        "quantile loss (Engle-Manganelli 2004). Per Phase 1 audit "
+        "B9, multiple local optima of similar quality exist; "
+        "three-tier comparison: q-path-given-fixed-beta strict "
+        "(recursion math identical), loss-ratio three-outcome "
+        "(optimum quality), beta coefficients record-only "
+        "(non-uniqueness)."
+    )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         return {"_seed": int(seed)}

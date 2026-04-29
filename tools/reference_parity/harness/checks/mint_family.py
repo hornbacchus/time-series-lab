@@ -43,7 +43,8 @@ import numpy as np
 # is importable.
 _REPO_ROOT = None  # set lazily
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -84,12 +85,23 @@ def _ensure_engine_on_path() -> None:
         sys.path.insert(0, eng_path)
 
 
-class MintFamilyParity(ParityCheck):
+class MintFamilyParity(P3ParityCheck):
     """MinT family (4 methods) vs hts + HF triangulation."""
 
     technique_id = "3e_mint_family"
     tier = "fast"
     fixture_id = "3e_mint"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "MinT reconciliation is closed-form matrix algebra: "
+        "y_tilde = S (S' W^-1 S)^-1 S' W^-1 y_hat. R hts::MinT and "
+        "Python hierarchicalforecast.MinTrace implement identical "
+        "math; Phase 1 audit measured 4.66e-15 abs vs hts on "
+        "mint_shrinkage (4 methods covered: ols, wls_variance, "
+        "mint_shrinkage, mint_sample)."
+    )
 
     METHODS = ("ols", "wls_variance", "mint_shrinkage", "mint_sample")
 

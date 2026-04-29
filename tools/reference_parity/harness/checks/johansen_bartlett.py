@@ -42,7 +42,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -69,12 +70,23 @@ def _ensure_engine_on_path() -> None:
         sys.path.insert(0, eng_path)
 
 
-class JohansenBartlettParity(ParityCheck):
+class JohansenBartlettParity(P3ParityCheck):
     """Johansen test + Reimers correction triangulation."""
 
     technique_id = "3d_johansen_bartlett"
     tier = "fast"
     fixture_id = "3d_johansen"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "Johansen trace statistic is closed-form generalized "
+        "eigenvalue problem on residual covariance. urca::ca.jo "
+        "vs statsmodels coint_johansen agree at machine precision "
+        "modulo small reduced-rank-regression parameterization "
+        "differences (documented Pattern J at 50.0 abs). Reimers "
+        "correction (T-n*p)/T is pure arithmetic; bit-exact."
+    )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         # On-disk fixture supplies y, rank_true, T, n, lag_order_p.

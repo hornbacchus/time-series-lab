@@ -51,7 +51,8 @@ from typing import Any
 
 import numpy as np
 
-from reference_parity.harness.base import ParityCheck, ParityResult
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -220,7 +221,7 @@ def _reimpl_har_cj(
 # Parity check class
 # ---------------------------------------------------------------------
 
-class HarCjParity(ParityCheck):
+class HarCjParity(P3ParityCheck):
     """HAR-CJ realized-volatility parity vs from-scratch ABD
     2007 + Huang-Tauchen 2005 reimplementation.
 
@@ -232,6 +233,18 @@ class HarCjParity(ParityCheck):
     technique_id = "3b_har_cj"
     tier = "fast"
     fixture_id = "3b_har_cj"
+
+    # Phase 3.5 Session 2 (Item 8): migrated to P3ParityCheck.
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "HAR-CJ regression is closed-form OLS given identical "
+        "design matrix (RV/BV/jump regressors). Both TSL and "
+        "from-scratch ABD 2007 + Huang-Tauchen 2005 reimpl "
+        "produce machine-precision-identical betas modulo TSL's "
+        "6-decimal output rounding floor (Phase 1 finding B8). "
+        "BNS jump-detection is deterministic given identical "
+        "RV/BV/threshold."
+    )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         return {"_seed": int(seed)}
