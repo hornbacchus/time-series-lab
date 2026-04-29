@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-28
 **Author:** Phase 3 kickoff Chat session
-**Status:** Authoritative for Phase 3 execution
+**Status:** **PHASE 3 CLOSED at Session 18 (2026-04-29).** Preserved as authoritative record of execution-phase guidance. Final outcomes: 70/70 wrappers covered, 0 BLOCK, 65 PASS / 5 CAVEAT / 1 SKIP-graceful, 17 sessions used vs original 18-22 budget. See [P-4 status tracker](../docs/reference_parity_status.md), [P-1 parity standard](../docs/engineering/parity_standard.md), [P-2 diagnostic reference](../docs/engineering/parity_diagnostic_reference.md), [P-3 empirical findings](../docs/engineering/parity_empirical_findings.md) for the closeout deliverables. Phase 3.5 candidates banked at [P-3 §6](../docs/engineering/parity_empirical_findings.md#6-phase-35-candidates-banked).
 **Supersedes:** Open questions in `reference_parity_phase3_handoff.md` Section 8
 **Companion:** `reference_parity_phase3_handoff.md` (background, scope sketch, working-agreement carry-forward)
 

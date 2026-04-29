@@ -1,18 +1,26 @@
 # TSL Reference Parity — Per-Wrapper Status Tracker (P-4)
 
-**Authoritative tracker for Phase 3 execution.**
-Updated per session per master plan §3.2 and §15.
+**Status:** v1.0.0 — Phase 3 closed at Session 18 (2026-04-29).
+Authoritative coverage data tracker. Companion to:
 
-**Status legend (per master plan §3.1):**
+- [P-1 parity standard](engineering/parity_standard.md)
+  v1.0.0 — directive ("must") for new wrapper PRs
+- [P-2 parity diagnostic reference](engineering/parity_diagnostic_reference.md)
+  v1.0.0 — descriptive reference / playbook
+- [P-3 parity empirical findings](engineering/parity_empirical_findings.md)
+  v1.0.0 — descriptive narrative
+
+**Status legend (per master plan §3.1; see [P-1 §2](engineering/parity_standard.md#2-four-verdict-closure-rule-b) for binding semantics):**
 
 - `PASS` — Output matches reference within stated tolerance on stated fixtures.
-- `CAVEAT` — Matches except in stated regime (boundary, near-singular, etc.).
-- `DOCUMENTED-DIVERGENCE` — Does not match; divergence is methodology-equivalent (different optimizer / prior / default), not a bug.
-- `NO-REFERENCE` — No clean external reference; internal-consistency only (Tier C).
+- `CAVEAT` — Matches except in stated regime (boundary, near-singular, MC noise band, finite-sample slack).
+- `DOCUMENTED-DIVERGENCE` — Does not match; divergence is methodology-equivalent (different optimizer / prior / default), not a bug. **Empirical note:** not encountered as distinct outcome in Phase 3; CAVEAT absorbed all such cases.
+- `NO-REFERENCE` — No clean external reference; internal-consistency proxy (Tier C).
+- `SKIP` — Runtime dependency unavailable (host binary, package install fails); informative-not-failing per [P-1 §2.4](engineering/parity_standard.md#24-skip-graceful-runtime-convention-b).
 - `PENDING` — Audit not yet started.
 - `IN-PROGRESS` — Audit in flight (mid-session).
 
-CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` verdicts.
+CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS`, `CAVEAT`, and `SKIP` verdicts (CAVEAT exit-code 2 → CI green per [P-1 §6.4](engineering/parity_standard.md#64-exit-code-policy-b)).
 
 ---
 
@@ -30,10 +38,10 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 | 8 | `kalman_filter.py` + `kalman_smoother.py` | `2a_kalman_filter_smoother` | R `dlm` + R `KFAS` | Closed-form (drift-banded) | fast | PASS (with documented dlm-vs-KFAS log-lik methodology offset) | `reports/2a_kalman_audit.md` | `harness/checks/kalman_filter.py` |
 | 9 | `stochastic_volatility.py` (Gaussian) | `2b_mcmc_sv_gaussian` | R `stochvol::svsample` | MCMC samplers | slow | PASS (with caveat on sigma_eta prior divergence) | `reports/2b_mcmc_sv_audit.md` | `harness/checks/mcmc_sv_gaussian.py` |
 | 10 | `stochastic_volatility.py` (Student-t) | `2c_mcmc_sv_student_t` | R `stochvol::svtsample` | MCMC samplers | slow | PASS (with caveat on ν posterior divergence) | `reports/2c_student_t_sv_audit.md` | `harness/checks/mcmc_sv_student_t.py` |
-| 11 | `tbats_forecast.py` | `1b_tbats` (audit-script only) | R `forecast::tbats` + Python `tbats` | MLE-fit | (TBD) | PENDING (harness promotion) — Phase 3 Batch 1 | `reports/1b_tbats_audit.md` | (deprecated `scripts/audit_1b_tbats.py`; needs harness check) |
+| 11 | `tbats_forecast.py` | `p3_tbats` (promoted at Session 3) | R `forecast::tbats` + Python `tbats` | MLE-fit | slow | **PASS** | `reports/p3_tbats_audit.md` | `harness/checks/p3_tbats.py` |
 | 12 | `transformer_forecast.py` (attention-capture only) | `3f_transformer_attention` | PyTorch native `nn.MultiheadAttention(need_weights=True)` | DL deterministic-flag | fast | **PASS** | `reports/3f_attention_audit.md` | `harness/checks/transformer_attention.py` |
 
-**Verification Initiative summary:** 12 wrappers covered; 11 PASS, 1 PENDING harness promotion (`tbats_forecast.py`).
+**Verification Initiative summary:** 12 wrappers covered; **all 12 PASS**. `tbats_forecast.py` audit-script promotion to harness check completed at Phase 3 Session 3 (Batch 1).
 
 ---
 
@@ -194,11 +202,11 @@ Documentation phase (Sessions 15-17) + closeout (Session 18) per Item 13 lock:
 
 ---
 
-## Aggregate progress (FINAL — Phase 3 batch-execution close)
+## Aggregate progress (FINAL — Phase 3 closed)
 
 | Metric | Value |
 |---|---:|
-| Phase 1+2 covered (Verification Initiative) | 12 wrappers |
+| Phase 1+2 covered (Verification Initiative) | 12 wrappers (all PASS) |
 | Phase 3 in-scope total | 70 audit deliverables |
 | **Phase 3 covered (FINAL)** | **70 / 70** (100%; Batches 1-10 complete) |
 | Phase 3 remaining | **0 — COMPLETE** |
@@ -207,11 +215,43 @@ Documentation phase (Sessions 15-17) + closeout (Session 18) per Item 13 lock:
 | Phase 3 CAVEAT | 5 (7% — p3_stl, p3_mstl, p3_star, p3_nar_narx, p3_emd_hht) |
 | Phase 3 SKIP-graceful | 1 (p3_x13 — Tier C runtime) |
 | Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
-| Phase 3 sessions used (batch-execution) | 13 (S2–S14) — **5 sessions ahead of locked 17-session horizon** |
-| Pattern A wrappers | **46** (66% of all wrappers) |
+| Total parity checks under CI | **82** (76 fast + 6 slow; 70 Phase 3 + 12 pre-Phase-3 inherited) |
+| Phase 3 sessions used (batch-execution) | 13 (S2–S14) |
+| Phase 3 sessions used (documentation) | 3 (S15–S17) |
+| Phase 3 sessions used (closeout) | 1 (S18) |
+| **Total Phase 3 sessions** | **17** (vs original master plan budget 18-22; vs locked Item 13 horizon 17) |
+| Pattern A wrappers | **46** (66% of Phase 3 in-scope) |
 | Pattern A.1 same-library sub-class | **18** wrappers (locked at scale) |
+| Pattern A.2 cross-package bit-exact | ~12 wrappers |
+| Pattern A.3 self-parity / paper-formula reimpl | ~10 wrappers |
 | Pattern F concrete invariants | **14** |
-| Pattern J catalog entries | **11** (B.1-B.6 sections in `docs/engineering/parity_diagnostic_reference.md`) |
-| Cross-batch patterns surfaced | A-H + I/J/K candidates fully populated; A.1 dominant; K → A path documented for 5 wrappers |
+| Pattern J catalog entries | **11** (B.1-B.6 sections in P-2) |
+| Pattern I sign/scale instances | **6** (P-2 Section E) |
+| DSCD instances | **4** across 3 sub-classes (P-2 Section F) |
+| Banked items resolved | **18 / 18** (5 RESOLVED at S12-S13 in-execution; 13 closed across S15-S17 documentation phase) |
+| Cross-batch patterns surfaced | A–H + I/J/K candidates fully populated; A.1 dominant; K → A path for 5 wrappers; J resolution sub-patterns J.A/J.B/J.C |
 
-**Last updated:** 2026-04-29 (Phase 3 Session 14 close — Batch 10 COMPLETE; **Phase 3 batch-execution phase COMPLETE at 70/70 wrappers covered, 5 sessions ahead of locked closure horizon**).
+## Documentation set (FINAL)
+
+| Document | Type | Version | Issued at |
+|---|---|---|---|
+| [P-1 parity standard](engineering/parity_standard.md) | Directive ("must") | v1.0.0 | Session 15 (commit `04054a4`) |
+| [P-2 parity diagnostic reference](engineering/parity_diagnostic_reference.md) | Descriptive reference / playbook | v1.0.0 | Session 16 (commit `3b08431`) |
+| [P-3 parity empirical findings](engineering/parity_empirical_findings.md) | Descriptive narrative | v1.0.0 | Session 17 (commit `dedb89c`) |
+| **P-4 status tracker (this document)** | Authoritative coverage data | **v1.0.0** | **Session 18 closeout** |
+
+## Phase 3.5 candidates (banked at P-3 §6)
+
+For forward-look:
+
+1. **Item #9 — `single_impl_mle` band tightening:** evidence from `p3_var` (8.1 orders headroom), `p3_vecm` (13 orders), `p3_pca` (8 orders). Add new `single_impl_mle` verdict_class with 1e-5 abs / 1e-4 rel band; migrate the 3 wrappers; audit other current `mle_fit`-class wrappers.
+2. **Item #10 — Per-metric bands within `em_stochastic`:** evidence from HMM (means 1e-5 abs vs transmat 0.05-0.25). Extend tolerance ladder schema to support per-metric granularity within a single verdict_class.
+3. **Manifest re-pin cadence:** `MANIFEST.toml`'s `next_review` fired during batch execution without scheduled action. First quarterly re-pin window at Phase 3.5 entry.
+4. **`parity-slow.yml` install matrix cleanup:** stale install lists (missing `prophet`, `dtaidistance`, `reservoirpy`, etc.) cause SKIPs in slow-tier nightly runs. Informative-not-failing per harness SKIP convention but worth fixing for full slow-tier coverage.
+5. **`scripts/` cleanup:** 12 deprecated Phase 1 audit scripts under `tools/reference_parity/scripts/` superseded by `harness/checks/`. Defer cleanup to Phase 3.5 to avoid bundling with closeout commit.
+6. **X-13 binary on Linux CI:** investigate whether `x13as` package is feasible in a Linux CI runner (Ubuntu has it in some distributions). If yes, add Linux-only slow-tier job for `p3_x13`.
+7. **DOCUMENTED-DIVERGENCE first-instance reservation:** when this verdict first surfaces in post-Phase-3 work, document classification recipe in P-2.
+
+---
+
+**Last updated:** 2026-04-29 (**Phase 3 Session 18 close — PHASE 3 FULLY CLOSED**. 70/70 wrappers covered, 0 BLOCK, 18/18 banked items resolved, P-1/P-2/P-3 v1.0.0 + P-4 v1.0.0 issued. Closure at Session 18 vs original master plan budget Session 27 = 10-session under).

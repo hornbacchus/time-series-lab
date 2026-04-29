@@ -9,21 +9,45 @@ calibration-audit status: parameter-sweep + real-data stress
 See `plans/calibration_audit_phase1_2026_04_25.md` for the
 Phase 1 design audit and methodology.
 
-> **Engineering reference (post-Session 29 consolidation):**
-> CAI's institutional knowledge is now consolidated into three
-> engineering documents under `docs/engineering/`:
+> **Engineering reference (post-Session 29 consolidation +
+> Phase 3 reference-parity close):**
+> Institutional knowledge is consolidated into engineering
+> documents under `docs/engineering/`. CAI established the
+> wrapper-development discipline (C-1/C-2/C-3); Phase 3
+> reference-parity established the parity-verification
+> discipline (P-1/P-2/P-3). Both standards are binding for
+> new wrapper PRs along orthogonal dimensions per
+> [P-1 §9](engineering/parity_standard.md#9-cross-reference-to-wrapper-development-standard-c-1).
 >
-> - **[Wrapper Development Standard](engineering/wrapper_development_standard.md)** —
+> **Wrapper-development discipline (CAI):**
+> - **[C-1: Wrapper Development Standard](engineering/wrapper_development_standard.md)** —
 >   directive ("must"); binding for new wrapper PRs.
-> - **[Validation Patterns Reference](engineering/validation_patterns_reference.md)** —
+> - **[C-2: Validation Patterns Reference](engineering/validation_patterns_reference.md)** —
 >   diagnostic tests + fix patterns + per-finding cross-reference.
-> - **[CAI Phase 2 Empirical Findings](engineering/cai_empirical_findings.md)** —
+> - **[C-3: CAI Phase 2 Empirical Findings](engineering/cai_empirical_findings.md)** —
 >   descriptive synthesis of "what we learned" across 28 sessions.
 >
+> **Parity-verification discipline (Phase 3 reference-parity,
+> closed at Session 18 — 2026-04-29):**
+> - **[P-1: Parity Standard](engineering/parity_standard.md)** v1.0.0 —
+>   directive ("must"); binding for new wrapper PRs (parity
+>   dimension). Pre-merge checklist for parity is at P-1 §8.
+> - **[P-2: Parity Diagnostic Reference](engineering/parity_diagnostic_reference.md)** v1.0.0 —
+>   descriptive reference / playbook (Pattern J catalog,
+>   Pattern A taxonomy, structural-invariants registry,
+>   DSCD diagnostic axes).
+> - **[P-3: Parity Empirical Findings](engineering/parity_empirical_findings.md)** v1.0.0 —
+>   descriptive narrative (Phase 3 batch-execution + doc
+>   phase synthesis; 70/70 wrappers covered; 0 BLOCK).
+> - **[P-4: Per-Wrapper Status Tracker](reference_parity_status.md)** v1.0.0 —
+>   authoritative coverage data tracker.
+>
 > Per-session findings docs under `docs/calibration_audit/`
-> remain as the audit trail for future re-investigation.
-> The three engineering docs are the primary reference for
-> day-to-day wrapper development.
+> and `docs/reference_parity/` remain as audit trails for
+> future re-investigation.
+> The C-1/C-2/C-3 + P-1/P-2/P-3/P-4 documents are the primary
+> reference for day-to-day wrapper development + parity
+> verification.
 
 ## CAI Phase 2: 28 sessions COMPLETE — TRUE CYCLE CLOSURE 2026-04-28
 
