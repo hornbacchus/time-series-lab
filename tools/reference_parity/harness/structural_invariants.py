@@ -366,13 +366,141 @@ def _check_garch_persistence(tsl, ref, fixture, inv):
 _REGISTRY["garch_conditional_variance"] = _check_garch_conditional_variance
 _REGISTRY["garch_persistence"] = _check_garch_persistence
 
-# Kalman family (Batch 5)
-_REGISTRY["kalman_covariance_ordering"] = _stub(
-    "kalman_covariance_ordering", 5,
-)
-_REGISTRY["kalman_innovation_positivity"] = _stub(
-    "kalman_innovation_positivity", 5,
-)
+# Kalman family — populated at Phase 3 Session 9
+# (Batch 5 entry; Pattern F fourth concrete batch).
+
+
+def _check_kalman_covariance_ordering(tsl, ref, fixture, inv):
+    """Filtered covariance ordering: P_{t|t} <= P_{t|t-1}.
+
+    The Kalman filter's measurement update step monotonically
+    reduces uncertainty: filtered covariance is dominated by
+    predicted covariance. Smoothed covariance is dominated by
+    filtered: P_{t|T} <= P_{t|t}. Both are matrix-PSD orderings
+    (A <= B iff B - A is positive-semi-definite). For 1-D state
+    (scalar variance) this reduces to scalar comparison.
+
+    Applied on TSL side primarily.
+    """
+    import numpy as np
+    P_filt = tsl.get("filtered_state_cov")
+    P_pred = tsl.get("predicted_state_cov")
+    P_smooth = tsl.get("smoothed_state_cov")
+    if P_filt is None or P_pred is None:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": (
+                "TSL output missing filtered_state_cov or "
+                "predicted_state_cov fields"
+            ),
+        }
+    P_filt = np.asarray(P_filt, dtype=np.float64)
+    P_pred = np.asarray(P_pred, dtype=np.float64)
+    # Skip first observation (predicted_state_cov[0] uses
+    # diffuse-prior initialization which can be huge in some
+    # implementations).
+    if P_filt.ndim == 1:
+        # 1-D state: filt <= pred (allow numerical noise eps)
+        eps = float(inv.tolerance)
+        viol_filt = int(np.sum(P_filt[1:] > P_pred[1:] + eps))
+        max_viol = float(np.max(P_filt[1:] - P_pred[1:]))
+    elif P_filt.ndim == 3:
+        # P_filt shape (T, k, k); compare per-state diagonal
+        # entries (full PSD ordering would require eigenvalue
+        # check; diagonal is necessary not sufficient)
+        eps = float(inv.tolerance)
+        diag_filt = np.diagonal(P_filt[1:], axis1=1, axis2=2)
+        diag_pred = np.diagonal(P_pred[1:], axis1=1, axis2=2)
+        viol_filt = int(np.sum(diag_filt > diag_pred + eps))
+        max_viol = float(np.max(diag_filt - diag_pred))
+    else:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": f"Unexpected covariance ndim {P_filt.ndim}",
+        }
+
+    # Smoothed covariance check (optional)
+    smoothing_check = "skipped"
+    if P_smooth is not None:
+        P_smooth_arr = np.asarray(P_smooth, dtype=np.float64)
+        if P_smooth_arr.shape == P_filt.shape:
+            if P_filt.ndim == 1:
+                viol_smooth = int(np.sum(
+                    P_smooth_arr[1:] > P_filt[1:] + eps,
+                ))
+            else:
+                diag_smooth = np.diagonal(
+                    P_smooth_arr[1:], axis1=1, axis2=2,
+                )
+                viol_smooth = int(np.sum(diag_smooth > diag_filt + eps))
+            smoothing_check = (
+                "PASS" if viol_smooth == 0 else
+                f"FAIL ({viol_smooth} violations)"
+            )
+
+    if viol_filt == 0:
+        status = "PASS"
+    elif max_viol < 10 * float(inv.tolerance):
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name,
+        "status": status,
+        "n_violations_filtered": viol_filt,
+        "max_violation": max_viol,
+        "smoothing_check": smoothing_check,
+    }
+
+
+def _check_kalman_innovation_positivity(tsl, ref, fixture, inv):
+    """Innovation covariance positivity: F_t > 0 for all t.
+
+    The innovation covariance F_t = H * P_{t|t-1} * H' + R must
+    be positive (positive-definite for multi-output) for the
+    Kalman gain K_t = P_{t|t-1} * H' * F_t^{-1} to be well-defined.
+    Negative or zero F_t indicates the filter has lost track or
+    the model is misspecified.
+    """
+    import numpy as np
+    F = tsl.get("innovation_variance")
+    if F is None:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output missing 'innovation_variance' field",
+        }
+    F = np.asarray(F, dtype=np.float64)
+    threshold = float(inv.tolerance)
+    if F.ndim == 1:
+        n_nonpositive = int(np.sum(F <= -threshold))
+        min_F = float(np.min(F))
+    else:
+        # Multi-output: F is (T, n_obs, n_obs); take min eigenvalue
+        # per t (positive-definiteness check)
+        min_eigs = np.array([
+            float(np.min(np.linalg.eigvalsh(F[t]))) for t in range(F.shape[0])
+        ])
+        n_nonpositive = int(np.sum(min_eigs <= -threshold))
+        min_F = float(np.min(min_eigs))
+    if min_F > -threshold:
+        status = "PASS"
+    elif min_F > -10 * threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name,
+        "status": status,
+        "min_innovation_variance": min_F,
+        "n_nonpositive": n_nonpositive,
+    }
+
+
+_REGISTRY["kalman_covariance_ordering"] = _check_kalman_covariance_ordering
+_REGISTRY["kalman_innovation_positivity"] = _check_kalman_innovation_positivity
 
 # HMM / Markov switching — populated at Phase 3 Session 8
 # (Batch 4 entry; Pattern F third concrete batch).

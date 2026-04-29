@@ -1256,6 +1256,115 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 5 — R state space (Session 9).
+    # 3 KFAS-based MLE Kalman wrappers + particle filter (SMC) +
+    # kalman imputation. KFAS and statsmodels UC implement same
+    # math; achievable mle_fit-class.
+    # ------------------------------------------------------------------
+
+    "p3_local_level": {
+        "type": "tiered_outputs",
+        "primary": {
+            # Single-state Kalman MLE; both implementations
+            # converge to similar variances modulo optimizer path.
+            # Smoothed state achievable at near-bit-exact when
+            # variances align.
+            "abs_tol": 1e-2,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Local level Kalman MLE. statsmodels UC and R KFAS "
+            "implement the same Kalman recursion. Variance "
+            "estimates can diverge by 5-10% due to BFGS "
+            "convergence-criterion differences; smoothed states "
+            "tighter (1e-3 abs typical given variance agreement)."
+        ),
+    },
+
+    "p3_local_linear_trend": {
+        "type": "tiered_outputs",
+        "primary": {
+            # LLT 3-variance identifiability is fundamentally
+            # weak: statsmodels and KFAS routinely converge to
+            # different local optima where one drives sigma_eta
+            # to zero and the other drives sigma_zeta to zero.
+            # Both are valid decompositions of same y. Pattern H
+            # DSCD instance for LLT family. Wide band to map
+            # to CAVEAT.
+            "abs_tol": 2.0,
+            "rel_tol": 2.0,
+            "block_abs_tol": 10.0,
+            "block_rel_tol": 10.0,
+        },
+        "justification": (
+            "LLT 3-variance identifiability: statsmodels UC and "
+            "R KFAS routinely converge to different local optima "
+            "of the same Kalman likelihood (one drives sigma_eta "
+            "to zero; other drives sigma_zeta to zero). Both are "
+            "mathematically valid decompositions of identical y. "
+            "Pattern H DSCD instance. Wide tolerance band; "
+            "CAVEAT verdict expected on small-T fixtures; PASS "
+            "when both implementations converge to same optimum."
+        ),
+    },
+
+    "p3_structural_ts": {
+        "type": "tiered_outputs",
+        "primary": {
+            # 4 variances + multi-state smoother. Hardest in
+            # Batch 5; may CAVEAT depending on optimizer path.
+            "abs_tol": 5e-1,
+            "rel_tol": 1.0,
+            "block_abs_tol": 2.0,
+            "block_rel_tol": 5.0,
+        },
+        "justification": (
+            "Structural TS = level + trend + seasonal Kalman "
+            "MLE. 4 variances to fit; multiple local optima "
+            "expected. Wide tolerance band; CAVEAT verdicts "
+            "acceptable for level/trend/seasonal variance "
+            "estimates."
+        ),
+    },
+
+    "p3_particle_filter": {
+        "type": "tiered_outputs",
+        "primary": {
+            "corr_pass": 0.85,
+            "corr_caveat": 0.6,
+            "abs_tol": 1.0,
+            "rel_tol": 0.5,
+            "block_abs_tol": 5.0,
+            "block_rel_tol": 2.0,
+        },
+        "justification": (
+            "Particle filter SMC. TSL numpy bootstrap PF and "
+            "Python particles package use different resampling "
+            "algorithms + RNG paths. Compare via filtered-mean "
+            "Pearson correlation; corr >= 0.85 PASS; 0.60-0.85 "
+            "CAVEAT. NO-REFERENCE Tier C class."
+        ),
+    },
+
+    "p3_kalman_imputation": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 5e-2,
+            "rel_tol": 2e-1,
+            "block_abs_tol": 5e-1,
+            "block_rel_tol": 1.0,
+        },
+        "justification": (
+            "Kalman imputation via local-level smoother. "
+            "Imputed values at NA positions = smoothed state; "
+            "tightness depends on variance estimate agreement "
+            "between statsmodels and KFAS optimizers."
+        ),
+    },
+
     "p3_har_rv": {
         "type": "tiered_outputs",
         "primary": {

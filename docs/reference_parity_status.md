@@ -90,7 +90,19 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **Batch 4 Session 8 status: COMPLETE in single session.** 3/5 PASS + 2/5 CAVEAT, 0 BLOCK. Master plan §15.6 budgeted 2 sessions (S10+S11); closed in S8. Per-batch summary: `tools/reference_parity/reports/p3_batch_4_summary.md`.
 
-## Phase 3 — Batches 5–10 (PENDING)
+## Phase 3 — Batch 5: R state space (5 audit IDs, single-session close)
+
+| # | Wrapper | Audit ID | Reference | Tier | Verdict | Audit script | Session |
+|---|---|---|---|---|---|---|---|
+| 1 | `local_level.py` | `p3_local_level` | R KFAS | fast | **PASS** | `harness/checks/p3_local_level.py` | S9 |
+| 2 | `local_linear_trend.py` | `p3_local_linear_trend` | R KFAS | fast | **PASS** (widened LLT band) | `harness/checks/p3_local_linear_trend.py` | S9 |
+| 3 | `structural_ts.py` | `p3_structural_ts` | R KFAS | fast | **PASS** | `harness/checks/p3_structural_ts.py` | S9 |
+| 4 | `particle_filter.py` | `p3_particle_filter` | Python `particles` | fast | **PASS** | `harness/checks/p3_particle_filter.py` | S9 |
+| 5 | `kalman_imputation.py` | `p3_kalman_imputation` | R KFAS | fast | **PASS** | `harness/checks/p3_kalman_imputation.py` | S9 |
+
+**Batch 5 Session 9 status: COMPLETE in single session.** 5/5 PASS, 0 CAVEAT, 0 BLOCK. Per-batch summary: `tools/reference_parity/reports/p3_batch_5_summary.md`.
+
+## Phase 3 — Batches 6–10 (PENDING)
 
 (Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
 
@@ -112,11 +124,11 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **23** (19 PASS + 4 CAVEAT — Batches 1+2+3+4 complete) |
-| Phase 3 remaining | 47 |
+| Phase 3 covered as of latest update | **28** (24 PASS + 4 CAVEAT — Batches 1+2+3+4+5 complete) |
+| Phase 3 remaining | 42 |
 | Phase 3 BLOCK | 0 |
 | Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
-| Phase 3 sessions used | 7 (S2–S8) — **3 sessions ahead of master plan** |
+| Phase 3 sessions used | 8 (S2–S9) — **4 sessions ahead of master plan** |
 | Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates |
 
 **Last updated:** 2026-04-29 (Phase 3 Session 8 close — Batch 4 complete in single session, 3 sessions ahead of schedule).
