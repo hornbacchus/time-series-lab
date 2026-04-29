@@ -87,14 +87,26 @@ class VecmParity(P3ParityCheck):
     tier = "fast"
     fixture_id = ""
 
-    verdict_class = "mle_fit"
+    # Phase 3.5 Session 3 (Item 1): migrated from `mle_fit` to
+    # `single_impl_mle`. Phase 3 Session 7 measured 9.99e-16 abs
+    # (beta after sign normalization) and 2.78e-13 abs (alpha) —
+    # 13 orders of magnitude headroom inside the canonical mle_fit
+    # 1e-3 band. Both implementations reduce to closed-form OLS
+    # on the cointegrating vectors after Johansen's reduced-rank
+    # regression collapses to its analytical solution; only
+    # invisible optimizer convergence noise separates them.
+    verdict_class = "single_impl_mle"
     verdict_class_rationale = (
-        "VECM Johansen MLE: statsmodels `VECM.fit` and R "
-        "`urca::ca.jo`+`vars::vec2var` implement the same "
-        "reduced-rank regression algorithm. Coefficients agree "
-        "at MLE-class tolerance (1e-3 abs); cointegrating-rank "
-        "determination is integer-valued and should match "
-        "exactly modulo near-critical-value boundary cases."
+        "VECM Johansen reduces to closed-form OLS on the "
+        "cointegrating vectors. statsmodels `VECM.fit` and R "
+        "`urca::ca.jo`+`vars::vec2var` implement identical "
+        "reduced-rank regression math; both arms produce machine-"
+        "precision-identical betas (Phase 3 Session 7 measured "
+        "9.99e-16 abs after sign normalization). The single-"
+        "implementation MLE classification reflects that the "
+        "underlying linear algebra is identical between the two "
+        "arms — only optimizer convergence-criterion noise "
+        "(invisible at this regression scale) separates them."
     )
 
     structural_invariants = (

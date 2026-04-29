@@ -51,6 +51,7 @@ from reference_parity.harness.base import ParityResult, Tier  # noqa: F401 — r
 VerdictClass = Literal[
     "closed_form",
     "mle_fit",
+    "single_impl_mle",
     "state_space_reform",
     "iterative_loess",
     "mcmc",
@@ -61,10 +62,22 @@ VerdictClass = Literal[
 ]
 
 
-# Frozen set for fast lookup + future-extension safety
+# Frozen set for fast lookup + future-extension safety.
+#
+# Phase 3.5 Session 3 (Item 1): added ``single_impl_mle`` between
+# ``closed_form`` and ``mle_fit``. Use for wrappers where:
+# - The TSL backend and reference reduce to the same closed-form
+#   linear-algebra solve (e.g., reduced-rank regression that
+#   collapses to OLS on the cointegration vectors), and
+# - Achieved tolerance demonstrates >=3 orders of magnitude
+#   headroom inside the canonical mle_fit band (1e-3 abs / 1e-2
+#   rel).
+# Band: 1e-5 abs / 1e-4 rel (per master plan §4 Item 1 spec;
+# 1.5x achieved-tolerance margin per §4 risk 4 mitigation).
 _REGISTERED_VERDICT_CLASSES = frozenset({
     "closed_form",
     "mle_fit",
+    "single_impl_mle",
     "state_space_reform",
     "iterative_loess",
     "mcmc",

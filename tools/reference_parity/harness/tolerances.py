@@ -1046,12 +1046,19 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
     },
 
     "p3_vecm": {
+        # Phase 3.5 Session 3 (Item 1): tightened from canonical
+        # mle_fit band (1e-3 abs / 1e-2 rel) to single_impl_mle
+        # band (1e-5 abs / 1e-4 rel). Phase 3 Session 7 achieved
+        # 9.99e-16 abs (beta) / 2.78e-13 abs (alpha) — 13 orders
+        # of headroom inside the new band still. 1.5x margin per
+        # master plan §4 risk 4 mitigation: 1e-5 abs is 1.5e+8
+        # × the actual achieved 9.99e-16 abs.
         "type": "tiered_outputs",
         "primary": {
-            "abs_tol": 1e-2,
-            "rel_tol": 1e-2,
-            "block_abs_tol": 1e-1,
-            "block_rel_tol": 1e-1,
+            "abs_tol": 1e-5,
+            "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
         },
         "secondary": {
             "abs_tol": 5.0,
@@ -1060,15 +1067,19 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "block_rel_tol": 5e-1,
         },
         "justification": (
-            "VECM Johansen MLE (reduced-rank regression). "
-            "statsmodels VECM and R urca::ca.jo + vars::vec2var "
-            "implement the same algorithm; alpha-beta sign + "
+            "VECM Johansen reduces to closed-form OLS on the "
+            "cointegrating vectors. statsmodels VECM and R "
+            "urca::ca.jo + vars::vec2var implement identical "
+            "reduced-rank regression math; alpha-beta sign + "
             "normalization convention differs (statsmodels "
             "normalizes beta first element to 1; R's @V "
             "eigenvectors have arbitrary norm). The compare "
             "function applies a normalize-and-align step before "
-            "comparison. Tolerance band MLE-class (1e-2 abs / "
-            "1e-2 rel)."
+            "comparison. Phase 3.5 Session 3 (Item 1) tightened "
+            "to single_impl_mle band (1e-5 abs / 1e-4 rel) — "
+            "achieved 9.99e-16 abs in Phase 3 Session 7 audit, "
+            "13 orders of headroom; 1e-5 floor preserves "
+            "subprocess CSV roundtrip noise margin."
         ),
     },
 
