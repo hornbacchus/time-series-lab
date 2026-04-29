@@ -188,7 +188,7 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 Documentation phase (Sessions 15-17) + closeout (Session 18) per Item 13 lock:
 
 - **Session 15 — P-1 parity standard:** **COMPLETE** — `docs/engineering/parity_standard.md` issued v1.0.0. Binding directive for new wrapper PRs (parity dimension). 11 sections: purpose/scope, four-verdict closure rule, output-surface discipline, reference-tier policy, tolerance bands per class, CI tier classification, manifest pinning protocol, pre-merge checklist, cross-reference to wrapper-development standard, empirical-additions Phase 3 surfaced (Pattern A.1 default, self-parity pattern, PyBridge subprocess-only, CAVEAT exit-code policy), Trigger 8/9 candidates.
-- **Session 16:** P-2 diagnostic reference (partially populated at `docs/engineering/parity_diagnostic_reference.md`)
+- **Session 16 — P-2 diagnostic reference:** **COMPLETE** — `docs/engineering/parity_diagnostic_reference.md` v1.0.0 issued. 8 sections (A–H): tolerance class taxonomy locked at 11 classes (A); Pattern J catalog complete with 11 entries across 6 sub-sections (B); Pattern A taxonomy formalized into A.1 same-library / A.2 cross-package / A.3 self-parity (C); Pattern F structural-invariants registry with 14 concrete invariants + 4-step new-wrapper playbook + wavelet-mode interaction note (D); Pattern I sign/scale convention alignment (E); DSCD diagnostic-axis registry with 3 sub-classes + 4 instances (F); Pattern J resolution sub-patterns J.A/J.B/J.C (G). Banked items #1, #4, #11, #18, #20 closed at P-2 venue.
 - **Session 17:** P-3 empirical findings synthesis
 - **Session 18:** CI workflow finalization + P-4 status tracker finalization + Phase 3 closeout commit
 

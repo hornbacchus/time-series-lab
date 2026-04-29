@@ -16,11 +16,229 @@ notes once a pattern recurs across 3+ wrappers.
 
 ---
 
-## Section A — Tolerance class taxonomy
+## Section A — Tolerance Class Taxonomy
 
-(Deferred to Session 14 / check-in 2 triage. The tolerance ladder
-in `tools/reference_parity/harness/tolerances.py` is currently the
-authoritative ladder for Phase 3.)
+**Status:** Locked at Session 16 close. The 11 verdict_class
+values below are the authoritative class taxonomy used by
+`harness/tolerances.py` and required-declared on every parity
+check via the `verdict_class` attribute (binding per
+[P-1 §5.1](parity_standard.md#51-verdict_class-taxonomy-11-classes--locked-session-14)).
+
+This section explains *what each class means* and *when to
+pick it* for new wrappers. Bands listed are the canonical
+defaults; per-wrapper widening is acceptable with audit-report
+justification.
+
+### A.1 — `closed_form` (1e-10 abs / 1e-10 rel)
+
+**Use when:** the algorithm is closed-form arithmetic
+(eigendecomposition, FFT, OLS, classical decomposition,
+quantile of sorted array). No iteration, no optimization, no
+random state. Both implementations execute identical math.
+
+**Empirical floor:** machine-precision (~1e-13 to 1e-16).
+The 1e-10 abs floor in tolerances.py leaves headroom for
+subprocess CSV roundtrip noise and BLAS-implementation drift.
+
+**21 wrappers in Phase 3** at this band:
+
+- `1c_bvar_irf_fevd` (Phase 1: 4.58e-16)
+- `3e_mint_family` (Phase 1: 4.66e-15)
+- `p3_intermittent` (S3: 3.77e-15)
+- `p3_classical_decompose` (S4: 7.11e-14)
+- `p3_har_rv` (S6: 8.88e-16)
+- `p3_var` (S7: 7.22e-16)
+- `p3_vecm` (S7: 9.99e-16)
+- `p3_pca` (S7: 7.99e-15)
+- `p3_local_level`, `p3_kalman_imputation` (S9; closed-form
+  when MLE optima align)
+- `p3_adf` (S10: 1.07e-14)
+- `p3_kpss` (S10: 5.55e-17)
+- `p3_pp` (S10: 2.09e-06; Pattern J widening for HAC kernel
+  divergence)
+- `p3_ccf` (S14: 1.33e-15)
+- `p3_dtw` (S14: 0.0)
+- `p3_denton_chowlin` (S14: 6.39e-14)
+- `p3_robust_estimators` (S12: 4.22e-15)
+- `p3_loess` (S14: 0.0; Pattern A.1 same-library)
+- `p3_periodogram` (S11: 0.0; Pattern A.1)
+- `p3_wavelet_transform` (S11: 0.0; Pattern A.1)
+- `p3_wavelet_coherence` (S11: 0.0; self-parity)
+
+### A.2 — `mle_fit` (1e-3 abs / 1e-2 rel)
+
+**Use when:** the algorithm requires MLE optimization with a
+deterministic optimizer (BFGS, L-BFGS-B, scoring algorithm,
+Newton-Raphson). Both implementations optimize the same
+likelihood but may converge to slightly different parameter
+values due to optimizer-stopping-criterion differences.
+
+**Master plan §7.1 baseline.** Coefficient-level divergence
+typically 1e-5 to 1e-4 abs; the 1e-3 abs / 1e-2 rel band leaves
+~3 orders of headroom.
+
+**4 wrappers in Phase 3** at this band:
+
+- `p3_arima_manual`, `p3_sarima`, `p3_arimax_sarimax` (S2-S3:
+  ~5e-6 abs typical)
+- `p3_tbats` (S3: harness promotion of Phase 1 audit)
+- `p3_intervention_analysis` (S10: ar1 4.20e-04, omega
+  1.70e-05)
+
+**S12 split candidate (banked Item #2):** evidence from S7
+(p3_var headroom 8.1 orders inside band) and from Batch 2
+GARCH (rugarch boundary attractor at the band's outer edge)
+suggests a future split:
+
+- `single_impl_mle` — TSL backend and reference share
+  optimizer lineage (e.g., both use L-BFGS-B variants);
+  achievable 1e-5 abs typical → tighten band to 1e-5 abs /
+  1e-4 rel
+- `optimizer_divergent_mle` — independent optimizer
+  implementations with different initialization heuristics
+  (arch SLSQP vs rugarch hybrid); keep the §7.1 1e-3 abs /
+  1e-2 rel baseline
+
+Currently use `mle_fit` as the default; refinement deferred
+to Phase 3.5 or P-2 v1.1.
+
+### A.3 — `state_space_reform` (5e-2 abs / 1e-1 rel — widened)
+
+**Use when:** TSL and reference implement the same algorithm
+via mathematically-equivalent but implementationally-different
+state-space reformulations. Hyndman-Khandakar 2008 §6.4
+documents this for ETS (statsmodels exponential-smoothing
+recursion vs R `forecast::ets` state-space innovation form).
+
+**2 wrappers in Phase 3:**
+
+- `p3_ets` (S3; AIC scale offset Pattern D as Secondary
+  documented divergence)
+- `p3_theta` (S3; Hyndman-Billah 2003 reformulation vs
+  Assimakopoulos-Nikolopoulos 2000)
+
+### A.4 — `iterative_loess` (5e-2 abs / 5e-2 rel — widened; CAVEAT-acceptable)
+
+**Use when:** the algorithm uses iterative LOESS smoothing
+with implementation-defined inner-iteration counts +
+LOESS-bandwidth defaults. Per-component divergence ~1e-2 abs
+is reproducible across seeds (deterministic; not MC noise).
+
+**2 wrappers in Phase 3:**
+
+- `p3_stl` (S4; CAVEAT verdict)
+- `p3_mstl` (S4; CAVEAT — non-unique decomposition)
+
+`reroll_on_caveat = False` is the operational default
+(established at S4); CAVEAT does not escalate to BLOCK.
+
+### A.5 — `mcmc` (5e-3 abs / 5e-2 rel — three-outcome PASS / CAVEAT / BLOCK)
+
+**Use when:** the algorithm uses MCMC sampling. Posterior
+moments have inherent MC error O(1/sqrt(N_eff)); tolerance
+must reflect this even when both implementations are
+mathematically correct.
+
+**Severity ladder (locked at Phase 1 Stage B):**
+
+- `< 5%` rel diff → PASS (MC noise band)
+- `5-10%` rel diff → CAVEAT (high but plausibly MC)
+- `>10%` rel diff → CAVEAT escalation; investigate prior
+  parameterization, mixture-component spec, proposal
+  tuning differences (NOT classified as bug)
+
+**2 wrappers in Phase 3** (Phase 1 audit IDs):
+
+- `2b_mcmc_sv_gaussian`
+- `2c_mcmc_sv_student_t`
+
+### A.6 — `em_stochastic` (1e-2 abs / 5e-2 rel — widened)
+
+**Use when:** the algorithm uses EM iteration with multiple
+local optima of the same likelihood surface. HMM transition
+matrix, Markov-switching mean estimates, DFM factor loadings.
+TSL and reference can converge to different local optima
+even on the same fixture.
+
+**Per-metric widening within em_stochastic** (banked Item
+#3): means + log-likelihood typically agree at 1e-5 abs (4+
+orders headroom); transition matrices at 0.05-0.25 abs (0-2
+orders headroom). The right granularity is **per-metric
+within em_stochastic**, not single-band-fits-all.
+
+**5 wrappers in Phase 3:**
+
+- `p3_dfm` (S7: loadings 1.22e-3)
+- `p3_hmm` (S8: means 1.48e-5; transmat 0.237 — 0.3 widened
+  band)
+- `p3_markov_switching` (S8: means 5.91e-5; transmat 5.46e-2)
+- `p3_emd_hht` (S11: CAVEAT — different sifting libraries)
+- `p3_nar_narx` (S8: NO-REFERENCE Tier C correlation-based)
+
+### A.7 — `dl_seed_pinned` (1e-6 abs / 1e-5 rel)
+
+**Use when:** the algorithm uses deep-learning training with
+seed pinning + cuDNN deterministic flag. Same-library self-
+test gives bit-exact reproducibility on float32 outputs;
+1e-6 abs floor accommodates float32 accumulation drift.
+
+**6 wrappers in Phase 3:**
+
+- `p3_lstm_gru`, `p3_tcn`, `p3_nbeats`, `p3_nhits`,
+  `p3_autoencoder`, `p3_esn` (S13: all 0.0 abs)
+
+### A.8 — `bootstrap_distributional` (planned)
+
+**Reserved.** Phase 3 Batch 10 (`p3_block_bootstrap`)
+exercised this class via self-parity at 0.0 abs, classified
+under `closed_form` since seed-pinning makes it deterministic.
+The `bootstrap_distributional` class is reserved for any
+future check that compares bootstrap distribution shapes
+(quantile match, distributional centering) rather than
+seed-pinned identical samples.
+
+### A.9 — `conformal_coverage` (1e-12 abs predictions; slack on coverage)
+
+**Use when:** the algorithm produces conformal prediction
+intervals. Predictions are closed-form (quantile of
+calibration residuals); coverage is probabilistic with finite-
+sample slack.
+
+**1 wrapper in Phase 3:**
+
+- `p3_conformal` (S13: predictions 0.0 abs; coverage 0.8625
+  vs nominal 0.9 within finite-sample slack)
+
+### A.10 — `single_impl_mle` (candidate; not yet locked)
+
+See A.2 above. Banked for Phase 3.5 / P-2 v1.1.
+
+### A.11 — `optimizer_divergent_mle` (candidate; not yet locked)
+
+See A.2 above. Banked for Phase 3.5 / P-2 v1.1.
+
+### A.12 — Selecting a class for new wrappers
+
+Use the following decision tree:
+
+1. **Is the algorithm closed-form (no optimization)?**
+   → `closed_form`
+2. **Is it MLE with a single optimizer family?**
+   → `mle_fit` (until A.10/A.11 split lock)
+3. **Is it state-space reformulation across implementations?**
+   → `state_space_reform`
+4. **Is it iterative LOESS / iterative smoothing?**
+   → `iterative_loess`
+5. **Is it MCMC sampling?**
+   → `mcmc`
+6. **Is it EM with multiple local optima?**
+   → `em_stochastic`
+7. **Is it DL training with seed pinning?**
+   → `dl_seed_pinned`
+8. **Is it conformal prediction?**
+   → `conformal_coverage`
+9. **None of the above?** → audit-report justification
+   required; propose a new class candidate.
 
 ---
 
@@ -336,11 +554,162 @@ runtime-graceful: SKIPs informatively rather than failing.
 
 ---
 
-## Section C — Pattern A taxonomy (formalization deferred)
+## Section C — Pattern A Taxonomy (formalized at Session 16)
 
-(Same-library self-test, closed-form bit-exact, recursion-self-
-parity, Pattern K → A path. Empirically locked at 27 wrappers as
-of Batch 8 close. Formalize at Session 25 / P-2 close.)
+**Status:** Locked at Session 16 close. Pattern A formalized
+into three sub-patterns (A.1 / A.2 / A.3) based on Phase 3
+empirical evidence (46 wrappers in Pattern A at Phase 3
+close).
+
+**Pattern A = "achieves bit-exact or near-machine-precision
+parity"**. The sub-patterns describe *how* the bit-exactness
+is established. All three sub-patterns share the operational
+discipline: **0.0 abs diff or sub-1e-10 abs diff is the
+acceptance bar**, with the only exceptions being subprocess
+CSV roundtrip noise (~1e-14) and BLAS implementation drift.
+
+### C.1 — Sub-pattern A.1: Same-library reproducibility verification
+
+**Definition:** TSL wrapper invokes a single library
+primitive (sklearn, xgboost, lightgbm, scipy, pywt, PyEMD,
+reservoirpy, prophet, statsmodels, PyTorch, etc.). The
+parity check's reference is a **direct second invocation of
+the same library** with identical arguments. Both arms hit
+the same C-implementation; output is bitwise-identical.
+
+**Verifies:** wrapper-level preprocessing bugs, parameter-
+resolution bugs, audit-field rounding regressions.
+
+**Does NOT verify:** TSL-vs-canonical-implementation
+methodology bugs.
+
+**18 wrappers in Phase 3** (locked at Batch 9 close, S13):
+
+| Batch | Wrappers |
+|---|---|
+| 6 | `p3_pelt` |
+| 7 | `p3_periodogram`, `p3_wavelet_transform` |
+| 8 | `p3_random_forest`, `p3_gradient_boosting`, `p3_xgboost`, `p3_lightgbm`, `p3_svr`, `p3_quantile_regression` |
+| 9 | `p3_lstm_gru`, `p3_tcn`, `p3_nbeats`, `p3_nhits`, `p3_autoencoder`, `p3_esn`, `p3_gp`, `p3_prophet` |
+| 10 | `p3_loess` |
+
+**All 18 achieved exactly 0.0 abs diff.**
+
+**P-1 §10.1 designates A.1 as the operational default for
+new Python wrappers.** When the wrapper invokes a single
+trusted library, A.1 is the path of least resistance — no
+need to invent a cross-package reference when the wrapper is
+a UX surface around the canonical implementation.
+
+### C.2 — Sub-pattern A.2: Cross-package bit-exact
+
+**Definition:** TSL and reference are **independent
+implementations** of the same algorithm, but both implement
+identical math (closed-form arithmetic, no optimization, no
+randomness). Cross-package comparison achieves machine
+precision (~1e-13 to 1e-16 abs).
+
+**Verifies:** algorithm-level correctness across two
+independent implementations.
+
+**~12 wrappers in Phase 3:**
+
+- `p3_intermittent` (S3; statsmodels vs R `forecast::croston`
+  — 3.77e-15 abs)
+- `p3_classical_decompose` (S4; statsmodels vs R
+  `stats::decompose` — 7.11e-14)
+- `p3_har_rv` (S6; numpy lstsq vs R `lm()` — 8.88e-16)
+- `p3_var` (S7; statsmodels vs R `vars::VAR` — 7.22e-16)
+- `p3_vecm` (S7; statsmodels vs R urca::ca.jo — 9.99e-16
+  after sign normalization)
+- `p3_pca` (S7; numpy eigh vs sklearn PCA — 7.99e-15)
+- `p3_adf`, `p3_kpss` (S10; statsmodels vs R urca; 1e-14
+  range)
+- `p3_fft_spectrum` (S11; scipy.fft vs numpy.fft — 2.84e-14)
+- `p3_dtw` (S14; numpy reference vs dtaidistance — 0.0)
+- `p3_denton_chowlin` (S14; numpy KKT solve vs R tempdisagg
+  — 6.39e-14)
+- `p3_robust_estimators` (S12; scipy/numpy vs R robustbase
+  — 4.22e-15)
+- `p3_granger` (S14; statsmodels vs R lmtest — 8.53e-14)
+- `p3_ccf` (S14; statsmodels.ccf vs R stats::ccf — 1.33e-15)
+
+### C.3 — Sub-pattern A.3: Self-parity / paper-formula reimplementation
+
+**Definition:** No installable reference exists OR the
+candidate references implement different math. The reference
+is a **from-scratch reimplementation of the algorithm
+directly from the paper**, inline in the check module
+(typically 30-80 LOC). The reimpl mirrors TSL's recursion
+verbatim; both arms execute the same paper formula.
+
+**Verifies:** wrapper-level regressions. Same scope as A.1.
+
+**Does NOT verify:** TSL-vs-canonical-implementation
+methodology bugs (mitigation: audit report MUST cite paper /
+formula source for independent reviewer cross-check).
+
+**~10 wrappers in Phase 3:**
+
+- `p3_bocpd` (S10; Adams-MacKay 2007 NIG-conjugate
+  recursion)
+- `p3_cusum_page_hinkley` (S10; identical recursion)
+- `p3_stl_esd` (S10; statsmodels STL + Rosner 1983 GESD)
+- `p3_wavelet_coherence` (S11; pywt CWT + scipy smoothing)
+- `p3_ssa` (S11; Golyandina-Zhigljavsky 2013 SVD-on-Hankel)
+- `p3_gcc_phat` (S14; Knapp-Carter 1976)
+- `p3_transfer_function` (S14; distributed-lag OLS)
+- `p3_block_bootstrap` (S14; moving-block sampler with seed
+  pinning)
+- `p3_forecast_combination` (S14; inverse-MSE weighted mean)
+- `p3_rolling_origin_cv` (S14; expanding-window loop)
+- `p3_conformal` (S13; split-conformal qhat formula)
+
+### C.4 — Pattern K → Pattern A path (sub-pattern A.3 special case)
+
+**Definition:** The wrapper was originally a Pattern K
+(NO-REFERENCE) candidate because no canonical CRAN/PyPI
+package implemented matching math. Resolution: sub-pattern
+A.3 reimplementation that mirrors TSL's recursion verbatim
+PROMOTES the verdict from CAVEAT (Pattern K) to PASS
+(Pattern A.3).
+
+**5 wrappers in Phase 3** followed this promotion path:
+
+- `p3_bocpd` (PyPI bocd package uses non-conjugate Gaussian
+  prior — would not match TSL's NIG conjugate)
+- `p3_cusum_page_hinkley` (R cpm/changepoint use different
+  formulations)
+- `p3_stl_esd` (Twitter AnomalyDetection R archived from
+  CRAN; no successor)
+- `p3_wavelet_coherence` (R biwavelet uses Liu-Liang-
+  Weisberg 2007 + Monte Carlo significance — different
+  methodology)
+- `p3_ssa` (pyts SSA expects sklearn-API per-row input;
+  doesn't fit 1-D series test)
+
+**Documentation discipline:** the audit report explicitly
+documents the regression-sentinel scope ("catches wrapper-
+level regressions; does NOT catch TSL-vs-canonical-
+implementation methodology bugs") and cites the paper /
+formula source.
+
+### C.5 — Selecting a sub-pattern for new wrappers
+
+Decision tree:
+
+1. **Does TSL invoke a single trusted library primitive
+   (sklearn, scipy, pywt, etc.)?** → A.1 same-library
+   self-test (P-1 §10.1 default)
+2. **Is there an installable canonical reference (R or
+   Python) implementing identical math?** → A.2 cross-
+   package bit-exact
+3. **Neither (1) nor (2)?** → A.3 paper-formula
+   reimplementation. Pattern K candidates promote here when
+   the paper formula is reproducible.
+
+If none of A.1/A.2/A.3 fits, the wrapper falls outside
+Pattern A — see verdict_class taxonomy in Section A.
 
 ---
 
@@ -366,4 +735,368 @@ See `tools/reference_parity/harness/structural_invariants.py`.
 | `conformal_nominal_coverage` | Conformal | **Session 13** |
 | `conformal_interval_containment` | Conformal | **Session 13** |
 
-Future populations: bootstrap (Batch 10), decomposition (open).
+Future populations: bootstrap (deferred — Batch 10 used self-
+parity at 0.0 abs, no invariant population needed),
+decomposition (open).
+
+### D.1 — Pattern F invariant playbook (new wrapper authoring)
+
+When adding a parity check that should declare structural
+invariants, follow this playbook:
+
+#### Step 1 — Identify the invariant class
+
+Match the wrapper's algorithm class against the registered
+invariant types:
+
+| Algorithm class | Registered invariants | Reference |
+|---|---|---|
+| GARCH family (sGARCH, GJR, EGARCH) | `garch_persistence`, `garch_conditional_variance` | S6 populations |
+| VAR / VECM | `var_eigenvalues`, `vecm_cointegration_rank` | S7 populations |
+| Kalman family (local-level, LLT, structural-TS, kalman-imputation) | `kalman_covariance_ordering`, `kalman_innovation_positivity` | S9 populations |
+| HMM / Markov switching | `hmm_row_sums`, `hmm_emission_normalization` | S8 populations |
+| FFT family | `fft_roundtrip`, `fft_energy_conservation` | S11 populations |
+| Wavelet family | `wavelet_inverse_roundtrip`, `wavelet_energy_conservation` | S11 populations |
+| Conformal prediction | `conformal_nominal_coverage`, `conformal_interval_containment` | S13 populations |
+
+If the wrapper's class doesn't match any registered type but
+has natural structural invariants (e.g., bootstrap with
+distributional centering, decomposition with sum-to-y), add
+a NEW invariant type to `harness/structural_invariants.py`
+following the pattern of existing populated checkers.
+
+#### Step 2 — Declare the invariant on the check class
+
+```python
+from reference_parity.harness.structural_invariants import (
+    StructuralInvariant,
+)
+
+class FutureGarchVariantParity(P3ParityCheck):
+    technique_id = "p3_future_garch"
+    verdict_class = "mle_fit"
+    structural_invariants = (
+        StructuralInvariant(
+            name="conditional_variance_positivity",
+            invariant_type="garch_conditional_variance",
+            tolerance=0.0,
+            tolerance_type="absolute",
+        ),
+        StructuralInvariant(
+            name="persistence_below_one",
+            invariant_type="garch_persistence",
+            tolerance=1e-3,  # near-IGARCH boundary slack
+            tolerance_type="relative",
+        ),
+    )
+```
+
+#### Step 3 — Output dict shape requirements
+
+Each registered invariant checker reads specific keys from
+the TSL output dict. The check's `run_tsl` must populate
+those keys:
+
+| Invariant | Required TSL output keys |
+|---|---|
+| `garch_conditional_variance` | `conditional_variance` (1-D ndarray) |
+| `garch_persistence` | `persistence` (scalar) |
+| `var_eigenvalues` | `companion_eig_magnitudes` (1-D ndarray) |
+| `vecm_cointegration_rank` | `cointegrating_rank` (int; on both TSL and ref) |
+| `kalman_covariance_ordering` | `filtered_state_cov`, `predicted_state_cov` (3-D arrays); optional `smoothed_state_cov` |
+| `kalman_innovation_positivity` | `innovation_variance` (1-D or 2-D) |
+| `hmm_row_sums` | `transition_matrix` (2-D, n_states × n_states) |
+| `hmm_emission_normalization` | `emission_means`, `emission_covars` |
+| `fft_roundtrip` | `roundtrip_max_abs` (scalar) |
+| `fft_energy_conservation` | `energy_time`, `energy_freq` (scalars) |
+| `wavelet_inverse_roundtrip` | `roundtrip_max_abs` (scalar) |
+| `wavelet_energy_conservation` | `signal_energy`, `coeff_energy` (scalars) |
+| `conformal_nominal_coverage` | `coverage`, `alpha` (scalars) |
+| `conformal_interval_containment` | `lower`, `upper` (1-D arrays) |
+
+#### Step 4 — Verdict propagation
+
+Per [P-1 §3.3](parity_standard.md#33-tier-propagation-rules),
+**Diagnostic-tier (Pattern F) CAVEAT does NOT propagate to
+overall outcome by default.** Invariant CAVEAT is reported
+in the metrics dict for audit-trail visibility. The check
+author may opt-in to propagation if the invariant carries
+hard-fail semantics.
+
+### D.2 — Pattern F wavelet-mode interaction (banked Item #18)
+
+**Empirical finding (S11):** wavelet energy conservation
+holds at machine precision **only under
+`mode='periodization'`** with power-of-2 signal lengths for
+orthogonal wavelet families (db4, sym4, coif*).
+
+Other modes break Parseval:
+
+- `'symmetric'` (default): boundary samples duplicated; energy
+  inflated by O(boundary_extension_size)
+- `'zero'`: boundary samples zeroed; energy deflated
+- `'reflect'`, `'periodic'`, `'smooth'`: similar boundary
+  effects
+
+**Operational discipline for new wavelet checks:**
+
+1. Use `mode='periodization'` in the parity test fixture
+   (NOT in the TSL wrapper — the wrapper uses whatever mode
+   the user requested).
+2. Ensure fixture length is a power of 2.
+3. Document the mode choice in the audit report.
+
+**Empirical evidence:** `p3_wavelet_transform` (S11) failed
+with mode='symmetric' (BLOCK on energy invariant); switching
+to mode='periodization' resolved to PASS at 5e-16 relative
+energy diff. Same fixture, only mode change.
+
+---
+
+## Section E — Pattern I: Sign / scale convention alignment (banked Item #1)
+
+**Status:** Locked at Session 16 close. **Pattern I**
+formalized as a comparison-side discipline: when TSL and
+reference agree on a quantity *up to sign or scale* (e.g.,
+SVD eigenvectors, factor loadings, eigenvector signs), the
+parity check **must apply a canonicalization step on both
+sides** before comparison. Failure to canonicalize produces
+spurious BLOCK verdicts.
+
+### E.1 — When Pattern I applies
+
+Pattern I applies whenever the underlying mathematical object
+is unique only up to a sign or scale ambiguity:
+
+| Object | Ambiguity | Canonicalization |
+|---|---|---|
+| SVD eigenvectors (PCA, SSA, DFM loadings) | Sign: `±u` produce identical reconstructions | "Max-absolute-entry positive" rule (sklearn `svd_flip` convention) |
+| Markov-switching state labels | Permutation: state 0 / state 1 are interchangeable | Label by ascending mean (lower regime first) |
+| VECM cointegration vectors | Scale + sign: `λβ` produces identical cointegration relation | Normalize first element of β to 1 |
+| Wavelet detail coefficients (some pywt versions) | Sign per band | TSL's `flip_sign_vector` helper (max-abs-positive) |
+
+### E.2 — Canonicalization recipe
+
+Apply the canonicalization **on both arms** before comparing.
+Comparing one canonicalized side to a non-canonicalized
+side produces guaranteed BLOCK.
+
+**Reference implementation** (PCA example from
+`harness/checks/p3_pca.py`):
+
+```python
+def _sign_canonicalize(eigenvectors: np.ndarray) -> np.ndarray:
+    """Apply max-abs-value-positive sign convention per
+    column. Loadings sign is arbitrary up to a flip; this
+    convention removes the ambiguity for parity comparison."""
+    out = eigenvectors.copy()
+    for i in range(out.shape[1]):
+        max_abs_idx = int(np.argmax(np.abs(out[:, i])))
+        if out[max_abs_idx, i] < 0:
+            out[:, i] = -out[:, i]
+    return out
+```
+
+Apply to both TSL's loadings AND reference's loadings.
+Recompute scores from sign-canonicalized loadings (otherwise
+scores ↔ loadings consistency breaks).
+
+### E.3 — Empirical instances in Phase 3
+
+Pattern I was applied (mostly invisibly inside check
+modules) in the following audits:
+
+| Wrapper | Ambiguity | Resolution |
+|---|---|---|
+| `p3_pca` (S7) | Eigenvector sign | `_sign_canonicalize` on both arms |
+| `p3_vecm` (S7) | β scale + sign | Normalize β[0] = 1 |
+| `p3_markov_switching` (S8) | State label permutation | Lower-mean state first |
+| `p3_ssa` (S11) | SVD U / Vt sign | sklearn `svd_flip` convention |
+| `p3_wavelet_transform` (S11) | Detail-band sign (pywt versions) | `flip_sign_vector` helper |
+| `p3_local_linear_trend` (S9) | LLT identifiability (sigma_eta vs sigma_zeta swap) | Pattern H DSCD; not canonicalizable, widened band |
+
+### E.4 — When Pattern I does NOT apply
+
+Some cases that *look* like Pattern I but are actually
+different:
+
+- **Forecast sign / value differences in independently-fit
+  models:** if two forecasters produce different forecast
+  signs on the same input, that's not a canonicalization
+  problem — it's a bug or methodology divergence.
+- **Bootstrap / MCMC sample order:** sample order is
+  random; canonicalize by sorting the samples (e.g., compare
+  sorted quantiles) but this is "sort canonicalization,"
+  classified separately from sign/scale.
+
+---
+
+## Section F — DSCD diagnostic-axis registry (banked Item #4)
+
+**Status:** Locked at Session 16 close. **DSCD = Documented
+Sub-Class Divergence within MLE-fit** (first surfaced at
+S6, sub-taxonomy locked at S9). Tracks wrapper instances
+where TSL backend and reference converge to genuinely
+different local optima of the same likelihood surface (or
+identifiability-ambiguous parameter sets).
+
+### F.1 — DSCD sub-taxonomy (locked at S9)
+
+| Sub-class | Mechanism | Example |
+|---|---|---|
+| **DSCD-MLE** | Independent optimizer implementations land at different local optima of the same likelihood. Often boundary attractors or plateau regions where multiple parameter sets give nearly-equivalent likelihood. | GARCH family (rugarch boundary attractor on alpha+beta≈1) |
+| **DSCD-EM** | Independent EM implementations converge to different local optima of the same EM objective. State-permutation + transition-matrix divergence patterns. | HMM (transmat 0.05-0.25 abs widening); Markov switching means at S8 |
+| **DSCD-Identifiability** | Multiple parameter sets produce identical observable behavior; identifiability is mathematically weak. Not a bug — fundamental property of the model. | LLT 3-variance identifiability (sigma_eta ↔ sigma_zeta); STAR smoothness gamma at orders-of-magnitude divergence |
+
+### F.2 — DSCD instances in Phase 3 (4 wrappers)
+
+| Wrapper | Sub-class | Detail |
+|---|---|---|
+| `p3_sgarch` / `p3_gjr_garch` / `p3_egarch` (S6) | DSCD-MLE | rugarch default `solver='hybrid'` lands at alpha+beta≈1 boundary attractor on ~30% of GARCH(1,1) fixtures; arch reliably finds global optimum on same data. **Resolution:** pin rugarch `solver='gosolnp'` with `n.restarts=10`, `n.sim=2000`, `rseed=20260428` for global-optimum convergence. |
+| `p3_local_linear_trend` (S9) | DSCD-Identifiability | statsmodels UC drives sigma_eta → 0.51 while KFAS drives sigma_eta → 1e-4 (with corresponding flip in sigma_zeta). Both are valid local optima of the same Kalman likelihood. **Resolution:** widened band; classified Pattern H. |
+| `p3_markov_switching` (S8) | DSCD-EM | statsmodels MarkovRegression and R MSwM converge to genuinely different mean estimates on synthetic fixtures (~5e-2 abs); transition matrices diverge by 0.05. **Resolution:** widened band (2.0 abs / 1.0 rel on means). |
+| `p3_star` (S8) | DSCD-Identifiability | Smoothness parameter gamma diverges by orders of magnitude (TSL gamma=1024 vs R gamma=100). Both fit acceptably on observable behavior. **Resolution:** widened gamma band (5e-1 abs / 5e-1 rel); Tier B per master plan §5. |
+
+### F.3 — Diagnostic-axis convention
+
+Each DSCD instance documents three axes in the audit report:
+
+1. **Mechanism axis:** is divergence due to optimizer
+   convergence (MLE) / EM iteration (EM) / identifiability
+   weakness (Identifiability)?
+2. **Reproducibility axis:** does the divergence reproduce
+   across seed re-rolls, or is it MC noise?
+3. **Resolution axis:** can the divergence be eliminated by
+   pinning a solver / initial condition? (Yes for GARCH via
+   gosolnp; No for LLT identifiability — fundamental.)
+
+These three axes give future contributors a structured way
+to triage new DSCD candidates: pinning solver + n_restarts
+typically resolves DSCD-MLE; widening band is the right move
+for DSCD-Identifiability.
+
+### F.4 — DSCD vs Pattern J — what's the difference?
+
+| Aspect | Pattern J (Section B) | DSCD (this section) |
+|---|---|---|
+| Source of divergence | Library-API quirks: parameter naming, default flips, normalization conventions | Mathematical: multiple local optima of same objective; identifiability ambiguity |
+| Resolution | Align comparison logic to handle the quirk (rename, swap, alignment-via-metric) | Pin solver / n_restarts (DSCD-MLE) OR widen band (DSCD-Identifiability) |
+| Verdict | PASS after alignment | PASS after band widening (often CAVEAT-class) |
+| Catalog | Section B Appendix entries | Section F sub-taxonomy + per-instance audit-report documentation |
+
+---
+
+## Section G — Pattern J resolution sub-patterns (banked Item #11)
+
+**Status:** Formalized at Session 16 close. Pattern J
+(reference-library quirks, see Section B catalog) admits
+**three distinct resolution sub-patterns** based on Phase 3
+empirical evidence (3 concrete instances, S6 / S10 / S11).
+This section formalizes the resolution typology so future
+contributors can match a new quirk against the right
+resolution pattern.
+
+### G.1 — Resolution Pattern J.A: Name-mapping in compare()
+
+**When:** the two implementations agree on the math but use
+different *names* for the same economic role (e.g., arch's
+`alpha` vs rugarch's `gamma1` for EGARCH magnitude).
+
+**Resolution:** swap names on one side in the check's
+`compare()` method. The compare logic explicitly maps
+`tsl["alpha"]` ↔ `ref["gamma1"]` based on the documented
+naming-swap.
+
+**Empirical instance:**
+
+- **B.2.5** arch / rugarch alpha-vs-gamma EGARCH naming
+  swap (S6) — resolved by name-mapping in
+  `harness/checks/p3_egarch.py`.
+
+### G.2 — Resolution Pattern J.B: Tolerance widening
+
+**When:** the two implementations agree on the math but
+have internal default-divergence (e.g., HAC kernel weights,
+numerical-conditioning paths). Output values agree to a
+*specific* tolerance band that's wider than the
+canonical-class band.
+
+**Resolution:** widen the tolerance ladder entry
+specifically for that wrapper, with audit-report
+justification documenting the source of the widening.
+
+**Empirical instance:**
+
+- **B.2.1** arch / urca PP HAC kernel divergence (S10) —
+  widened from machine-precision floor to 1e-3 abs / 1e-2
+  rel.
+
+### G.3 — Resolution Pattern J.C: Alignment-via-metric
+
+**When:** the two implementations agree on the math but
+use different output *normalizations* / *scales*. Absolute
+output values differ by a multiplicative factor; the
+*shape* / *peak location* of the output is invariant under
+the scale difference.
+
+**Resolution:** select a comparison metric that's invariant
+under the normalization (peak-location index instead of
+absolute peak power; sign-invariant correlation instead of
+absolute coefficient values).
+
+**Empirical instance:**
+
+- **B.3.1** scipy / astropy Lomb-Scargle normalization
+  (S11) — resolved by comparing peak-frequency LOCATION
+  (normalization-invariant) instead of absolute peak power.
+
+### G.4 — Selecting a resolution pattern for new Pattern J quirks
+
+Decision tree:
+
+1. **Is the quirk a naming difference (different parameter
+   names for the same role)?** → Pattern J.A name-mapping
+2. **Is the quirk an internal-default that produces
+   small-magnitude output drift?** → Pattern J.B tolerance
+   widening
+3. **Is the quirk a normalization / scale convention?** →
+   Pattern J.C alignment-via-metric
+
+If none fits, document the new resolution sub-pattern
+candidate at Section G when it surfaces a third time.
+
+---
+
+## Section H — Document maintenance + change log
+
+This document is **descriptive** — it captures what we
+learned. The directive equivalent is
+[P-1 parity standard](parity_standard.md). When directive
+guidance is needed, P-1 wins; this document explains the
+empirical foundation for the directive.
+
+### H.1 — Update protocol
+
+Living document. Updates happen as new patterns surface in
+post-Phase-3 audits:
+
+1. New Pattern J entry surfaces → append to Section B with
+   a new B.x.y sub-section.
+2. New verdict_class candidate locks → update Section A.
+3. New structural invariant populated → update Section D.
+4. New DSCD instance → update Section F.
+5. New Pattern J resolution sub-pattern (third concrete
+   instance) → formalize a new G.x sub-section.
+
+### H.2 — Change log
+
+| Version | Date | Author | Change |
+|---|---|---|---|
+| 0.1.0 | 2026-04-29 | Claude Code (S12) | Section B Pattern J catalog launched (B.1-B.4). |
+| 0.2.0 | 2026-04-29 | Claude Code (S13) | Section B extended with B.5 framework-incompatibility entries; Section D structural-invariants registry table populated (12 entries). |
+| 0.3.0 | 2026-04-29 | Claude Code (S14) | Section B extended with B.6 master-plan-reference adjustments; Section D extended to 14 invariants. |
+| 1.0.0 | 2026-04-29 | Claude Code (S16) | Section A tolerance class taxonomy locked (11 classes); Section C Pattern A taxonomy formalized (A.1/A.2/A.3 sub-patterns); Section D extended with invariant playbook + wavelet-mode interaction; Section E Pattern I sign/scale (Item #1); Section F DSCD diagnostic-axis registry (Item #4); Section G Pattern J resolution sub-patterns (Item #11). All banked Items #1, #4, #11, #18, #20 closed at this version. |
+
+---
+
+**End of Parity Diagnostic Reference P-2 v1.0.0.**
