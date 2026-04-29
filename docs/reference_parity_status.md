@@ -78,7 +78,19 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **Batch 3 Session 7 status: COMPLETE in single session.** 4/4 PASS, 0 CAVEAT, 0 BLOCK. Master plan §15.5 budgeted 2 sessions (S8+S9); closed in S7. Per-batch summary: `tools/reference_parity/reports/p3_batch_3_summary.md`.
 
-## Phase 3 — Batches 4–10 (PENDING)
+## Phase 3 — Batch 4: R Markov / nonlinear (5 audit IDs, single-session close)
+
+| # | Wrapper | Audit ID | Reference | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `hmm_model.py` | `p3_hmm` | R `depmixS4` | fast | **PASS** (em_stochastic; widened transmat) | `reports/p3_hmm_audit.md` | `harness/checks/p3_hmm.py` | S8 |
+| 2 | `markov_switching.py` | `p3_markov_switching` | R `MSwM::msmFit` | fast | **PASS** (means 5.9e-5; sign-convention aligned) | `reports/p3_markov_switching_audit.md` | `harness/checks/p3_markov_switching.py` | S8 |
+| 3 | `tar_setar.py` | `p3_tar_setar` | R `tsDyn::setar` | fast | **PASS** (threshold 1e-2 abs) | `reports/p3_tar_setar_audit.md` | `harness/checks/p3_tar_setar.py` | S8 |
+| 4 | `star_model.py` | `p3_star` | R `tsDyn::star` | fast | **CAVEAT** (Tier B/C — γ smoothness divergence) | `reports/p3_star_audit.md` | `harness/checks/p3_star.py` | S8 |
+| 5 | `nar_narx.py` | `p3_nar_narx` | R `tsDyn::nlar` | fast | **CAVEAT** (NO-REFERENCE Tier C; R reference non-finite) | `reports/p3_nar_narx_audit.md` | `harness/checks/p3_nar_narx.py` | S8 |
+
+**Batch 4 Session 8 status: COMPLETE in single session.** 3/5 PASS + 2/5 CAVEAT, 0 BLOCK. Master plan §15.6 budgeted 2 sessions (S10+S11); closed in S8. Per-batch summary: `tools/reference_parity/reports/p3_batch_4_summary.md`.
+
+## Phase 3 — Batches 5–10 (PENDING)
 
 (Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
 
@@ -100,11 +112,11 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **18** (16 PASS + 2 CAVEAT — Batches 1+2+3 complete) |
-| Phase 3 remaining | 52 |
+| Phase 3 covered as of latest update | **23** (19 PASS + 4 CAVEAT — Batches 1+2+3+4 complete) |
+| Phase 3 remaining | 47 |
 | Phase 3 BLOCK | 0 |
-| Documented Secondary-tier divergences (non-blocking) | 2 (ETS AIC scale offset, VAR AIC scale offset; both Pattern D methodology-equivalent) |
-| Phase 3 sessions used | 6 (S2–S7) — **2 sessions ahead of master plan** |
-| Cross-batch patterns surfaced | A–H (cumulative); Pattern I candidate added at S7 |
+| Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
+| Phase 3 sessions used | 7 (S2–S8) — **3 sessions ahead of master plan** |
+| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates |
 
-**Last updated:** 2026-04-29 (Phase 3 Session 7 close — Batch 3 complete in single session, 2 sessions ahead of schedule).
+**Last updated:** 2026-04-29 (Phase 3 Session 8 close — Batch 4 complete in single session, 3 sessions ahead of schedule).

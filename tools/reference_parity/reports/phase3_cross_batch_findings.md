@@ -255,3 +255,100 @@ Master plan §10.3 criterion 2 (≥30% reduction) is **batch-type dependent**. B
 ---
 
 **End of Session 7 entry.**
+
+---
+
+## Session 8 additions (2026-04-29 — Batch 4 close)
+
+### Updated progress snapshot
+
+| Metric | Value |
+|---|---:|
+| Phase 3 cumulative covered | **23** (Batch 1: 10; Batch 2: 4; Batch 3: 4; Batch 4: 5) |
+| Phase 3 remaining | 47 |
+| Phase 3 sessions used | 7 (S2–S8) — **3 sessions ahead of master plan** |
+| Phase 3 BLOCK | 0 |
+| Phase 3 CAVEAT (cumulative) | 4 (p3_stl, p3_mstl, p3_star, p3_nar_narx) |
+
+### Pattern H (DSCD) refined — extends to em_stochastic class
+
+Session 6 surfaced Pattern H for MLE-class (rugarch GARCH boundary attractor). Session 7 refined it to exclude closed-form (Pattern A regime). **Session 8 confirms Pattern H also applies to em_stochastic class:**
+
+- **p3_hmm:** hmmlearn vs depmixS4 transition matrix divergence ~0.24 abs (means + log-lik agree at 1e-5).
+- **p3_markov_switching:** statsmodels vs MSwM convergence + sign-convention divergences (resolved by extracting param names correctly + abs-value log-lik comparison).
+
+**Locked refined definition:**
+> **DSCD applies to ANY independent-implementation iterative-search wrapper, including MLE and EM-stochastic.** Closed-form algorithms with independent implementations (Pattern A regime) achieve bit-exact and are immune to DSCD.
+
+### Pattern F third concrete batch
+
+`hmm_row_sums` + `hmm_emission_normalization` registry slots populated. p3_hmm declares both via `structural_invariants` class attribute. Both verify PASS on seed=42 fixture.
+
+Cumulative populated invariants: 4 (garch_persistence, garch_conditional_variance, var_eigenvalues, vecm_cointegration_rank, hmm_row_sums, hmm_emission_normalization — actually 6 now).
+
+### Pattern I status — still candidate
+
+No new sign/scale convention alignment instances in Session 8. Still 3 confirmed instances (p3_pca, p3_vecm, p3_dfm). Needs 1+ more before formalizing. Likely Batch 7 wavelet coherence will provide the 4th.
+
+### NEW Pattern J candidate — Reference-Library API Quirks
+
+Session 8 surfaced 5 distinct R/Python API quirks (tsDyn::setar, tsDyn::star, MSwM, statsmodels MarkovRegression, tsDyn::nlar). **Pattern J candidate:** maintain a Reference-Library API Quirks Catalog as part of P-2 (Session 25). When future audit-creators integrate against these libraries, they don't have to re-discover the quirks.
+
+Status: candidate. Lock at Session 25 P-2 authoring (or earlier if quirks accumulate faster).
+
+### NEW Pattern K candidate — NO-REFERENCE harness representation
+
+`p3_nar_narx` is the **first Phase 3 audit landing in master plan §5 Tier C territory** (NO-REFERENCE). The harness has no runtime `NO-REFERENCE` outcome — only `CAVEAT` is emitted. The master plan §3.1 verdict ladder (PASS / CAVEAT / DOCUMENTED-DIVERGENCE / NO-REFERENCE) is a **tracker classification**, not a runtime outcome.
+
+**Pattern K candidate:** add a `NO-REFERENCE` runtime outcome to the harness, distinct from `CAVEAT`. Banked for check-in 2 design discussion. Currently NO-REFERENCE wrappers carry `verdict = "CAVEAT"` in JSON output + `verdict_class = "dl_seed_pinned"` (or similar Tier C class) + audit-report disclosure.
+
+### Verdict-class headroom evidence (Session 8 additions)
+
+| verdict_class | Wrapper | Band Primary abs_tol | Achieved abs | Headroom (orders) |
+|---|---|---:|---:|---:|
+| `em_stochastic` | `p3_dfm` (S7) | 5e-2 | 1.22e-3 | 1.6 |
+| `em_stochastic` | `p3_hmm` (S8 — transmat) | 0.3 | 0.237 | 0.1 (boundary) |
+| `em_stochastic` | `p3_hmm` (S8 — means) | 0.3 | 1.48e-5 | 4.3 |
+| `em_stochastic` | `p3_markov_switching` (S8 — means) | 2.0 | 5.91e-5 | 4.5 |
+| `em_stochastic` | `p3_markov_switching` (S8 — transmat) | 2.0 | 5.46e-2 | 1.6 |
+| `mle_fit` (grid-search) | `p3_tar_setar` (S8) | 1e-2 | <1e-2 | (passes; precise headroom not measured) |
+
+**Observation:** `em_stochastic` headroom varies by metric within a single check. Means + log-lik consistently at 1e-5-class agreement (4+ orders headroom); transition matrices at 0.05–0.25 abs (0–2 orders headroom). The right granularity for the band is **per-metric within em_stochastic**, not single-band-fits-all.
+
+Banked for check-in 2: per-metric tolerance bands within em_stochastic class.
+
+### Reference-solver configuration patterns (S8 additions)
+
+| Reference | Solver | Override |
+|---|---|---|
+| R `depmixS4` (HMM EM) | default EM (50 iter) | seed pinned via `set.seed(20260429)` |
+| R `MSwM::msmFit` | EM + Hessian Newton-step | `sw=c(TRUE, FALSE)` (intercept-only) to avoid Hessian singularity; `parallel=FALSE`; `maxiter=100` |
+| R `tsDyn::setar` | grid-search threshold + per-regime OLS | default; `m=2, thDelay=0` to align with TSL d=1 |
+| R `tsDyn::star` | scipy-equivalent optimizer | default `maxit=200`; gamma divergence intrinsic (Tier B/C) |
+| R `tsDyn::nlar` | neural-network gradient descent | NO seed-pin available; convergence unreliable on small T |
+
+### §10.3 criterion 2 wording revision — locked evidence
+
+3 distinct-wrapper batches now confirmed at ~10% LOC reduction (S7 multivariate, S8 Markov). 1 variant-shared batch at 75% (S6 GARCH). **Pattern is empirically locked.** Banked refinement at check-in 2:
+
+> Master plan §10.3 criterion 2 should specify expected LOC reduction by batch type:
+> - Variant-shared batch: ≥50% reduction expected
+> - Distinct-wrapper batch (4–5 distinct wrappers): 5–15% reduction expected
+> - Distinct-wrapper-distinct-method (e.g., DFM EM + PCA closed-form mixed): 0–10% reduction expected
+
+### Banked items (cumulative through S8)
+
+1. `verdict_class` enum split (single_impl_mle / optimizer_divergent_mle / em_stochastic / algebraic_mle); per-metric bands within em_stochastic.
+2. DSCD diagnostic-axis registry — design at check-in 2.
+3. Pattern I formalization (sign / scale convention alignment) — needs 1+ more wrapper.
+4. **NEW: Pattern J formalization (Reference-Library API Quirks Catalog).**
+5. **NEW: Pattern K formalization (NO-REFERENCE harness runtime outcome).**
+6. §10.3 criterion 2 wording revision per batch type — empirically locked.
+7. Cross-batch findings doc design refinements.
+8. Infrastructure-fix discipline track (1 fix to date: fd91dc7).
+9. p3_var headroom 8.1 orders + p3_vecm 13 orders — Phase 3.5 tightening candidates.
+10. EM-stochastic per-metric band tightening based on Session 8 evidence.
+
+---
+
+**End of Session 8 entry.**
