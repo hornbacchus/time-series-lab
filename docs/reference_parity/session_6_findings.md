@@ -123,6 +123,98 @@ overall: CAVEAT
 
 Overall CAVEAT is informative per master plan §3.3 (PASS+CAVEAT both run in CI; CAVEAT is non-failing).
 
+## Post-session CI fix (commit `fd91dc7`)
+
+A separate CI-fix commit followed Session 6's audit-creation
+commit (`853e1e6`) after a user-surfaced "All jobs have failed"
+GitHub email notification. Two compounding issues had been
+silently failing CI since Session 4:
+
+1. **Missing CI-side packages**: `pmdarima` (needed by
+   `p3_arima_manual` because the wrapper imports it at module
+   top — without it, `run_tsl()` raises ImportError which
+   propagates as ERROR rather than the more graceful SKIP that
+   `RPackageMissingError` gets in `run_reference()`); `arch`
+   (Python) and `rugarch` (R) for the new GARCH-family checks.
+2. **CAVEAT exit code 2 was failing CI** despite master plan
+   §3.3 specifying CAVEAT as non-failing. p3_stl and p3_mstl's
+   deterministic CAVEAT outcomes (locked at Session 4) had been
+   flipping CI red since their introduction.
+
+Per user retrospective: the install-matrix changes
+(`pmdarima`, `arch`, `rugarch`) **should have** been bundled
+with Session 6's audit-creation commit (`853e1e6`), not split
+into a separate CI-fix commit (`fd91dc7`). The split happened
+because the email-trigger sequencing forced the fix into a
+follow-up. **Discipline lesson locked for Session 7+:** when
+new audits introduce new dependencies, include the install-
+matrix update in the same commit. Session 7's Batch 3 entry
+will ship `MARSS` + `BVAR` (R) and `sklearn` (Python pip)
+install-matrix updates in the audit-creation commit per this
+discipline.
+
+### parity-slow.yml silent-green bug — latency assessment
+
+Surfaced during the same `fd91dc7` diagnosis: `parity-slow.yml`
+was running `python -m reference_parity --tier slow --json >
+parity-slow.json` followed by `cat parity-slow.json` with **no
+exit-code propagation at all** — the workflow was silently
+green regardless of harness outcome.
+
+**Latency:** the bug entered the workflow at its creation in
+commit `64700e1` (Phase 2 Session 1, 2026-04-25). It was latent
+for **3 days** spanning **3 Phase 2 sessions** (Sessions 1–3 of
+Phase 2 ran or could have run nightly slow-tier and would have
+silently passed regardless of outcome) **and 5 Phase 3
+sessions** (Sessions 1–5; Session 6 is the first Phase 3 session
+after the bug was caught and fixed).
+
+This is a **Phase 2 hangover bug**, not a Phase 3 introduction.
+Phase 3 inherited the bug without modifying parity-slow.yml
+until `fd91dc7` (which added the same exit-code policy + CAVEAT
+mapping to slow-tier for consistency with fast-tier).
+
+**Implication for slow-tier audit history:** any slow-tier audit
+runs prior to `fd91dc7` (nightly schedule + tag pushes since
+2026-04-25) reported "success" regardless of actual outcome.
+Slow-tier audits include `2b_mcmc_sv_gaussian`, `2c_mcmc_sv_student_t`,
+and (post-Session 3) `p3_tbats`. **No false-pass conclusions are
+believed to have been drawn** — the user surfaced the email-
+trigger CI red signal from fast-tier, which catches what slow-
+tier silent-green hid. But going forward, slow-tier audits will
+properly fail/CAVEAT/PASS as intended.
+
+## Three documentation captures from CI-fix retrospective
+
+The CI-fix retrospective surfaced three items captured for
+later documentation, no immediate action required:
+
+1. **CAVEAT → CI green policy belongs in P-1 (Session 24).**
+   Confirm at P-1 authoring whether `DOCUMENTED-DIVERGENCE`
+   and `NO-REFERENCE` verdicts also need exit-code assignments
+   before Batches 4 (Markov-switching may produce
+   `DOCUMENTED-DIVERGENCE`) and 10 (custom Markov / wavelet
+   coherence may produce `NO-REFERENCE`) introduce them. The
+   harness's runner.py currently emits exit codes 0/1/2/3 for
+   PASS/BLOCK/CAVEAT/ERROR; new verdict classes need explicit
+   mapping.
+
+2. **"CI failing across multiple consecutive sessions" pattern
+   is a §11 trigger candidate for P-1.** Master plan §11
+   (Escalation Triggers) lists 7 conditions under which
+   Code-side execution should escalate to Chat. The pattern
+   surfaced this session — CI red across Sessions 4, 5, and 6
+   without escalation, only caught by user-surfaced email
+   notification — is a candidate for an 8th trigger:
+   "CI red on >=2 consecutive sessions → escalate." Combine
+   with the earlier "CI failure on previously-passing local
+   check" candidate. P-1 author decides on phrasing.
+
+3. **parity-slow.yml silent-green bug latency** documented
+   above. P-1 author decides whether this gets its own
+   "infrastructure-bug-latency" pattern in the empirical
+   findings synthesis.
+
 ## Banked for Chat check-in 2 (do NOT modify at Session 6)
 
 Per user instruction, the following items wait for check-in 2 (post-Session 14, Batch 6 close):
@@ -132,6 +224,14 @@ Per user instruction, the following items wait for check-in 2 (post-Session 14, 
 2. **DSCD diagnostic-axis registry.** Pattern H may earn its own registry parallel to `structural_invariants`. Mechanism: per-check declarations like `dscd_axes = (DscdAxis(name="solver_global_search", ...),)` that drive harness-level "did we configure the reference solver appropriately?" verification before fit. Defer design decisions to check-in 2 with more evidence.
 
 3. **Cross-batch findings doc design refinements.** Format, taxonomy, and retention policy of `phase3_cross_batch_findings.md` may evolve as patterns accumulate. Revisit at check-in 2.
+
+4. **Infrastructure-fix discipline track.** If Sessions 6–14
+   produce ≥2 additional infrastructure-fix sub-commits beyond
+   `fd91dc7`, infrastructure-fix work earns its own discipline
+   track in the master plan (cadence, scope rules, sequencing
+   relative to audit-creation commits). If only `fd91dc7`
+   stands alone, infrastructure-fix stays ad-hoc. Decision
+   triggers at Chat check-in 2 with Sessions 6–14 evidence.
 
 ## Next session
 
