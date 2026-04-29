@@ -42,12 +42,27 @@ jobs:
           )
 
       - name: Run slow-tier parity checks
+        # CI exit-code policy: same as parity-fast.yml — CAVEAT
+        # (harness exit 2) maps to CI green per master plan §3.3;
+        # BLOCK / ERROR fail. Pre-fix this step swallowed the
+        # exit code entirely (no propagation), so the workflow
+        # was silently green regardless of outcome — fixed in the
+        # same commit that adds the §3.3 mapping to parity-fast.yml.
         shell: bash
         env:
           PYTHONPATH: ${{ github.workspace }}/tools
         run: |
+          set +e
           python -m reference_parity --tier slow --json > parity-slow.json
+          exit_code=$?
           cat parity-slow.json
+          if [ "$exit_code" = "2" ]; then
+            echo "::notice::Harness reported CAVEAT (exit 2); per master plan §3.3 this is non-failing for CI. Mapping to exit 0."
+            ci_exit=0
+          else
+            ci_exit=$exit_code
+          fi
+          exit $ci_exit
 
       - name: Upload parity result
         if: always()
