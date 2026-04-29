@@ -2044,6 +2044,186 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "verifies Vovk 2005 finite-sample coverage guarantee."
         ),
     },
+
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 10 — misc + Tier C (Session 14, FINAL BATCH).
+    # 11 wrappers spanning closed-form OLS / FFT / DTW / bootstrap /
+    # disaggregation / LOESS / X-13. Mostly Pattern A bit-exact +
+    # one Tier C (X-13 SKIP-graceful).
+    # ------------------------------------------------------------------
+
+    "p3_granger": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "Granger F-test is closed-form OLS-on-nested-models. "
+            "statsmodels and R lmtest::grangertest implement "
+            "identical procedure; sub-1e-6 abs expected modulo "
+            "subprocess CSV roundtrip noise."
+        ),
+    },
+
+    "p3_ccf": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Cross-correlation function is closed-form Pearson "
+            "correlation across lags. Both implementations compute "
+            "identical normalized cross-covariance values. Pattern "
+            "A bit-exact target."
+        ),
+    },
+
+    "p3_gcc_phat": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "GCC-PHAT delay is integer-valued (argmax of cross-"
+            "correlation peak). Self-parity reference; bit-exact "
+            "delay match expected. Block band 1.0 absolute "
+            "accommodates a potential boundary-tie-break ±1 sample "
+            "without escalating to BLOCK."
+        ),
+    },
+
+    "p3_dtw": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "DTW is closed-form dynamic programming. Numpy "
+            "reference and dtaidistance C-implementation produce "
+            "identical distances modulo float-precision drift; "
+            "1e-10 abs floor for safety."
+        ),
+    },
+
+    "p3_transfer_function": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Distributed-lag OLS is closed-form normal-equations "
+            "solve. Self-parity reference; bit-exact betas + SSE."
+        ),
+    },
+
+    "p3_block_bootstrap": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Block bootstrap with pinned numpy.random.default_rng "
+            "seed is fully deterministic. Self-parity reference; "
+            "bit-exact moments expected."
+        ),
+    },
+
+    "p3_forecast_combination": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Inverse-MSE weighted combination is closed-form "
+            "weighted mean. Self-parity bit-exact target."
+        ),
+    },
+
+    "p3_rolling_origin_cv": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Rolling-origin CV with naive last-value forecaster "
+            "is deterministic loop. Self-parity bit-exact target."
+        ),
+    },
+
+    "p3_denton_chowlin": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "Denton-Cholette / Chow-Lin disaggregation is closed-"
+            "form quadratic optimization. TSL solves via numpy "
+            "block-elimination of the KKT system; R tempdisagg::td "
+            "uses GLS-equivalent reformulation. Numerical "
+            "linear-algebra paths differ slightly; 1e-3 abs band "
+            "accommodates conditioning-related drift."
+        ),
+    },
+
+    "p3_loess": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "statsmodels.nonparametric.lowess is deterministic "
+            "given identical inputs + frac. Same-library self-"
+            "test."
+        ),
+    },
+
+    "p3_x13": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "X-13ARIMA-SEATS binary called by both arms. Tier C / "
+            "SKIP-graceful: when R seasonal package or X-13 binary "
+            "is unavailable, harness translates to SKIP outcome. "
+            "When both available, output is deterministic; 1e-3 "
+            "abs accommodates statsmodels.tsa.x13 vs R seasonal "
+            "wrapper preprocessing differences."
+        ),
+    },
 }
 
 

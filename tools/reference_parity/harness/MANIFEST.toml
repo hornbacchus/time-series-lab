@@ -78,6 +78,15 @@ quantreg = "6.1"
 # Session 12 (Batch 8): robustbase for p3_robust_estimators
 # parity (Qn / MAD reference vs scipy/numpy formulas).
 robustbase = "0.99-7"
+# Session 14 (Batch 10 final): lmtest for p3_granger (Granger
+# F-test); tempdisagg for p3_denton_chowlin; forecastHybrid
+# documented but not consumed this batch (forecast_combination
+# uses self-parity reference). seasonal NOT pinned — X-13 binary
+# required; p3_x13 SKIPs gracefully when unavailable.
+lmtest = "0.9.40"
+tempdisagg = "1.2.0"
+dtw = "1.23-2"
+forecastHybrid = "5.0.19"
 
 [python]
 version = "3.14"
@@ -127,6 +136,9 @@ xgboost = "3.2.0"
 # findings (Python 3.14 / wrapper-mismatch / wrapper-mismatch).
 reservoirpy = "0.4.1"
 prophet = "1.3.0"
+# Session 14 (Batch 10 entry — final batch): dtaidistance for
+# p3_dtw parity (cross-package canonical reference).
+dtaidistance = "2.4.0"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this

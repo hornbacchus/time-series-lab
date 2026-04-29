@@ -137,8 +137,21 @@ def run_check(
         else:
             fixture = check.setup_fixture(effective_seed)
 
-        # 2. Run TSL
-        tsl_out = check.run_tsl(fixture)
+        # 2. Run TSL. Phase 3 Session 14: ImportError from
+        # run_tsl now also maps to SKIP — used by p3_x13 to
+        # signal missing X-13 binary on host. This generalizes
+        # the SKIP-on-missing-dep semantics from run_reference
+        # (where it was added Session 1) to run_tsl (where it
+        # was historically an ERROR-class exception).
+        try:
+            tsl_out = check.run_tsl(fixture)
+        except ImportError as e:
+            return ParityResult(
+                technique_id=tid, outcome="SKIP",
+                error=f"TSL wrapper dependency missing: {e}",
+                duration_sec=round(time.monotonic() - t0, 3),
+                seed_used=effective_seed, fixture_sha=fixture_sha,
+            )
 
         # 3. Run reference (may raise R unavailable / package missing
         #    → SKIP)

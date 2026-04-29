@@ -65,9 +65,11 @@ jobs:
         #     * MAPIE ruled out — TSL conformal_intervals uses
         #       custom split-conformal on pmdarima base; self-
         #       parity reference suffices.
+        # Phase 3 Session 14 (Batch 10 misc / final) deps:
+        #   - dtaidistance: p3_dtw reference
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels torch==2.11.0 ewstools==2.1.2 pmdarima arch scikit-learn hmmlearn particles ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet
+          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels torch==2.11.0 ewstools==2.1.2 pmdarima arch scikit-learn hmmlearn particles ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -104,7 +106,13 @@ jobs:
               # Phase 3 Session 12 (Batch 8): robustbase for
               # p3_robust_estimators (Qn / MAD reference);
               # quantreg already in matrix.
-              "robustbase"),
+              "robustbase",
+              # Phase 3 Session 14 (Batch 10 misc/final):
+              # lmtest (granger), tempdisagg (denton-cholette),
+              # forecastHybrid (forecast-combination cross-check).
+              # `seasonal` (X-13) deliberately omitted — requires
+              # X-13 binary; p3_x13 SKIPs gracefully.
+              "lmtest", "tempdisagg", "forecastHybrid"),
             repos = "https://cloud.r-project.org"
           )
 

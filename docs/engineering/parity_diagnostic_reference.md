@@ -285,6 +285,55 @@ without subprocess isolation.
 
 **Detected in:** All 5 PyTorch checks (Session 13).
 
+### B.6 — Master plan §15.12 reference adjustments (Session 14 final-batch additions)
+
+#### B.6.1 — R TSA::arimax xtransf form mismatch (S14)
+
+**Source:** R `TSA::arimax` (TSA 1.3.1).
+
+**Quirk:** Master plan §15.12 named `R TSA::arimax` as the
+reference for `transfer_function.py`. TSA::arimax has a
+transfer-function form with `xtransf` that requires explicit
+numerator/denominator polynomials — useful for ARMAX
+modeling, but not directly aligned with TSL's simple
+distributed-lag (FDL) OLS implementation. Cross-package
+parity would test something different than what TSL ships.
+
+**Resolution:** Use from-scratch self-parity reference
+(numpy lstsq on lag-feature design matrix) that mirrors
+TSL's distributed-lag math verbatim. Same pattern as
+`p3_quantile_regression` (S12) and `p3_gp` (S13) where
+master-plan-stated reference doesn't match TSL's actual
+backend.
+
+**Detected in:** `p3_transfer_function` audit (Session 14).
+
+#### B.6.2 — R seasonal binary unavailable on Windows CI (S14)
+
+**Source:** R `seasonal` package + X-13ARIMA-SEATS binary.
+
+**Quirk:** R `seasonal::seas` wraps the X-13 binary
+distributed by the US Census Bureau. Installation requires
+separate binary download + PATH configuration. CI runners
+(both Windows and Linux GitHub-hosted) typically lack this
+binary unless explicitly provisioned. `install.packages("seasonal")`
+succeeds but the package is non-functional without the
+X-13 binary on PATH.
+
+**Resolution:** Implement SKIP-graceful: catch
+`statsmodels.tsa.x13.X13NotFoundError` in the check's
+`run_tsl`, re-raise as `ImportError`. Harness runner extended
+this session to translate `ImportError` from `run_tsl` into a
+SKIP outcome (was previously only handled in `run_reference`).
+Generalizes the "missing-dependency = SKIP" discipline.
+
+**Pattern:** any wrapper whose Python or R reference depends
+on a host binary (X-13, custom CLI tools, R packages with
+binary deps) should follow this convention. The check is
+runtime-graceful: SKIPs informatively rather than failing.
+
+**Detected in:** `p3_x13` audit (Session 14).
+
 ---
 
 ## Section C — Pattern A taxonomy (formalization deferred)
