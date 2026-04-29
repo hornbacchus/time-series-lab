@@ -96,3 +96,120 @@ jobs:
         with:
           name: parity-slow-results
           path: parity-slow.json
+
+  # Phase 3.5 Session 6 (Item 6): Linux runner job for X-13
+  # binary support. Windows runner cannot install X-13 (no
+  # binary distribution); p3_x13 SKIPs gracefully there. Linux
+  # has the X-13 binary via the R `x13binary` package, which
+  # auto-downloads a platform-specific binary at install time.
+  # Setting X13PATH to x13binary::x13path() lets statsmodels'
+  # x13_arima_analysis find the same binary that R `seasonal`
+  # uses — Pattern A.1 same-binary parity.
+  #
+  # Path investigated:
+  #   (a) apt install x13as-html — package exists on Ubuntu
+  #       24.04 but version pinning + binary location varies
+  #       across Ubuntu releases.
+  #   (b) R x13binary package — CRAN-hosted; downloads pinned
+  #       binary at install; cross-version stable. SELECTED.
+  #   (c) Build from US Census Bureau source — out of scope.
+  #
+  # Install duration: R x13binary package install is small
+  # (~1-2 min including the binary download). Total Linux job
+  # install fits in ~6-8 min (Python deps + R packages + x13
+  # binary), so this lives in slow-tier per the >5-min rule
+  # in the Session 6 prompt's Step 2 decision tree.
+  slow-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Python deps (Linux)
+        # Mirrors Windows install matrix. torch installed via
+        # pytorch.org cpu index URL (Linux default would pull
+        # CUDA wheel; we don't have GPU on GitHub-hosted
+        # ubuntu-latest runners and don't need GPU acceleration
+        # for parity checks anyway).
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.11.0
+          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.5.3"
+
+      - name: Install full manifest R packages + X-13 binary
+        # Adds x13binary + seasonal vs the Windows job. The
+        # `x13binary` package downloads a platform-specific X-13
+        # binary at install time; `seasonal` wraps it. Both
+        # Linux + macOS binaries are CRAN-hosted; Windows binary
+        # exists too but bundles into a non-functional install
+        # path on the windows-latest runner (deferred).
+        shell: Rscript {0}
+        run: |
+          install.packages(
+            c("hts", "stochvol", "urca", "extRemes", "forecast",
+              "vars", "tseries", "fable", "fabletools", "evir",
+              "POT", "rugarch", "dlm", "KFAS", "quantreg", "MARSS",
+              "depmixS4", "MSwM", "tsDyn",
+              "robustbase", "lmtest", "tempdisagg", "forecastHybrid",
+              # Phase 3.5 Session 6: X-13 binary support on Linux
+              "x13binary", "seasonal"),
+            repos = "https://cloud.r-project.org"
+          )
+
+      - name: Resolve X-13 binary path for statsmodels
+        # statsmodels.tsa.x13.x13_arima_analysis looks for the
+        # binary via X13PATH or X12PATH env vars. Point both at
+        # the directory containing the x13binary-bundled binary
+        # (NOT the binary itself; statsmodels expects a
+        # directory). x13binary::x13path() returns the binary
+        # path; we extract the dirname.
+        shell: bash
+        run: |
+          X13_BIN=$(Rscript -e 'cat(x13binary::x13path())')
+          X13_DIR=$(dirname "$X13_BIN")
+          echo "Resolved x13 binary: $X13_BIN"
+          echo "Resolved x13 binary dir: $X13_DIR"
+          echo "X13PATH=$X13_DIR" >> "$GITHUB_ENV"
+          echo "X12PATH=$X13_DIR" >> "$GITHUB_ENV"
+
+      - name: Run slow-tier parity checks (Linux)
+        # Same exit-code mapping as Windows slow job. p3_x13
+        # expected to PASS on Linux (X-13 binary available);
+        # other slow-tier checks (2b/2c MCMC SV, p3_dfm,
+        # p3_prophet, p3_tbats) provide cross-platform
+        # validation as a side effect.
+        shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/tools
+        run: |
+          set +e
+          python -m reference_parity --tier slow --json > parity-slow-linux.json
+          exit_code=$?
+          cat parity-slow-linux.json
+          if [ "$exit_code" = "2" ]; then
+            echo "::notice::Harness reported CAVEAT (exit 2); per master plan §3.3 + P-1 §6.4 this is non-failing for CI. Mapping to exit 0."
+            ci_exit=0
+          elif [ "$exit_code" = "4" ]; then
+            echo "::notice::Harness reported DOCUMENTED-DIVERGENCE (exit 4); per P-1 §2.1 + §6.4 this is non-failing for CI (methodology-equivalent divergence, not a bug). Mapping to exit 0."
+            ci_exit=0
+          else
+            ci_exit=$exit_code
+          fi
+          exit $ci_exit
+
+      - name: Upload parity result (Linux)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-slow-linux-results
+          path: parity-slow-linux.json
