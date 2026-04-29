@@ -927,6 +927,116 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 2 — R volatility (Session 6).
+    # GARCH variants share the same MLE-fit-class band but with
+    # variant-specific widening for EGARCH (log-variance amplifies
+    # optimizer divergence). HAR-RV is closed-form OLS.
+    # ------------------------------------------------------------------
+
+    "p3_sgarch": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 5.0,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 50.0,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Master plan §7.1 MLE-fit band, slightly widened from "
+            "p3_arima_manual baseline because Python `arch` and R "
+            "`rugarch` are independent implementations with "
+            "different optimizer initialization (arch uses SLSQP "
+            "with simulated annealing pre-pass; rugarch uses "
+            "hybrid solver). On standard GARCH(1,1) fixtures, "
+            "coefficient divergence ~1e-3 abs typical; widened to "
+            "1e-2 to leave headroom."
+        ),
+    },
+
+    "p3_gjr_garch": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 5.0,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 50.0,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Same band as p3_sgarch. GJR adds gamma asymmetry "
+            "term; identifiability of gamma depends on having "
+            "enough negative shocks in the fixture (GARCH(1,1) "
+            "DGP at T=1000 should suffice). MLE-fit band."
+        ),
+    },
+
+    "p3_egarch": {
+        "type": "tiered_outputs",
+        "primary": {
+            # EGARCH log-variance parameterization amplifies
+            # optimizer divergence — widened band.
+            "abs_tol": 5e-2,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 5e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "secondary": {
+            "abs_tol": 10.0,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 100.0,
+            "block_rel_tol": 1.0,
+        },
+        "justification": (
+            "EGARCH log-variance representation tends to amplify "
+            "optimizer-convergence divergence vs sGARCH/GJR. "
+            "Additionally arch and rugarch use SWAPPED naming "
+            "conventions for alpha (magnitude) and gamma "
+            "(leverage) — the helper `run_reference_garch` swaps "
+            "names on the rugarch side so the comparison aligns "
+            "by economic role, not raw name. Tolerance band "
+            "widened to 5e-2 abs / 1e-1 rel on Primary; CAVEAT "
+            "outcomes expected on some fixtures."
+        ),
+    },
+
+    "p3_har_rv": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "secondary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-6,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-3,
+        },
+        "justification": (
+            "HAR-RV is closed-form OLS regression on identical "
+            "regressors. NumPy lstsq (TSL) and R lm (reference) "
+            "implement the same normal-equations solve; bit-"
+            "exact parity expected (Session 3 Observation 1: "
+            "closed-form recursion → machine precision). "
+            "Achieved tolerance at 1e-12 to 1e-14 abs typical; "
+            "the 1e-10 floor leaves headroom for subprocess CSV "
+            "roundtrip noise."
+        ),
+    },
+
     "p3_tbats": {
         "type": "tiered_outputs",
         "primary": {

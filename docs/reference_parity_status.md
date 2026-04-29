@@ -56,14 +56,24 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 ---
 
-## Phase 3 — Batches 2–10 (PENDING)
+## Phase 3 — Batch 2: R volatility (4 audit IDs across 2 wrappers)
+
+| # | Wrapper / Variant | Audit ID | Reference | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `garch_model.py` (sGARCH path) | `p3_sgarch` | R `rugarch` (sGARCH, gosolnp solver) | fast | **PASS** | `reports/p3_sgarch_audit.md` | `harness/checks/p3_sgarch.py` | S6 |
+| 2 | `garch_model.py` (GJR-GARCH path) | `p3_gjr_garch` | R `rugarch` (gjrGARCH) | fast | **PASS** | `reports/p3_gjr_garch_audit.md` | `harness/checks/p3_gjr_garch.py` | S6 |
+| 3 | `garch_model.py` (EGARCH path) | `p3_egarch` | R `rugarch` (eGARCH, with alpha-gamma name swap) | fast | **PASS** | `reports/p3_egarch_audit.md` | `harness/checks/p3_egarch.py` | S6 |
+| 4 | `har_rv.py` | `p3_har_rv` | R base `lm()` reimpl (Corsi 2009 OLS) | fast | **PASS** (bit-exact 8.88e-16) | `reports/p3_har_rv_audit.md` | `harness/checks/p3_har_rv.py` | S6 |
+
+**Batch 2 Session 6 status: COMPLETE in single session.** 4/4 PASS, 0 CAVEAT, 0 BLOCK. Master plan §15.4 budgeted 2 sessions (S6+S7); closed in S6 alone. Per-batch summary: `tools/reference_parity/reports/p3_batch_2_summary.md`. Cross-batch findings (Pattern H — DSCD): `tools/reference_parity/reports/phase3_cross_batch_findings.md`.
+
+## Phase 3 — Batches 3–10 (PENDING)
 
 (Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
 
 | Batch | Theme | Wrapper count | Sessions | Status |
 |---|---|---:|---|---|
-| 2 | R volatility | 2 | S6–S7 | PENDING |
-| 3 | R multivariate | 4 | S8–S9 | PENDING |
+| 3 | R multivariate | 4 | S7+ (1 session ahead of master plan) | PENDING |
 | 4 | R Markov / nonlinear | 5 | S10–S11 | PENDING |
 | 5 | R state space | 5 | S12 | PENDING |
 | 6 | R change-points / stationarity | 9 | S13–S14 | PENDING |
@@ -80,9 +90,11 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **10** (8 PASS + 2 CAVEAT — Batch 1 complete) |
-| Phase 3 remaining | 60 |
+| Phase 3 covered as of latest update | **14** (12 PASS + 2 CAVEAT — Batches 1+2 complete) |
+| Phase 3 remaining | 56 |
 | Phase 3 BLOCK | 0 |
 | Documented Secondary-tier divergences (non-blocking) | 1 (ETS AIC scale offset, methodology-equivalent) |
+| Phase 3 sessions used | 5 (S2, S3, S4, S5, S6) — 1 session ahead of master plan |
+| Cross-batch patterns surfaced | A–H (8 cumulative; H — DSCD — new at S6) |
 
-**Last updated:** 2026-04-28 (Phase 3 Session 4 close — Batch 1 complete).
+**Last updated:** 2026-04-28 (Phase 3 Session 6 close — Batch 2 complete in single session, ahead of schedule).

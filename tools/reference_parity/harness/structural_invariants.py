@@ -179,11 +179,103 @@ _REGISTRY["decomposition_multiplicative"] = _stub(
 _REGISTRY["var_eigenvalues"] = _stub("var_eigenvalues", 3)
 _REGISTRY["vecm_cointegration_rank"] = _stub("vecm_cointegration_rank", 3)
 
-# GARCH family (Batch 2 — first to populate)
-_REGISTRY["garch_conditional_variance"] = _stub(
-    "garch_conditional_variance", 2,
-)
-_REGISTRY["garch_persistence"] = _stub("garch_persistence", 2)
+# GARCH family — populated at Phase 3 Session 6 (Batch 2 entry).
+# These are the FIRST concrete invariant implementations
+# replacing Session 5 NotImplementedError stubs. They establish
+# the checker contract: callable receives
+# (tsl_outputs, ref_outputs, fixture, invariant) and returns a
+# metric dict with status (PASS/CAVEAT/BLOCK), measured residual,
+# and diagnostic context.
+
+
+def _check_garch_conditional_variance(tsl, ref, fixture, inv):
+    """sigma2_t > 0 for all t. Conditional variance positivity is
+    a non-negotiable structural property of GARCH-family models;
+    any sigma2_t <= 0 indicates the optimizer landed at an
+    invalid parameter region. Apply on TSL side only — R rugarch
+    enforces positivity via parameter constraints, so we don't
+    expect to detect ref-side violations.
+    """
+    import numpy as np  # local import; harness modules avoid top-level numpy
+    sigma2 = np.asarray(tsl.get("conditional_variance"), dtype=np.float64)
+    if sigma2.size == 0:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output missing 'conditional_variance' field",
+        }
+    n_nonpositive = int(np.sum(sigma2 <= 0))
+    min_sigma2 = float(np.min(sigma2))
+    # Tolerance interpretation: with tolerance_type="absolute" and
+    # tolerance=0.0 (the canonical config), we allow no violations.
+    # Numerical noise near zero (sigma2 ~ 1e-300) is treated as a
+    # PASS since the GARCH math guarantees only sigma2 > 0, not
+    # sigma2 >= eps for any positive eps.
+    threshold = -float(inv.tolerance) if inv.tolerance > 0 else 0.0
+    if min_sigma2 > threshold:
+        status = "PASS"
+    elif n_nonpositive == 0 and min_sigma2 > -1e-10:
+        # Exactly-zero or near-zero negative — within numerical
+        # noise. Surface as CAVEAT for audit-trail visibility.
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name,
+        "status": status,
+        "min_sigma2": min_sigma2,
+        "n_nonpositive": n_nonpositive,
+        "n_total": int(sigma2.size),
+    }
+
+
+def _check_garch_persistence(tsl, ref, fixture, inv):
+    """Persistence < 1 for sGARCH/GJR (variance-level dynamics)
+    or |beta| < 1 for EGARCH (log-variance AR). The checker
+    receives the persistence value pre-computed by the wrapper
+    (TSL's garch_model.py emits a 'persistence' audit field with
+    the model-appropriate formula already applied per the CAI
+    Phase 2 Session 6 fix F-G-T2-EGARCH-PERSIST). We just check
+    that the absolute persistence value is < 1 within the stated
+    tolerance.
+
+    For IGARCH (which TSL doesn't expose as a distinct
+    technique_id), persistence == 1 exactly; that variant is
+    out of scope for Phase 3 Session 6.
+    """
+    persistence = tsl.get("persistence")
+    if persistence is None:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output missing 'persistence' field",
+        }
+    abs_p = abs(float(persistence))
+    # tolerance_type="relative" with tolerance=1e-3 means we allow
+    # persistence to be within 1e-3 of 1.0 (i.e., the
+    # near-IGARCH boundary). PASS iff abs_p < 1 - tolerance;
+    # CAVEAT iff abs_p < 1 + tolerance (boundary regime);
+    # BLOCK iff abs_p >= 1 + tolerance (unstable).
+    pass_threshold = 1.0 - float(inv.tolerance)
+    block_threshold = 1.0 + float(inv.tolerance)
+    if abs_p < pass_threshold:
+        status = "PASS"
+    elif abs_p < block_threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name,
+        "status": status,
+        "persistence": float(persistence),
+        "abs_persistence": abs_p,
+        "pass_threshold": pass_threshold,
+        "block_threshold": block_threshold,
+    }
+
+
+_REGISTRY["garch_conditional_variance"] = _check_garch_conditional_variance
+_REGISTRY["garch_persistence"] = _check_garch_persistence
 
 # Kalman family (Batch 5)
 _REGISTRY["kalman_covariance_ordering"] = _stub(
