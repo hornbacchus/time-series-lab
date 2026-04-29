@@ -254,7 +254,24 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-29 (**Phase 3.5 Session 4 close** — Item 2: em_stochastic per-metric bands.
+**Last updated:** 2026-04-29 (**Phase 3.5 Session 5 close** — Item 3: manifest re-pin cadence.
+First quarterly re-pin cycle. Inventory: 2 real drifts
+(`PyWavelets` 1.8.0 → 1.9.0 — direct PyWavelets-consumer
+re-validation produced bit-exact PASS at 0.0 max_abs_diff;
+`forecastHybrid` 5.0.19 → 5.1.21 — no wrapper consumes,
+metadata-only re-pin) and 2 cosmetic format-normalizations
+(robustbase 0.99-7 == 0.99.7; dtw 1.23-2 == 1.23.2 — pins
+updated to dot-format matching `packageVersion()` output).
+Selective re-validation per package family covered 9 sentinel
+wrappers (rugarch / forecast / KFAS / statsmodels / scipy /
+sklearn / torch / PyWavelets x2): 9/9 PASS. §8.1 risk 4 NOT
+triggered. Cadence advanced: last_review 2026-04-25 →
+2026-04-29; next_review 2026-07-25 → 2026-07-29 (3-month
+cadence). Recurring quarterly re-pin protocol documented in
+session findings doc §Step 5 (escalation rules + sentinel-
+wrapper coverage convention banked for next quarterly window).
+
+**Phase 3.5 Session 4 close** — Item 2: em_stochastic per-metric bands.
 Targeted refinement (outcome b per session prompt) on 2 wrappers
 where empirical heterogeneity warranted per-metric tier
 splits: `p3_hmm` (transition_matrix kept wide at 0.3 abs /
