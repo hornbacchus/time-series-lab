@@ -75,6 +75,9 @@ rugarch = "1.5.5"
 dlm = "1.1.6.1"
 KFAS = "1.6.0"
 quantreg = "6.1"
+# Session 12 (Batch 8): robustbase for p3_robust_estimators
+# parity (Qn / MAD reference vs scipy/numpy formulas).
+robustbase = "0.99-7"
 
 [python]
 version = "3.14"
@@ -112,6 +115,11 @@ astropy = "7.2.0"
 PyWavelets = "1.8.0"
 EMD-signal = "1.9.0"
 pyts = "0.13.0"
+# Session 12 (Batch 8 entry — Python ML): lightgbm for
+# p3_lightgbm parity; xgboost already pinned implicitly via
+# arch dep chain. Pin matches local install.
+lightgbm = "4.6.0"
+xgboost = "3.2.0"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this

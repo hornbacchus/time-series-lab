@@ -1755,6 +1755,137 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "bit-exact target at machine precision."
         ),
     },
+
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 8 — Python ML (Session 12).
+    # All same-library self-tests against sklearn / xgboost / lightgbm.
+    # Pattern A bit-exact target on all 7 wrappers (same library means
+    # no optimizer divergence; deterministic given seed pinning).
+    # robust_estimators uses R robustbase as cross-package reference;
+    # closed-form arithmetic at machine precision modulo CSV roundtrip.
+    # ------------------------------------------------------------------
+
+    "p3_random_forest": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Same-library: TSL and reference both invoke "
+            "sklearn.ensemble.RandomForestRegressor with "
+            "identical hyperparameters and random_state. "
+            "RF is deterministic given seed pinning; bit-exact "
+            "predictions + feature importances expected."
+        ),
+    },
+
+    "p3_gradient_boosting": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Same-library: TSL and reference both invoke "
+            "sklearn.ensemble.GradientBoostingRegressor with "
+            "identical hyperparameters and random_state. "
+            "Deterministic; bit-exact expected."
+        ),
+    },
+
+    "p3_xgboost": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Same-library: TSL and reference both invoke "
+            "xgboost.XGBRegressor with identical hyperparameters, "
+            "tree_method='hist' pinned for reproducibility, "
+            "n_jobs=1 for thread determinism. 1e-10 floor "
+            "leaves headroom for any internal float32 "
+            "intermediate-state drift between identical runs."
+        ),
+    },
+
+    "p3_lightgbm": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Same-library: TSL and reference both invoke "
+            "lightgbm.LGBMRegressor with deterministic=True + "
+            "force_col_wise=True + n_jobs=1 pinned. Bit-exact "
+            "predictions expected. 1e-10 floor leaves headroom "
+            "for float32 internal state drift."
+        ),
+    },
+
+    "p3_svr": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Same-library: TSL and reference both invoke "
+            "sklearn.svm.SVR with identical (kernel, C, epsilon, "
+            "gamma). libsvm SMO optimizer is deterministic from "
+            "fixed initialization (no random state); bit-exact "
+            "predictions + n_support + intercept expected."
+        ),
+    },
+
+    "p3_quantile_regression": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Same-library: TSL and reference both invoke "
+            "sklearn.ensemble.GradientBoostingRegressor with "
+            "loss='quantile' and pinned random_state per "
+            "quantile level. Deterministic; bit-exact "
+            "predictions expected per quantile."
+        ),
+    },
+
+    "p3_robust_estimators": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Trimmed mean, winsorized mean, MAD, and Qn are "
+            "closed-form arithmetic. scipy.stats and R "
+            "stats::mad / robustbase::Qn implement identical "
+            "formulae with identical consistency factors "
+            "(1.4826 / 2.2219). Bit-exact at machine precision "
+            "modulo subprocess CSV roundtrip noise. R Qn pinned "
+            "with finite.corr=FALSE for asymptotic-factor-only "
+            "match (matches scipy/numpy convention)."
+        ),
+    },
 }
 
 

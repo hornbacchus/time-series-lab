@@ -631,3 +631,114 @@ Carried from S10 (1–14) plus:
 ---
 
 **End of Session 11 entry.**
+
+---
+
+## Session 12 entry (Batch 8 — Python ML)
+
+**Date:** 2026-04-29
+**Wrappers covered:** 7 (random_forest, gradient_boosting,
+xgboost, lightgbm, svr, quantile_regression, robust_estimators)
+**Verdicts:** 7 PASS / 0 CAVEAT / 0 BLOCK
+**Cumulative Phase 3 covered:** 50 / 70
+
+### Pattern A — closed-form expansion to **27 wrappers**
+
+ALL 7 Batch 8 wrappers achieved bit-exact parity (6 at exactly
+0.0 abs diff via same-library; 1 at 4.22e-15 abs cross-package).
+Pattern A wrapper count is now **27**:
+
+- 14 from Batches 1–6
+- 6 from Batch 7
+- **NEW Session 12 (7):** random_forest, gradient_boosting,
+  xgboost, lightgbm, svr, quantile_regression,
+  robust_estimators
+
+**First all-PASS batch since Batch 1.**
+
+### Pattern A same-library self-test precedent at scale
+
+9 wrappers cumulatively now use the same-library self-test
+pattern (1 from Batch 6, 2 from Batch 7, 6 from Batch 8). All 9
+achieved bit-exact (0.0) parity. Pattern is empirically locked.
+
+P-2 should formalize this as a Pattern A sub-class:
+"same-library reproducibility verification" — catches wrapper-
+level preprocessing / parameter-resolution regressions without
+requiring an independent reference implementation. Use when the
+upstream library is broadly trusted and the wrapper's value-add
+is its UX surface, not algorithm implementation.
+
+### Pattern J catalog launched (check-in 1.5 act-now decision #1)
+
+`docs/engineering/parity_diagnostic_reference.md` Appendix B
+launched this session with 6 entries:
+
+- **B.1 Statistical methodology / numerical conventions:**
+  MSwM logLikel slot (S8), tsDyn setar coef access (S8), MSwM
+  Hessian sw=c(T,T) singularity (S8)
+- **B.2 Internal-default divergence:** arch/urca PP HAC kernel
+  (S10), rugarch boundary attractor (S6), arch GJR naming (S6),
+  arch EGARCH analytic horizon (S6), arch/rugarch alpha-vs-gamma
+  swap (S6)
+- **B.3 Normalization-convention divergence:** scipy/astropy LS
+  (S11)
+- **B.4 Version-default drift (NEW Session 12):** xgboost
+  tree_method default flip, lightgbm parameter case sensitivity
+
+Sessions 13–15 will append additional entries.
+
+### §10.3 criterion 2 split lock applied (check-in 1.5 act-now #2)
+
+Batch 8 reports against **sub-criterion 2c** (distinct-wrapper
+Python in-process / self-parity ≥30%): per-check files ~120–180
+LOC vs Batch 1 ~400 LOC = 55–70% reduction. **PASSED.**
+
+This is the third consecutive batch passing both §10.3 criteria
+1 and 2 (Batches 6, 7, 8).
+
+### PyBridge isolate=False shim retire investigation completed
+
+Per check-in 1.5 act-now decision #3, Batch 8 tracked shim mode
+usage:
+
+| Batch | Wrappers | py_invoke shim called | direct import |
+|---|---:|---:|---:|
+| Batch 7 | 7 | 0 | 7 |
+| Batch 8 | 7 | 0 | 7 |
+| **Cumulative** | **14** | **0** | **14** |
+
+**Decision:** Session 13 commit retires the `isolate=False`
+shim. PyBridge becomes subprocess-isolation-only
+(`isolate=True` for Batch 9 DL); in-process Python references
+continue using the established direct-import pattern.
+
+### Pattern H DSCD candidates ruled out
+
+S12 hypotheses (SVR DSCD-MLE, quantile_regression
+DSCD-Identifiability) were ruled out — TSL's wrappers use
+sklearn primitives (same library), so no cross-library
+optimizer divergence to surface. Pattern H DSCD remains 4
+wrappers.
+
+### Item 13 budget revision — 17–18 closure horizon locked
+
+Master plan budgeted 18–22 sessions; we're at 11 used (S2–S12)
++ ~6 remaining at current pace ≈ 17 total. Per check-in 1.5
+locked decision: closure horizon at 17–18 sessions; Phase 3
+buffer absorbs savings (no Phase 3.5 pull-forward).
+
+### Banked items (cumulative through S12)
+
+Carried from S11 (1–18). Status updates:
+
+| Item | Status |
+|---|---|
+| Pattern J catalog (#15 from S11) | **LAUNCHED** at S12 (Appendix B; 6 entries) |
+| §10.3 criterion 2 split (#16 from S11) | **APPLIED** at S12 (sub-criterion 2c reported) |
+| PyBridge isolate=False shim retire (#17 from S11) | **DECISION LOCKED** at S12; retire at S13 |
+| Items 1–14 + 18 | DEFER to check-in 2 (Session 14 close) |
+
+---
+
+**End of Session 12 entry.**

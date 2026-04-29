@@ -131,13 +131,26 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **Batch 7 Session 11 status: COMPLETE in single session.** 6/7 PASS + 1/7 CAVEAT, 0 BLOCK. Master plan §15.9 budgeted 2 sessions; closed in 1, extending Phase 3 lead to 5–6 sessions ahead. Per-batch summary: `tools/reference_parity/reports/p3_batch_7_summary.md`. **Pattern F first concrete population beyond GARCH/Kalman/HMM/VAR**: 4 new invariants (fft_roundtrip, fft_energy_conservation, wavelet_inverse_roundtrip, wavelet_energy_conservation) replace Session 5 NotImplementedError stubs. **PyBridge first production batch**: all 7 checks used direct import (PyBridge.py_invoke shim NOT invoked); banked for check-in 1.5 simplification triage.
 
-## Phase 3 — Batches 8–10 (PENDING)
+## Phase 3 — Batch 8: Python ML (7 audit IDs, single-session close — first all-PASS batch since Batch 1)
+
+| # | Wrapper | Audit ID | Reference | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `random_forest_forecast.py` | `p3_random_forest` | sklearn RandomForestRegressor | fast | **PASS** (0.0 abs same-library) | `reports/p3_random_forest_audit.md` | `harness/checks/p3_random_forest.py` | S12 |
+| 2 | `gradient_boosting_forecast.py` | `p3_gradient_boosting` | sklearn GradientBoostingRegressor | fast | **PASS** (0.0 abs same-library) | `reports/p3_gradient_boosting_audit.md` | `harness/checks/p3_gradient_boosting.py` | S12 |
+| 3 | `xgboost_forecast.py` | `p3_xgboost` | xgboost.XGBRegressor direct | fast | **PASS** (0.0 abs same-library) | `reports/p3_xgboost_audit.md` | `harness/checks/p3_xgboost.py` | S12 |
+| 4 | `lightgbm_forecast.py` | `p3_lightgbm` | lightgbm.LGBMRegressor direct | fast | **PASS** (0.0 abs same-library) | `reports/p3_lightgbm_audit.md` | `harness/checks/p3_lightgbm.py` | S12 |
+| 5 | `svr_forecast.py` | `p3_svr` | sklearn.svm.SVR direct | fast | **PASS** (0.0 abs same-library) | `reports/p3_svr_audit.md` | `harness/checks/p3_svr.py` | S12 |
+| 6 | `quantile_regression_model.py` | `p3_quantile_regression` | sklearn GBR with quantile loss | fast | **PASS** (0.0 abs same-library) | `reports/p3_quantile_regression_audit.md` | `harness/checks/p3_quantile_regression.py` | S12 |
+| 7 | `robust_estimators.py` | `p3_robust_estimators` | R stats::mad + robustbase::Qn | fast | **PASS** (4.22e-15 abs cross-package) | `reports/p3_robust_estimators_audit.md` | `harness/checks/p3_robust_estimators.py` | S12 |
+
+**Batch 8 Session 12 status: COMPLETE in single session.** 7/7 PASS, 0 CAVEAT, 0 BLOCK — **first all-PASS batch since Batch 1**. Master plan §15.10 budgeted 1 session; on-budget. Per-batch summary: `tools/reference_parity/reports/p3_batch_8_summary.md`. **Pattern A → 27 wrappers** (was 20). **Pattern J catalog launched** at `docs/engineering/parity_diagnostic_reference.md` Appendix B (6 entries; check-in 1.5 act-now #1). **§10.3 criterion 2 split-lock applied** (sub-criterion 2c reported; check-in 1.5 act-now #2). **PyBridge `isolate=False` shim retire decision locked** (0/14 wrappers used the shim across Batches 7+8; check-in 1.5 act-now #3 — retire at S13).
+
+## Phase 3 — Batches 9–10 (PENDING)
 
 (Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
 
 | Batch | Theme | Wrapper count | Sessions | Status |
 |---|---|---:|---|---|
-| 8 | Python ML | ~7 | S12 | PENDING |
 | 9 | Python DL | ~9 | S13–S15 | PENDING |
 | 10 | Misc + Tier C + deferred (`x13_seasonal_adjust`) | ~10 | S16–S17 | PENDING |
 
@@ -149,13 +162,14 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **43** (38 PASS + 5 CAVEAT — Batches 1+2+3+4+5+6+7 complete) |
-| Phase 3 remaining | 27 |
+| Phase 3 covered as of latest update | **50** (45 PASS + 5 CAVEAT — Batches 1+2+3+4+5+6+7+8 complete) |
+| Phase 3 remaining | 20 |
 | Phase 3 BLOCK | 0 |
 | Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
-| Phase 3 sessions used | 10 (S2–S11) — **5–6 sessions ahead of master plan** |
-| Pattern A wrappers | **20** (was 14 at Batch 6 close) |
-| Pattern F concrete invariants | **12** (was 8 at Batch 6 close) |
-| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates (J: 3 concrete instances + 3 resolution sub-patterns; K → A path documented for 5 wrappers) |
+| Phase 3 sessions used | 11 (S2–S12) — **5–6 sessions ahead; closure horizon locked at 17–18 (Item 13)** |
+| Pattern A wrappers | **27** (was 20 at Batch 7 close) |
+| Pattern F concrete invariants | 12 (no new this batch) |
+| Pattern J catalog entries | **6** (Appendix B launched at S12) |
+| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates (J: 6 catalog entries + 3 resolution sub-patterns; K → A path documented for 5 wrappers) |
 
-**Last updated:** 2026-04-29 (Phase 3 Session 11 close — Batch 7 complete in single session, 5–6 sessions ahead of schedule).
+**Last updated:** 2026-04-29 (Phase 3 Session 12 close — Batch 8 complete in single session, first all-PASS batch since Batch 1, Pattern J catalog launched).
