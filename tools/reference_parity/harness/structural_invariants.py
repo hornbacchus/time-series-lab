@@ -175,9 +175,98 @@ _REGISTRY["decomposition_multiplicative"] = _stub(
     "decomposition_multiplicative", 7,
 )
 
-# VAR / VECM family (Batch 3)
-_REGISTRY["var_eigenvalues"] = _stub("var_eigenvalues", 3)
-_REGISTRY["vecm_cointegration_rank"] = _stub("vecm_cointegration_rank", 3)
+# VAR / VECM family — populated at Phase 3 Session 7 (Batch 3 entry).
+
+
+def _check_var_eigenvalues(tsl, ref, fixture, inv):
+    """VAR companion-form eigenvalue stability: max |lambda| < 1.
+
+    The VAR(p) process is stable iff all eigenvalues of the
+    companion form (k*p, k*p) matrix lie strictly inside the unit
+    circle. TSL emits the pre-computed companion eigenvalue
+    magnitudes (or we compute from extracted A_p coefficients).
+    Reference (R vars::roots) provides the same; we compare both
+    for invariance separately rather than for parity (eigenvalues
+    are deterministic given identical coefficient matrix).
+    """
+    import numpy as np
+    eigs = np.asarray(tsl.get("companion_eig_magnitudes"), dtype=np.float64)
+    if eigs.size == 0:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output missing 'companion_eig_magnitudes' field",
+        }
+    max_abs_eig = float(np.max(np.abs(eigs)))
+    # Tolerance interpretation: relative tolerance against unit
+    # circle boundary. PASS iff max_abs < 1 - tolerance; CAVEAT if
+    # max_abs < 1 + tolerance (boundary regime); BLOCK if
+    # max_abs >= 1 + tolerance.
+    pass_threshold = 1.0 - float(inv.tolerance)
+    block_threshold = 1.0 + float(inv.tolerance)
+    if max_abs_eig < pass_threshold:
+        status = "PASS"
+    elif max_abs_eig < block_threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name,
+        "status": status,
+        "max_abs_eig": max_abs_eig,
+        "n_eigs": int(eigs.size),
+        "pass_threshold": pass_threshold,
+        "block_threshold": block_threshold,
+    }
+
+
+def _check_vecm_cointegration_rank(tsl, ref, fixture, inv):
+    """VECM cointegrating-rank invariance: TSL-fitted rank ==
+    reference-fitted rank within stated tolerance of trace
+    statistic differences.
+
+    The VECM cointegration rank r is the integer count of
+    cointegrating vectors implied by Johansen's trace statistic
+    test. Both TSL (statsmodels.tsa.vector_ar.vecm) and R
+    (urca::ca.jo with cointegration test → vec2var) determine r
+    from the same trace-statistic + critical-value comparison;
+    given identical fixture, they should agree on r exactly.
+
+    Tolerance interpretation: with tolerance_type="absolute" and
+    tolerance=0.0 (canonical), r_TSL must equal r_REF exactly. A
+    non-zero tolerance permits ±tolerance integer mismatch (e.g.,
+    tolerance=1 allows r_TSL=2, r_REF=1 — for boundary fixtures
+    where the trace statistic is near a critical value).
+    """
+    r_tsl = tsl.get("cointegrating_rank")
+    r_ref = ref.get("cointegrating_rank")
+    if r_tsl is None or r_ref is None:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": (
+                f"Missing rank field: tsl={r_tsl}, ref={r_ref}"
+            ),
+        }
+    diff = abs(int(r_tsl) - int(r_ref))
+    threshold = int(inv.tolerance)
+    if diff <= threshold:
+        status = "PASS"
+    elif diff <= threshold + 1:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name,
+        "status": status,
+        "tsl_rank": int(r_tsl),
+        "ref_rank": int(r_ref),
+        "abs_diff": diff,
+    }
+
+
+_REGISTRY["var_eigenvalues"] = _check_var_eigenvalues
+_REGISTRY["vecm_cointegration_rank"] = _check_vecm_cointegration_rank
 
 # GARCH family — populated at Phase 3 Session 6 (Batch 2 entry).
 # These are the FIRST concrete invariant implementations

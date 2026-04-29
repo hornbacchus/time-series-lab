@@ -67,13 +67,23 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **Batch 2 Session 6 status: COMPLETE in single session.** 4/4 PASS, 0 CAVEAT, 0 BLOCK. Master plan §15.4 budgeted 2 sessions (S6+S7); closed in S6 alone. Per-batch summary: `tools/reference_parity/reports/p3_batch_2_summary.md`. Cross-batch findings (Pattern H — DSCD): `tools/reference_parity/reports/phase3_cross_batch_findings.md`.
 
-## Phase 3 — Batches 3–10 (PENDING)
+## Phase 3 — Batch 3: R multivariate (4 audit IDs, single-session close)
+
+| # | Wrapper | Audit ID | Reference | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `var_model.py` | `p3_var` | R `vars::VAR` | fast | **PASS** (bit-exact 7.22e-16) | `reports/p3_var_audit.md` | `harness/checks/p3_var.py` | S7 |
+| 2 | `vecm_model.py` | `p3_vecm` | R `urca::ca.jo` + `vars::cajorls` | fast | **PASS** (bit-exact 9.99e-16 after sign norm) | `reports/p3_vecm_audit.md` | `harness/checks/p3_vecm.py` | S7 |
+| 3 | `dynamic_factor_model.py` | `p3_dfm` | R `MARSS::MARSS` | slow | **PASS** (loadings 1.22e-3; first em_stochastic class) | `reports/p3_dfm_audit.md` | `harness/checks/p3_dfm.py` | S7 |
+| 4 | `pca_analysis.py` | `p3_pca` | Python `sklearn.decomposition.PCA` | fast | **PASS** (bit-exact 7.99e-15) | `reports/p3_pca_audit.md` | `harness/checks/p3_pca.py` | S7 |
+
+**Batch 3 Session 7 status: COMPLETE in single session.** 4/4 PASS, 0 CAVEAT, 0 BLOCK. Master plan §15.5 budgeted 2 sessions (S8+S9); closed in S7. Per-batch summary: `tools/reference_parity/reports/p3_batch_3_summary.md`.
+
+## Phase 3 — Batches 4–10 (PENDING)
 
 (Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
 
 | Batch | Theme | Wrapper count | Sessions | Status |
 |---|---|---:|---|---|
-| 3 | R multivariate | 4 | S7+ (1 session ahead of master plan) | PENDING |
 | 4 | R Markov / nonlinear | 5 | S10–S11 | PENDING |
 | 5 | R state space | 5 | S12 | PENDING |
 | 6 | R change-points / stationarity | 9 | S13–S14 | PENDING |
@@ -90,11 +100,11 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **14** (12 PASS + 2 CAVEAT — Batches 1+2 complete) |
-| Phase 3 remaining | 56 |
+| Phase 3 covered as of latest update | **18** (16 PASS + 2 CAVEAT — Batches 1+2+3 complete) |
+| Phase 3 remaining | 52 |
 | Phase 3 BLOCK | 0 |
-| Documented Secondary-tier divergences (non-blocking) | 1 (ETS AIC scale offset, methodology-equivalent) |
-| Phase 3 sessions used | 5 (S2, S3, S4, S5, S6) — 1 session ahead of master plan |
-| Cross-batch patterns surfaced | A–H (8 cumulative; H — DSCD — new at S6) |
+| Documented Secondary-tier divergences (non-blocking) | 2 (ETS AIC scale offset, VAR AIC scale offset; both Pattern D methodology-equivalent) |
+| Phase 3 sessions used | 6 (S2–S7) — **2 sessions ahead of master plan** |
+| Cross-batch patterns surfaced | A–H (cumulative); Pattern I candidate added at S7 |
 
-**Last updated:** 2026-04-28 (Phase 3 Session 6 close — Batch 2 complete in single session, ahead of schedule).
+**Last updated:** 2026-04-29 (Phase 3 Session 7 close — Batch 3 complete in single session, 2 sessions ahead of schedule).

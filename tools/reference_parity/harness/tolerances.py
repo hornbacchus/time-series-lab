@@ -1011,6 +1011,119 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 3 — R multivariate (Session 7).
+    # VAR is closed-form OLS; PCA is closed-form eigendecomposition;
+    # VECM is MLE-class (Johansen reduced-rank regression);
+    # DFM is EM-stochastic (state-space with EM iteration).
+    # ------------------------------------------------------------------
+
+    "p3_var": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-8,
+            "rel_tol": 1e-8,
+            "block_abs_tol": 1e-4,
+            "block_rel_tol": 1e-4,
+        },
+        "secondary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "VAR(p) estimation is OLS-on-stacked-equations: a "
+            "closed-form normal-equations solve for the stacked "
+            "AR coefficient matrix. Both statsmodels VAR and R "
+            "vars::VAR implement the same algorithm; achieved "
+            "tolerance should match Pattern A (closed-form) at "
+            "1e-12 abs typical. The 1e-8 floor leaves headroom "
+            "for subprocess CSV roundtrip noise and for the "
+            "Sigma residual covariance divisor convention "
+            "differences (T - k_total vs T - k_total - 1)."
+        ),
+    },
+
+    "p3_vecm": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 5.0,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 50.0,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "VECM Johansen MLE (reduced-rank regression). "
+            "statsmodels VECM and R urca::ca.jo + vars::vec2var "
+            "implement the same algorithm; alpha-beta sign + "
+            "normalization convention differs (statsmodels "
+            "normalizes beta first element to 1; R's @V "
+            "eigenvectors have arbitrary norm). The compare "
+            "function applies a normalize-and-align step before "
+            "comparison. Tolerance band MLE-class (1e-2 abs / "
+            "1e-2 rel)."
+        ),
+    },
+
+    "p3_dfm": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 5e-2,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 5e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "secondary": {
+            "abs_tol": 50.0,
+            "rel_tol": 1e-1,
+            "block_abs_tol": 500.0,
+            "block_rel_tol": 1.0,
+        },
+        "justification": (
+            "DFM is fit via Kalman + EM. statsmodels "
+            "DynamicFactor and R MARSS are independent "
+            "implementations with different EM convergence "
+            "criteria, parameter parameterizations, and "
+            "initialization heuristics. Master plan §7.1 "
+            "EM-stochastic class: 1e-2 abs / 5e-2 rel widened "
+            "to 5e-2 abs / 1e-1 rel here because DFM EM is "
+            "particularly sensitive to local optima on small T "
+            "(200 obs)."
+        ),
+    },
+
+    "p3_pca": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "secondary": {
+            "abs_tol": 1e-8,
+            "rel_tol": 1e-8,
+            "block_abs_tol": 1e-4,
+            "block_rel_tol": 1e-4,
+        },
+        "justification": (
+            "PCA is closed-form eigendecomposition of the "
+            "covariance matrix. NumPy `eigh` (TSL) and sklearn "
+            "PCA (reference, internally `np.linalg.svd`) both "
+            "produce numerically equivalent eigenvalue / "
+            "eigenvector pairs (modulo sign convention, "
+            "handled by sign-canonicalization in compare). "
+            "Pattern A bit-exact target."
+        ),
+    },
+
     "p3_har_rv": {
         "type": "tiered_outputs",
         "primary": {

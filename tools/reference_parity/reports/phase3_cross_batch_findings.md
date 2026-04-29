@@ -162,4 +162,96 @@ Per pattern H, the reference-side optimizer choice matters as much as the algori
 
 ---
 
-**End of cross-batch findings, Session 6 entry.** Subsequent sessions append new patterns / refined evidence as they emerge.
+**End of Session 6 entry.** Subsequent sessions append below.
+
+---
+
+## Session 7 additions (2026-04-29 — Batch 3 close)
+
+### Updated progress snapshot
+
+| Metric | Value |
+|---|---:|
+| Phase 1+2 covered | 12 wrappers |
+| Phase 3 in-scope | 70 deliverables |
+| Phase 3 Batch 1 (S2–S4) | 10 (8 PASS + 2 CAVEAT) |
+| Phase 3 Batch 2 (S6) | 4 (4 PASS) |
+| Phase 3 Batch 3 (S7) | **4** (4 PASS) |
+| **Phase 3 cumulative** | **18** |
+| Phase 3 remaining | 52 |
+| Phase 3 sessions used | 6 (S2–S7) — **2 sessions ahead of master plan** |
+| Phase 3 BLOCK | 0 |
+
+### Pattern A reinforcement (now 9 wrappers)
+
+p3_pca, p3_var, p3_vecm join Pattern A:
+
+| Audit | Achieved abs |
+|---|---:|
+| `p3_pca` (S7) | 7.99e-15 |
+| `p3_var` (S7) | 7.22e-16 |
+| `p3_vecm` (S7) | 9.99e-16 |
+
+Pattern A is now the **most-validated** cross-batch pattern (9 confirming wrappers across 4 batches: 1c, 3e, p3_intermittent, p3_classical_decompose, p3_har_rv, p3_pca, p3_var, p3_vecm, p3_mstl-structural-identity).
+
+### Pattern D reinforcement (AIC scale offsets)
+
+p3_var: statsmodels AIC=0.07 (per-observation form) vs vars::VAR AIC=2859.52 (likelihood-based) — 2859-unit divergence on Secondary tier. Same as Batch 1 p3_ets (~1070-unit divergence). Pattern D now confirmed on 2 wrappers.
+
+### Pattern H (DSCD) refined definition (LOCKED)
+
+Session 6 banked DSCD as covering "independent-implementation MLE-fit" cases. Session 7 evidence (p3_var: independent statsmodels vs R `vars` implementations achieving Pattern A bit-exact 7.22e-16, NOT DSCD) refines:
+
+> **DSCD applies to independent-implementation OPTIMIZER-DRIVEN wrappers (MLE / iterative search), NOT to closed-form algorithms.** Closed-form OLS / eigendecomposition / FFT achieve Pattern A bit-exactness even with independent implementations.
+
+### NEW — Pattern I candidate: sign / scale convention alignment
+
+When the underlying algorithm has identifiability up to sign / scale (PCA eigenvectors, factor loadings, cointegrating vectors), parity comparison requires explicit alignment before computing diffs. Three Session 7 instances:
+
+| Audit | Alignment pattern |
+|---|---|
+| `p3_pca` | Max-abs-positive sign convention per column |
+| `p3_vecm` | First-element-normalization (beta) + joint-sign alignment (alpha) |
+| `p3_dfm` | First-loading-anchor to 1.0 |
+
+**Status: candidate.** Needs 1+ more wrapper exhibiting the same pattern in Batches 4–10 before formalizing. Likely candidates: HMM (state-label-permutation invariance, Batch 4), wavelet coherence (phase-sign convention, Batch 7).
+
+### NEW — `em_stochastic` verdict_class first concrete usage
+
+p3_dfm is the **first Phase 3 audit using `em_stochastic` verdict_class**. Achieved 1.22e-3 abs / 1.7e-3 rel on loadings (after sign-canonicalization) — 1.6 orders inside the 5e-2 abs band. Suggests EM convergence on small DFMs is more stable than master plan §7.1 anticipated. If Batch 4 HMM / Markov-switching shows similar headroom, the band could be tightened in Phase 3.5.
+
+### Reference-solver configuration patterns (S7 additions)
+
+| Reference | Solver | Override needed? |
+|---|---|---|
+| R `vars::VAR` | OLS (closed-form) | No |
+| R `urca::ca.jo` + `vars::cajorls` | reduced-rank regression (closed-form) | No |
+| R `MARSS::MARSS` | EM (default `conv.test.slope.tol=0.5`, `maxit=200`) | No — default sufficient on T=200 |
+| Python `sklearn.decomposition.PCA` | SVD (closed-form) | No |
+
+**Generalization (locked S7):** `gosolnp`-style global-search override is needed only for iterative-optimizer references with documented multiple-local-optima risk (rugarch GARCH). Closed-form and well-behaved single-pass EM use defaults.
+
+### §10.3 criterion 2 wording revision (banked for check-in 2)
+
+Session 7 evidence: per-check LOC reduction depends on within-batch wrapper similarity:
+
+| Batch type | Observed LOC reduction |
+|---|---:|
+| Variant-shared (S6 GARCH 3 variants on 1 wrapper) | 75% |
+| Distinct-wrapper batch (S7 4 distinct wrappers) | 10% |
+
+Master plan §10.3 criterion 2 (≥30% reduction) is **batch-type dependent**. Banked: re-word criterion 2 at Chat check-in 2 to specify expected reduction band per batch type.
+
+### Banked items (cumulative through S7)
+
+1. `verdict_class` enum split (single_impl_mle vs optimizer_divergent_mle vs em_stochastic vs algebraic_mle (e.g., Johansen reduced-rank)) — needs Batch 4–6 evidence
+2. DSCD diagnostic-axis registry — design at check-in 2
+3. Pattern I formalization — needs 1+ more wrapper
+4. §10.3 criterion 2 wording revision per batch type
+5. p3_var headroom 8.1 orders — Phase 3.5 candidate to tighten 1e-8 → 1e-12
+6. p3_vecm headroom 13 orders (achieves bit-exact in MLE band) — re-label as `algebraic_mle` sub-class candidate
+7. EM-stochastic band tightening (5e-2 → 1e-2) if Batch 4 evidence supports
+
+---
+
+**End of Session 7 entry.**
