@@ -185,8 +185,9 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **13 sessions used (S2-S14)** vs locked 17-session closure horizon — **5 sessions ahead** at batch-execution close.
 
-Documentation phase (Sessions 15-17) + closeout (Session 18) to follow per Item 13 lock:
-- **Session 15:** P-1 parity standard
+Documentation phase (Sessions 15-17) + closeout (Session 18) per Item 13 lock:
+
+- **Session 15 — P-1 parity standard:** **COMPLETE** — `docs/engineering/parity_standard.md` issued v1.0.0. Binding directive for new wrapper PRs (parity dimension). 11 sections: purpose/scope, four-verdict closure rule, output-surface discipline, reference-tier policy, tolerance bands per class, CI tier classification, manifest pinning protocol, pre-merge checklist, cross-reference to wrapper-development standard, empirical-additions Phase 3 surfaced (Pattern A.1 default, self-parity pattern, PyBridge subprocess-only, CAVEAT exit-code policy), Trigger 8/9 candidates.
 - **Session 16:** P-2 diagnostic reference (partially populated at `docs/engineering/parity_diagnostic_reference.md`)
 - **Session 17:** P-3 empirical findings synthesis
 - **Session 18:** CI workflow finalization + P-4 status tracker finalization + Phase 3 closeout commit
