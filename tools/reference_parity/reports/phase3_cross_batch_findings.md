@@ -742,3 +742,101 @@ Carried from S11 (1–18). Status updates:
 ---
 
 **End of Session 12 entry.**
+
+---
+
+## Session 13 entry (Batch 9 — Python DL)
+
+**Date:** 2026-04-29
+**Wrappers covered:** 9 (lstm_gru, tcn, nbeats, nhits,
+autoencoder, esn, gp, prophet, conformal)
+**Verdicts:** 9 PASS / 0 CAVEAT / 0 BLOCK — **second
+consecutive all-PASS batch**
+**Cumulative Phase 3 covered:** 59 / 70
+
+### Pattern A → 36 wrappers; Pattern A.1 → 18 wrappers locked
+
+ALL 9 Batch 9 wrappers achieved bit-exact parity. Pattern A
+count is now **36** (was 27); Pattern A.1 same-library sub-
+class is now **18 wrappers** (1 from Batch 6, 2 from Batch 7,
+6 from Batch 8, 9 from Batch 9). Empirically locked at scale.
+
+### Pattern F → 14 concrete invariants
+
+Two new invariants populated this batch (replacing Session 5
+stubs): `conformal_nominal_coverage` (Vovk 2005 finite-sample
+coverage validity) and `conformal_interval_containment` (lower
+≤ upper at all positions). Both PASS on the conformal
+fixture.
+
+### Pattern J catalog → 9 entries
+
+Three new B.5 entries (framework-incompatibility / wrapper-
+mismatch):
+
+- B.5.1 neuralforecast 0.1.0 + pytorch-lightning 2.x
+  incompatibility on Python 3.14
+- B.5.2 master-plan-stated reference vs actual TSL backend
+  mismatch (GPyTorch named, sklearn used) — same pattern as
+  S12 quantile_regression
+- B.5.3 PyTorch state isolation via in-test seed reset
+  (alternative to PyBridge.isolate=True for in-process DL
+  parity)
+
+### PyBridge isolate=False shim retired
+
+`PyBridge.py_invoke(isolate=False)` now raises `PyBridgeError`
+with explicit message pointing to direct-import as the
+established pattern. Subprocess-isolation path preserved.
+Empirical evidence: 0/14 wrappers used the shim across
+Batches 7+8; 0/9 used it in Batch 9. Architectural
+simplification complete.
+
+### DL non-determinism risk dramatically over-budgeted
+
+Master plan §17.1 risk 2 pre-budgeted ≥30% Tier C for Batch
+9. **Actual Tier C count: 0/9.** Empirical result: with
+rigorous seed pinning + cuDNN deterministic flag, all 9 DL
+wrappers achieved bit-exact same-library parity. Risk budget
+overestimated by 30 percentage points.
+
+**Implication for Item 12 (verdict-runtime alignment):** the
+NO-REFERENCE / DOCUMENTED-DIVERGENCE runtime path is **not
+needed** for any current Phase 3 wrapper. CAVEAT proxy +
+diagnostic note suffices for the 5 cumulative CAVEAT cases
+(Tier C in name only — convention from S8 nar_narx + S11
+emd_hht). **Item 12 disposition: no harness change needed;
+defer formalization to P-2 documentation phase.**
+
+### §10.3 criteria — fourth consecutive batch passing both
+
+Batch 9: criterion 1 (9 wrappers / 1 session vs 3-session
+budget = 67% improvement); criterion 2 sub-criterion 2c
+(50-60% LOC reduction). Pattern locked across 4 consecutive
+batches (S10–S13).
+
+### Session 13 closeout disposition
+
+- Item 12 (verdict-runtime alignment) — **resolved**: no
+  change needed; defer documentation to P-2.
+- Item 13 (budget revision) — **locked at optimistic end**:
+  17 sessions total. We're at 12 used + 1 remaining (Batch
+  10 in S14) + 3 documentation phase + 1 closeout = 17.
+
+### Banked items (cumulative through S13)
+
+Status updates:
+
+| Item | Status |
+|---|---|
+| Pattern J catalog (#15 from S11) | LIVE — 9 entries; appended this session |
+| §10.3 criterion 2 split (#16 from S11) | LIVE — applied 4× |
+| PyBridge isolate=False shim retire (#17 from S11) | **EXECUTED** at S13 |
+| Item 12 verdict-runtime alignment (#5 from S8) | **RESOLVED** at S13 — no change needed |
+| Item 13 budget revision | **LOCKED** at 17-session closure horizon |
+
+Items 1-4, 6-11, 14, 18, 20 remain DEFER to check-in 2.
+
+---
+
+**End of Session 13 entry.**

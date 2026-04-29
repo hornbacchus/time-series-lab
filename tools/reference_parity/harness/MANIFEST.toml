@@ -120,6 +120,13 @@ pyts = "0.13.0"
 # arch dep chain. Pin matches local install.
 lightgbm = "4.6.0"
 xgboost = "3.2.0"
+# Session 13 (Batch 9 entry — Python DL): reservoirpy for p3_esn
+# parity (same-library); prophet for p3_prophet (slow tier;
+# same-library). torch already pinned via prior batch.
+# neuralforecast / gpytorch / mapie ruled out per Session 13
+# findings (Python 3.14 / wrapper-mismatch / wrapper-mismatch).
+reservoirpy = "0.4.1"
+prophet = "1.3.0"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this

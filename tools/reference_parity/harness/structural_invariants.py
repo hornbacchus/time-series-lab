@@ -724,13 +724,66 @@ _REGISTRY["bootstrap_distributional_centering"] = _stub(
     "bootstrap_distributional_centering", 10,
 )
 
-# Conformal intervals (Batch 9)
-_REGISTRY["conformal_nominal_coverage"] = _stub(
-    "conformal_nominal_coverage", 9,
-)
-_REGISTRY["conformal_interval_containment"] = _stub(
-    "conformal_interval_containment", 9,
-)
+# Conformal intervals — populated at Phase 3 Session 13 (Batch 9 entry).
+
+
+def _check_conformal_nominal_coverage(tsl, ref, fixture, inv):
+    """Conformal coverage validity: empirical coverage >= 1-alpha
+    by Vovk 2005 finite-sample guarantee. The split-conformal
+    method guarantees marginal coverage of at least 1-alpha
+    asymptotically; finite-sample slack of 5-15% is acceptable.
+
+    Tolerance interpretation: ``inv.tolerance`` is the slack
+    (e.g., 0.05 means coverage >= 1-alpha-0.05 → PASS).
+    """
+    coverage = tsl.get("coverage")
+    alpha = tsl.get("alpha", 0.1)
+    if coverage is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'coverage' field",
+        }
+    nominal = 1.0 - float(alpha)
+    actual = float(coverage)
+    slack = float(inv.tolerance)
+    if actual >= nominal - slack:
+        status = "PASS"
+    elif actual >= nominal - 3 * slack:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "coverage": actual, "nominal": nominal,
+        "alpha": float(alpha), "slack": slack,
+    }
+
+
+def _check_conformal_interval_containment(tsl, ref, fixture, inv):
+    """Interval containment: lower <= upper at all positions
+    (no flipped intervals)."""
+    import numpy as np
+    lower = np.asarray(tsl.get("lower"), dtype=np.float64)
+    upper = np.asarray(tsl.get("upper"), dtype=np.float64)
+    if lower.size == 0 or upper.size == 0:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing lower/upper arrays",
+        }
+    n_violations = int(np.sum(lower > upper))
+    if n_violations == 0:
+        status = "PASS"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "n_violations": n_violations,
+        "n_total": int(len(lower)),
+    }
+
+
+_REGISTRY["conformal_nominal_coverage"] = _check_conformal_nominal_coverage
+_REGISTRY["conformal_interval_containment"] = _check_conformal_interval_containment
 
 
 def list_registered_types() -> list[str]:

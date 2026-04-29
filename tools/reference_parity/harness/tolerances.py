@@ -1886,6 +1886,164 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "match (matches scipy/numpy convention)."
         ),
     },
+
+    # ------------------------------------------------------------------
+    # Phase 3 Batch 9 — Python DL (Session 13).
+    # Most variance-prone batch; pre-budgeted >=30% Tier C per master
+    # plan section 17.1 risk 2. PyTorch wrappers use seed-pinning +
+    # cuDNN deterministic flag for in-process determinism. Same-library
+    # self-parity for all DL wrappers (TSL uses direct torch.nn, not
+    # neuralforecast which is unusable on Python 3.14).
+    # ------------------------------------------------------------------
+
+    "p3_lstm_gru": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-5,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "PyTorch nn.LSTM with all seeds pinned (torch + numpy "
+            "+ random) and cuDNN deterministic=True is "
+            "reproducible at machine precision modulo float32 "
+            "accumulation drift. 1e-6 abs floor accommodates "
+            "any internal float32 / float64 mixed-precision "
+            "intermediate-state drift; same-library self-test."
+        ),
+    },
+
+    "p3_tcn": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-5,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "PyTorch nn.Conv1d TCN with seed pinning + cuDNN "
+            "deterministic. Same-library self-test; 1e-6 abs "
+            "floor for float32 accumulation drift."
+        ),
+    },
+
+    "p3_nbeats": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-5,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "Custom PyTorch NBEATS with seed pinning. Same-"
+            "library self-test; neuralforecast (Nixtla) ruled "
+            "out due to Python 3.14 incompatibility."
+        ),
+    },
+
+    "p3_nhits": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-5,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "Custom PyTorch NHITS (NBEATS variant with multi-rate "
+            "hierarchical sampling). Seed-pinned same-library "
+            "self-test."
+        ),
+    },
+
+    "p3_autoencoder": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-5,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "PyTorch encoder-decoder MLP with seed pinning + "
+            "cuDNN deterministic. Same-library self-test on "
+            "reconstruction errors."
+        ),
+    },
+
+    "p3_esn": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-10,
+            "rel_tol": 1e-10,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "reservoirpy with set_seed pinned: reservoir-matrix "
+            "initialization + ridge-regression solve are both "
+            "deterministic. Pattern A.1 same-library bit-exact "
+            "target at machine precision."
+        ),
+    },
+
+    "p3_gp": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-8,
+            "rel_tol": 1e-8,
+            "block_abs_tol": 1e-4,
+            "block_rel_tol": 1e-4,
+        },
+        "justification": (
+            "sklearn.gaussian_process.GaussianProcessRegressor "
+            "with random_state pinned: L-BFGS-B hyperparameter "
+            "optimization is deterministic given fixed seed + "
+            "fixed n_restarts_optimizer. Pattern A same-library "
+            "bit-exact target. (TSL uses sklearn, NOT GPyTorch "
+            "as named in master plan section 15.11.)"
+        ),
+    },
+
+    "p3_prophet": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "Prophet's Stan backend (cmdstanpy) is deterministic "
+            "in MAP mode (uncertainty_samples=0) but L-BFGS-B "
+            "convergence-criterion variation can produce ~1e-4 "
+            "abs drift in fitted yhat / trend. Same-library "
+            "self-test; 1e-3 abs / 1e-2 rel band accommodates "
+            "Stan optimizer convergence differences across "
+            "identical-input runs."
+        ),
+    },
+
+    "p3_conformal": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-12,
+            "rel_tol": 1e-12,
+            "block_abs_tol": 1e-8,
+            "block_rel_tol": 1e-8,
+        },
+        "justification": (
+            "Split-conformal prediction is closed-form: quantile "
+            "of calibration absolute residuals. Both arms compute "
+            "identical quantile on identical residuals; bit-exact "
+            "qhat + lower/upper arrays expected. Pattern A self-"
+            "parity. Pattern F invariant conformal_nominal_coverage "
+            "verifies Vovk 2005 finite-sample coverage guarantee."
+        ),
+    },
 }
 
 

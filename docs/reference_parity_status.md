@@ -145,14 +145,29 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 
 **Batch 8 Session 12 status: COMPLETE in single session.** 7/7 PASS, 0 CAVEAT, 0 BLOCK — **first all-PASS batch since Batch 1**. Master plan §15.10 budgeted 1 session; on-budget. Per-batch summary: `tools/reference_parity/reports/p3_batch_8_summary.md`. **Pattern A → 27 wrappers** (was 20). **Pattern J catalog launched** at `docs/engineering/parity_diagnostic_reference.md` Appendix B (6 entries; check-in 1.5 act-now #1). **§10.3 criterion 2 split-lock applied** (sub-criterion 2c reported; check-in 1.5 act-now #2). **PyBridge `isolate=False` shim retire decision locked** (0/14 wrappers used the shim across Batches 7+8; check-in 1.5 act-now #3 — retire at S13).
 
-## Phase 3 — Batches 9–10 (PENDING)
+## Phase 3 — Batch 9: Python DL (9 audit IDs, single-session close — second consecutive all-PASS batch)
 
-(Wrappers enumerated in `plans/reference_parity_phase3_master_plan.md` Appendix A; status rows added per session as audits complete.)
+| # | Wrapper | Audit ID | Reference | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `lstm_gru_forecast.py` | `p3_lstm_gru` | direct PyTorch nn.LSTM | fast | **PASS** (0.0 abs Pattern A.1) | `reports/p3_lstm_gru_audit.md` | `harness/checks/p3_lstm_gru.py` | S13 |
+| 2 | `tcn_forecast.py` | `p3_tcn` | direct PyTorch nn.Conv1d | fast | **PASS** (0.0 abs Pattern A.1) | `reports/p3_tcn_audit.md` | `harness/checks/p3_tcn.py` | S13 |
+| 3 | `nbeats_forecast.py` | `p3_nbeats` | custom PyTorch NBEATS self-parity | fast | **PASS** (0.0 abs Pattern A.1) | `reports/p3_nbeats_audit.md` | `harness/checks/p3_nbeats.py` | S13 |
+| 4 | `nhits_forecast.py` | `p3_nhits` | custom PyTorch NHITS self-parity | fast | **PASS** (0.0 abs Pattern A.1) | `reports/p3_nhits_audit.md` | `harness/checks/p3_nhits.py` | S13 |
+| 5 | `autoencoder_anomaly.py` | `p3_autoencoder` | direct PyTorch encoder-decoder | fast | **PASS** (0.0 abs Pattern A.1) | `reports/p3_autoencoder_audit.md` | `harness/checks/p3_autoencoder.py` | S13 |
+| 6 | `echo_state_network.py` | `p3_esn` | direct reservoirpy | fast | **PASS** (0.0 abs Pattern A.1) | `reports/p3_esn_audit.md` | `harness/checks/p3_esn.py` | S13 |
+| 7 | `gaussian_process_forecast.py` | `p3_gp` | direct sklearn.gaussian_process | fast | **PASS** (0.0 abs Pattern A) | `reports/p3_gp_audit.md` | `harness/checks/p3_gp.py` | S13 |
+| 8 | `prophet_forecast.py` | `p3_prophet` | direct prophet (cmdstanpy MAP) | slow | **PASS** (0.0 abs Pattern A) | `reports/p3_prophet_audit.md` | `harness/checks/p3_prophet.py` | S13 |
+| 9 | `conformal_intervals.py` | `p3_conformal` | self-parity split-conformal | fast | **PASS** (0.0 abs + Pattern F invariant PASS) | `reports/p3_conformal_audit.md` | `harness/checks/p3_conformal.py` | S13 |
+
+**Batch 9 Session 13 status: COMPLETE in single session.** 9/9 PASS, 0 CAVEAT, 0 BLOCK — **second consecutive all-PASS batch**. Master plan §15.11 budgeted 3 sessions; closed in 1, locking 17-session closure horizon. Per-batch summary: `tools/reference_parity/reports/p3_batch_9_summary.md`. **Pattern A → 36 wrappers; Pattern A.1 same-library sub-class locked at 18 wrappers**. **PyBridge `isolate=False` shim retired** (per S12 decision). **Pattern F → 14 concrete invariants** (+conformal_nominal_coverage, conformal_interval_containment). **Pattern J catalog → 9 entries** (+3 B.5 framework-incompat / wrapper-mismatch). **DL non-determinism risk pre-budget (≥30% Tier C) dramatically over-estimated: actual 0/9.** **Item 12 (verdict-runtime alignment) RESOLVED — no harness change needed.**
+
+## Phase 3 — Batch 10 (PENDING)
 
 | Batch | Theme | Wrapper count | Sessions | Status |
 |---|---|---:|---|---|
-| 9 | Python DL | ~9 | S13–S15 | PENDING |
-| 10 | Misc + Tier C + deferred (`x13_seasonal_adjust`) | ~10 | S16–S17 | PENDING |
+| 10 | Misc + Tier C + deferred (`x13_seasonal_adjust`) | ~11 | S14 | PENDING (final batch) |
+
+After Batch 10: documentation phase (Sessions 15-17) + closeout (Session 18).
 
 ---
 
@@ -162,14 +177,15 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS` and `CAVEAT` ver
 |---|---:|
 | Phase 1+2 covered (Verification Initiative) | 12 wrappers |
 | Phase 3 in-scope total | 70 audit deliverables |
-| Phase 3 covered as of latest update | **50** (45 PASS + 5 CAVEAT — Batches 1+2+3+4+5+6+7+8 complete) |
-| Phase 3 remaining | 20 |
+| Phase 3 covered as of latest update | **59** (54 PASS + 5 CAVEAT — Batches 1+2+3+4+5+6+7+8+9 complete) |
+| Phase 3 remaining | 11 |
 | Phase 3 BLOCK | 0 |
 | Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
-| Phase 3 sessions used | 11 (S2–S12) — **5–6 sessions ahead; closure horizon locked at 17–18 (Item 13)** |
-| Pattern A wrappers | **27** (was 20 at Batch 7 close) |
-| Pattern F concrete invariants | 12 (no new this batch) |
-| Pattern J catalog entries | **6** (Appendix B launched at S12) |
-| Cross-batch patterns surfaced | A–H + Pattern I/J/K candidates (J: 6 catalog entries + 3 resolution sub-patterns; K → A path documented for 5 wrappers) |
+| Phase 3 sessions used | 12 (S2–S13) — **6+ sessions ahead; closure locked at 17 (Item 13 optimistic end)** |
+| Pattern A wrappers | **36** (was 27 at Batch 8 close) |
+| Pattern A.1 same-library sub-class | **18** wrappers (locked at scale) |
+| Pattern F concrete invariants | **14** (was 12; +2 conformal at S13) |
+| Pattern J catalog entries | **9** (was 6; +3 B.5 framework entries at S13) |
+| Cross-batch patterns surfaced | A–H + I/J/K candidates (J: 9 catalog entries + 3 resolution sub-patterns; K → A path documented for 5 wrappers; A.1 same-library locked at 18) |
 
-**Last updated:** 2026-04-29 (Phase 3 Session 12 close — Batch 8 complete in single session, first all-PASS batch since Batch 1, Pattern J catalog launched).
+**Last updated:** 2026-04-29 (Phase 3 Session 13 close — Batch 9 complete in single session, second consecutive all-PASS batch, PyBridge shim retired, Item 12 resolved).

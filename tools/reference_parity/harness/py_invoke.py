@@ -236,59 +236,27 @@ class PyBridge:
         timeout_sec : int
             Subprocess timeout in ``isolate=True`` mode.
         """
-        if isolate:
-            return self._py_invoke_subprocess(
-                reference_callable, fixture,
-                extract_fields=list(extract_fields or ()),
-                version_packages=list(version_packages or ()),
-                isolate_seed=isolate_seed,
-                timeout_sec=timeout_sec,
+        # Phase 3 Session 13 (per check-in 1.5 act-now decision #3):
+        # ``isolate=False`` shim retired. Empirical evidence across
+        # Batches 7+8 (14 wrappers): 0/14 used the in-process shim.
+        # All in-process Python references go through direct import
+        # (the p3_pca / p3_dfm / p3_random_forest / etc. precedent).
+        # PyBridge is now subprocess-isolation-only.
+        if not isolate:
+            raise PyBridgeError(
+                "PyBridge.py_invoke now requires isolate=True. "
+                "The in-process shim was retired in Session 13 "
+                "(0/14 wrappers used it across Batches 7+8). "
+                "For in-process Python references, use direct "
+                "import: ``import sklearn; ref = sklearn.X(...)``."
             )
-        return self._py_invoke_inprocess(
+        return self._py_invoke_subprocess(
             reference_callable, fixture,
             extract_fields=list(extract_fields or ()),
             version_packages=list(version_packages or ()),
+            isolate_seed=isolate_seed,
+            timeout_sec=timeout_sec,
         )
-
-    # -----------------------------------------------------------------
-    # In-process path (Batches 7–8)
-    # -----------------------------------------------------------------
-
-    def _py_invoke_inprocess(
-        self,
-        reference_callable: Callable[[dict[str, Any]], dict[str, Any]],
-        fixture: dict[str, Any],
-        *,
-        extract_fields: list[str],
-        version_packages: list[str],
-    ) -> tuple[dict[str, Any], dict[str, str]]:
-        """Direct in-process call. Zero subprocess overhead.
-
-        The reference_callable executes in the harness
-        Python session. Suitable for stateless references
-        (scipy, sklearn, xgboost, lightgbm, statsmodels).
-
-        Raises
-        ------
-        PyImportError
-            If the callable's module raises ImportError
-            during invocation (caller can wrap with
-            try/import path-setup if needed).
-        """
-        try:
-            outputs = reference_callable(fixture)
-        except ImportError as e:
-            raise PyImportError(
-                f"Reference callable failed to import: {e}"
-            ) from e
-        if not isinstance(outputs, dict):
-            raise PyBridgeError(
-                f"reference_callable must return a dict; "
-                f"got {type(outputs).__name__}"
-            )
-        if extract_fields:
-            outputs = {k: outputs[k] for k in extract_fields if k in outputs}
-        return outputs, _capture_versions(version_packages)
 
     # -----------------------------------------------------------------
     # Subprocess path (Batch 9)

@@ -216,6 +216,75 @@ Combine with `deterministic=True` + `force_col_wise=True` +
 
 **Detected in:** `p3_lightgbm` audit (Session 12).
 
+### B.5 — Framework-incompatibility / wrapper-mismatch (Session 13 additions)
+
+#### B.5.1 — neuralforecast 0.1.0 + pytorch-lightning incompatibility on Python 3.14 (S13)
+
+**Source:** Python `neuralforecast` 0.1.0 (the only version pip
+will install on Python 3.14 + current pytorch-lightning
+2.6.1).
+
+**Quirk:** Import fails with
+`AttributeError: module 'pytorch_lightning.utilities' has no
+attribute 'distributed'`. neuralforecast 0.1.0 was written
+against pytorch-lightning < 2.0, which had a
+`pl.utilities.distributed` namespace; newer pytorch-lightning
+removed it.
+
+**Resolution:** Use direct PyTorch self-parity for NBEATS /
+NHITS parity tests. TSL's wrappers (`nbeats_forecast.py` /
+`nhits_forecast.py`) already use direct `torch.nn` (NOT
+neuralforecast), so this is a clean fit. The "self-parity"
+here means TSL's torch.nn architecture vs an inline
+reproduction of the same architecture in the check module.
+
+**Detected in:** `p3_nbeats`, `p3_nhits` audits (Session 13).
+
+#### B.5.2 — Master-plan-stated reference vs actual TSL backend mismatch (S13)
+
+**Source:** `engine/techniques/gaussian_process_forecast.py`.
+
+**Quirk:** Master plan §15.11 named GPyTorch as the reference
+implementation; TSL wrapper actually uses
+`sklearn.gaussian_process.GaussianProcessRegressor` (NOT
+GPyTorch). Cross-package GPyTorch comparison would test
+something different than what TSL ships.
+
+**Resolution:** Always read the actual wrapper imports before
+fixing the reference. Align reference to actual TSL backend.
+This catches a class of wrapper-naming-vs-implementation
+drift bugs (similar to `p3_quantile_regression` Session 12,
+where master plan named statsmodels QR but TSL uses sklearn
+GBR with quantile loss).
+
+**Detected in:** `p3_gp` audit (Session 13). Same pattern in
+`p3_quantile_regression` (Session 12).
+
+#### B.5.3 — PyTorch state isolation via in-test seed reset (S13)
+
+**Source:** `harness/checks/p3_lstm_gru.py` (and 4 other
+torch-based checks in Batch 9).
+
+**Quirk:** PyBridge `isolate=True` subprocess spawn adds
+~300-500ms per check. For 5 PyTorch wrappers that's 1.5-2.5s
+of pure subprocess overhead — and PyBridge `isolate=False`
+shim was retired this session (0/14 usage in Batches 7+8).
+
+**Resolution:** Use in-test seed reset at the start of each
+TSL/reference fit/predict — call `_seed_torch(seed)` to set
+torch + numpy + random + cuDNN deterministic flag IMMEDIATELY
+BEFORE model instantiation (so weight initialization is
+reproducible). Both arms share this discipline; same-process
+state leak is benign because both arms reset before use.
+
+**Bit-exact result:** all 5 PyTorch checks (LSTM/GRU, TCN,
+NBEATS, NHITS, autoencoder) achieved 0.0 abs diff with this
+in-test seed-reset pattern. PyTorch + cuDNN deterministic
+flag + manual_seed at start of fit gives full reproducibility
+without subprocess isolation.
+
+**Detected in:** All 5 PyTorch checks (Session 13).
+
 ---
 
 ## Section C — Pattern A taxonomy (formalization deferred)
@@ -229,7 +298,7 @@ of Batch 8 close. Formalize at Session 25 / P-2 close.)
 ## Section D — Pattern F structural-invariants registry
 
 See `tools/reference_parity/harness/structural_invariants.py`.
-12 concrete invariants populated as of Session 12 close:
+14 concrete invariants populated as of Session 13 close:
 
 | Invariant | Wrapper class | Populated at |
 |---|---|---|
@@ -245,6 +314,7 @@ See `tools/reference_parity/harness/structural_invariants.py`.
 | `fft_energy_conservation` | FFT family | Session 11 |
 | `wavelet_inverse_roundtrip` | Wavelet family | Session 11 |
 | `wavelet_energy_conservation` | Wavelet family | Session 11 |
+| `conformal_nominal_coverage` | Conformal | **Session 13** |
+| `conformal_interval_containment` | Conformal | **Session 13** |
 
-Future populations: bootstrap (Batch 10), conformal (Batch 9),
-decomposition (open).
+Future populations: bootstrap (Batch 10), decomposition (open).

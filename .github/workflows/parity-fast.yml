@@ -53,9 +53,21 @@ jobs:
         #   - lightgbm: p3_lightgbm reference (same-library
         #     self-test). xgboost already in matrix from prior
         #     session.
+        # Phase 3 Session 13 (Batch 9 Python DL) deps:
+        #   - reservoirpy: p3_esn reference (same-library)
+        #   - prophet: p3_prophet reference (same-library; tier=slow)
+        #   torch already in matrix from prior session;
+        #   neuralforecast / gpytorch / mapie ruled out:
+        #     * neuralforecast 0.1.0 incompatible with Python 3.14
+        #       (pl.utilities.distributed AttributeError);
+        #     * GPyTorch ruled out — TSL gp_forecast actually uses
+        #       sklearn.gaussian_process not GPyTorch;
+        #     * MAPIE ruled out — TSL conformal_intervals uses
+        #       custom split-conformal on pmdarima base; self-
+        #       parity reference suffices.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels torch==2.11.0 ewstools==2.1.2 pmdarima arch scikit-learn hmmlearn particles ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm
+          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels torch==2.11.0 ewstools==2.1.2 pmdarima arch scikit-learn hmmlearn particles ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
