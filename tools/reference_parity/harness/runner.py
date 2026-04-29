@@ -9,8 +9,15 @@ Usage:
 Exit codes:
     0 — all PASS / SKIP only.
     1 — any BLOCK.
-    2 — any CAVEAT, no BLOCK.
+    2 — any CAVEAT, no BLOCK / DOCUMENTED-DIVERGENCE.
     3 — ERROR or fatal environment mismatch.
+    4 — any DOCUMENTED-DIVERGENCE, no BLOCK / ERROR
+        (Phase 3.5 Session 1 Item 7 forward-provision; not yet
+        triggered by any current wrapper).
+
+The workflow YAMLs map exit codes 2 (CAVEAT) and 4
+(DOCUMENTED-DIVERGENCE) to 0 (CI green) per
+[P-1 §6.4](../../../docs/engineering/parity_standard.md#64-exit-code-policy-b).
 """
 
 from __future__ import annotations
@@ -396,12 +403,25 @@ def _emit_results(
 
 
 def _exit_code_for(overall: str) -> int:
+    """Map aggregate outcome to runner exit code.
+
+    Exit code policy (per [P-1 §6.4](../../../docs/engineering/parity_standard.md#64-exit-code-policy-b)):
+        0 — PASS / SKIP only → CI green
+        1 — BLOCK            → CI red
+        2 — CAVEAT           → mapped to 0 in workflow YAML
+        3 — ERROR            → CI red
+        4 — DOCUMENTED-DIVERGENCE → mapped to 0 in workflow YAML
+            (Phase 3.5 Session 1 Item 7 forward-provision; no
+            current wrapper triggers DD; reserved per P-1 §2.3)
+    """
     if overall == "BLOCK":
         return 1
     if overall == "CAVEAT":
         return 2
     if overall == "ERROR":
         return 3
+    if overall == "DOCUMENTED-DIVERGENCE":
+        return 4
     return 0
 
 

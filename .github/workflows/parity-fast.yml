@@ -123,16 +123,21 @@ jobs:
         # wrapper, the --json redirect + bash set -e silenced all
         # diagnostic output on failure (Phase 0 D5 Tier 4 finding).
         #
-        # CI exit-code policy (per master plan §3.3 — "PASS and
-        # CAVEAT verdicts both run in CI"):
-        #   harness exit 0 = PASS / SKIP only        → CI green
-        #   harness exit 2 = CAVEAT (no BLOCK/ERROR) → CI green
+        # CI exit-code policy (per master plan §3.3 + P-1 §6.4 +
+        # Phase 3.5 Session 1 Item 7 DOCUMENTED-DIVERGENCE
+        # provision):
+        #   harness exit 0 = PASS / SKIP only           → CI green
+        #   harness exit 1 = BLOCK                      → CI red
+        #   harness exit 2 = CAVEAT (no BLOCK/ERROR)    → CI green
         #     (CAVEAT is the documented verdict for "matches
         #     except in stated regime" — STL / MSTL deterministic
         #     impl-divergence are PASS-class outcomes per §3.1
         #     and must not fail the CI gate)
-        #   harness exit 1 = BLOCK                   → CI red
-        #   harness exit 3 = ERROR                   → CI red
+        #   harness exit 3 = ERROR                      → CI red
+        #   harness exit 4 = DOCUMENTED-DIVERGENCE      → CI green
+        #     (Phase 3.5 Session 1 forward-provision; methodology-
+        #     equivalent divergence per P-1 §2.1; not yet
+        #     triggered by any current wrapper)
         # Translation happens here, not in the runner — the
         # runner's exit-code semantics remain debug-friendly for
         # local invocation.
@@ -144,10 +149,14 @@ jobs:
           python -m reference_parity --tier fast --json > parity-fast.json
           exit_code=$?
           cat parity-fast.json
-          # Map CAVEAT (exit 2) → 0 per §3.3 CI exit-code policy.
-          # Pass through 0 (PASS/SKIP), 1 (BLOCK), 3 (ERROR) as-is.
+          # Map CAVEAT (exit 2) and DOCUMENTED-DIVERGENCE (exit 4)
+          # → 0 per P-1 §6.4. Pass through 0 (PASS/SKIP), 1
+          # (BLOCK), 3 (ERROR) as-is.
           if [ "$exit_code" = "2" ]; then
-            echo "::notice::Harness reported CAVEAT (exit 2); per master plan §3.3 this is non-failing for CI. Mapping to exit 0."
+            echo "::notice::Harness reported CAVEAT (exit 2); per master plan §3.3 + P-1 §6.4 this is non-failing for CI. Mapping to exit 0."
+            ci_exit=0
+          elif [ "$exit_code" = "4" ]; then
+            echo "::notice::Harness reported DOCUMENTED-DIVERGENCE (exit 4); per P-1 §2.1 + §6.4 this is non-failing for CI (methodology-equivalent divergence, not a bug). Mapping to exit 0."
             ci_exit=0
           else
             ci_exit=$exit_code

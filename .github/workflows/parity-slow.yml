@@ -22,9 +22,22 @@ jobs:
           python-version: "3.14"
 
       - name: Install Python deps
+        # Phase 3.5 Session 1 (Item 4): aligned slow-tier install
+        # matrix with fast-tier deps so all 6 slow-tier checks
+        # (2b/2c MCMC SV, p3_dfm, p3_prophet, p3_tbats, p3_x13)
+        # run with full coverage instead of SKIPping on missing
+        # deps. Previously stale: missing prophet (genuine slow-
+        # tier dep), plus harness-discovery deps (dtaidistance,
+        # reservoirpy, ruptures, astropy, PyWavelets, EMD-signal,
+        # pyts, xgboost, lightgbm) — every check class imports
+        # at runner startup regardless of tier, so importing
+        # checks fail without these even when the check itself
+        # is fast-tier. torch + ewstools added for parity with
+        # fast-tier check imports. p3_x13 still SKIPs gracefully
+        # (X-13 binary not installable on Windows runner).
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles
+          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles torch==2.11.0 ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -32,23 +45,32 @@ jobs:
           r-version: "4.5.3"
 
       - name: Install full manifest R packages
+        # Phase 3.5 Session 1 (Item 4): aligned slow-tier R install
+        # matrix with fast-tier (parity-fast.yml). Adds robustbase,
+        # lmtest, tempdisagg, forecastHybrid (Phase 3 Sessions
+        # 12+14 fast-tier deps that also need to be present at
+        # runner-discovery time on slow tier so all check classes
+        # import successfully). `seasonal` (X-13) deliberately
+        # omitted — requires X-13 binary; p3_x13 SKIPs gracefully.
         shell: Rscript {0}
         run: |
           install.packages(
             c("hts", "stochvol", "urca", "extRemes", "forecast",
               "vars", "tseries", "fable", "fabletools", "evir",
               "POT", "rugarch", "dlm", "KFAS", "quantreg", "MARSS",
-              "depmixS4", "MSwM", "tsDyn"),
+              "depmixS4", "MSwM", "tsDyn",
+              # Phase 3.5 Session 1 additions:
+              "robustbase", "lmtest", "tempdisagg", "forecastHybrid"),
             repos = "https://cloud.r-project.org"
           )
 
       - name: Run slow-tier parity checks
         # CI exit-code policy: same as parity-fast.yml — CAVEAT
-        # (harness exit 2) maps to CI green per master plan §3.3;
-        # BLOCK / ERROR fail. Pre-fix this step swallowed the
-        # exit code entirely (no propagation), so the workflow
-        # was silently green regardless of outcome — fixed in the
-        # same commit that adds the §3.3 mapping to parity-fast.yml.
+        # (harness exit 2) and DOCUMENTED-DIVERGENCE (harness exit
+        # 4) both map to CI green per P-1 §6.4; BLOCK / ERROR
+        # fail. DOCUMENTED-DIVERGENCE provision added at Phase 3.5
+        # Session 1 (Item 7) — forward-provisioned; not triggered
+        # by any current wrapper.
         shell: bash
         env:
           PYTHONPATH: ${{ github.workspace }}/tools
@@ -58,7 +80,10 @@ jobs:
           exit_code=$?
           cat parity-slow.json
           if [ "$exit_code" = "2" ]; then
-            echo "::notice::Harness reported CAVEAT (exit 2); per master plan §3.3 this is non-failing for CI. Mapping to exit 0."
+            echo "::notice::Harness reported CAVEAT (exit 2); per master plan §3.3 + P-1 §6.4 this is non-failing for CI. Mapping to exit 0."
+            ci_exit=0
+          elif [ "$exit_code" = "4" ]; then
+            echo "::notice::Harness reported DOCUMENTED-DIVERGENCE (exit 4); per P-1 §2.1 + §6.4 this is non-failing for CI (methodology-equivalent divergence, not a bug). Mapping to exit 0."
             ci_exit=0
           else
             ci_exit=$exit_code

@@ -62,9 +62,28 @@ The harness is the durable Phase 3 substrate. New parity audits land as new modu
 - Fast tier: 10 checks (closed-form, OLS, FFT-style, deterministic-MLE, attention-capture).
 - Slow tier: 2 checks (`2b_mcmc_sv_gaussian`, `2c_mcmc_sv_student_t` — both ~5–10 minute MCMC runs).
 
-### 1.4 `scripts/` — Phase 1 legacy audit scripts (DEPRECATED)
+### 1.4 `scripts/` — REMOVED at Phase 3.5 Session 1
 
-12 audit scripts originally produced during the Verification Initiative Phase 1 (Stage C):
+**Phase 3.5 update (2026-04-29):** The 12 deprecated Phase 1 audit
+scripts + `rscript_bridge.py` + `test_rscript_bridge.py` were
+**removed** at Phase 3.5 Session 1 (Item 5 cleanup). Justification:
+
+- Files were never tracked under git (Phase 1 plan discipline kept
+  the entire `tools/reference_parity/` tree untracked at first;
+  only the Phase 2/3 harness was promoted to git).
+- All 12 audit scripts depended on `scripts/rscript_bridge.py`,
+  which raised `ImportError` on import in Phase 2 — making the
+  scripts non-functional.
+- Phase 3 promoted all relevant audits to `harness/checks/p3_*.py`
+  (per-wrapper) AND retained Phase 1 audit reports under
+  `tools/reference_parity/reports/<phase1_id>_audit.md` as
+  historical record.
+- Cross-references in `harness/tolerances.py` `justification`
+  fields cite the Phase 1 audit IDs (e.g., `1c_bvar_irf_fevd`)
+  not file paths — unaffected by the deletion.
+
+**Historical record (for archaeological reference):** the 12
+audit scripts were:
 
 ```
 audit_1a_regression.py        audit_2c_student_t_sv.py   audit_3d_johansen.py
@@ -72,17 +91,13 @@ audit_1b_tbats.py             audit_3a_caviar.py         audit_3e_mint.py
 audit_1c_bvar_irf.py          audit_3b_har_cj.py         audit_3f_attention.py
 audit_2a_kalman.py            audit_3c_ferro_segers.py
 audit_2b_mcmc_sv.py
-rscript_bridge.py  ← DEPRECATED (raises ImportError on import; see header)
+rscript_bridge.py  ← function-based prototype superseded by harness/r_bridge.py:RBridge
 test_rscript_bridge.py
 ```
 
-**Status:** All 12 audit scripts are now **legacy / non-functional**. They depend on `scripts/rscript_bridge.py`, which was deprecated in Phase 2 — its module body raises `ImportError` immediately:
-
-> `"rscript_bridge is DEPRECATED. Use reference_parity.harness.r_bridge.RBridge instead."`
-
-**Recommended disposition:** Leave the 12 audit scripts in place as historical record (they wrote the per-audit reports under `reports/` and are referenced by `harness/tolerances.py` `justification` fields), but treat them as read-only artifacts. **Do not extend.** All Phase 3 audits land in `harness/checks/` per Section 16.2 of the master plan.
-
-A future cleanup commit may delete `scripts/` after a migration period; not in scope for Phase 3.
+The per-audit reports under `reports/<phase1_id>_audit.md` remain
+in place as the durable Phase 1 record. They are NOT under git
+but are preserved in local checkouts.
 
 ### 1.5 `fixtures/` — 18 fixture files + sidecars
 

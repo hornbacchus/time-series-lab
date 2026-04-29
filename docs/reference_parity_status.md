@@ -254,4 +254,4 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-29 (**Phase 3 Session 18 close — PHASE 3 FULLY CLOSED**. 70/70 wrappers covered, 0 BLOCK, 18/18 banked items resolved, P-1/P-2/P-3 v1.0.0 + P-4 v1.0.0 issued. Closure at Session 18 vs original master plan budget Session 27 = 10-session under).
+**Last updated:** 2026-04-29 (**Phase 3.5 Session 1 close** — Items 4/5/7 bundled commit per §6 of locked Phase 3.5 plan: parity-slow.yml install matrix aligned with fast-tier (Python +12 pkgs, R +4 pkgs); deprecated Phase 1 `scripts/` directory removed (14 untracked files; INVENTORY.md §1.4 updated); DOCUMENTED-DIVERGENCE wired end-to-end as runtime outcome (`Outcome` literal + `_OUTCOME_PRIORITY` rank 3 + runner exit code 4 + both workflow YAMLs map exit 4 → CI green per CAVEAT precedent). Forward-provisioning: no current wrapper triggers DD. Fast-tier sweep 76/76 unchanged from Phase 3 close. Phase 3 closure state preserved (70/70 wrappers covered; 0 BLOCK; 18/18 banked items resolved; P-1/P-2/P-3/P-4 v1.0.0 issued; 10 sessions under master plan §17.1 worst-case projection).

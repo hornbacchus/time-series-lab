@@ -1,7 +1,8 @@
 """Base types for the reference-parity harness.
 
 Defines:
-- ``Outcome`` literal union (PASS / CAVEAT / BLOCK / ERROR / SKIP)
+- ``Outcome`` literal union (PASS / CAVEAT / DOCUMENTED-DIVERGENCE
+  / BLOCK / ERROR / SKIP)
 - ``Tier`` literal union (fast / slow)
 - ``ParityResult`` dataclass — the per-check return shape
 - ``ParityCheck`` abstract base class — the contract every
@@ -10,6 +11,15 @@ Defines:
 The runner discovers ``ParityCheck`` subclasses, calls their
 ``setup_fixture`` / ``run_tsl`` / ``run_reference`` / ``compare``
 methods in sequence, and packages the result.
+
+**Phase 3.5 Session 1 (Item 7):** ``DOCUMENTED-DIVERGENCE``
+added as a runtime outcome distinct from ``CAVEAT``. Per
+P-1 §2.1, DD means "output does not match reference; divergence
+is methodology-equivalent (different optimizer / prior / scale
+/ parameterization), not a bug." Empirically not encountered
+in Phase 3 (CAVEAT absorbed all such cases); reserved here for
+first-instance use in post-Phase-3 work. Maps to CI green per
+CAVEAT precedent (exit code 4 → 0 in workflow YAML).
 """
 
 from __future__ import annotations
@@ -19,7 +29,14 @@ import dataclasses
 from typing import Any, Literal
 
 
-Outcome = Literal["PASS", "CAVEAT", "BLOCK", "ERROR", "SKIP"]
+Outcome = Literal[
+    "PASS",
+    "CAVEAT",
+    "DOCUMENTED-DIVERGENCE",
+    "BLOCK",
+    "ERROR",
+    "SKIP",
+]
 Tier = Literal["fast", "slow"]
 
 
@@ -31,12 +48,20 @@ Tier = Literal["fast", "slow"]
 # check aggregates to PASS (the harness produced positive signal).
 # Both still map to exit code 0 in ``_exit_code_for`` — the
 # distinction matters only for the human-readable summary.
+#
+# DOCUMENTED-DIVERGENCE ranks between CAVEAT and ERROR — it's a
+# stronger signal than CAVEAT (the divergence is documented as
+# real, not "matches except in stated regime") but still maps to
+# CI green (no bug; methodology-equivalent). Phase 3.5 Session 1
+# Item 7: DD is forward-provisioned here; no current wrapper
+# triggers it.
 _OUTCOME_PRIORITY: dict[Outcome, int] = {
     "SKIP": 0,
     "PASS": 1,
     "CAVEAT": 2,
-    "ERROR": 3,
-    "BLOCK": 4,
+    "DOCUMENTED-DIVERGENCE": 3,
+    "ERROR": 4,
+    "BLOCK": 5,
 }
 
 
@@ -45,7 +70,8 @@ def aggregate_outcomes(outcomes: list[Outcome]) -> Outcome:
 
     Returns the worst outcome encountered. Empty input → PASS
     (vacuously true; no checks failed because none ran).
-    BLOCK > ERROR > CAVEAT > SKIP > PASS.
+    Priority (worst → best):
+    BLOCK > ERROR > DOCUMENTED-DIVERGENCE > CAVEAT > PASS > SKIP.
     """
     if not outcomes:
         return "PASS"

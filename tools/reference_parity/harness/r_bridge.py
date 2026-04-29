@@ -1,5 +1,6 @@
 """R subprocess bridge — harness-grade promotion of the Phase 1
-``tools/reference_parity/scripts/rscript_bridge.py`` utility.
+``rscript_bridge.py`` utility (Phase 1 prototype removed at
+Phase 3.5 Session 1; see INVENTORY.md §1.4).
 
 What carries over from the Phase 1 bridge (do NOT re-derive):
 - numpy ↔ R CSV roundtrip via ``np.savetxt(fmt='%.18e')``
