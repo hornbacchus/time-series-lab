@@ -300,7 +300,39 @@ will sequence these alongside any new batch-execution work.
 
 ---
 
-**Last updated:** 2026-04-30 (**Phase 3.5 Session 11 close** — Documentation phase: P-1 / P-2 / P-3 / P-4 v1.1.0 amendments
+**Last updated:** 2026-04-30 (**Phase 3.5 Session 12 close —
+PHASE 3.5 CLOSED.** Final closeout session per Phase 3 Session
+18 precedent. Verification: CI workflows current state covers
+76 fast + 6 slow checks (Windows + Linux runner) with active
+CAVEAT exit-code policy + DOCUMENTED-DIVERGENCE forward
+provision; local fast-tier 76/76 unchanged (71 PASS + 5
+CAVEAT, 0 BLOCK); P-4 v1.1.0 final state confirmed (9 Phase
+3.5 dispositions, 3 Phase 4 carry-forward, 0 PENDING
+placeholders); 82 active checks all satisfy P-1 §8.1
+verdict_class declaration invariant. Master plan
+[`reference_parity_phase3_master_plan.md`](../plans/reference_parity_phase3_master_plan.md)
+retro-edited with PHASE 3.5 CLOSED status banner.
+
+**Phase 3.5 cycle complete: 12 sessions used vs 17-session
+budget (5 sessions under budget on optimistic end).**
+
+Phase 4 launches IMMEDIATELY at this commit. P-1/P-2/P-3/P-4
+v1.1.0 serve as the handoff doc (no separate handoff doc
+needed). Phase 4 master plan drafts in the next Chat session
+per established handoff-doc → master-plan pattern. Phase 4
+entry scope: 3 documented carry-forward items
+(structural_invariants on 12 inherited; statsmodels-x13ashtml
+integration completion or formal deferral; CSD wrapper
+engineering n_surrogates default cap). Mid-cycle banked items
+add at midpoint check-in per Phase 3.5 precedent.
+
+Phase 4 carry-forward framing: Phase 4 holds Phase 3
+discipline (honest disposition; PASS/CAVEAT/DD/NO-REFERENCE
+per verdict taxonomy; no verdict-forcing). Carry-forward items
+resolve to correct verdict per methodology, not to maximum-
+PASS optimization.
+
+**Phase 3.5 Session 11 close** — Documentation phase: P-1 / P-2 / P-3 / P-4 v1.1.0 amendments
 issued in single session per Session 10 amendment plan's
 locked 19-step drafting order. ~610 LOC across 22 amendment
 sites. Cross-document consistency verified before commit.

@@ -2,7 +2,25 @@
 
 **Date:** 2026-04-28
 **Author:** Phase 3 kickoff Chat session
-**Status:** **PHASE 3 CLOSED at Session 18 (2026-04-29).** Preserved as authoritative record of execution-phase guidance. Final outcomes: 70/70 wrappers covered, 0 BLOCK, 65 PASS / 5 CAVEAT / 1 SKIP-graceful, 17 sessions used vs original 18-22 budget. See [P-4 status tracker](../docs/reference_parity_status.md), [P-1 parity standard](../docs/engineering/parity_standard.md), [P-2 diagnostic reference](../docs/engineering/parity_diagnostic_reference.md), [P-3 empirical findings](../docs/engineering/parity_empirical_findings.md) for the closeout deliverables. Phase 3.5 candidates banked at [P-3 §6](../docs/engineering/parity_empirical_findings.md#6-phase-35-candidates-banked).
+**Status:** **PHASE 3 CLOSED at Session 18 (2026-04-29).
+PHASE 3.5 CLOSED at Session 12 (2026-04-30).** Preserved as
+authoritative record of execution-phase guidance through both
+cycles. Phase 3 final outcomes: 70/70 wrappers covered, 0 BLOCK,
+65 PASS / 5 CAVEAT / 1 SKIP-graceful, 17 sessions used vs
+original 18-22 budget. **Phase 3.5 final outcomes: 9 banked
+candidates dispositioned (8 closed in-cycle; 1 partial Phase 4
+deferral), P-1/P-2/P-3/P-4 all at v1.1.0, 12 sessions used vs
+17-session budget (5 sessions under budget), 3 Phase 4 carry-
+forward items documented.** See [P-4 status tracker](../docs/reference_parity_status.md),
+[P-1 parity standard](../docs/engineering/parity_standard.md),
+[P-2 diagnostic reference](../docs/engineering/parity_diagnostic_reference.md),
+[P-3 empirical findings](../docs/engineering/parity_empirical_findings.md)
+for the v1.1.0 closeout deliverables. Phase 3.5 per-session
+findings docs preserved at [`docs/reference_parity_phase3_5/`](../docs/reference_parity_phase3_5/).
+**Phase 4 launches immediately at Phase 3.5 Session 12
+closeout** (this commit); Phase 4 master plan drafts in next
+Chat session per established handoff-doc → master-plan
+pattern (P-1/P-2/P-3/P-4 v1.1.0 serve as the handoff doc).
 **Supersedes:** Open questions in `reference_parity_phase3_handoff.md` Section 8
 **Companion:** `reference_parity_phase3_handoff.md` (background, scope sketch, working-agreement carry-forward)
 
