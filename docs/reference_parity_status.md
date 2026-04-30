@@ -254,7 +254,29 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-30 (**Phase 3.5 Session 6 close** — Item 6: X-13 binary on Linux CI.
+**Last updated:** 2026-04-30 (**Phase 3.5 Session 7 close** — Item 9 entry: macro fixture expansion (FX pairs).
+First of 3 fixture-expansion sessions (Sessions 7-9 budget).
+Added 4 FX pairs to `tools/calibration_audit/fixtures/
+macro_canonical_series.npz`: GBPUSD (FRED DEXUSUK), USDJPY
+(FRED DEXJPUS), AUDUSD (FRED DEXUSAL), EURJPY (cross-
+constructed as DEXUSEU * DEXJPUS). All 4 fetched cleanly on
+first FRED attempt; §8.1 risk 2 (acquisition unreliability)
+NOT triggered. Pre-existing 5 series (DGS10, DGS2, DEXUSEU,
+GSPC, GOLD) byte-equal preserved (np.array_equal check pre-
+write). SHA256 re-pinned: `ba90ffe0...` → `f80fc1ce...`.
+Selective re-validation: parity-harness fast-tier 76/76
+unchanged (uses synthetic fixtures, not macro_canonical);
+12 GARCH-family runs (sGARCH × GJR-GARCH × EGARCH × 4 pairs)
+all status=success with reasonable log-lik / AIC / BIC
+ranges; CSD on USDJPY + PELT on EURJPY runs both succeed.
+**Pattern A.1 stability claim verified on FX cross-pair**
+(Session 5 banking) — same-library wrappers produce
+numerically-well-formed outputs across heterogeneous pairs.
+Recurring fixture-expansion protocol documented in findings
+§Step 5. Banked for Session 11: Pattern A.1 cross-pair
+stability as confirmed empirical claim.
+
+**Phase 3.5 Session 6 close** — Item 6: X-13 binary on Linux CI.
 **PARTIAL — Session 6.5 escalation fired; partial close per
 prompt protocol.** Investigation surfaced 3 distinct
 install/integration failure modes (manifest hardcoded Windows
