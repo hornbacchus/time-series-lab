@@ -173,12 +173,24 @@ jobs:
         # (NOT the binary itself; statsmodels expects a
         # directory). x13binary::x13path() returns the binary
         # path; we extract the dirname.
+        #
+        # x13binary names the binary `x13ashtml` on Linux/macOS,
+        # but statsmodels expects to find `x13as` (or `x12a`)
+        # in X13PATH. Add a symlink so both names point at the
+        # same binary; R `seasonal` honors the binary regardless
+        # of the symlink.
         shell: bash
         run: |
           X13_BIN=$(Rscript -e 'cat(x13binary::x13path())')
           X13_DIR=$(dirname "$X13_BIN")
-          echo "Resolved x13 binary: $X13_BIN"
+          X13_NAME=$(basename "$X13_BIN")
+          echo "Resolved x13 binary: $X13_BIN (name=$X13_NAME)"
           echo "Resolved x13 binary dir: $X13_DIR"
+          if [ "$X13_NAME" != "x13as" ] && [ ! -e "$X13_DIR/x13as" ]; then
+            ln -s "$X13_BIN" "$X13_DIR/x13as"
+            echo "Created symlink: $X13_DIR/x13as -> $X13_BIN"
+          fi
+          ls -la "$X13_DIR"
           echo "X13PATH=$X13_DIR" >> "$GITHUB_ENV"
           echo "X12PATH=$X13_DIR" >> "$GITHUB_ENV"
 

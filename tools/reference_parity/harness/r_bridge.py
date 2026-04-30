@@ -230,6 +230,83 @@ class RBridge:
         # Cache the libs_user resolution so the diagnostic stderr
         # line fires at most once per RBridge instance lifetime.
         self._libs_user_warned: bool = False
+        # Phase 3.5 Session 6 — cache the rscript_exe resolution
+        # so the cross-platform fallback ("Rscript not at manifest
+        # path; falling back to PATH") fires at most once per
+        # RBridge instance.
+        self._rscript_exe_warned: bool = False
+        self._rscript_exe_cached: str | None = None
+
+    def _resolve_rscript_exe(self) -> str:
+        """Resolve the Rscript executable path with cross-platform
+        fallback. Returns a path string suitable for
+        ``subprocess.run([path, ...])``.
+
+        Resolution order:
+
+          1. ``RSCRIPT_EXE`` env var (explicit override, highest
+             precedence; useful for CI matrix entries that point
+             at a specific R install).
+          2. ``self.manifest.r.rscript_exe`` if the path exists
+             on disk (the dev-machine pin; e.g.,
+             ``C:/Program Files/R/R-4.5.3/bin/Rscript.exe`` on
+             Windows).
+          3. ``shutil.which("Rscript")`` — system PATH lookup.
+             This catches Linux/macOS CI runners where R is
+             installed by ``r-lib/actions/setup-r`` to
+             ``/usr/bin/Rscript`` or
+             ``/opt/R/<version>/bin/Rscript``.
+
+        Raises
+        ------
+        RNotAvailableError
+            If none of the three resolution paths produce a
+            valid executable. Caller's check loop catches this
+            and translates to SKIP.
+
+        Notes
+        -----
+        Prior to Phase 3.5 Session 6, the bridge used
+        ``self.manifest.r.rscript_exe`` directly, which hardcoded
+        the Windows dev-machine path. On Linux CI, every R-using
+        check SKIPped with "Rscript executable not found"
+        because the manifest path was never present on the
+        runner. The cross-platform fallback unblocks Linux CI
+        without disturbing the Windows dev-machine path.
+        """
+        if self._rscript_exe_cached is not None:
+            return self._rscript_exe_cached
+        import shutil
+        # 1. Env var override
+        env_override = os.environ.get("RSCRIPT_EXE")
+        if env_override and pathlib.Path(env_override).exists():
+            self._rscript_exe_cached = env_override
+            return env_override
+        # 2. Manifest pin
+        manifest_path = self.manifest.r.rscript_exe
+        if manifest_path and pathlib.Path(manifest_path).exists():
+            self._rscript_exe_cached = manifest_path
+            return manifest_path
+        # 3. PATH fallback
+        which = shutil.which("Rscript")
+        if which:
+            if not self._rscript_exe_warned:
+                import sys
+                print(
+                    f"[r_bridge] manifest rscript_exe "
+                    f"{manifest_path!r} not found on disk; "
+                    f"falling back to PATH-resolved {which!r}.",
+                    file=sys.stderr,
+                )
+                self._rscript_exe_warned = True
+            self._rscript_exe_cached = which
+            return which
+        raise RNotAvailableError(
+            f"Rscript not found at manifest path "
+            f"{manifest_path!r} nor on PATH; manifest pin is "
+            f"incorrect for this machine, the RSCRIPT_EXE env "
+            f"var is unset, AND R is not installed system-wide."
+        )
 
     def _resolve_libs_user(self) -> tuple[str | None, bool]:
         """Resolve manifest's R libs_user against the running
@@ -289,13 +366,9 @@ class RBridge:
         RNotAvailableError
             If Rscript cannot be found / invoked.
         """
-        if not pathlib.Path(self.manifest.r.rscript_exe).exists():
-            raise RNotAvailableError(
-                f"Rscript not found at "
-                f"{self.manifest.r.rscript_exe}; manifest pin "
-                f"is incorrect for this machine OR R is not "
-                f"installed."
-            )
+        # Phase 3.5 Session 6 — cross-platform Rscript resolution
+        # (raises RNotAvailableError if no path resolvable).
+        rscript_exe = self._resolve_rscript_exe()
         # Build a tiny R script that prints package versions
         manifest_libs, libs_valid = self._resolve_libs_user()
         pkgs = list(self.manifest.r.packages.keys())
@@ -323,7 +396,7 @@ class RBridge:
         # else: inherit runner R_LIBS_USER unchanged
         try:
             result = subprocess.run(
-                [self.manifest.r.rscript_exe, str(script_path)],
+                [rscript_exe, str(script_path)],
                 capture_output=True, text=True, timeout=30, env=env,
             )
         except FileNotFoundError as e:
@@ -439,10 +512,13 @@ class RBridge:
             env["R_LIBS_USER"] = manifest_libs
         # else: inherit runner R_LIBS_USER unchanged
 
+        # Phase 3.5 Session 6 — cross-platform Rscript resolution.
+        rscript_exe = self._resolve_rscript_exe()
+
         t0 = time.monotonic()
         try:
             result = subprocess.run(
-                [self.manifest.r.rscript_exe, str(script_path)],
+                [rscript_exe, str(script_path)],
                 capture_output=True, text=True,
                 timeout=timeout_sec, env=env,
             )
