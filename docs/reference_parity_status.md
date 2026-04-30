@@ -254,7 +254,29 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-29 (**Phase 3.5 Session 5 close** — Item 3: manifest re-pin cadence.
+**Last updated:** 2026-04-30 (**Phase 3.5 Session 6 close** — Item 6: X-13 binary on Linux CI.
+**PARTIAL — Session 6.5 escalation fired; partial close per
+prompt protocol.** Investigation surfaced 3 distinct
+install/integration failure modes (manifest hardcoded Windows
+Rscript path → x13path() output type misread → statsmodels-
+x13ashtml output convention mismatch), satisfying escalation
+criterion #3. Per Session 6.5 protocol: deferred p3_x13
+PASS-on-Linux to Phase 4 (upstream statsmodels-x13ashtml
+incompat, not TSL bug); preserved p3_x13 SKIP-graceful on both
+platforms. Salvaged two genuine wins from the iteration cycle:
+(a) **R bridge cross-platform Rscript resolution** —
+`_resolve_rscript_exe()` helper added to `harness/r_bridge.py`
+with 3-step fallback (RSCRIPT_EXE env / manifest pin /
+shutil.which); 5/6 slow-tier R-using checks now PASS on Linux
+(was SKIP on missing Rscript) — major cross-platform
+infrastructure win; (b) **x13binary install + symlink
+scaffolding** preserved in workflow for Phase 4 forward use.
+Net Linux slow-tier: 5 PASS + 1 SKIP, matching Windows.
+Banked for Session 11: P-1 §6 CI matrix Linux + cross-platform
+Rscript; Pattern J.B.6 catalog entry for statsmodels-x13ashtml
+deferral.
+
+**Phase 3.5 Session 5 close** — Item 3: manifest re-pin cadence.
 First quarterly re-pin cycle. Inventory: 2 real drifts
 (`PyWavelets` 1.8.0 → 1.9.0 — direct PyWavelets-consumer
 re-validation produced bit-exact PASS at 0.0 max_abs_diff;
