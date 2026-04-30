@@ -1,14 +1,15 @@
 # TSL Reference Parity — Per-Wrapper Status Tracker (P-4)
 
-**Status:** v1.0.0 — Phase 3 closed at Session 18 (2026-04-29).
-Authoritative coverage data tracker. Companion to:
+**Status:** **v1.1.0** — Phase 3 closed at Session 18 (2026-04-29);
+Phase 3.5 closed at Session 11 (2026-04-30) with v1.1.0 doc set
+issued. Authoritative coverage data tracker. Companion to:
 
 - [P-1 parity standard](engineering/parity_standard.md)
-  v1.0.0 — directive ("must") for new wrapper PRs
+  **v1.1.0** — directive ("must") for new wrapper PRs
 - [P-2 parity diagnostic reference](engineering/parity_diagnostic_reference.md)
-  v1.0.0 — descriptive reference / playbook
+  **v1.1.0** — descriptive reference / playbook
 - [P-3 parity empirical findings](engineering/parity_empirical_findings.md)
-  v1.0.0 — descriptive narrative
+  **v1.1.0** — descriptive narrative
 
 **Status legend (per master plan §3.1; see [P-1 §2](engineering/parity_standard.md#2-four-verdict-closure-rule-b) for binding semantics):**
 
@@ -235,26 +236,84 @@ Documentation phase (Sessions 15-17) + closeout (Session 18) per Item 13 lock:
 
 | Document | Type | Version | Issued at |
 |---|---|---|---|
-| [P-1 parity standard](engineering/parity_standard.md) | Directive ("must") | v1.0.0 | Session 15 (commit `04054a4`) |
-| [P-2 parity diagnostic reference](engineering/parity_diagnostic_reference.md) | Descriptive reference / playbook | v1.0.0 | Session 16 (commit `3b08431`) |
-| [P-3 parity empirical findings](engineering/parity_empirical_findings.md) | Descriptive narrative | v1.0.0 | Session 17 (commit `dedb89c`) |
-| **P-4 status tracker (this document)** | Authoritative coverage data | **v1.0.0** | **Session 18 closeout** |
+| [P-1 parity standard](engineering/parity_standard.md) | Directive ("must") | **v1.1.0** | Phase 3.5 Session 11 (this cycle) |
+| [P-2 parity diagnostic reference](engineering/parity_diagnostic_reference.md) | Descriptive reference / playbook | **v1.1.0** | Phase 3.5 Session 11 (this cycle) |
+| [P-3 parity empirical findings](engineering/parity_empirical_findings.md) | Descriptive narrative | **v1.1.0** | Phase 3.5 Session 11 (this cycle) |
+| **P-4 status tracker (this document)** | Authoritative coverage data | **v1.1.0** | **Phase 3.5 Session 11** |
 
-## Phase 3.5 candidates (banked at P-3 §6)
+Prior versions:
 
-For forward-look:
+| Document | v1.0.0 issued at |
+|---|---|
+| P-1 | Session 15 (commit `04054a4`) |
+| P-2 | Session 16 (commit `3b08431`) |
+| P-3 | Session 17 (commit `dedb89c`) |
+| P-4 | Session 18 closeout |
 
-1. **Item #9 — `single_impl_mle` band tightening:** evidence from `p3_var` (8.1 orders headroom), `p3_vecm` (13 orders), `p3_pca` (8 orders). Add new `single_impl_mle` verdict_class with 1e-5 abs / 1e-4 rel band; migrate the 3 wrappers; audit other current `mle_fit`-class wrappers.
-2. **Item #10 — Per-metric bands within `em_stochastic`:** evidence from HMM (means 1e-5 abs vs transmat 0.05-0.25). Extend tolerance ladder schema to support per-metric granularity within a single verdict_class.
-3. **Manifest re-pin cadence:** `MANIFEST.toml`'s `next_review` fired during batch execution without scheduled action. First quarterly re-pin window at Phase 3.5 entry.
-4. **`parity-slow.yml` install matrix cleanup:** stale install lists (missing `prophet`, `dtaidistance`, `reservoirpy`, etc.) cause SKIPs in slow-tier nightly runs. Informative-not-failing per harness SKIP convention but worth fixing for full slow-tier coverage.
-5. **`scripts/` cleanup:** 12 deprecated Phase 1 audit scripts under `tools/reference_parity/scripts/` superseded by `harness/checks/`. Defer cleanup to Phase 3.5 to avoid bundling with closeout commit.
-6. **X-13 binary on Linux CI:** investigate whether `x13as` package is feasible in a Linux CI runner (Ubuntu has it in some distributions). If yes, add Linux-only slow-tier job for `p3_x13`.
-7. **DOCUMENTED-DIVERGENCE first-instance reservation:** when this verdict first surfaces in post-Phase-3 work, document classification recipe in P-2.
+## Phase 3.5 cycle close — disposition table
+
+Phase 3.5 ran 11 sessions (2026-04-29 to 2026-04-30) closing
+all 9 banked candidates from P-3 v1.0.0 §6 plus 2 mid-cycle
+findings (verdict_class production-locks):
+
+| # | Banked candidate | Disposition | Session(s) | Findings doc |
+|---:|---|---|---|---|
+| 1 | `single_impl_mle` band tightening | **CLOSED** — verdict_class production-locked at 1e-5 abs / 1e-4 rel; `p3_vecm` migrated (9 orders preserved headroom; only candidate ≥3 orders) | S3 | [`session_3_findings.md`](reference_parity_phase3_5/session_3_findings.md) |
+| 2 | em_stochastic per-metric bands | **CLOSED** — schema extension `per_metric` block on tolerance ladder + `_get_metric_tol()` helper; targeted refinement on `p3_hmm` + `p3_markov_switching` (outcome b per audit-first protocol) | S4 | [`session_4_findings.md`](reference_parity_phase3_5/session_4_findings.md) |
+| 3 | Manifest re-pin cadence | **CLOSED** — first quarterly re-pin cycle executed; 4 pin updates (PyWavelets minor; forecastHybrid minor; robustbase + dtw format-norms); recurring quarterly protocol documented; cadence anchored at 2026-07-29 | S5 | [`session_5_findings.md`](reference_parity_phase3_5/session_5_findings.md) |
+| 4 | `parity-slow.yml` install matrix cleanup | **CLOSED** — install-matrix tier-agnosticism via shared composite action; cross-platform Rscript resolution protocol added in S6 | S1 + S6 | [`session_1_findings.md`](reference_parity_phase3_5/session_1_findings.md) + [`session_6_findings.md`](reference_parity_phase3_5/session_6_findings.md) |
+| 5 | `scripts/` cleanup | **CLOSED** — deprecated audit scripts removed | S1 | [`session_1_findings.md`](reference_parity_phase3_5/session_1_findings.md) |
+| 6 | X-13 binary on Linux CI | **PARTIAL — Phase 4 deferral** — Linux runner job added with `x13binary` install + symlink scaffolding; statsmodels-x13ashtml integration mismatch deferred to Phase 4 (Session 6.5 escalation criterion #3 met: 3 distinct failure modes); SKIP-graceful preserved on both platforms; 5/6 R-using slow-tier checks now PASS on Linux (R-bridge cross-platform fix unanticipated win) | S6 | [`session_6_findings.md`](reference_parity_phase3_5/session_6_findings.md) |
+| 7 | DOCUMENTED-DIVERGENCE first-instance reservation | **CLOSED — forward-provisioned** — wired end-to-end as runtime outcome (Outcome literal + `_OUTCOME_PRIORITY` rank 3 + runner exit code 4 + workflow YAMLs map exit 4 → CI green); not triggered by any current wrapper | S1 | [`session_1_findings.md`](reference_parity_phase3_5/session_1_findings.md) |
+| 8 | 12 pre-Phase-3 wrapper migration to P3ParityCheck | **CLOSED** — all 82 active checks now satisfy P-1 §8.1 (verdict_class + verdict_class_rationale declared); 11-class taxonomy validated empirically | S2 | [`session_2_findings.md`](reference_parity_phase3_5/session_2_findings.md) |
+| 9 | Macro fixture expansion | **CLOSED** — fixture extended 5 → 16 series (4 FX in S7; 4 rates + 3 commodities in S8; cross-pair empirical synthesis in S9); Pattern A.1 stability claim production-locked across 4 dimensions (53 datapoints, 0 regressions) | S7 + S8 + S9 | [`session_7_findings.md`](reference_parity_phase3_5/session_7_findings.md) + [`session_8_findings.md`](reference_parity_phase3_5/session_8_findings.md) + [`session_9_findings.md`](reference_parity_phase3_5/session_9_findings.md) |
+| (S2 banked) | structural_invariants on 12 inherited | **DEFERRED to Phase 4** — 0 of 12 inherited wrappers have both registry-type fit AND bounded engineering scope; engine audit-field expansion required (out of Phase 3.5 narrow scope) | S9 | [`session_9_findings.md`](reference_parity_phase3_5/session_9_findings.md) |
+
+Total Phase 3.5 sessions: **11** (S1-S11) vs locked schedule
+17. **6 sessions under budget** (zero scope deviation entering
+documentation phase; 3 Phase 4 carry-forward items
+documented but not actioned in cycle).
+
+## Phase 3.5 cycle additions to P-* documentation
+
+| Document | v1.0.0 → v1.1.0 changes |
+|---|---|
+| P-1 parity standard | §5.1 single_impl_mle production-locked (was candidate); §5.2.1 NEW per-metric tolerance ladder schema; §6.2 NEW Linux runner + cross-platform Rscript resolution protocol; §7.3 quarterly re-pin protocol formalized; §8.1 12-wrapper migration affirmed; §10.1 Pattern A.1 cross-reference strengthened |
+| P-2 parity diagnostic reference | §A.6 em_stochastic per-metric tier docs (p3_hmm + p3_markov_switching); §A.10 single_impl_mle production-lock evidence; §B.4.3 NEW CRAN-vs-R-runtime version representation; §B.6.3 NEW statsmodels-x13ashtml deferral; §B.D NEW platform-binary integration sub-pattern; §B header note Pattern J scoping rule |
+| P-3 parity empirical findings | §1 cycle statistics update; §2.4 NEW master plan §4 Item 9 methodology evolution; §3.3 DSCD per-metric finding; §3.4 NEW Pattern A.1 4-dimensions production-lock; §10 NEW macro fixture expansion synthesis; §6 close all 9 banked + 2 verdict-class production-locks; §11 NEW Phase 4 carry-forward |
+| P-4 status tracker (this document) | v1.1.0 issuance; 12 pre-Phase-3 inherited wrappers fully migrated; Phase 3.5 disposition table; Phase 4 carry-forward block |
+
+## Phase 4 carry-forward (NOT actioned in Phase 3.5)
+
+Three items carry forward to Phase 4 master plan (drafted at
+Session 12 closeout decision):
+
+| # | Item | Origin | Phase 4 role |
+|---:|---|---|---|
+| P4-1 | structural_invariants population on 12 inherited wrappers (engine audit-field expansion + registry expansion for non-fit wrappers) | S2 banking, deferred at S9 audit | Dedicated work item in Phase 4 master plan |
+| P4-2 | statsmodels ↔ x13ashtml integration (TSL-side post-processor OR pinned statsmodels patch) — currently SKIP-graceful on both platforms | S6 deferral (3-failure-mode escalation) | Phase 4 candidate |
+| P4-3 | CSD wrapper engineering (n_surrogates default cap; chunk surrogate dimension OR auto-cap per series length) — workaround verified at n_surrogates=100 | S8 finding (T10Y2Y default-params 11.7 GiB allocation blow-up) | Phase 4 wrapper-engineering candidate |
+
+All three require engine-side wrapper modifications outside
+Phase 3.5's narrow parity-harness scope. Phase 4 master plan
+will sequence these alongside any new batch-execution work.
 
 ---
 
-**Last updated:** 2026-04-30 (**Phase 3.5 Session 10 close** — Substantive slack absorption + Session 11 amendment plan.
+**Last updated:** 2026-04-30 (**Phase 3.5 Session 11 close** — Documentation phase: P-1 / P-2 / P-3 / P-4 v1.1.0 amendments
+issued in single session per Session 10 amendment plan's
+locked 19-step drafting order. ~610 LOC across 22 amendment
+sites. Cross-document consistency verified before commit.
+Phase 3.5 cycle CLOSED with 9 of 9 banked candidates
+dispositioned (8 closed in-cycle; Item 6 partial — Phase 4
+deferral on statsmodels-x13ashtml integration; structural_
+invariants on 12 inherited deferred to Phase 4 per S9 audit).
+3 Phase 4 carry-forward items documented in v1.1.0 issuance.
+Sessions used: 11 (vs locked 17; 6 sessions under budget).
+Session 12 — Phase 3.5 closeout + Phase 4 launch decision —
+follows per locked schedule.
+
+**Phase 3.5 Session 10 close** — Substantive slack absorption + Session 11 amendment plan.
 Two-stream session per chat-checkin disposition (a). Stream 1
 produced
 [`docs/reference_parity_phase3_5/session_11_amendment_plan.md`](reference_parity_phase3_5/session_11_amendment_plan.md):

@@ -1,5 +1,7 @@
 # TSL Reference Parity Standard (P-1)
 
+**Version:** v1.1.0 (issued at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 15)
+
 **Status:** Binding for any new wrapper PR that surfaces
 numerical output. Authoritative directive.
 
@@ -298,13 +300,97 @@ subclass (mandatory per Session 5 lock).
 | `dl_seed_pinned` | 1e-6 abs / 1e-5 rel | LSTM/GRU, TCN, NBEATS, NHITS, autoencoder, ESN |
 | `bootstrap_distributional` | (planned) | (Batch 10 used self-parity; not exercised) |
 | `conformal_coverage` | 1e-12 abs (predictions); slack tolerance on coverage | conformal_intervals |
-| `single_impl_mle` (S12 split candidate) | 1e-5 abs / 1e-4 rel (tightened) | (banked; 8.1+ orders headroom evidence at S7 p3_var) |
-| `optimizer_divergent_mle` (S12 split candidate) | 1e-3 abs / 1e-2 rel (master plan §7.1 baseline) | GARCH family (rugarch boundary attractor) |
+| `single_impl_mle` (**production-locked at Phase 3.5 Session 3**) | 1e-5 abs / 1e-4 rel | `p3_vecm` (only current member; 9.99e-16 abs achieved on beta; 13 orders inside old `mle_fit` band; 9 orders preserved inside new band) |
+| `optimizer_divergent_mle` (S12 split candidate; banked) | 1e-3 abs / 1e-2 rel (master plan §7.1 baseline) | GARCH family (rugarch boundary attractor) |
 
-The `single_impl_mle` / `optimizer_divergent_mle` split is
-**a candidate refinement** banked at check-in 1.5; not yet
-locked. Use `mle_fit` as default until the split is
-formalized.
+`single_impl_mle` was **production-locked at Phase 3.5
+Session 3** (2026-04-29) per [P-2 §A.10](parity_diagnostic_reference.md#a10--single_impl_mle-production-locked-at-phase-35-session-3).
+A wrapper qualifies for migration from `mle_fit` (1e-3 / 1e-2)
+to `single_impl_mle` (1e-5 / 1e-4) when:
+1. There is a single canonical implementation across TSL +
+   reference (no optimizer divergence).
+2. Empirical evidence shows ≥3 orders of headroom inside the
+   `mle_fit` band on the wrapper's primary metrics.
+3. The tightening preserves ≥1 order of margin against the
+   measured tolerance.
+
+Audit of Phase 3 `mle_fit`-class wrappers at S3 found only
+`p3_vecm` met criterion 2 (13 orders headroom). `p3_var` and
+`p3_pca` were already classified `closed_form` (tighter band
+than `single_impl_mle` would offer); other `mle_fit` wrappers
+(`p3_arima_manual`, `p3_sarima`, `p3_arimax_sarimax`,
+`p3_intervention_analysis`, `3a_caviar_sav`) had < 3 orders
+headroom.
+
+The `optimizer_divergent_mle` split remains a banked
+candidate — no Phase 3 wrapper has demonstrated ≥ 3 orders
+headroom in the OPPOSITE direction (i.e., evidence that the
+canonical `mle_fit` band is too tight). The GARCH family at
+S6 was a borderline case, but rugarch's gosolnp pinning
+brought divergence within 1e-4 abs (~1 order outside band,
+not inside). Use `mle_fit` as default until/unless the
+opposite-direction split is justified.
+
+### 5.2.1 Per-metric tolerance ladder schema (locked Phase 3.5 Session 4)
+
+A tolerance ladder MAY declare an optional `per_metric` block
+mapping metric names to per-metric tolerance band definitions.
+When present, the harness's `_get_metric_tol(ladder,
+metric_name, fallback_key="primary")` helper returns the
+per-metric band; absent metric names fall back to
+`ladder["primary"]` (or `ladder[fallback_key]` if non-default).
+
+**Schema:**
+
+```python
+tolerance_ladder = {
+    "type": "tiered_outputs",
+    "primary": {
+        "abs_tol": float,
+        "rel_tol": float,
+        "block_abs_tol": float,
+        "block_rel_tol": float,
+    },
+    "secondary": {  # optional
+        "abs_tol": float, ...
+    },
+    "per_metric": {  # OPTIONAL — Phase 3.5 Session 4 schema extension
+        "<metric_name_1>": {
+            "abs_tol": float,
+            "rel_tol": float,
+            "block_abs_tol": float,
+            "block_rel_tol": float,
+        },
+        "<metric_name_2>": {...},
+    },
+    "justification": str,
+}
+```
+
+**Migration criterion:** populate `per_metric` block when
+empirical evidence shows **≥1 order of separation** between
+metrics within a single wrapper's output. Sub-1-order
+heterogeneity does NOT justify per-metric splitting (single-
+band ladder preserves simplicity and is harder to mis-tune).
+
+**Precedents (Phase 3.5 Session 4):** `p3_hmm` and
+`p3_markov_switching` (both `em_stochastic` class) split
+their tolerance ladders so the wide Pattern H DSCD-EM band
+(0.3 abs / 1.0 rel for HMM transition matrices; 2.0 abs /
+1.0 rel for Markov-switching transition matrices and
+log-likelihood) applies only to the latent-structure metrics,
+while emission means / regime means / log-likelihood
+(non-divergent metrics) tighten by 1.1-2.3 orders. See
+[P-2 §A.6](parity_diagnostic_reference.md#a6--em_stochastic-1e-2-abs--5e-2-rel--widened)
+for the populated per-metric tables.
+
+**When to use vs widen the canonical band:** the per-metric
+schema is the right answer when most metrics behave well at
+a tighter band but a small subset (≤30%) of metrics
+genuinely diverge. If MOST metrics need a wider band, widen
+the canonical `primary`/`secondary` directly and document the
+justification. Don't fragment the ladder across many
+per-metric entries when the band itself is the issue.
 
 ### 5.2 §10.3 criterion 2 — three sub-criteria (locked S12)
 
@@ -361,7 +447,65 @@ Target runtime under 30 minutes total. Includes:
 - TBATS multi-component fitting on long series
 - Prophet (cmdstanpy MAP fits ~2s each; pushed to slow per
   master plan §12.2)
-- X-13 (when binary available)
+- X-13 (when binary available; SKIP-graceful otherwise)
+
+**CI matrix (Phase 3.5 Session 6 addition):** the slow-tier
+workflow runs on **two parallel jobs**:
+- `slow` — Windows (canonical Phase 3 platform)
+- `slow-linux` — Ubuntu (Phase 3.5 Session 6 addition)
+
+The Linux runner enables R-using checks to PASS on the
+Linux side after the Phase 3.5 Session 6 cross-platform
+Rscript resolution fix. 5 of 6 slow-tier R-using checks
+(`2b_mcmc_sv_gaussian`, `2c_mcmc_sv_student_t`, `p3_dfm`,
+`p3_prophet`, `p3_tbats`) now PASS cross-platform.
+`p3_x13` remains SKIP-graceful on both platforms (Windows:
+binary not available; Linux: statsmodels-x13ashtml
+integration deferred to Phase 4 — see [P-2 §B.6.3](parity_diagnostic_reference.md#b63--statsmodels-x13ashtml-integration-deferred-s6)).
+
+#### 6.2.1 Cross-platform Rscript resolution protocol (Phase 3.5 Session 6)
+
+The harness's `_resolve_rscript_exe()` helper (in
+`tools/reference_parity/harness/r_bridge.py`) implements a
+**3-step fallback** for cross-platform Rscript executable
+resolution. New parity checks invoking `RBridge` get this
+behavior automatically; no per-check change required.
+
+Resolution cascade (in priority order):
+
+1. **`RSCRIPT_EXE` environment variable** (explicit override).
+   When set and points to an existing executable, use it.
+   Highest precedence; supports CI matrix entries that pin a
+   specific R install path.
+2. **Manifest pin** (`MANIFEST.toml [r] rscript_exe`). When
+   the manifest's pinned path exists on disk, use it. This
+   catches the canonical Windows dev-machine path
+   (`C:/Program Files/R/R-4.5.3/bin/Rscript.exe`).
+3. **`shutil.which("Rscript")`** (system PATH lookup).
+   Fallback when neither override nor manifest pin resolves.
+   Catches Linux/macOS CI runners where `r-lib/actions/setup-r`
+   installs Rscript to a path not present in the manifest
+   (`/usr/bin/Rscript` or `/opt/R/<version>/bin/Rscript`).
+
+**Failure mode:** if all 3 steps fail, raise
+`RNotAvailableError`; caller's check loop translates this to
+SKIP per the [§2.4 SKIP-graceful runtime convention](#24-skip-graceful-runtime-convention-b).
+
+**Caching:** result is cached on the `RBridge` instance.
+PATH-fallback path emits a one-time stderr warning to surface
+the fallback to the operator without spamming.
+
+**Backward compatibility:** Windows dev-machine behavior is
+preserved unchanged — manifest pin is checked at step 2 and
+returned when valid. The fallback only activates when the
+manifest pin doesn't resolve.
+
+**Empirical validation** (Phase 3.5 Session 6):
+- Pre-fix Linux runner: 5 of 6 R-using slow-tier checks
+  SKIPped with "Rscript executable not found:
+  C:/Program Files/R/R-4.5.3/bin/Rscript.exe".
+- Post-fix Linux runner: 5 of 6 R-using slow-tier checks
+  PASS.
 
 ### 6.3 skip-CI tier
 
@@ -414,16 +558,94 @@ When a new parity check requires an installable reference:
    same commit as the check** (per locked discipline,
    sessions 4–6 hardening).
 
-### 7.3 Quarterly re-pin window
+### 7.3 Quarterly re-pin window (formalized at Phase 3.5 Session 5)
 
 Per master plan §13.3, the manifest's `next_review` field
-governs a quarterly re-pin cadence. **Empirical note:**
-during Phase 3 execution (Sessions 2–14), `next_review`
-fired during batch execution without scheduled action. The
-batches continued under the original pin set without
-issue. Re-pinning cadence will be revisited in **Phase 3.5
-or as part of P-4 (status tracker) maintenance**;
-out-of-scope for P-1.
+governs a quarterly re-pin cadence. The protocol below was
+formalized at Phase 3.5 Session 5 (first quarterly re-pin
+cycle) and is now binding.
+
+**Triggers** — any of:
+1. **Quarterly anchor reached.** `next_review` date passes;
+   `--check-environment` reports `stale=True`. Open a session
+   to run the re-pin protocol.
+2. **CI parity-fast / parity-slow regression on a wrapper that
+   was passing.** Even within a quarter, an upstream release
+   introducing methodology divergence may surface as a sudden
+   PASS → CAVEAT/BLOCK transition. Run a focused re-pin
+   investigation on the affected package family.
+3. **Manual contributor notice.** A contributor reports a
+   methodology change in an upstream package they consume
+   (e.g., a `forecast::ets` optimizer default change, an
+   `rugarch` numerical fix). Run a focused re-pin
+   investigation.
+
+**Expected output of a re-pin session:**
+
+1. **Inventory table** — pinned vs installed for all R +
+   Python packages in the manifest.
+2. **Drift summary** — real-drift cases (semver minor or
+   major bumps) separated from cosmetic format-only
+   differences.
+3. **Per-drift disposition** — one of:
+   - **Re-pin to current.** Default for routine updates with
+     no observed methodology impact (sentinel re-validation
+     PASS).
+   - **Hold pin.** When the upstream change introduces
+     methodology divergence the session does not want to
+     adopt yet. Document rationale.
+   - **Investigate.** When the upstream change produces
+     unexpected divergence in re-validation. Escalate per
+     escalation protocol below.
+4. **Selective re-validation outcome** — sentinel wrapper(s)
+   for each affected package family, with PASS/CAVEAT/BLOCK
+   verdicts. Do NOT run the full 76/76 sweep on a re-pin
+   session; selective per package family is the convention.
+5. **Cadence advancement** — `last_review` → today's date;
+   `next_review` → today + 3 months (or alternative cadence
+   anchor if locked).
+
+**Sentinel-wrapper coverage convention** (Phase 3.5 Session 5
+locked the canonical set):
+
+- `p3_sgarch` (rugarch); `p3_arima_manual` (forecast);
+  `p3_local_level` (KFAS); `p3_arimax_sarimax` (statsmodels);
+  `p3_fft_spectrum` (scipy); `p3_random_forest` (sklearn);
+  `p3_lstm_gru` (torch).
+- Plus any wrapper directly affected by a real-drift package
+  in the current cycle.
+
+Future sessions should add new sentinel wrappers when a new
+package family enters the manifest via a new wrapper batch.
+
+**Escalation protocol** (Phase 3.5 v1.1.0 finding name):
+
+If selective re-validation surfaces a regression (PASS →
+CAVEAT/BLOCK on any sentinel wrapper):
+
+1. **Surface immediately** in the session findings doc + the
+   Chat check-in (no wait until session end).
+2. **Classify regression cause:**
+   - Tolerance band needs widening (Pattern H DSCD
+     manifestation — methodology divergence within the
+     verdict_class). → Bank as a v1.1.0 follow-up; do not
+     block the re-pin commit.
+   - True numerical bug in upstream package. → Hold the pin;
+     report upstream; document in [P-2 §B (Pattern J catalog)](parity_diagnostic_reference.md#section-b--pattern-j-reference-library-quirks-catalog).
+   - True bug in TSL wrapper that the new version exposes. →
+     Hold the pin; open a wrapper-fix session (Session N.5
+     continuation).
+3. **Re-pin commit may proceed iff** all regressions are
+   classified as "Pattern H DSCD widening" (i.e., they don't
+   indicate a TSL-side bug). Otherwise hold the pin and run
+   Session N.5.
+
+**Empirical validation** (Phase 3.5 Session 5): first
+quarterly re-pin cycle executed with 4 pin updates
+(PyWavelets minor; forecastHybrid minor; robustbase + dtw
+format-norms). Selective re-validation on 9 sentinel
+wrappers: 9/9 PASS. §8.1 risk 4 not triggered. Cadence
+advanced to next_review = 2026-07-29.
 
 ---
 
@@ -669,7 +891,8 @@ This document is **directive**. Changes must:
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 1.0.0 | 2026-04-29 | Claude Code (Phase 3 Session 15) | Initial directive issued. Distilled from Phase 3 batch-execution (S2–S14, 70 wrappers, 0 BLOCK). |
+| **1.1.0** | **2026-04-30** | **Claude Code (Phase 3.5 Session 11)** | **Phase 3.5 cycle close amendments:** (1) §5.1 — `single_impl_mle` production-locked at 1e-5 abs / 1e-4 rel band; promotion criteria documented (Phase 3.5 S3 evidence: `p3_vecm` migrated, 9 orders preserved headroom). (2) §5.2.1 NEW — per-metric tolerance ladder schema (Phase 3.5 S4: `_get_metric_tol()` helper, `per_metric` block, ≥1-order migration criterion, p3_hmm + p3_markov_switching precedents). (3) §6.2 — Linux runner added to slow-tier CI matrix; §6.2.1 NEW — cross-platform Rscript resolution protocol (3-step fallback: RSCRIPT_EXE env / manifest pin / shutil.which); empirical: 5/6 R-using slow-tier checks SKIP → PASS on Linux. (4) §7.3 — quarterly re-pin window protocol formalized (triggers / expected output / sentinel-wrapper coverage / escalation rules; first cycle executed at Phase 3.5 S5, cadence anchored at 2026-07-29). |
 
 ---
 
-**End of Parity Standard P-1 v1.0.0.**
+**End of Parity Standard P-1 v1.1.0.**

@@ -1,8 +1,10 @@
 # TSL Parity Diagnostic Reference (P-2)
 
+**Version:** v1.1.0 (issued at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 16)
+
 **Status:** Living document. Spec for parity-harness diagnostic
 patterns and reference-library quirks accumulated across Phase 3
-batches.
+batches and Phase 3.5 cycle.
 
 This document captures **lessons learned** from Phase 3 reference
 parity audits — patterns of cross-implementation divergence that
@@ -160,20 +162,53 @@ matrix, Markov-switching mean estimates, DFM factor loadings.
 TSL and reference can converge to different local optima
 even on the same fixture.
 
-**Per-metric widening within em_stochastic** (banked Item
-#3): means + log-likelihood typically agree at 1e-5 abs (4+
-orders headroom); transition matrices at 0.05-0.25 abs (0-2
-orders headroom). The right granularity is **per-metric
-within em_stochastic**, not single-band-fits-all.
+**Per-metric widening within em_stochastic** (Item #10
+**CLOSED at Phase 3.5 Session 4**): the original v1.0.0 entry
+identified that means + log-likelihood typically agree at
+1e-5 abs (4+ orders headroom) while transition matrices
+diverge at 0.05-0.25 abs (0-2 orders headroom). Phase 3.5
+Session 4 implemented the per-metric schema (see
+[P-1 §5.2.1](parity_standard.md#521-per-metric-tolerance-ladder-schema-locked-phase-35-session-4))
+and split two wrappers' ladders.
 
-**5 wrappers in Phase 3:**
+**5 wrappers in Phase 3 + per-metric tier status:**
 
-- `p3_dfm` (S7: loadings 1.22e-3)
+- `p3_dfm` (S7: loadings 1.22e-3) — single-band, no split
+  warranted (S4 audit found aligned per-metric headroom).
 - `p3_hmm` (S8: means 1.48e-5; transmat 0.237 — 0.3 widened
-  band)
+  band) — **per-metric SPLIT at S4**:
+
+  | Metric | Per-metric band | Achieved abs | Headroom (orders) |
+  |---|---:|---:|---:|
+  | transition_matrix | 0.3 abs / 1.0 rel (kept — Pattern H DSCD-EM) | 2.37e-1 | 0.1 |
+  | emission_means | 1e-3 abs / 1e-3 rel (tightened) | 1.48e-5 | 1.8 |
+  | emission_covars | 1e-3 abs / 1e-3 rel (tightened) | 7.74e-5 | 1.1 |
+  | log_likelihood | 1e-3 abs / 1e-3 rel (tightened) | 5.46e-6 | 2.3 |
+
 - `p3_markov_switching` (S8: means 5.91e-5; transmat 5.46e-2)
+  — **per-metric SPLIT at S4**:
+
+  | Metric | Per-metric band | Achieved abs | Headroom (orders) |
+  |---|---:|---:|---:|
+  | regime_means | 1e-2 abs / 1e-2 rel (tightened) | 5.90e-5 | 2.2 |
+  | transition_matrix | 2.0 abs / 1.0 rel (kept) | 5.46e-2 | 1.6 |
+  | log_likelihood | 2.0 abs / 1.0 rel (kept) | 0.348 | 0.8 |
+
 - `p3_emd_hht` (S11: CAVEAT — different sifting libraries)
+  — single-band; CAVEAT verdict already accommodates the
+  per-metric divergence pattern.
 - `p3_nar_narx` (S8: NO-REFERENCE Tier C correlation-based)
+  — N/A; no reference for per-metric calibration.
+
+**Pattern H per-metric finding** (Phase 3.5 Session 4):
+within em_stochastic wrappers, the DSCD pattern is
+**metric-specific**, not wrapper-wide. Both audited wrappers
+showed DSCD on transition matrices and log-likelihoods
+(where EM label-permutation and sign-convention ambiguities
+live) but per-component agreement at machine-precision-
+adjacent tolerances on emission / regime means. This
+strengthens the [P-3 §3.3 DSCD finding](parity_empirical_findings.md#33--dscd-is-a-real-phenomenon-not-a-tolerance-bug)
+with metric-level granularity.
 
 ### A.7 — `dl_seed_pinned` (1e-6 abs / 1e-5 rel)
 
@@ -209,13 +244,82 @@ sample slack.
 - `p3_conformal` (S13: predictions 0.0 abs; coverage 0.8625
   vs nominal 0.9 within finite-sample slack)
 
-### A.10 — `single_impl_mle` (candidate; not yet locked)
+### A.10 — `single_impl_mle` (production-locked at Phase 3.5 Session 3)
 
-See A.2 above. Banked for Phase 3.5 / P-2 v1.1.
+**Band: 1e-5 abs / 1e-4 rel** (block: 1e-3 abs / 1e-2 rel)
+
+**Status:** Production-locked at Phase 3.5 Session 3 (2026-04-29).
+Was P-2 v1.0.0 candidate; v1.1.0 promotes per [P-1 §5.1](parity_standard.md#51-verdict_class-taxonomy-11-classes--locked-session-14)
+production-lock criteria.
+
+The `single_impl_mle` class applies to MLE-fit wrappers where:
+1. There is a single canonical implementation shared across
+   TSL + reference (no optimizer divergence between
+   independent MLE implementations).
+2. Empirical evidence shows ≥3 orders of headroom inside the
+   canonical `mle_fit` band (1e-3 abs / 1e-2 rel) on the
+   wrapper's primary metrics.
+
+The class is the natural tightening of `mle_fit` for the
+sub-population where TSL + reference share the optimizer
+machinery (e.g., both wrap statsmodels under the hood, or
+both invoke the same R-package implementation). The
+`mle_fit` band's 1e-3 abs ceiling is calibrated for the
+worst-case across independent MLE implementations; when that
+worst-case doesn't apply, the achievable precision is several
+orders better.
+
+**Production-lock evidence:**
+
+| Wrapper | Worst-metric achieved abs | Old `mle_fit` band | Headroom (orders) |
+|---|---:|---:|---:|
+| `p3_vecm` (the only current member) | 9.99e-16 (beta vector) | 1e-3 | 13 |
+
+`p3_vecm` migrated from `mle_fit` → `single_impl_mle` at S3.
+Tightening preserved 9 orders of margin against the new 1e-5
+abs band. Fast-tier sweep 76/76 unchanged post-migration;
+master plan §8.1 risk 4 (tolerance tightening produces
+regression on previously-passing checks) NOT triggered.
+
+**Audit of remaining `mle_fit` wrappers at S3:** no other
+candidates met the ≥3-orders headroom criterion:
+
+| Wrapper | Worst-metric achieved abs | Headroom (orders) | Decision |
+|---|---:|---:|---|
+| `p3_arimax_sarimax` | 5.52e-06 | 2.3 | Keep `mle_fit` |
+| `p3_sarima` | 2.22e-05 | 1.7 | Keep `mle_fit` |
+| `p3_arima_manual` | 1.02e-04 | 1.0 | Keep `mle_fit` |
+| `p3_intervention_analysis` | 4.20e-04 | 0.4 | Keep `mle_fit` (right at band) |
+| `3a_caviar_sav` | (Nelder-Mead non-uniqueness) | — | Keep `mle_fit` (not a candidate) |
+| `p3_var` / `p3_pca` | (already `closed_form`) | — | Already in tighter band |
+
+**Selecting `single_impl_mle` for new wrappers:** use the
+decision tree at [A.12](#a12--selecting-a-class-for-new-wrappers).
+The class is appropriate when both TSL and the reference are
+known to call the same underlying optimizer / linear-algebra
+routines (e.g., both wrap `statsmodels.tsa.vector_ar.vecm`
+internals, OR both compile to a shared C/Fortran routine).
 
 ### A.11 — `optimizer_divergent_mle` (candidate; not yet locked)
 
-See A.2 above. Banked for Phase 3.5 / P-2 v1.1.
+The `optimizer_divergent_mle` candidate would tighten the
+`mle_fit` band for wrappers where optimizer divergence
+between independent MLE implementations is empirically
+larger than the canonical 1e-3 abs band can cleanly contain
+(i.e., the wrapper would benefit from a WIDER band, not a
+tighter one).
+
+**Banked status:** Phase 3 + Phase 3.5 surfaced no wrapper
+that demonstrated ≥3 orders of headroom in the opposite
+direction (i.e., evidence that the canonical band is too
+tight to admit a passing verdict for genuinely divergent
+optimizers). The GARCH family at S6 was a borderline case,
+but rugarch's gosolnp pinning brought divergence within
+1e-4 abs (~1 order outside band, not inside).
+
+**No action required at v1.1.0.** Reserve the candidate
+status for Phase 4 if/when an optimizer-divergent MLE
+wrapper surfaces.
 
 ### A.12 — Selecting a class for new wrappers
 
@@ -224,7 +328,11 @@ Use the following decision tree:
 1. **Is the algorithm closed-form (no optimization)?**
    → `closed_form`
 2. **Is it MLE with a single optimizer family?**
-   → `mle_fit` (until A.10/A.11 split lock)
+   → `mle_fit` (canonical default); promote to
+   `single_impl_mle` when the wrapper meets the [A.10
+   production-lock criteria](#a10--single_impl_mle-production-locked-at-phase-35-session-3)
+   (single canonical implementation across TSL + reference,
+   ≥3 orders headroom evidence)
 3. **Is it state-space reformulation across implementations?**
    → `state_space_reform`
 4. **Is it iterative LOESS / iterative smoothing?**
@@ -246,6 +354,28 @@ Use the following decision tree:
 
 **Started:** 2026-04-29 (Phase 3 Session 12, Batch 8 entry close,
 per check-in 1.5 act-now decision #1).
+
+**Scoping rule** (Phase 3.5 Session 9 / v1.1.0 hardening):
+Pattern J catalog entries describe **behaviors of the
+reference library** that the TSL parity harness must
+accommodate. The catalog is NOT a general "things we
+encountered" list. Three categories of finding that LOOK
+like Pattern J entries but are NOT, and should route
+elsewhere:
+
+| Category | Example | Routes to |
+|---|---|---|
+| **TSL wrapper defects** | CSD `n_surrogates=1000` default produces 11.7 GiB scipy memory blow-up on long real-data series (Phase 3.5 S8 finding) | Phase 4 wrapper-engineering candidate |
+| **Fixture conventions** | T10Y2Y constructed as `DGS10 - DGS2` cross-rate (Phase 3.5 S8 fixture expansion) | Tools-level fixture-pool README convention |
+| **Applied empirical findings** | GJR-GARCH leverage gap on commodity returns (~16 lik units on WTI vs ~0.2 on FX; Phase 3.5 S8 GARCH sweep) | Macro Strategy product backlog |
+
+These three re-banking decisions were made at Phase 3.5
+Session 9 closure to preserve Pattern J's specificity. Without
+this scoping rule, the catalog drifts toward becoming a
+universal observation-log and loses its diagnostic value
+(when a contributor scans Pattern J for a quirk affecting
+their reference library, they should find concrete reference-
+library behaviors, not TSL-side defects mixed in).
 
 Each entry documents:
 1. **Source** — package/version where the quirk surfaces
@@ -434,6 +564,65 @@ Combine with `deterministic=True` + `force_col_wise=True` +
 
 **Detected in:** `p3_lightgbm` audit (Session 12).
 
+#### B.4.3 — CRAN-vs-R-runtime version representation (Phase 3.5 Session 5)
+
+**Source:** R packaging convention vs `packageVersion()`
+rendering. Encountered with `robustbase` and `dtw` during the
+Phase 3.5 Session 5 first quarterly re-pin cycle.
+
+**Quirk:** CRAN releases R packages with hyphen-suffix versions
+for sub-patch revisions:
+
+```
+robustbase: 0.99-7
+dtw:        1.23-2
+```
+
+When R loads the package, `packageVersion()` renders the same
+versions in dot-format:
+
+```
+> packageVersion("robustbase")
+[1] '0.99.7'
+> packageVersion("dtw")
+[1] '1.23.2'
+```
+
+Both representations refer to **bit-identical package code**;
+only the string representation differs. The TSL harness's
+`--check-environment` reports the manifest pin (CRAN format)
+against `packageVersion()` (dot format), surfacing the
+cosmetic mismatch as "divergence":
+
+```
+R divergences:
+  robustbase: pinned=0.99-7 actual=0.99.7
+  dtw: pinned=1.23-2 actual=1.23.2
+```
+
+**Resolution:** TSL manifest pins use the **dot-format that
+matches `packageVersion()` output**. This keeps
+`--check-environment` clean (no spurious divergence reports)
+without requiring custom normalization code in the harness.
+
+**Why not normalize in the harness?** A custom normalizer
+would either accept both formats (silently masking real
+version drift if a package's hyphen position shifted) OR
+require maintaining a per-package format-rule table (high
+maintenance cost for a cosmetic finding). The pin-format
+convention is simpler and explicit.
+
+**Detected in:** `MANIFEST.toml` re-pin at Phase 3.5 Session
+5 (commit `7620a35`). Pre-S5 had hyphen-format pins for
+`robustbase` and `dtw`; S5 normalized to dot-format alongside
+the actual minor-version updates (PyWavelets 1.8.0 → 1.9.0,
+forecastHybrid 5.0.19 → 5.1.21).
+
+**Severity:** cosmetic; documented to prevent contributors
+from confusing format-only differences with actual version
+drift, AND to lock the dot-format convention for future
+manifest updates.
+
 ### B.5 — Framework-incompatibility / wrapper-mismatch (Session 13 additions)
 
 #### B.5.1 — neuralforecast 0.1.0 + pytorch-lightning incompatibility on Python 3.14 (S13)
@@ -551,6 +740,153 @@ binary deps) should follow this convention. The check is
 runtime-graceful: SKIPs informatively rather than failing.
 
 **Detected in:** `p3_x13` audit (Session 14).
+
+#### B.6.3 — statsmodels ↔ x13ashtml integration deferred (Phase 3.5 Session 6)
+
+**Source:** Python `statsmodels.tsa.x13.x13_arima_analysis` +
+R `x13binary` package's bundled `x13ashtml` binary.
+
+**Quirk:** statsmodels' `x13_arima_analysis` expects the
+classic `x13as` binary's output convention — a temp prefix
+with `.err` / `.lkr` / `.txt` / `.acm` / `.rcm` / `.tdf`
+output files at known locations. The R `x13binary` package
+ships `x13ashtml` (HTML-aware build of X-13ARIMA-SEATS) which
+writes outputs to a different location (or under different
+naming) than statsmodels expects. R `seasonal` accepts the
+HTML build; statsmodels does not.
+
+**Concrete error trace** (Phase 3.5 Session 6 WIP-3 CI run on
+Linux runner with x13binary binary symlinked as `x13as`):
+
+```
+Fixture file missing: [Errno 2] No such file or directory:
+'/tmp/tmpbdv0xoyv.err'
+```
+
+The binary itself **runs correctly** (verified via R
+`seasonal` which uses the same binary and would PASS its
+parity check). The integration mismatch is upstream
+between statsmodels and x13ashtml output convention, NOT a
+TSL wrapper bug.
+
+**Resolution at Phase 3.5 Session 6:** **DEFERRED to Phase 4**
+per Session 6.5 escalation criterion #3 (three install
+attempts produced three different failure modes — signal of
+platform incompatibility):
+- WIP-1: Rscript path hardcoded to Windows (5/6 R-using
+  checks SKIP) → fixed by [§6.2.1 cross-platform Rscript
+  protocol](parity_standard.md#621-cross-platform-rscript-resolution-protocol-phase-35-session-6).
+- WIP-2: `x13path()` output type misread (treated as binary
+  file when it's a directory).
+- WIP-3: x13ashtml-vs-statsmodels output convention mismatch
+  (binary runs, but `.err` file missing where statsmodels
+  expects).
+
+**Workaround scaffolding preserved** in
+`.github/workflows/parity-slow.yml` for Phase 4 forward use:
+
+```yaml
+# x13binary install (R seasonal works with this binary)
+- name: Install full manifest R packages + X-13 binary
+  run: install.packages(c(..., "x13binary", "seasonal"), ...)
+
+# Symlink x13ashtml -> x13as (preserved; documentation only)
+- name: Resolve X-13 binary path (documentation only)
+  run: |
+    X13_DIR=$(Rscript -e 'cat(x13binary::x13path())')
+    if [ -f "$X13_DIR/x13ashtml" ] && [ ! -e "$X13_DIR/x13as" ]; then
+      ln -s x13ashtml "$X13_DIR/x13as"
+    fi
+    # X13PATH/X12PATH NOT exported (Phase 3.5 S6.5 deferral)
+    # statsmodels then raises X13NotFoundError -> harness SKIP
+```
+
+**Outcome:** `p3_x13` SKIPs gracefully on **both** platforms
+post-Phase-3.5:
+- Windows: binary not on system PATH → SKIP (unchanged).
+- Linux: binary present but X13PATH deliberately not
+  exported → SKIP (forward-compatible with Phase 4 fix).
+
+**Phase 4 candidates** (NOT actioned at Phase 3.5):
+- Patch `engine/techniques/x13_seasonal_adjust.py` to handle
+  x13ashtml output convention directly (bypass statsmodels'
+  `x13_arima_analysis` abstraction).
+- Pin a statsmodels patch / branch that handles x13ashtml
+  output correctly.
+- Add a TSL-side post-process that normalizes x13ashtml
+  output to the format statsmodels expects.
+
+**Pattern:** even when both TSL and the reference invoke
+the same upstream binary (Pattern A.1 same-library),
+differences in **binary build variants** (`x13as` vs
+`x13ashtml`) can produce different output file conventions.
+This is distinct from R-package version drift (§B.4) and
+distinct from output-name divergence (§B.5) — it's a
+**binary-build-variant integration** quirk that emerges only
+when the Python and R wrappers consume different binary
+builds of the same source code.
+
+---
+
+### B.D — Platform-binary integration sub-pattern (Phase 3.5 v1.1.0 sub-pattern)
+
+**Status:** New sub-pattern formalized at Phase 3.5 Session 11
+based on cumulative S6 evidence. Distinct from B.1-B.6 because
+the quirks below are not about the reference library's API
+or numerical conventions; they're about how the host platform
+exposes the reference's binary dependencies.
+
+This sub-pattern collects 3 instances surfaced during Phase
+3.5 Session 6 X-13 Linux integration work:
+
+#### B.D.1 — R-bridge platform path resolution (Phase 3.5 S6)
+
+**Quirk:** the harness's `RBridge` originally hardcoded the
+Windows dev-machine Rscript path
+(`C:/Program Files/R/R-4.5.3/bin/Rscript.exe`) via the
+`MANIFEST.toml [r] rscript_exe` field. On Linux CI runners,
+this path doesn't exist; every R-using check SKIPped with
+"Rscript executable not found".
+
+**Resolution** (Phase 3.5 S6): added `_resolve_rscript_exe()`
+3-step fallback to `harness/r_bridge.py` — see
+[P-1 §6.2.1](parity_standard.md#621-cross-platform-rscript-resolution-protocol-phase-35-session-6).
+
+**Severity:** structural infrastructure issue. **Empirical
+impact:** 5 of 6 R-using slow-tier checks went from SKIP to
+PASS on the Linux runner.
+
+#### B.D.2 — Binary naming variation (x13as / x13ashtml) (Phase 3.5 S6)
+
+**Quirk:** the same X-13ARIMA-SEATS source code is built into
+two binaries with different default names depending on build
+options:
+- `x13as` (classic; statsmodels expects this name)
+- `x13ashtml` (HTML-aware; what `x13binary` R package ships
+  on Linux/macOS)
+
+**Resolution** (Phase 3.5 S6): symlink `x13ashtml` → `x13as`
+in the X13PATH directory. See [§B.6.3](#b63--statsmodels-x13ashtml-integration-deferred-phase-35-session-6)
+for the deeper output-convention mismatch that defers full
+integration to Phase 4.
+
+**Severity:** cosmetic (binary-name) but blocks discovery
+without symlink. Easily fixed.
+
+#### B.D.3 — `x13path()` directory semantics (Phase 3.5 S6)
+
+**Quirk:** the R `x13binary::x13path()` function returns the
+**bin directory** containing the binary, not the binary file
+path itself. WIP-2 of Phase 3.5 S6 misread this — used
+`dirname(x13path())` to walk up one level for X13PATH, which
+pointed statsmodels at the parent of bin/ instead of bin/.
+
+**Resolution** (Phase 3.5 S6 WIP-3): use `x13path()` output
+directly as X13PATH; symlink `x13ashtml` → `x13as` inside.
+
+**Severity:** documentation issue (`x13path()` doc string
+doesn't make this explicit; empirical inspection of the
+bin-directory listing was the diagnostic).
 
 ---
 
@@ -1096,7 +1432,8 @@ post-Phase-3 audits:
 | 0.2.0 | 2026-04-29 | Claude Code (S13) | Section B extended with B.5 framework-incompatibility entries; Section D structural-invariants registry table populated (12 entries). |
 | 0.3.0 | 2026-04-29 | Claude Code (S14) | Section B extended with B.6 master-plan-reference adjustments; Section D extended to 14 invariants. |
 | 1.0.0 | 2026-04-29 | Claude Code (S16) | Section A tolerance class taxonomy locked (11 classes); Section C Pattern A taxonomy formalized (A.1/A.2/A.3 sub-patterns); Section D extended with invariant playbook + wavelet-mode interaction; Section E Pattern I sign/scale (Item #1); Section F DSCD diagnostic-axis registry (Item #4); Section G Pattern J resolution sub-patterns (Item #11). All banked Items #1, #4, #11, #18, #20 closed at this version. |
+| **1.1.0** | **2026-04-30** | **Claude Code (Phase 3.5 Session 11)** | **Phase 3.5 cycle close amendments:** (A.6) `em_stochastic` per-metric tier docs added for `p3_hmm` + `p3_markov_switching` (Phase 3.5 S4 implementation; 4 + 3 metric tables); Pattern H per-metric finding added (DSCD is metric-specific, not wrapper-wide). (A.10) `single_impl_mle` production-locked at 1e-5 abs / 1e-4 rel band (was candidate); promotion criteria + `p3_vecm` migration evidence documented. (A.11) `optimizer_divergent_mle` candidate banked status preserved (no Phase 3 / 3.5 wrapper exhibits opposite-direction headroom). (A.12) decision-tree updated with [A.10] cross-reference. (B header) Pattern J catalog scoping rule added — J entries describe reference-library quirks, NOT TSL wrapper defects (→ Phase 4) / fixture conventions (→ tools docs) / applied empirical findings (→ product backlogs); 3 re-banking decisions from Phase 3.5 S9 codified. (B.4.3 NEW) CRAN-vs-R-runtime version representation (Phase 3.5 S5; hyphen-format → dot-format pin convention). (B.6.3 NEW) statsmodels-x13ashtml integration deferred to Phase 4 (Phase 3.5 S6 escalation criterion #3 — 3 distinct failure modes; SKIP-graceful preserved both platforms; Phase 4 paths documented). (B.D NEW sub-pattern) platform-binary integration: B.D.1 R-bridge platform path resolution; B.D.2 binary naming variation x13as / x13ashtml; B.D.3 x13path() directory semantics. |
 
 ---
 
-**End of Parity Diagnostic Reference P-2 v1.0.0.**
+**End of Parity Diagnostic Reference P-2 v1.1.0.**
