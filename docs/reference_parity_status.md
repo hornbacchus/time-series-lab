@@ -254,7 +254,33 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-30 (**Phase 3.5 Session 7 close** — Item 9 entry: macro fixture expansion (FX pairs).
+**Last updated:** 2026-04-30 (**Phase 3.5 Session 8 close** — Item 9 second session: rates + commodity expansion.
+Second of 3 fixture-expansion sessions. Added 7 series to
+`tools/calibration_audit/fixtures/macro_canonical_series.npz`:
+4 rates (DGS5, DGS30 daily; FEDFUNDS monthly; T10Y2Y as
+DGS10−DGS2 cross-construction) + 3 commodities (WTI, NG, HG
+via Yahoo CL=F/NG=F/HG=F). All 6 explicit fetches succeeded
+first-attempt; T10Y2Y is computed (no fetch). FEDFUNDS at
+native monthly frequency disclosed via `_fedfunds_freq_note`
+metadata key. §8.1 risk 2 NOT triggered. Pre-existing 9 series
+byte-equal preserved. SHA256 re-pinned: `f80fc1ce...` →
+`7dfc7d65...`. Selective re-validation: parity-fast 76/76
+unchanged; 9 GARCH-family runs on 3 commodities all
+status=success (GJR-GARCH ≥ sGARCH on every commodity, with
+WTI showing largest leverage gap at ~16 likelihood-units —
+empirically expected for oil); CSD on T10Y2Y at default
+n_surrogates=1000 triggered scipy memory blow-up (11.7 GiB
+alloc) — workaround verified at n_surrogates=100 PASSes on
+T10Y2Y/DGS5/WTI; PELT on DGS5 + WTI both PASS. Pattern A.1
+stability claim confirmed across rates + commodities (Session
+7+8 cumulative: 21 GARCH-family runs all status=success).
+Banked: Pattern J.E (cross-construction conventions) and
+Pattern J.F (wrapper memory scaling on long series — CSD
+default-surrogate-count alloc blow-up) for Session 11; CSD
+wrapper engineering for Phase 4. Fixture now 16 series (5
+Phase 3 + 4 FX + 7 rates/commodities).
+
+**Phase 3.5 Session 7 close** — Item 9 entry: macro fixture expansion (FX pairs).
 First of 3 fixture-expansion sessions (Sessions 7-9 budget).
 Added 4 FX pairs to `tools/calibration_audit/fixtures/
 macro_canonical_series.npz`: GBPUSD (FRED DEXUSUK), USDJPY
