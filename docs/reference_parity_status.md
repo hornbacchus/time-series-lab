@@ -254,7 +254,32 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-30 (**Phase 3.5 Session 9 close** — Item 9 closure + Stream 2 deferral.
+**Last updated:** 2026-04-30 (**Phase 3.5 Session 10 close** — Substantive slack absorption + Session 11 amendment plan.
+Two-stream session per chat-checkin disposition (a). Stream 1
+produced
+[`docs/reference_parity_phase3_5/session_11_amendment_plan.md`](reference_parity_phase3_5/session_11_amendment_plan.md):
+22 amendment sites across P-1/P-2/P-3/P-4 v1.1.0; ~610 LOC
+total estimated; 19-step drafting order locked (P-4 first;
+cross-references resolved by amend-referenced-before-referrer
+ordering). Single-session feasible per Phase 3 S16/S17
+precedents. Stream 2 produced 5 bounded preparation artifacts
+in [`session_10_findings.md`](reference_parity_phase3_5/session_10_findings.md):
+(A) Pattern J catalog entry artifacts for J.B.4.3 (CRAN-vs-R-
+runtime version representation) + J.B.6.3 (statsmodels-
+x13ashtml integration deferral); (B) per-metric tolerance
+ladder schema in formal form (P-1 §5.2.1 NEW); (C) R-bridge
+cross-platform Rscript resolution protocol description (P-1
+§6.2 NEW); (D) Pattern A.1 4-dimensions aggregate evidence
+table (53 datapoints, 0 regressions; P-3 §3.4 NEW); (E) two-
+paragraph master plan §4 Item 9 assumption-mismatch narrative
+draft (P-3 §2.4 NEW). All Sessions 1-9 banked items mapped to
+target P-* documents/sections; 3 Phase 4 carry-forward items
+identified (structural_invariants on 12 inherited; CSD
+wrapper engineering; statsmodels-x13ashtml integration).
+Schedule: 10 of 17 sessions; on-pace; Sessions 11 + 12 close
+the cycle.
+
+**Phase 3.5 Session 9 close** — Item 9 closure + Stream 2 deferral.
 Third and final session of Item 9 (Sessions 7-9 budget).
 **Stream 1 (cross-pair empirical synthesis) COMPLETE;
 Stream 2 (structural_invariants on 12 inherited) DEFERRED
