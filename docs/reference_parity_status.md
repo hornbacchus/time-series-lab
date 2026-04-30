@@ -254,7 +254,46 @@ For forward-look:
 
 ---
 
-**Last updated:** 2026-04-30 (**Phase 3.5 Session 8 close** — Item 9 second session: rates + commodity expansion.
+**Last updated:** 2026-04-30 (**Phase 3.5 Session 9 close** — Item 9 closure + Stream 2 deferral.
+Third and final session of Item 9 (Sessions 7-9 budget).
+**Stream 1 (cross-pair empirical synthesis) COMPLETE;
+Stream 2 (structural_invariants on 12 inherited) DEFERRED
+to Phase 4** per session prompt's deferral protocol.
+
+Stream 1 deliverables: (a) 16-series fixture pool composition
+rationale formalized (5 rates, 5 FX, 1 equity, 4 commodities;
+10y window 2015-04-25 to 2025-04-25); (b) Sessions 7-8
+cumulative 21 GARCH-family runs across 7 series — all
+status=success, GJR ≥ sGARCH on every series, WTI shows
+largest leverage gap (~16 lik-units, banked for **Macro
+Strategy product backlog**, NOT P-3); (c) Pattern A.1 stability
+claim production-locked across 4 dimensions (implementation /
+version / cross-pair / cross-asset); (d) selective re-
+validation methodology codified for Session 11 P-3 §X update;
+(e) master plan §4 Item 9 implicit-assumption mismatch
+documented (parity harness uses synthetic DGP fixtures, NOT
+macro fixtures by design — wrapper-level re-validation is the
+correct interpretation); (f) **3 re-banking decisions
+tightening Pattern J catalog scope**: CSD memory blow-up →
+Phase 4 wrapper-engineering (NOT J.F); T10Y2Y cross-construct
+→ tools-level convention (NOT formal J entry); GJR vs sGARCH
+on commodities → Macro Strategy backlog (NOT parity doc).
+
+Stream 2 deferral rationale: 0 of 12 inherited wrappers have
+both registry-type fit AND bounded engineering scope. 2a + 3d
+have registry fit but require engine-side audit-field
+expansion (out of Phase 3.5 scope); 10 wrappers have no
+registry-type fit (would require new invariant types — Phase 4
+master-plan activity). §8.1 risk 5 (Phase 3 patterns don't
+predict Phase 3.5 surfacing) triggered as anticipated; clean
+deferral preserves Phase 3.5's narrow scope and Phase 4's
+design freedom.
+
+Item 9 cycle COMPLETE: Sessions 7-8-9 budget consumed;
+fixture extended 5 → 16 series; 21 GARCH-family runs
+verified; recurring expansion protocol codified.
+
+**Phase 3.5 Session 8 close** — Item 9 second session: rates + commodity expansion.
 Second of 3 fixture-expansion sessions. Added 7 series to
 `tools/calibration_audit/fixtures/macro_canonical_series.npz`:
 4 rates (DGS5, DGS30 daily; FEDFUNDS monthly; T10Y2Y as
