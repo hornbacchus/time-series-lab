@@ -171,24 +171,24 @@ jobs:
         # binary via X13PATH or X12PATH env vars. Point both at
         # the directory containing the x13binary-bundled binary
         # (NOT the binary itself; statsmodels expects a
-        # directory). x13binary::x13path() returns the binary
-        # path; we extract the dirname.
+        # directory).
         #
-        # x13binary names the binary `x13ashtml` on Linux/macOS,
-        # but statsmodels expects to find `x13as` (or `x12a`)
-        # in X13PATH. Add a symlink so both names point at the
-        # same binary; R `seasonal` honors the binary regardless
-        # of the symlink.
+        # x13binary::x13path() returns the BIN DIRECTORY
+        # (verified empirically — the prior `dirname(x13path())`
+        # was incorrect; that produced the parent of bin/).
+        # Inside, x13binary ships the binary as `x13ashtml`
+        # (HTML-aware build). statsmodels expects `x13as` (or
+        # `x12a`) — add a relative symlink so statsmodels finds
+        # the same binary that R `seasonal` does.
         shell: bash
         run: |
-          X13_BIN=$(Rscript -e 'cat(x13binary::x13path())')
-          X13_DIR=$(dirname "$X13_BIN")
-          X13_NAME=$(basename "$X13_BIN")
-          echo "Resolved x13 binary: $X13_BIN (name=$X13_NAME)"
-          echo "Resolved x13 binary dir: $X13_DIR"
-          if [ "$X13_NAME" != "x13as" ] && [ ! -e "$X13_DIR/x13as" ]; then
-            ln -s "$X13_BIN" "$X13_DIR/x13as"
-            echo "Created symlink: $X13_DIR/x13as -> $X13_BIN"
+          X13_DIR=$(Rscript -e 'cat(x13binary::x13path())')
+          echo "Resolved X13PATH dir: $X13_DIR"
+          ls -la "$X13_DIR"
+          # Symlink x13ashtml -> x13as for statsmodels naming.
+          if [ -f "$X13_DIR/x13ashtml" ] && [ ! -e "$X13_DIR/x13as" ]; then
+            ln -s x13ashtml "$X13_DIR/x13as"
+            echo "Created symlink: $X13_DIR/x13as -> x13ashtml"
           fi
           ls -la "$X13_DIR"
           echo "X13PATH=$X13_DIR" >> "$GITHUB_ENV"
