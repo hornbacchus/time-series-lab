@@ -8,7 +8,12 @@ on:
 jobs:
   fast:
     runs-on: windows-latest
-    timeout-minutes: 10
+    # Phase 3.5 Session 6: bumped from 10 to 15 min. Fast-tier
+    # was intermittently brushing the 10-min ceiling (8-9 min
+    # typical; 10m24s hit cancellation once on commit fad9013).
+    # 15 min gives stable headroom without enabling slow-tier-
+    # class work.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
