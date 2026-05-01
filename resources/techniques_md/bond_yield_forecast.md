@@ -100,12 +100,52 @@ On the canonical fixture (143 quarters × 6 variables,
 | Yield-space mapping + table assembly | <1s |
 | **Total** | **~22s** |
 
-The first call after a fresh Python process pays an additional
-~5s numba JIT compile cost (FFBS state-sampling +
-`_conditional_inner` loop). Subsequent calls within the same
-process are JIT-cached. Session 5 (per integration plan) wires the
-JIT warmer into engine_worker startup so the first user-facing
-click sees the warm path.
+### First-call vs subsequent-call latency (numba JIT)
+
+Bond Yield Forecast uses **numba `@jit(cache=True)`** on two
+inner loops for performance:
+
+1. **FFBS state sampling** (`_ffbs.ffbs_one_equation`) — runs
+   once per equation per Gibbs draw inside BVAR-SV estimation.
+2. **Conditional-forecast inner loop**
+   (`_conditional_inner.conditional_forecast_inner_loop`) —
+   runs once per kept draw inside the conditioning step.
+
+**First-call cost (cold cache):** ~2-5 seconds. The first
+invocation after a fresh Python process must JIT-compile both
+functions. Numba writes the compiled artifacts to an on-disk
+cache (`__pycache__/` adjacent to the .py source) keyed by
+(numba version, Python version, platform, source-file mtime).
+
+**Subsequent-call cost (warm cache):** <0.001s for the JIT
+lookup itself; the actual loops run at compiled C-extension
+speed. Wall-clock per BVAR-SV run is dominated by the algorithm
+not the JIT lookup.
+
+**TSL integration smooths this for users:** the
+`engine_worker` startup (BYF Session 5, commit `38a5144`)
+invokes a JIT warmer
+(`engine/techniques/bond_yield_forecast/_jit_warmer.py`)
+exactly once at process startup, before the named-pipe server
+accepts connections. The first user-facing click after Excel
+loads the add-in therefore sees the warm path — no surprise
+2-5s latency hiding inside the first BYF run.
+
+**When you might see cold-call latency anyway:**
+- First run after a fresh deployment (cache binds to source
+  mtime; new install = new mtime = first run pays compile).
+- After a numba upgrade (cache binds to numba version).
+- After a Python upgrade (cache binds to Python version).
+- If running BYF outside the engine_worker process (e.g.,
+  ad-hoc Python scripts, CI parity-audit invocations); these
+  paths bypass the engine_worker startup hook and pay the
+  cold JIT cost on first call.
+
+The integration plan §5.3 banked the lazy-warming alternative
+(move the warmer call to the BYF dispatch instead of the
+engine_worker startup) for hardware where cold-warm exceeds
+~10s. Current dev-hardware measurement: ~2.05s cold / <0.001s
+warm — well within the budget; eager warming preserved.
 
 `n_draws_subsample=1000` and `n_paths_per_draw=50` (defaults)
 keep the conditional-forecast peak memory under ~150 MB. Setting

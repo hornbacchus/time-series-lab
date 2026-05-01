@@ -458,8 +458,46 @@ def build_panel(
 
     Either ``input_path`` (or ``config["data"]["input_file"]``) or ``raw``
     must be supplied. ``raw`` lets callers (e.g., the unified-workbook
-    reader) skip the file-load step when they already have the macro and
-    yields DataFrames in hand.
+    reader, or TSL's in-memory dispatch path
+    ``_dispatch._build_panel_in_memory``) skip the file-load step when they
+    already have the macro and yields DataFrames in hand.
+
+    Parameters
+    ----------
+    config
+        BVAR-SV configuration dict (see ``config/default.yaml``).
+    input_path
+        Path to a 3-sheet input workbook. Mutually exclusive with ``raw``.
+    output_dir
+        Directory for the parquet/npz artifacts written at the end of the
+        pipeline.
+    raw
+        BYF Session 6 cleanup §6(a) — explicit shape contract.
+        Optional dict that bypasses the file-load step. Required keys:
+
+        - ``"macro_raw"`` : ``pandas.DataFrame``
+            Macro panel pre-validation. Index = ``pandas.PeriodIndex`` at
+            quarterly frequency (or convertible via
+            ``pandas.PeriodIndex(freq="Q")``); columns = the 3 macro
+            variable names declared in ``config["data"]["macro_columns"]``
+            ("Real GDP Growth (Q/Q SAAR)", "Headline CPI Inflation (Q/Q
+            annualized)", "Effective Federal Funds Rate (Q-end)" by
+            default). Values are quarterly observations, NaN allowed at
+            head/tail; no interior gaps after sample-window resolution.
+        - ``"yields_raw"`` : ``pandas.DataFrame``
+            Yield panel pre-validation. Same index convention as
+            ``macro_raw``; columns = the 10 maturity names declared in
+            ``config["data"]["yield_columns"]`` ("3M", "6M", "1Y", "2Y",
+            "3Y", "5Y", "7Y", "10Y", "20Y", "30Y" by default). Values
+            are end-of-quarter par yields in percent.
+
+        Both DataFrames must align on a common index range; the pipeline
+        concatenates them column-wise and resolves the sample window per
+        ``config["data"]["sample_window"]`` afterwards. Callers (notably
+        ``_dispatch._build_panel_in_memory`` for the TSL Excel-DNA
+        in-memory path, and ``unified_input.read_unified_workbook`` for
+        the bundled-template path) construct ``raw`` from upstream
+        sources without round-tripping through .xlsx.
 
     Returns
     -------

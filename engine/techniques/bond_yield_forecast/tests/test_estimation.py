@@ -202,6 +202,43 @@ def test_bvarsv_unconditional_posterior_predictive():
     assert np.all(np.isfinite(out["paths"]))
 
 
+def test_bvarsv_unconditional_posterior_predictive_horizon_one():
+    """BYF Session 6 cleanup §6(f) — regression guard for horizon=1.
+
+    BVAR Session 0 banked item: horizon=1 is the smallest non-trivial
+    forecast horizon and exercises the inner loop's first-iteration
+    branch (state-update before any prior y_t accumulation; volatility
+    evolution from h_T directly without compounding). A bug at
+    horizon=1 would silently corrupt every multi-horizon path's first
+    period as well, so this guard catches the regression even though
+    multi-horizon tests would also fail in practice — making the
+    horizon=1 case the most diagnostically informative single test.
+
+    Asserts:
+      - Output contract identical to multi-horizon case (same keys,
+        finite values).
+      - Shape collapses correctly to ``(n_kept * n_paths, 1, n_vars)``.
+      - First-period y_t differs from the deterministic mean
+        ``B @ [1, last_obs[::-1].ravel()]`` (i.e., the SV innovation
+        was actually applied; not silently zeroed out).
+    """
+    res = _quick_results(seed=5)
+    out = res.posterior_predictive_unconditional(horizon=1, n_paths=3, seed=7)
+    assert set(out.keys()) == {"paths", "observable_names", "origin_period"}
+    n_kept = res.coefficients.shape[0]
+    n_vars = res.coefficients.shape[1]
+    assert out["paths"].shape == (n_kept * 3, 1, n_vars)
+    assert np.all(np.isfinite(out["paths"]))
+    # Innovation applied: the first-period draw at horizon=1 must NOT
+    # equal the deterministic VAR mean (probability of equality is
+    # zero given any non-degenerate SV variance).
+    last_obs = res.data_used.to_numpy(dtype=float)[-res.n_lags:]
+    x_det = np.concatenate(([1.0], last_obs[::-1].ravel()))
+    det_mean_draw_0 = res.coefficients[0] @ x_det
+    sampled_draw_0 = out["paths"][0, 0, :]
+    assert not np.allclose(sampled_draw_0, det_mean_draw_0)
+
+
 def test_bvarsv_asis_preserves_or_improves_sv_convergence():
     """Regression guard: ASIS must produce >= as-good per-group convergence
     on SV parameters as the non-ASIS baseline.
