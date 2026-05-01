@@ -201,6 +201,82 @@ def case_happy_path_dispatch() -> None:
         raise
 
 
+def case_template_scheme_dispatch() -> None:
+    """Case 7 (S3 carry-forward A): dispatch on the Session 3 sample
+    template (BondYield_* sheet names). Verifies the auto-detection
+    in _resolve_workbook_sheet_config rewrites the config so
+    read_unified_workbook resolves the right sheets without any
+    user-facing config-override step."""
+    print("\n=== Case 7: dispatch on Session 3 template (BondYield_* sheets) ===")
+    template = (
+        Path(__file__).resolve().parent
+        / "resources" / "templates" / "bond_yield_forecast_input_template.xlsx"
+    )
+    if not template.exists():
+        print(f"  SKIP — template not found at {template}")
+        return
+    run = _resolve_run()
+    ctx = _make_ctx({
+        "input_workbook": str(template),
+        "scenario": "baseline",
+    })
+    resp = run(ctx, _progress)
+    assert resp["status"] == "success", \
+        f"expected success, got {resp['status']}: {resp.get('error_message')}"
+    table_names = [t["name"] for t in resp["tables"]]
+    assert any("Yield Forecast" in n for n in table_names)
+    print(f"  PASS — template-scheme dispatch produced {len(resp['tables'])} tables")
+
+
+def case_reentrancy() -> None:
+    """Case 8 (S3 carry-forward B): re-entrancy — invoke run() twice in
+    the same Python process, verify root-logger handler count + warning
+    capture stay clean across calls."""
+    print("\n=== Case 8: re-entrancy (run() invoked twice in same process) ===")
+    import logging
+
+    root_handlers_before = len(logging.getLogger().handlers)
+    print(f"  Root-logger handlers before any call: {root_handlers_before}")
+
+    fixture = _FIXTURE
+    run = _resolve_run()
+    ctx1 = _make_ctx({"input_workbook": str(fixture), "scenario": "baseline"})
+    resp1 = run(ctx1, _progress)
+    assert resp1["status"] == "success", f"first call failed: {resp1.get('error_message')}"
+    root_handlers_after_1 = len(logging.getLogger().handlers)
+    print(f"  Root-logger handlers after first call: {root_handlers_after_1}")
+
+    ctx2 = _make_ctx({"input_workbook": str(fixture), "scenario": "baseline"})
+    resp2 = run(ctx2, _progress)
+    assert resp2["status"] == "success", f"second call failed: {resp2.get('error_message')}"
+    root_handlers_after_2 = len(logging.getLogger().handlers)
+    print(f"  Root-logger handlers after second call: {root_handlers_after_2}")
+
+    # Re-entrancy invariant: handler count must not grow unboundedly.
+    # Some bvar internals attach handlers (Session 0 _log_to_file context
+    # manager); the wrapper itself does not. After two calls, the count
+    # should be bounded — equal to the post-first-call count, indicating
+    # the second call did not duplicate the handler-attach.
+    assert root_handlers_after_2 == root_handlers_after_1, (
+        f"Handler accumulation across re-entrant calls: "
+        f"after1={root_handlers_after_1} after2={root_handlers_after_2}. "
+        f"This indicates BVAR's logging context (_log_to_file) is "
+        f"attaching but not detaching — friction-points §2(c) regression."
+    )
+
+    # Both responses should be byte-equivalent on numerical content
+    # (same fixture, same seed, same params). Compare a few key tables.
+    n_tables_1 = len(resp1["tables"])
+    n_tables_2 = len(resp2["tables"])
+    assert n_tables_1 == n_tables_2, "table count differs across calls"
+    # Audit fields should also be consistent.
+    af1, af2 = resp1["audit_fields"], resp2["audit_fields"]
+    for k in ("scenario", "n_draws", "n_burn", "horizon", "n_kept_draws"):
+        assert af1[k] == af2[k], f"audit_field {k} drift: {af1[k]} vs {af2[k]}"
+
+    print("  PASS — handler count bounded; tables + audit_fields consistent across calls")
+
+
 def main() -> int:
     cases = [
         case_registry_resolution,
@@ -209,6 +285,8 @@ def main() -> int:
         case_preflight_param_out_of_bounds,
         case_preflight_n_draws_subsample_above_5000,
         case_happy_path_dispatch,
+        case_template_scheme_dispatch,
+        case_reentrancy,
     ]
     failed = 0
     for c in cases:

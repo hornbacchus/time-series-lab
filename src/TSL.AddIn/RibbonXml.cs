@@ -89,6 +89,33 @@ namespace TSL.AddIn
                   onAction='OnConformal'
                   screentip='Conformal Prediction Intervals'
                   supertip='Calibrated, distribution-free forecast intervals. Produces valid prediction bands that hold regardless of model misspecification — answers &quot;75% probability CPI prints between X and Y&quot; without parametric assumptions.' />
+          <!-- Bond Yield Forecast (BYF Integration Session 3): split button
+               with primary Run action + submenu including Open Input Template.
+               Uses splitButton (per existing sbExplorer pattern, line ~125)
+               so the primary click runs the forecast and the dropdown arrow
+               exposes the template-open menu item. -->
+          <splitButton id='sbBondYield' size='large'>
+            <button id='btnBondYield'
+                    label='Bond Yield Forecast'
+                    imageMso='ChartTypeLineInsertGallery'
+                    onAction='OnBondYieldForecastRun'
+                    screentip='Bond Yield Forecast (BVAR-SV)'
+                    supertip='Large Bayesian VAR with stochastic volatility for U.S. Treasury yield curve forecasting, conditioned on economist macro projections. Requires a 3-sheet bundled .xlsx workbook (BondYield_Macro / BondYield_Yields / BondYield_Projections); use &apos;Open Input Template&apos; from the dropdown to generate a starter workbook.' />
+            <menu id='menuBondYield'>
+              <button id='btnBondYieldOpenTemplate'
+                      label='Open Input Template'
+                      imageMso='TableInsertExcel'
+                      onAction='OnBondYieldForecastOpenTemplate'
+                      screentip='Open the Bond Yield Forecast input template'
+                      supertip='Opens a pre-formatted .xlsx with example macro/yield/projection data. Edit the data sheets in place, save the workbook, then click &apos;Run Bond Yield Forecast&apos; to forecast.' />
+              <button id='btnBondYieldRun'
+                      label='Run Bond Yield Forecast'
+                      imageMso='MacroPlay'
+                      onAction='OnBondYieldForecastRun'
+                      screentip='Run the BVAR-SV forecast on the active workbook'
+                      supertip='Dispatches the BVAR-SV estimation + conditional forecast pipeline against the active workbook. Results render on a new &quot;Bond Yield Forecast Results&quot; sheet; diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet. Estimation typically takes 15-30 seconds on the canonical fixture.' />
+            </menu>
+          </splitButton>
           <separator id='sepQA2' />
           <!-- Regime / volatility / state-space. -->
           <button id='btnMarkovSwitch'

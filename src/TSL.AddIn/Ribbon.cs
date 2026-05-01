@@ -205,6 +205,110 @@ namespace TSL.AddIn
             TaskPaneManager.RunTechnique("conformal_intervals");
         }
 
+        // ── Bond Yield Forecast (BYF Integration Session 3) ──────────
+        // Split-button dropdown with two menu items + a primary action:
+        //   - Primary click on the split button = OnBondYieldForecastRun
+        //     (matches Pattern A from UX spec / plan §3.2 default action).
+        //   - Submenu "Open Input Template" = OnBondYieldForecastOpenTemplate
+        //   - Submenu "Run Bond Yield Forecast" = OnBondYieldForecastRun
+        //     (same as primary; explicit menu entry for discoverability).
+
+        public void OnBondYieldForecastRun(IRibbonControl control)
+        {
+            // Bond Yield Forecast consumes a 3-sheet xlsx workbook
+            // (BondYield_Macro / BondYield_Yields / BondYield_Projections)
+            // referenced via ctx.params["input_workbook"], NOT the standard
+            // ctx.series cell-selection contract. Pass the active workbook's
+            // path through the Task Pane's RunRequest builder so the wrapper
+            // can read the workbook directly.
+            //
+            // The Task Pane builds a RunRequest from selection by default;
+            // for Bond Yield Forecast we need to inject the workbook path
+            // before dispatch. TaskPaneManager.RunTechniqueWithParams (a
+            // future extension banked for Session 5 Task Pane integration
+            // work) would handle this cleanly. For now we route through
+            // RunTechnique and surface a Task Pane warning if no workbook
+            // path is provided — the user then sets it via the parameter
+            // editor before clicking the explicit "Run" Ribbon button.
+            //
+            // Effective UX: clicking Bond Yield Forecast opens the Task
+            // Pane on the Bond Yield Forecast view; the user confirms the
+            // input_workbook path (auto-defaulted to the active workbook
+            // when present), then clicks the Task Pane's Run button to
+            // dispatch.
+            TaskPaneManager.RunTechnique("bond_yield_forecast");
+        }
+
+        public void OnBondYieldForecastOpenTemplate(IRibbonControl control)
+        {
+            try
+            {
+                var templatePath = LocateBondYieldForecastTemplate();
+                if (templatePath == null)
+                {
+                    MessageBox.Show(
+                        "Bond Yield Forecast input template not found.\n\n" +
+                        "Reinstall Time Series Lab to restore the template, or " +
+                        "regenerate it via:\n" +
+                        "    python engine/techniques/bond_yield_forecast/" +
+                        "_session3_template_generator.py\n",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    var app = (Application)ExcelDnaUtil.Application;
+                    // Open as a NEW workbook (not Read-only) so the user can
+                    // edit the template and save-as their own workbook before
+                    // running the forecast. The unified-workbook reader doesn't
+                    // require write access; opening read-write here is a UX
+                    // affordance, not an engine requirement.
+                    app.Workbooks.Open(templatePath, ReadOnly: false);
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error opening Bond Yield Forecast input template: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Resolve the bundled Bond Yield Forecast input template path.
+        /// Mirrors the LoadSampleData two-step search (dev → installed)
+        /// for consistency with TSL's existing resource-bundling pattern.
+        /// </summary>
+        private string LocateBondYieldForecastTemplate()
+        {
+            const string templateRel =
+                @"engine\techniques\bond_yield_forecast\resources\templates\bond_yield_forecast_input_template.xlsx";
+
+            // Dev / project location: walk up from XLL output dir to
+            // repo root. XLL is at:
+            //   src/TSL.AddIn/bin/x64/Release/net48/   (6 levels up)
+            // Same convention LoadSampleData uses.
+            var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            if (!string.IsNullOrEmpty(xllDir))
+            {
+                var projectRoot = Path.GetFullPath(
+                    Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
+                var devPath = Path.Combine(projectRoot, templateRel);
+                if (File.Exists(devPath)) return devPath;
+            }
+
+            // Installed location: %LOCALAPPDATA%/TimeSeriesLab/...
+            var installedPath = Path.Combine(AddIn.AppDataPath, templateRel);
+            if (File.Exists(installedPath)) return installedPath;
+
+            return null;
+        }
+
         // Regime / volatility / state-space
         public void OnMarkovSwitching(IRibbonControl control)
         {

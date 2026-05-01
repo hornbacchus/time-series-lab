@@ -502,9 +502,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
             config = _apply_param_overrides(config, ctx.params)
             scenario = str(ctx.get_param("scenario", "baseline") or "baseline")
 
+            # -- Sheet-naming auto-detection (Session 3 carry-forward A) -
+            # The Session 3 sample template uses BondYield_* sheet names
+            # (per integration plan §3.1); the canonical pre-S3 fixture
+            # uses BVAR-config-default names. Resolve which scheme applies
+            # before invoking read_unified_workbook so a template-config
+            # mismatch doesn't surface as an InputValidationError deep in
+            # the reader.
+            progress_callback("Detecting workbook sheet scheme", 15)
+            workbook_path = Path(ctx.get_param("input_workbook"))
+            config = _resolve_workbook_sheet_config(workbook_path, config, scenario)
+
             # -- Read unified workbook ---------------------------------
             progress_callback("Reading input workbook", 18)
-            workbook_path = Path(ctx.get_param("input_workbook"))
             bundle = read_unified_workbook(workbook_path, scenario, config)
 
             # -- Build PCA panel (in-memory; no parquet write) ---------
@@ -649,6 +659,78 @@ def run(ctx: RunContext, progress_callback) -> dict:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _resolve_workbook_sheet_config(
+    workbook_path: Path, base_config: dict, scenario: str
+) -> dict:
+    """Detect sheet-naming scheme + return adjusted config.
+
+    Two supported schemes (Session 3 / verification carry-forward A):
+
+    1.  **Template scheme** (integration plan §3.1; Session 3 template):
+        ``BondYield_Macro`` / ``BondYield_Yields`` / ``BondYield_Projections``.
+        Rewrites ``config["data"]["macro_sheet"]`` etc. to match.
+
+    2.  **Default scheme** (BVAR-config defaults; canonical pre-S3
+        fixture): ``macro`` / ``yields`` / ``projections_baseline``
+        etc. Returns ``base_config`` unchanged.
+
+    Auto-detection avoids template-config mismatch as a runtime failure
+    mode: a workbook-config drift would otherwise surface as a deep
+    ``InputValidationError`` from inside ``read_unified_workbook``,
+    which is harder to act on than an explicit "wrong sheet names" hint.
+
+    Both schemes coexist; both work; this resolution is invisible to
+    the caller.
+    """
+    import copy as _copy
+
+    try:
+        import openpyxl  # type: ignore
+
+        wb = openpyxl.load_workbook(workbook_path, read_only=True, data_only=True)
+        sheets = set(wb.sheetnames)
+        wb.close()
+    except Exception:
+        # Pre-flight already validated loadability; if this re-load fails,
+        # fall back to base_config and let read_unified_workbook surface
+        # the underlying issue.
+        return base_config
+
+    template_scheme_present = {
+        "BondYield_Macro", "BondYield_Yields", "BondYield_Projections",
+    }.issubset(sheets)
+
+    if not template_scheme_present:
+        # Default scheme (or some other variant); base config applies.
+        return base_config
+
+    cfg = _copy.deepcopy(base_config)
+    # The unified-workbook reader resolves sheet names via
+    # config["unified_input"]["sheet_names"] (see
+    # techniques.bond_yield_forecast.unified_input._resolve_sheet_names).
+    # Override macro_history / yields_history / projections_<scenario>
+    # to point at the BondYield_* template sheet names.
+    sn = cfg.setdefault("unified_input", {}).setdefault("sheet_names", {})
+    sn["macro_history"] = "BondYield_Macro"
+    sn["yields_history"] = "BondYield_Yields"
+    sn[f"projections_{scenario}"] = "BondYield_Projections"
+
+    # Some downstream paths (validate_input / build_panel for the legacy
+    # two-file format) read config["data"]["macro_sheet"] /
+    # ["yield_sheet"]. Mirror the override there too so re-entry through
+    # those paths from the wrapper context resolves the right sheets.
+    cfg.setdefault("data", {})["macro_sheet"] = "BondYield_Macro"
+    cfg["data"]["yield_sheet"] = "BondYield_Yields"
+
+    # Also map common alt-scenario aliases when present so a workbook
+    # with additional BondYield_Projections_<scenario> sheets resolves.
+    for alt in ("scenario_1", "scenario_2", "scenario_3", "scenario_4"):
+        candidate = f"BondYield_Projections_{alt}"
+        if candidate in sheets:
+            sn[f"projections_{alt}"] = candidate
+    return cfg
 
 
 def _audit_safe(value):
