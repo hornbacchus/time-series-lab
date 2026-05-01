@@ -38,12 +38,34 @@ def _find_x13_binary():
     """
     Search for x13 binary in standard locations.
     Returns path to binary or None.
+
+    Phase 4 Session 2 (P4-2 pathway (c) closure, 2026-05-01):
+    The ``TSL_X13_BINARY_PATH`` env var is the highest-priority
+    search location. CI workflows on Linux set this to the
+    R ``x13binary`` package install directory (returned by
+    ``Rscript -e 'cat(x13binary::x13path())'``); the binary
+    there is named ``x13ashtml`` and is functionally equivalent
+    to the Windows ``x13as_html.exe``. Setting an explicit env
+    var avoids both PATH-pollution and statsmodels'
+    incompatible output-file naming convention (per Phase 3.5
+    Session 6.5 deferral context, statsmodels expects ``.err``
+    files at temp prefix; x13ashtml writes to a different
+    location/naming, so statsmodels wrappers fail on Linux).
+    TSL's direct binary invocation + .d10/.d11/.d12/.d13
+    parsing in ``run()`` is fully x13ashtml-compatible.
     """
+    # Phase 4 S2: TSL_X13_BINARY_PATH env var first.
+    env_dir = os.environ.get("TSL_X13_BINARY_PATH")
+    if env_dir and os.path.isdir(env_dir):
+        env_search_paths = [env_dir]
+    else:
+        env_search_paths = []
+
     # Check relative to the engine directory
     engine_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     project_dir = os.path.dirname(engine_dir)
 
-    search_paths = [
+    search_paths = env_search_paths + [
         os.path.join(project_dir, "resources", "x13"),
         os.path.join(project_dir, "resources", "x13arima"),
         os.path.join(engine_dir, "resources", "x13"),

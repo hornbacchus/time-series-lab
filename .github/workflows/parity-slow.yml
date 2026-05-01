@@ -166,31 +166,32 @@ jobs:
             repos = "https://cloud.r-project.org"
           )
 
-      - name: Resolve X-13 binary path (documentation only)
-        # PHASE 3.5 SESSION 6.5 DEFERRAL — see session_6_findings.md.
+      - name: Resolve X-13 binary path (export TSL_X13_BINARY_PATH)
+        # PHASE 4 SESSION 2 (2026-05-01) — P4-2 pathway (c) closure.
         #
-        # The x13binary R package successfully installs and runs;
-        # R `seasonal` works with it. However, statsmodels'
-        # x13_arima_analysis function is incompatible with the
-        # x13ashtml binary's output convention: statsmodels
-        # expects a `.err` output file at a temp prefix; x13ashtml
-        # produces the file in a different location (or under a
-        # different name suffix). On the WIP-3 CI run, p3_x13
-        # returned ERROR with "Fixture file missing:
-        # /tmp/tmpbdv0xoyv.err" — an upstream statsmodels-vs-
-        # x13ashtml integration issue, NOT a TSL wrapper bug.
+        # Phase 3.5 Session 6.5 originally deferred Linux p3_x13
+        # support due to a statsmodels.x13_arima_analysis vs
+        # x13ashtml incompatibility (statsmodels expects .err
+        # files at a specific temp prefix; x13ashtml produces
+        # them elsewhere; statsmodels raised "Fixture file
+        # missing" on the WIP-3 CI run). Phase 3.5 deferral
+        # text: "Phase 4 may revisit statsmodels-x13ashtml
+        # integration."
         #
-        # Resolution: deliberately do NOT export X13PATH/X12PATH
-        # on the Linux runner. statsmodels then raises
-        # X13NotFoundError → harness SKIPs gracefully (same path
-        # as Windows). Other 5 slow-tier checks (2b/2c MCMC SV,
-        # p3_dfm, p3_prophet, p3_tbats) PASS on Linux as a
-        # cross-platform validation bonus from the R bridge
-        # cross-platform fix.
+        # Phase 4 S2 closes the deferral via pathway (c) bypass:
+        # ``p3_x13.py:run_tsl`` no longer invokes statsmodels.
+        # It now invokes TSL's actual wrapper
+        # (``engine/techniques/x13_seasonal_adjust.py:run``),
+        # which does direct x13ashtml invocation +
+        # .d10/.d11/.d12/.d13 parsing and is fully x13ashtml-
+        # compatible.
         #
-        # The x13binary install + symlink steps are preserved for
-        # forward use (Phase 4 may revisit statsmodels-x13ashtml
-        # integration); they're inert without the env-var export.
+        # This step exports TSL_X13_BINARY_PATH so that TSL's
+        # ``_find_x13_binary()`` discovers x13ashtml at the path
+        # where the R x13binary package installed it. The env
+        # var is the highest-priority search location per the
+        # Phase 4 S2 amendment to the wrapper's binary-discovery
+        # logic.
         shell: bash
         run: |
           X13_DIR=$(Rscript -e 'cat(x13binary::x13path())')
@@ -200,17 +201,20 @@ jobs:
             ln -s x13ashtml "$X13_DIR/x13as"
             echo "Created symlink: $X13_DIR/x13as -> x13ashtml"
           fi
-          # X13PATH/X12PATH NOT exported — p3_x13 SKIPs on Linux
-          # per Session 6.5 deferral. R seasonal would still find
-          # the binary via x13binary::x13path() if any check
-          # invokes it directly.
+          # Persist X13_DIR for the next step's env block.
+          echo "TSL_X13_BINARY_PATH=$X13_DIR" >> "$GITHUB_ENV"
+          echo "TSL_X13_BINARY_PATH set; TSL wrapper's _find_x13_binary will discover x13ashtml here."
 
       - name: Run slow-tier parity checks (Linux)
-        # Same exit-code mapping as Windows slow job. p3_x13
-        # expected to PASS on Linux (X-13 binary available);
-        # other slow-tier checks (2b/2c MCMC SV, p3_dfm,
-        # p3_prophet, p3_tbats) provide cross-platform
-        # validation as a side effect.
+        # Phase 4 S2: p3_x13 now PASSes on Linux (was
+        # SKIP-graceful per Phase 3.5 S6.5 deferral). TSL's
+        # wrapper finds x13ashtml via TSL_X13_BINARY_PATH and
+        # invokes it directly; ``p3_x13.py:run_tsl`` reads the
+        # X-13 Decomposition table from TSL's response
+        # rather than calling statsmodels.
+        # Other slow-tier checks (2b/2c MCMC SV, p3_dfm,
+        # p3_prophet, p3_tbats) continue to provide
+        # cross-platform validation.
         shell: bash
         env:
           PYTHONPATH: ${{ github.workspace }}/tools

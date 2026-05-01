@@ -6,16 +6,27 @@ package (also wraps the same binary). Pattern A target —
 both implementations call the same binary; differences should
 be limited to wrapper preprocessing.
 
-**Tier C / SKIP-graceful:** the R `seasonal` package requires
-the X-13 binary on the host system (non-trivial to install on
-Windows; failed install during Session 14 deps verification).
-When the package is missing, the harness translates the
-RPackageMissingError to a SKIP outcome — informative-not-
-failing. Both CI and local invocations handle this cleanly.
+**Phase 4 Session 2 (2026-05-01) — P4-2 pathway (c) closure:**
+``run_tsl`` now invokes TSL's actual wrapper
+(``engine/techniques/x13_seasonal_adjust.py:run``) via the
+dispatch entry point rather than calling
+``statsmodels.x13_arima_analysis`` directly. The pre-S2
+implementation called statsmodels because it produced the
+seasadj+trend output in a single library call; that path
+fails on Linux CI because statsmodels' temp-file naming
+convention is incompatible with the ``x13ashtml`` binary's
+output convention (statsmodels expects ``.err`` files at a
+specific prefix; ``x13ashtml`` writes elsewhere). TSL's
+wrapper does direct binary invocation + .d10/.d11/.d12/.d13
+parsing, which is fully x13ashtml-compatible. Linux CI now
+PASSes ``p3_x13`` (was SKIP-graceful). Windows CI behavior
+unchanged — the wrapper still SKIPs gracefully via
+ImportError when no binary is found locally.
 
-Master plan §15.12 deferred this from Session 1 inventory due
-to install difficulty; **the check is built but expected to
-SKIP** in most environments.
+The ``run_reference`` path continues to invoke R
+``seasonal::seas`` via RBridge unchanged (R seasonal works
+correctly with x13ashtml on both platforms via the
+x13binary package).
 """
 
 from __future__ import annotations
@@ -64,30 +75,93 @@ class X13Parity(P3ParityCheck):
 
     def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
         _ensure_engine_on_path()
-        # statsmodels.tsa.x13 wraps the X-13 binary. When the
-        # binary is missing on the host, statsmodels raises
-        # X13NotFoundError. Re-raise as ImportError so the
-        # harness's SKIP-on-import-error path catches it
-        # cleanly (the runner's run_check already wraps
-        # ImportError → SKIP for run_reference; we want the
-        # same semantics for run_tsl in this binary-dependent
-        # case).
-        from statsmodels.tsa.x13 import x13_arima_analysis  # type: ignore
-        from statsmodels.tools.sm_exceptions import X13NotFoundError  # type: ignore
-        import pandas as pd  # type: ignore
+        # Phase 4 Session 2 (P4-2 pathway (c)): invoke TSL's
+        # wrapper through the dispatch entry point. TSL's
+        # ``engine/techniques/x13_seasonal_adjust.py:run`` does
+        # direct x13 binary invocation and .d10/.d11/.d12/.d13
+        # parsing — fully compatible with the x13ashtml binary
+        # produced by the R ``x13binary`` package (used on the
+        # Linux CI runner). The pre-S2 implementation called
+        # ``statsmodels.x13_arima_analysis`` directly, which
+        # fails on Linux due to incompatible temp-file
+        # conventions vs x13ashtml's output naming.
+        from techniques.base import RunContext
+        from techniques.x13_seasonal_adjust import run as tsl_x13_run
+
         y = np.asarray(fixture["y"], dtype=np.float64)
-        idx = pd.date_range("2010-01-01", periods=len(y), freq="MS")
-        s = pd.Series(y, index=idx)
-        try:
-            res = x13_arima_analysis(s, x12path=None)
-        except X13NotFoundError as e:
-            raise ImportError(
-                f"X-13 binary not found on system PATH; "
-                f"p3_x13 SKIPped: {e}"
-            ) from e
+        # Series spans 2010-01 .. 2010-01 + (DGP_N - 1) months.
+        # Build the time column as ISO date strings; TSL's
+        # wrapper parses this to recover ``start_year`` /
+        # ``start_period``.
+        from datetime import datetime
+        time_col = []
+        for i in range(len(y)):
+            year = 2010 + (i // 12)
+            month = (i % 12) + 1
+            time_col.append(f"{year}-{month:02d}-01T00:00:00")
+
+        ctx = RunContext({
+            "run_id": "p3_x13_audit_tsl",
+            "technique_id": "x13_seasonal_adjust",
+            "preset": "Balanced",
+            "seed": 42,
+            "frequency": "MS",
+            "time": time_col,
+            "series": [{"name": "y", "values": y.tolist()}],
+            "params": {
+                # Force a fixed start so audit is deterministic
+                # regardless of how the wrapper parses the time
+                # column.
+                "start_year": 2010,
+                "start_period": 1,
+                # Use all DGP_N=120 observations (default
+                # fit_window_obs is 10*period=120 for monthly,
+                # which equals N here; setting 0 disables the
+                # window and uses every observation
+                # unconditionally).
+                "fit_window_obs": 0,
+            },
+        })
+        res = tsl_x13_run(ctx, lambda *a, **k: None)
+        # TSL's wrapper returns SKIP-equivalent via a failure
+        # response when the binary cannot be located. Translate
+        # to ImportError so the harness's SKIP-on-import-error
+        # path catches it.
+        if res.get("status") != "success":
+            err_msg = res.get("error_message") or "unknown"
+            if "binary not found" in err_msg.lower():
+                raise ImportError(
+                    f"X-13 binary not found by TSL wrapper; "
+                    f"p3_x13 SKIPped: {err_msg}"
+                )
+            raise RuntimeError(
+                f"TSL x13_seasonal_adjust failed in audit: "
+                f"{err_msg}"
+            )
+
+        # Extract seasadj + trend from the X-13 Decomposition
+        # table. Columns: [Time, name, Seasonally Adjusted,
+        # Trend, Seasonal, Irregular].
+        decomp_table = next(
+            (t for t in res.get("tables", [])
+             if t.get("name") == "X-13 Decomposition"),
+            None,
+        )
+        if decomp_table is None:
+            raise RuntimeError(
+                "TSL x13_seasonal_adjust did not produce the "
+                "expected 'X-13 Decomposition' table."
+            )
+        rows = decomp_table["rows"]
+        seasadj = np.asarray(
+            [r[2] for r in rows], dtype=np.float64,
+        )
+        trend = np.asarray(
+            [r[3] for r in rows], dtype=np.float64,
+        )
         return {
-            "seasadj": np.asarray(res.seasadj.values, dtype=np.float64),
-            "trend": np.asarray(res.trend.values, dtype=np.float64),
+            "seasadj": seasadj,
+            "trend": trend,
         }
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
