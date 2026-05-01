@@ -37,7 +37,7 @@ jobs:
         # (X-13 binary not installable on Windows runner).
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles torch==2.11.0 ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance
+          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles torch==2.11.0 ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance numba pyyaml openpyxl
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -139,7 +139,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.11.0
-          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance
+          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance numba pyyaml openpyxl
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2

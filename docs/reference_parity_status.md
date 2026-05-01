@@ -2,7 +2,9 @@
 
 **Status:** **v1.1.0** — Phase 3 closed at Session 18 (2026-04-29);
 Phase 3.5 closed at Session 11 (2026-04-30) with v1.1.0 doc set
-issued. Authoritative coverage data tracker. Companion to:
+issued. Bond Yield Forecast Integration cycle (post-Phase-3.5)
+added 1 wrapper at Session 4 (2026-05-01); v1.1.x increment.
+Authoritative coverage data tracker. Companion to:
 
 - [P-1 parity standard](engineering/parity_standard.md)
   **v1.1.0** — directive ("must") for new wrapper PRs
@@ -190,6 +192,31 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS`, `CAVEAT`, and `
 
 ---
 
+## Bond Yield Forecast Integration (post-Phase-3.5; +1 wrapper)
+
+| # | Wrapper | Audit ID | Reference strategy | Tolerance class | Tier | Verdict | Audit report | Audit script | Session |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | `bond_yield_forecast/` (BVAR-SV; CCM-2019 + KSC-1998 + CK-1994 + K-FS-2014) | `p3_bond_yield_forecast` | **Pattern A.1 self-parity + Pattern F structural invariants** (R `bvars` Pattern A.2 unavailable for R 4.5.3 per integration plan §4.1 fallback; Pattern A.3 paper-formula reimpl out-of-LOC-budget at ~1000 LOC) | mcmc | fast (~20s; reduced-chain `n_draws=2000`) | **PASS-A.1+F** | `reports/p3_bond_yield_forecast_audit.md` | `harness/checks/p3_bond_yield_forecast.py` | BYF-S4 |
+
+**Verdict characterization (per integration plan §5.4):** **PASS at intra-implementation reproducibility level only.** What this verdict verifies / does not verify is documented explicitly in the audit report §4.1-4.4:
+
+- **Verifies:** determinism contract (1,557,000 elements bit-exact at 1e-15 across two TSL invocations with identical seed); mathematical correctness at property level (VAR companion-form max\|eig\|=0.948 < 1.0; SV \|φ\| max=0.996 < 1.0; PCA explained-variance 99.91% ≥ 99%; coef finiteness).
+- **Does NOT verify:** cross-implementation parity (TSL is the only implementation in the test); posterior calibration vs held-out data; conditional-forecast machinery beyond Session 2 dispatch test exercise.
+
+**Phase 4 v1.2.0 amendment candidates from BYF audit** (banked, not actioned in BYF cycle): R `BVAR` (Kuschnig & Vashold) constant-vol cross-check; partial Pattern A.3 Minnesota dummy-observation reimpl; `stochvol` rpy2 partial Pattern A.2 for SV component only; P-2 §B.6 entry if R `bvars` becomes available for a future R release. See `docs/bond_yield_forecast_integration/phase4_v1_2_0_amendment_candidates.md`.
+
+**BYF cycle session disposition:**
+
+| BYF session | Status | Commit | Findings |
+|---|---|---|---|
+| BYF-S1 | BVAR migration → `engine/techniques/bond_yield_forecast/` subpackage | `95f5f01` | byte-identical smoke verification |
+| BYF-S2 | dispatch entry point + pre-flight + BVARWarning capture + registry/catalog/markdown 5-place integration | `075fa2e` | file/package collision resolved via `_dispatch.py` + `__init__.py` re-export |
+| BYF-S3 | sample input template + Ribbon dropdown + carry-forward A (config-aware sheet detection) + B (re-entrancy regression) | `39fd4e6` | sheet-naming auto-detection; C# coverage maintained |
+| BYF-S4 | parity audit at P-1 v1.1.0 standard | `4983522` | PASS-A.1+F (10/10 checks PASS); 3 audit-script convention iterations documented |
+| BYF-S5 (this commit) | MANIFEST + CI integration + JIT warming + P-4 v1.1.x + Phase 4 v1.2.0 amendment candidates | (pending) | tier-classification deviation banked: §5.2 plan assumed slow-tier @ default chains; reduced-chain audit measured ~20s wall-clock fits fast-tier |
+
+---
+
 ## Phase 3 batch-execution COMPLETE — 70/70 wrappers covered
 
 **13 sessions used (S2-S14)** vs locked 17-session closure horizon — **5 sessions ahead** at batch-execution close.
@@ -216,7 +243,7 @@ Documentation phase (Sessions 15-17) + closeout (Session 18) per Item 13 lock:
 | Phase 3 CAVEAT | 5 (7% — p3_stl, p3_mstl, p3_star, p3_nar_narx, p3_emd_hht) |
 | Phase 3 SKIP-graceful | 1 (p3_x13 — Tier C runtime) |
 | Documented Secondary-tier divergences (non-blocking) | 2 (ETS + VAR AIC scale offsets; Pattern D) |
-| Total parity checks under CI | **82** (76 fast + 6 slow; 70 Phase 3 + 12 pre-Phase-3 inherited) |
+| Total parity checks under CI | **83** (77 fast + 6 slow; 70 Phase 3 + 12 pre-Phase-3 inherited + 1 BYF integration) |
 | Phase 3 sessions used (batch-execution) | 13 (S2–S14) |
 | Phase 3 sessions used (documentation) | 3 (S15–S17) |
 | Phase 3 sessions used (closeout) | 1 (S18) |
@@ -300,7 +327,16 @@ will sequence these alongside any new batch-execution work.
 
 ---
 
-**Last updated:** 2026-04-30 (**Phase 3.5 Session 12 close —
+**Last updated:** 2026-05-01 (**Bond Yield Forecast
+Integration Session 5** — MANIFEST + CI install + JIT
+warming integration; 1 BYF wrapper added per Session 4 audit
+(`p3_bond_yield_forecast`, PASS-A.1+F); total parity checks
+under CI: 82 → 83 (77 fast + 6 slow); v1.1.x increment, no
+new banked items, 4 Phase 4 v1.2.0 amendment candidates added
+to carry-forward via dedicated document at
+`docs/bond_yield_forecast_integration/phase4_v1_2_0_amendment_candidates.md`).
+
+**Phase 3.5 Session 12 close —
 PHASE 3.5 CLOSED.** Final closeout session per Phase 3 Session
 18 precedent. Verification: CI workflows current state covers
 76 fast + 6 slow checks (Windows + Linux runner) with active

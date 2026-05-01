@@ -72,9 +72,21 @@ jobs:
         #       parity reference suffices.
         # Phase 3 Session 14 (Batch 10 misc / final) deps:
         #   - dtaidistance: p3_dtw reference
+        # Bond Yield Forecast Session 5 deps:
+        #   - numba: @jit(cache=True) on FFBS state sampling +
+        #     conditional-forecast inner loop in the migrated
+        #     subpackage at engine/techniques/bond_yield_forecast/.
+        #   - pyyaml: default.yaml config loading.
+        #   - openpyxl: unified-workbook .xlsx I/O.
+        # The p3_bond_yield_forecast audit runs at reduced chain
+        # config (n_draws=2000, n_burn=500) for ~20s wall-clock
+        # — fits inside the 30s fast-tier budget. Plan §5.2
+        # initially assumed slow-tier classification based on
+        # default-chain 40s wall-clock; the audit's reduced-chain
+        # design avoids that ceiling. See Session 5 findings doc.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels torch==2.11.0 ewstools==2.1.2 pmdarima arch scikit-learn hmmlearn particles ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance
+          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels torch==2.11.0 ewstools==2.1.2 pmdarima arch scikit-learn hmmlearn particles ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance numba pyyaml openpyxl
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2

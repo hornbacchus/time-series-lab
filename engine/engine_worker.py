@@ -482,6 +482,40 @@ def serve(pipe_name: str):
     if os.environ.get("TSL_NO_NETWORK") == "1":
         log.info("TSL_NO_NETWORK=1: network access is disabled by policy.")
 
+    # Bond Yield Forecast Session 5 (§5.3) — eager numba JIT warming.
+    # The bond_yield_forecast subpackage uses @jit(cache=True) on FFBS
+    # state sampling and conditional-forecast inner loops. First-call
+    # JIT compilation costs ~5-8s; warming once at process startup
+    # amortizes that against all subsequent requests and avoids a
+    # surprise latency spike on the first BYF run. The warmer runs
+    # representative trace inputs through each @jit-decorated function
+    # to populate the on-disk cache.
+    #
+    # Defensive: wrapped in broad try/except so a missing subpackage
+    # (e.g., a future stripped-build profile) cannot crash engine
+    # startup. Failure mode is graceful — first BYF call pays the
+    # JIT cost instead.
+    #
+    # Lazy-warming alternative: if measured warming exceeds 10s on
+    # field hardware, move this hook into the bond_yield_forecast
+    # dispatch path so warming only fires when the technique is
+    # actually invoked. Current measurement on dev hardware: <2s.
+    try:
+        _t_warm = time.time()
+        from techniques.bond_yield_forecast._jit_warmer import (
+            warm_jit_caches,
+        )
+        warm_jit_caches()
+        _warm_dur = time.time() - _t_warm
+        log.info(
+            f"JIT caches warmed (bond_yield_forecast): {_warm_dur:.2f}s"
+        )
+    except Exception as e:
+        # Non-fatal — first BYF call will pay the JIT cost on demand.
+        log.warning(
+            f"JIT warming skipped (non-fatal): {type(e).__name__}: {e}"
+        )
+
     pipe_handle = _create_named_pipe(pipe_name)
     log.info(f"Named pipe created: \\\\.\\pipe\\{pipe_name}")
 

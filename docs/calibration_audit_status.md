@@ -150,11 +150,20 @@ extensions are operationally valuable.
 - **DEFERRED** — explicitly out of scope; reason logged
 - **UNAUDITED** — not selected for Phase 2; no audit planned
   in this initiative cycle
+- **POST-CAI-INTEGRATION** — wrapper integrated AFTER CAI
+  Phase 2 cycle close (2026-04-28); did not flow through the
+  CAI per-wrapper audit protocol because the cycle was already
+  CLOSED. Equivalent calibration discipline was applied via
+  the integration plan's testing and parity-audit phases —
+  see linked findings docs for evidence trail. New wrappers
+  added in future calibration cycles will reset to AUDITED if
+  CAI re-opens.
 
 ## Counts
 
-- Total wrappers: 83
+- Total wrappers: 84 (83 CAI Phase 2 in-scope + 1 post-CAI BYF integration)
 - AUDITED: 83 (Sessions 1-28; Session 28 closed deferred CSD wrapper after deferral rationale resolved)
+- POST-CAI-INTEGRATION: 1 (`bond_yield_forecast`; integrated 2026-05-01 BYF Session 5; parity verdict PASS-A.1+F)
 - PENDING: 0 (CAI Phase 2 TRUE CYCLE CLOSURE 2026-04-28)
 - DEFERRED: 0 (CSD deferral lifted Session 28)
 - UNAUDITED: 0
@@ -258,6 +267,7 @@ extensions are operationally valuable.
 
 | Wrapper | Status | Findings doc | Severe | Operational | Cosmetic |
 |---|---|---|---|---|---|
+| bond_yield_forecast | POST-CAI-INTEGRATION | [BYF integration plan + Session 2-4 findings](bond_yield_forecast_integration/) (parity-side: [`tools/reference_parity/reports/p3_bond_yield_forecast_audit.md`](../tools/reference_parity/reports/p3_bond_yield_forecast_audit.md)) | 0 | 0 (S2 dispatch test 8/8 PASS; S4 parity audit 10/10 PASS) | 0 |
 | bvar | AUDITED | [multivariate_systems_batch_findings_2026_04_27.md](calibration_audit/multivariate_systems_batch_findings_2026_04_27.md) | 0 | 1 (fixed inline) | 0 |
 | dynamic_factor_model | AUDITED | [multivariate_systems_batch_findings_2026_04_27.md](calibration_audit/multivariate_systems_batch_findings_2026_04_27.md) | 1 (fixed inline) | 0 | 0 |
 | forecast_reconciliation | AUDITED | [multivariate_systems_batch_findings_2026_04_27.md](calibration_audit/multivariate_systems_batch_findings_2026_04_27.md) | 2 (both fixed inline) | 0 | 0 |
