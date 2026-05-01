@@ -376,6 +376,52 @@ checklist. Reviewer signs off explicitly.
 - [ ] **A-3**: Backend-fallback pattern (sklearn fallback
   when torch unavailable, etc.) when relevant.
 
+### 4.6 Dependency-addition checklist (binding)
+
+Phase 4 Session 1 (2026-05-01). Cross-references P-1 §8.5
+install-matrix gate
+([parity_standard.md §8.5](parity_standard.md#85-required-install-matrix-updates-b)).
+
+If the wrapper depends on a non-stdlib Python package or any
+R package or any system binary that is **not already** in
+TSL's existing install matrix (i.e., not already imported by
+some other shipped wrapper), the PR author MUST verify the
+new dependency is added across all four CI-relevant surfaces:
+
+- [ ] **B-14**: New runtime dependency added to all four
+  install surfaces:
+  - `engine/requirements.txt` (engine-side runtime install)
+  - `tools/reference_parity/harness/MANIFEST.toml`
+    (parity-harness pinned version)
+  - `.github/workflows/parity-fast.yml` (fast-tier CI;
+    Windows job)
+  - `.github/workflows/parity-slow.yml` **both** the
+    Windows job AND the Linux job (per Phase 3.5 Session 1
+    Item 4 protocol: all check classes import at runner-
+    discovery time regardless of tier).
+
+**Failure mode codified by this checklist item:** historical
+precedent shows that single-surface omissions produce
+asymmetric CI failures invisible to local-only testing
+(local installs resolve the dependency from site-packages
+regardless of which TSL surface declares it). The four-
+surface check is the minimum sufficient gate.
+
+**Two recurring instances of this failure class** prior to
+codification:
+
+1. Phase 3.5 Session 6 — Linux `parity-slow.yml`
+   missing `x13binary`.
+2. Bond Yield Forecast Session 4 → Session 5 — fast-tier
+   `parity-fast.yml` missing `openpyxl`.
+
+Both closed by retrospective install-matrix amendment.
+
+The parity-dimension checklist item lives in
+[P-1 §8.5](parity_standard.md#85-required-install-matrix-updates-b);
+this C-1 item is the engine-side companion. Both must hold
+for any wrapper PR introducing a new dependency.
+
 ---
 
 ## 5. Canonical Test Suite Requirement

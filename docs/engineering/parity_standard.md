@@ -710,6 +710,79 @@ merge.
       compliance independently verified (separate dimension;
       this checklist covers parity only).
 
+### 8.5 Required install-matrix updates (B)
+
+Phase 4 Session 1 (2026-05-01). Codifies a recurring failure
+class observed across two prior cycles: a wrapper-addition PR
+introduced a new runtime dependency, but the dependency was
+not added to every CI-relevant install surface, producing a
+silent CI red on the next run that imported the new check.
+
+**Triggering retrospectives:**
+
+- **Phase 3.5 Session 6** — Linux runner job for `p3_x13`
+  added but missing `x13binary` install entry; CI red on
+  the first scheduled nightly run after merge. Closed by
+  amending `parity-slow.yml` Linux job; documented in
+  `docs/reference_parity_phase3_5/session_6_findings.md`.
+- **Bond Yield Forecast Session 4 → Session 5** — BYF
+  parity audit committed at S4 (`p3_bond_yield_forecast`
+  PASS-A.1+F locally). S4 CI run 25213149549 failed with
+  exit 3 ERROR: pre-flight workbook validator imported
+  `openpyxl`, not present in `parity-fast.yml`'s install
+  line. Closed by S5 install-matrix update (commit
+  `38a5144`); documented in
+  `docs/bond_yield_forecast_integration/session_5_findings.md`.
+
+Both failures shared root cause: *the new dependency was
+present in some install surfaces (e.g., `engine/requirements.txt`
+or `MANIFEST.toml`) but not in every CI-relevant surface*. The
+gap is invisible to local-only verification because every
+local install path resolves the dependency from site-packages
+regardless of which TSL surface declares it.
+
+**Pre-merge checklist additions (B):**
+
+If the wrapper-addition PR introduces ANY new runtime
+dependency (Python package OR R package OR system binary)
+that is not already in TSL's existing install matrix, the
+PR author MUST verify install lines updated across **all
+four** of the following surfaces:
+
+- [ ] **`engine/requirements.txt`** — engine-side runtime
+      install (used by `engine_worker` and any local
+      `pip install -r`).
+- [ ] **`tools/reference_parity/harness/MANIFEST.toml`** —
+      parity-harness pinned versions (used by
+      `--check-environment`; loaded via
+      `harness/manifest.py`).
+- [ ] **`.github/workflows/parity-fast.yml`** — fast-tier
+      CI install line (Windows job; runs on every PR + push
+      to master).
+- [ ] **`.github/workflows/parity-slow.yml`** — slow-tier
+      CI install line; **BOTH the Windows job AND the Linux
+      job** must be updated (per Phase 3.5 Session 6 +
+      Session 1 Item 4 protocol: all check classes import
+      at runner-discovery time regardless of tier, so the
+      slow-tier install must mirror the fast-tier install
+      for the dependency to be available when
+      `parity-slow.yml` invokes the harness).
+
+**Rationale for "all four surfaces":** the four surfaces
+serve different purposes (engine runtime vs harness pinning
+vs fast-tier CI vs slow-tier CI × dual-platform), and the
+historical precedent shows that any single missed surface
+produces an asymmetric failure that slips through local
+testing but lands red in CI. The four-surface check is the
+minimum sufficient gate to catch the entire failure class.
+
+**Cross-reference:** the engine-side wrapper standard
+([C-1](wrapper_development_standard.md)) carries a
+companion checklist item — if the wrapper depends on a
+non-stdlib package not already in TSL's install matrix,
+the dependency-addition checklist item there gates the PR
+on the same four-surface verification.
+
 ---
 
 ## 9. Cross-Reference to Wrapper Development Standard (C-1)
