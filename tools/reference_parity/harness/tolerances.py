@@ -2334,6 +2334,53 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "wrapper preprocessing differences."
         ),
     },
+
+    # ------------------------------------------------------------------
+    # Bond Yield Forecast (BYF integration Session 4)
+    # ------------------------------------------------------------------
+
+    "p3_bond_yield_forecast": {
+        "type": "tiered_outputs",
+        "primary": {
+            # Pattern A.1 self-parity: bit-exact reproducibility (numpy
+            # + numba random state is fully deterministic given pinned
+            # seed). Tolerance band is machine-epsilon ceiling, not
+            # mcmc-class default — the audit's reproducibility check
+            # is much stricter than typical mcmc inter-implementation
+            # comparison.
+            "abs_tol": 1e-15,
+            "rel_tol": 1e-15,
+            "block_abs_tol": 1e-10,
+            "block_rel_tol": 1e-10,
+        },
+        "secondary": {
+            # Reserved for future Pattern A.3 paper-formula reimpl
+            # comparison if/when budget allows. Currently unused.
+            "abs_tol": 5e-3,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 5e-2,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Bond Yield Forecast (BVAR-SV per CCM-2019). Master plan "
+            "§7.1 mcmc class default is 5e-3 abs / 5e-2 rel. The "
+            "audit at p3_bond_yield_forecast.py uses Pattern A.1 "
+            "self-parity (run TSL twice with same seed; assert byte-"
+            "identical) instead of cross-implementation parity, "
+            "because R bvars (Krueger; the plan §4.1 primary Pattern "
+            "A.2 candidate) is not available for R 4.5.3 and a from-"
+            "scratch Pattern A.3 reimpl is out of session-LOC budget. "
+            "The strict abs_tol=1e-15 reflects what's achievable at "
+            "the same-implementation reproducibility level — anything "
+            "looser would mask seed-pinning or numba-cache bugs. "
+            "Pattern F structural invariants (VAR companion eig < 1; "
+            "SV |phi| < 1; PCA roundtrip residual; coef finiteness) "
+            "are checked in compare() at property level (no tolerance "
+            "band; PASS = property holds, BLOCK = violated). See "
+            "tools/reference_parity/reports/p3_bond_yield_forecast_audit.md "
+            "for full audit protocol + verdict."
+        ),
+    },
 }
 
 
