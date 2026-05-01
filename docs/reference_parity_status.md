@@ -1,9 +1,13 @@
 # TSL Reference Parity — Per-Wrapper Status Tracker (P-4)
 
-**Status:** **v1.1.0** — Phase 3 closed at Session 18 (2026-04-29);
+**Status:** **v1.1.1** — Phase 3 closed at Session 18 (2026-04-29);
 Phase 3.5 closed at Session 11 (2026-04-30) with v1.1.0 doc set
 issued. Bond Yield Forecast Integration cycle (post-Phase-3.5)
-added 1 wrapper at Session 4 (2026-05-01); v1.1.x increment.
+added 1 wrapper at Session 4 (2026-05-01); v1.1.x increment. BYF
+modification cycle 1 (Mod-1 + Mod-2) closed 2026-05-01: audit
+coverage extended to TWO fixtures (10-mat legacy + 34-mat
+BYF-Mod-1 grid); v1.1.1 increment (calibration extension; verdict
+class unchanged).
 Authoritative coverage data tracker. Companion to:
 
 - [P-1 parity standard](engineering/parity_standard.md)
@@ -196,12 +200,15 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS`, `CAVEAT`, and `
 
 | # | Wrapper | Audit ID | Reference strategy | Tolerance class | Tier | Verdict | Audit report | Audit script | Session |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | `bond_yield_forecast/` (BVAR-SV; CCM-2019 + KSC-1998 + CK-1994 + K-FS-2014) | `p3_bond_yield_forecast` | **Pattern A.1 self-parity + Pattern F structural invariants** (R `bvars` Pattern A.2 unavailable for R 4.5.3 per integration plan §4.1 fallback; Pattern A.3 paper-formula reimpl out-of-LOC-budget at ~1000 LOC) | mcmc | fast (~20s; reduced-chain `n_draws=2000`) | **PASS-A.1+F** | `reports/p3_bond_yield_forecast_audit.md` | `harness/checks/p3_bond_yield_forecast.py` | BYF-S4 |
+| 1 | `bond_yield_forecast/` (BVAR-SV; CCM-2019 + KSC-1998 + CK-1994 + K-FS-2014) | `p3_bond_yield_forecast` | **Pattern A.1 self-parity + Pattern F structural invariants** on TWO canonical fixtures (10-mat legacy + 34-mat BYF-Mod-1; BYF-Mod-2 extension) (R `bvars` Pattern A.2 unavailable for R 4.5.3 per integration plan §4.1 fallback; Pattern A.3 paper-formula reimpl out-of-LOC-budget at ~1000 LOC) | mcmc | fast (~17s; reduced-chain `n_draws=2000`; 4 BVAR-SV cycles total) | **PASS-A.1+F** (both fixtures) | `reports/p3_bond_yield_forecast_audit.md` | `harness/checks/p3_bond_yield_forecast.py` | BYF-S4 / BYF-Mod-2 |
 
-**Verdict characterization (per integration plan §5.4):** **PASS at intra-implementation reproducibility level only.** What this verdict verifies / does not verify is documented explicitly in the audit report §4.1-4.4:
+**Verdict characterization (per integration plan §5.4 + BYF-Mod-2 extension):** **PASS at intra-implementation reproducibility level only on BOTH fixtures.** What this verdict verifies / does not verify is documented explicitly in the audit report §4.1-4.4 + §3-bis:
 
-- **Verifies:** determinism contract (1,557,000 elements bit-exact at 1e-15 across two TSL invocations with identical seed); mathematical correctness at property level (VAR companion-form max\|eig\|=0.948 < 1.0; SV \|φ\| max=0.996 < 1.0; PCA explained-variance 99.91% ≥ 99%; coef finiteness).
-- **Does NOT verify:** cross-implementation parity (TSL is the only implementation in the test); posterior calibration vs held-out data; conditional-forecast machinery beyond Session 2 dispatch test exercise.
+- **Verifies:**
+  - **fixture_10mat:** determinism contract (1,557,000 elements bit-exact at 1e-15); VAR companion-form max\|eig\|=0.948 < 1.0; SV \|φ\| max=0.996 < 1.0; PCA explained-variance 99.91% ≥ 99%; coef finiteness.
+  - **fixture_34mat (BYF-Mod-1 grid):** determinism contract (1,557,000 elements bit-exact at 1e-15); VAR companion-form max\|eig\|=0.999 < 1.0 (boundary; denser grid drives system closer to unit circle but stationary); SV \|φ\| max=0.996 < 1.0; PCA explained-variance 99.92% ≥ 99% (threshold preserved per BYF-Mod-2 §2.5 measurement; B-Mod1-2 banked finding closed); coef finiteness.
+  - **Sparse-column code-path correctness:** the BYF-Mod-1 sparse-column auto-detection preserves seed-pinning bit-exactness on variable-N inputs.
+- **Does NOT verify:** cross-implementation parity (TSL is the only implementation; no R/external reference exercises the full BVAR-SV chain); posterior calibration vs held-out data; conditional-forecast machinery beyond Session 2 dispatch test exercise.
 
 **Phase 4 v1.2.0 amendment candidates from BYF audit** (banked, not actioned in BYF cycle): R `BVAR` (Kuschnig & Vashold) constant-vol cross-check; partial Pattern A.3 Minnesota dummy-observation reimpl; `stochvol` rpy2 partial Pattern A.2 for SV component only; P-2 §B.6 entry if R `bvars` becomes available for a future R release. See `docs/bond_yield_forecast_integration/phase4_v1_2_0_amendment_candidates.md`.
 
@@ -212,8 +219,11 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS`, `CAVEAT`, and `
 | BYF-S1 | BVAR migration → `engine/techniques/bond_yield_forecast/` subpackage | `95f5f01` | byte-identical smoke verification |
 | BYF-S2 | dispatch entry point + pre-flight + BVARWarning capture + registry/catalog/markdown 5-place integration | `075fa2e` | file/package collision resolved via `_dispatch.py` + `__init__.py` re-export |
 | BYF-S3 | sample input template + Ribbon dropdown + carry-forward A (config-aware sheet detection) + B (re-entrancy regression) | `39fd4e6` | sheet-naming auto-detection; C# coverage maintained |
-| BYF-S4 | parity audit at P-1 v1.1.0 standard | `4983522` | PASS-A.1+F (10/10 checks PASS); 3 audit-script convention iterations documented |
-| BYF-S5 (this commit) | MANIFEST + CI integration + JIT warming + P-4 v1.1.x + Phase 4 v1.2.0 amendment candidates | (pending) | tier-classification deviation banked: §5.2 plan assumed slow-tier @ default chains; reduced-chain audit measured ~20s wall-clock fits fast-tier |
+| BYF-S4 | parity audit at P-1 v1.1.0 standard | `4983522` | PASS-A.1+F (10/10 checks PASS on 10-mat fixture); 3 audit-script convention iterations documented |
+| BYF-S5 | MANIFEST + CI integration + JIT warming + P-4 v1.1.x + Phase 4 v1.2.0 amendment candidates | `38a5144` | tier-classification deviation banked: §5.2 plan assumed slow-tier @ default chains; reduced-chain audit measured ~20s wall-clock fits fast-tier |
+| BYF-S6 | closeout + §6 deferred cleanup + v1.2.0 candidates finalization | `a2fba71` | retired standalone bvar-yield-forecaster repo; 10 v1.2.0 amendment candidates banked |
+| **BYF-Mod-1** | **post-cycle modification 1: maturity grid 10 → 34 + sparse-column auto-detection** | **`3d15bf3`** | byte-identical numerical equivalence on legacy 10-mat input verified; 13 sparse tests + 2 smoke tests added; 2 banked findings |
+| **BYF-Mod-2 (this commit)** | **modification cycle close: parity audit re-run on both fixtures + B-Mod1-1 fix + B-Mod1-2 measurement** | **(pending)** | **PASS on both fixtures**; B-Mod1-1 dispatch attribute fix shipped; B-Mod1-2 PCA threshold measurement (99.92% on 34-mat → keep 99% threshold) |
 
 ---
 
@@ -327,7 +337,17 @@ will sequence these alongside any new batch-execution work.
 
 ---
 
-**Last updated:** 2026-05-01 (**Bond Yield Forecast
+**Last updated:** 2026-05-01 (**BYF Modification Cycle 1
+Session Mod-2** — parity audit extended to two-fixture coverage
+(10-mat legacy + 34-mat BYF-Mod-1 grid); both fixtures PASS-A.1+F
+at 1e-15 with 1.557M elements bit-exact each; B-Mod1-1 dispatch
+attribute fix shipped; B-Mod1-2 PCA threshold measurement
+confirmed 99% threshold appropriate for both fixtures (99.91%
+10-mat / 99.92% 34-mat measured). v1.1.0 → v1.1.1 increment;
+verdict class unchanged. Total parity checks under CI remains 83
+(BYF audit covers two fixtures within a single check).
+
+**Bond Yield Forecast
 Integration Session 5** — MANIFEST + CI install + JIT
 warming integration; 1 BYF wrapper added per Session 4 audit
 (`p3_bond_yield_forecast`, PASS-A.1+F); total parity checks

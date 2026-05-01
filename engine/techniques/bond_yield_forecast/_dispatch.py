@@ -318,9 +318,20 @@ def _build_yield_forecast_table(yield_forecast, scenario: str) -> dict:
     paths = np.asarray(yield_forecast.yield_paths)
     horizon = int(paths.shape[1])
     n_mat = int(paths.shape[2])
-    maturity_names = list(getattr(yield_forecast, "yield_names", [])) or [
-        f"Maturity_{i}" for i in range(n_mat)
-    ]
+    # BYF-Mod-2 (B-Mod1-1, 2026-05-01): the YieldCurveForecast dataclass
+    # exposes the per-maturity labels as ``maturity_names`` (set by
+    # ``ConditionalForecast.to_yield_space`` from
+    # ``pca_dict["yield_names"]``). The pre-Mod-2 code read the
+    # nonexistent attribute ``yield_names`` and fell through to
+    # placeholder ``Maturity_0..Maturity_N`` labels, masking the
+    # canonical maturity names in the user-facing Yield Forecast
+    # table. ``yield_names`` retained as a secondary lookup for
+    # forward compatibility (some downstream callers may set it).
+    maturity_names = (
+        list(getattr(yield_forecast, "maturity_names", []))
+        or list(getattr(yield_forecast, "yield_names", []))
+        or [f"Maturity_{i}" for i in range(n_mat)]
+    )
     proj_idx = list(getattr(yield_forecast, "projections_index", [])) or [
         f"H+{i + 1}" for i in range(horizon)
     ]
@@ -611,13 +622,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
     n_kept = int(results.coefficients.shape[0])
     horizon = int(np.asarray(ycf.yield_paths).shape[1])
     # BYF-Mod-1: derive populated-maturity surface from the actual
-    # ycf.yield_names (set by ConditionalForecast.to_yield_space from
-    # the post-PCA pca_dict["yield_names"]). The "or 10" fallback was
-    # a pre-Mod-1 artifact from the fixed 10-maturity grid; with the
-    # 34-maturity declarative grid + sparse auto-detection, the actual
-    # count varies per input.
-    yield_names_used = list(getattr(ycf, "yield_names", []))
-    n_maturities = len(yield_names_used) or len(getattr(ycf, "maturity_names", []))
+    # ycf canonical labels. With BYF-Mod-2 (B-Mod1-1) the canonical
+    # source attribute is ``maturity_names`` (set by
+    # ``ConditionalForecast.to_yield_space`` from
+    # ``pca_dict["yield_names"]``). ``yield_names`` retained as a
+    # secondary lookup for forward compatibility.
+    yield_names_used = (
+        list(getattr(ycf, "maturity_names", []))
+        or list(getattr(ycf, "yield_names", []))
+    )
+    n_maturities = len(yield_names_used)
     summary = (
         f"Bond Yield Forecast: scenario='{scenario}'; "
         f"BVAR-SV estimated with {n_kept} kept draws (n_draws="

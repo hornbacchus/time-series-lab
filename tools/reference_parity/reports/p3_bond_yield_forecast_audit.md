@@ -1,10 +1,28 @@
 # Bond Yield Forecast — Parity Audit Report
 
-**Audit date:** 2026-05-01
+**Audit date:** 2026-05-01 (BYF-Mod-2 amendment)
 **Audit script:** [`tools/reference_parity/harness/checks/p3_bond_yield_forecast.py`](../harness/checks/p3_bond_yield_forecast.py)
-**Fixture:** `engine/techniques/bond_yield_forecast/tests/fixtures/test_input_canonical.xlsx` (143 quarters × 6 variables; 8 quarters projection; seed 20260427)
+**Fixtures (TWO; BYF-Mod-2 extension):**
+- `engine/techniques/bond_yield_forecast/tests/fixtures/test_input_canonical.xlsx`
+  — 10-maturity legacy grid (3M, 6M, 1Y, 2Y, 3Y, 5Y, 7Y, 10Y, 20Y, 30Y);
+  143 quarters × 6 BVAR variables; sha256
+  `5c74081554badbdf324427c9a4457ea18b6f251e43c3b700cbead7904aaad0f3`.
+- `engine/techniques/bond_yield_forecast/tests/fixtures/test_input_canonical_34mat.xlsx`
+  — 34-maturity BYF-Mod-1 grid (1M, 3M, 6M, 9M, 1Y, 2Y, 3Y, 4Y, 5Y, 6Y,
+  7Y, 8Y, 9Y, 10Y, 11Y..30Y); 143 quarters × 6 BVAR variables; sha256
+  `dd30894f1829c0be6026778b3cb0473009267796ffcf3ea258644fa22cceedd9`.
+
+Both fixtures use 8-quarter projection horizon and seed 20260427. The
+34-mat fixture preserves the 10 anchor maturities verbatim from the
+10-mat fixture and inserts 24 linearly interpolated maturities in
+maturity-years space (per BYF-Mod-1 README addendum); the BVAR
+variable count remains 6 (3 macro + 3 PCs) regardless of maturity
+count — only the PCA-input panel width changes (10 vs 34 maturity
+columns).
+
 **verdict_class:** `mcmc` (P-1 v1.1.0 §5.1)
-**Outcome:** **PASS** (10 of 10 checks PASS; 0 CAVEAT; 0 BLOCK)
+**Outcome:** **PASS** (20 of 20 checks PASS; 0 CAVEAT; 0 BLOCK
+across both fixtures — 6 reproducibility + 4 invariants per fixture).
 
 ---
 
@@ -70,18 +88,18 @@ verification).
 
 | Setting | Value | Rationale |
 |---|---|---|
-| Fixture path | `engine/techniques/bond_yield_forecast/tests/fixtures/test_input_canonical.xlsx` | Migrated canonical fixture from BVAR Session 0 |
+| Fixtures (TWO) | `test_input_canonical.xlsx` (10-mat) + `test_input_canonical_34mat.xlsx` (34-mat) | BYF-Mod-2 extended audit coverage to both legacy 10-mat and BYF-Mod-1 34-mat grids |
 | Audit seed | 20260427 | Matches BVAR Session 0 fixture seed |
 | `n_draws` | 2000 (reduced from default 10000) | Audit-runtime budget; reproducibility doesn't depend on chain length |
 | `n_burn` | 500 (reduced from default 3000) | Same |
-| Tier | fast (~20s wall-clock) | Two BVAR-SV cycles + invariant computations |
+| Tier | fast (~17s wall-clock; 4 BVAR-SV cycles total) | Two cycles per fixture × 2 fixtures |
 | `verdict_class` | `mcmc` | CCM-2019 Gibbs + KSC mixture + ASIS interweaving |
 | Pattern A.1 abs_tol | 1e-15 | Machine-epsilon ceiling; bit-exact in practice |
 | Pattern F invariants | Property-level (PASS / CAVEAT / BLOCK by threshold) | No tolerance band per check; thresholds documented per invariant |
 
 ---
 
-## 3. Results
+## 3. Results — fixture_10mat (legacy)
 
 ### 3.1 Pattern A.1 reproducibility self-parity (6 arrays)
 
@@ -138,6 +156,94 @@ for the canonical Treasury fixture. The 3-PC truncation is
 representation); the truncated reconstruction residual of ~0.41
 (absolute, in yield units) is informational only — not a bug.
 
+---
+
+## 3-bis. Results — fixture_34mat (BYF-Mod-1 grid)
+
+### 3-bis.1 Pattern A.1 reproducibility self-parity (6 arrays)
+
+| Array | Shape | dtype | max_abs_diff | max_rel_diff | n_compared | Status |
+|---|---|---|---:|---:|---:|---|
+| `coefficients` | (1500, 6, 25) | f64 | **0.0** | **0.0** | 225,000 | **PASS** |
+| `A_lower_triangular` | (1500, 6, 6) | f64 | **0.0** | **0.0** | 54,000 | **PASS** |
+| `log_volatilities` | (1500, 139, 6) | f64 | **0.0** | **0.0** | 1,251,000 | **PASS** |
+| `mu` | (1500, 6) | f64 | **0.0** | **0.0** | 9,000 | **PASS** |
+| `omega` | (1500, 6) | f64 | **0.0** | **0.0** | 9,000 | **PASS** |
+| `phi` | (1500, 6) | f64 | **0.0** | **0.0** | 9,000 | **PASS** |
+
+**1,557,000 elements bit-exact across two TSL invocations.** Same
+deterministic-given-seed contract holds on the denser 34-maturity
+grid: PCA fits a different loadings matrix (3 × 34 instead of 3 ×
+10), but the BVAR-SV operates on the same 6-dim panel (3 macro + 3
+PCs) so post-PCA the chain dimensions are identical. Numerical
+arrays match bit-for-bit between two same-seed runs on the 34-mat
+input, confirming the BYF-Mod-1 sparse-column code path preserves
+seed-pinning correctness on the variable-N input case.
+
+### 3-bis.2 Pattern F structural invariants (4 checks)
+
+| Invariant | Measurement | Threshold | Status |
+|---|---:|---:|---|
+| **VAR companion-form max\|eig\|** | 0.9988 | < 0.999 PASS / < 1.0 CAVEAT | **PASS** (boundary; see note) |
+| **SV \|phi\| (max across 6 equations)** | 0.9956 | < 0.999 PASS / < 1.0 CAVEAT | **PASS** |
+| **PCA explained-variance ratio (3 PCs)** | 0.99916 | ≥ 0.99 PASS | **PASS** |
+| **Posterior-mean coef finiteness** | 0 non-finite | 0 PASS / >0 BLOCK | **PASS** |
+
+**SV phi posterior means per equation (34-mat):**
+
+| Variable | φᵢ posterior mean |
+|---|---:|
+| Real GDP Growth | 0.9956 |
+| CPI Inflation | 0.9923 |
+| Fed Funds Rate | 0.9404 |
+| PC1 (level) | 0.7767 |
+| PC2 (slope) | 0.7892 |
+| PC3 (curvature) | 0.7971 |
+
+**VAR companion eigenvalues (34-mat):** max |λ| = 0.9988 — clears
+the 0.999 PASS threshold by a thin margin. This is a meaningful
+empirical observation: **the 34-mat input drives the system closer
+to the unit circle than the 10-mat input** (0.948 → 0.9988). The
+extra 24 maturity columns enter the BVAR via the PCA factor
+structure (level/slope/curvature scores derived from a 34-column
+input vs 10-column input); the resulting macro+PC panel is more
+strongly persistent. The companion form remains stationary
+(< 1.0); the Minnesota prior continues to do its job. Worth
+documenting for any future BYF-Mod cycle that materially changes
+the maturity grid composition (e.g., adding maturities below 1M
+or with non-uniform spacing).
+
+**PCA explained variance (34-mat):** 99.92% — slightly HIGHER than
+the 10-mat case (99.91%). Counterintuitive at first glance —
+denser maturity grids typically capture LESS variance in a 3-PC
+truncation because higher-frequency shape variation enters the 4th-
+N PCs. Here, however, the BYF-Mod-1 sample template's 24 inserted
+maturities are LINEARLY INTERPOLATED in maturity-years space
+between the 10 anchor maturities (per BYF-Mod-1 README addendum);
+linear interpolation does not introduce variance orthogonal to the
+existing level/slope/curvature factor structure, so the 3-PC
+truncation continues to capture ≥99% of the (slightly redenser)
+variance. The 99% threshold remains methodologically appropriate
+for both fixtures.
+
+**B-Mod1-2 disposition:** measurement confirmed Pattern F PCA
+threshold of 99% remains correct on the BYF-Mod-1 34-mat fixture.
+**No threshold change.** Per BYF-Mod-2 §2.5 decision tree (≥99%
+measured → keep 99% threshold). If a future BYF-Mod cycle replaces
+the synthetic-interpolation 34-mat fixture with empirically-sourced
+Treasury data carrying real high-frequency curve variation, this
+threshold may need re-measurement.
+
+---
+
+## 3-ter. Combined verdict
+
+| Fixture | Reproducibility (6 arrays) | Pattern F (4 invariants) | Overall |
+|---|---:|---:|---|
+| `fixture_10mat` | 6/6 PASS (1.557M elements bit-exact) | 4/4 PASS | **PASS** |
+| `fixture_34mat` | 6/6 PASS (1.557M elements bit-exact) | 4/4 PASS | **PASS** |
+| **Total** | **12/12 PASS (3.114M elements bit-exact)** | **8/8 PASS** | **PASS** |
+
 ### 3.3 Overall outcome
 
 | Statuses | Count |
@@ -156,12 +262,20 @@ representation); the truncated reconstruction residual of ~0.41
 ### 4.1 What this audit verifies
 
 - **Determinism contract:** TSL's Bond Yield Forecast pipeline produces
-  bit-exact identical posteriors given the same seed + config. Numba
-  caching does not invalidate determinism across calls. RNG state does
-  not leak between invocations.
+  bit-exact identical posteriors given the same seed + config on BOTH
+  the legacy 10-maturity input and the BYF-Mod-1 34-maturity input
+  (BYF-Mod-2 extension). Numba caching does not invalidate determinism
+  across calls. RNG state does not leak between invocations. The
+  BYF-Mod-1 sparse-column auto-detection code path preserves seed-
+  pinning correctness on variable-N inputs.
 - **Mathematical correctness (property-level):** the BVAR is stationary
-  in companion form; the SV process is stationary; the PCA truncation
-  preserves the dominant variance structure; coefficients are finite.
+  in companion form on both fixtures (max |λ| = 0.948 on 10-mat;
+  0.999 boundary on 34-mat — the denser grid drives the system closer
+  to but not beyond the unit circle, documented in §3-bis.2); the SV
+  process is stationary on both; the PCA truncation preserves the
+  dominant variance structure on both (99.91% on 10-mat; 99.92% on
+  34-mat; threshold preserved at 99%); coefficients are finite on
+  both.
 
 ### 4.2 What this audit does NOT verify
 
@@ -247,4 +361,41 @@ no abs/rel tolerance).
 
 ## 7. Verdict summary line (for P-4 status tracker)
 
-**`p3_bond_yield_forecast`** | mcmc | bit-exact (1e-15) Pattern A.1 self-parity + Pattern F invariants | fast | **PASS** | this report
+**`p3_bond_yield_forecast`** | mcmc | bit-exact (1e-15) Pattern A.1 self-parity + Pattern F invariants on TWO fixtures (10-mat + 34-mat) | fast | **PASS** | this report
+
+---
+
+## 8. BYF-Mod-1 / BYF-Mod-2 modification cycle effects on this audit
+
+This audit underwent two amendments during the post-integration
+modification cycle:
+
+**BYF-Mod-1 (commit `3d15bf3`, 2026-05-01)** expanded the declarative
+maturity grid from 10 to 34 maturities and added column-level sparse-
+input auto-detection. The integration plan §4.5 verdict at BYF-Mod-1
+close was indirectly affirmed by the unchanged 10-maturity fixture
+continuing to PASS (CI run 25226399543 green) — but Mod-1 deferred
+the 34-maturity audit-coverage extension and Pattern F threshold
+recalibration to BYF-Mod-2.
+
+**BYF-Mod-2 (this commit, 2026-05-01)** extends audit coverage to
+both fixtures (Option A per BYF-Mod-2 §2.4 — single audit script,
+single P-4 entry). Two banked findings from BYF-Mod-1 resolved:
+
+- **B-Mod1-1** (`_dispatch.py:321` attribute mismatch): one-line fix
+  swapping the primary lookup from the nonexistent `yield_names` to
+  the canonical `maturity_names`. User-visible Yield Forecast table
+  Maturity column now reads `treasury_3m...treasury_30y` instead of
+  placeholder `Maturity_0...Maturity_N`. Verified via regression
+  test in `tests/test_dispatch_maturity_names.py`.
+
+- **B-Mod1-2** (PCA explained-variance threshold recalibration on
+  34-mat grid): empirical measurement found 99.92% on 34-mat vs
+  99.91% on 10-mat. Per BYF-Mod-2 §2.5 decision tree (≥99% measured
+  → keep 99% threshold). **No threshold change.** Documented in
+  §3-bis.2 above.
+
+The Mod-1 modification cycle did not affect Pattern A.1 reproducibility
+or Pattern F invariants on the legacy 10-maturity input — verified
+via numerical-array byte-identical equivalence at Mod-1 §1.10b
+(commit `3d15bf3`) and confirmed at Mod-2 §2.9.
