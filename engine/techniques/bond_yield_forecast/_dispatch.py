@@ -610,18 +610,32 @@ def run(ctx: RunContext, progress_callback) -> dict:
     # -- Plain-English summary ------------------------------------------
     n_kept = int(results.coefficients.shape[0])
     horizon = int(np.asarray(ycf.yield_paths).shape[1])
+    # BYF-Mod-1: derive populated-maturity surface from the actual
+    # ycf.yield_names (set by ConditionalForecast.to_yield_space from
+    # the post-PCA pca_dict["yield_names"]). The "or 10" fallback was
+    # a pre-Mod-1 artifact from the fixed 10-maturity grid; with the
+    # 34-maturity declarative grid + sparse auto-detection, the actual
+    # count varies per input.
+    yield_names_used = list(getattr(ycf, "yield_names", []))
+    n_maturities = len(yield_names_used) or len(getattr(ycf, "maturity_names", []))
     summary = (
         f"Bond Yield Forecast: scenario='{scenario}'; "
         f"BVAR-SV estimated with {n_kept} kept draws (n_draws="
         f"{config['estimation']['n_draws']}, n_burn="
         f"{config['estimation']['n_burn']}). "
         f"Conditional forecast generated over {horizon}-quarter horizon "
-        f"across {len(getattr(ycf, 'yield_names', [])) or 10} maturities "
+        f"across {n_maturities or 10} maturities "
         f"with 5/25/50/75/95 percentile bands. "
         f"Captured {len(captured_warnings)} warning(s) "
         f"({sum(warnings_summary['by_category'].values())} categorized)."
     )
 
+    # BYF-Mod-1: surface the populated-maturity subset for transparency.
+    # Audit_fields exposes the canonical maturity codes (post-rename:
+    # "treasury_3m", "treasury_10y", etc.) actually used; the original
+    # workbook header forms ("3M", "10Y") are also surfaced via the
+    # pca_dict yield_names if needed for downstream reporting.
+    pca_yield_names = list(panel_bundle.get("pca", {}).get("yield_names", []))
     elapsed = time.perf_counter() - t0
     audit_fields = {
         "scenario": scenario,
@@ -636,6 +650,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
             config["conditioning"].get("projection_uncertainty")
         ),
         "input_workbook": str(workbook_path),
+        # BYF-Mod-1 audit-field additions:
+        "n_maturities_populated": n_maturities,
+        "maturities_populated": pca_yield_names or yield_names_used,
         "wrapper_runtime_seconds": round(elapsed, 2),
         "warnings_count": len(captured_warnings),
         "warnings_by_category": warnings_summary["by_category"],

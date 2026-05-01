@@ -22,6 +22,173 @@ logger = logging.getLogger(__name__)
 
 _QUARTER_RE = re.compile(r"^\d{4}-Q[1-4]$")
 
+# BYF-Mod-1 (2026-05-01): sparse-column auto-detection support.
+#
+# ``MIN_MATURITY_COUNT`` is the methodological floor — PCA needs at
+# least n_components=3 columns to fit; below that the level/slope/
+# curvature factor decomposition collapses. Pre-flight rejects with a
+# clear error when fewer than 3 maturities are populated.
+MIN_MATURITY_COUNT = 3
+
+# Header canonicalization: accept common variants of maturity column
+# headers and normalize to the canonical "NM" / "NY" form (e.g.,
+# "1Y", "1Yr", "1-year", "1 Year" all → "1Y"). The map covers
+# observed user-entry styles. Anything not matching either the
+# canonical form OR a known variant is rejected with a clear error
+# (no silent acceptance of garbage headers).
+def _canonicalize_maturity_header(raw_header: object) -> str | None:
+    """Normalize a workbook maturity header to canonical "NM" / "NY".
+
+    Returns the canonical form (e.g. "1Y"), OR ``None`` if the header
+    is not a recognizable maturity (caller treats as non-maturity
+    column to ignore).
+
+    Recognized canonical forms:
+      - ``"<n>M"``: 1 ≤ n ≤ 11 (sub-year months: 1M, 3M, 6M, 9M)
+      - ``"<n>Y"``: 1 ≤ n ≤ 30 (1Y through 30Y)
+
+    Recognized variants (case-insensitive, whitespace-tolerant):
+      - "1y", "1 Y", "1yr", "1 yr", "1-year", "1 year", "1Y" → "1Y"
+      - "3m", "3 m", "3mo", "3-month", "3 month", "3M" → "3M"
+    """
+    if raw_header is None:
+        return None
+    s = str(raw_header).strip()
+    if not s:
+        return None
+    # Lowercase + strip separators for variant matching.
+    lower = s.lower().replace("-", "").replace("_", "").replace(" ", "")
+    # Match: (n)(unit-suffix where suffix matches m / mo / month / months / y / yr / year / years)
+    m = re.match(
+        r"^(\d{1,3})(m|mo|month|months|y|yr|year|years)$", lower
+    )
+    if not m:
+        return None
+    n = int(m.group(1))
+    unit = m.group(2)
+    is_month = unit.startswith("m") and unit not in ("y", "yr", "year", "years")
+    if is_month:
+        # Months under 12 are valid (1M..11M). We canonicalize all to
+        # "<n>M".
+        if not 1 <= n <= 11:
+            return None
+        return f"{n}M"
+    # Years: 1Y..30Y is the canonical grid. Reject 0Y or > 30Y.
+    if not 1 <= n <= 30:
+        return None
+    return f"{n}Y"
+
+
+def _resolve_populated_yield_columns(
+    yields_raw: pd.DataFrame, expected_yield_cols: list[str]
+) -> tuple[list[str], dict[str, str]]:
+    """Detect which declared maturity columns are populated in the workbook.
+
+    Returns
+    -------
+    (filtered_cols, header_rewrite)
+        ``filtered_cols`` — the subset of ``expected_yield_cols``
+        (canonical "NM"/"NY" forms) that:
+          (a) appear in the workbook header (canonicalized + matched), AND
+          (b) have at least one non-NaN value across all rows.
+        Ordered by ``expected_yield_cols`` config order so the column
+        order is deterministic regardless of header order in the
+        workbook.
+        ``header_rewrite`` — dict mapping the workbook's actual header
+        (raw) to the canonical form, for callers that need to rename
+        DataFrame columns before downstream processing.
+
+    Raises
+    ------
+    InputValidationError
+        - ``no_populated_maturities`` if zero declared maturities are
+          present (or all present columns are entirely empty).
+        - ``insufficient_maturities`` if fewer than
+          ``MIN_MATURITY_COUNT`` (=3) maturities are populated.
+        - ``unrecognized_maturity_header`` if a header is non-blank
+          but doesn't canonicalize to any of the 34 declared
+          maturities. (Strict mode: reject garbage; do not silently
+          ignore.)
+        - ``partial_column_data`` if a header is recognized but the
+          column has interior NaN inside the workbook's row span
+          (row-level sparsity is OUT OF SCOPE for BYF-Mod-1; the
+          column is rejected with a clear error pointing the user
+          either to fill the missing rows or remove the column).
+    """
+    # Build raw-header → canonical map by walking workbook columns.
+    header_rewrite: dict[str, str] = {}
+    populated_canonicals: list[str] = []
+    expected_set = set(expected_yield_cols)
+    for raw_header in yields_raw.columns:
+        canonical = _canonicalize_maturity_header(raw_header)
+        if canonical is None:
+            # Header is non-blank but doesn't match any maturity-like
+            # pattern. We'll only flag this if the column also has
+            # data — empty columns with nonsense headers are tolerated
+            # (Excel often has stray header strings in unused cells).
+            col_data = yields_raw[raw_header]
+            if col_data.notna().any():
+                raise InputValidationError(
+                    "unrecognized_maturity_header",
+                    f"Yield-sheet header {str(raw_header)!r} is not a "
+                    f"recognized maturity (expected forms: '<N>M' for "
+                    f"months 1-11, or '<N>Y' for years 1-30). Either "
+                    f"rename the column to a canonical form or remove "
+                    f"its data so the engine can ignore it.",
+                    location=f"sheet='yields', column={str(raw_header)!r}",
+                )
+            continue
+        if canonical not in expected_set:
+            # Canonicalizes to a maturity-like form but isn't in the
+            # 34-grid (e.g., somehow a "33Y" slipped through; can't
+            # happen given _canonicalize_maturity_header's bounds, but
+            # defensive check).
+            raise InputValidationError(
+                "unrecognized_maturity_header",
+                f"Header {str(raw_header)!r} canonicalizes to "
+                f"{canonical!r}, which is outside the declared "
+                f"34-maturity grid (1M, 3M, 6M, 9M, 1Y, 2Y, ..., 30Y).",
+                location=f"sheet='yields', column={str(raw_header)!r}",
+            )
+        col_data = yields_raw[raw_header]
+        if not col_data.notna().any():
+            # Column header present but cells entirely empty: treat
+            # as non-provided (drop from the working set; do not
+            # raise — letting users leave unused columns blank is
+            # part of the locked sparse-column UX).
+            continue
+        # Recognized + populated.
+        header_rewrite[str(raw_header)] = canonical
+        populated_canonicals.append(canonical)
+    if len(populated_canonicals) == 0:
+        raise InputValidationError(
+            "no_populated_maturities",
+            "BondYield_Yields sheet has no populated maturity columns. "
+            "Provide at least 3 maturities (1M-30Y) for the PCA factor "
+            "structure (level/slope/curvature). Use the bundled sample "
+            "template via the Ribbon's 'Open Input Template' menu item.",
+            location="sheet='yields'",
+        )
+    if len(populated_canonicals) < MIN_MATURITY_COUNT:
+        raise InputValidationError(
+            "insufficient_maturities",
+            f"PCA factor structure requires N >= {MIN_MATURITY_COUNT} "
+            f"maturity columns; got N={len(populated_canonicals)} "
+            f"({populated_canonicals!r}). The level/slope/curvature "
+            f"3-PC decomposition collapses below 3 maturities. Add "
+            f"more populated maturity columns to your BondYield_Yields "
+            f"sheet.",
+            location="sheet='yields'",
+        )
+    # Order the populated canonicals by config (1M < 3M < ... < 30Y),
+    # so column order is deterministic regardless of workbook header
+    # ordering.
+    canonical_order = {c: i for i, c in enumerate(expected_yield_cols)}
+    populated_canonicals_sorted = sorted(
+        populated_canonicals, key=lambda c: canonical_order[c]
+    )
+    return populated_canonicals_sorted, header_rewrite
+
 _MACRO_BOUNDS = {
     "real_gdp_growth": (-20.0, 20.0),
     "headline_cpi": (-5.0, 25.0),
@@ -294,23 +461,42 @@ def validate_input(
                 f"Macro sheet missing required column '{col}'",
                 location="sheet='macro'",
             )
-    for col in expected_yield_cols:
-        if col not in yields.columns:
-            raise InputValidationError(
-                "missing_column",
-                f"Yields sheet missing required column '{col}'",
-                location="sheet='yields'",
-            )
+
+    # BYF-Mod-1 (2026-05-01) — sparse-column auto-detection on the
+    # yields sheet. Replaces the previous strict-presence check (every
+    # declared maturity must be in the workbook) with a data-driven
+    # filter: detect which of the 34 declared maturities are
+    # (a) actually present in the workbook header AND (b) have at
+    # least one non-NaN data value. Reject if N < 3 (PCA factor floor)
+    # or if any header is unrecognized garbage.
+    populated_canonicals, header_rewrite = _resolve_populated_yield_columns(
+        yields, expected_yield_cols
+    )
+    # Rename workbook headers to canonical form so downstream code
+    # (validation, pca, conditioning) sees a stable canonical column
+    # set regardless of "1Y" vs "1Yr" variants in the input.
+    if header_rewrite:
+        yields = yields.rename(columns=header_rewrite)
+    # Build the working list of yield specs: only the populated
+    # subset, ordered by config (1M, 3M, ..., 30Y).
+    populated_specs = {
+        name: spec
+        for name, spec in yield_specs.items()
+        if spec["column"] in populated_canonicals
+    }
 
     extra_macro = [c for c in macro.columns if c not in expected_macro_cols]
     if extra_macro:
         logger.warning("Extra columns in macro sheet ignored: %s", extra_macro)
-    extra_yields = [c for c in yields.columns if c not in expected_yield_cols]
+    extra_yields = [c for c in yields.columns if c not in populated_canonicals]
     if extra_yields:
-        logger.warning("Extra columns in yields sheet ignored: %s", extra_yields)
+        logger.info(
+            "Yield sheet columns not in populated set (ignored): %s",
+            extra_yields,
+        )
 
     macro = macro[expected_macro_cols]
-    yields = yields[expected_yield_cols]
+    yields = yields[populated_canonicals]
 
     _check_quarter_format(macro, "macro")
     _check_quarter_format(yields, "yields")
@@ -337,7 +523,11 @@ def validate_input(
     _check_interior_nan(yields, "yields", sample_start, sample_end)
 
     macro_rename = {s["column"]: n for n, s in macro_specs.items()}
-    yield_rename = {s["column"]: n for n, s in yield_specs.items()}
+    # BYF-Mod-1: only rename columns for the populated maturity subset.
+    yield_rename = {
+        s["column"]: n
+        for n, s in populated_specs.items()
+    }
     _emit_sanity_warnings(macro, yields, macro_rename)
 
     macro = macro.rename(columns=macro_rename)

@@ -12,13 +12,27 @@ data:
     fed_funds_rate:
       column: "Fed Funds Rate (quarterly average)"
       units: "percent"
+  # BYF-Mod-1 (2026-05-01): expanded from 10 → 34 declarative maturity
+  # grid (1M-30Y; monthly under 1Y plus annual at every integer year).
+  # The full 34-maturity grid is the maximum surface; runtime usage is
+  # data-driven — ``data.validate_input`` auto-detects which subset of
+  # these 34 is populated in the user's BondYield_Yields sheet and
+  # forecasts only those maturities. PCA factor structure (3 PCs)
+  # requires N>=3 populated maturities; otherwise pre-flight rejects
+  # with a clear error.
   yield_variables:
+    treasury_1m:
+      column: "1M"
+      maturity_years: 0.0833
     treasury_3m:
       column: "3M"
       maturity_years: 0.25
     treasury_6m:
       column: "6M"
       maturity_years: 0.5
+    treasury_9m:
+      column: "9M"
+      maturity_years: 0.75
     treasury_1y:
       column: "1Y"
       maturity_years: 1.0
@@ -28,18 +42,84 @@ data:
     treasury_3y:
       column: "3Y"
       maturity_years: 3.0
+    treasury_4y:
+      column: "4Y"
+      maturity_years: 4.0
     treasury_5y:
       column: "5Y"
       maturity_years: 5.0
+    treasury_6y:
+      column: "6Y"
+      maturity_years: 6.0
     treasury_7y:
       column: "7Y"
       maturity_years: 7.0
+    treasury_8y:
+      column: "8Y"
+      maturity_years: 8.0
+    treasury_9y:
+      column: "9Y"
+      maturity_years: 9.0
     treasury_10y:
       column: "10Y"
       maturity_years: 10.0
+    treasury_11y:
+      column: "11Y"
+      maturity_years: 11.0
+    treasury_12y:
+      column: "12Y"
+      maturity_years: 12.0
+    treasury_13y:
+      column: "13Y"
+      maturity_years: 13.0
+    treasury_14y:
+      column: "14Y"
+      maturity_years: 14.0
+    treasury_15y:
+      column: "15Y"
+      maturity_years: 15.0
+    treasury_16y:
+      column: "16Y"
+      maturity_years: 16.0
+    treasury_17y:
+      column: "17Y"
+      maturity_years: 17.0
+    treasury_18y:
+      column: "18Y"
+      maturity_years: 18.0
+    treasury_19y:
+      column: "19Y"
+      maturity_years: 19.0
     treasury_20y:
       column: "20Y"
       maturity_years: 20.0
+    treasury_21y:
+      column: "21Y"
+      maturity_years: 21.0
+    treasury_22y:
+      column: "22Y"
+      maturity_years: 22.0
+    treasury_23y:
+      column: "23Y"
+      maturity_years: 23.0
+    treasury_24y:
+      column: "24Y"
+      maturity_years: 24.0
+    treasury_25y:
+      column: "25Y"
+      maturity_years: 25.0
+    treasury_26y:
+      column: "26Y"
+      maturity_years: 26.0
+    treasury_27y:
+      column: "27Y"
+      maturity_years: 27.0
+    treasury_28y:
+      column: "28Y"
+      maturity_years: 28.0
+    treasury_29y:
+      column: "29Y"
+      maturity_years: 29.0
     treasury_30y:
       column: "30Y"
       maturity_years: 30.0

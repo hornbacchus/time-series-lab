@@ -35,7 +35,12 @@ def test_load_config_parses_default_yaml():
     for key in ("data", "model", "estimation", "forecast"):
         assert key in config, f"missing top-level key '{key}'"
     assert len(config["data"]["macro_variables"]) == 3
-    assert len(config["data"]["yield_variables"]) == 10
+    # BYF-Mod-1 (2026-05-01): declarative grid expanded 10 → 34
+    # maturities (1M-30Y; monthly under 1Y plus annual at every
+    # integer year through 30Y). Runtime usage is data-driven via
+    # ``_resolve_populated_yield_columns`` — workbook may populate
+    # any subset of these 34, with N>=3 enforced.
+    assert len(config["data"]["yield_variables"]) == 34
     for spec in config["data"]["macro_variables"].values():
         assert "column" in spec and "units" in spec
     for spec in config["data"]["yield_variables"].values():
