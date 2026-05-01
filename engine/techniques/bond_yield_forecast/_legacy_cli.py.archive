@@ -1,0 +1,1841 @@
+"""Command-line entry point for the bvar-yield-forecaster pipeline.
+
+Step 1 implements ``--process-data``: load the input workbook, validate
+it, run PCA, write processed artifacts.
+
+Step 2 implements ``--estimate``: load the processed panel (or rebuild
+it), construct the Minnesota prior, run CCM-2019 BVAR-SV, save the
+posterior draws and a self-describing metadata blob, run convergence
+diagnostics, and run a sanity-check unconditional posterior predictive.
+"""
+
+from __future__ import annotations
+
+import argparse
+import contextlib
+import datetime as dt
+import logging
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import yaml
+
+from bvar._paths import package_default_config, resolve_path
+from bvar.data import (
+    InputValidationError,
+    build_panel,
+    load_config,
+)
+
+
+@contextlib.contextmanager
+def _log_to_file(path: Path):
+    """Attach a FileHandler to the root logger for the with-block.
+
+    Ensures detachment on exit even if the body raises. Restores the
+    previous root logger level. Closes the file handle. This makes
+    repeated CLI helper invocations re-entrant — no handler accumulation
+    across calls.
+
+    Used by every CLI mode helper that previously attached a FileHandler
+    to the root logger without detaching it (S0.2 fix for re-entrancy).
+    """
+    handler = logging.FileHandler(path, encoding="utf-8")
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+    )
+    handler.setLevel(logging.INFO)
+    root = logging.getLogger()
+    prev_level = root.level
+    root.addHandler(handler)
+    root.setLevel(logging.INFO)
+    try:
+        yield
+    finally:
+        root.removeHandler(handler)
+        root.setLevel(prev_level)
+        handler.close()
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="bvar-yield-forecaster",
+        description="Run the BVAR yield forecaster pipeline (Step 1 + Step 2).",
+    )
+    p.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Path to the YAML config file. Defaults to the package's "
+        "config/default.yaml resolved relative to the bvar install location "
+        "(works regardless of cwd).",
+    )
+    p.add_argument(
+        "--working-dir",
+        type=Path,
+        default=None,
+        help="Base directory for resolving relative --input / --output / "
+        "--projections / --estimation-results paths. Default: current "
+        "working directory (preserves existing CLI behavior). Wrappers "
+        "should pass this explicitly to avoid implicit-cwd surprises.",
+    )
+    p.add_argument(
+        "--input",
+        type=Path,
+        default=None,
+        help="Override the input workbook path from config.data.input_file.",
+    )
+    p.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Directory to write artifacts. Default for --process-data is "
+        "'data/processed'; for --estimate is 'output/<YYYY-MM-DD_HHMMSS>'.",
+    )
+    p.add_argument(
+        "--process-data",
+        action="store_true",
+        help="Load, validate, and process the input workbook.",
+    )
+    p.add_argument(
+        "--estimate",
+        action="store_true",
+        help="Run BVAR-SV estimation on the processed panel.",
+    )
+    p.add_argument(
+        "--validate",
+        action="store_true",
+        help="Run the Step 2.5 validation harness (4 domains).",
+    )
+    p.add_argument(
+        "--optimize-hyperparameters",
+        action="store_true",
+        help="Run GLP-2015 grid + L-BFGS-B optimization; write "
+        "optimal_hyperparameters.json. Standalone — does not run estimation.",
+    )
+    p.add_argument(
+        "--estimate-with-optimized",
+        action="store_true",
+        help="Composite: optimize hyperparameters via GLP-2015, then run BVAR-SV "
+        "estimation with the optimum substituted into the prior.",
+    )
+    p.add_argument(
+        "--forecast",
+        action="store_true",
+        help="Composite: --estimate then BGL-2015 conditional forecast on "
+        "economist projections (--projections required).",
+    )
+    p.add_argument(
+        "--forecast-from-estimate",
+        action="store_true",
+        help="Load --estimation-results and run BGL-2015 conditional forecast "
+        "(--projections required).",
+    )
+    p.add_argument(
+        "--generate-projections-template",
+        action="store_true",
+        help="Write a projections workbook template for the desk to fill in. "
+        "--input + --output (or --output-dir) + --horizon supported.",
+    )
+    p.add_argument(
+        "--projections",
+        type=Path,
+        default=None,
+        help="Path to the economist-projections workbook (used by --forecast "
+        "and --forecast-from-estimate).",
+    )
+    p.add_argument(
+        "--estimation-results",
+        type=Path,
+        default=None,
+        help="Path to a saved estimation_results.npz "
+        "(used by --forecast-from-estimate).",
+    )
+    p.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Output file path (used by --generate-projections-template).",
+    )
+    p.add_argument(
+        "--horizon",
+        type=int,
+        default=None,
+        help="Horizon (quarters); used by --generate-projections-template, "
+        "--generate-input-template, and overrides config.conditioning.horizon "
+        "for --forecast.",
+    )
+    p.add_argument(
+        "--scenario",
+        type=str,
+        default="baseline",
+        help="Scenario to run with the unified --forecast workflow: "
+        "'baseline' (default), 'scenario_1'..'scenario_4', or 'all' to "
+        "iterate over every populated scenario in the input workbook.",
+    )
+    p.add_argument(
+        "--copy-history-from",
+        type=Path,
+        default=None,
+        help="With --generate-input-template: path to an existing input "
+        "workbook whose macro/yields sheets should be copied verbatim "
+        "into the new unified template (migration helper).",
+    )
+    p.add_argument(
+        "--generate-input-template",
+        action="store_true",
+        help="Write a unified bvar_inputs.xlsx workbook template (8 sheets: "
+        "macro, yields, projections_baseline + scenario_1..4, README).",
+    )
+    p.add_argument(
+        "--list-scenarios",
+        action="store_true",
+        help="With --input pointing at a unified workbook: list which "
+        "projection scenarios are populated and exit.",
+    )
+    p.add_argument(
+        "--no-confirm",
+        action="store_true",
+        help="With --forecast (unified): bypass the y/N prompts that fire "
+        "when the input has unusually short history or appears to be older "
+        "than a previous run's history. Use this for scripted/CI runs.",
+    )
+    p.add_argument(
+        "--no-rebuild",
+        action="store_true",
+        help="With --estimate: skip data rebuild; load data/processed/panel.parquet.",
+    )
+    p.add_argument(
+        "--override-seed",
+        type=int,
+        default=None,
+        help="Override estimation.seed from config.",
+    )
+    p.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Verbose logging (INFO).",
+    )
+    return p
+
+
+def _emit_deprecation_notice(flag: str, note: str | None = None) -> None:
+    """Print the standard Step 5 deprecation notice on stderr.
+
+    Old CLI commands continue to work for reproducibility of pre-Step-5
+    outputs but emit this notice to nudge desk users toward the unified
+    --forecast workflow.
+    """
+    msg = (
+        f"DEPRECATION NOTICE: --{flag} is deprecated as of Step 5.\n"
+        "Use --forecast with the unified bvar_inputs.xlsx workbook architecture\n"
+        "instead. See README section 'Running forecasts (canonical Step 5 workflow)'\n"
+        "for the canonical workflow. Old commands remain functional for\n"
+        "reproducibility of pre-Step-5 outputs."
+    )
+    if note:
+        msg += f"\nNote: {note}"
+    print(msg, file=sys.stderr)
+
+
+def _process_data(args: argparse.Namespace) -> int:
+    _emit_deprecation_notice("process-data")
+    output_dir = args.output_dir or resolve_path("data/processed", args.working_dir)
+    config = load_config(args.config)
+    try:
+        result = build_panel(
+            config, input_path=args.input, output_dir=output_dir
+        )
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        print(
+            "Generate the template first with: python tools/generate_template.py",
+            file=sys.stderr,
+        )
+        return 1
+    except InputValidationError as exc:
+        print(f"ERROR: input validation failed: {exc}", file=sys.stderr)
+        print("Fix the workbook and re-run. See templates/input_template.xlsx for the format.", file=sys.stderr)
+        return 1
+
+    panel = result["panel"]
+    pca = result["pca"]
+    start, end = result["sample"]
+    # S0.8 — scope pandas display option mutations to the print block
+    # via option_context, so re-entrant CLI invocations don't leak
+    # global option state to the next caller.
+    with pd.option_context(
+        "display.width", 140,
+        "display.max_columns", 12,
+        "display.precision", 4,
+    ):
+        print(f"Sample window: {start} to {end} ({len(panel)} quarters)")
+        print()
+        print("Panel head (3 macro + 3 PC):")
+        print(panel.head())
+        print()
+        print("Panel tail:")
+        print(panel.tail())
+        print()
+        print(
+            "PC explained variance: "
+            + ", ".join(
+                f"{name}={ratio:.4f}"
+                for name, ratio in zip(pca["component_names"], pca["explained_variance_ratio"])
+            )
+            + f" (sum={float(np.sum(pca['explained_variance_ratio'])):.4f})"
+        )
+        print()
+    print(f"Output written to: {output_dir.resolve()}")
+    return 0
+
+
+def _print_convergence_summary(diag: pd.DataFrame) -> tuple[float, dict, bool]:
+    overall_pct = float(diag["converged"].mean()) * 100
+    print("Convergence diagnostics")
+    print("=" * 60)
+    print(f"Total parameters: {len(diag)}")
+    print(f"Converged (|geweke z| < 1.96): {int(diag['converged'].sum())} ({overall_pct:.1f}%)")
+    print()
+    print("Per-group pass rates:")
+    group_pcts = {}
+    all_groups_pass = True
+    for group, sub in diag.groupby("parameter_group"):
+        pct = float(sub["converged"].mean()) * 100
+        group_pcts[group] = pct
+        flag = "" if pct >= 80.0 else "  ** WARNING **"
+        print(f"  {group:>22s}  {int(sub['converged'].sum())}/{len(sub)} ({pct:.1f}%){flag}")
+        if pct < 80.0:
+            all_groups_pass = False
+    print()
+    # S0.5 — convert stderr-print soft-fail diagnostics to ConvergenceWarning
+    # so wrappers can capture programmatically via warnings.catch_warnings().
+    # Per Refinement 5: "Remove the stderr print at that site. Do not double-output."
+    # Single warning per soft-fail (overall + group), aggregated.
+    soft_fail_msgs: list[str] = []
+    if overall_pct < 90.0:
+        soft_fail_msgs.append(
+            f"overall convergence {overall_pct:.1f}% < 90%"
+        )
+    if not all_groups_pass:
+        below_floor = {g: p for g, p in group_pcts.items() if p < 80.0}
+        soft_fail_msgs.append(
+            f"parameter groups below 80% floor: {below_floor}"
+        )
+    if soft_fail_msgs:
+        import warnings as _warnings
+        from bvar.exceptions import ConvergenceWarning
+        _warnings.warn(
+            "; ".join(soft_fail_msgs),
+            ConvergenceWarning,
+            stacklevel=2,
+        )
+    return overall_pct, group_pcts, all_groups_pass
+
+
+def _estimate(args: argparse.Namespace) -> int:
+    _emit_deprecation_notice("estimate")
+    from bvar.estimation import BVARSV
+    from bvar.priors import MinnesotaPrior
+
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    output_dir = args.output_dir or Path(f"output/{timestamp}")
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    log_path = output_dir / "run.log"
+    with _log_to_file(log_path):
+        return _estimate_body(args, output_dir)
+
+
+def _estimate_body(args, output_dir):
+    from bvar.estimation import BVARSV
+    from bvar.priors import MinnesotaPrior
+
+    config = load_config(args.config)
+    if args.override_seed is not None:
+        config["estimation"]["seed"] = int(args.override_seed)
+        logging.info("Overriding seed -> %d", args.override_seed)
+
+    if args.no_rebuild:
+        panel_path = resolve_path("data/processed/panel.parquet", args.working_dir)
+        if not panel_path.exists():
+            print(f"ERROR: --no-rebuild requested but {panel_path} not found.", file=sys.stderr)
+            print("Run --process-data first.", file=sys.stderr)
+            return 1
+        panel = pd.read_parquet(panel_path)
+        logging.info("Loaded panel from %s (skipping rebuild)", panel_path)
+    else:
+        try:
+            result = build_panel(
+                config, input_path=args.input, output_dir=resolve_path("data/processed", args.working_dir)
+            )
+        except (FileNotFoundError, InputValidationError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        panel = result["panel"]
+
+    variable_names = list(panel.columns)
+    hp = config["model"]["hyperparameters"]["fixed"]
+    prior = MinnesotaPrior(
+        n_vars=len(variable_names),
+        n_lags=int(config["model"]["lags"]),
+        lambda_1=hp["lambda_1"],
+        lambda_2=hp["lambda_2"],
+        lambda_3=hp["lambda_3"],
+        lambda_sc=hp["lambda_sc"],
+        lambda_io=hp["lambda_io"],
+        persistence_prior=config["model"]["persistence_prior"],
+        variable_names=variable_names,
+        training_data=panel,
+    )
+
+    bvar = BVARSV(
+        data=panel,
+        n_lags=int(config["model"]["lags"]),
+        prior=prior,
+        n_draws=int(config["estimation"]["n_draws"]),
+        n_burn=int(config["estimation"]["n_burn"]),
+        thinning=int(config["estimation"].get("thinning", 1)),
+        seed=int(config["estimation"]["seed"]),
+    )
+
+    print(
+        f"Running CCM-2019 BVAR-SV: n_vars={len(variable_names)}, "
+        f"n_lags={config['model']['lags']}, "
+        f"n_draws={config['estimation']['n_draws']}, "
+        f"n_burn={config['estimation']['n_burn']}, "
+        f"seed={config['estimation']['seed']}"
+    )
+    results = bvar.estimate()
+
+    print(
+        f"Estimation complete: {results.coefficients.shape[0]} kept draws, "
+        f"runtime {results.posterior_metadata.runtime_seconds:.1f}s"
+    )
+    print()
+    diag = results.convergence_diagnostics()
+    overall_pct, group_pcts, all_groups_pass = _print_convergence_summary(diag)
+    diag.to_csv(output_dir / "convergence_diagnostics.csv")
+
+    print("Unconditional posterior predictive (horizon=4, n_paths=200) sanity check:")
+    pp = results.posterior_predictive_unconditional(
+        horizon=4, n_paths=200, seed=int(config["estimation"]["seed"])
+    )
+    median_path = np.median(pp["paths"], axis=0)
+    for i, name in enumerate(variable_names):
+        path = ", ".join(f"{x:+.3f}" for x in median_path[:, i])
+        print(f"  {name:>20s}  median path: [{path}]")
+    print()
+
+    results_path = output_dir / "estimation_results.npz"
+    results.save(results_path)
+    summary_text = results.summary()
+    (output_dir / "posterior_summary.txt").write_text(summary_text, encoding="utf-8")
+    print(summary_text)
+    print()
+
+    resolved_cfg_path = output_dir / "resolved_config.yaml"
+    with resolved_cfg_path.open("w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f, sort_keys=False)
+
+    print(f"Output written to: {output_dir.resolve()}")
+    print(f"  estimation_results.npz")
+    print(f"  resolved_config.yaml")
+    print(f"  run.log")
+    print(f"  posterior_summary.txt")
+    print(f"  convergence_diagnostics.csv")
+    return 0
+
+
+def _print_optimization_summary(opt_result: dict) -> None:
+    """Print the optimization-result table and any warnings to stdout/stderr."""
+    method = opt_result.get("method", "?")
+    panel_dims = opt_result.get("panel_dimensions", {})
+    print("GLP-2015 hyperparameter optimization")
+    print("=" * 60)
+    print(f"Method: {method}")
+    print(
+        f"Panel: T={panel_dims.get('T')}, n={panel_dims.get('n')}, "
+        f"n_lags={panel_dims.get('n_lags')}"
+    )
+    if "grid" in opt_result:
+        g = opt_result["grid"]
+        print(
+            f"Grid:        {g['n_evaluations']:5d} evals, "
+            f"best log-MDD = {g['best_log_marginal_likelihood']:+.4f}, "
+            f"runtime {g['runtime_seconds']:.1f}s"
+        )
+    if "numerical" in opt_result:
+        nu = opt_result["numerical"]
+        print(
+            f"Numerical:   {nu['n_function_evaluations']:5d} fevals, "
+            f"best log-MDD = {nu['best_log_marginal_likelihood']:+.4f}, "
+            f"runtime {nu['runtime_seconds']:.1f}s, converged={nu['converged']}"
+        )
+    rec = opt_result["recommended"]
+    print(f"Recommended (source={rec.get('source')}):")
+    for key in ("lambda_1", "lambda_2", "lambda_3", "lambda_sc", "lambda_io"):
+        if key in rec:
+            print(f"  {key:<10s} = {rec[key]:.6g}")
+    log_mdd = rec.get("log_marginal_likelihood")
+    if log_mdd is not None:
+        print(f"  log-MDD    = {log_mdd:+.4f}")
+    print(f"Total runtime: {opt_result.get('runtime_seconds', 0.0):.1f}s")
+
+    # S0.5 — convert hard-warning stderr prints to ProjectionAtBoundWarning
+    # so wrappers can capture programmatically. Soft warnings continue to
+    # print on stdout (informational, not soft-fail diagnostics).
+    hard_warnings = opt_result.get("warnings_hard", []) or []
+    if hard_warnings:
+        import warnings as _warnings
+        from bvar.exceptions import ProjectionAtBoundWarning
+        _warnings.warn(
+            "\n".join(hard_warnings),
+            ProjectionAtBoundWarning,
+            stacklevel=2,
+        )
+    for w in opt_result.get("warnings_soft", []):
+        print(w)
+
+
+def _run_optimization_with_panel(
+    panel: pd.DataFrame, config: dict, override_method: str | None = None
+) -> dict:
+    """Run GLP-2015 optimization on `panel` per `config['model']['hyperparameters']`.
+
+    If `override_method` is given (e.g. ``"glp_composite"`` from a CLI flag),
+    overrides the in-memory config's method before dispatching.
+    """
+    from bvar.hyperparameters import HyperparameterOptimizer
+
+    if override_method is not None:
+        config["model"]["hyperparameters"]["method"] = override_method
+
+    hp_cfg = config["model"]["hyperparameters"]
+    lambda_2_fixed = float(hp_cfg.get("fixed", {}).get("lambda_2", 1.0))
+    optimizer = HyperparameterOptimizer(
+        panel=panel,
+        n_lags=int(config["model"]["lags"]),
+        persistence_prior=config["model"]["persistence_prior"],
+        variable_names=list(panel.columns),
+        lambda_2_fixed=lambda_2_fixed,
+        seed=int(config["estimation"].get("seed", 0)),
+    )
+    return optimizer.optimize(hp_cfg)
+
+
+def _optimize_hyperparameters(args: argparse.Namespace) -> int:
+    _emit_deprecation_notice("optimize-hyperparameters")
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    output_dir = Path(args.output_dir) if args.output_dir else Path(
+        f"output/{timestamp}_optimization"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    log_path = output_dir / "run.log"
+    with _log_to_file(log_path):
+        return _optimize_hyperparameters_body(args, output_dir)
+
+
+def _optimize_hyperparameters_body(args, output_dir):
+    import json
+    from bvar.estimation import _to_jsonable
+
+    config = load_config(args.config)
+    if args.no_rebuild:
+        panel_path = resolve_path("data/processed/panel.parquet", args.working_dir)
+        if not panel_path.exists():
+            print(f"ERROR: --no-rebuild requested but {panel_path} not found.", file=sys.stderr)
+            return 1
+        panel = pd.read_parquet(panel_path)
+    else:
+        try:
+            result = build_panel(
+                config, input_path=args.input, output_dir=resolve_path("data/processed", args.working_dir)
+            )
+        except (FileNotFoundError, InputValidationError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        panel = result["panel"]
+
+    opt_result = _run_optimization_with_panel(
+        panel, config, override_method="glp_composite"
+    )
+    _print_optimization_summary(opt_result)
+
+    out_path = output_dir / "optimal_hyperparameters.json"
+    with out_path.open("w", encoding="utf-8") as f:
+        json.dump(_to_jsonable(opt_result), f, indent=2, default=str)
+
+    resolved_cfg_path = output_dir / "resolved_config.yaml"
+    with resolved_cfg_path.open("w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f, sort_keys=False)
+
+    print()
+    print(f"Output written to: {output_dir.resolve()}")
+    print(f"  optimal_hyperparameters.json")
+    print(f"  resolved_config.yaml")
+    print(f"  run.log")
+    return 0
+
+
+def _estimate_with_optimized(args: argparse.Namespace) -> int:
+    _emit_deprecation_notice("estimate-with-optimized")
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    output_dir = Path(args.output_dir) if args.output_dir else Path(
+        f"output/{timestamp}_optimized_estimate"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    log_path = output_dir / "run.log"
+    with _log_to_file(log_path):
+        return _estimate_with_optimized_body(args, output_dir)
+
+
+def _estimate_with_optimized_body(args, output_dir):
+    import json
+    from bvar.estimation import BVARSV, _to_jsonable
+    from bvar.priors import MinnesotaPrior
+
+    config = load_config(args.config)
+    if args.override_seed is not None:
+        config["estimation"]["seed"] = int(args.override_seed)
+        logging.info("Overriding seed -> %d", args.override_seed)
+
+    if args.no_rebuild:
+        panel_path = resolve_path("data/processed/panel.parquet", args.working_dir)
+        if not panel_path.exists():
+            print(f"ERROR: --no-rebuild requested but {panel_path} not found.", file=sys.stderr)
+            return 1
+        panel = pd.read_parquet(panel_path)
+    else:
+        try:
+            result = build_panel(
+                config, input_path=args.input, output_dir=resolve_path("data/processed", args.working_dir)
+            )
+        except (FileNotFoundError, InputValidationError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        panel = result["panel"]
+
+    # Phase 1: Optimization.
+    print("Phase 1/2: GLP-2015 hyperparameter optimization")
+    print("-" * 60)
+    opt_result = _run_optimization_with_panel(
+        panel, config, override_method="glp_composite"
+    )
+    _print_optimization_summary(opt_result)
+    opt_path = output_dir / "optimal_hyperparameters.json"
+    with opt_path.open("w", encoding="utf-8") as f:
+        json.dump(_to_jsonable(opt_result), f, indent=2, default=str)
+
+    # Phase 2: Estimation with optimal lambdas.
+    print()
+    print(
+        "NOTE: GLP-optimized hyperparameters may degrade BVAR-SV sampler\n"
+        "      convergence relative to fixed defaults on this panel. See README\n"
+        "      section 'When to use optimized vs fixed hyperparameters' for the\n"
+        "      trade-off discussion."
+    )
+    print()
+    print("Phase 2/2: BVAR-SV estimation with optimized hyperparameters")
+    print("-" * 60)
+    rec = opt_result["recommended"]
+    variable_names = list(panel.columns)
+    prior = MinnesotaPrior(
+        n_vars=len(variable_names),
+        n_lags=int(config["model"]["lags"]),
+        lambda_1=float(rec["lambda_1"]),
+        lambda_2=float(rec["lambda_2"]),
+        lambda_3=float(rec["lambda_3"]),
+        lambda_sc=float(rec["lambda_sc"]),
+        lambda_io=float(rec["lambda_io"]),
+        persistence_prior=config["model"]["persistence_prior"],
+        variable_names=variable_names,
+        training_data=panel,
+    )
+
+    bvar = BVARSV(
+        data=panel,
+        n_lags=int(config["model"]["lags"]),
+        prior=prior,
+        n_draws=int(config["estimation"]["n_draws"]),
+        n_burn=int(config["estimation"]["n_burn"]),
+        thinning=int(config["estimation"].get("thinning", 1)),
+        seed=int(config["estimation"]["seed"]),
+    )
+    print(
+        f"Running CCM-2019 BVAR-SV: n_vars={len(variable_names)}, "
+        f"n_lags={config['model']['lags']}, "
+        f"n_draws={config['estimation']['n_draws']}, "
+        f"n_burn={config['estimation']['n_burn']}, "
+        f"seed={config['estimation']['seed']}"
+    )
+    results = bvar.estimate()
+
+    # Stamp optimization metadata onto the results so summary() can render it.
+    results.posterior_metadata.optimization = _to_jsonable(opt_result)
+
+    print(
+        f"Estimation complete: {results.coefficients.shape[0]} kept draws, "
+        f"runtime {results.posterior_metadata.runtime_seconds:.1f}s"
+    )
+    print()
+    diag = results.convergence_diagnostics()
+    overall_pct, group_pcts, all_groups_pass = _print_convergence_summary(diag)
+    diag.to_csv(output_dir / "convergence_diagnostics.csv")
+
+    print("Unconditional posterior predictive (horizon=4, n_paths=200) sanity check:")
+    pp = results.posterior_predictive_unconditional(
+        horizon=4, n_paths=200, seed=int(config["estimation"]["seed"])
+    )
+    median_path = np.median(pp["paths"], axis=0)
+    for i, name in enumerate(variable_names):
+        path = ", ".join(f"{x:+.3f}" for x in median_path[:, i])
+        print(f"  {name:>20s}  median path: [{path}]")
+    print()
+
+    results.save(output_dir / "estimation_results.npz")
+    summary_text = results.summary()
+    (output_dir / "posterior_summary.txt").write_text(summary_text, encoding="utf-8")
+    print(summary_text)
+    print()
+
+    resolved_cfg_path = output_dir / "resolved_config.yaml"
+    with resolved_cfg_path.open("w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f, sort_keys=False)
+
+    print(f"Output written to: {output_dir.resolve()}")
+    print(f"  optimal_hyperparameters.json")
+    print(f"  estimation_results.npz")
+    print(f"  resolved_config.yaml")
+    print(f"  run.log")
+    print(f"  posterior_summary.txt")
+    print(f"  convergence_diagnostics.csv")
+    return 0
+
+
+def _load_processed_pca(working_dir: Path | None = None) -> dict:
+    """Load the processed pca_dict from data/processed/pca.npz.
+
+    Resolves the path against ``working_dir`` (or cwd if None) so the
+    helper works regardless of the calling process's working directory.
+    """
+    pca_path = resolve_path("data/processed/pca.npz", working_dir)
+    if not pca_path.exists():
+        raise FileNotFoundError(
+            f"{pca_path} not found. Run --process-data first to populate "
+            "data/processed/, or use --forecast (without --no-rebuild) to "
+            "rebuild from the input workbook."
+        )
+    with np.load(pca_path) as f:
+        return {
+            "loadings": f["loadings"].copy(),
+            "mean": f["mean"].copy(),
+            "explained_variance_ratio": f["explained_variance_ratio"].copy(),
+            "yield_names": [str(s) for s in f["yield_names"]],
+            "component_names": [str(s) for s in f["component_names"]],
+        }
+
+
+def _save_forecast_artifacts(
+    output_dir: Path,
+    cond_forecast,
+    yield_forecast,
+    quantiles: tuple[float, ...] = (0.05, 0.16, 0.50, 0.84, 0.95),
+) -> None:
+    """Write conditional_forecast.npz, yield_curve_forecast.npz,
+    forecast_summary.csv, and forecast_plots/."""
+    cond_forecast.save(output_dir / "conditional_forecast.npz")
+    yield_forecast.save(output_dir / "yield_curve_forecast.npz")
+
+    summary_df = yield_forecast.summary_dataframe(quantiles=quantiles)
+    summary_df.to_csv(output_dir / "forecast_summary.csv")
+
+    _save_forecast_plots(output_dir / "forecast_plots", yield_forecast)
+
+
+def _save_forecast_plots(plots_dir: Path, yield_forecast) -> None:
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        import matplotlib
+        # S0.8 — guard the backend mutation: only force Agg if the
+        # current backend is unset or interactive (would fail to render
+        # headless). If a non-interactive backend is already in place
+        # (Agg, PDF, SVG, PS, Cairo), respect the caller's choice.
+        # Wrappers in headless contexts (Excel add-in's engine_worker)
+        # will configure their own backend via MPLBACKEND; this path
+        # is only the CLI's defensive fallback.
+        if matplotlib.get_backend().lower() not in {
+            "agg", "pdf", "svg", "ps", "cairo",
+        }:
+            matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError:
+        return
+
+    quantiles = (0.05, 0.16, 0.50, 0.84, 0.95)
+    q = np.quantile(yield_forecast.yield_paths, list(quantiles), axis=0)
+    # q shape: (n_q=5, horizon, n_maturities)
+    horizons_to_plot = sorted({1, max(1, yield_forecast.horizon // 2), yield_forecast.horizon})
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for h in horizons_to_plot:
+        h_idx = h - 1
+        ax.plot(
+            yield_forecast.maturity_names, q[2, h_idx, :], "o-",
+            label=f"h={h} median",
+        )
+        ax.fill_between(
+            yield_forecast.maturity_names,
+            q[1, h_idx, :], q[3, h_idx, :], alpha=0.2,
+            label=f"h={h} 16-84",
+        )
+    ax.set_title("Conditional yield-curve forecast (median + 16-84 band)")
+    ax.set_ylabel("yield (%)")
+    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
+    ax.legend(loc="best", fontsize=8)
+    fig.tight_layout()
+    fig.savefig(plots_dir / "yield_curves.png", dpi=120)
+    plt.close(fig)
+
+    horizons = list(range(1, yield_forecast.horizon + 1))
+    for matur in ("treasury_2y", "treasury_10y"):
+        if matur not in yield_forecast.maturity_names:
+            continue
+        m_idx = yield_forecast.maturity_names.index(matur)
+        fig, ax = plt.subplots(figsize=(8, 5))
+        ax.plot(horizons, q[2, :, m_idx], "o-", label="median")
+        ax.fill_between(horizons, q[1, :, m_idx], q[3, :, m_idx], alpha=0.3, label="16-84")
+        ax.fill_between(horizons, q[0, :, m_idx], q[4, :, m_idx], alpha=0.15, label="5-95")
+        ax.set_title(f"Forecast fan chart: {matur}")
+        ax.set_xlabel("horizon (quarters)")
+        ax.set_ylabel("yield (%)")
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig(plots_dir / f"fan_{matur.replace('treasury_', '')}.png", dpi=120)
+        plt.close(fig)
+
+
+def _print_forecast_summary(yield_forecast, n_top_horizons: int = 4) -> None:
+    summary_df = yield_forecast.summary_dataframe(
+        quantiles=(0.16, 0.50, 0.84)
+    )
+    print("Conditional yield-curve forecast (median; 16-84 band)")
+    print("=" * 60)
+    print(f"Origin: {yield_forecast.origin_period}, horizon: {yield_forecast.horizon}q")
+    print(
+        f"Total paths: {yield_forecast.yield_paths.shape[0]} "
+        f"(draws_used x paths_per_draw)"
+    )
+    print()
+    head = summary_df.head(n_top_horizons)
+    # S0.8 — option_context scopes the display-format mutations to this
+    # print only; no leakage into wrapper-context global pandas state.
+    with pd.option_context(
+        "display.width", 140,
+        "display.max_columns", 30,
+        "display.precision", 3,
+    ):
+        print(head)
+
+
+def _generate_projections_template(args: argparse.Namespace) -> int:
+    _emit_deprecation_notice("generate-projections-template")
+    from bvar.conditioning import write_projections_template
+
+    config = load_config(args.config)
+    horizon = int(args.horizon or config.get("conditioning", {}).get("horizon", 8))
+
+    if args.output is None:
+        out_path = Path("data/raw/economist_projections_template.xlsx")
+    else:
+        out_path = Path(args.output)
+
+    try:
+        result = build_panel(
+            config, input_path=args.input, output_dir=Path("data/processed")
+        )
+    except (FileNotFoundError, InputValidationError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    panel = result["panel"]
+    last_period = panel.index[-1]
+    macro_specs = config["data"]["macro_variables"]
+    macro_columns = [spec["column"] for spec in macro_specs.values()]
+
+    write_projections_template(
+        output_path=out_path,
+        last_observation_period=last_period,
+        horizon=horizon,
+        macro_columns=macro_columns,
+    )
+    print(
+        f"Wrote projections template to {out_path}\n"
+        f"  first projection quarter: {last_period + 1}\n"
+        f"  horizon: {horizon} quarters\n"
+        f"  columns: {macro_columns}"
+    )
+    return 0
+
+
+def _forecast(args: argparse.Namespace) -> int:
+    """Dispatcher: route to the unified workflow (default) or the legacy
+    two-file workflow if --projections is supplied as a separate file."""
+    if args.projections is not None:
+        _emit_deprecation_notice(
+            "forecast --projections",
+            note=("--forecast with a separate --projections workbook is the "
+                  "pre-Step-5 call signature. Migrate to the unified "
+                  "bvar_inputs.xlsx workbook with --generate-input-template."),
+        )
+        return _forecast_legacy(args)
+    return _forecast_unified(args)
+
+
+def _forecast_legacy(args: argparse.Namespace) -> int:
+    """Pre-Step-5 --forecast behavior: estimate then conditional forecast on
+    a separate --projections workbook."""
+    if args.projections is None:
+        print(
+            "ERROR: --forecast (legacy) requires --projections "
+            "(path to the economist-projections workbook).",
+            file=sys.stderr,
+        )
+        return 2
+
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    output_dir = Path(args.output_dir) if args.output_dir else Path(
+        f"output/{timestamp}_forecast"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    log_path = output_dir / "run.log"
+    with _log_to_file(log_path):
+        return _forecast_legacy_body(args, output_dir)
+
+
+def _forecast_legacy_body(args, output_dir):
+    from bvar.conditioning import (
+        ConditionalForecaster,
+        EconomistProjections,
+    )
+    from bvar.estimation import BVARSV
+    from bvar.priors import MinnesotaPrior
+
+    config = load_config(args.config)
+    if args.override_seed is not None:
+        config["estimation"]["seed"] = int(args.override_seed)
+    if args.horizon is not None:
+        config.setdefault("conditioning", {})["horizon"] = int(args.horizon)
+
+    if args.no_rebuild:
+        panel_path = resolve_path("data/processed/panel.parquet", args.working_dir)
+        if not panel_path.exists():
+            print(f"ERROR: --no-rebuild requested but {panel_path} not found.", file=sys.stderr)
+            return 1
+        panel = pd.read_parquet(panel_path)
+        pca_dict = _load_processed_pca(args.working_dir)
+    else:
+        try:
+            result = build_panel(
+                config, input_path=args.input, output_dir=resolve_path("data/processed", args.working_dir)
+            )
+        except (FileNotFoundError, InputValidationError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        panel = result["panel"]
+        pca_dict = result["pca"]
+
+    print("Phase 1/2: BVAR-SV estimation")
+    print("-" * 60)
+    variable_names = list(panel.columns)
+    hp = config["model"]["hyperparameters"]["fixed"]
+    prior = MinnesotaPrior(
+        n_vars=len(variable_names),
+        n_lags=int(config["model"]["lags"]),
+        lambda_1=hp["lambda_1"], lambda_2=hp["lambda_2"],
+        lambda_3=hp["lambda_3"], lambda_sc=hp["lambda_sc"],
+        lambda_io=hp["lambda_io"],
+        persistence_prior=config["model"]["persistence_prior"],
+        variable_names=variable_names,
+        training_data=panel,
+    )
+    bvar = BVARSV(
+        data=panel,
+        n_lags=int(config["model"]["lags"]),
+        prior=prior,
+        n_draws=int(config["estimation"]["n_draws"]),
+        n_burn=int(config["estimation"]["n_burn"]),
+        thinning=int(config["estimation"].get("thinning", 1)),
+        seed=int(config["estimation"]["seed"]),
+    )
+    print(
+        f"Running CCM-2019 BVAR-SV: n_vars={len(variable_names)}, "
+        f"n_draws={config['estimation']['n_draws']}, "
+        f"n_burn={config['estimation']['n_burn']}, "
+        f"seed={config['estimation']['seed']}"
+    )
+    results = bvar.estimate()
+    print(
+        f"Estimation complete: {results.coefficients.shape[0]} kept draws, "
+        f"runtime {results.posterior_metadata.runtime_seconds:.1f}s"
+    )
+
+    results.save(output_dir / "estimation_results.npz")
+    summary_text = results.summary()
+    (output_dir / "posterior_summary.txt").write_text(summary_text, encoding="utf-8")
+    diag = results.convergence_diagnostics()
+    diag.to_csv(output_dir / "convergence_diagnostics.csv")
+
+    print()
+    print("Phase 2/2: BGL-2015 conditional forecast on economist projections")
+    print("-" * 60)
+    try:
+        projections = EconomistProjections.from_workbook(
+            args.projections, config
+        )
+    except (FileNotFoundError, InputValidationError) as exc:
+        print(f"ERROR reading projections: {exc}", file=sys.stderr)
+        return 1
+
+    try:
+        forecaster = ConditionalForecaster(
+            results=results,
+            projections=projections,
+            config_section=config["conditioning"],
+            seed=int(config["estimation"]["seed"]),
+        )
+    except InputValidationError as exc:
+        print(f"ERROR validating projections: {exc}", file=sys.stderr)
+        return 1
+
+    cond_forecast = forecaster.forecast()
+    yield_forecast = cond_forecast.to_yield_space(pca_dict)
+
+    _print_forecast_summary(yield_forecast)
+    _save_forecast_artifacts(output_dir, cond_forecast, yield_forecast)
+
+    resolved_cfg_path = output_dir / "resolved_config.yaml"
+    with resolved_cfg_path.open("w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f, sort_keys=False)
+
+    print()
+    print(f"Output written to: {output_dir.resolve()}")
+    print(f"  estimation_results.npz")
+    print(f"  conditional_forecast.npz")
+    print(f"  yield_curve_forecast.npz")
+    print(f"  forecast_summary.csv")
+    print(f"  forecast_plots/")
+    print(f"  posterior_summary.txt")
+    print(f"  convergence_diagnostics.csv")
+    print(f"  resolved_config.yaml")
+    print(f"  run.log")
+    return 0
+
+
+def _check_history_length_and_confirm(
+    macro_history: pd.DataFrame, args: argparse.Namespace
+) -> bool:
+    """Refinement 3a: history-length sanity check.
+
+    Returns False if the user declines to continue (only relevant when
+    history is unusually short and --no-confirm is not set).
+    """
+    n_quarters = len(macro_history)
+    if n_quarters >= 80:
+        return True
+    print(
+        f"WARNING: Input workbook has {n_quarters} quarters of history "
+        f"({n_quarters/4:.1f} years). Production estimation typically uses "
+        f"100+ quarters.",
+        file=sys.stderr,
+    )
+    if args.no_confirm:
+        print("  --no-confirm set; continuing.", file=sys.stderr)
+        return True
+    response = input("Continue? [y/N]: ")
+    if response.strip().lower() not in ("y", "yes"):
+        print("Aborted.")
+        return False
+    return True
+
+
+def _check_estimation_staleness_and_confirm(
+    output_dir: Path,
+    macro_history: pd.DataFrame,
+    args: argparse.Namespace,
+) -> bool:
+    """Refinement 3b: detect a stale workbook (history older than a previous
+    run's). Returns False if the user declines to continue."""
+    npz_path = output_dir / "estimation_results.npz"
+    if not npz_path.exists():
+        return True
+    try:
+        from bvar.estimation import BVARSVResults
+        prev = BVARSVResults.load(npz_path)
+    except Exception:
+        return True
+    prev_last = prev.last_observation_period
+    cur_last = macro_history.index[-1]
+    if prev_last > cur_last:
+        print(
+            f"WARNING: Existing estimation has history through {prev_last}, "
+            f"but current input ends at {cur_last}. Did you accidentally revert "
+            f"to an older workbook?",
+            file=sys.stderr,
+        )
+        if args.no_confirm:
+            print("  --no-confirm set; continuing.", file=sys.stderr)
+            return True
+        response = input("Continue? [y/N]: ")
+        if response.strip().lower() not in ("y", "yes"):
+            print("Aborted.")
+            return False
+    return True
+
+
+def _print_scenario_preamble(
+    scenarios_to_run: list[str],
+    skipped: list[str],
+    workbook_path: Path,
+) -> None:
+    """Refinement 1: visible stdout summary of which scenarios will run.
+
+    Printed before estimation kicks off so the user can ctrl-C if the skip
+    list looks wrong.
+    """
+    print()
+    print(f"--scenario all on {workbook_path}")
+    if scenarios_to_run:
+        print("Will run:")
+        for s in scenarios_to_run:
+            print(f"  {s}")
+    else:
+        print("Will run: (none — no populated scenarios found)")
+    if skipped:
+        print("Skipping (empty/header-only):")
+        print(f"  {', '.join(skipped)}")
+    print()
+
+
+def _forecast_unified(args: argparse.Namespace) -> int:
+    """Step 5 canonical: read unified workbook, re-estimate BVAR-SV from
+    its history, run conditional forecast(s) on selected scenario(s)."""
+    if args.input is None:
+        print(
+            "ERROR: --forecast (unified) requires --input pointing at the "
+            "bvar_inputs.xlsx workbook.",
+            file=sys.stderr,
+        )
+        return 2
+
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    output_dir = Path(args.output_dir) if args.output_dir else Path(
+        f"output/{timestamp}_forecast"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    log_path = output_dir / "run.log"
+    with _log_to_file(log_path):
+        return _forecast_unified_body(args, output_dir)
+
+
+def _forecast_unified_body(args, output_dir):
+    from bvar.conditioning import ConditionalForecaster
+    from bvar.estimation import BVARSV
+    from bvar.priors import MinnesotaPrior
+    from bvar.unified_input import (
+        list_available_scenarios,
+        read_unified_workbook,
+    )
+    from bvar.data import build_panel
+
+    config = load_config(args.config)
+    if args.override_seed is not None:
+        config["estimation"]["seed"] = int(args.override_seed)
+    if args.horizon is not None:
+        config.setdefault("conditioning", {})["horizon"] = int(args.horizon)
+
+    # Determine which scenarios to run.
+    try:
+        available = list_available_scenarios(args.input, config)
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    all_scenarios = ["baseline", "scenario_1", "scenario_2", "scenario_3", "scenario_4"]
+    skipped = [s for s in all_scenarios if s not in available]
+
+    if args.scenario == "all":
+        scenarios_to_run = list(available)
+        if not scenarios_to_run:
+            print(
+                f"ERROR: --scenario all requested but no scenario sheets are "
+                f"populated in {args.input}.",
+                file=sys.stderr,
+            )
+            return 1
+        _print_scenario_preamble(scenarios_to_run, skipped, Path(args.input))
+    else:
+        if args.scenario not in available:
+            print(
+                f"ERROR: scenario {args.scenario!r} is empty or missing in "
+                f"{args.input}. Available scenarios: {available}",
+                file=sys.stderr,
+            )
+            return 1
+        scenarios_to_run = [args.scenario]
+
+    # Read history + first scenario (just to get macro_history for sanity checks
+    # and the raw dict for build_panel).
+    first = scenarios_to_run[0]
+    try:
+        bundle = read_unified_workbook(args.input, first, config)
+    except (InputValidationError, FileNotFoundError) as exc:
+        print(f"ERROR reading unified workbook: {exc}", file=sys.stderr)
+        return 1
+
+    macro_history = bundle["macro_history"]
+
+    if not _check_history_length_and_confirm(macro_history, args):
+        return 1
+    if not _check_estimation_staleness_and_confirm(output_dir, macro_history, args):
+        return 1
+
+    # Build panel (panel + yield_panel + pca_dict) by feeding the raw dict
+    # into build_panel. Outputs go to a sub-folder of output_dir.
+    panel_bundle = build_panel(
+        config,
+        raw=bundle["raw"],
+        output_dir=output_dir / "data_processed",
+    )
+    panel = panel_bundle["panel"]
+    pca_dict = panel_bundle["pca"]
+
+    # Phase 1: BVAR-SV estimation (always re-estimate; no caching).
+    print("Phase 1/2: BVAR-SV estimation (always re-estimated from workbook history)")
+    print("-" * 60)
+    variable_names = list(panel.columns)
+    hp = config["model"]["hyperparameters"]["fixed"]
+    prior = MinnesotaPrior(
+        n_vars=len(variable_names),
+        n_lags=int(config["model"]["lags"]),
+        lambda_1=hp["lambda_1"], lambda_2=hp["lambda_2"],
+        lambda_3=hp["lambda_3"], lambda_sc=hp["lambda_sc"],
+        lambda_io=hp["lambda_io"],
+        persistence_prior=config["model"]["persistence_prior"],
+        variable_names=variable_names,
+        training_data=panel,
+    )
+    bvar = BVARSV(
+        data=panel,
+        n_lags=int(config["model"]["lags"]),
+        prior=prior,
+        n_draws=int(config["estimation"]["n_draws"]),
+        n_burn=int(config["estimation"]["n_burn"]),
+        thinning=int(config["estimation"].get("thinning", 1)),
+        seed=int(config["estimation"]["seed"]),
+    )
+    print(
+        f"Running CCM-2019 BVAR-SV: n_vars={len(variable_names)}, "
+        f"history={len(panel)} quarters, "
+        f"n_draws={config['estimation']['n_draws']}, "
+        f"n_burn={config['estimation']['n_burn']}, "
+        f"seed={config['estimation']['seed']}"
+    )
+    results = bvar.estimate()
+    print(
+        f"Estimation complete: {results.coefficients.shape[0]} kept draws, "
+        f"runtime {results.posterior_metadata.runtime_seconds:.1f}s"
+    )
+    results.save(output_dir / "estimation_results.npz")
+    (output_dir / "posterior_summary.txt").write_text(
+        results.summary(), encoding="utf-8"
+    )
+    diag = results.convergence_diagnostics()
+    diag.to_csv(output_dir / "convergence_diagnostics.csv")
+
+    # Phase 2: Conditional forecast for each scenario.
+    print()
+    print(f"Phase 2/2: BGL-2015 conditional forecast for "
+          f"{len(scenarios_to_run)} scenario(s): {scenarios_to_run}")
+    print("-" * 60)
+    for scenario in scenarios_to_run:
+        scenario_dir = output_dir / scenario
+        scenario_dir.mkdir(parents=True, exist_ok=True)
+        scenario_bundle = (
+            bundle if scenario == first
+            else read_unified_workbook(args.input, scenario, config)
+        )
+        forecaster = ConditionalForecaster(
+            results=results,
+            projections=scenario_bundle["projections"],
+            config_section=config["conditioning"],
+            seed=int(config["estimation"]["seed"]),
+        )
+        cf = forecaster.forecast()
+        ycf = cf.to_yield_space(pca_dict)
+        _save_forecast_artifacts(scenario_dir, cf, ycf)
+        print(f"  [{scenario}] forecast written to {scenario_dir}")
+
+    resolved_cfg_path = output_dir / "resolved_config.yaml"
+    with resolved_cfg_path.open("w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f, sort_keys=False)
+
+    print()
+    print(f"Output written to: {output_dir.resolve()}")
+    print(f"  estimation_results.npz                 (single estimation, shared)")
+    print(f"  posterior_summary.txt")
+    print(f"  convergence_diagnostics.csv")
+    for s in scenarios_to_run:
+        print(f"  {s}/")
+        print(f"    conditional_forecast.npz")
+        print(f"    yield_curve_forecast.npz")
+        print(f"    forecast_summary.csv")
+        print(f"    forecast_plots/")
+    print(f"  resolved_config.yaml")
+    print(f"  run.log")
+    return 0
+
+
+def _generate_input_template(args: argparse.Namespace) -> int:
+    """Step 5: write the unified bvar_inputs.xlsx template (8 sheets)."""
+    from bvar.unified_input import write_unified_template
+
+    config = load_config(args.config)
+    horizon = int(args.horizon or config.get("conditioning", {}).get("horizon", 8))
+
+    if args.output is None:
+        out_path = Path("data/raw/bvar_inputs_template.xlsx")
+    else:
+        out_path = Path(args.output)
+
+    try:
+        write_unified_template(
+            output_path=out_path,
+            horizon=horizon,
+            copy_history_from=args.copy_history_from,
+            config=config,
+        )
+    except (FileNotFoundError, InputValidationError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"Wrote unified-input template to {out_path}")
+    print(f"  horizon: {horizon} quarters")
+    if args.copy_history_from:
+        print(f"  history copied from: {args.copy_history_from}")
+    else:
+        print("  history sheets: header-only (fill in manually)")
+    print(
+        "  next step: populate projections_baseline (and optionally "
+        "projections_scenario_1..4) in the workbook, then run --forecast."
+    )
+    return 0
+
+
+def _list_scenarios_cmd(args: argparse.Namespace) -> int:
+    """Step 5: print which projection scenarios are populated in the workbook."""
+    from bvar.unified_input import list_available_scenarios
+
+    if args.input is None:
+        print(
+            "ERROR: --list-scenarios requires --input pointing at the unified "
+            "workbook.",
+            file=sys.stderr,
+        )
+        return 2
+
+    config = load_config(args.config)
+    try:
+        available = list_available_scenarios(args.input, config)
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    all_scenarios = ["baseline", "scenario_1", "scenario_2", "scenario_3", "scenario_4"]
+    empty = [s for s in all_scenarios if s not in available]
+
+    print(f"Populated scenarios in {args.input}:")
+    if available:
+        # Read each populated sheet to report row count + quarter range.
+        from bvar.unified_input import _resolve_sheet_names, _scenario_sheet_name
+        sheet_names = _resolve_sheet_names(config)
+        macro_specs = config["data"]["macro_variables"]
+        expected_macro_cols = [spec["column"] for spec in macro_specs.values()]
+        for s in available:
+            sheet = _scenario_sheet_name(s, sheet_names)
+            df = pd.read_excel(args.input, sheet_name=sheet)
+            df = df[df["Quarter"].notna()] if "Quarter" in df.columns else df
+            n_rows = len(df)
+            quarter_first = str(df["Quarter"].iloc[0]) if n_rows > 0 else "(empty)"
+            quarter_last = str(df["Quarter"].iloc[-1]) if n_rows > 0 else "(empty)"
+            print(f"  {s:<12s}  ({n_rows} rows, {quarter_first}..{quarter_last})")
+    else:
+        print("  (none)")
+    if empty:
+        print("Empty (header-only) scenarios:")
+        print(f"  {', '.join(empty)}")
+    return 0
+
+
+def _forecast_from_estimate(args: argparse.Namespace) -> int:
+    _emit_deprecation_notice("forecast-from-estimate")
+    if args.projections is None or args.estimation_results is None:
+        print(
+            "ERROR: --forecast-from-estimate requires both --projections "
+            "and --estimation-results.",
+            file=sys.stderr,
+        )
+        return 2
+
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    output_dir = Path(args.output_dir) if args.output_dir else Path(
+        f"output/{timestamp}_forecast"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    log_path = output_dir / "run.log"
+    with _log_to_file(log_path):
+        return _forecast_from_estimate_body(args, output_dir)
+
+
+def _forecast_from_estimate_body(args, output_dir):
+    from bvar.conditioning import (
+        ConditionalForecaster,
+        EconomistProjections,
+    )
+    from bvar.estimation import BVARSVResults
+
+    config = load_config(args.config)
+    if args.horizon is not None:
+        config.setdefault("conditioning", {})["horizon"] = int(args.horizon)
+
+    print(f"Loading estimation results from {args.estimation_results}")
+    try:
+        results = BVARSVResults.load(args.estimation_results)
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    try:
+        pca_dict = _load_processed_pca(args.working_dir)
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    try:
+        projections = EconomistProjections.from_workbook(args.projections, config)
+    except (FileNotFoundError, InputValidationError) as exc:
+        print(f"ERROR reading projections: {exc}", file=sys.stderr)
+        return 1
+
+    try:
+        forecaster = ConditionalForecaster(
+            results=results,
+            projections=projections,
+            config_section=config["conditioning"],
+            seed=int(config["estimation"]["seed"]),
+        )
+    except InputValidationError as exc:
+        print(f"ERROR validating projections: {exc}", file=sys.stderr)
+        return 1
+
+    print(
+        f"Running BGL-2015 conditional forecast: horizon={config['conditioning']['horizon']}, "
+        f"strict={config['conditioning']['enforce_strict_match']}"
+    )
+    cond_forecast = forecaster.forecast()
+    yield_forecast = cond_forecast.to_yield_space(pca_dict)
+
+    _print_forecast_summary(yield_forecast)
+    _save_forecast_artifacts(output_dir, cond_forecast, yield_forecast)
+
+    resolved_cfg_path = output_dir / "resolved_config.yaml"
+    with resolved_cfg_path.open("w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f, sort_keys=False)
+
+    print()
+    print(f"Output written to: {output_dir.resolve()}")
+    print(f"  conditional_forecast.npz")
+    print(f"  yield_curve_forecast.npz")
+    print(f"  forecast_summary.csv")
+    print(f"  forecast_plots/")
+    print(f"  resolved_config.yaml")
+    print(f"  run.log")
+    return 0
+
+
+def _validate(args: argparse.Namespace) -> int:
+    _emit_deprecation_notice("validate")
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    output_dir = Path(args.output_dir) if args.output_dir else Path(f"output/{timestamp}_validation")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    plots_dir = output_dir / "validation_plots"
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    log_path = output_dir / "run.log"
+    with _log_to_file(log_path):
+        return _validate_body(args, output_dir, plots_dir)
+
+
+def _validate_body(args, output_dir, plots_dir):
+    import json
+    import datetime as dt
+    from bvar.estimation import BVARSV, _to_jsonable
+    from bvar.priors import MinnesotaPrior
+    from bvar.validation import ValidationHarness
+
+    config = load_config(args.config)
+    if args.override_seed is not None:
+        config["estimation"]["seed"] = int(args.override_seed)
+        logging.info("Overriding seed -> %d", args.override_seed)
+
+    if args.no_rebuild:
+        panel_path = resolve_path("data/processed/panel.parquet", args.working_dir)
+        yield_path = resolve_path("data/processed/yield_panel.parquet", args.working_dir)
+        if not (panel_path.exists() and yield_path.exists()):
+            print(
+                "ERROR: --no-rebuild requested but data/processed/ artifacts missing.",
+                file=sys.stderr,
+            )
+            return 1
+        panel = pd.read_parquet(panel_path)
+        yield_panel = pd.read_parquet(yield_path)
+        with np.load(resolve_path("data/processed/pca.npz", args.working_dir)) as f:
+            pca_dict = {
+                "loadings": f["loadings"].copy(),
+                "mean": f["mean"].copy(),
+                "explained_variance_ratio": f["explained_variance_ratio"].copy(),
+                "yield_names": [str(s) for s in f["yield_names"]],
+                "component_names": [str(s) for s in f["component_names"]],
+            }
+        logging.info("Loaded panel + yield_panel + pca from data/processed/")
+    else:
+        try:
+            result = build_panel(
+                config, input_path=args.input, output_dir=resolve_path("data/processed", args.working_dir)
+            )
+        except (FileNotFoundError, InputValidationError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        panel = result["panel"]
+        yield_panel = result["yield_panel"]
+        pca_dict = result["pca"]
+
+    variable_names = list(panel.columns)
+    hp = config["model"]["hyperparameters"]["fixed"]
+    prior = MinnesotaPrior(
+        n_vars=len(variable_names),
+        n_lags=int(config["model"]["lags"]),
+        lambda_1=hp["lambda_1"],
+        lambda_2=hp["lambda_2"],
+        lambda_3=hp["lambda_3"],
+        lambda_sc=hp["lambda_sc"],
+        lambda_io=hp["lambda_io"],
+        persistence_prior=config["model"]["persistence_prior"],
+        variable_names=variable_names,
+        training_data=panel,
+    )
+
+    bvar = BVARSV(
+        data=panel,
+        n_lags=int(config["model"]["lags"]),
+        prior=prior,
+        n_draws=int(config["estimation"]["n_draws"]),
+        n_burn=int(config["estimation"]["n_burn"]),
+        thinning=int(config["estimation"].get("thinning", 1)),
+        seed=int(config["estimation"]["seed"]),
+    )
+    print(
+        f"Running BVAR-SV estimation: n_draws={config['estimation']['n_draws']}, "
+        f"n_burn={config['estimation']['n_burn']}"
+    )
+    results = bvar.estimate()
+    print(
+        f"Estimation done: {results.coefficients.shape[0]} kept draws, "
+        f"runtime {results.posterior_metadata.runtime_seconds:.1f}s"
+    )
+
+    print()
+    print("Running validation harness...")
+    harness = ValidationHarness()
+
+    print("  [1/4] posterior_recovery_test (easy + realistic configs)...")
+    recovery = harness.posterior_recovery_test()
+    print(f"        easy pass={recovery['easy']['pass']}, realistic pass={recovery['realistic']['pass']}")
+
+    print("  [2/4] analytic_invariant_tests...")
+    invariants = harness.analytic_invariant_tests()
+    cv_status = (
+        f"constant_vol skipped"
+        if "skipped" in invariants["constant_vol_limit"]
+        else f"constant_vol pass={invariants['constant_vol_limit']['pass']}"
+        + f" (max_diff={invariants['constant_vol_limit']['max_diff']:.4f})"
+    )
+    print(
+        f"        loose_prior pass={invariants['loose_prior_limit']['pass']}, "
+        f"high_lag_decay pass={invariants['high_lag_decay_limit']['pass']}, "
+        f"{cv_status}"
+    )
+
+    print("  [3/4] stochvol_sv_cross_validation...")
+    stochvol_result = harness.stochvol_sv_cross_validation(results)
+    if "skipped" in stochvol_result:
+        print(f"        SKIPPED: {stochvol_result['skipped']}")
+    else:
+        print(f"        all_pass={stochvol_result.get('all_pass')}")
+        per_eq = stochvol_result.get("per_equation", {})
+        thresholds = stochvol_result.get("thresholds_informational", {})
+        print("        per-variable Pearson r(h), MAD(h), |omega rel|, |phi rel|, |mu rel|:")
+        for name, m in per_eq.items():
+            if "error" in m:
+                print(f"          {name:>20s}  ERROR: {m['error']}")
+                continue
+            print(
+                f"          {name:>20s}  "
+                f"r={m['h_pearson_corr']:+.3f}  "
+                f"MAD={m['h_mad']:.3f}  "
+                f"omega_rel={m['omega_rel_diff']:.3f}  "
+                f"phi_rel={m['phi_rel_diff']:.3f}  "
+                f"mu_rel={m['mu_rel_diff']:.3f}  "
+                f"pass={m['pass']}"
+            )
+
+        # Summary failure block (Step 6 refinement 2): list which variables
+        # failed which threshold, for fast scanning.
+        print()
+        print("        Cross-check summary:")
+        print(f"          {len(per_eq)} variables checked.")
+        print(f"          Overall all_pass: {stochvol_result.get('all_pass')}")
+        h_thr = thresholds.get("h_max_abs", 0.5)
+        omega_thr = thresholds.get("omega_rel", 0.50)
+        phi_thr = thresholds.get("phi_rel", 0.15)
+        mu_thr = thresholds.get("mu_rel", 0.30)
+        failures: list[str] = []
+        for name, m in per_eq.items():
+            if "error" in m:
+                failures.append(f"            {name}: ERROR ({m['error']})")
+                continue
+            if m["pass"]:
+                continue
+            reasons = []
+            if m["h_max_abs_diff"] >= h_thr:
+                reasons.append(f"h_max_abs_diff={m['h_max_abs_diff']:.3f} (>{h_thr})")
+            if m["omega_rel_diff"] >= omega_thr:
+                reasons.append(f"omega_rel={m['omega_rel_diff']:.3f} (>{omega_thr})")
+            if m["phi_rel_diff"] >= phi_thr:
+                reasons.append(f"phi_rel={m['phi_rel_diff']:.3f} (>{phi_thr})")
+            if m["mu_rel_diff"] >= mu_thr:
+                reasons.append(f"mu_rel={m['mu_rel_diff']:.3f} (>{mu_thr})")
+            failures.append(f"            {name}: " + ", ".join(reasons))
+        if failures:
+            print("          Per-variable failures:")
+            for line in failures:
+                print(line)
+        else:
+            print("          (No failures.)")
+
+    print("  [4/4] real_data_economic_checks...")
+    economic = harness.real_data_economic_checks(results, yield_panel, pca_dict)
+    print(
+        f"        var_stability pass={economic['var_stability']['pass']} "
+        f"(max |eig| = {economic['var_stability']['max_modulus']:.4f}); "
+        f"irf_check pass={economic['irf_check']['pass']}; "
+        f"forecast_curve_sanity pass={economic['forecast_curve_sanity']['pass']}"
+    )
+
+    if not economic["all_pass"]:
+        # S0.5 — convert 'REVIEW REQUIRED' stderr block to a single
+        # ValidationDomainWarning. Wrappers can capture programmatically
+        # via warnings.catch_warnings(); the message preserves all
+        # per-domain detail.
+        import warnings as _warnings
+        from bvar.exceptions import ValidationDomainWarning
+        details = ["Economic-content check failed. Details:"]
+        if not economic["var_stability"]["pass"]:
+            details.append(f"  VAR stability fail: {economic['var_stability']}")
+        if not economic["irf_check"]["pass"]:
+            details.append(
+                f"  IRF check fail: pc1_pos="
+                f"{economic['irf_check'].get('pc1_positive_at_horizons')}, "
+                f"pc2_neg_h1="
+                f"{economic['irf_check'].get('pc2_negative_at_h1')}"
+            )
+        if not economic["forecast_curve_sanity"]["pass"]:
+            for issue in economic["forecast_curve_sanity"].get("issues", []):
+                details.append(f"  forecast issue: {issue}")
+        _warnings.warn(
+            "\n".join(details),
+            ValidationDomainWarning,
+            stacklevel=2,
+        )
+
+    full_report = {
+        "timestamp": timestamp,
+        "config": config,
+        "estimation": {
+            "n_draws": int(config["estimation"]["n_draws"]),
+            "n_burn": int(config["estimation"]["n_burn"]),
+            "seed": int(config["estimation"]["seed"]),
+            "runtime_seconds": float(results.posterior_metadata.runtime_seconds),
+            "kept_draws": int(results.coefficients.shape[0]),
+        },
+        "domain_1_posterior_recovery": _to_jsonable(recovery),
+        "domain_2_analytic_invariants": _to_jsonable(invariants),
+        "domain_3_stochvol_cross_validation": _to_jsonable(stochvol_result),
+        "domain_4_real_data_economic_checks": _to_jsonable(economic),
+    }
+    report_path = output_dir / "validation_report.json"
+    with report_path.open("w", encoding="utf-8") as f:
+        json.dump(full_report, f, indent=2, default=str)
+
+    _save_validation_plots(plots_dir, economic, results)
+
+    print()
+    print(f"Validation report written to: {report_path}")
+    print(f"Validation plots written to:  {plots_dir}")
+    return 0
+
+
+def _save_validation_plots(plots_dir, economic, results):
+    try:
+        import matplotlib
+        # S0.8 — guard the backend mutation (same pattern as
+        # _save_forecast_plots): only force Agg if needed.
+        if matplotlib.get_backend().lower() not in {
+            "agg", "pdf", "svg", "ps", "cairo",
+        }:
+            matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError:
+        return
+
+    irf = economic.get("irf_check", {})
+    if "irf_pc_space" in irf and irf.get("irf_pc_space", {}).get("median"):
+        horizons = irf.get("horizons", [])
+        irf_med = np.array(irf["irf_pc_space"]["median"])
+        irf_q16 = np.array(irf["irf_pc_space"]["q16"])
+        irf_q84 = np.array(irf["irf_pc_space"]["q84"])
+        var_names = irf["irf_pc_space"]["variable_names"]
+        n_panel = irf_med.shape[1]
+        fig, axes = plt.subplots(2, 3, figsize=(12, 6), sharex=True)
+        for v in range(min(n_panel, 6)):
+            ax = axes.flat[v]
+            ax.plot(horizons, irf_med[:, v], "o-", label="median")
+            ax.fill_between(horizons, irf_q16[:, v], irf_q84[:, v], alpha=0.3, label="16-84")
+            ax.axhline(0, color="k", lw=0.5)
+            ax.set_title(f"IRF: {var_names[v]} to FFR shock")
+            ax.set_xlabel("horizon (q)")
+        axes.flat[0].set_ylabel("response (PC space)")
+        fig.tight_layout()
+        fig.savefig(plots_dir / "irf_pc_space.png", dpi=120)
+        plt.close(fig)
+
+    if "irf_yield_space" in irf and irf.get("irf_yield_space", {}).get("median_bps"):
+        horizons = irf.get("horizons", [])
+        med_bps = np.array(irf["irf_yield_space"]["median_bps"])
+        q16_bps = np.array(irf["irf_yield_space"]["q16_bps"])
+        q84_bps = np.array(irf["irf_yield_space"]["q84_bps"])
+        maturity_names = irf["irf_yield_space"]["maturity_names"]
+        fig, ax = plt.subplots(figsize=(8, 5))
+        for h_i, h in enumerate(horizons):
+            ax.plot(maturity_names, med_bps[h_i, :], "o-", label=f"h={h}")
+        ax.axhline(0, color="k", lw=0.5)
+        ax.set_title("IRF in yield space (bps): yields' response to +1SD FFR shock")
+        ax.set_ylabel("bps")
+        plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig(plots_dir / "irf_yield_space.png", dpi=120)
+        plt.close(fig)
+
+    fc = economic.get("forecast_curve_sanity", {})
+    if "forecast_yield_curves_pct" in fc:
+        curves = fc["forecast_yield_curves_pct"]
+        maturity_names = fc.get("maturity_names", [])
+        if curves and maturity_names:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            for label, curve in curves.items():
+                ys = [curve.get(name, np.nan) for name in maturity_names]
+                ax.plot(maturity_names, ys, "o-", label=label)
+            ax.set_title("Posterior predictive yield curves (median)")
+            ax.set_ylabel("percent")
+            plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
+            ax.legend()
+            fig.tight_layout()
+            fig.savefig(plots_dir / "forecast_yield_curves.png", dpi=120)
+            plt.close(fig)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+
+    # Resolve --config to the package default if unspecified, so the CLI
+    # works from any cwd. Then resolve every user-supplied path against
+    # --working-dir (or cwd if None). Absolute paths pass through unchanged.
+    if args.config is None:
+        args.config = package_default_config()
+    else:
+        args.config = resolve_path(args.config, args.working_dir)
+    for attr in (
+        "input", "output_dir", "output", "projections",
+        "estimation_results", "copy_history_from",
+    ):
+        val = getattr(args, attr, None)
+        if val is not None:
+            setattr(args, attr, resolve_path(val, args.working_dir))
+
+    logging.basicConfig(
+        level=logging.INFO if args.verbose else logging.WARNING,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+
+    # Mutual-exclusion check on mode flags.
+    mode_flags = [
+        ("--process-data", args.process_data),
+        ("--estimate", args.estimate),
+        ("--validate", args.validate),
+        ("--optimize-hyperparameters", args.optimize_hyperparameters),
+        ("--estimate-with-optimized", args.estimate_with_optimized),
+        ("--forecast", args.forecast),
+        ("--forecast-from-estimate", args.forecast_from_estimate),
+        ("--generate-projections-template", args.generate_projections_template),
+        ("--generate-input-template", args.generate_input_template),
+        ("--list-scenarios", args.list_scenarios),
+    ]
+    chosen = [name for name, flag in mode_flags if flag]
+    if len(chosen) > 1:
+        print(
+            f"ERROR: at most one mode flag per invocation; got {chosen}",
+            file=sys.stderr,
+        )
+        return 2
+
+    if args.process_data:
+        return _process_data(args)
+    if args.estimate:
+        return _estimate(args)
+    if args.optimize_hyperparameters:
+        return _optimize_hyperparameters(args)
+    if args.estimate_with_optimized:
+        return _estimate_with_optimized(args)
+    if args.forecast:
+        return _forecast(args)
+    if args.forecast_from_estimate:
+        return _forecast_from_estimate(args)
+    if args.generate_projections_template:
+        return _generate_projections_template(args)
+    if args.generate_input_template:
+        return _generate_input_template(args)
+    if args.list_scenarios:
+        return _list_scenarios_cmd(args)
+    if args.validate:
+        return _validate(args)
+
+    parser.print_help()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

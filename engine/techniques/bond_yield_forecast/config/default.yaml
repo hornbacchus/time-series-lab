@@ -1,0 +1,140 @@
+data:
+  input_file: "data/raw/macro_yield_inputs.xlsx"
+  macro_sheet: "macro"
+  yield_sheet: "yields"
+  macro_variables:
+    real_gdp_growth:
+      column: "Real GDP Growth (Q/Q SAAR)"
+      units: "percent"
+    headline_cpi:
+      column: "Headline CPI Inflation (Q/Q annualized)"
+      units: "percent"
+    fed_funds_rate:
+      column: "Fed Funds Rate (quarterly average)"
+      units: "percent"
+  yield_variables:
+    treasury_3m:
+      column: "3M"
+      maturity_years: 0.25
+    treasury_6m:
+      column: "6M"
+      maturity_years: 0.5
+    treasury_1y:
+      column: "1Y"
+      maturity_years: 1.0
+    treasury_2y:
+      column: "2Y"
+      maturity_years: 2.0
+    treasury_3y:
+      column: "3Y"
+      maturity_years: 3.0
+    treasury_5y:
+      column: "5Y"
+      maturity_years: 5.0
+    treasury_7y:
+      column: "7Y"
+      maturity_years: 7.0
+    treasury_10y:
+      column: "10Y"
+      maturity_years: 10.0
+    treasury_20y:
+      column: "20Y"
+      maturity_years: 20.0
+    treasury_30y:
+      column: "30Y"
+      maturity_years: 30.0
+  sample:
+    start: "1990-Q1"
+    end: "latest"
+  pca:
+    n_components: 3
+    component_names: ["pc1_level", "pc2_slope", "pc3_curvature"]
+    reporting_maturities: ["treasury_2y", "treasury_5y", "treasury_10y", "treasury_30y"]
+
+model:
+  lags: 4
+  prior: "minnesota"
+  stochastic_volatility: true
+  persistence_prior:
+    real_gdp_growth: 0.0
+    headline_cpi: 0.0
+    fed_funds_rate: 1.0
+    pc1_level: 1.0
+    pc2_slope: 0.9
+    pc3_curvature: 0.5
+  hyperparameters:
+    method: "fixed"   # default for --estimate; --optimize-hyperparameters and
+                      # --estimate-with-optimized override to "glp_composite".
+    fixed:
+      lambda_1: 0.2
+      lambda_2: 0.5
+      lambda_3: 1.0
+      lambda_sc: 1.0
+      lambda_io: 1.0
+    # GLP-2015 grid search. The dummy-form MDD does not depend on lambda_2;
+    # it is held at the value above (or at 1.0, where dummy and moments
+    # forms agree exactly). Quasi-log-spaced lambda_1 — denser at the low
+    # end where the response surface is most sensitive (per Step 3
+    # refinement 2).
+    glp_grid:
+      lambda_1: [0.025, 0.05, 0.075, 0.10, 0.15, 0.20, 0.30, 0.50]
+      lambda_3: [0.5, 1.0, 1.5, 2.0]
+      lambda_sc: [0.0, 0.5, 1.0, 2.0, 5.0]
+      lambda_io: [0.0, 0.5, 1.0, 2.0, 5.0]
+    glp_numerical:
+      bounds:
+        lambda_1: [0.01, 1.0]
+        lambda_3: [0.1, 4.0]
+        lambda_sc: [0.0, 10.0]
+        lambda_io: [0.0, 10.0]
+      options:
+        eps: 0.001
+        maxiter: 100
+        ftol: 1.0e-7
+
+estimation:
+  n_draws: 10000
+  n_burn: 3000
+  thinning: 1
+  seed: 20260427
+
+forecast:
+  horizon_default: 8
+  horizon_midyear: 6
+  bands: [0.16, 0.50, 0.84]
+
+# Step 4: BGL-2015 / Waggoner-Zha conditional forecasting on
+# economist projections of the macro variables.
+conditioning:
+  horizon: 8                        # quarters ahead
+  n_paths_per_draw: 50              # paths per posterior draw
+  n_draws_subsample: 1000           # cap kept-draws to this many for runtime;
+                                    # null = use all (production-grade posterior).
+  macro_variables:                  # which panel columns are conditioned on;
+    - real_gdp_growth               # target = panel.columns minus this list.
+    - headline_cpi
+    - fed_funds_rate
+  enforce_strict_match: true        # default per Waggoner-Zha-1999.
+                                    # False enables soft match using the
+                                    # projection_uncertainty stds below.
+  projection_uncertainty:           # only used if enforce_strict_match=false
+    real_gdp_growth: 0.5            # std (in variable's own units)
+    headline_cpi: 0.3
+    fed_funds_rate: 0.1
+  workbook_sheet: "projections"     # sheet name in the projections workbook
+
+# Step 5: unified input-workbook architecture. A single workbook contains
+# history (macro + yields) plus up to five projection scenarios. The
+# canonical CLI command is `--forecast --input bvar_inputs.xlsx --scenario X`.
+unified_input:
+  workbook_filename: "bvar_inputs.xlsx"
+  sheet_names:
+    macro_history: "macro"
+    yields_history: "yields"
+    projections_baseline: "projections_baseline"
+    projections_scenario_1: "projections_scenario_1"
+    projections_scenario_2: "projections_scenario_2"
+    projections_scenario_3: "projections_scenario_3"
+    projections_scenario_4: "projections_scenario_4"
+    readme: "README"
+  default_scenario: "baseline"

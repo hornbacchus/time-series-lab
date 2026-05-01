@@ -168,6 +168,18 @@ prophet = "1.3.0"
 # Session 14 (Batch 10 entry — final batch): dtaidistance for
 # p3_dtw parity (cross-package canonical reference).
 dtaidistance = "2.4.0"
+# Bond Yield Forecast Session 1: numba (@jit(cache=True) on FFBS state
+# sampling + conditional-forecast inner loop), pyyaml (default.yaml
+# config loading), openpyxl (unified-workbook .xlsx I/O). Migrated as
+# hard deps from bvar-yield-forecaster pyproject.toml at
+# v1.0.0-session-0-complete tag. matplotlib + pyarrow remain optional:
+# matplotlib is only invoked from _legacy_cli.py.archive (CLI did not
+# migrate); pyarrow is only invoked by build_panel(output_dir=...) for
+# parquet export, which the TSL dispatch path bypasses by consuming the
+# in-memory panel_bundle dict directly.
+numba = "0.65.0"
+PyYAML = "6.0.3"
+openpyxl = "3.1.5"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this

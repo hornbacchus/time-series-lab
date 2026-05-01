@@ -10,8 +10,19 @@ hmmlearn>=0.3
 scikit-learn>=1.5
 python-docx>=1.1
 
+# Bond Yield Forecast (BYF Session 1) — migrated from bvar-yield-forecaster
+# v1.0.0-session-0-complete. The subpackage at
+# engine/techniques/bond_yield_forecast/ uses numba @jit(cache=True) for FFBS
+# state-sampling (~5s first-call warm-up; ~10x speedup on subsequent calls per
+# BVAR Session 0 measurements). pyyaml is required for default.yaml config
+# loading; openpyxl for unified-workbook .xlsx I/O.
+numba>=0.58
+pyyaml>=6.0
+openpyxl>=3.1
+
 # Optional ML/Deep Learning (graceful fallback if not installed)
 # prophet>=1.1
 # xgboost>=2.0
 # reservoirpy>=0.3
 # torch>=2.0
+# pyarrow>=14.0  # only needed if calling techniques.bond_yield_forecast.data.build_panel(output_dir=...) for parquet export; the TSL dispatch path consumes the in-memory panel dict directly without parquet roundtrip
