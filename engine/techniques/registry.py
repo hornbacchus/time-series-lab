@@ -188,6 +188,18 @@ TECHNIQUE_REGISTRY = {
     "bvar": "techniques.bvar",
     "bayesian_var": "techniques.bvar",
 
+    # --- Bond Yield Forecast (BYF integration Session 2) ---
+    # Large BVAR-SV with conditional forecasting on economist
+    # projections. Migrated from bvar-yield-forecaster v1.0.0-session-0
+    # at BYF Session 1; the dispatch entry point at
+    # techniques/bond_yield_forecast.py wraps the
+    # techniques.bond_yield_forecast subpackage. Distinct from `bvar`
+    # above (Phase 1/2 IRF/FEVD wrapper, technique_id 1c_bvar_irf_fevd);
+    # the two coexist per integration plan §1.2 disposition.
+    "bond_yield_forecast": "techniques.bond_yield_forecast",
+    "byf": "techniques.bond_yield_forecast",
+    "yield_forecast": "techniques.bond_yield_forecast",
+
     # --- Dynamic Factor Model (Batch 2) ---
     "dynamic_factor_model": "techniques.dynamic_factor_model",
     "dynamic_factor": "techniques.dynamic_factor_model",

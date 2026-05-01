@@ -1011,6 +1011,160 @@
       ]
     },
     {
+      "id": "bond_yield_forecast",
+      "name": "Bond Yield Forecast",
+      "category": "Multivariate Systems",
+      "summary": "Large Bayesian VAR with stochastic volatility for U.S. Treasury yield curve forecasting, conditioned on economist macro projections.",
+      "description_file": "bond_yield_forecast.md",
+      "min_series": 0,
+      "max_series": 0,
+      "supports_auto_udf": false,
+      "auto_udf_name": null,
+      "presets": [
+        "Fast",
+        "Balanced",
+        "Thorough"
+      ],
+      "parameters": [
+        {
+          "name": "input_workbook",
+          "label": "Input Workbook (.xlsx path)",
+          "type": "string",
+          "default": null,
+          "required": true,
+          "advanced": false,
+          "description": "Absolute path to a 3-sheet Bond Yield Forecast workbook (BondYield_Macro / BondYield_Yields / BondYield_Projections). Use the 'Open Input Template' Ribbon menu item to create one.",
+          "options": null
+        },
+        {
+          "name": "scenario",
+          "label": "Projection Scenario",
+          "type": "string",
+          "default": "baseline",
+          "required": false,
+          "advanced": false,
+          "description": "Name of the projection scenario to run. Must match a column in BondYield_Projections.",
+          "options": null
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon (quarters)",
+          "type": "int",
+          "default": 8,
+          "required": false,
+          "advanced": false,
+          "description": "Number of quarters to forecast. Range 1-20.",
+          "options": null
+        },
+        {
+          "name": "n_draws",
+          "label": "MCMC Draws",
+          "type": "int",
+          "default": 10000,
+          "required": false,
+          "advanced": true,
+          "description": "Total MCMC draws (including burn-in). Range 1000-50000.",
+          "options": null
+        },
+        {
+          "name": "n_burn",
+          "label": "MCMC Burn-in",
+          "type": "int",
+          "default": 3000,
+          "required": false,
+          "advanced": true,
+          "description": "Burn-in draws to discard. Range 100-20000. Must be < n_draws.",
+          "options": null
+        },
+        {
+          "name": "n_paths_per_draw",
+          "label": "Forecast Paths per Draw",
+          "type": "int",
+          "default": 50,
+          "required": false,
+          "advanced": true,
+          "description": "Conditional-forecast paths sampled per posterior draw. Range 10-500.",
+          "options": null
+        },
+        {
+          "name": "n_draws_subsample",
+          "label": "Posterior Subsample for Forecasting",
+          "type": "int",
+          "default": 1000,
+          "required": false,
+          "advanced": true,
+          "description": "Subsample of kept posterior draws used for conditional forecasting. Range 100-5000 (capped to mitigate OOM on long horizons; friction-points §3 OOM-evidence-based default).",
+          "options": null
+        },
+        {
+          "name": "projection_uncertainty",
+          "label": "Projection Uncertainty (std)",
+          "type": "float",
+          "default": 0.25,
+          "required": false,
+          "advanced": true,
+          "description": "Soft-mode projection uncertainty (std around economist projection). Minimum 0.01 enforced (Session 0 tiered: <0.0001 raises ValueError; <0.01 raises BVARWarning; >=0.01 clean).",
+          "options": null
+        },
+        {
+          "name": "lambda_1",
+          "label": "Minnesota Lambda 1 (overall tightness)",
+          "type": "float",
+          "default": 0.2,
+          "required": false,
+          "advanced": true,
+          "description": "Overall prior tightness. Range 0.001-2.0 (Session 0 lambda guard prevents zero-divide).",
+          "options": null
+        },
+        {
+          "name": "lambda_2",
+          "label": "Minnesota Lambda 2 (cross-equation)",
+          "type": "float",
+          "default": 0.5,
+          "required": false,
+          "advanced": true,
+          "description": "Cross-equation prior shrinkage. Minimum 0.001 (Session 0 lambda guard).",
+          "options": null
+        },
+        {
+          "name": "lambda_3",
+          "label": "Minnesota Lambda 3 (lag decay)",
+          "type": "float",
+          "default": 1.0,
+          "required": false,
+          "advanced": true,
+          "description": "Lag-decay prior. Minimum 0.001 (Session 0 lambda guard).",
+          "options": null
+        },
+        {
+          "name": "seed",
+          "label": "Random Seed",
+          "type": "int",
+          "default": 42,
+          "required": false,
+          "advanced": true,
+          "description": "Random seed for reproducibility.",
+          "options": null
+        }
+      ],
+      "output_tables": [
+        "yield_forecast",
+        "macro_forecast",
+        "convergence_diagnostics",
+        "run_metadata"
+      ],
+      "tags": [
+        "multivariate",
+        "bayesian",
+        "var",
+        "stochastic_volatility",
+        "yield_curve",
+        "treasury",
+        "conditional_forecast",
+        "macro"
+      ]
+    },
+    {
       "id": "dynamic_factor_model",
       "name": "Dynamic Factor Model",
       "category": "Multivariate Systems",
