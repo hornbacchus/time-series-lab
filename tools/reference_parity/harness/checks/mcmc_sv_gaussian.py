@@ -50,6 +50,7 @@ from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -162,6 +163,22 @@ class McmcSvGaussianParity(P3ParityCheck):
     # MC error makes single-seed CAVEAT ambiguous; re-roll
     # with seed+1 to distinguish noise from systematic divergence.
     reroll_on_caveat = True
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # mcmc_convergence omnibus invariant. stochastic_volatility.py
+    # (the engine wrapper this audit covers) exposes ess_min +
+    # rhat_max in audit_fields per S8 catalog; geweke_max_abs_z
+    # is not exposed (the S7 omnibus checker treats None as PASS-
+    # contribution per the optional-field path). tolerance=200.0
+    # = ESS_min PASS threshold per BYF Phase 1 2b precedent.
+    structural_invariants = (
+        StructuralInvariant(
+            name="mcmc_convergence",
+            invariant_type="mcmc_convergence",
+            tolerance=200.0,
+            tolerance_type="absolute",
+        ),
+    )
 
     # Subprocess timeout (seconds). svsample on T=500 with
     # 10000 draws + 1000 burn typically completes in ~30s on

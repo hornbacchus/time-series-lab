@@ -42,6 +42,7 @@ from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.tolerances import get_ladder
 
 # Reuse the helpers from the 2b sibling module so the two checks
@@ -82,6 +83,19 @@ class McmcSvStudentTParity(P3ParityCheck):
     )
 
     reroll_on_caveat = True
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # mcmc_convergence omnibus invariant. Same as the 2b Gaussian
+    # sibling: stochastic_volatility.py exposes ess_min + rhat_max;
+    # geweke is None per S8 catalog.
+    structural_invariants = (
+        StructuralInvariant(
+            name="mcmc_convergence",
+            invariant_type="mcmc_convergence",
+            tolerance=200.0,
+            tolerance_type="absolute",
+        ),
+    )
 
     R_TIMEOUT_SEC = 240
 

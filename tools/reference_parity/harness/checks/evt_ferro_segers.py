@@ -45,6 +45,7 @@ import numpy as np
 from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.fixtures import FixtureLoader
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
 from reference_parity.harness.tolerances import get_ladder
@@ -90,6 +91,20 @@ class EvtFerroSegersParity(P3ParityCheck):
         "(method='intervals') and TSL `_ferro_segers_extremal_index` "
         "implement identical formula. Phase 1 audit measured "
         "0.0 abs diff on GARCH + iid fixtures."
+    )
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # evt_extremal_index structural invariant. The TSL audit's
+    # output dict surfaces ``theta`` (extremal index) directly
+    # per P3 Session 14 audit script. tolerance=0.01 = slack
+    # outside [0, 1] for numerical noise.
+    structural_invariants = (
+        StructuralInvariant(
+            name="evt_extremal_index",
+            invariant_type="evt_extremal_index",
+            tolerance=0.01,
+            tolerance_type="absolute",
+        ),
     )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:

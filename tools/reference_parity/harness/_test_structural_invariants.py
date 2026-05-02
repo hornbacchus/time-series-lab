@@ -347,6 +347,116 @@ def test_unregistered_type_raises_keyerror() -> None:
     )
 
 
+def test_s9_inherited_wrapper_declarations() -> None:
+    """Phase 4 Session 9 (P4-1.3, 2026-05-02) — verify the 9
+    inherited-wrapper audit scripts declare ``structural_invariants``
+    tuples that resolve to registered checkers.
+
+    Declarations are dormant at S9 (the harness's check_invariants
+    lifecycle method is not yet wired into the runner — declared
+    invariants are discoverable via class introspection but do not
+    fire during normal audit runs). This test exercises the
+    declaration-side contract:
+      - each audit class declares a non-empty structural_invariants
+        tuple
+      - each declared invariant_type resolves to a registered
+        checker via get_invariant_checker
+      - StructuralInvariant fields (name, tolerance, tolerance_type)
+        are well-formed
+
+    When the runner integration lands (Phase 4.5 / Phase 5
+    candidate), this test extends to dispatch the checkers on
+    actual run_tsl outputs.
+    """
+    # Import inherited audit classes lazily so the test file
+    # doesn't slow down on import for the simple stub checks.
+    expected = [
+        ("reference_parity.harness.checks.kalman_filter",
+         "KalmanFilterParity",
+         "kalman_covariance_ordering"),
+        ("reference_parity.harness.checks.johansen_bartlett",
+         "JohansenBartlettParity",
+         "vecm_cointegration_rank"),
+        ("reference_parity.harness.checks.mcmc_sv_gaussian",
+         "McmcSvGaussianParity",
+         "mcmc_convergence"),
+        ("reference_parity.harness.checks.mcmc_sv_student_t",
+         "McmcSvStudentTParity",
+         "mcmc_convergence"),
+        ("reference_parity.harness.checks.evt_ferro_segers",
+         "EvtFerroSegersParity",
+         "evt_extremal_index"),
+        ("reference_parity.harness.checks.mint_family",
+         "MintFamilyParity",
+         "mint_coherence"),
+        ("reference_parity.harness.checks.transformer_attention",
+         "TransformerAttentionParity",
+         "attention_normalization"),
+        ("reference_parity.harness.checks.caviar_sav",
+         "CaviarSavParity",
+         "intervals_test"),
+        ("reference_parity.harness.checks.p3_bond_yield_forecast",
+         "BondYieldForecastParity",
+         "mcmc_convergence"),
+    ]
+    n_verified = 0
+    import importlib
+    for module_path, class_name, expected_inv_type in expected:
+        try:
+            mod = importlib.import_module(module_path)
+        except ImportError as e:
+            raise AssertionError(
+                f"{module_path}: failed to import: {e}"
+            )
+        cls = getattr(mod, class_name, None)
+        assert cls is not None, (
+            f"{module_path}: class {class_name} not found"
+        )
+        invs = getattr(cls, "structural_invariants", ())
+        assert isinstance(invs, tuple), (
+            f"{class_name}: structural_invariants must be a tuple, "
+            f"got {type(invs).__name__}"
+        )
+        assert len(invs) >= 1, (
+            f"{class_name}: structural_invariants tuple is empty "
+            f"(S9 P4-1.3 declaration missing)"
+        )
+        invariant_types = {inv.invariant_type for inv in invs}
+        assert expected_inv_type in invariant_types, (
+            f"{class_name}: declared invariant_types "
+            f"{sorted(invariant_types)!r} missing expected "
+            f"{expected_inv_type!r}"
+        )
+        # Resolve every declared checker (raises KeyError if missing)
+        for inv in invs:
+            checker = get_invariant_checker(inv.invariant_type)
+            assert callable(checker), (
+                f"{class_name}: checker for {inv.invariant_type!r} "
+                f"not callable"
+            )
+            assert isinstance(inv.name, str) and inv.name, (
+                f"{class_name}: invariant name must be non-empty str"
+            )
+            assert isinstance(inv.tolerance, (int, float)), (
+                f"{class_name}: invariant tolerance must be numeric"
+            )
+            assert inv.tolerance_type in (
+                "absolute", "relative", "probabilistic",
+            ), (
+                f"{class_name}: invalid tolerance_type "
+                f"{inv.tolerance_type!r}"
+            )
+        n_verified += 1
+    assert n_verified == 9, (
+        f"expected 9 inherited-wrapper declarations; got {n_verified}"
+    )
+    print(
+        f"  test_s9_inherited_wrapper_declarations: PASS "
+        f"({n_verified} audit classes; all declarations resolve "
+        f"to registered checkers)"
+    )
+
+
 def main() -> int:
     print(
         "Phase 4 Session 7 (P4-1.1) — structural_invariants registry "
@@ -359,6 +469,7 @@ def main() -> int:
         test_s7_new_checkers_pass_on_valid_inputs()
         test_s7_new_checkers_block_on_violation()
         test_unregistered_type_raises_keyerror()
+        test_s9_inherited_wrapper_declarations()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1

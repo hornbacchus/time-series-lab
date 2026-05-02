@@ -72,6 +72,7 @@ from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -112,6 +113,20 @@ class KalmanFilterParity(P3ParityCheck):
         "math; only diffuse-prior initialization conventions "
         "differ slightly. Phase 1 audit 2a achieved 3.64e-7 abs "
         "log-likelihood vs KFAS on Phase 1 fixture."
+    )
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # kalman_covariance_ordering structural invariant. Engine
+    # audit-field surface (filtered_state_cov, predicted_state_cov,
+    # smoothed_state_cov) was added at S8; structural-invariants
+    # registry checker was registered at Phase 3 Session 9.
+    structural_invariants = (
+        StructuralInvariant(
+            name="kalman_covariance_ordering",
+            invariant_type="kalman_covariance_ordering",
+            tolerance=1e-6,  # numerical-noise slack on the PSD ordering
+            tolerance_type="absolute",
+        ),
     )
 
     # Second fixture used only for KFAS log-lik parity (loaded

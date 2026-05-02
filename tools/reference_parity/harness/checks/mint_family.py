@@ -47,6 +47,7 @@ from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -104,6 +105,20 @@ class MintFamilyParity(P3ParityCheck):
     )
 
     METHODS = ("ols", "wls_variance", "mint_shrinkage", "mint_sample")
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # mint_coherence structural invariant. The TSL audit's output
+    # surfaces ``coherence_residual`` per method (L2 norm of the
+    # summing-constraint violation; should be ~0 on closed-form-
+    # safe MinT reconciliation per Phase 1 audit measurement).
+    structural_invariants = (
+        StructuralInvariant(
+            name="mint_coherence",
+            invariant_type="mint_coherence",
+            tolerance=1e-10,
+            tolerance_type="absolute",
+        ),
+    )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         # On-disk fixture supplies y, y_hat, residuals, S; the

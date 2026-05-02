@@ -46,6 +46,7 @@ from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.manifest import Manifest
 from reference_parity.harness.r_bridge import RBridge
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -86,6 +87,21 @@ class JohansenBartlettParity(P3ParityCheck):
         "modulo small reduced-rank-regression parameterization "
         "differences (documented Pattern J at 50.0 abs). Reimers "
         "correction (T-n*p)/T is pure arithmetic; bit-exact."
+    )
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # vecm_cointegration_rank structural invariant. Engine
+    # audit-field surface (cointegrating_rank + determined_rank_trace
+    # aliases) was added at S8; structural-invariants registry
+    # checker was registered at Phase 3 Session 7. tolerance=0
+    # → strict integer match expected.
+    structural_invariants = (
+        StructuralInvariant(
+            name="vecm_cointegration_rank",
+            invariant_type="vecm_cointegration_rank",
+            tolerance=0.0,
+            tolerance_type="absolute",
+        ),
     )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:

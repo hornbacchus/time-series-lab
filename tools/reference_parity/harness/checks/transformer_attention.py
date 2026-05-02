@@ -52,6 +52,7 @@ import numpy as np
 
 from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -114,6 +115,20 @@ class TransformerAttentionParity(P3ParityCheck):
         "bit-exact attention matrices expected. Failure indicates "
         "TSL's _sa_block patch mechanism bug — strict bit-exact "
         "BLOCK-class assertion (not tolerance question)."
+    )
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # attention_normalization structural invariant. The TSL audit
+    # surfaces ``attention_matrix`` (n_heads, T, T) per layer; the
+    # invariant verifies row-stochasticity + value range [0, 1].
+    # tolerance=1e-6 = float32 row-sum-deviation noise floor.
+    structural_invariants = (
+        StructuralInvariant(
+            name="attention_normalization",
+            invariant_type="attention_normalization",
+            tolerance=1e-6,
+            tolerance_type="absolute",
+        ),
     )
     # Phase 3.3: standard fixture_id; runner auto-loads the .pt
     # fixture via FixtureLoader's format dispatch. Replaced the

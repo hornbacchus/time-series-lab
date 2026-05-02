@@ -101,6 +101,7 @@ import numpy as np
 
 from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
+from reference_parity.harness.structural_invariants import StructuralInvariant
 from reference_parity.harness.tolerances import get_ladder
 
 
@@ -271,6 +272,21 @@ class CaviarSavParity(P3ParityCheck):
         "(recursion math identical), loss-ratio three-outcome "
         "(optimum quality), beta coefficients record-only "
         "(non-uniqueness)."
+    )
+
+    # Phase 4 Session 9 (P4-1.3, 2026-05-02) — declare the
+    # intervals_test (Christoffersen LR independence) structural
+    # invariant. The TSL audit's output surfaces ``chris_pvalue``
+    # for VaR-violation independence testing. tolerance=0.05
+    # = standard 5% p-value floor (PASS if p > floor; INVERTED
+    # semantics — larger p-value is the desired outcome).
+    structural_invariants = (
+        StructuralInvariant(
+            name="intervals_test",
+            invariant_type="intervals_test",
+            tolerance=0.05,
+            tolerance_type="absolute",
+        ),
     )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:

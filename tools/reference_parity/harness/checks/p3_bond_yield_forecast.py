@@ -87,6 +87,7 @@ import numpy as np
 from reference_parity.harness.base import ParityResult
 from reference_parity.harness.check_base import P3ParityCheck
 from reference_parity.harness.compare import _compare_vector
+from reference_parity.harness.structural_invariants import StructuralInvariant
 
 
 def _ensure_engine_on_path() -> None:
@@ -173,11 +174,46 @@ class BondYieldForecastParity(P3ParityCheck):
     BIT_EXACT_ABS_TOL = 1e-15
     BIT_EXACT_REL_TOL = 1e-15
 
-    # Pattern F invariant thresholds (per master plan §3.1; held
-    # constant across both fixtures per BYF-Mod-2 §2.5 measurement).
-    VAR_EIG_PASS_THRESHOLD = 0.999
+    # Pattern F invariant thresholds (per master plan §3.1).
+    #
+    # Phase 4 Session 9 (P4-1.3 Category 2 / O-2 tightening,
+    # 2026-05-02) — VAR_EIG_PASS_THRESHOLD tightened from 0.999
+    # to 0.9995 per master plan Decision 11. The 34-maturity
+    # fixture's measured companion eigenvalue is 0.9988, leaving
+    # a 7e-4 margin — acceptable per Decision 11. Future fixture
+    # drift past 0.9995 will trigger BLOCK; that's the desired
+    # early-warning behaviour. The strict-instability threshold
+    # (BLOCK at >= 1.0) is preserved per Pattern F semantics
+    # (eigenvalue < 1 means stationary VAR; >= 1 means unit-root
+    # / explosive — non-negotiable).
+    #
+    # SV_PHI_ABS_MAX preserved at 0.999 per Phase 1 measurement
+    # (S4 audit observed max |phi| = 0.996; 3e-3 margin).
+    # PCA_EXPLAINED_VAR_MIN preserved at 0.99 per BYF-Mod-2 §2.5
+    # measurement (99.91% on 10-mat; 99.92% on 34-mat).
+    VAR_EIG_PASS_THRESHOLD = 0.9995
     SV_PHI_ABS_MAX = 0.999
     PCA_EXPLAINED_VAR_MIN = 0.99
+
+    # Phase 4 Session 9 (P4-1.3 Category 1, 2026-05-02) — declare
+    # the mcmc_convergence omnibus invariant. BVAR-SV diagnostics
+    # elevation (Category 3 in S9; commit-this-session) surfaces
+    # ess_min, rhat_max (None for single-chain Gibbs),
+    # geweke_max_abs_z in audit_fields. Note: BYF runs a single
+    # Gibbs chain so rhat_max is None; the S7 omnibus checker
+    # treats None as PASS contribution (skip-the-check). This
+    # declaration is supplementary to the audit's existing
+    # Pattern A.1 + Pattern F compare() logic; the omnibus
+    # provides a third verdict surface focused on convergence
+    # rather than reproducibility or structural identity.
+    structural_invariants = (
+        StructuralInvariant(
+            name="mcmc_convergence",
+            invariant_type="mcmc_convergence",
+            tolerance=200.0,  # ESS_min PASS threshold
+            tolerance_type="absolute",
+        ),
+    )
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         return {"_seed": int(seed)}

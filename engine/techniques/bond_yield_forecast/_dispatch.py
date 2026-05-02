@@ -673,6 +673,44 @@ def run(ctx: RunContext, progress_callback) -> dict:
         "bvar_warning_messages": warnings_summary["bvar_warning_messages"],
     }
 
+    # Phase 4 Session 9 (P4-1.3 Category 3 / B-Phase4-S8-2 closure,
+    # 2026-05-02) — elevate MCMC diagnostic top-level summary
+    # statistics from BVARSVResults.convergence_diagnostics() into
+    # audit_fields so the structural-invariants registry's
+    # `mcmc_convergence` omnibus checker (S7 P4-1.1) can read
+    # ess_min / rhat_max / geweke_max_abs_z directly. Mirrors
+    # stochastic_volatility.py's exposure pattern (line 647-650);
+    # PATH A direct surface (NOT consume-via-DataFrame-iloc Path B
+    # which is an anti-pattern per Decision 12).
+    try:
+        diag_df_p4s9 = results.convergence_diagnostics()
+        if hasattr(diag_df_p4s9, "iloc") and not diag_df_p4s9.empty:
+            ess_col = diag_df_p4s9.get("ess")
+            rhat_col = diag_df_p4s9.get("rhat")
+            geweke_col = diag_df_p4s9.get("geweke_z")
+            audit_fields["ess_min"] = (
+                round(float(ess_col.min()), 1)
+                if ess_col is not None else None
+            )
+            audit_fields["rhat_max"] = (
+                round(float(rhat_col.max()), 4)
+                if rhat_col is not None else None
+            )
+            audit_fields["geweke_max_abs_z"] = (
+                round(float(geweke_col.abs().max()), 4)
+                if geweke_col is not None else None
+            )
+        else:
+            audit_fields["ess_min"] = None
+            audit_fields["rhat_max"] = None
+            audit_fields["geweke_max_abs_z"] = None
+    except Exception:
+        # Defensive: if diagnostics API drifts, default all three to
+        # None so the wrapper still produces a valid response.
+        audit_fields["ess_min"] = None
+        audit_fields["rhat_max"] = None
+        audit_fields["geweke_max_abs_z"] = None
+
     return make_response(
         ctx,
         tables=tables,
