@@ -1512,6 +1512,13 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "det_order": 0,
         "trace_rank": 1,
         "max_eig_rank": 1,
+        # Phase 4 S8 (P4-1.2) — VECM rank invariance precondition.
+        # Aliases of trace_rank under the master-plan-mandated name
+        # (determined_rank_trace) and the registry-checker-expected
+        # name (cointegrating_rank). All three carry the same value
+        # by construction.
+        "determined_rank_trace": 1,
+        "cointegrating_rank": 1,
         "trace_stat_at_decision": 30.0,
         "trace_cv_at_decision": 29.8,
         # NOTE: ``significance_level`` is intentionally omitted. ADF
@@ -1799,6 +1806,15 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "n_free_params": 2,
         "sigma_slope": None,
         "custom_matrix_shapes": None,
+        # Phase 4 S8 (P4-1.2) — Kalman covariance ordering invariant
+        # precondition. Per-time-step covariance arrays from
+        # statsmodels MLEResults; consumed by the structural-
+        # invariants `kalman_covariance_ordering` checker. Default
+        # to None (T14 minimal-input probe doesn't construct real
+        # covariance tensors); spec null-guards via .get().
+        "filtered_state_cov": None,
+        "predicted_state_cov": None,
+        "smoothed_state_cov": None,
         # Follow-up 2c — Student-t SV innovations fields. Default to
         # Gaussian path with nu None; the Student-t path is exercised
         # in Phase 5 canonical validation, not T14's minimal probe.
@@ -2101,6 +2117,19 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         "state_space_model", "local_linear_trend",
         "SE_smoothed", "SE_filtered",
         "initial_state", "initial_covariance",
+        # (c8b) Phase 4 S8 (P4-1.2) — Kalman covariance ordering
+        # invariant precondition. Audit-field tokens may surface
+        # in spec disclosure prose verbatim; allowlist defensively
+        # (chained-underscore form already disqualified by the
+        # adjacent-underscore lookaround on the T15 regex).
+        "filtered_state_cov",
+        "predicted_state_cov",
+        "smoothed_state_cov",
+        # (c8c) Phase 4 S8 (P4-1.2) — VECM rank invariance
+        # precondition. Aliases of trace_rank under master-plan-
+        # mandated and registry-checker-expected names.
+        "determined_rank_trace",
+        "cointegrating_rank",
         # (c9) Follow-up 2c — Student-t SV innovations. Programmatic
         # param value `student_t` that users type as the innovations
         # parameter (same category as use_trigonometric / use_log from

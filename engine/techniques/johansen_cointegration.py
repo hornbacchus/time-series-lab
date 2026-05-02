@@ -496,6 +496,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "det_order": det_order,
             "trace_rank": determined_rank_trace,
             "max_eig_rank": determined_rank_eig,
+            # Phase 4 Session 8 (P4-1.2, 2026-05-02) — VECM rank
+            # invariance precondition. Surfaces the trace-test-based
+            # cointegrating rank under both the master-plan-mandated
+            # name ``determined_rank_trace`` (per §15 S8) and the
+            # registry-checker-expected name ``cointegrating_rank``
+            # (per tools/reference_parity/harness/structural_invariants.py
+            # `vecm_cointegration_rank` checker, populated at Phase 3
+            # Session 7). Both fields hold the same value
+            # (= ``trace_rank`` above; redundant by design for
+            # backward compatibility + structural-invariants registry
+            # contract).
+            "determined_rank_trace": determined_rank_trace,
+            "cointegrating_rank": determined_rank_trace,
             "trace_stat_at_decision": round(trace_stat_at_decision, 4),
             "trace_cv_at_decision": round(trace_cv_at_decision, 4),
             "significance_level": significance,

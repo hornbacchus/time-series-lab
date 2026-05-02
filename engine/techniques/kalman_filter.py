@@ -514,6 +514,44 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "custom_matrix_shapes": custom_matrix_shapes,
         }
 
+        # Phase 4 Session 8 (P4-1.2, 2026-05-02) — Kalman covariance
+        # ordering invariant precondition (consumed by
+        # tools/reference_parity/harness/structural_invariants.py
+        # `kalman_covariance_ordering` checker, populated at Phase 3
+        # Session 9 + carried into Phase 4 S7 registry expansion).
+        # Surfaces the per-time-step covariance arrays from
+        # statsmodels' MLEResults so audit-time invariant checking
+        # can verify the Kalman filter's recursive covariance
+        # contraction property (P_{t|t-1} >= P_{t|t} >= P_{t|T}).
+        # Wrapped in try/except so any statsmodels API drift
+        # downgrades gracefully — the new audit fields default to
+        # None rather than failing the whole run.
+        try:
+            import numpy as _np_p4s8
+            _filt_cov = getattr(fit, "filtered_state_cov", None)
+            _pred_cov = getattr(fit, "predicted_state_cov", None)
+            _smooth_cov = getattr(fit, "smoothed_state_cov", None)
+            audit["filtered_state_cov"] = (
+                _np_p4s8.asarray(_filt_cov, dtype=float).tolist()
+                if _filt_cov is not None else None
+            )
+            audit["predicted_state_cov"] = (
+                _np_p4s8.asarray(_pred_cov, dtype=float).tolist()
+                if _pred_cov is not None else None
+            )
+            audit["smoothed_state_cov"] = (
+                _np_p4s8.asarray(_smooth_cov, dtype=float).tolist()
+                if _smooth_cov is not None else None
+            )
+        except Exception:
+            # Defensive: if statsmodels API changes the attribute
+            # names or any conversion fails, default to None for
+            # all three new fields so the wrapper still produces
+            # a valid response.
+            audit["filtered_state_cov"] = None
+            audit["predicted_state_cov"] = None
+            audit["smoothed_state_cov"] = None
+
         # --- Interpretation ---
         try:
             from interpretation import build_interpretation  # type: ignore

@@ -525,6 +525,34 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "custom_matrix_shapes": custom_matrix_shapes,
         }
 
+        # Phase 4 Session 8 (P4-1.2, 2026-05-02) — Kalman covariance
+        # ordering invariant precondition. Same surface as
+        # kalman_filter.py:audit so the structural-invariants
+        # checker `kalman_covariance_ordering` works uniformly
+        # against either wrapper's output. See kalman_filter.py
+        # for full rationale.
+        try:
+            import numpy as _np_p4s8
+            _filt_cov = getattr(fit, "filtered_state_cov", None)
+            _pred_cov = getattr(fit, "predicted_state_cov", None)
+            _smooth_cov = getattr(fit, "smoothed_state_cov", None)
+            audit["filtered_state_cov"] = (
+                _np_p4s8.asarray(_filt_cov, dtype=float).tolist()
+                if _filt_cov is not None else None
+            )
+            audit["predicted_state_cov"] = (
+                _np_p4s8.asarray(_pred_cov, dtype=float).tolist()
+                if _pred_cov is not None else None
+            )
+            audit["smoothed_state_cov"] = (
+                _np_p4s8.asarray(_smooth_cov, dtype=float).tolist()
+                if _smooth_cov is not None else None
+            )
+        except Exception:
+            audit["filtered_state_cov"] = None
+            audit["predicted_state_cov"] = None
+            audit["smoothed_state_cov"] = None
+
         # --- Interpretation ---
         try:
             from interpretation import build_interpretation  # type: ignore
