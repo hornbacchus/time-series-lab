@@ -60,7 +60,14 @@ jobs:
               "POT", "rugarch", "dlm", "KFAS", "quantreg", "MARSS",
               "depmixS4", "MSwM", "tsDyn",
               # Phase 3.5 Session 1 additions:
-              "robustbase", "lmtest", "tempdisagg", "forecastHybrid"),
+              "robustbase", "lmtest", "tempdisagg", "forecastHybrid",
+              # Phase 4 Session 5 (BYF #1 R BVAR constant-vol
+              # Pattern A.2 audit; closes BYF v1.2.0 candidate #1).
+              # Surface to MANIFEST.toml + this install line per
+              # P-1 §8.5 (Phase 4 S1) install-matrix gate. R BVAR
+              # = Kuschnig & Vashold 2021, JSS — distinct from
+              # Krueger 2018 bvars (which is unavailable on R 4.5.3).
+              "BVAR"),
             repos = "https://cloud.r-project.org"
           )
 
@@ -162,7 +169,13 @@ jobs:
               "depmixS4", "MSwM", "tsDyn",
               "robustbase", "lmtest", "tempdisagg", "forecastHybrid",
               # Phase 3.5 Session 6: X-13 binary support on Linux
-              "x13binary", "seasonal"),
+              "x13binary", "seasonal",
+              # Phase 4 Session 5 (BYF #1 R BVAR constant-vol
+              # Pattern A.2). Mirrored from Windows install line
+              # per P-1 §8.5 install-matrix gate (Phase 3.5 S1
+              # Item 4 protocol: slow-tier install must mirror
+              # fast-tier across both Windows + Linux jobs).
+              "BVAR"),
             repos = "https://cloud.r-project.org"
           )
 
