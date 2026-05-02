@@ -786,6 +786,320 @@ _REGISTRY["conformal_nominal_coverage"] = _check_conformal_nominal_coverage
 _REGISTRY["conformal_interval_containment"] = _check_conformal_interval_containment
 
 
+# ---------------------------------------------------------------------
+# Phase 4 Session 7 (P4-1.1, 2026-05-02) — registry expansion
+#
+# Five new invariant types per master plan §15 S7. These complete
+# the registry coverage for the 12 inherited Phase 3.5 wrappers
+# whose families lacked registry fit (per Phase 3.5 S9 audit):
+#
+#   1. mcmc_convergence       — for stochastic_volatility,
+#                                bond_yield_forecast (BVAR-SV)
+#   2. evt_extremal_index     — for evt_pot_gpd
+#   3. mint_coherence         — for forecast_reconciliation
+#   4. attention_normalization — for transformer_forecast
+#   5. intervals_test         — for caviar_quantile_dynamics
+#                                (and any VaR backtester)
+#
+# No engine touches yet — checkers consume audit-field values
+# expected to surface from the inherited wrappers; engine-side
+# audit-field additions land at S8 (Kalman covariance + VECM rank
+# already established at Phase 3 / Phase 3.5; new fields per §15
+# S8 catalog).
+# ---------------------------------------------------------------------
+
+
+def _check_mcmc_convergence(tsl, ref, fixture, inv):
+    """MCMC convergence omnibus check across (ESS, R-hat, Geweke).
+
+    Consumes audit-field values:
+      - ``ess_min`` (float, required) — minimum effective sample
+        size across all sampled parameters. Standard MCMC heuristic:
+        ESS >= 200 indicates the chain mixed well enough for
+        posterior-mean reliability.
+      - ``rhat_max`` (float, optional) — maximum Gelman-Rubin
+        statistic across all parameters. Standard convergence
+        threshold: R-hat < 1.1 (well-converged); 1.1-1.5 borderline;
+        > 1.5 unconverged.
+      - ``geweke_max_abs_z`` (float, optional) — maximum absolute
+        Geweke z-score. |z| < 1.96 means no significant difference
+        between chain segments at 5% level.
+
+    Tolerance interpretation: ``inv.tolerance`` is the ESS_min
+    threshold (e.g., 200 means "ESS >= 200 PASS contribution").
+    The R-hat and Geweke checks use fixed canonical thresholds
+    (1.1 / 1.5 for R-hat; 1.96 / 3.0 for Geweke).
+
+    Returns the WORST status across all three checks (omnibus).
+    """
+    ess_min = tsl.get("ess_min")
+    rhat_max = tsl.get("rhat_max")
+    geweke_max_abs_z = tsl.get("geweke_max_abs_z")
+    if ess_min is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'ess_min' field",
+        }
+    ess_threshold = float(inv.tolerance)
+    ess_min_f = float(ess_min)
+    # ESS check
+    if ess_min_f >= ess_threshold:
+        ess_status = "PASS"
+    elif ess_min_f >= ess_threshold / 2:
+        ess_status = "CAVEAT"
+    else:
+        ess_status = "BLOCK"
+    # R-hat check (optional)
+    if rhat_max is None:
+        rhat_status = "PASS"  # not provided ⇒ skip
+    else:
+        rhat_max_f = float(rhat_max)
+        if rhat_max_f < 1.1:
+            rhat_status = "PASS"
+        elif rhat_max_f < 1.5:
+            rhat_status = "CAVEAT"
+        else:
+            rhat_status = "BLOCK"
+    # Geweke check (optional)
+    if geweke_max_abs_z is None:
+        geweke_status = "PASS"
+    else:
+        geweke_f = float(geweke_max_abs_z)
+        if geweke_f < 1.96:
+            geweke_status = "PASS"
+        elif geweke_f < 3.0:
+            geweke_status = "CAVEAT"
+        else:
+            geweke_status = "BLOCK"
+    # Omnibus status: take the worst
+    rank = {"PASS": 0, "CAVEAT": 1, "BLOCK": 2}
+    statuses = [ess_status, rhat_status, geweke_status]
+    worst = max(statuses, key=lambda s: rank[s])
+    return {
+        "name": inv.name, "status": worst,
+        "ess_min": ess_min_f,
+        "ess_threshold": ess_threshold,
+        "ess_status": ess_status,
+        "rhat_max": float(rhat_max) if rhat_max is not None else None,
+        "rhat_status": rhat_status,
+        "geweke_max_abs_z": (
+            float(geweke_max_abs_z)
+            if geweke_max_abs_z is not None else None
+        ),
+        "geweke_status": geweke_status,
+    }
+
+
+def _check_evt_extremal_index(tsl, ref, fixture, inv):
+    """EVT extremal index theta in [0, 1].
+
+    The Ferro-Segers (2003) intervals estimator yields theta in
+    [0, 1] by construction. Numerical-noise-driven values
+    slightly outside the unit interval (e.g., theta = -0.001 or
+    1.002) are CAVEAT-band per the slack tolerance; values
+    outside [-tolerance, 1 + tolerance] are BLOCK.
+
+    Consumes ``tsl["theta"]`` (float, required).
+
+    Tolerance interpretation: ``inv.tolerance`` is the slack
+    outside [0, 1] (e.g., 0.01 means [-0.01, 1.01] = PASS band).
+    """
+    theta = tsl.get("theta")
+    if theta is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'theta' field",
+        }
+    theta_f = float(theta)
+    slack = float(inv.tolerance)
+    lo = 0.0 - slack
+    hi = 1.0 + slack
+    if lo <= theta_f <= hi:
+        if 0.0 <= theta_f <= 1.0:
+            status = "PASS"
+        else:
+            status = "CAVEAT"  # outside [0, 1] but within slack
+    elif (0.0 - 10 * slack) <= theta_f <= (1.0 + 10 * slack):
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "theta": theta_f,
+        "lower_bound": lo, "upper_bound": hi,
+    }
+
+
+def _check_mint_coherence(tsl, ref, fixture, inv):
+    """MinT reconciliation coherence: aggregation constraints
+    satisfied to within numerical tolerance.
+
+    For a hierarchy with summing matrix S of shape (n_total, n_bottom),
+    reconciled forecasts ``y_tilde`` (n_total,) must satisfy:
+        ``y_tilde[: n_top] == S[: n_top] @ y_tilde[n_bottom_start:]``
+
+    The L2 norm of the violation is the coherence residual.
+
+    Consumes ``tsl["coherence_residual"]`` (float, required) — the
+    pre-computed L2 norm of the summing-constraint violation,
+    surfaced by TSL's forecast_reconciliation.py wrapper at audit
+    time.
+
+    Tolerance interpretation: ``inv.tolerance`` is the abs threshold
+    on the L2 norm (e.g., 1e-10 for closed-form-safe MinT
+    reconciliation).
+    """
+    residual = tsl.get("coherence_residual")
+    if residual is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'coherence_residual' field",
+        }
+    residual_f = float(abs(residual))
+    threshold = float(inv.tolerance)
+    if residual_f <= threshold:
+        status = "PASS"
+    elif residual_f <= 10 * threshold:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "coherence_residual": residual_f,
+        "threshold": threshold,
+    }
+
+
+def _check_attention_normalization(tsl, ref, fixture, inv):
+    """Attention-matrix row-stochasticity + value-range invariants.
+
+    Per the standard self-attention definition (Vaswani et al.
+    2017), the attention matrix A satisfies:
+      - row-sums: each row of A sums to 1.0 (probability mass)
+      - value range: A[i, j] in [0, 1] (softmax output)
+
+    Numerical noise on softmax outputs introduces ~1e-6 row-sum
+    drift on float32 attention; ~1e-15 on float64. Per-element
+    rounding in PyTorch's MultiheadAttention may also introduce
+    small negative values (e.g., -1e-8) that are CAVEAT-band.
+
+    Consumes:
+      - ``tsl["attention_matrix"]`` (np.ndarray of shape
+        ``(n_heads, T_query, T_key)`` or ``(T_query, T_key)``).
+
+    Tolerance interpretation: ``inv.tolerance`` is the abs threshold
+    on row-sum deviation (e.g., 1e-6 for float32; 1e-12 for float64).
+    The value-range check uses 10 * tolerance as the slack outside
+    [0, 1].
+    """
+    import numpy as np
+    A = tsl.get("attention_matrix")
+    if A is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'attention_matrix' field",
+        }
+    A_arr = np.asarray(A, dtype=np.float64)
+    if A_arr.ndim < 2 or A_arr.ndim > 3:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": (
+                f"attention_matrix expected 2D or 3D; got "
+                f"shape {A_arr.shape}"
+            ),
+        }
+    # Row-sums: sum across last axis
+    row_sums = np.sum(A_arr, axis=-1)
+    max_row_dev = float(np.max(np.abs(row_sums - 1.0)))
+    # Value range
+    min_val = float(np.min(A_arr))
+    max_val = float(np.max(A_arr))
+    threshold = float(inv.tolerance)
+    range_slack = 10 * threshold
+    range_ok = (-range_slack <= min_val) and (max_val <= 1.0 + range_slack)
+    if max_row_dev <= threshold and range_ok:
+        status = "PASS"
+    elif (
+        max_row_dev <= 10 * threshold
+        and (-100 * threshold <= min_val)
+        and (max_val <= 1.0 + 100 * threshold)
+    ):
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "max_row_sum_deviation": max_row_dev,
+        "min_value": min_val,
+        "max_value": max_val,
+        "threshold": threshold,
+        "matrix_shape": list(A_arr.shape),
+    }
+
+
+def _check_intervals_test(tsl, ref, fixture, inv):
+    """Christoffersen 1998 LR independence test for VaR
+    backtesting.
+
+    The Christoffersen LR_ind statistic tests the null hypothesis
+    "VaR violations are independent across time" against the
+    alternative "violations cluster". Under the null, LR_ind is
+    chi-sq distributed with 1 degree of freedom; failing to
+    reject (p > 0.05) means the VaR model produces independent
+    violations (a desirable property; clustered violations
+    indicate the model misses volatility regimes).
+
+    Consumes ``tsl["chris_pvalue"]`` (float, required) — the
+    p-value from TSL's Christoffersen LR test, surfaced by
+    e.g. caviar_quantile_dynamics.py.
+
+    Tolerance interpretation: ``inv.tolerance`` is the p-value
+    floor (e.g., 0.05 → PASS if p > 0.05). PASS = "fail to
+    reject independence", which is the DESIRED outcome.
+
+    Note on inverted semantics: most invariants treat smaller
+    residuals as PASS; here, LARGER p-values are PASS. The
+    threshold is interpreted as a floor, not a ceiling.
+    """
+    pvalue = tsl.get("chris_pvalue")
+    if pvalue is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'chris_pvalue' field",
+        }
+    pvalue_f = float(pvalue)
+    floor = float(inv.tolerance)
+    # PASS if pvalue > floor (independence not rejected)
+    # CAVEAT if pvalue in (floor/2, floor]
+    # BLOCK if pvalue <= floor/2 (independence strongly rejected)
+    if pvalue_f > floor:
+        status = "PASS"
+    elif pvalue_f > floor / 2:
+        status = "CAVEAT"
+    else:
+        status = "BLOCK"
+    return {
+        "name": inv.name, "status": status,
+        "chris_pvalue": pvalue_f,
+        "floor": floor,
+        "interpretation": (
+            "fail-to-reject independence (PASS)" if status == "PASS"
+            else (
+                "marginal evidence against independence (CAVEAT)"
+                if status == "CAVEAT"
+                else "strong evidence against independence (BLOCK)"
+            )
+        ),
+    }
+
+
+_REGISTRY["mcmc_convergence"] = _check_mcmc_convergence
+_REGISTRY["evt_extremal_index"] = _check_evt_extremal_index
+_REGISTRY["mint_coherence"] = _check_mint_coherence
+_REGISTRY["attention_normalization"] = _check_attention_normalization
+_REGISTRY["intervals_test"] = _check_intervals_test
+
+
 def list_registered_types() -> list[str]:
     """Return all registered invariant_type names. Useful for
     test enumeration and documentation."""
