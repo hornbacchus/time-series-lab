@@ -997,4 +997,170 @@ This document is **directive**. Changes must:
 
 ---
 
-**End of Parity Standard P-1 v1.1.0.**
+## 13. Per-Session Cycle Discipline
+
+**Phase 4 Session 11a-2 (2026-05-02).** Codifies the per-
+session LOC budget protocol as a binding standard. Replaces
+the master plan §11.13 single-threshold framing with per-
+category accounting, a sharpened bundled-exception rule, and
+explicit retrospective precedent disclosure. The codification
+is the institutional response to Phase 4 Session 9's
+bundled-category cluster exceeding the original 200 LOC
+ceiling without producing semantic defects (verified via
+retrospective Check-in #2 three-probe protocol).
+
+### 13.1 Per-session LOC budget (B)
+
+A "session" is a single conceptual work unit producing a
+single commit. Per-session LOC budget protects against
+cognitive-overhead spillover (a session that ships too much
+code in too many concerns becomes hard to review, hard to
+roll back, and hard to verify end-to-end).
+
+**Default per-session LOC budget:** 200 net LOC across all
+modified files in the commit, EXCLUDING the per-session
+findings doc. The commit body documents which §15.x
+master-plan trigger sourced the work.
+
+**Counted toward the budget:**
+- Engine touches (`engine/techniques/`,
+  `engine/interpretation/`, `engine/tests/`).
+- Audit-side touches (`tools/reference_parity/harness/`,
+  `tools/reference_parity/harness/checks/`).
+- Doc patches to P-1 / P-2 / P-3 / P-4 / C-1.
+- Shared utility / harness infrastructure modifications.
+
+**NOT counted toward the budget:**
+- The per-session findings doc itself
+  (`docs/reference_parity_phase<N>/session_<M>_findings.md`).
+- The per-cycle master plan
+  (`plans/reference_parity_phase<N>_master_plan.md`).
+- Untracked Phase 1 verification artifacts (per Phase 1
+  plan-mode discipline).
+- Auto-generated artifacts (CSV outputs, fixture binaries,
+  CI workflow logs).
+
+### 13.2 Bundled-category exception (B)
+
+A session may exceed the 200 LOC default budget when **ALL
+THREE** of the following sharpened criteria hold (not "most
+of three" — the conjunction is binding):
+
+1. **Architectural inseparability.** Splitting the session
+   would create cross-session dependencies — e.g., Category
+   A's audit-side declaration depends on Category B's
+   engine-side audit-field surface existing. Splitting
+   would force one half of the work to be functionally
+   incomplete (canonical declaration without consumer; OR
+   producer without declaration) until the other half
+   lands.
+2. **Categorical orthogonality.** Each category touches a
+   distinct concern type. Engine touches, audit-side
+   touches, and registry-stub population are distinct
+   concerns; bundling all three is acceptable when each
+   category alone is small. Bundling two engine touches in
+   the same module is NOT orthogonal — those should split.
+3. **Per-category LOC under threshold even when bundled.**
+   Each category's LOC contribution alone is under the 200
+   LOC default. Cumulative LOC exceeds 200 only because
+   multiple categories combined; no single category overruns.
+
+When all three criteria hold, the session may commit-and-
+document with explicit acknowledgment in the commit body:
+"§13.2 bundled-category exception engaged: Cat A (X LOC) +
+Cat B (Y LOC) + Cat C (Z LOC); architectural inseparability
+established (because <reason>); each category under default
+budget; bundled total <total> LOC."
+
+**Why all three are required.** Failing architectural
+inseparability means the work could be split cleanly;
+splitting beats bundling. Failing categorical orthogonality
+means two same-concern touches that should ship as separate
+commits for review clarity. Failing per-category LOC means
+at least one concern is genuinely too large for a single
+session and needs its own scope-tightening or sub-session
+split. Accepting "two of three" would normalize bundling
+when the discipline calls for splitting.
+
+### 13.3 Test-LOC accounting (B)
+
+Tests count separately at a higher threshold. The pattern
+that motivates this: registry-pattern verification tests
+(e.g., `_test_structural_invariants.py`) commonly add 100+
+LOC of test scaffolding to validate a 30-LOC engine touch.
+Counting tests against the engine budget would penalize
+sessions that ship robust test coverage.
+
+**Per-session test-LOC ceiling:** 150 LOC of net test
+additions, in addition to the 200 LOC engine/audit/doc
+budget. Combined ceiling for sessions that hit both budgets:
+**350 LOC total** (200 engine/audit/doc + 150 tests).
+
+Tests counted at the test budget include:
+- `engine/tests/` pytest additions (T14 fixture entries; T15
+  allowlist tokens; new test functions).
+- `tools/reference_parity/harness/_test_*.py` registry /
+  dispatch tests.
+- `tools/reference_parity/harness/checks/<wrapper>_test_*.py`
+  per-wrapper canonical regression scripts (when added
+  alongside engine work).
+
+### 13.4 Spill protocol (B)
+
+If a session is projected to exceed §13.1 (engine / audit /
+doc budget) AND §13.2 bundled exception is NOT met:
+**surface to Chat for clean N+1 sub-session split BEFORE
+committing.**
+
+Naming convention: parent session N becomes `Na`, `Nb`, `Nc`
+(Phase 4 Session 11 → 11a / 11b / 11c precedent). Further
+sub-splits use double-suffix (Phase 4 Session 11a → 11a-1 /
+11a-2 / 11a-3 precedent). Cascading sub-splits (e.g.,
+11a-2 → 11a-2-1 / 11a-2-2) follow the same convention with
+additional suffixes; the discipline has no arbitrary depth
+limit, only the §13.2 criteria check at each split-level.
+Retrospective grounding for these naming conventions is
+documented at §13.5 (forward-reference; lands at the next
+sub-session per the cascading-split protocol).
+
+The spill protocol prefers split-before-commit over commit-
+and-explain. Reasons:
+
+- **Reviewability.** A 200-LOC commit is reviewable as a
+  whole; a 400-LOC commit is reviewable only as a
+  partition.
+- **Rollback granularity.** If one of the bundled
+  categories surfaces a regression, splitting allows
+  selective revert.
+- **CI verification per concern.** Each split sub-session
+  gets its own CI run; failures localize to the concern
+  that introduced them.
+- **Discipline reinforcement.** Treating the threshold as
+  binding (not advisory) prevents threshold drift over
+  cycles.
+
+Spill protocol does NOT apply to:
+- Findings docs (excluded from budget per §13.1).
+- Pre-cycle master plans (excluded).
+- Documentation that is itself the cycle deliverable (the
+  cycle-close v1.x doc-set issuance; covered by the §11.11
+  cumulative ledger trigger separately).
+
+### 13.5 Retrospective examples (forward-reference)
+
+Reserved for retrospective examples grounding §13.1-§13.4
+binding rules in operationally-validated precedent (S9
+spill case study; S11a institutional self-application; S1
+/ S5 self-validating-irony parallel). Lands at Phase 4
+Session 11a-2-2 per the cascading-split naming convention
+in §13.4. The §13 binding-rules block (§13.1-§13.4) is
+operationally complete and self-contained without §13.5;
+the retrospective examples reinforce institutional
+precedent but are not preconditions for applying the
+binding rules.
+
+---
+
+**End of Parity Standard P-1 v1.1.0** (cumulative Phase 4
+amendments toward v1.2.0 issuance documented in §12.1
+change log + §13 NEW above).
