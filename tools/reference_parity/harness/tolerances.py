@@ -2411,6 +2411,34 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "formula trace."
         ),
     },
+    # Phase 4 Session 5 (BYF v1.2.0 candidate #1 closure, 2026-05-02).
+    # Pattern A.2 cross-package: TSL BVAR-SV with force_constant_h=True
+    # vs R BVAR::bvar() (Kuschnig & Vashold 2021, JSS) at hyperprior-
+    # pinned Minnesota config. Posterior-mean B comparison at MCMC band.
+    "p3_byf_bvar_constant_vol": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 5e-3,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 5e-2,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "mcmc Pattern A.2 cross-package. Two independent Bayesian "
+            "VAR samplers (TSL CCM-2019 BVAR-SV with force_constant_h "
+            "constant-vol toggle; R BVAR GLP-2015 hierarchical) on "
+            "identical synthetic VAR(p) data with hyperparameters "
+            "aligned via near-point-mass collapse of R BVAR's "
+            "hyperpriors at TSL's fixed lambda values. The 5e-3 abs / "
+            "5e-2 rel band absorbs methodology-equivalent divergences "
+            "(sampler differences; hyperprior-vs-fixed framework "
+            "differences even after point-mass collapse) while "
+            "surfacing wrapper-level bugs above 5% relative. Per "
+            "master plan §11.9: any divergence outside this band on "
+            "Minnesota-prior coefficient posteriors must escalate to "
+            "Chat for investigation."
+        ),
+    },
 }
 
 

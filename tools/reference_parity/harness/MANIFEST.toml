@@ -116,6 +116,13 @@ lmtest = "0.9.40"
 tempdisagg = "1.2.0"
 dtw = "1.23.2"
 forecastHybrid = "5.1.21"
+# Phase 4 Session 5 (BYF candidate #1, 2026-05-02):
+# R BVAR (Kuschnig & Vashold 2021, JSS) constant-vol cross-check
+# against TSL BVAR-SV with force_constant_h=True. Pattern A.2
+# audit at p3_byf_bvar_constant_vol; mcmc tolerance band
+# (5e-3 abs / 5e-2 rel). Pre-flight verified at S4 (v1.0.5
+# installs cleanly on R 4.5.3).
+BVAR = "1.0.5"
 
 [python]
 version = "3.14"
