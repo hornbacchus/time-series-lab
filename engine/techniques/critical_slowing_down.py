@@ -44,6 +44,26 @@ from techniques.base import (
 
 # Preset configuration: rolling-window/lookback fractions + surrogate
 # count. Defaults applied when ctx.params doesn't override.
+#
+# Phase 4 Session 3 (P4-3 pathway b, 2026-05-01) — auto-cap by series
+# length. The preset ``n_surrogates`` value is the UPPER BOUND on the
+# effective surrogate count when the user does not explicitly override.
+# When defaulting, the wrapper computes::
+#
+#     n_surrogates_effective = max(MIN_SURROGATES_FLOOR,
+#                                  min(preset_default, T // 10))
+#
+# where ``MIN_SURROGATES_FLOOR`` (=100) is the methodological floor for
+# stable empirical p-value estimation. The cap protects against the
+# Phase 3.5 Session 8 OOM-blow-up case (T10Y2Y at T=2501 with
+# ``n_surrogates=1000`` produced an ~11.7 GiB complex128 allocation in
+# the surrogate-rolling-indicator vectorisation). Empirical workaround
+# at S8 used n_surrogates=100; the auto-cap yields between 100 and the
+# preset default, scaling smoothly with T.
+#
+# Explicit user-supplied ``n_surrogates`` is NOT capped — users typing
+# the value have implicitly opted into managing their own memory
+# constraints.
 _PRESET_CONFIG = {
     "Fast": {
         "window_fraction": 0.5,
@@ -64,6 +84,11 @@ _PRESET_CONFIG = {
         "default_compute_pvalues": True,
     },
 }
+
+# Phase 4 S3 (P4-3): methodological floor on n_surrogates for stable
+# empirical p-value estimation. The auto-cap formula never goes below
+# this regardless of T.
+_MIN_SURROGATES_FLOOR = 100
 
 # State classification thresholds (composite z-score sigma)
 _THRESHOLD_ELEVATED = 1.0
@@ -91,6 +116,9 @@ def _none_audit_fields() -> dict[str, Any]:
         "kendall_lookback": None,
         "compute_pvalues": None,
         "n_surrogates": None,
+        # Phase 4 S3 (P4-3): transparency on auto-cap behaviour.
+        "n_surrogates_default_per_preset": None,
+        "n_surrogates_auto_capped": None,
         "series_length": None,
         "tail_skewness": None,
         "tail_kurtosis": None,
@@ -320,9 +348,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
     compute_pvalues = bool(
         ctx.get_param("compute_pvalues", cfg["default_compute_pvalues"])
     )
-    n_surrogates = int(
-        ctx.get_param("n_surrogates", cfg["n_surrogates"])
-    )
+    # Phase 4 S3 (P4-3 pathway b, 2026-05-01) — auto-cap n_surrogates
+    # by series length when defaulting from preset config. Closes the
+    # Phase 3.5 S8 OOM-blow-up on long fixtures (T10Y2Y T=2501 with
+    # n_surrogates=1000 produced an ~11.7 GiB complex128 allocation).
+    # Cap formula: effective = max(MIN_FLOOR, min(preset_default, T//10)).
+    # User-supplied values bypass the cap (explicit user opt-in to
+    # managing their own memory constraints).
+    n_surrogates_user = ctx.get_param("n_surrogates")
+    n_surrogates_default_per_preset = int(cfg["n_surrogates"])
+    if n_surrogates_user is not None:
+        n_surrogates = int(n_surrogates_user)
+        n_surrogates_auto_capped = False
+    else:
+        n_surrogates_capped = max(
+            _MIN_SURROGATES_FLOOR,
+            min(n_surrogates_default_per_preset, T // 10),
+        )
+        n_surrogates_auto_capped = (
+            n_surrogates_capped < n_surrogates_default_per_preset
+        )
+        n_surrogates = n_surrogates_capped
     composite_method = str(
         ctx.get_param("composite_method", "equal_weight_zscore")
     )
@@ -503,6 +549,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
         "kendall_lookback": int(kendall_lookback),
         "compute_pvalues": bool(compute_pvalues),
         "n_surrogates": (int(n_surrogates) if compute_pvalues else None),
+        # Phase 4 S3 (P4-3): auto-cap transparency. The default-per-
+        # preset is what the Balanced/Fast/Thorough preset would
+        # produce ABSENT the cap; n_surrogates_auto_capped indicates
+        # whether the cap fired (True) or not (False). Both fields
+        # are None when n_surrogates is user-supplied (no cap then)
+        # OR when compute_pvalues is False (no surrogates path
+        # exercised).
+        "n_surrogates_default_per_preset": (
+            int(n_surrogates_default_per_preset) if compute_pvalues else None
+        ),
+        "n_surrogates_auto_capped": (
+            bool(n_surrogates_auto_capped) if compute_pvalues else None
+        ),
         "series_length": int(T),
     }
 

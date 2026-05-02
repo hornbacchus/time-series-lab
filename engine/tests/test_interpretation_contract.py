@@ -1938,11 +1938,16 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "tail_skewness": None,
         "tail_kurtosis": None,
         "post_transition_indicated": None,
-        # Methodology (5)
+        # Methodology (5+2)
         "rolling_window": None,
         "kendall_lookback": None,
         "compute_pvalues": None,
         "n_surrogates": None,
+        # Phase 4 S3 (P4-3 pathway b) — auto-cap transparency.
+        # Default to None on the insufficient-data / non-MCMC path;
+        # spec null-guards via .get().
+        "n_surrogates_default_per_preset": None,
+        "n_surrogates_auto_capped": None,
         "series_length": None,
         # Rolling-indicator series (6)
         "rolling_ar1_series": None,
@@ -2248,6 +2253,13 @@ class TestT15NoProgrammaticTokenLeaks(unittest.TestCase):
         # indicator names, EWS state values, surrogate-method
         # nouns, audit-field names cited in prose.
         "first_diff", "compute_pvalues", "n_surrogates",
+        # (c17b) Phase 4 S3 (P4-3 pathway b) — auto-cap audit
+        # fields. The chained-underscore tokens are strictly
+        # already disqualified by the T15 adjacent-underscore
+        # lookaround, but allowlisting keeps the intent explicit
+        # against future regex tightening.
+        "n_surrogates_default_per_preset",
+        "n_surrogates_auto_capped",
         "kendall_lookback", "rolling_window",
         "post_transition_indicated", "ews_composite_score",
         "ews_state", "tau_ar1", "tau_variance",
