@@ -530,7 +530,147 @@ patterns, missing values, fat tails).
 
 ---
 
-## 6. References
+## 6. Wrapper Structural Patterns
+
+Phase 4 Session 10 (2026-05-01). Three patterns surfaced
+during the Bond Yield Forecast (BYF) integration cycle
+(Sessions 2-3, 2026-04-30 to 2026-05-01) that are now
+codified as binding C-1 standards. Each addresses a failure
+class invisible to local-only verification but reproducible
+in long-lived engine_worker processes or cross-platform CI.
+
+### 6.1 Module-vs-package layout (B)
+
+Origin: BYF Session 2.
+
+**Failure class.** Python's import resolver picks the
+package over the file at the same parent directory level
+when both `<id>.py` and `<id>/` exist. The shadowing is
+silent at import time but manifests downstream as
+`AttributeError: module 'techniques.<id>' has no attribute
+'run'` — diagnosable but easy to misread as a missing-export
+issue when the root cause is a layout collision.
+
+**Required pattern.**
+
+- **Single-file wrappers:** place at
+  `engine/techniques/<id>.py`. No subpackage directory at
+  `engine/techniques/<id>/` may exist.
+- **Multi-module wrappers (subpackage):** place at
+  `engine/techniques/<id>/__init__.py` plus
+  `_dispatch.py` (or equivalent dispatch module). The
+  `__init__.py` MUST re-export the dispatch entry point:
+  `from ._dispatch import run`. No `engine/techniques/<id>.py`
+  file may exist alongside the subpackage.
+- **NEVER co-locate** `<id>.py` and `<id>/` at the same
+  level. The pre-merge checklist must verify this.
+
+**Retrospective.** BYF S2 initially placed dispatch logic
+at `engine/techniques/bond_yield_forecast.py` adjacent to
+the `engine/techniques/bond_yield_forecast/` subpackage.
+Symptom: the dispatch's `run()` function was unreachable
+from `techniques.bond_yield_forecast` because Python
+resolved the package, not the file. Fix: moved logic to
+`_dispatch.py` inside the subpackage with `__init__.py`
+re-export. See
+`docs/bond_yield_forecast_integration/session_2_findings.md`.
+
+### 6.2 Bundled-workbook input wrappers (B)
+
+Origin: BYF Session 3.
+
+**Failure class.** Wrappers that read bundled `.xlsx`
+input via opinionated sheet-naming schemes can collide
+with other workbook-driven wrappers shipped in the same
+template, OR can fail to read user-provided workbooks
+that retain a different (e.g., legacy or external-tool)
+sheet-naming scheme.
+
+**Required pattern.** For any wrapper that consumes a
+bundled `.xlsx` workbook input:
+
+- **Prefix sheet names** with the wrapper's catalog ID
+  (e.g., `BondYield_Macro` rather than just `Macro`).
+  This prevents cross-wrapper sheet-name collisions when
+  the TSL sample template ships with multiple
+  workbook-driven wrappers.
+- **Implement an auto-detection helper** paralleling
+  BYF's `_resolve_workbook_sheet_config()`. The helper
+  uses `openpyxl` (or equivalent) to list the workbook's
+  sheet names and matches them against both the prefixed
+  scheme AND any legacy / external-tool scheme the
+  wrapper accepts. Falls back gracefully with a clear
+  error if neither matches.
+- **Keep the helper local** to the wrapper module or
+  subpackage. Do not extract prematurely to a shared
+  utility — the inventory of bundled-workbook wrappers
+  is small (~3 expected per master-plan inventory) and
+  premature extraction couples unrelated wrappers.
+
+**Retrospective.** BYF S3 surfaced this when the migrated
+subpackage retained the standalone repo's default config
+assuming `Macro` / `Yields` / `Projections` sheet names
+while the new TSL-shipped sample template used the
+prefixed `BondYield_*` scheme to coexist with other
+workbook-driven wrappers. Fix landed via
+`_resolve_workbook_sheet_config`. See
+`docs/bond_yield_forecast_integration/session_3_findings.md`.
+
+### 6.3 Layered validation: request-local config copy (B)
+
+Origin: BYF Session 3 (re-entrancy regression).
+
+**Failure class.** Pre-flight validation that mutates the
+wrapper-level config dict (or any other persistent module
+state) creates a re-entrancy hazard in long-lived
+`engine_worker` processes. Second-and-later invocations
+in the same process see stale validated-config state and
+either short-circuit validation (returning success
+without re-checking) or crash on type-mismatch when the
+new request differs in shape from the prior request.
+
+**Required pattern.**
+
+- **Pre-flight validation operates on a request-local
+  config copy**, never on persistent module state.
+  Materialize the copy via `dict(config)` shallow copy
+  (or `copy.deepcopy()` if the config nests mutable
+  containers) at the top of the validation function,
+  then mutate only the copy.
+- **Validation outputs flow forward via return value**,
+  not side-effect on outer-scope mutable structures.
+  The outer dispatcher passes the validated copy to
+  downstream layers explicitly.
+- **Subsequent layers** (catalog-bound type coercion,
+  range validation, semantic validation) each receive
+  their own working copy to avoid downstream-mutates-
+  upstream coupling. A downstream layer that adds
+  derived fields (e.g., `_resolved_sheet_names`) must
+  not write those onto an upstream-shared dict.
+- **The pattern is testable** via a re-entrancy
+  regression test: invoke the dispatcher twice in the
+  same process with two materially-different valid
+  configs; assert both succeed and produce
+  configuration-distinct outputs. BYF S3 added one such
+  test in `engine/techniques/bond_yield_forecast/tests/
+  test_dispatch.py`; new wrappers exposing pre-flight
+  validation surfaces SHOULD include a parallel
+  regression test.
+
+**Retrospective.** BYF S3 surfaced this when the
+dispatch's pre-flight validation set state on the
+wrapper-level config dict that persisted across calls.
+Fix landed by switching to per-request `dict(config)`
+shallow copy. See
+`docs/bond_yield_forecast_integration/session_3_findings.md`.
+The cross-reference companion to this section is P-1
+§8.5 install-matrix gate (parity-dimension); both
+disciplines protect against failure classes invisible
+to local-only testing.
+
+---
+
+## 7. References
 
 - [Validation Patterns Reference](validation_patterns_reference.md):
   diagnostic and fix patterns by failure mode
@@ -540,10 +680,12 @@ patterns, missing values, fat tails).
   status (master tracker)
 - `docs/calibration_audit/<wrapper>_findings_<date>.md`:
   per-session findings (28 sessions in CAI Phase 2)
+- `docs/bond_yield_forecast_integration/session_2_findings.md`
+  and `session_3_findings.md`: origin of §6 patterns
 
 ---
 
-## 7. Standard amendment process
+## 8. Standard amendment process
 
 Amendments to this standard are made via PR. The standard
 is binding as of the date of merge. Existing wrappers
@@ -552,5 +694,16 @@ in — they remain in their current state until the next
 audit cycle catches them, OR until a PR modifies them and
 the new code must conform.
 
-**Last revised:** 2026-04-28 (Session 29, post-CAI Phase 2
-cycle closure).
+**Version history:**
+
+- **v1.0.0** (2026-04-28, Session 29): post-CAI Phase 2
+  cycle closure baseline.
+- **v1.1.0** (2026-05-01, Phase 4 Session 1): added §4.6
+  dependency-addition checklist (B-14 four-surface install
+  matrix gate).
+- **v2.0.0** (2026-05-01, Phase 4 Session 10): added §6
+  Wrapper Structural Patterns (module-vs-package layout,
+  bundled-workbook input, layered validation). Major
+  version bump reflects new top-level section group.
+
+**Last revised:** 2026-05-01 (Phase 4 Session 10).
