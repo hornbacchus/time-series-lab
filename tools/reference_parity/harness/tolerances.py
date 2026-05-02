@@ -2411,6 +2411,38 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "formula trace."
         ),
     },
+    # Phase 4 Session 6 (BYF v1.2.0 candidate #3 closure, 2026-05-02).
+    # Pattern A.2 partial-component: TSL BVAR-SV per-equation log-
+    # volatility posterior vs R stochvol::svsample on OLS-VAR
+    # residuals. Per-parameter tolerance bands per BYF Phase 1 2b
+    # audit precedent. Note: this ladder uses per-parameter rel
+    # tolerances (mu_rel_tol / phi_rel_tol) rather than the standard
+    # abs/rel pair; the comparison harness consumes them via
+    # ladder["primary"]["mu_rel_tol"] etc.
+    "p3_byf_stochvol_partial": {
+        "type": "tiered_per_parameter",
+        "primary": {
+            "mu_rel_tol": 5e-2,
+            "phi_rel_tol": 1e-1,
+            # sigma is record-only per BYF Phase 1 2b precedent
+            # (prior-divergence-driven; TSL Minnesota-prior-derived
+            # omega prior vs stochvol IG-prior sigma)
+        },
+        "justification": (
+            "mcmc Pattern A.2 partial-component cross-package. TSL "
+            "BVAR-SV's per-equation log-volatility posterior (mu, "
+            "phi, omega) vs R stochvol::svsample's per-series SV "
+            "posterior on OLS-VAR residuals. The per-parameter "
+            "tolerance band (5% mu / 10% phi / record-only sigma) "
+            "is the canonical BYF Phase 1 2b audit precedent; "
+            "absorbs methodology-equivalent divergences (residual-"
+            "source asymmetry + sampler-framework gaps + prior-"
+            "derivation gaps for sigma). Per master plan §11.9 + "
+            "S6 trigger: any tolerance-band exceedance reclassifies "
+            "as DOCUMENTED-DIVERGENCE (parallel to S5 disposition); "
+            "the audit script's compare() handles this wiring."
+        ),
+    },
     # Phase 4 Session 5 (BYF v1.2.0 candidate #1 closure, 2026-05-02).
     # Pattern A.2 cross-package: TSL BVAR-SV with force_constant_h=True
     # vs R BVAR::bvar() (Kuschnig & Vashold 2021, JSS) at hyperprior-
