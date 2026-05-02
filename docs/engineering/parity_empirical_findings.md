@@ -382,6 +382,60 @@ construction.
 
 ---
 
+#### 3.4.1 — O-1 banking: near-unit-root VAR companion margin observation (Phase 4 Session 11a)
+
+**Origin:** BYF Mod-2 audit extension (commit `34-mat fixture`,
+2026-04-30) surfaced a near-unit-root VAR companion eigenvalue
+on the 34-maturity yield-curve fixture: `max|λ_companion| =
+0.9988`.
+
+**Why it matters:** the original Pattern F threshold for VAR
+companion-form stability was `<0.999` for PASS / `<1.0` for
+strict-instability BLOCK. The 34-maturity fixture's 0.9988
+**barely** PASSed the original 0.999 threshold — a 1.2e-3
+margin, well within the noise band of fixture re-rolls or
+prior-tightening drift.
+
+**Banked at BYF-Mod-2 close** as an early-warning observation:
+the existing threshold provided no operational headroom
+between PASS and BLOCK on near-unit-root macro fixtures.
+Future fixture additions in the same regime would force
+either (a) PASS-but-precarious verdicts that mask real
+fragility, or (b) ad-hoc threshold tightening at audit-time.
+
+**Corrective action consumed at Phase 4 Session 9** (commit
+`ff403dd`): O-2 Pattern F threshold tightening from
+`<0.999 → <0.9995` per master plan O-2 spec. Net effect on
+the BYF audits:
+
+| Fixture | max\|λ_companion\| | Pre-S9 verdict (threshold 0.999) | Post-S9 verdict (threshold 0.9995) | Margin to threshold |
+|---|---|---|---|---|
+| BYF 10-maturity | 0.9477 | PASS | PASS | huge (~5e-2) |
+| BYF 34-maturity | 0.9988 | PASS (barely) | **PASS** | **7e-4** |
+
+**Outcome:** the 34-mat fixture's 7e-4 margin matches the
+O-2 acceptance criterion; strict-instability BLOCK
+threshold (max\|λ\| ≥ 1.0) preserved separately. Future
+fixture drift past 0.9995 triggers early-warning BLOCK as
+designed.
+
+**Pattern as institutional precedent:** banked observations
+that flag near-threshold operational margins should be
+audited at next-cycle close; the corrective action (here:
+threshold tightening to add explicit early-warning band) is
+preferable to ad-hoc relaxation of the strict-instability
+boundary. Future audit cycles should adopt the same
+two-band pattern (`<PASS_threshold` for PASS;
+`<BLOCK_threshold` for early-warning BLOCK; `≥
+BLOCK_threshold` for strict BLOCK) when a single-threshold
+PASS/BLOCK boundary leaves no operational headroom.
+
+**Cross-references:**
+- BYF Mod-2 findings doc: `docs/bond_yield_forecast_integration/byf_mod2_findings.md` (O-1 origin).
+- Phase 4 Session 9 findings doc: `docs/reference_parity_phase4/session_9_findings.md` (O-2 corrective action).
+
+---
+
 ## 4. Surprises and reversals
 
 Five Phase 3 surprises warrant explicit narrative.

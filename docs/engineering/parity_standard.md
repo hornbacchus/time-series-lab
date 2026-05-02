@@ -438,6 +438,35 @@ Target runtime under 10 minutes total. Includes:
 - Rolling-origin CV, bootstrap, conformal (deterministic
   given seed)
 
+**Clarification (Phase 4 Session 11a):** §6.1 / §6.2 tier
+classification refers to **per-check audit runtime** (the
+wall-clock cost of running a single parity check end-to-end:
+fixture load → TSL invoke → reference invoke → compare
+→ verdict emit). It does **not** refer to:
+
+- The engineering work runtime needed to author / extend a
+  check (covered by master plan §11.13 per-session LOC
+  budget protocol; see [§13](#13-per-session-cycle-discipline)).
+- The C-1 §1.2 "Standard tier" framework — which is about
+  binding-vs-aspirational requirement classification, NOT
+  runtime classification.
+
+Cross-document precedent: C-1 §1.2 codifies a parallel
+tier framework (Binding `B` vs Aspirational `A`) for engine-
+side wrapper-development requirements. Both are "tier"
+frameworks, but:
+
+| Doc | Section | Axis | Values |
+|---|---|---|---|
+| P-1 | §6.1/§6.2 | per-check audit runtime | fast / slow |
+| C-1 | §1.2 | per-requirement binding | B / A |
+| P-1 | §13 (new) | per-session LOC budget | within / spill |
+
+When a future audit-engineering session needs to discuss
+"tier", explicit qualification (`runtime tier`,
+`binding tier`, `LOC-budget tier`) prevents cross-axis
+confusion.
+
 ### 6.2 Slow tier
 
 Target runtime under 30 minutes total. Includes:

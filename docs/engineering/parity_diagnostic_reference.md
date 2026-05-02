@@ -828,6 +828,62 @@ builds of the same source code.
 
 ---
 
+#### B.6.4 — R `bvars` package install fragility on R 4.5.3 (Phase 4 Session 11a)
+
+**Source:** R `bvars` package (Bayesian VAR with stochastic
+volatility — would have been a candidate Pattern A.2
+secondary reference for TSL's BVAR-SV wrapper).
+
+**Quirk:** the `bvars` CRAN package failed to install on
+R 4.5.3 across multiple Phase 3 + Phase 4 install attempts
+on this development machine and on CI runners. Specifically,
+`install.packages("bvars")` returns successfully but the
+subsequent `library(bvars)` raises a namespace-load error
+indicating a compiled-binary / system-library mismatch
+incompatible with R 4.5.x ABI changes. The package's CRAN
+maintenance has been intermittent; build artifacts for
+recent R versions are not reliably available.
+
+**Operational impact:** at Phase 4 Session 5, the BVAR-SV
+constant-volatility cross-check (BYF candidate #1) needed
+a Pattern A.2 secondary reference. `bvars` was the natural
+candidate (BVAR with shared methodological lineage to TSL's
+CCM-2019 sampler). With `bvars` unavailable, the audit
+fell back to R `BVAR::bvar()` (Kuschnig & Vashold 2021,
+JSS) which has a different prior parameterization and
+therefore produces methodologically-divergent posterior
+draws. This contributed to the Phase 4 S5 audit landing as
+PASS-A.2 with **DOCUMENTED-DIVERGENCE** outcome rather
+than a clean bit-exact comparison.
+
+**Recommended fallback hierarchy** for future BVAR-family
+audits needing a Pattern A.2 secondary reference:
+
+1. R `bvars` if it becomes available for the current R
+   release (check via `available.packages("bvars")` in
+   R; verify subsequent `library()` succeeds).
+2. R `BVAR` (Kuschnig & Vashold 2021) — note that prior
+   parameterization differs from CCM-2019 conventions;
+   plan for DOCUMENTED-DIVERGENCE outcome.
+3. R `BMR::bvarm()` (Bayesian Macroeconometrics in R) —
+   alternative; not yet evaluated for Phase 4 BVAR-SV
+   parity.
+4. Tier-B: paper-formula reimplementation per Banbura,
+   Giannone, Reichlin 2010 specification (~250 LOC).
+
+**Pattern:** R-package availability is a real-world
+constraint on Pattern A.2 secondary-reference selection.
+The audit-design phase must verify package install AND
+`library()` load on the target R version BEFORE committing
+to a specific reference. A reference that's "in CRAN" is
+not the same as a reference that "loads on R 4.5.3 today".
+
+**Cross-references:**
+- [P-3 §3.4 Decision 3 forward-provisioning interval](parity_empirical_findings.md#34--pattern-a1-production-locked-across-4-dimensions-phase-35-v110) — the BYF Mod-2 + Phase 4 S5 verification interval surfaced this same fragility class.
+- Phase 4 Session 5 findings doc: `docs/reference_parity_phase4/session_5_findings.md`.
+
+---
+
 ### B.D — Platform-binary integration sub-pattern (Phase 3.5 v1.1.0 sub-pattern)
 
 **Status:** New sub-pattern formalized at Phase 3.5 Session 11
