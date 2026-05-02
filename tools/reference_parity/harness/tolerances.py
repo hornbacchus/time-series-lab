@@ -2381,6 +2381,36 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "for full audit protocol + verdict."
         ),
     },
+    # Phase 4 Session 4 (BYF v1.2.0 candidate #2 closure, 2026-05-01).
+    # Pattern A.3 self-parity reimpl: Minnesota dummy-observation
+    # construction is closed-form matrix arithmetic over the
+    # hyperparameter set (lambda_1/3/4/sc/io, sigma, y_bar,
+    # persistence). Same configuration must produce element-wise
+    # identical (Y_d, X_d) arrays across implementations; bit-exact
+    # tolerance applies. The reference is a from-scratch reimpl per
+    # Doan-Litterman-Sims 1984 §3 + Sims-Zha 1998 extensions.
+    "p3_byf_minnesota_dummies": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-15,
+            "rel_tol": 1e-15,
+            "block_abs_tol": 1e-12,
+            "block_rel_tol": 1e-12,
+        },
+        "justification": (
+            "closed_form Pattern A.3 self-parity reimpl. Both "
+            "implementations execute the same closed-form arithmetic "
+            "on identical hyperparameter inputs, so bit-exact "
+            "machine-precision agreement is the appropriate verdict "
+            "band. Any divergence above 1e-15 surfaces a wrapper bug "
+            "in the prior construction (Block A coefficients, "
+            "Block B covariance, Block C intercept, Block D "
+            "sum-of-coefficients, Block E initial-observation). "
+            "See tools/reference_parity/harness/checks/"
+            "p3_byf_minnesota_dummies.py for the full per-block "
+            "formula trace."
+        ),
+    },
 }
 
 
