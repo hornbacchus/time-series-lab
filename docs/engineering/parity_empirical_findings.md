@@ -436,6 +436,127 @@ PASS/BLOCK boundary leaves no operational headroom.
 
 ---
 
+#### 3.4.2 — DOCUMENTED-DIVERGENCE forward-provisioning interval (Phase 4 Session 11a-3)
+
+**Origin:** Phase 3.5 Session 1 wired the DOCUMENTED-DIVERGENCE
+verdict path into the runner + CI exit-code policy as part
+of the forward-provisioning discipline (commit predating the
+final cycle close, late 2025 / early 2026). The wiring was
+**forward-provisioned**: no in-tree audit produced a
+DOCUMENTED-DIVERGENCE verdict at the time of wiring. The
+provisioning was made on the basis of "future Pattern A.2
+audits will likely surface methodologically-divergent
+verdicts that are valid PASS-with-disclosure rather than
+BLOCK", documented at the time as P-3 §6.6.
+
+**First runtime exercise:** Phase 4 Session 5 (commit
+`2b54acb`, 2026-05-01) — the BYF candidate #1 Pattern A.2
+audit (R `BVAR::bvar()` constant-volatility cross-check)
+landed as **PASS-A.2 (DOCUMENTED-DIVERGENCE)** when the
+TSL CCM-2019 Gibbs sampler produced posterior-mean draws
+that differed from R `BVAR`'s draws by `max_rel_diff=1.76`
+on the Minnesota-prior coefficient posterior — far outside
+any conventional MCMC tolerance band (5e-3 abs / 5e-2 rel)
+but methodologically expected given the prior
+parameterization differences between CCM-2019 and `BVAR`.
+
+**Forward-provisioning interval:** approximately 6 months
+between wiring (Phase 3.5 S1) and first runtime (Phase 4 S5).
+This is **the longest forward-provisioning interval in TSL
+parity history**. During this interval the DOCUMENTED-
+DIVERGENCE code path existed in the runner + CI exit-code
+policy but was never exercised end-to-end.
+
+**S5 first-runtime exercise validated three wiring layers:**
+
+1. **Harness exit-code mapping** — exit code 4 (DOCUMENTED-
+   DIVERGENCE) → CI green per P-1 §6.4 fired correctly at
+   first encounter. The exit code was not aliased to BLOCK
+   (which would have hung CI red on first organic
+   occurrence) and was not silently swallowed (which would
+   have hidden the verdict from operators).
+2. **Audit-script return shape** — the parity check's
+   verdict assignment + characterization metadata
+   (divergence rationale, max_rel_diff, methodology citation)
+   serialized cleanly into the audit-report format. No
+   schema migration needed at S5; the schema fields existed
+   in the harness output dataclass from S1 wiring.
+3. **P-4 status tracker secondary-verdict-line rendering** —
+   the BYF row in P-4's per-wrapper verdict table accepted
+   the secondary verdict line (PASS-A.1 + PASS-A.2-with-DD)
+   without rendering bug. The two-line-per-row format
+   pre-existed for cycle-close summary rendering; S1 wiring
+   just added DD as a valid secondary verdict.
+
+**Self-validating-irony parallel.** A complementary meta-
+pattern surfaced in the same cycle: Phase 4 Session 1
+codified P-1 §8.5 install-matrix gate; Phase 4 Session 5
+violated the just-codified gate by adding R `BVAR` to
+MANIFEST.toml without also adding it to `parity-slow.yml`
+install lines. The very gate authored at S1 caught the
+gate-author at S5 (CI red on the missing install line;
+correction commit `ed5662c`).
+
+The two patterns are **complementary verification-pattern
+case studies**:
+- DOCUMENTED-DIVERGENCE wiring **stayed correct** over the
+  6-month interval (forward-provisioning paid off).
+- §8.5 install-matrix gate **failed within the same cycle**
+  it was codified (documentation-discipline alone
+  insufficient).
+
+**Pattern as institutional precedent.** Forward-provisioning
+provides a meaningful safety net when carefully scoped
+(verdict-path wiring stayed correct over 6 months;
+production code didn't drift). However, **forward-
+provisioning is NOT a substitute for end-to-end runtime
+exercise**. Two complementary hardening mechanisms:
+
+1. **Test coverage at provisioning time** — a synthetic
+   end-to-end test of the provisioned path (`status="success"
+   with verdict="DOCUMENTED-DIVERGENCE"`) would have
+   exercised the code path during Phase 3.5 instead of
+   waiting for first organic occurrence at Phase 4 S5.
+   Catches subtle wiring rot earlier; complements but
+   does not replace organic first-runtime validation.
+2. **Periodic provisioned-path inventory check** — at each
+   cycle close (Phase 3.5 close, Phase 4 close, etc.),
+   audit which provisioned paths have NOT yet been runtime-
+   exercised; flag for synthetic test addition or for
+   re-evaluation of necessity.
+
+**Forward-looking discipline:** future forward-provisioning
+decisions should anticipate end-to-end exercise within
+**reasonable time (months, not years)**. The 6-month
+DOCUMENTED-DIVERGENCE interval was at the upper edge of
+acceptable; longer intervals risk silent wiring rot.
+Periodic synthetic-test exercise of provisioned paths is
+worth considering as preventive discipline; bank for Phase 5
+cycle-close audit list.
+
+**Forward-provisioning candidates to monitor for analogous
+rot:** any newly-introduced verdict class, exit-code
+mapping, or CI-side gate that ships before its first
+runtime occurrence. Cycle-close audits should specifically
+inventory these.
+
+**Cross-references:**
+- Phase 3.5 Session 1 findings doc:
+  `docs/reference_parity_phase3_5/session_1_findings.md`
+  (DOCUMENTED-DIVERGENCE wiring origin).
+- Phase 4 Session 5 findings doc:
+  `docs/reference_parity_phase4/session_5_findings.md`
+  (first runtime + install-matrix gate self-validating-
+  irony).
+- P-1 §13.5.4 (S1/S5 install-matrix self-validating-irony
+  parallel) — cross-pattern grounding for "documented gates
+  can fail when not exercised end-to-end".
+- B-Phase4-S5-4 banked observation: install-matrix gate
+  operational pre-commit-hook integration (S11b scope —
+  next session class).
+
+---
+
 ## 4. Surprises and reversals
 
 Five Phase 3 surprises warrant explicit narrative.
