@@ -1,0 +1,43 @@
+#!/bin/sh
+# Phase 4 Session 11b — local pre-commit gate for P-1 §8.5
+# install-matrix consistency. Installed via tools/install_hooks.ps1.
+#
+# Triggers only when MANIFEST.toml or workflow files are
+# modified in this commit (most commits skip this check
+# entirely; <100ms when triggered).
+#
+# CI fallback: parity-fast.yml runs the same validator as its
+# first step regardless of whether this local hook fired.
+
+set -e
+
+# Files whose modification triggers the gate.
+TRIGGERS="tools/reference_parity/harness/MANIFEST.toml .github/workflows/parity-fast.yml .github/workflows/parity-slow.yml"
+
+CHANGED=$(git diff --cached --name-only)
+TRIGGER_HIT=0
+for trigger in $TRIGGERS; do
+    if echo "$CHANGED" | grep -q "^${trigger}$"; then
+        TRIGGER_HIT=1
+        break
+    fi
+done
+
+if [ "$TRIGGER_HIT" -eq 0 ]; then
+    exit 0
+fi
+
+# Resolve python: prefer C:/Python314/python.exe (TSL convention);
+# fall back to PATH.
+PY="C:/Python314/python.exe"
+if [ ! -f "$PY" ]; then
+    PY=$(command -v python3 || command -v python)
+fi
+
+if [ -z "$PY" ]; then
+    echo "pre-commit: python interpreter not found; skipping §8.5 gate." >&2
+    exit 0
+fi
+
+echo "pre-commit: validating P-1 §8.5 install-matrix consistency..." >&2
+"$PY" tools/validate_install_matrix.py

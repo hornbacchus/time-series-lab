@@ -22,6 +22,17 @@ jobs:
         with:
           python-version: "3.14"
 
+      - name: Validate install-matrix consistency (P-1 §8.5)
+        # Phase 4 Session 11b: operational enforcement of P-1 §8.5
+        # install-matrix gate. Belt-and-suspenders pattern — local
+        # pre-commit hook catches gaps before commit; this CI step
+        # catches gaps if the local hook missed (or wasn't
+        # installed). Runs BEFORE pip install so a missing entry
+        # fails fast without the slow-but-doomed install attempt.
+        # See B-Phase4-S5-4 banked observation; S5 self-validating-
+        # irony case study (P-1 §13.5.4).
+        run: python tools/validate_install_matrix.py
+
       - name: Install Python deps
         # torch 2.11.0 needed for 3f Transformer attention parity
         # (.pt fixture loading via FixtureLoader._load_pt; added in
