@@ -21,6 +21,28 @@ Use kalman_filter when:
 
 See ``_kalman_common.py`` for shared preset config, param resolution,
 and the MLEModel subclass used on the custom path.
+
+References
+----------
+Kalman 1960 (filter recursions); Harvey 1989 *Forecasting, Structural
+Time Series Models and the Kalman Filter*; Durbin & Koopman 2012
+*Time Series Analysis by State Space Methods* §4 (filtered/smoothed
+covariance ordering). Reference parity check: R `KFAS::KFS` +
+`dlm::dlmFilter` (Phase 1 audit 2a).
+
+Audit fields (added Phase 4 Session 8 P4-1.2)
+---------------------------------------------
+- ``filtered_state_cov``: list of (k, k) per-t one-step posterior
+  covariance P_{t|t}; consumed by Pattern F structural invariant
+  ``kalman_covariance_ordering`` (P-2 §D.1).
+- ``predicted_state_cov``: list of (k, k) per-t predictive covariance
+  P_{t|t-1} = T·P_{t-1|t-1}·T' + R·Q·R'.
+- ``smoothed_state_cov``: list of (k, k) per-t two-sided smoothed
+  covariance P_{t|T}. None on filter-only path; populated when the
+  smoother runs.
+
+The structural invariant verifies P_{t|t-1} ≥ P_{t|t} ≥ P_{t|T}
+(PSD ordering on the diagonal); see P-2 §D.1 for the checker.
 """
 
 import numpy as np

@@ -26,6 +26,23 @@ Use kalman_smoother when:
 
 See ``_kalman_common.py`` for shared preset config, param resolution,
 and the MLEModel subclass used on the custom path.
+
+References
+----------
+Kalman 1960; de Jong 1988 *Kalman smoother*; Durbin & Koopman 2012
+§4.4–§4.5 (RTS smoother + disturbance smoother). Reference parity
+check: R `KFAS::KFS` (Phase 1 audit 2a; same audit covers both
+filter + smoother paths).
+
+Audit fields (added Phase 4 Session 8 P4-1.2)
+---------------------------------------------
+- ``filtered_state_cov`` / ``predicted_state_cov`` /
+  ``smoothed_state_cov``: same shape semantics as kalman_filter.
+  Smoother populates all three; the structural invariant
+  ``kalman_covariance_ordering`` (P-2 §D.1) verifies
+  P_{t|t-1} ≥ P_{t|t} ≥ P_{t|T} on the diagonal — a fundamental
+  PSD-ordering property of the RTS smoother that any
+  numerically-correct implementation must satisfy.
 """
 
 import numpy as np

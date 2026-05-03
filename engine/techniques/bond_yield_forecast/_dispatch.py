@@ -36,6 +36,29 @@ unrelated. The two coexist; this module registers under
 See ``docs/bond_yield_forecast_integration/session_2_findings.md``
 for design rationale and the friction-points §1 pre-flight
 validation layer.
+
+References
+----------
+Carriero-Clark-Marcellino 2019 (CCM-2019; BVAR with stochastic
+volatility — the inner sampler this dispatch wraps); Kim-Shephard-
+Chib 1998 (KSC mixture for SV); Litterman 1986 (Minnesota prior).
+Reference parity: R `BVAR::bvar()` constant-vol Pattern A.2 at
+Phase 4 S5 (BYF #1; PASS-A.2 with DOCUMENTED-DIVERGENCE);
+`stochvol::svsample` partial Pattern A.2 at Phase 4 S6 (BYF #3;
+SV-component-only).
+
+Audit fields (B-Phase4-S8-2 elevation at Phase 4 Session 9)
+-----------------------------------------------------------
+- ``ess_min``: minimum effective sample size across all sampled
+  parameter groups (extracted from ``BVARSVResults.convergence_diagnostics()``
+  DataFrame). Floor for the Pattern F ``mcmc_convergence`` invariant
+  (P-2 §D.1; tolerance 200 ESS).
+- ``rhat_max``: maximum Gelman-Rubin R-hat. None on single-chain
+  Gibbs (CCM-2019 default); the omnibus invariant skips the rhat
+  criterion when None per S7 design.
+- ``geweke_max_abs_z``: maximum absolute Geweke z-score across
+  parameter groups. Diagnoses chain-segment convergence; omnibus
+  contributes to the ``mcmc_convergence`` verdict.
 """
 
 from __future__ import annotations

@@ -18,8 +18,25 @@ regressors implied by det_order ∈ {−1, 0, 1}. Corrected statistics
 are Q_corrected = B * Q_asymptotic. Comparison against statsmodels's
 existing MacKinnon asymptotic critical values is arithmetically
 equivalent to comparing uncorrected statistics against MHM 1999
-response-surface CVs at the decision level. Johansen (2002)
-provides more refined higher-order terms not implemented here.
+response-surface CVs at the decision level.
+
+References
+----------
+Johansen 1988 / 1991 (trace + maximum eigenvalue tests); Reimers 1992
+(small-sample correction); MacKinnon-Haug-Michelis 1999 (response-
+surface CVs); Johansen 2002 (refined higher-order corrections, not
+implemented here). Reference parity check: R `urca::ca.jo` with
+`small_sample=TRUE` (Phase 1 audit 3d).
+
+Audit fields (S8 P4-1.2 alias additions)
+----------------------------------------
+- ``trace_rank`` (legacy name; retained for backward compat).
+- ``determined_rank_trace``: alias of trace_rank per master plan
+  §15 S8 naming convention.
+- ``cointegrating_rank``: alias of trace_rank; matches the registry
+  checker contract (P-2 §D.1 ``vecm_cointegration_rank``). All three
+  hold the same integer value; the multi-name surface bridges naming
+  conventions across consumer code.
 """
 
 import numpy as np

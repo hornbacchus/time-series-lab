@@ -6,6 +6,17 @@ Implements a Bayesian Vector Autoregression using the Minnesota prior
 Estimation via analytical posterior (no MCMC needed).
 
 Implemented with numpy/scipy only (no external Bayesian library).
+
+References
+----------
+Litterman 1986 (Minnesota prior); Doan-Litterman-Sims 1984 (dummy-
+observation reformulation per BYF #2 audit at Phase 4 S4);
+Banbura-Giannone-Reichlin 2010 (large BVAR shrinkage). Reference
+parity check: R `BVAR::bvar()` (Kuschnig & Vashold 2021, JSS) at
+Phase 4 S5 — landed PASS-A.2 with DOCUMENTED-DIVERGENCE due to
+prior-parameterization differences (P-3 §3.4.2 forward-provisioning
+case study). BVAR-with-stochastic-volatility implementation lives
+in the ``bond_yield_forecast`` subpackage's CCM-2019 Gibbs sampler.
 """
 
 import numpy as np

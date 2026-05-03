@@ -196,6 +196,68 @@ Each check declares a tolerance ladder in
   (e.g., conformal coverage <50% nominal indicates a real
   bug).
 
+### 3.4 Engine wrapper docstring convention (B)
+
+**Phase 4 Session 11c (2026-05-03; closes BYF #5).** Codifies
+the docstring convention for engine wrapper modules under
+`engine/techniques/`. Engine wrappers are the parity-audit
+surface; their docstrings are the first-stop documentation
+for cycle authors triaging audit findings + adding new
+wrappers.
+
+**Module-level docstring requirements:**
+
+- Technique name + 1-paragraph methodology summary (what the
+  wrapper computes and how).
+- Reference citations to canonical sources (papers, R / Python
+  package authors, textbooks). Citation form: `<Author Year>`
+  with package name where applicable (e.g., "Litterman 1986;
+  R `vars::VAR`").
+- **Audit fields documentation** (REQUIRED if the wrapper
+  populates audit_fields beyond the standard `n_obs`,
+  `frequency`, `runtime_ms`): a brief block enumerating each
+  emitted audit_field key + 1-line description of what it
+  contains and how it's computed. The audit-fields block
+  serves the parity-check author who needs to know what
+  fields are reliably present at compare() time.
+- Cross-references to validation_patterns_reference.md or
+  spec docs where applicable.
+
+**Per-function docstring requirements** (especially the
+`run()` entry point):
+
+- Purpose (1-2 sentences).
+- Key user-facing parameters (subset; not exhaustive — the
+  catalog JSON is the canonical parameter source).
+- Returns: dict shape (status, results, audit_fields,
+  interpretation, error_message).
+- Raises: any exceptions surfaced to the caller.
+
+**Cross-references and exemplars:**
+
+- See `engine/techniques/critical_slowing_down.py` for a
+  wrapper with a thorough Stage A/B/C methodology breakdown
+  + reference citations.
+- See `engine/techniques/kalman_filter.py` (post-S11c) for
+  the audit-fields documentation block pattern, including
+  the S8-added `filtered_state_cov` / `predicted_state_cov`
+  / `smoothed_state_cov` fields.
+
+The docstring convention is part of the C-1 §6 wrapper
+structural patterns family (cross-doc; the C-1 §6.1
+module-vs-package layout convention is the engine-side
+companion). Both protect against a class of failure where
+audit-time triage requires reading non-obvious code paths
+that lack documentation.
+
+**Application to wrappers introducing new audit_fields:**
+the per-cycle pattern is to add the audit-fields documentation
+block in the same commit that introduces the new field. The
+S11c wrapper-docstring backfill closed gaps from prior cycles
+where audit-field surface was added without corresponding
+docstring documentation (S8 P4-1.2 + B-Phase4-S8-2 BYF
+diagnostics elevation are precedent cases).
+
 ---
 
 ## 4. Reference Availability Tier Policy (B)
