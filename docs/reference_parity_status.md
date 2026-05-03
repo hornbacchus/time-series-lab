@@ -1,27 +1,35 @@
 # TSL Reference Parity — Per-Wrapper Status Tracker (P-4)
 
-**Status:** **v1.1.1** — Phase 3 closed at Session 18 (2026-04-29);
-Phase 3.5 closed at Session 11 (2026-04-30) with v1.1.0 doc set
-issued. Bond Yield Forecast Integration cycle (post-Phase-3.5)
-added 1 wrapper at Session 4 (2026-05-01); v1.1.x increment. BYF
-modification cycle 1 (Mod-1 + Mod-2) closed 2026-05-01: audit
-coverage extended to TWO fixtures (10-mat legacy + 34-mat
-BYF-Mod-1 grid); v1.1.1 increment (calibration extension; verdict
-class unchanged).
+**Status:** **v1.2.0** — Phase 4 closed at Session 13a
+(2026-05-03) with v1.2.0 doc-set issued (P-1 v1.2.0 + P-2 v1.2.0
++ P-3 v1.2.0 + C-1 v2.0.0). All 13 inheritance items
+dispositioned (12 closed in-cycle + BYF #5 closed at S11c-2 =
+13/13 closed); 2 forward-banked observations explicit-deferred to
+Phase 4.5+. Engine baseline frozen at S11c-2 commit `8c45de7`;
+doc-set baseline frozen at S12c-2 commit `bcbf243`.
+
+Prior versions: **v1.1.1** — Phase 3 closed at Session 18
+(2026-04-29); Phase 3.5 closed at Session 11 (2026-04-30) with
+v1.1.0 doc set issued. Bond Yield Forecast Integration cycle
+added 1 wrapper at Session 4 (2026-05-01) + BYF Mod-1/Mod-2
+cycle close 2026-05-01 (v1.1.x increments).
+
 Authoritative coverage data tracker. Companion to:
 
 - [P-1 parity standard](engineering/parity_standard.md)
-  **v1.1.0** — directive ("must") for new wrapper PRs
+  **v1.2.0** — directive ("must") for new wrapper PRs
 - [P-2 parity diagnostic reference](engineering/parity_diagnostic_reference.md)
-  **v1.1.0** — descriptive reference / playbook
+  **v1.2.0** — descriptive reference / playbook
 - [P-3 parity empirical findings](engineering/parity_empirical_findings.md)
-  **v1.1.0** — descriptive narrative
+  **v1.2.0** — descriptive narrative
+- [C-1 wrapper development standard](engineering/wrapper_development_standard.md)
+  **v2.0.0** — engine-side wrapper standard
 
 **Status legend (per master plan §3.1; see [P-1 §2](engineering/parity_standard.md#2-four-verdict-closure-rule-b) for binding semantics):**
 
 - `PASS` — Output matches reference within stated tolerance on stated fixtures.
 - `CAVEAT` — Matches except in stated regime (boundary, near-singular, MC noise band, finite-sample slack).
-- `DOCUMENTED-DIVERGENCE` — Does not match; divergence is methodology-equivalent (different optimizer / prior / default), not a bug. **Empirical note:** not encountered as distinct outcome in Phase 3; CAVEAT absorbed all such cases.
+- `DOCUMENTED-DIVERGENCE` — Does not match; divergence is methodology-equivalent (different optimizer / prior / default), not a bug. **Empirical note (post-Phase 4):** first runtime instance landed at Phase 4 S5 (`p3_byf_bvar_constant_vol`; max_rel_diff=1.76 on Minnesota posterior; CCM-2019 Minnesota vs R BVAR hierarchical Litterman). Second instance at Phase 4 S6 (`p3_byf_stochvol_partial`; CCM-KSC vs standalone svsample). See P-3 §3.4.3 + §3.4.4 for cycle-close documentation; P-2 §C.2 for audit entries; P-2 §C.2.x + §C.2.y for auto-DD pattern + audit-design discipline codifications.
 - `NO-REFERENCE` — No clean external reference; internal-consistency proxy (Tier C).
 - `SKIP` — Runtime dependency unavailable (host binary, package install fails); informative-not-failing per [P-1 §2.4](engineering/parity_standard.md#24-skip-graceful-runtime-convention-b).
 - `PENDING` — Audit not yet started.
@@ -212,6 +220,33 @@ CI gate: `parity-fast.yml` and `parity-slow.yml` run all `PASS`, `CAVEAT`, and `
 
 **Phase 4 v1.2.0 amendment candidates from BYF audit** (banked, not actioned in BYF cycle): R `BVAR` (Kuschnig & Vashold) constant-vol cross-check; partial Pattern A.3 Minnesota dummy-observation reimpl; `stochvol` rpy2 partial Pattern A.2 for SV component only; P-2 §B.6 entry if R `bvars` becomes available for a future R release. See `docs/bond_yield_forecast_integration/phase4_v1_2_0_amendment_candidates.md`.
 
+**Phase 4 secondary verdict lines** (post-cycle close per S13a v1.2.0 issuance):
+
+- **BYF #1 — `p3_byf_bvar_constant_vol`** secondary verdict:
+  **PASS-A.2 (DOCUMENTED-DIVERGENCE)** at Phase 4 S5 (commit
+  `2b54acb`; sampler-correction at S12b-1-1 commit `5e0c93c`).
+  TSL `bond_yield_forecast` BVAR-SV with `force_constant_h=True`
+  (CCM-2019 Gibbs sampler) vs R `BVAR::bvar()` (Kuschnig &
+  Vashold 2021, JSS) at matched Minnesota-prior config;
+  `max_rel_diff=1.76` on Minnesota coefficient posterior means
+  — methodologically expected divergence (prior-parameterization
+  gap CCM-2019 Minnesota vs R BVAR hierarchical Litterman).
+  Cross-references: P-2 §C.2 entry; P-3 §3.4.3 cycle-close
+  documentation; P-3 §3.4.2 forward-provisioning interval
+  context.
+- **BYF #2 — `p3_byf_minnesota_dummies`** Pattern A.3 verdict:
+  **PASS bit-exact (1318/1318 cells)** at Phase 4 S4 (commit
+  `5bd748a`). Inline reimplementation per Doan-Litterman-Sims
+  1984 §3 dummy-observation reformulation. Cross-reference:
+  P-2 §C.3 entry.
+- **BYF #3 — `p3_byf_stochvol_partial`** secondary verdict:
+  **PASS-A.2 (DOCUMENTED-DIVERGENCE)** at Phase 4 S6 (commit
+  `8ab6b6e`). Partial Pattern A.2 on SV component only; per-
+  equation log-volatility posterior means: mu rel_diff < 5%
+  (PASS); phi rel_diff in 5-10% (CAVEAT band); sigma_eta record-
+  only (prior-driven). Cross-references: P-2 §C.2 entry; P-3
+  §3.4.4 cycle-close documentation.
+
 **BYF cycle session disposition:**
 
 | BYF session | Status | Commit | Findings |
@@ -320,24 +355,130 @@ documented but not actioned in cycle).
 | P-3 parity empirical findings | §1 cycle statistics update; §2.4 NEW master plan §4 Item 9 methodology evolution; §3.3 DSCD per-metric finding; §3.4 NEW Pattern A.1 4-dimensions production-lock; §10 NEW macro fixture expansion synthesis; §6 close all 9 banked + 2 verdict-class production-locks; §11 NEW Phase 4 carry-forward |
 | P-4 status tracker (this document) | v1.1.0 issuance; 12 pre-Phase-3 inherited wrappers fully migrated; Phase 3.5 disposition table; Phase 4 carry-forward block |
 
-## Phase 4 carry-forward (NOT actioned in Phase 3.5)
+## Phase 4 carry-forward (NOT actioned in Phase 3.5) — **ALL CLOSED at Phase 4**
 
 Three items carry forward to Phase 4 master plan (drafted at
-Session 12 closeout decision):
+Session 12 closeout decision); all three closed during Phase 4
+cycle:
 
-| # | Item | Origin | Phase 4 role |
+| # | Item | Origin | Phase 4 closure |
 |---:|---|---|---|
-| P4-1 | structural_invariants population on 12 inherited wrappers (engine audit-field expansion + registry expansion for non-fit wrappers) | S2 banking, deferred at S9 audit | Dedicated work item in Phase 4 master plan |
-| P4-2 | statsmodels ↔ x13ashtml integration (TSL-side post-processor OR pinned statsmodels patch) — currently SKIP-graceful on both platforms | S6 deferral (3-failure-mode escalation) | Phase 4 candidate |
-| P4-3 | CSD wrapper engineering (n_surrogates default cap; chunk surrogate dimension OR auto-cap per series length) — workaround verified at n_surrogates=100 | S8 finding (T10Y2Y default-params 11.7 GiB allocation blow-up) | Phase 4 wrapper-engineering candidate |
+| P4-1 | structural_invariants population on 12 inherited wrappers | S2 banking, deferred at S9 audit | **CLOSED at S7+S8+S9** (commits `ac91cb0` + `bcd162b` + `ff403dd`): registry expansion + engine audit-field expansion + 9 wrapper declarations + O-2 threshold tightening + B-Phase4-S8-2 BVAR diagnostics elevation. Declarations dormant pending runner integration (Phase 4.5+). |
+| P4-2 | statsmodels ↔ x13ashtml integration | S6 deferral (3-failure-mode escalation) | **CLOSED at S2** (commits `050647e` + `6fb9590`): pathway (c) bypass — TSL `x13_seasonal_adjust.py` invokes `x13ashtml` binary directly via `TSL_X13_BINARY_PATH` env var discovery cascade + parses .d10/.d11/.d12/.d13 outputs natively. `p3_x13` PASSes Linux post-Phase-4 (was SKIP-graceful). |
+| P4-3 | CSD wrapper engineering (n_surrogates default cap) | S8 finding (T10Y2Y 11.7 GiB blow-up) | **CLOSED at S3** (commit `3bd5f61`): pathway (b) auto-cap by series length — `critical_slowing_down.py` computes `n_surrogates_effective = max(100, min(default, T // 10))`. T10Y2Y / DGS5 / WTI fixtures verified OOM-free at PASS post-fix. |
 
-All three require engine-side wrapper modifications outside
-Phase 3.5's narrow parity-harness scope. Phase 4 master plan
-will sequence these alongside any new batch-execution work.
+All three closed via engine-side modifications. Phase 4
+inheritance register fully resolved (see Phase 4 cycle-close
+section below).
+
+## Phase 4 cycle close — disposition table (S13a v1.2.0 issuance)
+
+Phase 4 ran 13 sessions (2026-05-01 to 2026-05-03; engine
+work CLOSED at S11c-2 commit `8c45de7`; v1.2.0 doc-set
+issuance event CLOSED at S12c-2 commit `bcbf243`). All 13
+master plan §15.1 inheritance items dispositioned (12
+closed in-cycle + BYF #5 closed at S11c-2 = 13/13 closed);
+2 forward-banked observations explicit-deferred to Phase
+4.5+.
+
+**13-item inheritance register — final disposition:**
+
+| Item | Closed at | Closure commit |
+|---|---|---|
+| P4-1 (structural_invariants on 12 wrappers) | S7+S8+S9 | `ac91cb0` + `bcd162b` + `ff403dd` |
+| P4-2 (statsmodels-x13ashtml integration) | S2 | `050647e` + `6fb9590` |
+| P4-3 (CSD wrapper engineering) | S3 | `3bd5f61` |
+| BYF #1 (R BVAR Pattern A.2) | S5 | `2b54acb` + `ed5662c` |
+| BYF #2 (Minnesota A.3 reimpl) | S4 | `5bd748a` |
+| BYF #3 (stochvol partial A.2) | S6 | `8ab6b6e` |
+| BYF #4 (P-2 §B.6.4 bvars trigger) | S11a-1 | `1d8b0ff` |
+| BYF #5 (P-1 §3.4 docstring + 10-wrapper backfill) | S11c-1 + S11c-2 | `05d5e29` + `8c45de7` |
+| BYF #6 (C-1 module-vs-package layout) | S10 | `193f4e7` |
+| BYF #7 (C-1 bundled-workbook input) | S10 | `193f4e7` |
+| BYF #8 (C-1 layered validation) | S10 | `193f4e7` |
+| BYF #9 (P-1 §6.1 tier classification) | S11a-1 | `1d8b0ff` |
+| BYF #10 (P-1 §8.5 install-matrix gate) | S1 + S11b-3 | `5b9bdc2` + `c00fdd7` |
+
+**Per-wrapper Phase 4 amendments** (S9 declarations + S11c
+docstring backfill):
+
+- **9 wrappers** received `structural_invariants` declarations
+  at S9 (P4-1.3): kalman_filter, kalman_smoother,
+  johansen_bartlett, mcmc_sv_gaussian, mcmc_sv_student_t,
+  evt_ferro_segers, mint_family, transformer_attention,
+  caviar_sav, p3_bond_yield_forecast. **Declarations dormant
+  pending runner integration** per B-Phase4-S9-2 (Phase 4.5+
+  scope; see P-2 §D.1.5 audit-side declaration table for
+  tolerance values).
+- **10 wrappers** received docstring backfill at S11c (P-1
+  §3.4 application): kalman_filter, kalman_smoother,
+  johansen_cointegration, bvar, bond_yield_forecast/_dispatch
+  (S11c-1 commit `05d5e29`); var_model, dynamic_factor_model,
+  pelt_change_points, dtw_alignment_lag, x13_seasonal_adjust
+  (S11c-2 commit `8c45de7`). All 10 wrappers' docstrings now
+  comply with P-1 §3.4 two-block convention (References +
+  Audit-fields blocks; per B-Phase4-S11c-1-2).
+
+**Phase 4.5+ explicit forward-banking** (NOT silent
+slippage):
+
+| Item | Reason | Phase 4.5+ context |
+|---|---|---|
+| **B-Phase4-S7-1** | None-handling bug in 6 concrete invariant checkers (`np.asarray(tsl.get(field), dtype=np.float64)` raises TypeError on None instead of returning empty array) | Surfaced at S7 P4-1.1 registry expansion; per §11.8 blast-radius discipline NOT fixed within S7; banked for Phase 4.5+ runner-integration session |
+| **B-Phase4-S10-3** | Smoke-test n_draws insufficiency surfaces as omnibus BLOCK once runner-integration lands | BYF smoke runs at n_draws=1000 will surface as BLOCK on `mcmc_convergence` omnibus when Phase 4.5+ wires `check_invariants` lifecycle into the runner |
+
+Phase 4 cycle-planning discipline validated: 13-item
+register at cycle-start was sized correctly; only
+explicitly-designed forward-banked items deferred to Phase
+4.5+. No items banked forward as silent overruns. See P-3
+§6.10 for full cycle-close consolidation per
+B-Phase4-S11c-2-1 institutional precedent.
+
+**v1.2.0 doc-set issuance event** (S12 four-phase split per
+Decision 22 + Decision 23B re-split): all 4 docs at Phase 4
+target versions:
+
+| Doc | Issuance commit | Sub-session |
+|---|---|---|
+| P-1 v1.2.0 | `c66af23` | S12a |
+| P-2 v1.2.0 | `cfc6e54` | S12b-2 (closes P-2 §D + change log) |
+| P-3 v1.2.0 | `bcbf243` | S12c-2 (closes P-3 §6+§7+§8 + change log) |
+| C-1 v2.0.0 | `193f4e7` | Phase 4 S10 (NEW §6 wrapper structural patterns + major version bump) |
+
+19/19 touchpoints + 15/15 codifications LANDED across the
+v1.2.0 doc-set. See P-1 §13.6 for principled-content-density
+vs measurement-variance distinction (Decision 21
+codification); P-1 §12.2 for version-bump criteria
+(B-Phase4-S10-1 codification).
+
+## Documentation set (Phase 4 v1.2.0)
+
+| Document | Type | Version | Issued at |
+|---|---|---|---|
+| [P-1 parity standard](engineering/parity_standard.md) | Directive | **v1.2.0** | Phase 4 Session 12a (commit `c66af23`) |
+| [P-2 parity diagnostic reference](engineering/parity_diagnostic_reference.md) | Descriptive reference | **v1.2.0** | Phase 4 Session 12b-2 (commit `cfc6e54`) |
+| [P-3 parity empirical findings](engineering/parity_empirical_findings.md) | Descriptive narrative | **v1.2.0** | Phase 4 Session 12c-2 (commit `bcbf243`) |
+| **P-4 status tracker (this document)** | Authoritative coverage data | **v1.2.0** | **Phase 4 Session 13a** |
+| [C-1 wrapper development standard](engineering/wrapper_development_standard.md) | Engine-side directive | **v2.0.0** | Phase 4 Session 10 (commit `193f4e7`) |
 
 ---
 
-**Last updated:** 2026-05-01 (**BYF Modification Cycle 1
+**Last updated:** 2026-05-03 (**Phase 4 Session 13a — P-4
+v1.2.0 ISSUED**: 13-item inheritance register fully
+dispositioned (12 closed in-cycle + BYF #5 closed at S11c-2
+= 13/13 closed); 2 forward-banked observations explicit-
+deferred to Phase 4.5+ (B-Phase4-S7-1 None-handling bug;
+B-Phase4-S10-3 smoke-test n_draws insufficiency); v1.2.0
+doc-set issuance event CLOSED at S12c-2 commit `bcbf243`
+(P-1 + P-2 + P-3 all at v1.2.0; C-1 at v2.0.0); 9 wrapper
+declarations dormant pending runner integration (Phase
+4.5+); 10 wrappers received P-1 §3.4 docstring backfill at
+S11c. Engine baseline frozen at S11c-2 commit `8c45de7`;
+doc-set baseline frozen at S12c-2 commit `bcbf243`. Phase
+4 cycle close artifact (cycle-close summary + carry-forward
+register seeding + engineering retrospective) lands at S13b.
+
+Prior update: 2026-05-01 (**BYF Modification Cycle 1
 Session Mod-2** — parity audit extended to two-fixture coverage
 (10-mat legacy + 34-mat BYF-Mod-1 grid); both fixtures PASS-A.1+F
 at 1e-15 with 1.557M elements bit-exact each; B-Mod1-1 dispatch
