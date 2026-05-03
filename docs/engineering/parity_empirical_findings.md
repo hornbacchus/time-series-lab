@@ -557,6 +557,108 @@ inventory these.
 
 ---
 
+#### 3.4.3 — Phase 4 BVAR DD finding (S5 BYF #1; first DD outcome in TSL parity history)
+
+**Origin:** Phase 4 Session 5 (commit `2b54acb`, 2026-05-01)
+ran the BYF candidate #1 Pattern A.2 audit:
+`p3_byf_bvar_constant_vol`. Compares TSL `bond_yield_forecast`
+BVAR-SV with `force_constant_h=True` (CCM-2019 Gibbs
+sampler with constant-volatility constraint) against R
+`BVAR::bvar()` (Kuschnig & Vashold 2021, JSS) at matched
+Minnesota-prior config.
+
+**Empirical outcome.** `max_rel_diff = 1.76` on Minnesota-
+prior coefficient posterior means — far outside any
+conventional MCMC tolerance band (5e-3 abs / 5e-2 rel).
+Verdict: **PASS-A.2 (DOCUMENTED-DIVERGENCE)** — the first
+DD outcome in TSL parity history.
+
+**Methodology gap analysis.** The divergence reflects
+prior-parameterization differences between TSL's CCM-2019
+Minnesota-prior conditional posterior and R `BVAR`'s
+hierarchical Litterman prior — NOT a TSL bug. Both
+implementations are mathematically correct under their
+respective frameworks. R `bvars` (Krueger 2018) would
+have been a closer Pattern A.2 reference (shared CCM-2019
+methodological lineage) but failed to install on R 4.5.3
+(see [P-2 §B.6.4](parity_diagnostic_reference.md#b64--r-bvars-package-install-fragility-on-r-453-phase-4-session-11a)).
+
+**Cross-references.** P-2 §C.2 documents the audit entry
++ B-Phase4-S5-3 sampler correction (CCM-2019 Gibbs not
+PyMC NUTS); P-3 §3.4.2 documents the forward-provisioning
+interval (~6 months between DD wiring at Phase 3.5 S1 and
+first runtime exercise at this S5 audit).
+
+#### 3.4.4 — Phase 4 stochvol partial A.2 finding (S6 BYF #3)
+
+**Origin:** Phase 4 Session 6 (commit `8ab6b6e`, 2026-05-02)
+ran the BYF candidate #3 partial Pattern A.2 audit:
+`p3_byf_stochvol_partial`. Compares TSL's KSC-1998 mixture
++ FFBS via `bond_yield_forecast` subpackage's CCM-2019
+inner sampler against R `stochvol::svsample` per-equation
+invocation via `rpy2`.
+
+**Empirical outcome.** Per-equation log-volatility posterior
+means at audit-time: mu rel_diff < 5% (PASS); phi rel_diff
+in 5-10% range (CAVEAT band); sigma_eta record-only
+(prior-parameterization driven). Verdict: **PASS-A.2
+(DOCUMENTED-DIVERGENCE)** per the locked tolerance ladder
+from Phase 1 audit 2b extended at S6 — second DD outcome
+in TSL parity history.
+
+**Methodology gap analysis.** The divergence reflects
+prior-parameterization differences between TSL's CCM-2019
+embedded KSC-1998 mixture (joint-with-VAR-coefficients
+sampling) and R `stochvol`'s standalone univariate SV
+sampler. Both implementations are mathematically correct
+under their respective frameworks; the gap is genuinely
+methodological at the partial-A.2 audit boundary.
+
+**Cross-references.** P-2 §C.2 documents the audit entry;
+P-2 §C.2.x + §C.2.y codify the auto-DD pattern + audit-
+design discipline that frames both Phase 4 DD outcomes;
+P-3 §3.4.3 (above) documents the parallel BVAR DD finding.
+
+#### 3.4.5 — Auto-DD pattern empirical-findings-side (B-Phase4-S6-1; cross-doc with P-2 §C.2.x)
+
+**Cross-doc placement (Disposition 3).** The auto-DD
+pattern codification lands at BOTH P-2 (registry-side
+framing of how `compare()` logic embeds DD verdict at
+design time; landed at P-2 §C.2.x at S12b-1-2) AND P-3
+(empirical-findings-side framing of which audits
+empirically produce auto-DD outcomes; landed here).
+
+**Empirical instances at Phase 4.** Two concrete auto-DD
+audits emerged from the BYF integration cycle:
+
+| Audit | Cycle session | Methodology gap | Verdict |
+|---|---|---|---|
+| `p3_byf_bvar_constant_vol` | Phase 4 S5 (BYF #1) | CCM-2019 Minnesota vs R `BVAR` hierarchical Litterman | PASS-A.2 (DOCUMENTED-DIVERGENCE) |
+| `p3_byf_stochvol_partial` | Phase 4 S6 (BYF #3) | Joint CCM-KSC sampler vs standalone `stochvol::svsample` | PASS-A.2 (DOCUMENTED-DIVERGENCE) |
+
+**Pattern as institutional precedent.** Auto-DD outcomes
+are NOT failures — they are explicit acknowledgments of
+methodologically-known-a-priori framework gaps that exceed
+the conventional A.2 tolerance band. The DD verdict
+preserves operator awareness of the gap; the audit
+continues to surface numerical-fidelity reporting (max_rel_diff,
+posterior summaries). Future Pattern A.2 audits selecting
+methodologically-divergent references should adopt the
+auto-DD pattern (P-2 §C.2.x) per the audit-design
+discipline (P-2 §C.2.y).
+
+**Cycle empirical evidence.** The Phase 4 cycle closes
+with 2 of 70+ Pattern A audits classified as auto-DD —
+small fraction (~3%), reflecting that most TSL wrappers
+have either same-library Pattern A.1 references OR
+methodologically-equivalent A.2 references available in
+R / Python ecosystems. Auto-DD is the safety net for the
+remaining cases where only methodologically-divergent
+references exist (typically Bayesian sampler families with
+prior-parameterization differences).
+
+---
+
 ## 4. Surprises and reversals
 
 Five Phase 3 surprises warrant explicit narrative.
