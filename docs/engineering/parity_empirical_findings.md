@@ -1,6 +1,6 @@
 # TSL Reference Parity — Empirical Findings (P-3)
 
-**Version:** v1.2.0 (issued at Phase 4 Session 12c, 2026-05-03; v1.1.0 at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 17)
+**Version:** v1.1.0 (issued at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 17)
 
 **Status:** Descriptive narrative. The story of Phase 3
 told through cumulative cross-batch patterns + Phase 3.5
@@ -557,108 +557,6 @@ inventory these.
 
 ---
 
-#### 3.4.3 — Phase 4 BVAR DD finding (S5 BYF #1; first DD outcome in TSL parity history)
-
-**Origin:** Phase 4 Session 5 (commit `2b54acb`, 2026-05-01)
-ran the BYF candidate #1 Pattern A.2 audit:
-`p3_byf_bvar_constant_vol`. Compares TSL `bond_yield_forecast`
-BVAR-SV with `force_constant_h=True` (CCM-2019 Gibbs
-sampler with constant-volatility constraint) against R
-`BVAR::bvar()` (Kuschnig & Vashold 2021, JSS) at matched
-Minnesota-prior config.
-
-**Empirical outcome.** `max_rel_diff = 1.76` on Minnesota-
-prior coefficient posterior means — far outside any
-conventional MCMC tolerance band (5e-3 abs / 5e-2 rel).
-Verdict: **PASS-A.2 (DOCUMENTED-DIVERGENCE)** — the first
-DD outcome in TSL parity history.
-
-**Methodology gap analysis.** The divergence reflects
-prior-parameterization differences between TSL's CCM-2019
-Minnesota-prior conditional posterior and R `BVAR`'s
-hierarchical Litterman prior — NOT a TSL bug. Both
-implementations are mathematically correct under their
-respective frameworks. R `bvars` (Krueger 2018) would
-have been a closer Pattern A.2 reference (shared CCM-2019
-methodological lineage) but failed to install on R 4.5.3
-(see [P-2 §B.6.4](parity_diagnostic_reference.md#b64--r-bvars-package-install-fragility-on-r-453-phase-4-session-11a)).
-
-**Cross-references.** P-2 §C.2 documents the audit entry
-+ B-Phase4-S5-3 sampler correction (CCM-2019 Gibbs not
-PyMC NUTS); P-3 §3.4.2 documents the forward-provisioning
-interval (~6 months between DD wiring at Phase 3.5 S1 and
-first runtime exercise at this S5 audit).
-
-#### 3.4.4 — Phase 4 stochvol partial A.2 finding (S6 BYF #3)
-
-**Origin:** Phase 4 Session 6 (commit `8ab6b6e`, 2026-05-02)
-ran the BYF candidate #3 partial Pattern A.2 audit:
-`p3_byf_stochvol_partial`. Compares TSL's KSC-1998 mixture
-+ FFBS via `bond_yield_forecast` subpackage's CCM-2019
-inner sampler against R `stochvol::svsample` per-equation
-invocation via `rpy2`.
-
-**Empirical outcome.** Per-equation log-volatility posterior
-means at audit-time: mu rel_diff < 5% (PASS); phi rel_diff
-in 5-10% range (CAVEAT band); sigma_eta record-only
-(prior-parameterization driven). Verdict: **PASS-A.2
-(DOCUMENTED-DIVERGENCE)** per the locked tolerance ladder
-from Phase 1 audit 2b extended at S6 — second DD outcome
-in TSL parity history.
-
-**Methodology gap analysis.** The divergence reflects
-prior-parameterization differences between TSL's CCM-2019
-embedded KSC-1998 mixture (joint-with-VAR-coefficients
-sampling) and R `stochvol`'s standalone univariate SV
-sampler. Both implementations are mathematically correct
-under their respective frameworks; the gap is genuinely
-methodological at the partial-A.2 audit boundary.
-
-**Cross-references.** P-2 §C.2 documents the audit entry;
-P-2 §C.2.x + §C.2.y codify the auto-DD pattern + audit-
-design discipline that frames both Phase 4 DD outcomes;
-P-3 §3.4.3 (above) documents the parallel BVAR DD finding.
-
-#### 3.4.5 — Auto-DD pattern empirical-findings-side (B-Phase4-S6-1; cross-doc with P-2 §C.2.x)
-
-**Cross-doc placement (Disposition 3).** The auto-DD
-pattern codification lands at BOTH P-2 (registry-side
-framing of how `compare()` logic embeds DD verdict at
-design time; landed at P-2 §C.2.x at S12b-1-2) AND P-3
-(empirical-findings-side framing of which audits
-empirically produce auto-DD outcomes; landed here).
-
-**Empirical instances at Phase 4.** Two concrete auto-DD
-audits emerged from the BYF integration cycle:
-
-| Audit | Cycle session | Methodology gap | Verdict |
-|---|---|---|---|
-| `p3_byf_bvar_constant_vol` | Phase 4 S5 (BYF #1) | CCM-2019 Minnesota vs R `BVAR` hierarchical Litterman | PASS-A.2 (DOCUMENTED-DIVERGENCE) |
-| `p3_byf_stochvol_partial` | Phase 4 S6 (BYF #3) | Joint CCM-KSC sampler vs standalone `stochvol::svsample` | PASS-A.2 (DOCUMENTED-DIVERGENCE) |
-
-**Pattern as institutional precedent.** Auto-DD outcomes
-are NOT failures — they are explicit acknowledgments of
-methodologically-known-a-priori framework gaps that exceed
-the conventional A.2 tolerance band. The DD verdict
-preserves operator awareness of the gap; the audit
-continues to surface numerical-fidelity reporting (max_rel_diff,
-posterior summaries). Future Pattern A.2 audits selecting
-methodologically-divergent references should adopt the
-auto-DD pattern (P-2 §C.2.x) per the audit-design
-discipline (P-2 §C.2.y).
-
-**Cycle empirical evidence.** The Phase 4 cycle closes
-with 2 of 70+ Pattern A audits classified as auto-DD —
-small fraction (~3%), reflecting that most TSL wrappers
-have either same-library Pattern A.1 references OR
-methodologically-equivalent A.2 references available in
-R / Python ecosystems. Auto-DD is the safety net for the
-remaining cases where only methodologically-divergent
-references exist (typically Bayesian sampler families with
-prior-parameterization differences).
-
----
-
 ## 4. Surprises and reversals
 
 Five Phase 3 surprises warrant explicit narrative.
@@ -869,22 +767,15 @@ Cadence anchored at next_review = 2026-07-29.
 
 Findings doc: [`docs/reference_parity_phase3_5/session_5_findings.md`](../reference_parity_phase3_5/session_5_findings.md).
 
-### 6.6 — DOCUMENTED-DIVERGENCE verdict reservation — **CLOSED — forward-provisioned at S1; FIRST RUNTIME at Phase 4 S5**
+### 6.6 — DOCUMENTED-DIVERGENCE verdict reservation — **CLOSED — forward-provisioned at S1**
 
 **Disposition:** Wired end-to-end as runtime outcome at S1
 (`Outcome` literal + `_OUTCOME_PRIORITY` rank 3 + runner
-exit code 4 + workflow YAMLs map exit 4 → CI green). The
-classification recipe stays in P-1 §2.1.
-
-**Update (Phase 4 Session 12c v1.2.0 issuance):** the first
-concrete DD verdict instance landed at **Phase 4 Session 5**
-(BYF candidate #1 R `BVAR::bvar()` Pattern A.2 audit;
-`max_rel_diff=1.76` on Minnesota posterior). A second DD
-instance landed at Phase 4 Session 6 (BYF #3 stochvol
-partial A.2). See P-3 §3.4.3 (BVAR DD finding) + §3.4.4
-(stochvol partial DD finding) for the cycle-close
-documentation, and P-3 §3.4.2 for the ~6-month forward-
-provisioning interval analysis.
+exit code 4 + workflow YAMLs map exit 4 → CI green).
+**Not triggered** by any current wrapper in Phase 3 or
+Phase 3.5; remains forward-provisioned. The classification
+recipe stays in P-1 §2.1; first concrete instance will land
+in Phase 4+ documentation when triggered.
 
 Findings doc: [`docs/reference_parity_phase3_5/session_1_findings.md`](../reference_parity_phase3_5/session_1_findings.md).
 
@@ -950,86 +841,13 @@ Findings docs:
 - [`session_8_findings.md`](../reference_parity_phase3_5/session_8_findings.md) (rates + commodities)
 - [`session_9_findings.md`](../reference_parity_phase3_5/session_9_findings.md) (cross-pair synthesis + Stream 2 deferral)
 
-### 6.10 — Phase 4 cycle close consolidation (S12c v1.2.0 issuance)
-
-The Phase 4 cycle closes with the **13-item inheritance
-register fully dispositioned** (12 closed in-cycle + 1
-deferred per explicit forward-banking discipline) AND **2
-forward-banked observations** explicitly deferred to Phase
-4.5+ (B-Phase4-S7-1 None-handling bug; B-Phase4-S10-3
-smoke-test n_draws insufficiency).
-
-**Cycle disposition table:**
-
-| Item | Source | Phase 4 closure | Closure session |
-|---|---|---|---|
-| P4-1 (structural_invariants on 12 wrappers) | P3.5 §7.1 | CLOSED (S7+S8+S9) | S7 / S8 / S9 |
-| P4-2 (statsmodels-x13ashtml integration) | P3.5 §7.2 | CLOSED (pathway c bypass) | S2 |
-| P4-3 (CSD wrapper engineering) | P3.5 §7.3 | CLOSED (pathway b auto-cap) | S3 |
-| BYF #1 (R BVAR Pattern A.2) | BYF candidate | CLOSED (PASS-A.2 with DD) | S5 |
-| BYF #2 (Minnesota A.3 reimpl) | BYF candidate | CLOSED (PASS bit-exact 1318/1318) | S4 |
-| BYF #3 (stochvol partial A.2) | BYF candidate | CLOSED (PASS-A.2 with DD) | S6 |
-| BYF #4 (P-2 §B.6.4 bvars trigger) | BYF candidate | CLOSED (P-2 v1.2.0 §B.6.4 NEW) | S11a-1 |
-| BYF #5 (P-1 §3.4 docstring + 10-wrapper backfill) | BYF candidate | CLOSED (P-1 v1.2.0 §3.4 NEW + 10 wrappers) | S11c-1 + S11c-2 |
-| BYF #6 (C-1 module-vs-package layout) | BYF candidate | CLOSED (C-1 v2.0.0 §6.1 NEW) | S10 |
-| BYF #7 (C-1 bundled-workbook input) | BYF candidate | CLOSED (C-1 v2.0.0 §6.2 NEW) | S10 |
-| BYF #8 (C-1 layered validation) | BYF candidate | CLOSED (C-1 v2.0.0 §6.3 NEW) | S10 |
-| BYF #9 (P-1 §6.1 tier classification) | BYF candidate | CLOSED (P-1 v1.2.0 §6.1 clarification) | S11a-1 |
-| BYF #10 (P-1 §8.5 install-matrix gate) | BYF candidate | CLOSED (P-1 v1.2.0 §8.5 NEW + S11b-3 operational enforcement) | S1 + S11b-3 |
-
-**Phase 4.5+ explicit forward-banking** (NOT silent
-slippage):
-
-- **B-Phase4-S7-1** — None-handling bug in 6 concrete
-  invariant checkers (`np.asarray(tsl.get(field), dtype=np.float64)`
-  raises TypeError on None instead of returning empty
-  array). Surfaced at S7 P4-1.1 registry expansion; per
-  §11.8 blast-radius discipline NOT fixed within S7;
-  banked for Phase 4.5+ runner-integration session.
-- **B-Phase4-S10-3** — Smoke-test n_draws insufficiency
-  surfaces as omnibus BLOCK once runner-integration
-  lands. BYF smoke runs at n_draws=1000 will surface as
-  BLOCK on the mcmc_convergence omnibus when Phase 4.5+
-  wires `check_invariants` lifecycle into the runner.
-  Bank for runner-integration design discussion.
-
-**Cycle-internal operational items** (no codification
-needed; ~14 items across S11a-* / S11b-* / S11c-*
-sub-session series): documented in respective per-session
-findings docs; consolidated at S12 Phase 1 touchpoint
-enumeration (commit `9387e8e`) + S12 Phase 1 findings doc
-banked-observations register reconciliation.
-
-**Phase 4 cycle-planning discipline validated.** The
-13-item register at cycle-start was sized correctly; only
-explicitly-designed forward-banked items (B-Phase4-S7-1 +
-B-Phase4-S10-3) deferred to Phase 4.5+. No items had to
-be banked forward as silent overruns; the cycle closed
-with the cleanest cycle-close state achievable per
-B-Phase4-S11c-2-1 institutional precedent.
-
 ---
 
 ## 7. Phase 4 carry-forward
 
 Three items deferred from Phase 3.5 to Phase 4 master plan:
 
-### 7.1 — structural_invariants on 12 inherited wrappers — **CLOSED at Phase 4 S7+S8+S9 (P4-1)**
-
-**Phase 4 closure (S12c v1.2.0 issuance update):** P4-1
-closed in three sub-sessions: S7 P4-1.1 registry expansion
-(5 new invariant types: mcmc_convergence, evt_extremal_index,
-mint_coherence, attention_normalization, intervals_test);
-S8 P4-1.2 engine audit-field expansion (Kalman covariance
-ordering + VECM rank invariance audit-field surface);
-S9 P4-1.3 wrapper wiring (9 wrapper declarations +
-B-Phase4-S8-2 BVAR diagnostics elevation). Plus O-2
-Pattern F threshold tightening (var_eigenvalues <0.999 →
-<0.9995). Per P-2 §D.1.5 audit-side declaration table;
-declarations dormant pending runner integration (B-Phase4-
-S9-2; Phase 4.5+ deferred).
-
-Original deferral text preserved:
+### 7.1 — structural_invariants on 12 inherited wrappers
 
 **Source:** Session 2 banking; deferred at Session 9 audit.
 
@@ -1051,19 +869,7 @@ wrappers (new invariant types: mcmc_convergence,
 evt_extremal_index_validity, mint_coherence,
 transformer_attention_normalization, etc.).
 
-### 7.2 — statsmodels ↔ x13ashtml integration — **CLOSED at Phase 4 S2 (P4-2 pathway c)**
-
-**Phase 4 closure (S12c v1.2.0 issuance update):** P4-2
-closed via pathway (c) bypass: TSL `x13_seasonal_adjust.py`
-no longer invokes `statsmodels.x13_arima_analysis`. The
-wrapper now invokes `x13ashtml` binary directly via
-`TSL_X13_BINARY_PATH` env var discovery cascade + parses
-.d10/.d11/.d12/.d13 outputs natively. Linux runner CI step
-discovers the binary via R `x13binary::x13path()`. `p3_x13`
-PASSes on Linux post-Phase-4 (was SKIP-graceful per Phase
-3.5 S6.5 deferral).
-
-Original deferral text preserved:
+### 7.2 — statsmodels ↔ x13ashtml integration
 
 **Source:** Session 6 deferral (escalation criterion #3 —
 3 distinct failure modes).
@@ -1079,17 +885,7 @@ statsmodels patch / branch that handles x13ashtml output;
 OR add a TSL-side post-process that normalizes x13ashtml
 output to the format statsmodels expects.
 
-### 7.3 — CSD wrapper engineering (n_surrogates default cap) — **CLOSED at Phase 4 S3 (P4-3 pathway b)**
-
-**Phase 4 closure (S12c v1.2.0 issuance update):** P4-3
-closed via pathway (b) auto-cap by series length:
-`critical_slowing_down.py` now computes
-`n_surrogates_effective = max(100, min(default_per_preset,
-T // 10))`. T10Y2Y / DGS5 / WTI fixtures verified OOM-free
-post-fix at PASS. Pathway (c) chunking deferred to Phase
-4.5+ if a future fixture defeats the auto-cap.
-
-Original deferral text preserved:
+### 7.3 — CSD wrapper engineering (n_surrogates default cap)
 
 **Source:** Session 8 finding — T10Y2Y at default
 n_surrogates=1000 triggered scipy `_vectorized_rolling_indicators`
@@ -1115,7 +911,7 @@ scoping rule — see [P-2 §B header note](parity_diagnostic_reference.md#sectio
 
 Three meta-lessons.
 
-### 8.1 — Reference selection is the hardest decision
+### 7.1 — Reference selection is the hardest decision
 
 For any new parity check, the reference selection drives
 60% of the work and 100% of the verdict ceiling. Bad
@@ -1140,7 +936,7 @@ reference selection = often PASS at 0.0 abs.
 5. **Tier C (correlation-based proxy) when 1-4 don't apply.**
    Empirically rare (3 wrappers in Phase 3).
 
-### 8.2 — The harness scaffolding pays for itself
+### 7.2 — The harness scaffolding pays for itself
 
 Sessions 1-5 built the harness scaffolding: ABC class,
 helpers, RBridge, PyBridge, structural-invariants registry,
@@ -1160,7 +956,7 @@ batches passed the criterion. The scaffolding plateaued —
 no further LOC reduction possible without sacrificing
 audit-report quality.
 
-### 8.3 — Documentation-as-you-go beats documentation-at-end
+### 7.3 — Documentation-as-you-go beats documentation-at-end
 
 P-2 Section B (Pattern J catalog) was launched at Session
 12 (Batch 8 close), 7 sessions before the documentation
@@ -1244,15 +1040,12 @@ should:
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 1.0.0 | 2026-04-29 | Claude Code (Phase 3 Session 17) | Initial narrative issued. Synthesizes Phase 3 batch-execution (S2-S14) + documentation phase (S15-S16). Closes banked items #6, #7, #9, #10 at P-3 venue. |
-| 1.1.0 | 2026-04-30 | Claude Code (Phase 3.5 Session 11) | **Phase 3.5 cycle close amendments:** (§1) Phase 3.5 statistics; (§2.4 NEW) Master plan §4 Item 9 implicit-assumption mismatch; (§3.3) DSCD Pattern H per-metric refinement; (§3.4 NEW) Pattern A.1 production-locked across 4 dimensions; (§6) Phase 3.5 cycle close all 7 banked candidates dispositioned; (§7 NEW) Phase 4 carry-forward; (§8/§9/§10) Existing sections renumbered. |
-| **1.2.0** | **2026-05-03** | **Claude Code (Phase 4 Session 12c — closes v1.2.0 doc-set issuance event)** | **Phase 4 cycle close amendments — P-3 v1.2.0 ISSUED.** (§3.4.1 NEW; S11a-1) O-1 banking near-unit-root VAR companion margin observation (BYF Mod-2 34-mat fixture 0.9988; corrective action consumed at S9 var_eigenvalues threshold tightening to <0.9995). (§3.4.2 NEW; S11a-3) DOCUMENTED-DIVERGENCE forward-provisioning interval (~6 months between Phase 3.5 S1 wiring and Phase 4 S5 first runtime exercise; 3 wiring layers validated; self-validating-irony parallel with §8.5 install-matrix gate per P-1 §13.5.4). (§3.4.3 NEW; S5; S12c) Phase 4 BVAR DD finding — first DD outcome in TSL parity history (BYF #1 Pattern A.2 audit; max_rel_diff=1.76 on Minnesota posterior; methodology gap CCM-2019 Minnesota vs R BVAR hierarchical Litterman). (§3.4.4 NEW; S6; S12c) Phase 4 stochvol partial DD finding — second DD outcome (BYF #3; CCM-KSC vs standalone svsample). (§3.4.5 NEW; B-Phase4-S6-1 cross-doc P-3 side; S12c) Auto-DD pattern empirical-findings-side codification per Disposition 3 (registry-side at P-2 §C.2.x). (§6.6 update; S12c; P3-T3) DD verdict reservation — first runtime instance landed at Phase 4 S5; cross-references to P-3 §3.4.3/§3.4.4/§3.4.2. (§6.10 NEW; S12c; P3-T5) Phase 4 cycle close consolidation — 13-item inheritance register fully dispositioned (12 closed in-cycle + BYF #5 closed at S11c-2 = 13/13 closed); 2 forward-banked items explicit deferral to Phase 4.5+ (B-Phase4-S7-1 None-handling bug; B-Phase4-S10-3 smoke-test n_draws). (§7.1/§7.2/§7.3 closure dispositions; S12c; P3-T4) P4-1 CLOSED at S7+S8+S9 (registry expansion + engine audit-field + wrapper wiring); P4-2 CLOSED at S2 (pathway c bypass); P4-3 CLOSED at S3 (pathway b auto-cap). (§8 numbering fix; S12c; P3-T6 per Disposition 1) Subsections renumbered §7.1/§7.2/§7.3 → §8.1/§8.2/§8.3 (pre-existing Phase 3.5 v1.1.0 amendment artifact corrected). |
+| **1.1.0** | **2026-04-30** | **Claude Code (Phase 3.5 Session 11)** | **Phase 3.5 cycle close amendments:** (§1) Numbers table extended with Phase 3.5 statistics (11 sessions; 6 under budget; 8 of 9 candidates closed in-cycle; 1 verdict-class production-lock; 1 schema extension; fixture pool 5 → 16 series; 3 Phase 4 carry-forward). (§2.4 NEW) Master plan §4 Item 9 implicit-assumption mismatch — methodology evolution: parity harness uses synthetic DGP fixtures by design, NOT macro fixtures; macro fixture expansion serves wrapper-level re-validation. Pattern observed: audit-first discipline catches prompt-premise/evidence boundary errors. (§3.3) DSCD Pattern H per-metric refinement: DSCD is metric-specific (latent-structure outputs) within em_stochastic, not wrapper-wide. (§3.4 NEW) Pattern A.1 production-locked across 4 dimensions (53 datapoints, 0 regressions: 18 implementation + 9 version + 21 cross-pair + 5 cross-asset). (§6) Phase 3.5 cycle close — all 7 banked candidates dispositioned (6 closed; 1 partial Phase 4 deferral on X-13 Linux integration); §6.8 + §6.9 added for S2 12-wrapper migration + Item 9 macro fixture expansion synthesis. (§7 NEW) Phase 4 carry-forward: structural_invariants on 12 inherited; statsmodels-x13ashtml integration; CSD wrapper engineering. (§8/§9/§10) Existing sections renumbered; original §6/§7/§8/§9 → §6 (rewritten) / §8 / §9 / §10. |
 
 ---
 
-**End of Parity Empirical Findings P-3 v1.2.0.**
+**End of Parity Empirical Findings P-3 v1.1.0.**
 
-**Phase 4 documentation phase COMPLETE for P-1 + P-2 +
-P-3.** v1.2.0 doc-set issuance event (P-1 + P-2 + P-3
-both at v1.2.0 ISSUED; C-1 already at v2.0.0 from Phase 4
-S10) closes at this commit. Session 13 (P-4 v1.2.0 +
-Phase 4 cycle close) is the final Phase 4 session.
+**Phase 3.5 documentation phase COMPLETE.** Session 12
+proceeds to closeout: CI workflow verification + Phase 3.5
+closeout commit + Phase 4 launch decision.
