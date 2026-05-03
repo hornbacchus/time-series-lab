@@ -1,6 +1,6 @@
 # TSL Parity Diagnostic Reference (P-2)
 
-**Version:** v1.1.0 (issued at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 16)
+**Version:** v1.2.0 (issued at Phase 4 Session 12b-2, 2026-05-03; v1.1.0 at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 16)
 
 **Status:** Living document. Spec for parity-harness diagnostic
 patterns and reference-library quirks accumulated across Phase 3
@@ -1334,7 +1334,8 @@ landed in the prior sub-sub-session.
 ## Section D — Pattern F structural-invariants registry
 
 See `tools/reference_parity/harness/structural_invariants.py`.
-14 concrete invariants populated as of Session 13 close:
+**19 concrete invariants populated as of Phase 4 Session 7
+close** (14 from Phase 3 + 5 from Phase 4 P4-1.1 expansion):
 
 | Invariant | Wrapper class | Populated at |
 |---|---|---|
@@ -1350,11 +1351,39 @@ See `tools/reference_parity/harness/structural_invariants.py`.
 | `fft_energy_conservation` | FFT family | Session 11 |
 | `wavelet_inverse_roundtrip` | Wavelet family | Session 11 |
 | `wavelet_energy_conservation` | Wavelet family | Session 11 |
-| `conformal_nominal_coverage` | Conformal | **Session 13** |
-| `conformal_interval_containment` | Conformal | **Session 13** |
+| `conformal_nominal_coverage` | Conformal | Session 13 |
+| `conformal_interval_containment` | Conformal | Session 13 |
+| `mcmc_convergence` (omnibus) | MCMC family (SV, BVAR-SV) | **Phase 4 S7 (P4-1.1)** |
+| `evt_extremal_index` | EVT POT/GPD | **Phase 4 S7 (P4-1.1)** |
+| `mint_coherence` | MinT reconciliation | **Phase 4 S7 (P4-1.1)** |
+| `attention_normalization` | Transformer (multi-head) | **Phase 4 S7 (P4-1.1)** |
+| `intervals_test` (Christoffersen LR) | CAViaR / VaR backtester | **Phase 4 S7 (P4-1.1)** |
 
-Future populations: bootstrap (deferred — Batch 10 used self-
-parity at 0.0 abs, no invariant population needed),
+**INVERTED semantics convention (B-Phase4-S9-3):**
+the `intervals_test` invariant uses an INVERTED tolerance
+semantic vs the other 18 invariants. All other invariants
+treat `tolerance` as an upper bound on the residual (PASS
+if residual ≤ tolerance). `intervals_test` treats
+`tolerance` as a LOWER bound on the p-value (PASS if
+Christoffersen LR p-value ≥ floor; default 0.05).
+Documented at the registry checker
+(`structural_invariants.py:1040-1093`) with explicit "Note
+on inverted semantics" docstring + at the audit-side
+declaration in `caviar_sav.py` with matching framing.
+Future inverted-semantics invariants should use the same
+explicit-docstring convention to prevent confusion.
+
+**Pattern F threshold-tightening event (P2-T8 + O-2
+banking).** Phase 4 Session 9 tightened the `var_eigenvalues`
+PASS threshold from `<0.999` to `<0.9995` per O-2 corrective
+action. The early-warning band (PASS_threshold to BLOCK_threshold;
+0.9995 to 1.0) provides explicit operational headroom for
+near-unit-root macro fixtures (BYF Mod-2 34-mat fixture
+landed at 0.9988 with 7e-4 margin). Cross-reference:
+[P-3 §3.4.1 O-1 banking](parity_empirical_findings.md#341--o-1-banking-near-unit-root-var-companion-margin-observation-phase-4-session-11a).
+
+Future populations: bootstrap (deferred — Batch 10 used
+self-parity at 0.0 abs, no invariant population needed),
 decomposition (open).
 
 ### D.1 — Pattern F invariant playbook (new wrapper authoring)
@@ -1431,6 +1460,11 @@ those keys:
 | `wavelet_energy_conservation` | `signal_energy`, `coeff_energy` (scalars) |
 | `conformal_nominal_coverage` | `coverage`, `alpha` (scalars) |
 | `conformal_interval_containment` | `lower`, `upper` (1-D arrays) |
+| `mcmc_convergence` | `ess_min` (scalar; required); `rhat_max` (scalar; optional — None on single-chain Gibbs); `geweke_max_abs_z` (scalar; optional) |
+| `evt_extremal_index` | `theta` (scalar; Ferro-Segers extremal index in [0, 1]) |
+| `mint_coherence` | `coherence_residual` (scalar; L2 norm of summing-constraint violation) |
+| `attention_normalization` | `attention_matrix` (2-D or 3-D ndarray; (T_query, T_key) OR (n_heads, T_query, T_key)) |
+| `intervals_test` | `chris_pvalue` (scalar; Christoffersen LR independence test p-value) |
 
 #### Step 4 — Verdict propagation
 
@@ -1440,6 +1474,71 @@ overall outcome by default.** Invariant CAVEAT is reported
 in the metrics dict for audit-trail visibility. The check
 author may opt-in to propagation if the invariant carries
 hard-fail semantics.
+
+### D.1.5 — Audit-side wrapper-declaration table (P2-T7; Phase 4 S9)
+
+Phase 4 Session 9 (P4-1.3) declared structural_invariants
+on 9 inherited wrappers. Each wrapper's audit-script
+declares the invariant tuple as a class attribute; the
+declarations are **dormant pending runner integration**
+(see B-Phase4-S9-2 banked observation; runner integration
+deferred to Phase 4.5+). Future audit runs will exercise
+these declarations once `check_invariants` is wired into
+the `runner` lifecycle.
+
+| Wrapper audit-script | Invariant declared | Tolerance |
+|---|---|---|
+| `kalman_filter.py` | `kalman_covariance_ordering` | 1e-6 abs |
+| `johansen_bartlett.py` | `vecm_cointegration_rank` | 0 abs (strict integer match) |
+| `mcmc_sv_gaussian.py` | `mcmc_convergence` (omnibus) | 200 ESS_min |
+| `mcmc_sv_student_t.py` | `mcmc_convergence` (omnibus) | 200 ESS_min |
+| `evt_ferro_segers.py` | `evt_extremal_index` | 0.01 abs slack outside [0, 1] |
+| `mint_family.py` | `mint_coherence` | 1e-10 abs |
+| `transformer_attention.py` | `attention_normalization` | 1e-6 abs (float32 noise floor) |
+| `caviar_sav.py` | `intervals_test` (Christoffersen LR; **INVERTED semantics**) | 0.05 p-value floor |
+| `p3_bond_yield_forecast.py` | `mcmc_convergence` (omnibus) | 200 ESS_min |
+
+**Tolerance-value semantic correctness verification** (per
+Phase 4 Check-in #2 deep-verification probe; commit `ff403dd`
++ Check-in #2 transcript): each tolerance value matches the
+registry checker's documented semantic interpretation. All
+9 declarations passed the operational test (covariance-
+ordering numerical noise; integer rank canonical match;
+ESS_min standard MCMC convention; theta [0, 1] slack; L2
+norm closed-form-safe; row-sum float32 floor; Christoffersen
+INVERTED semantic explicitly understood).
+
+### D.1.6 — Registry-expansion-test-coordination discipline (B-Phase4-S7-4)
+
+**Phase 4 Session 12b-2 codification** (banked at S7 P4-1.1
+registry expansion; surfaced when 5 new invariant types were
+registered + the existing `_test_structural_invariants.py`
+test asserted ALL checkers raise `NotImplementedError` —
+contract violation when the 14 concrete checkers had
+replaced the original stubs).
+
+Discipline for registry-expansion sessions:
+
+1. **Audit existing tests for stub-vs-concrete contract
+   assumptions** before adding new invariant types. The
+   pre-S7 test asserted "every registered invariant raises
+   NotImplementedError"; this contract held only when ALL
+   registered invariants were stubs.
+2. **Update test contract in same commit as registry
+   expansion** when the contract assumption no longer
+   holds. At S7, the test was rewritten to handle the
+   stub + concrete + new-type mixed registry state.
+3. **Document the test-contract evolution** in the
+   findings doc + commit message — registry expansions
+   change the implicit test contract; the discipline
+   surfaces the change explicitly.
+4. **Run full test suite after registry expansion** —
+   not just the new tests; existing tests may have
+   contract assumptions that break silently.
+
+Bank as institutional precedent for future Phase 4.5+
+registry expansion (e.g., new wrapper-class invariants for
+HMM-EM extensions, conformal-mondrian splits).
 
 ### D.2 — Pattern F wavelet-mode interaction (banked Item #18)
 
@@ -1714,8 +1813,9 @@ post-Phase-3 audits:
 | 0.2.0 | 2026-04-29 | Claude Code (S13) | Section B extended with B.5 framework-incompatibility entries; Section D structural-invariants registry table populated (12 entries). |
 | 0.3.0 | 2026-04-29 | Claude Code (S14) | Section B extended with B.6 master-plan-reference adjustments; Section D extended to 14 invariants. |
 | 1.0.0 | 2026-04-29 | Claude Code (S16) | Section A tolerance class taxonomy locked (11 classes); Section C Pattern A taxonomy formalized (A.1/A.2/A.3 sub-patterns); Section D extended with invariant playbook + wavelet-mode interaction; Section E Pattern I sign/scale (Item #1); Section F DSCD diagnostic-axis registry (Item #4); Section G Pattern J resolution sub-patterns (Item #11). All banked Items #1, #4, #11, #18, #20 closed at this version. |
-| **1.1.0** | **2026-04-30** | **Claude Code (Phase 3.5 Session 11)** | **Phase 3.5 cycle close amendments:** (A.6) `em_stochastic` per-metric tier docs added for `p3_hmm` + `p3_markov_switching` (Phase 3.5 S4 implementation; 4 + 3 metric tables); Pattern H per-metric finding added (DSCD is metric-specific, not wrapper-wide). (A.10) `single_impl_mle` production-locked at 1e-5 abs / 1e-4 rel band (was candidate); promotion criteria + `p3_vecm` migration evidence documented. (A.11) `optimizer_divergent_mle` candidate banked status preserved (no Phase 3 / 3.5 wrapper exhibits opposite-direction headroom). (A.12) decision-tree updated with [A.10] cross-reference. (B header) Pattern J catalog scoping rule added — J entries describe reference-library quirks, NOT TSL wrapper defects (→ Phase 4) / fixture conventions (→ tools docs) / applied empirical findings (→ product backlogs); 3 re-banking decisions from Phase 3.5 S9 codified. (B.4.3 NEW) CRAN-vs-R-runtime version representation (Phase 3.5 S5; hyphen-format → dot-format pin convention). (B.6.3 NEW) statsmodels-x13ashtml integration deferred to Phase 4 (Phase 3.5 S6 escalation criterion #3 — 3 distinct failure modes; SKIP-graceful preserved both platforms; Phase 4 paths documented). (B.D NEW sub-pattern) platform-binary integration: B.D.1 R-bridge platform path resolution; B.D.2 binary naming variation x13as / x13ashtml; B.D.3 x13path() directory semantics. |
+| 1.1.0 | 2026-04-30 | Claude Code (Phase 3.5 Session 11) | **Phase 3.5 cycle close amendments:** (A.6) `em_stochastic` per-metric tier docs; (A.10) `single_impl_mle` production-lock; (A.12) decision-tree updates; (B header) catalog scoping rule; (B.4.3) CRAN-vs-R-runtime version representation; (B.6.3) statsmodels-x13ashtml integration deferred; (B.D) platform-binary integration sub-pattern. |
+| **1.2.0** | **2026-05-03** | **Claude Code (Phase 4 Session 12b series — S12b-1-1 + S12b-1-2 + S12b-2)** | **Phase 4 cycle close amendments — P-2 v1.2.0 ISSUED.** (B.6.4 NEW; S11a-1) R `bvars` package install fragility on R 4.5.3 (motivating Phase 4 S5 BYF #1 fallback to `BVAR`). (C.2 Phase 4 additions; S12b-1-1) `p3_byf_bvar_constant_vol` PASS-A.2 (DOCUMENTED-DIVERGENCE) entry — first DD outcome in TSL parity history; B-Phase4-S5-3 sampler correction (CCM-2019 Gibbs not PyMC NUTS). `p3_byf_stochvol_partial` PASS-A.2 (DOCUMENTED-DIVERGENCE) entry — partial A.2 on SV component. (C.2.x NEW; S12b-1-2; B-Phase4-S6-1) Auto-DD pattern codification — 4-step pattern for compare() embedding DD verdict at design time when methodology gap is a priori known. (C.2.y NEW; S12b-1-2; B-Phase4-S6-4) Auto-DD audit-design discipline — 4-step methodology compatibility verification before tolerance ladder selection. (C.2 trace_rank deprecation marking; S12b-1-1; B-Phase4-S8-1) Future code preference for `cointegrating_rank` alias; `trace_rank` retained for backward compat. (C.3 Phase 4 additions; S12b-1-1) `p3_byf_minnesota_dummies` Pattern A.3 entry per Doan-Litterman-Sims 1984 §3 dummy-observation reformulation (PASS bit-exact 1318/1318). (C.6 NEW; S12b-1-2; B-Phase4-S6-5) Pattern A.2 vs A.3 expectation differentiation — A.2 expects bit-exact unless DD documented; A.3 regression-sentinel scope only; failure-modes table. (C.7 NEW; S12b-1-2; Decision 20) Convention-with-application landing pattern — codify convention with first concrete applications in same commit; Phase 4 precedents (S11a-2-2 marginal-tolerance amendment + S11c-1 §3.4 docstring convention). (D registry table; S12b-2; P2-T5) 14 → 19 invariants (5 P4-1.1 additions: mcmc_convergence, evt_extremal_index, mint_coherence, attention_normalization, intervals_test); B-Phase4-S9-3 INVERTED semantics convention call-out (intervals_test treats tolerance as p-value floor; PASS if p ≥ tolerance). (D Pattern F threshold-tightening event; S12b-2; P2-T8 + O-2 banking) `var_eigenvalues` PASS threshold tightened <0.999 → <0.9995 at Phase 4 S9; cross-reference to P-3 §3.4.1. (D Step 3 table; S12b-2; P2-T6) 5 new rows for S7-added invariants' required TSL output keys. (D.1.5 NEW; S12b-2; P2-T7) Audit-side wrapper-declaration table — 9 S9 wrapper declarations + tolerance values + dormant-pending-runner status. (D.1.6 NEW; S12b-2; B-Phase4-S7-4) Registry-expansion-test-coordination discipline — audit existing test-contract assumptions before adding new invariant types. (B.6.4 cross-reference fix; S12b-1-1; P2-T1) anchor pointing to OLD P-3 §3.4 corrected to §3.4.2 (DD forward-provisioning interval landed S11a-3). |
 
 ---
 
-**End of Parity Diagnostic Reference P-2 v1.1.0.**
+**End of Parity Diagnostic Reference P-2 v1.2.0.**
