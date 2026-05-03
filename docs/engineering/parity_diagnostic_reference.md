@@ -1082,15 +1082,82 @@ implementation and the R reference packages, NOT TSL bugs.
   from Phase 1 audit 2b extended at S6 (P-3 §3.4.x BVAR DD
   finding context).
 
-Both entries reflect a methodology-gap pattern (auto-DD)
-that S12b-1-2 codifies at new §C.2.x (forward-reference;
-lands at next sub-session per cascading-split protocol).
-When an A.2 audit's expected-to-fail-tolerance outcome is
-methodologically known a priori (prior-framework gap,
-parameterization difference between otherwise-correct
-implementations), the audit's `compare()` logic embeds the
-DD verdict classification at design time rather than
-producing CAVEAT/BLOCK at runtime.
+Both entries reflect the auto-DD pattern codified at §C.2.x
++ §C.2.y below.
+
+### C.2.x — Auto-DD pattern (B-Phase4-S6-1 P-2 codification)
+
+When a Pattern A.2 audit selects a reference whose
+methodological framework is known a priori to differ from
+TSL's (different prior parameterization; different mixture
+formulation; different sampler family with non-equivalent
+posteriors), the audit's `compare()` logic should:
+
+1. **Pre-compute the methodology-equivalence verdict at
+   design time** — embed the verdict as `DOCUMENTED-DIVERGENCE`
+   in the audit's compare() return path rather than emitting
+   CAVEAT/BLOCK at runtime based on tolerance breach.
+2. **Document the methodology gap explicitly** — the audit's
+   findings doc + audit-report `divergence_rationale` field
+   must cite the specific framework difference (e.g., "TSL
+   uses CCM-2019 Minnesota-prior conditional posterior;
+   reference uses BVAR's hierarchical Litterman prior").
+3. **Preserve numerical-fidelity reporting** — the audit
+   still emits `max_rel_diff`, posterior summaries, and any
+   relevant per-component diagnostics. The verdict
+   classification is overlay; the numerical reporting is
+   underlying.
+4. **Cross-reference the framework gap** — link to the §B
+   Pattern J reference-library quirks catalog OR P-3 §3.4.x
+   empirical findings entry that documents the methodology
+   rationale.
+
+The Phase 4 cycle landed two auto-DD audits
+(`p3_byf_bvar_constant_vol` at S5; `p3_byf_stochvol_partial`
+at S6; both documented at §C.2 above) under this pattern;
+both verdicts cleanly surfaced the DOCUMENTED-DIVERGENCE
+forward-provisioned path wired at Phase 3.5 S1 (see P-3
+§3.4.2 forward-provisioning interval).
+
+### C.2.y — Auto-DD audit-design discipline (B-Phase4-S6-4)
+
+The auto-DD pattern requires audit-design-time methodology
+verification BEFORE tolerance ladder selection. The
+discipline:
+
+1. **Pre-flight methodology compatibility check** — before
+   selecting a Pattern A.2 reference, verify the reference's
+   methodological framework matches TSL's at the level
+   relevant to the audit's verdict (e.g., for posterior-
+   means comparison, verify prior parameterization; for
+   forecast-distribution comparison, verify innovation
+   distribution family).
+2. **If methodology gap exists** — either (a) select a
+   different reference with closer methodological match
+   (preferred), OR (b) accept the auto-DD pattern with
+   explicit framework-gap documentation (acceptable when no
+   closer reference is operationally available).
+3. **Pre-flight tolerance band selection** — for auto-DD
+   audits, the tolerance band documents the "methodological
+   noise floor" — the residual that's expected to remain
+   even when both implementations are mathematically
+   correct under their respective frameworks. The band is
+   NOT chosen to "pass the test"; it's chosen to characterize
+   the framework gap.
+4. **Audit-report transparency** — the auto-DD verdict must
+   be visible in audit reports as PASS-A.2 (DOCUMENTED-
+   DIVERGENCE), not silently downgraded to PASS or upgraded
+   to CAVEAT. The DD designation preserves operator
+   awareness of the methodology gap.
+
+The discipline emerged at Phase 4 S6 when the BYF #3
+stochvol audit needed to differentiate "tolerance-band
+breach due to implementation bug" from "tolerance-band
+breach due to methodology gap". Without the discipline,
+A.2 audits would emit unclassified CAVEAT/BLOCK on
+methodology-driven breaches, masking real bugs in the
+noise. Bank as institutional precedent for future cross-
+package A.2 audit design.
 
 ### C.3 — Sub-pattern A.3: Self-parity / paper-formula reimplementation
 
@@ -1185,6 +1252,82 @@ Decision tree:
 
 If none of A.1/A.2/A.3 fits, the wrapper falls outside
 Pattern A — see verdict_class taxonomy in Section A.
+
+### C.6 — Pattern A.2 vs A.3 expectation differentiation (B-Phase4-S6-5 codification)
+
+Phase 4 cycle audits surfaced an expectation gap between
+Pattern A.2 (cross-package bit-exact) and Pattern A.3
+(self-parity / paper-formula reimplementation) that wasn't
+explicitly codified at Phase 3 cycle close. The gap:
+
+- **Pattern A.2 expectation:** bit-exact match within
+  closed-form numerical noise (~1e-13 abs typical). When
+  A.2 produces a DD outcome, this is an explicit
+  acknowledgment that the methodology gap exceeds the
+  tolerance band — NOT a "good enough" PASS.
+- **Pattern A.3 expectation:** regression-sentinel scope
+  only. A.3 catches wrapper-level regressions
+  (preprocessing bugs, parameter-resolution bugs,
+  audit-field rounding changes) but does NOT catch
+  TSL-vs-canonical-implementation methodology bugs. The
+  audit report must explicitly cite the paper / formula
+  source for independent reviewer cross-check.
+
+Failure modes when the differentiation is not honored:
+
+| Wrong attribution | Symptom |
+|---|---|
+| A.3 PASS as TSL-vs-canonical correctness | False reassurance; methodology bugs pass undetected |
+| A.2 DD as a "wrapper bug" | False BLOCK; methodology gap mistakenly attributed to TSL |
+| A.2 CAVEAT as auto-DD-pattern equivalent | DD designation lost; framework-gap rationale not documented |
+
+**Application discipline:** when adding a new A.2 OR A.3
+audit, the audit-design phase must explicitly state which
+pattern applies AND what the verdict means in operational
+terms. §C.5's decision tree extends with this expectation-
+differentiation framing per B-Phase4-S6-5.
+
+### C.7 — Convention-with-application landing pattern (Decision 20)
+
+**Phase 4 Session 12b-1-2 codification per
+B-Phase4-S11c-1-1.**
+
+When codifying a new Pattern A sub-pattern OR audit-design
+discipline OR registry-checker contract, prefer landing the
+codification with its first concrete applications in the
+same commit. Two empirical Phase 4 precedents (documented
+at P-1 §13.5.2 / §13.5.3 retrospective examples):
+
+- **S11a-2-2** — codified P-1 §13.4 marginal-overshoot
+  tolerance in the same commit that needed it (the §13.5
+  retrospective examples block landed at +218 LOC, just
+  outside the codified ~5-10% band; the marginal-tolerance
+  amendment landed in the same commit as the §13.5
+  content).
+- **S11c-1** — codified P-1 §3.4 docstring convention with
+  5 audit-field-touched wrapper backfills (kalman_filter,
+  kalman_smoother, johansen_cointegration, bvar, BYF
+  dispatch); convention validated against motivating cases
+  in same commit.
+
+**Why the pattern matters:** convention-only codification
+without first applications creates a "what does this mean
+operationally?" gap for future cycle authors. Co-locating
+the codification with at least one concrete application
+provides operating-context examples adjacent to the rule.
+
+**Application examples in P-2 §C:** the §C.2.x auto-DD
+pattern codification (B-Phase4-S6-1, landed S12b-1-2) is
+directly motivated by §C.2's two BVAR-cycle DD entries
+(`p3_byf_bvar_constant_vol`, `p3_byf_stochvol_partial`,
+landed S12b-1-1). The §C.3 Minnesota A.3 entry
+(`p3_byf_minnesota_dummies`, S12b-1-1) exemplifies the
+§C.6 A.2-vs-A.3 differentiation principle (per
+B-Phase4-S6-5, landed S12b-1-2). The convention-with-
+application pattern was honored across the S12b-1 / S12b-1-1
+/ S12b-1-2 split despite the cascading-split sequencing
+constraint — codifications cross-reference touchpoints
+landed in the prior sub-sub-session.
 
 ---
 
