@@ -180,8 +180,116 @@ Final per-series count:
 
 ---
 
-**§3 Phase 4.5+ handoff + cycle-close retrospective + §4
-Cycle close confirmation: append at S13b-2** per Decision
-27 cascading-split disposition. Cycle-close artifact lands
-in initial state at this S13b-1 commit; structurally
-completed at S13b-2.
+## 3. Phase 4.5+ handoff + cycle-close retrospective
+
+### 3.1 Phase 4.5+ deferred items
+
+Two items explicit-deferred to Phase 4.5+ per cycle close:
+
+- **B-Phase4-S7-1** — None-handling bug in 6 concrete
+  invariant checkers (`np.asarray(tsl.get(field), dtype=
+  np.float64)` raises TypeError on None instead of returning
+  empty array). Surfaced at S7 P4-1.1 registry expansion;
+  per §11.8 blast-radius discipline NOT fixed within S7.
+  Phase 4.5+ runner-integration concern.
+- **B-Phase4-S10-3** — Smoke-test n_draws insufficiency
+  surfaces as omnibus BLOCK once runner-integration lands.
+  Phase 4.5+ runner-integration concern.
+
+Cross-reference: P-4 Phase 4.5+ deferred-items section
+landed at S13a commit `64ade89`. Forward-banking is
+**explicit deferral**, NOT silent slippage. Both items
+scoped concretely with rationale + closure path documented
+per B-Phase4-S11c-2-1 institutional precedent.
+
+### 3.2 Master plan §15 estimate-vs-actual comparison
+
+| Aspect | Master plan §15 estimate | Phase 4 actual |
+|---|---|---|
+| Sessions | ~13 | ~26+ sub-sessions (S1-S13 with S11/S12/S13 cascading splits + 1 revert pair at S12c) |
+| Cycle duration | (open) | 2026-05-01 to 2026-05-03 (~3 days) |
+| Inheritance items | 13 | 13 (all closed) |
+| Cascading splits | 0 (planned linear sequence) | 8+ application-driven splits at sub-session level |
+
+The session-count expansion was driven by **§13 discipline
+application**, NOT scope creep. Each split honored §13.2
+criteria check at split-level; each revert preserved audit
+trail integrity (S11b-1 ORIGINAL per Decision 17 Path B;
+S12c original per Decision 23B). The cycle expanded honestly
+to fit institutional discipline rather than compressing
+dishonestly to fit master plan estimates.
+
+### 3.3 Institutional-grade discipline framework empirical validation
+
+§13 fired correctly on routine work AND on its own
+codification (P-1 §13.5.3 S11a-2 cascading split case).
+§13.4 marginal-tolerance band empirically calibrated at
+S11a-2-2 from theoretical 5% to empirical 5-10% per
+codified amendment + S11a-2-2 acknowledgment-banking. §13.4
+hard threshold preserved at borderline edge case (S12b-1
+3-LOC overshoot at 223 vs 220 upper bound; honestly
+disposed as split per Decision 22 / B-Phase4-S12b-1-1).
+
+§8.5 operational enforcement caught real Phase 3 latent
+violation at S11b-2 (R `dtw` package pinned in MANIFEST
+since Phase 3 S14 but missing from both slow-tier R install
+lines; latent ~8 cycles before §8.5 operational enforcement
+exposed it). Belt-and-suspenders pattern empirically
+validated end-to-end via synthetic gap test at S11b-3 per
+B-Phase4-S11b-3-1.
+
+Two correction patterns established:
+- **Revert-and-re-commit** (S11b-1 ORIGINAL → Decision 17
+  Path B): substantive-content-violation correction.
+- **Revert-and-re-split** (S12c original → Decision 23B):
+  institutional-inconsistency correction.
+
+Audit trail integrity preserved across all correction
+patterns (master history shows: original commit + revert +
+corrected re-commit/re-split; mistakes documented as
+institutional learning, not erased per B-Phase4-S11b-1-3
+discipline).
+
+### 3.4 Forward-looking lessons for Phase 4.5+ cycle planning
+
+1. **Trigger-drafting discipline** (B-Phase4-S12c-3):
+   marginal-tolerance applications must explicitly preserve
+   content-vs-measurement distinction. Permissive trigger
+   language at S12c trigger permitted institutional-
+   inconsistency disposition; corrected via revert + re-split
+   per Decision 23B. Future trigger drafts must specify the
+   Decision 21 operational test as a precondition for
+   marginal-tolerance band absorption.
+2. **Pre-flight enumeration discipline** (S12 Phase 1
+   bounded-coherence framing pattern): for issuance-class
+   sessions spanning multiple companion docs, run a Phase 1
+   read-only touchpoint enumeration + dispositions +
+   recommended split structure BEFORE the write phase.
+   Phase 4.5+ should adopt this pattern for multi-doc
+   issuance work.
+3. **Institutional self-application validates discipline**:
+   cycles that apply codified discipline to themselves
+   (Phase 4's §13 framework codified at S11a + applied to
+   itself across 9 application instances) produce stronger
+   institutional grounding than aspirational specification
+   followed by deferred application.
+4. **Master-plan LOC estimates run 1.5-2× under empirical
+   actuals** for codification-density work (per
+   B-Phase4-S12a-2). Future master plans should treat per-
+   session LOC estimates as lower bound; sub-session splits
+   driven by §13.4 discipline are expected, not exceptional.
+
+---
+
+## 4. Cycle close confirmation
+
+Phase 4 cycle CLOSES at this S13b-2 commit.
+
+- **Engine baseline frozen at S11c-2 commit `8c45de7`** (2026-05-02)
+- **Doc-set issuance baseline frozen at S13a commit `64ade89`** (2026-05-03)
+- **Cycle-close artifact frozen at this commit**
+- **Phase 4.5+ work inherits from**: this cycle-close artifact
+  (institutional learning + deferred items) + P-4's Phase 4.5+
+  deferred-items section (operational inheritance register)
+
+**End of Phase 4.**
