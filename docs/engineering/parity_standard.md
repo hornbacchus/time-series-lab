@@ -1,6 +1,6 @@
 # TSL Reference Parity Standard (P-1)
 
-**Version:** v1.1.0 (issued at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 15)
+**Version:** v1.2.0 (issued at Phase 4 Session 12a, 2026-05-03; v1.1.0 at Phase 3.5 Session 11, 2026-04-30; v1.0.0 at Phase 3 Session 15)
 
 **Status:** Binding for any new wrapper PR that surfaces
 numerical output. Authoritative directive.
@@ -27,6 +27,23 @@ documents:
 This document is **directive** ("must"). P-2 + P-3 are
 descriptive ("what we found"). When this document conflicts
 with P-2 or P-3, **this document wins**.
+
+**Cross-doc unifying theme** (Phase 4 Session 12a addition;
+B-Phase4-S10-2). Three Phase 4 amendments — §8.5 install-
+matrix gate, §13 per-session cycle discipline, and C-1 §6.3
+layered validation — all address a common failure class:
+**discipline violations invisible to local-only verification**.
+§8.5's install-matrix gap surfaces only on CI, not local
+install; §13's per-session LOC budget enforces commit-size
+discipline that single-author review cannot reliably catch;
+C-1 §6.3's request-local config copy prevents re-entrancy
+hazards that local single-call testing misses. The three
+sections together codify operational enforcement as the
+hardening layer for prose discipline (B-Phase4-S11b-3-2
+belt-and-suspenders pattern). Future amendments to P-1 / C-1
+should consider whether prose discipline alone is sufficient
+or whether operational enforcement is required to make the
+discipline reliable.
 
 ---
 
@@ -257,6 +274,22 @@ S11c wrapper-docstring backfill closed gaps from prior cycles
 where audit-field surface was added without corresponding
 docstring documentation (S8 P4-1.2 + B-Phase4-S8-2 BYF
 diagnostics elevation are precedent cases).
+
+**Two-block docstring pattern** (Phase 4 Session 12a
+codification per B-Phase4-S11c-1-2). The S11c-1 / S11c-2
+backfill across 10 wrappers landed on a two-block convention:
+each wrapper's module docstring carries BOTH a References
+block (academic / paper / package-author citations) AND an
+Audit-fields block (per-key contract for audit-trail
+consumers). The two blocks serve **distinct reader
+populations** (academic / research vs parity-audit
+infrastructure); removing either degrades the artifact for
+that population. This is principled content density, NOT
+measurement-variance LOC bloat. Future docstring-backfill
+sessions should preserve both block types when both are
+operationally relevant; tighten only inline narrative
+rationale (S11b-1 ORIGINAL anti-pattern documented at
+P-1 §13.5.4).
 
 ---
 
@@ -874,6 +907,34 @@ non-stdlib package not already in TSL's install matrix,
 the dependency-addition checklist item there gates the PR
 on the same four-surface verification.
 
+**Operational enforcement (Phase 4 Session 11b-3 closure;
+B-Phase4-S11b-3-2).** §8.5 was authored at S1 as a prose-
+only PR-author manual checklist. The S5 self-validating-
+irony case (S1 codified §8.5; S5 missed §8.5 within the
+same cycle by adding R `BVAR` to MANIFEST.toml without
+also adding it to `parity-slow.yml`) demonstrated that
+prose discipline alone is insufficient. B-Phase4-S5-4
+banked the operational-enforcement requirement; S11b
+closed it via belt-and-suspenders implementation:
+
+- **Belt** — local pre-commit hook
+  (`tools/git_hooks/pre-commit`; installer at
+  `tools/install_hooks.ps1`) catches gaps at staging time
+  when MANIFEST.toml or workflow files are modified.
+- **Suspenders** — `parity-fast.yml` CI step
+  (`tools/validate_install_matrix.py`) catches gaps if
+  the local hook missed or wasn't installed; runs BEFORE
+  pip install for fast-fail.
+
+Both layers verified via synthetic gap test
+(B-Phase4-S11b-3-1 institutional precedent for operational-
+enforcement infrastructure). The §8.5 checklist above is
+now operational discipline, not just prose; future
+dependency additions are gated end-to-end. The S11b-3
+closure commits are `28f6983` (revert) → `715e06a` (script
+re-commit) → `712397f` (tests + dtw fix) → `c00fdd7` (CI
+step + hook).
+
 ---
 
 ## 9. Cross-Reference to Wrapper Development Standard (C-1)
@@ -1055,7 +1116,51 @@ This document is **directive**. Changes must:
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 1.0.0 | 2026-04-29 | Claude Code (Phase 3 Session 15) | Initial directive issued. Distilled from Phase 3 batch-execution (S2–S14, 70 wrappers, 0 BLOCK). |
-| **1.1.0** | **2026-04-30** | **Claude Code (Phase 3.5 Session 11)** | **Phase 3.5 cycle close amendments:** (1) §5.1 — `single_impl_mle` production-locked at 1e-5 abs / 1e-4 rel band; promotion criteria documented (Phase 3.5 S3 evidence: `p3_vecm` migrated, 9 orders preserved headroom). (2) §5.2.1 NEW — per-metric tolerance ladder schema (Phase 3.5 S4: `_get_metric_tol()` helper, `per_metric` block, ≥1-order migration criterion, p3_hmm + p3_markov_switching precedents). (3) §6.2 — Linux runner added to slow-tier CI matrix; §6.2.1 NEW — cross-platform Rscript resolution protocol (3-step fallback: RSCRIPT_EXE env / manifest pin / shutil.which); empirical: 5/6 R-using slow-tier checks SKIP → PASS on Linux. (4) §7.3 — quarterly re-pin window protocol formalized (triggers / expected output / sentinel-wrapper coverage / escalation rules; first cycle executed at Phase 3.5 S5, cadence anchored at 2026-07-29). |
+| 1.1.0 | 2026-04-30 | Claude Code (Phase 3.5 Session 11) | **Phase 3.5 cycle close amendments:** (1) §5.1 — `single_impl_mle` production-locked at 1e-5 abs / 1e-4 rel band. (2) §5.2.1 NEW — per-metric tolerance ladder schema. (3) §6.2 — Linux runner added; §6.2.1 NEW cross-platform Rscript resolution. (4) §7.3 — quarterly re-pin protocol. |
+| **1.2.0** | **2026-05-03** | **Claude Code (Phase 4 Session 12a)** | **Phase 4 cycle close amendments:** (1) Header — cross-doc unifying-theme framing per B-Phase4-S10-2 (failure classes invisible to local-only verification: §8.5 + §13 + C-1 §6.3). (2) §3.4 NEW (S11c-1) — engine wrapper docstring convention; updated Phase 4 S12a with two-block docstring pattern codification per B-Phase4-S11c-1-2. (3) §6.1 (S11a-1) — tier classification clarification (per-check audit runtime; cross-doc tier-axis disambiguation table). (4) §8.5 NEW (S1) — pre-merge install-matrix gate (4-surface checklist); updated Phase 4 S12a with operational-enforcement closure per B-Phase4-S11b-3-2 (belt-and-suspenders: pre-commit hook + CI step). (5) §12.2 NEW — version-bump criteria per B-Phase4-S10-1 (mirrors C-1 v2.0.0 precedent). (6) §13 NEW (S11a-2-1, S11a-2-2) — per-session cycle discipline (LOC budget + bundled-category exception + test-LOC + spill protocol + retrospective examples + marginal-tolerance amendment). (7) §13.3 — Decision 18 clarifying sentence per B-Phase4-S11b-2-1 (combined-ceiling interpretation when both budgets engaged). (8) §13.6 NEW — Decision 21 codification per B-Phase4-S11b-1-3 + B-Phase4-S11c-1-2 (principled content density vs measurement-variance overshoot distinction; operational test for Decision 21 application). |
+
+### 12.2 Version-bump criteria (B)
+
+**Phase 4 Session 12a codification (B-Phase4-S10-1).**
+Mirrors the C-1 v2.0.0 major-version-bump precedent
+established at Phase 4 Session 10 (C-1 §6 NEW). Future
+P-1 amendments should follow these criteria:
+
+- **Major version bump (vN.x.y → v(N+1).0.0):** addition
+  of a new top-level section introducing binding (B-tier)
+  requirements that PR authors must verify, OR fundamental
+  change to the verdict closure rule (§2), reference tier
+  policy (§4), or tolerance bands (§5) that requires
+  revalidation of existing wrappers.
+- **Minor version bump (vN.x.y → vN.(x+1).0):** subsection
+  additions to existing sections; new aspirational (A-tier)
+  recommendations; codification of existing institutional
+  precedents into binding directive; non-breaking schema
+  extensions (e.g., §5.2.1 per-metric tolerance ladder).
+- **Patch version bump (vN.x.y → vN.x.(y+1)):** factual
+  corrections, link fixes, formatting; clarifying sentences
+  that resolve ambiguity without changing semantic intent;
+  cross-reference target updates.
+
+**Application examples:**
+
+| Version transition | Trigger | Example |
+|---|---|---|
+| v1.0.0 → v1.1.0 | Subsection additions; non-breaking schema extension | Phase 3.5 S11 (§5.2.1 per-metric ladder; §6.2.1 cross-platform Rscript) |
+| v1.1.0 → v1.2.0 | Multiple subsection additions + 1 NEW top-level section (§13) but bounded scope (no §2/§4/§5 fundamentals) | Phase 4 S12a (this issuance; §13 NEW + §3.4 NEW + §8.5 NEW + §12.2 NEW) |
+| Hypothetical v1.2.0 → v2.0.0 | NEW §14+ binding section OR §2 verdict-rule fundamental change | Future cycle (none planned) |
+
+The §13 NEW addition at Phase 4 S12a is borderline — it's
+a new top-level section AND introduces binding requirements.
+Per the criteria above, this would qualify for major-version
+bump. **The choice to bump to v1.2.0 instead of v2.0.0
+reflects** the §13 codification's narrow operational scope
+(per-session LOC budget; doesn't affect existing wrapper
+verdicts or tolerance bands). C-1's contrasting v1.x → v2.0.0
+bump at S10 covered §6 NEW with broader operational impact
+(every PR modifying any existing wrapper must now conform
+to §6). Future P-1 codifications adding new binding
+requirements at the per-wrapper level should bump major.
 
 ---
 
@@ -1157,6 +1262,14 @@ sessions that ship robust test coverage.
 additions, in addition to the 200 LOC engine/audit/doc
 budget. Combined ceiling for sessions that hit both budgets:
 **350 LOC total** (200 engine/audit/doc + 150 tests).
+
+**Decision 18 clarification** (Phase 4 Session 12a per
+B-Phase4-S11b-2-1): when a session has BOTH test and non-
+test content, the combined 350 LOC ceiling applies and the
+standalone 150 LOC test ceiling is a soft target. Test-only
+sessions apply the 150 LOC standalone ceiling as the hard
+limit. This resolves the "in addition to" wording ambiguity
+that surfaced at S11b-2 (commit `712397f`).
 
 Tests counted at the test budget include:
 - `engine/tests/` pytest additions (T14 fixture entries; T15
@@ -1439,8 +1552,60 @@ Bank as discipline: same-cycle forward-references are
 acceptable; cross-cycle forward-references should be
 avoided or inlined (rot risk per B-Phase4-S11a1-1).
 
+### 13.6 Principled content density vs measurement-variance overshoot (B)
+
+**Decision 21 codification (Phase 4 Session 12a per
+B-Phase4-S11b-1-3 + B-Phase4-S11c-1-2).** §13.4's marginal-
+overshoot tolerance band (5-10%) covers **measurement-
+variance** — formatting choices (table widths, blank-line
+spacing) and edit-vs-replace LOC accounting. It does NOT
+cover **content-density overshoot** — additional content
+the artifact could exist without (inline rationale,
+extended examples, supplementary blocks).
+
+The two are distinguishable in practice:
+
+| Aspect | Measurement-variance | Content-density |
+|---|---|---|
+| Source of LOC | Markdown formatting + edit-vs-replace accounting | Distinct content blocks added beyond core scope |
+| Removable without information loss? | Yes (cosmetic) | No (information loss for reader population) |
+| §13.4 disposition | Commit within 5-10% band with explicit acknowledgment | Surface to Chat for split disposition (Decision 17 / S11b-1 ORIGINAL precedent) |
+| Anti-pattern | Treating content-density as measurement-variance to slip substantive scope past §13.4 | Tightening principled multi-block content (e.g., the S11c two-block pattern) to fit budget |
+
+**Principled multi-reader content density** (B-Phase4-
+S11c-1-2 institutional precedent): when an artifact serves
+distinct reader populations (academic / research +
+parity-audit infrastructure; production engineer + cycle
+author; etc.), each block earns its LOC. Removing either
+block degrades the artifact for that population. The S11c
+two-block docstring pattern (References + Audit-fields)
+exemplifies this; tightening to one block would have lost
+information for one reader population.
+
+**Substantive content-density overshoot** (B-Phase4-
+S11b-1-3 anti-pattern): when an artifact's content goes
+beyond what's operationally necessary for any reader
+population (inline rationale that could live in findings
+docs, extended narrative documenting decisions rather than
+rules), the LOC is substantive overshoot. The S11b-1
+ORIGINAL commit (revert `3b04bf9`) exemplifies this;
+~120 LOC of inline rationale was content the script could
+exist without.
+
+**Operational test for Decision 21 application:**
+1. Identify the distinct reader populations the artifact
+   serves.
+2. For each block of content, ask: "would removing this
+   block leave any reader population without operationally
+   necessary information?" If yes → principled content
+   density (block earns its LOC). If no → substantive
+   overshoot (tightening or split disposition required).
+3. When in doubt, surface to Chat — never classify content-
+   density as measurement-variance to slip substantive
+   scope past §13.4.
+
 ---
 
-**End of Parity Standard P-1 v1.1.0** (cumulative Phase 4
-amendments toward v1.2.0 issuance documented in §12.1
-change log + §13 NEW above).
+**End of Parity Standard P-1 v1.2.0** (cumulative Phase 4
+amendments documented in §12.1 change log + §13 codifications
+above).
