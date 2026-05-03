@@ -3,6 +3,22 @@ Vector Autoregression (VAR) model for Time Series Lab.
 
 Fits a VAR(p) model to two or more series, producing impulse responses,
 forecast error variance decomposition, and multi-step forecasts.
+
+References
+----------
+Sims 1980 (VAR origin); Lütkepohl 2005 *New Introduction to Multiple
+Time Series Analysis*; statsmodels `tsa.api.VAR` (the underlying
+estimator). Reference parity check: R `vars::VAR` at Phase 1 audit 1c
+(closed-form match at machine precision given fixed coefficients).
+
+Audit fields
+------------
+- ``companion_eig_magnitudes``: list of |λ_i| for the VAR(p) companion
+  matrix. Stationarity requires max |λ| < 1; Pattern F structural
+  invariant ``var_eigenvalues`` (P-2 §D.1) verifies this. See P-3
+  §3.4.1 (O-1) for the near-unit-root margin observation banked at
+  BYF Mod-2 + corrective Pattern F threshold tightening to 0.9995
+  at Phase 4 S9.
 """
 
 import numpy as np

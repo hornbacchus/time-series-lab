@@ -1,8 +1,27 @@
 """
 Dynamic Factor Model for Time Series Lab.
 
-Fits a dynamic factor model using statsmodels DynamicFactor.
-Extracts common latent factors from multiple observed time series.
+Fits a dynamic factor model using ``statsmodels.tsa.statespace.
+DynamicFactor``. Extracts ``k_factors`` common latent factors from N
+observed time series via state-space representation
+y_t = Λ·f_t + ε_t with f_t following an AR(p) process. Estimation
+via Kalman-filter MLE; factor extraction via Kalman smoother.
+
+References
+----------
+Stock & Watson 2002, 2011 (large-dimensional dynamic factor models;
+PCA-style factor extraction); Bai & Ng 2002 (factor-count selection
+criteria — IC1/IC2/IC3 referenced in the wrapper's diagnostic
+output). Reference parity check: same-library Pattern A.1 against
+statsmodels DynamicFactor (Phase 3 audit p3_dfm).
+
+Audit fields
+------------
+- ``factor_loadings``: matrix Λ ∈ R^{N × k_factors} mapping factors
+  to series (smoothed-state basis).
+- ``factor_series``: list of T-length factor estimates (smoothed).
+- ``ic_p``, ``ic_k``: Bai-Ng information criteria for lag-order p
+  + factor count k respectively (when computed).
 """
 
 import numpy as np

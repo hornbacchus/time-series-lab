@@ -2,7 +2,26 @@
 PELT Change Point Detection for Time Series Lab.
 
 Detects abrupt changes in the statistical properties of a time series
-(mean, variance, or both) using the PELT algorithm from the ``ruptures`` package.
+(mean, variance, or both) using the PELT algorithm via ``ruptures``.
+PELT (Pruned Exact Linear Time) is exact for the additive cost +
+penalty objective; runs in O(T log T) with the linear-time pruning
+trick.
+
+References
+----------
+Killick, Fearnhead & Eckley 2012 (PELT algorithm); Truong, Oudre &
+Vayatis 2020 (ruptures package). Reference parity check: same-library
+Pattern A.1 against ruptures.Pelt (Phase 3 audit p3_pelt; closed-form
+match given identical cost function + penalty).
+
+Audit fields
+------------
+- ``change_points``: list of T-indices where PELT detected breaks
+  (returned by ``ruptures.Pelt(...).fit_predict()``; the final entry
+  is always T itself per ruptures convention).
+- ``cost_function``, ``penalty``: the cost class name (e.g., l2 /
+  rbf / cosine) and penalty value used; reproduces the exact PELT
+  invocation for downstream verification.
 """
 
 import numpy as np

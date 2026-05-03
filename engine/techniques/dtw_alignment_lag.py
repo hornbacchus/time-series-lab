@@ -8,6 +8,24 @@ relationship varies: at each point, the local lag can be extracted.
 
 Implements DTW from scratch using dynamic programming with configurable
 window constraints (Sakoe-Chiba band or Itakura parallelogram).
+
+References
+----------
+Sakoe & Chiba 1978 (DTW + Sakoe-Chiba band constraint); Itakura 1975
+(Itakura parallelogram); Müller 2007 *Information Retrieval for Music
+and Motion* (DTW survey). Reference parity check: Python
+``dtaidistance.dtw`` (cross-package canonical reference; Phase 3
+audit p3_dtw at closed-form precision). R `dtw` package pinned in
+MANIFEST.toml (Phase 3 S14 documentation pin; surfaced as §8.5
+application case at Phase 4 S11b-2 — install lines fixed).
+
+Audit fields
+------------
+- ``warping_path``: list of (i, j) index pairs along the optimal
+  alignment path.
+- ``dtw_distance``: scalar accumulated cost along the path.
+- ``time_varying_lag``: per-t local lag (j_t - i_t) extracted from
+  the warping path; positive values indicate y leads x.
 """
 
 import numpy as np

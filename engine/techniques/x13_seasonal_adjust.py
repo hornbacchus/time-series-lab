@@ -1,9 +1,36 @@
 """
 X-13 ARIMA-SEATS Seasonal Adjustment for Time Series Lab.
 
-Wraps the US Census Bureau's X-13ARIMA-SEATS program for seasonal adjustment.
-Looks for the x13 binary in ../resources/x13/. If not found, returns a clear
-error message with installation instructions.
+Wraps the US Census Bureau's X-13ARIMA-SEATS program for seasonal
+adjustment. Per Phase 4 Session 2 (P4-2 pathway c bypass), invokes
+the ``x13ashtml`` binary directly and parses its output (.d10/.d11/
+.d12/.d13) rather than going through statsmodels'
+``x13_arima_analysis`` abstraction (which has incompatibilities with
+the HTML-aware build of X-13ARIMA-SEATS).
+
+Binary discovery cascade:
+1. ``TSL_X13_BINARY_PATH`` env var (highest priority; CI sets this
+   on Linux runner per Phase 4 S2 amendment).
+2. ``../resources/x13/`` (TSL bundled binary search path).
+3. ``shutil.which("x13as" / "x13ashtml")`` (system PATH fallback).
+
+References
+----------
+US Census Bureau X-13ARIMA-SEATS Reference Manual (Findley 1998 +
+later revisions); Dagum & Bianconcini 2016 *Seasonal Adjustment
+Methods and Real Time Trend-Cycle Estimation*. Reference parity check:
+R `seasonal::seas` (Phase 1 / Phase 4 S2 — both invoke the same
+underlying X-13 binary; Pattern A.1 same-binary parity at machine
+precision once binary discovered identically).
+
+Audit fields
+------------
+- ``seasonal_adjustment``: T-length D11 (final seasonally-adjusted
+  series).
+- ``seasonal_factors``: T-length D10 (final seasonal factors).
+- ``trend_cycle``: T-length D12 (final trend-cycle).
+- ``binary_path``: resolved x13 binary path (debugging aid; verifies
+  the discovery cascade landed where expected).
 """
 
 import os
