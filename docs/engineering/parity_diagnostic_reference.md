@@ -879,7 +879,7 @@ to a specific reference. A reference that's "in CRAN" is
 not the same as a reference that "loads on R 4.5.3 today".
 
 **Cross-references:**
-- [P-3 §3.4 Decision 3 forward-provisioning interval](parity_empirical_findings.md#34--pattern-a1-production-locked-across-4-dimensions-phase-35-v110) — the BYF Mod-2 + Phase 4 S5 verification interval surfaced this same fragility class.
+- [P-3 §3.4.2 DOCUMENTED-DIVERGENCE forward-provisioning interval](parity_empirical_findings.md#342--documented-divergence-forward-provisioning-interval-phase-4-session-11a-3) — the BYF Mod-2 + Phase 4 S5 verification interval surfaced this same fragility class.
 - Phase 4 Session 5 findings doc: `docs/reference_parity_phase4/session_5_findings.md`.
 
 ---
@@ -1014,6 +1014,17 @@ independent implementations.
 - `p3_var` (S7; statsmodels vs R `vars::VAR` — 7.22e-16)
 - `p3_vecm` (S7; statsmodels vs R urca::ca.jo — 9.99e-16
   after sign normalization)
+  - **B-Phase4-S8-1 trace_rank deprecation marking
+    (Decision 10).** Phase 4 S8 added two alias audit-fields
+    to the Johansen wrapper (`determined_rank_trace`,
+    `cointegrating_rank`) for naming-convention bridging.
+    The original `trace_rank` field is preserved unchanged
+    for backward compat. **Future code should prefer
+    `cointegrating_rank`** (matches the registry-checker
+    contract at P-2 §D.1 `vecm_cointegration_rank`).
+    `trace_rank` will be marked deprecated at the next P-1
+    breaking-change cycle (no current deprecation warning;
+    documentation-only marking at v1.2.0 issuance).
 - `p3_pca` (S7; numpy eigh vs sklearn PCA — 7.99e-15)
 - `p3_adf`, `p3_kpss` (S10; statsmodels vs R urca; 1e-14
   range)
@@ -1025,6 +1036,61 @@ independent implementations.
   — 4.22e-15)
 - `p3_granger` (S14; statsmodels vs R lmtest — 8.53e-14)
 - `p3_ccf` (S14; statsmodels.ccf vs R stats::ccf — 1.33e-15)
+
+#### Phase 4 cycle additions to §C.2 (DOCUMENTED-DIVERGENCE entries)
+
+The Phase 4 cycle introduced two A.2 audits that landed
+PASS-A.2 with **DOCUMENTED-DIVERGENCE** outcome — the first
+DD verdicts in TSL parity history. Both reflect prior-
+parameterization differences between TSL's CCM-2019-based
+implementation and the R reference packages, NOT TSL bugs.
+
+- **`p3_byf_bvar_constant_vol`** (Phase 4 S5; BYF candidate
+  #1) — TSL `bond_yield_forecast` BVAR-SV with
+  `force_constant_h=True` vs R `BVAR::bvar()` (Kuschnig &
+  Vashold 2021, JSS) at matched Minnesota-prior config.
+  `max_rel_diff = 1.76` on Minnesota coefficient posterior
+  means; well outside MCMC tolerance band (5e-3 abs / 5e-2
+  rel) but methodologically expected. R `bvars` (Krueger
+  2018) would have been the closer Pattern A.2 reference
+  but was unavailable on R 4.5.3 (see [§B.6.4](#b64--r-bvars-package-install-fragility-on-r-453-phase-4-session-11a)).
+  Verdict: **PASS-A.2 (DOCUMENTED-DIVERGENCE)**.
+
+  **B-Phase4-S5-3 sampler correction (Phase 4 S12b-1
+  v1.2.0 issuance):** the original S5 audit-script + findings-
+  doc verdict text characterized the TSL sampler as "TSL NUTS
+  (PyMC)". The actual TSL implementation is the **CCM-2019
+  Gibbs sampler** (Carriero-Clark-Marcellino 2019; with KSC-
+  1998 mixture for SV; FFBS state sampling). The DD verdict
+  classification itself (turns on prior-parameterization gap,
+  not sampler choice) is preserved unchanged; only the
+  sampler characterization is corrected at v1.2.0 issuance.
+  Original S5 audit-script + findings doc remain authoritative
+  for "what was authored when"; this correction is integration
+  not silent revision.
+
+- **`p3_byf_stochvol_partial`** (Phase 4 S6; BYF candidate
+  #3) — partial Pattern A.2 on the stochastic-volatility
+  component only of TSL BVAR-SV. TSL's KSC-1998 mixture +
+  FFBS via `bond_yield_forecast` subpackage's CCM-2019 inner
+  sampler vs R `stochvol::svsample` per-equation invocation
+  via `rpy2`. Per-equation log-volatility posterior means at
+  audit-time mu rel_diff < 5% (PASS); phi rel_diff in 5-10%
+  range (CAVEAT band); sigma_eta record-only (prior-
+  parameterization driven). Audit reports as **PASS-A.2
+  (DOCUMENTED-DIVERGENCE)** per the locked tolerance ladder
+  from Phase 1 audit 2b extended at S6 (P-3 §3.4.x BVAR DD
+  finding context).
+
+Both entries reflect a methodology-gap pattern (auto-DD)
+that S12b-1-2 codifies at new §C.2.x (forward-reference;
+lands at next sub-session per cascading-split protocol).
+When an A.2 audit's expected-to-fail-tolerance outcome is
+methodologically known a priori (prior-framework gap,
+parameterization difference between otherwise-correct
+implementations), the audit's `compare()` logic embeds the
+DD verdict classification at design time rather than
+producing CAVEAT/BLOCK at runtime.
 
 ### C.3 — Sub-pattern A.3: Self-parity / paper-formula reimplementation
 
@@ -1056,6 +1122,23 @@ formula source for independent reviewer cross-check).
 - `p3_forecast_combination` (S14; inverse-MSE weighted mean)
 - `p3_rolling_origin_cv` (S14; expanding-window loop)
 - `p3_conformal` (S13; split-conformal qhat formula)
+
+#### Phase 4 cycle additions to §C.3
+
+- **`p3_byf_minnesota_dummies`** (Phase 4 S4; BYF candidate
+  #2) — partial Pattern A.3 reimplementation of the
+  Doan-Litterman-Sims 1984 §3 dummy-observation
+  reformulation of the Minnesota prior. Inline reimpl
+  (~50 LOC) mirrors TSL `bond_yield_forecast`
+  subpackage's CCM-2019 inner sampler dummy-observation
+  construction for posterior-mean coefficient verification.
+  Verdict: PASS bit-exact (1318/1318 cells matching at
+  closed-form precision). Per A.3 expectation
+  (B-Phase4-S6-5): catches wrapper-level regressions in
+  the dummy-observation construction; does NOT catch
+  TSL-vs-canonical implementation methodology bugs in
+  the underlying CCM-2019 sampler (which `p3_byf_bvar_
+  constant_vol` audit covers under Pattern A.2 with DD).
 
 ### C.4 — Pattern K → Pattern A path (sub-pattern A.3 special case)
 
