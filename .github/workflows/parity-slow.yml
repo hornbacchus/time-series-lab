@@ -67,7 +67,17 @@ jobs:
               # P-1 §8.5 (Phase 4 S1) install-matrix gate. R BVAR
               # = Kuschnig & Vashold 2021, JSS — distinct from
               # Krueger 2018 bvars (which is unavailable on R 4.5.3).
-              "BVAR"),
+              "BVAR",
+              # Phase 4 Session 11b (B-Phase4-S5-4 install-matrix
+              # operational enforcement): dtw was pinned in
+              # MANIFEST.toml at Phase 3 Session 14 (Batch 10) but
+              # was never added to slow-tier install lines.
+              # Documentation-only pin (R dtw is not consumed by any
+              # audit; p3_dtw uses Python dtaidistance as reference)
+              # but per §8.5 discipline every MANIFEST package must
+              # appear in slow-tier install. The validate_install_matrix.py
+              # script surfaced this gap at S11b execution.
+              "dtw"),
             repos = "https://cloud.r-project.org"
           )
 
@@ -175,7 +185,12 @@ jobs:
               # per P-1 §8.5 install-matrix gate (Phase 3.5 S1
               # Item 4 protocol: slow-tier install must mirror
               # fast-tier across both Windows + Linux jobs).
-              "BVAR"),
+              "BVAR",
+              # Phase 4 Session 11b (B-Phase4-S5-4 install-matrix
+              # operational enforcement): dtw mirrored from Windows
+              # job per §8.5 four-surface gate. See parity-slow.yml
+              # Windows job for the same dtw entry's context.
+              "dtw"),
             repos = "https://cloud.r-project.org"
           )
 
