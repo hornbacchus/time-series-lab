@@ -174,6 +174,119 @@ docstring (line 358) confirms the gap explicitly:
 > discoverable via class introspection but do not fire
 > during normal audit runs."
 
+## §2 Design decisions
+
+Per Decision 29F sequencing + forward-banking framing:
+§2.a-§2.d + §2.f are S2-blocking design decisions (resolved
+here; outputs lock S2 trigger drafting). §2.e + §2.g are
+surfaced design questions FORWARD-BANKED for later
+resolution (§2.e to S6 trigger; §2.g to integration time).
+
+### §2.a Runner harness location
+
+**Question:** engine-side, audit-side, or separate module?
+**Constraints:** import dependencies; test discoverability;
+declarations already live audit-side per B-Phase5-S1-1.
+**Options:** (1) extend `P3ParityCheck` with `check_invariants`
+method + dispatch from `runner.py:run_check` after step 4;
+(2) parallel `harness/invariants_runner.py` module; (3)
+engine-side relocation.
+**Recommended:** Option (1) harness-side via `P3ParityCheck`.
+Rationale: declarations already live audit-side; engine
+wrappers stay agnostic of audit infrastructure (preserves
+separation of concerns).
+
+### §2.b Dormant declaration elevation mechanism
+
+**Question:** registry-driven, decorator-driven, or class-
+attribute introspection?
+**Constraints:** existing `structural_invariants = (...)`
+class-attribute pattern; registry at
+`harness/structural_invariants.py` already populated.
+**Options:** (1) class-attribute introspection (read
+`check.structural_invariants` tuple; dispatch via
+`get_invariant_checker(inv.invariant_type)`); (2) decorator-
+driven re-discovery; (3) registry refactor.
+**Recommended:** Option (1) class-attribute introspection.
+No refactor needed; `_test_structural_invariants.py`
+already exercises this dispatch shape.
+
+### §2.c INVERTED semantics handling (caviar_sav)
+
+**Question:** how does runner interpret tolerance-band
+semantics for INVERTED p-value floor 0.05?
+**Constraints:** per §1.b finding, `_check_intervals_test`
+handles inversion internally (PASS if `pvalue > floor`);
+B-Phase4-S9-3 codification.
+**Options:** (1) no special runner-side handling (checker
+handles inversion); (2) runner-side INVERTED flag in
+`StructuralInvariant`; (3) per-checker inversion convention.
+**Recommended:** Option (1) no special runner-side handling.
+Checker contract (PASS/CAVEAT/BLOCK status) is symmetric;
+inversion is per-checker internal math; runner consumes
+status return uniformly.
+
+### §2.d None-handling boundary
+
+**Question:** runner's None-handling responsibility vs
+concrete checker's?
+**Constraints:** B-Phase4-S7-1 (6 checkers raise TypeError
+on None); sub-domain (iii) S8 owns fix.
+**Options:** (1) runner defensive try/except wrapping
+dispatch; (2) two-layer discipline (wrappers populate
+audit-fields; checkers return clean BLOCK on missing); (3)
+runner-side null-guards before dispatch.
+**Recommended:** Option (2) two-layer defensive discipline.
+Wrappers populate; checkers return BLOCK on missing
+(post-S8 fix). Runner does NOT add defensive try/except;
+existing catch-all (lines 257-263 of `runner.py`) maps to
+ERROR if checker raises despite S8.
+
+### §2.e Smoke-test integration with sub-domain (ii) — FORWARD-BANKED
+
+**Question:** how does smoke-test n_draws calibration
+(sub-domain (ii)) interact with runner-harness elevation
+(sub-domain (i))?
+**Constraints:** B-Phase4-S10-3 (smoke-test n_draws
+insufficiency); S6 sub-domain (ii) design session ahead.
+**Forward-banking disposition:** deferred to S6 trigger
+drafting; resolution requires sub-domain (ii) infrastructure
+design context (n_draws calibration framework + per-wrapper
+fixture metadata + `setup_fixture` parameter contract). Bank
+as B-Phase5-S1-§2-e-FORWARD-BANKED at S1-C codification.
+
+### §2.f Test coverage strategy
+
+**Question:** test pattern for S2-S5? Per-wrapper smoke +
+cross-wrapper acceptance? Reuses existing + adds wrapper-
+specific?
+**Constraints:** existing test infrastructure per §1.d; smoke
+infrastructure per §1.e; runner integration gap per §1.f.
+**Options:** (1) per-wrapper smoke at S2-S4 + cross-wrapper
+acceptance at S5; (2) single end-to-end acceptance only; (3)
+extension-only of `_test_structural_invariants.py`.
+**Recommended:** Option (1) per-wrapper smoke at S2-S4 +
+cross-wrapper acceptance at S5. Add
+`_test_runner_invariants_dispatch.py` at S2 (~80 LOC)
+verifying runner-side dispatch + outcome-ladder integration;
+existing `_test_structural_invariants.py` continues
+declarations-side coverage.
+
+### §2.g Outcome-ladder integration — FORWARD-BANKED
+
+**Question:** how does runner harness interact with outcome-
+ladder per §1.f finding (intra-check sub-result aggregation
+not currently handled)?
+**Constraints:** outcome-ladder current state per §1.f;
+resolution requires concrete S2-S5 implementation context
+for empirical evaluation.
+**Forward-banking disposition:** deferred to integration
+time; surfaces during S2-S5 implementation per master plan
+§15 sub-domain (i). Initial position: structural-invariants
+BLOCK propagates to `ParityResult.outcome` via same
+`aggregate_outcomes` ranking; verify empirically at S2. Bank
+as B-Phase5-S1-§2-g-FORWARD-BANKED at S1-C codification.
+
 ## Cascading-split institutional record
 
 S1 sub-session sequence depth: Decision 28 four-level master
@@ -262,20 +375,23 @@ deep-cascade scope must include explicit overhead minimums +
 banking-deferral pathways. Bank as Phase 5 institutional
 precedent for cascade-depth trigger calibration.
 
-**§13.4 compliance:** S1-A-2 +80 net LOC commit delta (95
-insertions, 15 deletions); 60% headroom under §13.1 default
+**§13.4 compliance:** S1-B +116 net LOC commit delta (129
+insertions, 13 deletions); 42% headroom under §13.1 default
 200; clean per §13.1 default; no marginal-tolerance band
-engagement. Trigger projection ~95-115 LOC; actual 0.84×
-(under lower-bound) — constraint-specification fix continues
-generalizing. Doc cumulative: 281 LOC across S1-A-1-a-CORRECTED
-+ S1-A-1-b + S1-A-1-c + S1-A-2.
+engagement. Trigger projection ~110-150 LOC; actual 1.05×
+(low-mid of projection) — constraint-specification fix
+continues generalizing across content + codification +
+design-enumeration density classes. Doc cumulative: 397 LOC
+across S1-A-1-a-CORRECTED + S1-A-1-b + S1-A-1-c + S1-A-2 + S1-B.
 
 ## Disposition
 
-§1.a + §1.b + §1.c + §1.d + §1.e + §1.f + 5 banking entries
-LANDED across S1-A-1-a-CORRECTED + S1-A-1-b + S1-A-1-c +
-S1-A-2 sequence. **§1 Architecture review structurally
-complete; S1-A sub-section CLOSED at S1-A-2.** §2 deferred
-to S1-B; §3-§5 + B-Phase5-S1-CALIBRATION-PATTERN +
-B-Phase5-S1-A-1-b-CONSTRAINT-VALIDATION +
-B-Phase5-S1-A-1-c-GENERALIZATION-VALIDATION to S1-C.
+§1.a-§1.f + §2.a-§2.g + 5 banking entries LANDED across S1-A
+sequence + S1-B. **§1 Architecture review CLOSED at S1-A-2;
+§2 design enumeration CLOSED at S1-B (S2-blocking decisions
+§2.a-§2.d + §2.f resolved with recommendations; §2.e + §2.g
+forward-banked).** §3-§5 + 5 deferred banking entries
+(B-Phase5-S1-CALIBRATION-PATTERN + B-Phase5-S1-A-1-b-CONSTRAINT-VALIDATION
++ B-Phase5-S1-A-1-c-GENERALIZATION-VALIDATION +
+B-Phase5-S1-§2-e-FORWARD-BANKED + B-Phase5-S1-§2-g-FORWARD-BANKED)
+deferred to S1-C combined codification.
