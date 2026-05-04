@@ -91,8 +91,88 @@ docstring (lines 129-208): `var_eigenvalues` (line 193),
 (line 519). Other 3 are similarly-shaped
 `np.asarray(tsl.get(field), dtype=np.float64)` calls without
 None pre-check. Currently masked by the runner integration
-gap (S1-A-2 §1.f scope); becomes empirical once invariants
-fire.
+gap (§1.f below); becomes empirical once invariants fire.
+
+### §1.d Existing test infrastructure inventory
+
+`tools/reference_parity/harness/_test_structural_invariants.py`
+(485 LOC) covers 7 test functions:
+
+1. `test_dataclass_instantiation` — `StructuralInvariant`
+   field semantics
+2. `test_registry_enumeration` — 23 types discoverable
+3. `test_checker_dispatch` — both stub-raise + concrete-BLOCK
+   + concrete-raise (B-Phase4-S7-1) paths accepted
+4. `test_s7_new_checkers_pass_on_valid_inputs` — 5 S7 types
+   PASS on satisfying inputs
+5. `test_s7_new_checkers_block_on_violation` — 5 S7 types
+   BLOCK on violating inputs
+6. `test_unregistered_type_raises_keyerror` — registry
+   lookup safety
+7. `test_s9_inherited_wrapper_declarations` — 9 inherited
+   wrapper classes have valid `structural_invariants` tuples
+   resolving to registered checkers
+
+**Coverage gap:** no test exercises the runner-side dispatch
+of `check_invariants` against actual `run_tsl` outputs (test
+7 docstring confirms: "Declarations are dormant at S9 — the
+harness's check_invariants lifecycle method is not yet wired
+into the runner"). S2 introduces
+`_test_runner_invariants_dispatch.py` to close this gap.
+
+### §1.e Smoke-test infrastructure entry points (B-Phase4-S10-3 context)
+
+The harness `tools/reference_parity/harness/checks/_smoke.py`
+smoke-test is a generic numpy-vs-R mean probe (1-second
+harness validator); **unrelated** to B-Phase4-S10-3.
+
+B-Phase4-S10-3 concerns the **wrapper-fixture n_draws
+calibration** for the MCMC SV wrappers
+(`mcmc_sv_gaussian`, `mcmc_sv_student_t`,
+`p3_bond_yield_forecast`). At BYF integration time, smoke
+runs at `n_draws=1000` produced ESS_min < 200 →
+`mcmc_convergence` omnibus BLOCK once runner integration
+lands. Fix surface is fixture metadata + per-wrapper
+`setup_fixture` n_draws parameter, not the harness runner
+itself. Sub-domain (ii) S6+S7 owns this scope.
+
+### §1.f Runner integration gap + outcome-ladder current state (the core S1 finding)
+
+`tools/reference_parity/harness/runner.py:run_check` (lines
+112-263) has **4 lifecycle steps**:
+
+1. Load fixture (with hash verify; lines 134-145)
+2. `check.run_tsl(fixture)` (line 154)
+3. `check.run_reference(fixture)` (line 166)
+4. `first_result = check.compare(tsl_out, ref_out)` (line 190)
+
+Plus a CAVEAT-reroll branch (lines 200-239) and exception
+mapping to ParityResult outcomes.
+
+**There is NO `check_invariants` step.** The base
+`ParityCheck` ABC (`base.py` lines 134-212) declares only
+the 4 abstract methods; `P3ParityCheck` (`check_base.py`
+lines 91-166) extends with mandatory `verdict_class` /
+`verdict_class_rationale` attributes + `reroll_on_caveat`
+default flip + `structural_invariants : tuple = ()`
+declaration attribute, but adds NO new lifecycle method.
+
+**Outcome-ladder current state:** `aggregate_outcomes`
+(`base.py` lines 68-79) handles multi-check aggregation via
+`_OUTCOME_PRIORITY` ranking (BLOCK > ERROR > DOCUMENTED-
+DIVERGENCE > CAVEAT > PASS > SKIP). Intra-check sub-result
+aggregation (e.g., compare-status vs invariants-status)
+within a single ParityResult is NOT currently handled — the
+runner just returns `compare`'s ParityResult verbatim.
+Design question for S1-B: should structural-invariants
+status integrate via the same ranking?
+
+The `_test_structural_invariants.py:test_s9_inherited_wrapper_declarations`
+docstring (line 358) confirms the gap explicitly:
+
+> "Declarations are dormant at S9 — declared invariants are
+> discoverable via class introspection but do not fire
+> during normal audit runs."
 
 ## Cascading-split institutional record
 
@@ -182,20 +262,20 @@ deep-cascade scope must include explicit overhead minimums +
 banking-deferral pathways. Bank as Phase 5 institutional
 precedent for cascade-depth trigger calibration.
 
-**§13.4 compliance:** S1-A-1-c +75 net LOC commit delta (88
-insertions, 13 deletions); 62.5% headroom under §13.1 default
+**§13.4 compliance:** S1-A-2 +80 net LOC commit delta (95
+insertions, 15 deletions); 60% headroom under §13.1 default
 200; clean per §13.1 default; no marginal-tolerance band
-engagement. Trigger projection ~85-115 LOC; actual 0.88×
-(under lower-bound) — constraint-specification fix validates
-at codification-density scope. Doc cumulative: 201 LOC across
-S1-A-1-a-CORRECTED + S1-A-1-b + S1-A-1-c. Path 30E NOT
-triggered; constraint-specification empirically validated
-across all three S1-A-1 sequence commits.
+engagement. Trigger projection ~95-115 LOC; actual 0.84×
+(under lower-bound) — constraint-specification fix continues
+generalizing. Doc cumulative: 281 LOC across S1-A-1-a-CORRECTED
++ S1-A-1-b + S1-A-1-c + S1-A-2.
 
 ## Disposition
 
-§1.a + §1.b + §1.c + 5 banking entries LANDED across
-S1-A-1-a-CORRECTED + S1-A-1-b + S1-A-1-c sequence; S1-A-1
-correction sequence CLOSED. §1.d-§1.f deferred to S1-A-2;
-§2 to S1-B; §3-§5 + B-Phase5-S1-CALIBRATION-PATTERN +
-B-Phase5-S1-A-1-b-CONSTRAINT-VALIDATION to S1-C.
+§1.a + §1.b + §1.c + §1.d + §1.e + §1.f + 5 banking entries
+LANDED across S1-A-1-a-CORRECTED + S1-A-1-b + S1-A-1-c +
+S1-A-2 sequence. **§1 Architecture review structurally
+complete; S1-A sub-section CLOSED at S1-A-2.** §2 deferred
+to S1-B; §3-§5 + B-Phase5-S1-CALIBRATION-PATTERN +
+B-Phase5-S1-A-1-b-CONSTRAINT-VALIDATION +
+B-Phase5-S1-A-1-c-GENERALIZATION-VALIDATION to S1-C.
