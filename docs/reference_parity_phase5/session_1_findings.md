@@ -287,6 +287,148 @@ BLOCK propagates to `ParityResult.outcome` via same
 `aggregate_outcomes` ranking; verify empirically at S2. Bank
 as B-Phase5-S1-§2-g-FORWARD-BANKED at S1-C codification.
 
+## §3 Recommended S2-S5 sub-session structure
+
+Per master plan §15 sub-domain (i) S1 specification + S1-A
+architecture review + S1-B design decisions.
+
+### §3.a Per-session wrapper grouping
+
+Master plan §15 anticipates 3 wrappers per S2-S4 +
+p3_bond_yield_forecast at S5. Per §1.a (B-Phase5-S1-1 locus
+correction) + §2.a (harness-side dispatch) + §2.b (class-
+attribute introspection) decisions, recommended grouping:
+- **S2:** kalman_filter + johansen_bartlett + evt_ferro_segers
+  (closed-form-numerical trio; uniform invariant-checker shape)
+- **S3:** mcmc_sv_gaussian + mcmc_sv_student_t (MCMC pair
+  sharing `_sv_mcmc.py`; Path A audit-field elevation needed)
+- **S4:** mint_family + transformer_attention + caviar_sav
+  (heterogeneous: closed-form mint + matrix attention + INVERTED)
+- **S5:** cross-wrapper acceptance + p3_bond_yield_forecast
+
+### §3.b Per-session LOC estimate
+
+Master plan §15 estimates ~150-200 LOC per S2-S4. Decision
+30D constraint-specification empirically validated 0.84-1.07×
+multiplier. Refined estimates under constraint-specified
+triggers:
+- **S2:** ~120-180 LOC (3 closed-form wrappers; no Path A)
+- **S3:** ~150-200 LOC (engine-touch heavier; Path A
+  audit-field elevation in `_sv_mcmc.py`)
+- **S4:** ~120-160 LOC (3 wrappers; INVERTED via existing
+  checker; chris_pvalue audit-field if absent)
+- **S5:** ~80-120 LOC (cross-wrapper acceptance + p3_BYF)
+
+### §3.c Per-session §13.4 spill anticipation
+
+S3 highest-risk per engine touch + Path A elevation + 2
+wrapper integrations. Pre-planned natural seam: **S3a
+(engine Path A audit-field elevation) + S3b (wrapper
+integrations + smoke tests)**. S2/S4/S5 likely clean per
+content-density-bounded scoping. Per master plan §4.5
+calibration awareness: engine-touch sessions trend 1.5-2×
+projection multiplier despite constraint-specification —
+S3 splits eagerly per Decision 22 + Decision 27 precedent.
+
+### §3.d Sequencing dependencies
+
+**Lock in S2 trigger** (per S1-B recommendations):
+- §2.a (harness-side via `P3ParityCheck`)
+- §2.b (class-attribute introspection)
+- §2.c (no special INVERTED handling)
+- §2.d (two-layer None-handling discipline)
+- §2.f (per-wrapper smoke + cross-wrapper acceptance;
+  `_test_runner_invariants_dispatch.py` at S2 ~80 LOC)
+
+**Defer to S6:** §2.e (smoke-test sub-domain (ii) integration).
+**Defer to S2-S5 integration time:** §2.g (outcome-ladder
+integration; verify initial position empirically).
+
+## §4 Banking consolidation (S1-A + S1-B deferred entries)
+
+**B-Phase5-S1-CALIBRATION-PATTERN — Phase 5 sub-domain (i)
+opening trigger calibration error pattern.** Empirical record:
+S0-MASTERPLAN-1 unsplit 1.7× | S1 unsplit 2.8× | S1-A-1
+ORIGINAL 1.5× | S1-A-1-a 2.7×. Pattern is genuine
+codification-density at cycle-establishment scope, not
+measurement noise. Cross-reference: B-Phase5-S0-1 (master
+plan codification-density-class observation); Decision 28 +
+Decision 29F + Decision 29F-1 + Decision 30B + Decision 30D
+cascading-split sequence. Forward-looking: Phase 5 sub-
+domain (i)+ trigger drafting defaults to constraint-
+specification per Decision 30D validation; future cycles
+inherit pattern as standing expectation at cycle-establishment
+scope.
+
+**B-Phase5-S1-A-1-b-CONSTRAINT-VALIDATION — Constraint-
+specification validated for content-density scope.**
+S1-A-1-a-CORRECTED (1.07×) + S1-A-1-b (1.02×) empirically
+demonstrate constraint-specification produces sub-1.1×
+multiplier at content-density scope when overhead expansion
+vector removed via per-section LOC cap + banking deferral +
+overhead minimum specification. Cross-reference: Decision
+30D trigger; B-Phase5-S1-A-1-a-OVERHEAD-EXPANSION precedent.
+Forward-looking: bank as Phase 5 institutional precedent
+for content-density scope; future deep-cascade content-
+density trigger drafting adopts pattern.
+
+**B-Phase5-S1-A-1-c-GENERALIZATION-VALIDATION — Constraint-
+specification fix generalizes to codification-density scope.**
+S1-A-1-c at 0.88× under constraint-specified trigger with
+per-banking-entry LOC cap empirically validates generalization
+beyond content-density. Cross-reference: B-Phase5-S1-A-1-b-
+CONSTRAINT-VALIDATION; Decision 30D trigger. Forward-looking:
+trigger specificity is the discipline lever for cascade-depth
+scope; master plan §4.5 calibration awareness amendment may
+be warranted at S13 doc-set issuance to formally codify
+constraint-specification as standing trigger-drafting pattern
+for sub-domain-opening cycle-establishment work.
+
+**B-Phase5-S1-§2-e-FORWARD-BANKED — Smoke-test integration
+design question deferred.** §2.e surfaced at S1-B; resolution
+requires sub-domain (ii) infrastructure design context
+(n_draws calibration framework + per-wrapper fixture
+metadata + `setup_fixture` parameter contract). Deferred
+to S6 trigger drafting per Decision 29F forward-banking
+framing. Cross-reference: B-Phase4-S10-3 (smoke-test n_draws
+insufficiency); master plan §15 sub-domain (ii) S6.
+Forward-looking: surface as design question at S6 trigger
+drafting; explicit deferral with resolution context, NOT
+silent slippage.
+
+**B-Phase5-S1-§2-g-FORWARD-BANKED — Outcome-ladder integration
+design question deferred to integration time.** §2.g
+surfaced at S1-B; resolution requires concrete S2-S5
+implementation context for empirical evaluation. Initial
+position: structural-invariants BLOCK propagates to
+`ParityResult.outcome` via `aggregate_outcomes` ranking;
+verify empirically at S2. Cross-reference: §1.f outcome-
+ladder current-state finding; master plan §15 sub-domain (i)
+S2-S5. Forward-looking: address design question during S2
+implementation; if empirical evaluation diverges from initial
+position, surface to Chat for refinement.
+
+## §5 Recommended next steps for S2 trigger
+
+S2 trigger drafting style: **constraint-specification per
+Decision 30D validated pattern.** Skeleton triggers prohibited
+at sub-domain (i) opening per Phase 5 empirical record
+(B-Phase5-S1-CALIBRATION-PATTERN).
+
+S2 trigger LOCKS:
+- §2.a-§2.d + §2.f S2-blocking decisions per S1-B recommendations
+- Per-wrapper integration constraints per §3.a (kalman + johansen
+  + evt trio for S2)
+- Per-session LOC estimate per §3.b (~120-180 LOC for S2)
+- Per-session §13.4 spill anticipation per §3.c (S2 likely clean;
+  no pre-planned natural seam needed)
+- Test pattern per §2.f (`_test_runner_invariants_dispatch.py`
+  at S2 ~80 LOC)
+
+S2 trigger DEFERS:
+- §2.e to S6 (sub-domain (ii) infrastructure design)
+- §2.g to S2-S5 integration time (empirical verification)
+
 ## Cascading-split institutional record
 
 S1 sub-session sequence depth: Decision 28 four-level master
@@ -375,23 +517,24 @@ deep-cascade scope must include explicit overhead minimums +
 banking-deferral pathways. Bank as Phase 5 institutional
 precedent for cascade-depth trigger calibration.
 
-**§13.4 compliance:** S1-B +116 net LOC commit delta (129
-insertions, 13 deletions); 42% headroom under §13.1 default
+**§13.4 compliance:** S1-C +143 net LOC commit delta (160
+insertions, 17 deletions); 28.5% headroom under §13.1 default
 200; clean per §13.1 default; no marginal-tolerance band
-engagement. Trigger projection ~110-150 LOC; actual 1.05×
-(low-mid of projection) — constraint-specification fix
-continues generalizing across content + codification +
-design-enumeration density classes. Doc cumulative: 397 LOC
-across S1-A-1-a-CORRECTED + S1-A-1-b + S1-A-1-c + S1-A-2 + S1-B.
+engagement. Trigger projection ~155-215 LOC; actual 0.92×
+(under lower-bound) — constraint-specification fix lands
+under projection on highest-content-density S1 sub-sub-sub-
+sub-session. Doc cumulative: 540 LOC across S1-A-1-a-CORRECTED
++ S1-A-1-b + S1-A-1-c + S1-A-2 + S1-B + S1-C. S1 [PRE-FLIGHT]
+design session COMPLETE.
 
 ## Disposition
 
-§1.a-§1.f + §2.a-§2.g + 5 banking entries LANDED across S1-A
-sequence + S1-B. **§1 Architecture review CLOSED at S1-A-2;
-§2 design enumeration CLOSED at S1-B (S2-blocking decisions
-§2.a-§2.d + §2.f resolved with recommendations; §2.e + §2.g
-forward-banked).** §3-§5 + 5 deferred banking entries
-(B-Phase5-S1-CALIBRATION-PATTERN + B-Phase5-S1-A-1-b-CONSTRAINT-VALIDATION
-+ B-Phase5-S1-A-1-c-GENERALIZATION-VALIDATION +
-B-Phase5-S1-§2-e-FORWARD-BANKED + B-Phase5-S1-§2-g-FORWARD-BANKED)
-deferred to S1-C combined codification.
+§1.a-§1.f + §2.a-§2.g + §3.a-§3.d + §4 (5 banking entries) +
+§5 + 5 S1-A correction-sequence banking entries LANDED across
+S1-A-1-a-CORRECTED + S1-A-1-b + S1-A-1-c + S1-A-2 + S1-B + S1-C
+sequence. **S1 [PRE-FLIGHT] design session COMPLETE.** Phase 5
+cycle proceeds to S2-S5 implementation sessions per master
+plan §15 sub-domain (i); S2 trigger drafting ships using
+constraint-specification per Decision 30D + B-Phase5-S1-A-1-b-
+CONSTRAINT-VALIDATION + B-Phase5-S1-A-1-c-GENERALIZATION-VALIDATION
+institutional precedent.
