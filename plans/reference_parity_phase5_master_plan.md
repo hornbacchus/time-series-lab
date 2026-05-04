@@ -256,8 +256,148 @@ nominal session estimates are skeleton-class.
 
 ---
 
-**End of Phase 5 master plan §1-§5 (S0-MASTERPLAN-1-B
-appending per Decision 28 cascading split, 2 of 3).** §15
-session enumeration + §16 Phase 6 inheritance handoff
-anticipation + §17 master plan version history land at
-S0-MASTERPLAN-2 per pre-planned natural seam.
+## 15. Session enumeration
+
+### Sub-domain (i) — Runner harness elevation
+
+**S1 — Runner harness architecture review + design** [PRE-FLIGHT]
+- Read-only enumeration of current runner-harness state.
+- Design decisions: how runner fires structural-invariants
+  checks against engine output; how dormant declarations
+  elevate to active; integration points with engine
+  `_dispatch.py` + audit registry in P-2 §D.1.5 + tolerance
+  values per audit-side declarations.
+- Output: design touchpoint enumeration + recommended sub-
+  session structure for S2-S5.
+- LOC estimate: ~100-150 (design doc; content-density);
+  empirical projection ~110-195 actual.
+
+**S2 — Runner harness implementation Phase 1**
+- Core dispatch implementation; first 3 wrapper integrations:
+  kalman_filter, kalman_smoother, johansen_bartlett.
+- Engine touch + smoke test for each integrated wrapper.
+- LOC estimate: ~150-200 (engine + tests); empirical
+  projection ~180-300 actual; §13.4 spill possible; pre-
+  planned split natural seam: per-wrapper if needed.
+
+**S3 — Runner harness implementation Phase 2**
+- Next 3 wrapper integrations: mcmc_sv_gaussian,
+  mcmc_sv_student_t, evt_ferro_segers; same engine touch +
+  smoke test pattern as S2.
+- LOC estimate: ~150-200; empirical projection ~180-300
+  actual; §13.4 spill possible.
+
+**S4 — Runner harness implementation Phase 3**
+- Final 3 wrapper integrations: mint_family,
+  transformer_attention, caviar_sav (INVERTED semantics per
+  B-Phase4-S9-3 codification); same engine touch + smoke
+  test pattern.
+- LOC estimate: ~150-200; empirical projection ~180-300
+  actual; §13.4 spill possible.
+
+**S5 — Runner integration acceptance testing + p3_bond_yield_forecast**
+- Cross-wrapper acceptance testing across the 9 sub-domain (i)
+  integrations; p3_bond_yield_forecast wrapper integration
+  (single wrapper; separate from prior batch).
+- LOC estimate: ~100-150; empirical projection ~110-195 actual.
+
+### Sub-domain (ii) — Smoke-test infrastructure upgrade
+
+**S6 — Smoke-test infrastructure design**
+- n_draws calibration; sample-size requirements; tolerance
+  band review across the 9 wrappers; B-Phase4-S10-3 specific
+  concern addressed.
+- LOC estimate: ~80-120 (design doc + calibration analysis;
+  content-density); empirical projection ~90-155 actual.
+
+**S7 — Smoke-test infrastructure implementation + validation**
+- Implementation of upgraded smoke-test infrastructure;
+  validation across all 9 wrappers from sub-domain (i).
+- LOC estimate: ~120-180 (engine + tests); empirical
+  projection ~145-270 actual; §13.4 spill possible.
+
+### Sub-domain (iii) — None-handling robustness
+
+**S8 — None-handling fix for 6 concrete checkers + audit**
+- B-Phase4-S7-1 specific concern: 6 concrete checkers None-
+  handling bug; audit of additional None-handling surface
+  area across runner harness post-integration.
+- LOC estimate: ~80-120; empirical projection ~90-155 actual.
+
+**S9 — None-handling robustness extension** (conditional)
+- Triggered only if S8 audit surfaces additional concerns
+  warranting separate session.
+- LOC estimate: ~50-100 (conditional); empirical projection
+  ~55-130 actual.
+
+### Sub-domain (iv) — Surface-during-integration concerns (engine-touch reserved)
+
+**S10-S12 — Reserve allocation for surface-during-integration scope**
+- Specific session content determined as integration
+  progresses; engine-touch class per Domain 5 disposition.
+- LOC estimate per session: skeleton ~100-150; empirical
+  projection per session ~110-225 actual; §13.4 spill per
+  session possible.
+
+If integration surfaces purely doc-side learnings, those
+fold into S13 issuance scope rather than consuming sub-
+domain (iv) reserve.
+
+### Cycle-close sessions
+
+**S13 — Phase 5 v1.x.0 doc-set issuance** [PRE-FLIGHT]
+- Phase-1-style enumeration prepended (issuance-class
+  session per §4.3); v1.x.0 amendments to P-1 / P-2 / P-3 /
+  P-4 reflecting Phase 5 runner integration outcomes.
+- C-1 amendment scope deferred to integration findings:
+  ~5-10 LOC C-1 amendments fold into S13; ~30+ LOC C-1
+  amendments warrant standalone sub-session.
+- Mirrors Phase 4 S12 four-phase topology (Phase 1 + per-doc
+  sub-sessions); cascading splits expected per Phase 4
+  empirical pattern.
+- LOC estimate: skeleton ~400-600 across full S13 sub-session
+  series (empirical projection ~600-1200 actual across
+  cascading splits; nominal "session" represents the doc-set
+  issuance event not single commit).
+
+**S14 — Phase 5 cycle close**
+- P-4 v1.x.0 issuance + cycle-close artifact authoring;
+  mirrors Phase 4 S13a + S13b structure.
+- LOC estimate: skeleton ~250-350 across S14a + S14b;
+  empirical projection ~280-700 actual across cascading splits.
+
+## 16. Cycle-close handoff anticipation
+
+Phase 5 closure produces:
+- Engine baseline frozen at last engine-touch sub-session
+- Doc-set issuance baseline frozen at S13 final commit
+- Cycle-close artifact frozen at S14 final commit
+- Phase 6 inheritance register seeded (forward-banked items
+  + any sub-domain (iv) deferrals + cycle-close institutional
+  learning)
+
+Phase 5 cycle-close artifact lands at
+`docs/reference_parity_phase5/phase_5_cycle_close.md` per
+Phase 4 S13b precedent (Decision 25).
+
+Per-session findings docs at
+`docs/reference_parity_phase5/session_*_findings.md` per
+Phase 4 pattern.
+
+## 17. Master plan version history
+
+- **v1 (2026-05-03):** Initial draft. Phase 5 cycle definition
+  with 4-sub-domain runner integration scope; ~14 nominal
+  sessions; empirical 1.5-2× expansion expectation; full
+  institutional-discipline standing application from Phase 4
+  v1.2.0 doc-set. Landed via Decision 28 four-level cascading
+  split: S0-MASTERPLAN-1-A (§1-§3, commit `9721852`) +
+  S0-MASTERPLAN-1-B (§4-§5, commit `716421c`) +
+  S0-MASTERPLAN-2 (§15-§17, this commit).
+
+---
+
+**End of Phase 5 master plan v1 (S0-MASTERPLAN-2 appending
+per Decision 28 cascading split, 3 of 3).** Master plan
+fully landed; Phase 5 cycle execution sessions begin per §15
+enumeration.
