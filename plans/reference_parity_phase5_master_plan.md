@@ -147,10 +147,117 @@ Anticipated category types for sub-domain (iv):
 
 ---
 
-**End of Phase 5 master plan §1-§3 (S0-MASTERPLAN-1-A
-landing per Decision 28 cascading split).** §4 institutional
-discipline standing application + §5 cycle-scope expansion
-expectation land at S0-MASTERPLAN-1-B; §15 session enumeration
-+ §16 Phase 6 inheritance handoff anticipation + §17 master
-plan version history land at S0-MASTERPLAN-2 per pre-planned
-natural seam.
+## 4. Institutional discipline standing application
+
+### 4.1 §13 per-session cycle discipline
+
+Phase 5 inherits P-1 v1.2.0 §13.1-§13.4 binding rules verbatim:
+- Default budget **200 LOC** per §13.1
+- Marginal-tolerance band **200-220 LOC** per S11a-2-2
+  amendment (P-1 v1.2.0 §13.4)
+- Hard threshold **220 LOC** per B-Phase4-S12b-1-1
+  institutional precedent
+- Decision 21 principled-content-density test required for
+  marginal-tolerance band classification per B-Phase4-S12c-3
+- Test-LOC accounting per P-1 v1.2.0 §13.3 clarifying
+  sentence (Decision 18)
+
+Cross-reference: P-1 v1.2.0 §13 + Phase 4 cycle-close artifact
+§3.3 (institutional-grade discipline framework empirical
+validation, 9 application instances).
+
+### 4.2 Trigger-drafting discipline (B-Phase4-S12c-3 standing language)
+
+Every Phase 5 trigger anticipating LOC above ~150 includes
+this language verbatim:
+
+> "If actual lands at 200-220 LOC band: run Decision 21
+> principled-content-density test BEFORE classifying as
+> marginal-tolerance band absorption. Content-density
+> classification → split per Decision 17 + B-Phase4-S12b-1-1
+> hard-threshold precedent. Measurement-variance classification
+> → band absorption with explicit findings-doc banking."
+
+This is institutional precedent from Phase 4 S12c revert +
+re-split (Decision 23B); not ceremony. The standing language
+prevents Phase 4 S12c-class trigger-drafting omissions where
+absorbing-into-band became default disposition without
+Decision 21 application.
+
+### 4.3 Pre-flight enumeration discipline (S12 Phase 1 pattern)
+
+Pre-flight enumeration applies to:
+- **Issuance-class sessions** (sessions producing version
+  bumps to multi-doc artifacts)
+- **Multi-touchpoint-coherence sessions** (sessions touching
+  multiple existing artifacts requiring cross-amendment
+  coherence verification)
+
+Pre-flight enumeration does NOT apply to:
+- Engine-implementation sessions (Phase 5 S1-S9 style)
+- Single-doc bounded amendments
+- Cycle-close artifact authoring
+
+Phase 5 sessions warranting pre-flight enumeration are marked
+**[PRE-FLIGHT]** in §15 (lands at S0-MASTERPLAN-2).
+
+### 4.4 Correction patterns
+
+Phase 4 codified two empirically-validated correction patterns:
+
+- **Revert-and-re-commit** (Decision 17 Path B; S11b-1
+  ORIGINAL precedent at commit `28f6983` revert + corrected
+  re-commit at `712397f`): for substantive-content violations
+  caught mid-session before disposition lock-in.
+- **Revert-and-re-split** (Decision 23B; S12c original
+  precedent at commit `f0833c8` revert + re-split at
+  `59102bb` + `bcbf243`): for institutional-inconsistency
+  dispositions corrected post-commit when CI-green has
+  confirmed clean execution but disposition contradicts
+  institutional framework.
+
+Audit trail integrity preserved through both: original commit
++ revert + corrected re-commit/re-split documented in master
+history.
+
+### 4.5 LOC estimate calibration awareness
+
+Phase 4 empirical pattern (B-Phase4-S12a-2 + B-Phase4-S12b-2-1
++ B-Phase4-S13a-1):
+- **Codification-density-bounded scope**: 1.5-2× projection-
+  to-actual multiplier (e.g., S12a 165 LOC vs ~86 projected =
+  1.92×; S11a Decision A 170 LOC vs ~30-50 projected ≈ 3-4×)
+- **Content-density-bounded scope**: 1.1-1.3× multiplier
+  (e.g., S12b-2 100 LOC vs ~78 projected = 1.28×; S12b-1-1
+  84 LOC vs ~75 projected = 1.12×; S13a 141 LOC vs ~140
+  projected = 1.01×)
+
+Master plan §15 session estimates are skeleton-class;
+empirical multipliers applied at trigger drafting and Chat-
+side review.
+
+## 5. Cycle-scope expansion expectation
+
+Per Phase 4 empirical pattern (master plan estimated ~13
+sessions; actual ~26+ sub-sessions; expansion driven by §13
+discipline application not scope creep), Phase 5 master plan
+§15 represents **nominal session count**.
+
+**Empirical expansion of 1.5-2× nominal-to-actual sub-session
+count expected.** Phase 5's ~14 nominal §15 sessions
+anticipate ~21-28 actual sub-sessions. This is calibration-
+awareness for stakeholders reading the master plan, not
+pre-splitting commitment (Disposition 4 from Phase 4 S12
+prohibits pre-splitting for hypothetical overshoot per §13.2
+sharpened criteria).
+
+Cycle expands honestly to fit institutional discipline;
+nominal session estimates are skeleton-class.
+
+---
+
+**End of Phase 5 master plan §1-§5 (S0-MASTERPLAN-1-B
+appending per Decision 28 cascading split, 2 of 3).** §15
+session enumeration + §16 Phase 6 inheritance handoff
+anticipation + §17 master plan version history land at
+S0-MASTERPLAN-2 per pre-planned natural seam.
