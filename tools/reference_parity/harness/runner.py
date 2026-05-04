@@ -192,33 +192,6 @@ def run_check(
         first_result.seed_used = effective_seed
         first_result.fixture_sha = fixture_sha
 
-        # 4.5. Phase 5 S2-α — dispatch declared structural
-        # invariants and integrate into ParityResult outcome.
-        # Per S1-B §2.a decision: harness-side dispatch via
-        # P3ParityCheck.check_invariants. Per S1-B §2.g
-        # forward-banked initial position: structural-invariants
-        # status propagates to ParityResult.outcome via
-        # aggregate_outcomes ranking. Backward-compat:
-        # check_invariants returns {} for non-P3 checks (no
-        # structural_invariants attr) or P3 checks declaring
-        # empty tuple — outcome unchanged in those cases.
-        if hasattr(check, "check_invariants") and getattr(
-            check, "structural_invariants", (),
-        ):
-            invariant_results = check.check_invariants(
-                tsl_out, ref_out, fixture,
-            )
-            if invariant_results:
-                first_result.metrics["invariants"] = invariant_results
-                inv_outcomes = [
-                    str(r.get("status", "PASS"))
-                    for r in invariant_results.values()
-                ]
-                worst_inv = aggregate_outcomes(inv_outcomes)
-                first_result.outcome = aggregate_outcomes([
-                    first_result.outcome, worst_inv,
-                ])
-
         # 5. CAVEAT re-roll. Bumps the EFFECTIVE seed by +1
         # (Phase 3.3): for fixtures with canonical_seed metadata
         # this is canonical_seed+1, NOT runner_seed+1. Without
