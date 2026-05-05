@@ -21,26 +21,63 @@ Recursive-pattern protection applied per `trigger_templates_v1.md`
 refinements.** Master plan v1 lists groupings: S2-S4 (3
 wrappers each) + S5 (acceptance + p3_bond_yield_forecast).
 S1-C §3 empirically refined groupings (closed-form-numerical
-trio at S2; MCMC-stochastic-vol pair at S3; etc.) informed
-by S1-A architecture review + S1-B design decisions.
-Specific instance: `evt_ferro_segers` belongs at S2-β per
-Decision 31ζ pre-split, NOT at S3 per master plan v1 §15.
-**Touchpoint:** master plan v1.1 amendment incorporates S1-C
-§3 refinements as authoritative grouping; reconciles
-evt_ferro_segers placement.
+trio at S2; MCMC-stochastic-vol pair at S3) informed by
+S1-A architecture review + S1-B design decisions.
 
-**(b) Master plan §15 session structure restructuring.**
-Master plan v1 specifies S2-S4 each as 3-wrappers-per-
-session. S2-α / S2-α-1 empirical evidence indicates 3-
-wrappers may exceed framework empirical-validation envelope
-at sub-domain (i) opening: Decision 31ζ pre-split S2 into
-S2-α + S2-β per per-wrapper natural seam (S1-C §3.c spill
-anticipation); S2-α ORIGINAL trim disposition + S2-α-1 1.55×
-upper-bound + Decision 32B revert sequence empirical
-evidence basis. **Touchpoint:** master plan v1.1 amendment
-considers smaller-grained default session structure (per-
-wrapper as default; multi-wrapper as exception when natural
-seam permits).
+Specific instances:
+- `evt_ferro_segers` belongs at S2-β per Decision 31ζ pre-
+  split, NOT at S3 per master plan v1 §15
+- S1-C §3 confirmed only 2 MCMC wrappers (mcmc_sv_gaussian +
+  mcmc_sv_student_t); S3's third wrapper requires
+  re-specification under restructured grouping
+- S4 + S5 wrapper groupings under master plan v1 §15
+  (mint_family + transformer_attention + caviar_sav INVERTED
+  at S4; acceptance + p3_bond_yield_forecast at S5) require
+  verification against S1-C §3 grouping principles
+- Sub-domain (i) total: 9 wrappers + p3_bond_yield_forecast;
+  redistribution under restructured grouping enumerates
+  placement per principled grouping (closed-form-numerical /
+  MCMC / structural-decomposition / quantile-statistic)
+
+**Touchpoint:** master plan v1.1 amendment specifies
+authoritative wrapper-to-session mapping for all 9 sub-
+domain (i) wrappers + p3_bond_yield_forecast under
+restructured grouping principles; reconciles
+evt_ferro_segers + S3 third-wrapper + S4 / S5 verification.
+
+**(b) Master plan §15 sub-domain (i) session structure
+restructuring.** Master plan v1 specifies S2-S4 each as
+3-wrappers-per-session. S2-α / S2-α-1 empirical evidence
+indicates 3-wrappers may exceed framework empirical-
+validation envelope at sub-domain (i) opening: Decision 31ζ
+pre-split S2 into S2-α + S2-β per per-wrapper natural seam
+(S1-C §3.c spill anticipation); S2-α ORIGINAL trim
+disposition + S2-α-1 1.55× upper-bound + Decision 32B revert
+sequence empirical evidence basis.
+
+Decision space for Phase 2 Consolidation authoring:
+- **Option α — per-wrapper default.** Sub-domain (i) S2-S4
+  restructured to per-wrapper sessions; multi-wrapper
+  sessions permitted only when natural seam architectural
+  justification surfaces at trigger drafting. Empirical
+  evidence supports this option (Decision 31ζ + S2-α revert
+  + S2-α-1 upper-bound).
+- **Option β — multi-wrapper with mandatory pre-planned
+  natural seam.** S2-S4 retain multi-wrapper sessions but
+  master plan §15 mandates pre-planned natural seam
+  enumeration at trigger drafting time. Codifies Decision
+  31ζ pattern as standing discipline without changing
+  default session granularity.
+- **Option γ — no structural change.** Master plan v1
+  session structure retained; framework refinement at
+  `trigger_templates_v1.md` sufficient. Risks repeated
+  calibration errors at S3 / S4 sub-domain (i) opening.
+
+**Touchpoint:** Phase 2 Consolidation authoring chooses
+among Options α / β / γ per empirical evidence weight +
+master plan architectural cohesion. Pre-flight Phase 2
+enumeration does NOT pre-commit; commitment lands at Phase 2
+Consolidation trigger drafting.
 
 **(c) Master plan §4.5 calibration awareness amendment.**
 Master plan §4.5 v1 captures Phase 4 empirical multiplier
@@ -103,17 +140,44 @@ covering:
   `trigger_templates_v1.md`
 - §15 sub-domain (i) wrapper grouping authoritative
   (incorporating S1-C §3 refinements; reconciling
-  evt_ferro_segers placement)
-- §15 sub-domain (i) session structure (per-wrapper default
-  vs multi-wrapper exception)
+  evt_ferro_segers + S3 third-wrapper + S4 / S5 verification
+  per touchpoint (a))
+- §15 sub-domain (i) session structure (decision per
+  touchpoint (b) Option α / β / γ)
 - B-Phase5-S1-1 master-plan-locus correction codified
 - Cross-reference structure between master plan v1.1 and
   `trigger_templates_v1.md`
 - Phase 5 reflective record (Path 30E + Decision 34B-γ as
   candidate institutional precedent for Phase 6+)
-- Status: master plan v1.1 cycle-internal; future versioning
-  at Phase 5 cycle close (S14) per v1.1 inheritance
-  disposition determination
+
+**§4.5 vs `trigger_templates_v1.md` jurisdictional question
+(deferred to Phase 2 Consolidation authoring):**
+- Master plan §4.5 is summary-level architectural doc;
+  `trigger_templates_v1.md` is detailed application
+  companion. Content jurisdictional split during §4.5
+  amendment authoring requires explicit decision.
+- Candidate jurisdictional principles for Phase 2
+  Consolidation to apply:
+  - **Principle 1 — multiplier ranges in §4.5; per-class
+    budgets in `trigger_templates_v1.md`.** §4.5 captures
+    architectural multiplier observations (Phase 4 + Phase 5
+    ranges + trigger-specificity-as-moderation-lever);
+    `trigger_templates_v1.md` retains per-class LOC budgets +
+    verbatim standing language + per-section empirical
+    baselines.
+  - **Principle 2 — empirical observations in §4.5;
+    application discipline in `trigger_templates_v1.md`.**
+    §4.5 captures empirical record (what was observed);
+    `trigger_templates_v1.md` captures application
+    discipline (how to apply at trigger drafting).
+    Multiplier ranges could appear in both with §4.5
+    referencing `trigger_templates_v1.md` for detail.
+  - Phase 2 Consolidation authoring chooses Principle per
+    architectural cohesion + cross-reference clarity.
+
+Status: master plan v1.1 cycle-internal; future versioning
+at Phase 5 cycle close (S14) per v1.1 inheritance
+disposition determination.
 
 ## §4 Out-of-scope (per Decision 34B-γ + Q1=a sequencing)
 
