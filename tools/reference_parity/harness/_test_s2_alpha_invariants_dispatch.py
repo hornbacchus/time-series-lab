@@ -1,8 +1,9 @@
 """Phase 5 S2-α per-wrapper smoke tests for structural-
 invariants dispatch (Decision 32B per-wrapper natural seam).
 
-S2-α-1: kalman_filter dispatch smoke test.
-S2-α-2: johansen_bartlett dispatch smoke test (appended).
+S2-α-1 (this file at land time): kalman_filter dispatch
+smoke test only. S2-α-2 will append johansen_bartlett
+dispatch smoke test to this same file.
 
 Verifies the ``check_invariants`` lifecycle method on
 ``P3ParityCheck`` (added Phase 5 S2-α-1) dispatches each
@@ -11,8 +12,7 @@ satisfying the invariant's PASS condition.
 
 Lightweight unit tests — no R, no MCMC, no live ``run_tsl``
 pipeline. Cross-wrapper acceptance + end-to-end runner
-dispatch integration test deferred to S2-β alongside
-evt_ferro_segers integration.
+dispatch integration test deferred to S2-β.
 
 Run via::
 
@@ -27,9 +27,6 @@ import numpy as np
 
 from reference_parity.harness.checks.kalman_filter import (
     KalmanFilterParity,
-)
-from reference_parity.harness.checks.johansen_bartlett import (
-    JohansenBartlettParity,
 )
 
 
@@ -54,40 +51,20 @@ def test_kalman_filter_check_invariants_dispatch() -> None:
     )
 
 
-def test_johansen_bartlett_check_invariants_dispatch() -> None:
-    """JohansenBartlettParity.check_invariants dispatches the
-    vecm_cointegration_rank invariant; PASS on matching tsl +
-    ref ranks (strict tolerance=0.0 integer-equality semantics
-    per Phase 4 S9 declaration).
-    """
-    check = JohansenBartlettParity()
-    tsl = {"cointegrating_rank": 1}
-    ref = {"cointegrating_rank": 1}
-    results = check.check_invariants(tsl, ref, {})
-    assert "vecm_cointegration_rank" in results, results
-    r = results["vecm_cointegration_rank"]
-    assert r["status"] == "PASS", r
-    print(
-        f"  test_johansen_bartlett_check_invariants_dispatch: "
-        f"PASS ({r['status']})"
-    )
-
-
 def main() -> int:
     print(
-        "Phase 5 S2-alpha - per-wrapper structural-invariants "
-        "dispatch smoke tests"
+        "Phase 5 S2-alpha-1 - per-wrapper structural-"
+        "invariants dispatch smoke tests"
     )
     try:
         test_kalman_filter_check_invariants_dispatch()
-        test_johansen_bartlett_check_invariants_dispatch()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
     except Exception as e:
         print(f"\nERROR: {type(e).__name__}: {e}", file=sys.stderr)
         return 2
-    print("\nAll S2-alpha dispatch smoke tests PASS.")
+    print("\nAll S2-alpha-1 dispatch smoke tests PASS.")
     return 0
 
 
