@@ -96,6 +96,20 @@ def discover_checks() -> dict[str, type[ParityCheck]]:
 
 
 # ---------------------------------------------------------------------
+# Allowlist of wrapper IDs verified for invariants dispatch.
+# Each entry must have TSL output exposing fields the declared
+# structural_invariants require. Verified per Code authoring at
+# session that adds the entry. See B-Phase5-S2-α-1-redux-
+# ALLOWLIST-MECHANISM banking entry. Per Q-Allowlist-2=(a)
+# kalman-only initial population at S2-α-1-redux; per-wrapper
+# additions through subsequent S2 sub-sessions (johansen +
+# evt + ...).
+# ---------------------------------------------------------------------
+
+_INVARIANTS_DISPATCH_ALLOWLIST = ("2a_kalman_filter_smoother",)
+
+
+# ---------------------------------------------------------------------
 # Per-check orchestration
 # ---------------------------------------------------------------------
 
@@ -191,6 +205,37 @@ def run_check(
         first_result.duration_sec = round(time.monotonic() - t0, 3)
         first_result.seed_used = effective_seed
         first_result.fixture_sha = fixture_sha
+
+        # 4.5. Phase 5 S2-α-1-redux — dispatch declared
+        # structural invariants for allowlist wrappers.
+        # Allowlist gating per _INVARIANTS_DISPATCH_ALLOWLIST
+        # restricts dispatch to verified-field-availability
+        # wrappers per B-Phase5-S2-α-1-redux-ALLOWLIST-MECHANISM
+        # banking. Wrappers NOT in allowlist: skip dispatch
+        # entirely (no INFO/BLOCK emitted; behavior matches
+        # pre-S2-α-1).
+        if (
+            tid in _INVARIANTS_DISPATCH_ALLOWLIST
+            and hasattr(check, "check_invariants")
+            and getattr(check, "structural_invariants", ())
+        ):
+            invariant_results = check.check_invariants(tsl_out)
+            if invariant_results:
+                first_result.metrics["invariants"] = invariant_results
+                inv_outcomes = [
+                    str(r.get("status", "PASS"))
+                    for r in invariant_results.values()
+                    # INFO outcomes from defensive field-check
+                    # layer don't affect overall outcome
+                    # (they're audit-trail signal, not parity
+                    # outcome).
+                    if r.get("status") != "INFO"
+                ]
+                if inv_outcomes:
+                    worst_inv = aggregate_outcomes(inv_outcomes)
+                    first_result.outcome = aggregate_outcomes([
+                        first_result.outcome, worst_inv,
+                    ])
 
         # 5. CAVEAT re-roll. Bumps the EFFECTIVE seed by +1
         # (Phase 3.3): for fixtures with canonical_seed metadata

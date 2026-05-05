@@ -165,6 +165,77 @@ class P3ParityCheck(_BaseParityCheck):
         """
         return bool(self.reroll_on_caveat)
 
+    # Per-invariant-type required-field map. Used by
+    # `check_invariants` defensive layer (Q-Allowlist-3=(c)) to
+    # verify TSL output exposes the fields a checker requires
+    # before dispatching. If required fields missing, return
+    # INFO outcome (not BLOCK) so wrappers in allowlist whose
+    # output structure shifts don't silently break the runner;
+    # missing-fields cases surface in audit trail without
+    # masquerading as invariant violations. Phase 5 S2-α-1-redux
+    # baseline; extended per per-wrapper allowlist additions.
+    _INVARIANT_REQUIRED_FIELDS: dict[str, tuple] = {
+        "kalman_covariance_ordering": (
+            "filtered_state_cov", "predicted_state_cov",
+        ),
+    }
+
+    def check_invariants(
+        self,
+        tsl_output: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Phase 5 S2-α-1-redux — dispatch declared
+        ``structural_invariants`` against ``tsl_output``.
+
+        Per-wrapper allowlist gating happens in
+        ``runner.py:run_check`` step 4.5 (only allowlist
+        wrappers reach this method); this method handles
+        per-invariant defensive field check + dispatch.
+
+        Defensive layer (Q-Allowlist-3=(c)): for each declared
+        invariant, verify the required fields per
+        ``_INVARIANT_REQUIRED_FIELDS`` are present + non-None
+        in ``tsl_output``. If missing, emit INFO outcome with
+        diagnostic message identifying the missing fields. If
+        present, dispatch the registered checker per
+        ``structural_invariants.get_invariant_checker``.
+
+        Returns aggregated invariant outcomes dict:
+        ``{name: {status, details, ...}}`` — one entry per
+        declared invariant (regardless of dispatch / skip /
+        INFO disposition).
+        """
+        from reference_parity.harness.structural_invariants import (
+            get_invariant_checker,
+        )
+        results: dict[str, Any] = {}
+        for inv in self.structural_invariants:
+            if not inv.enabled:
+                continue
+            req = self._INVARIANT_REQUIRED_FIELDS.get(
+                inv.invariant_type, (),
+            )
+            missing = [
+                f for f in req
+                if tsl_output.get(f) is None
+            ]
+            if missing:
+                results[inv.name] = {
+                    "name": inv.name,
+                    "invariant_type": inv.invariant_type,
+                    "status": "INFO",
+                    "details": (
+                        f"required fields missing from TSL "
+                        f"output: {missing}; dispatch skipped"
+                    ),
+                }
+                continue
+            checker = get_invariant_checker(inv.invariant_type)
+            results[inv.name] = checker(
+                tsl_output, {}, {}, inv,
+            )
+        return results
+
 
 __all__ = [
     "P3ParityCheck",

@@ -192,6 +192,29 @@ class KalmanFilterParity(P3ParityCheck):
                 out["kalman_gain_ss"] = float(P_ss / (P_ss + H))
             except Exception:
                 out["kalman_gain_ss"] = float("nan")
+        # Phase 5 S2-α-1-redux: expose covariance arrays for
+        # kalman_covariance_ordering structural invariant
+        # (per B-Phase5-S2-α-1-redux-HARNESS-VS-ENGINE-EXPANSION
+        # banking; Q-Field-α-2=(b) per-session scope: ONLY
+        # filtered + predicted; Q-Field-α-3=(b) NO try/except —
+        # statsmodels API change → loud failure → CI red).
+        # statsmodels gives (k_states, k_states, T); checker
+        # expects (T, k, k) — transpose axes (2, 0, 1).
+        # filtered has T entries; predicted has T+1 entries
+        # (initial prior + T predictions); slice predicted to
+        # first T entries to match filtered shape per checker
+        # convention (P_{t|t-1} for t=0..T-1).
+        filt_cov = np.transpose(
+            np.asarray(res.filtered_state_cov, dtype=np.float64),
+            (2, 0, 1),
+        )
+        pred_cov = np.transpose(
+            np.asarray(res.predicted_state_cov, dtype=np.float64),
+            (2, 0, 1),
+        )
+        T = filt_cov.shape[0]
+        out["filtered_state_cov"] = filt_cov
+        out["predicted_state_cov"] = pred_cov[:T]
         return out
 
     def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -217,7 +240,16 @@ class KalmanFilterParity(P3ParityCheck):
             compute_kalman_gain=False,
         )
 
-        return {"main": main, "phase1": phase1}
+        # Phase 5 S2-α-1-redux: expose covariance arrays at top
+        # level (so `_check_kalman_covariance_ordering` checker
+        # finds them); main fixture covariances used per per-
+        # session field-exposure scope.
+        return {
+            "main": main,
+            "phase1": phase1,
+            "filtered_state_cov": main.get("filtered_state_cov"),
+            "predicted_state_cov": main.get("predicted_state_cov"),
+        }
 
     # -----------------------------------------------------------------
     # Reference side: R dlm (main fixture) + R KFAS (Phase 1 fixture)
