@@ -232,9 +232,47 @@ Phase 4 empirical pattern (B-Phase4-S12a-2 + B-Phase4-S12b-2-1
   84 LOC vs ~75 projected = 1.12×; S13a 141 LOC vs ~140
   projected = 1.01×)
 
+**Phase 5 sub-domain (i) opening empirical observations**
+(v1.1 amendment per Decision 34B-γ Phase 2 Consolidation):
+- **Skeleton triggers** (sub-domain (i) opening):
+  1.5-2.8× multipliers (S0-MASTERPLAN-1 unsplit 1.7×; S1
+  unsplit 2.8×; S1-A-1 ORIGINAL 1.5×; S1-A-1-a 2.7×) —
+  pattern is genuine codification-density at cycle-
+  establishment scope, not measurement noise
+- **Constraint-specified triggers (design-class):**
+  0.84-1.07× multipliers (S1 sequence: S1-A-1-a-CORRECTED
+  1.07×; S1-A-1-b 1.02×; S1-A-1-c 0.88×; S1-A-2 0.84×;
+  S1-B 1.05×; S1-C 0.92×)
+- **Constraint-specified triggers (execution-class):**
+  empirical data thin; S2-α ORIGINAL 1.23× post-trim
+  (institutionally inconsistent disposition; reverted at
+  Decision 32B); S2-α-1 1.55× upper-bound calibration error
+  (within marginal-tolerance band); NO clean execution-class
+  validation point yet
+- **Recursive-pattern protection** (design-class read-only
+  + write-phase consolidation): Pre-flight Phase 1 0.99×
+  upper-bound (read-only enumeration); Phase 1 Consolidation
+  1.10× deliverable + within-band combined (write-phase
+  consolidation); both distinct from execution-class scope
+
+Trigger specificity as moderation lever empirically validated
+(B-Phase5-S0-3 + B-Phase5-S0-6 + B-Phase5-S1-A-1-c-
+GENERALIZATION-VALIDATION); skeleton triggers prohibited at
+Phase 5 sub-domain (i) opening per empirical record.
+
 Master plan §15 session estimates are skeleton-class;
 empirical multipliers applied at trigger drafting and Chat-
 side review.
+
+**Cross-reference:** see `docs/reference_parity_phase5/trigger_templates_v1.md`
+for application discipline (per-class LOC budgets +
+authoring-overshoot disposition + within-band classification
++ trigger-drafting protocols + per-section empirical
+baselines). §4.5 captures empirical observations (what was
+observed across Phase 4 + Phase 5 cycles); trigger-template
+doc captures application discipline (how to apply at trigger
+drafting) per Decision 40-I1 Q2=Principle 2 jurisdictional
+split.
 
 ## 5. Cycle-scope expansion expectation
 
@@ -260,46 +298,103 @@ nominal session estimates are skeleton-class.
 
 ### Sub-domain (i) — Runner harness elevation
 
+**Sub-domain (i) session structure standing discipline** (v1.1
+amendment per Decision 40-I1 Q1=Option α per-wrapper default):
+
+Per-wrapper sessions are the **default** at sub-domain (i)
+opening. Multi-wrapper sessions retained as **exception**
+ONLY where ALL three criteria met:
+1. Analytical-class cohesion (per wrapper grouping principles
+   below)
+2. Pre-planned natural seam enumerated at trigger drafting
+   per Decision 31ζ pattern + `trigger_templates_v1.md` §7
+3. Empirical-validation-envelope assessment at trigger drafting
+
+**Wrapper grouping (authoritative for all 9 sub-domain (i)
+wrappers + p3_bond_yield_forecast)** per Decision 40-I1 +
+S1-C §3 grouping principles:
+- **Closed-form-numerical:** kalman_filter, johansen_bartlett,
+  evt_ferro_segers
+- **MCMC-stochastic-vol:** mcmc_sv_gaussian, mcmc_sv_student_t
+- **Heterogeneous (per-wrapper analytical class):**
+  mint_family (closed-form structural-decomposition),
+  transformer_attention (matrix-attention),
+  caviar_sav (INVERTED quantile-statistic)
+- **Acceptance + cycle-baseline wrapper:**
+  p3_bond_yield_forecast (separate session per master plan
+  v1 §15 S5)
+
+B-Phase5-S1-1 master-plan-locus correction (v1.1 codified):
+audit-side `structural_invariants` declarations live at
+`tools/reference_parity/harness/checks/*.py` per Phase 4 S9
+commit `ff403dd`, NOT engine `_dispatch.py` as v1
+hypothesised. S1 below references the authoritative locus.
+
 **S1 — Runner harness architecture review + design** [PRE-FLIGHT]
 - Read-only enumeration of current runner-harness state.
 - Design decisions: how runner fires structural-invariants
   checks against engine output; how dormant declarations
-  elevate to active; integration points with engine
-  `_dispatch.py` + audit registry in P-2 §D.1.5 + tolerance
-  values per audit-side declarations.
+  elevate to active; integration points with audit-side
+  declarations at
+  `tools/reference_parity/harness/checks/*.py` + audit
+  registry in P-2 §D.1.5 + tolerance values per audit-side
+  declarations.
 - Output: design touchpoint enumeration + recommended sub-
   session structure for S2-S5.
 - LOC estimate: ~100-150 (design doc; content-density);
   empirical projection ~110-195 actual.
 
-**S2 — Runner harness implementation Phase 1**
-- Core dispatch implementation; first 3 wrapper integrations:
-  kalman_filter, kalman_smoother, johansen_bartlett.
-- Engine touch + smoke test for each integrated wrapper.
-- LOC estimate: ~150-200 (engine + tests); empirical
-  projection ~180-300 actual; §13.4 spill possible; pre-
-  planned split natural seam: per-wrapper if needed.
+**S2 — Closed-form-numerical trio** (multi-wrapper exception
+per analytical-class cohesion)
+- Wrappers: kalman_filter + johansen_bartlett +
+  evt_ferro_segers (Decision 31ζ pre-split S2-α + S2-β
+  empirically established as natural seam).
+- Engine touch + smoke test for each integrated wrapper;
+  shared lifecycle method + dispatch infrastructure landed
+  per S2-α (B-Phase5-S2-α-INFRASTRUCTURE-COLOCATION pattern).
+- Multi-wrapper exception criteria (per discipline above):
+  ✓ analytical-class cohesion (closed-form-numerical);
+  ✓ pre-planned natural seam (Decision 31ζ S2-α + S2-β);
+  ✓ empirical-validation envelope (S1-C §3 + S2-α-1
+  empirical record).
 
-**S3 — Runner harness implementation Phase 2**
-- Next 3 wrapper integrations: mcmc_sv_gaussian,
-  mcmc_sv_student_t, evt_ferro_segers; same engine touch +
-  smoke test pattern as S2.
-- LOC estimate: ~150-200; empirical projection ~180-300
-  actual; §13.4 spill possible.
+**S3 — MCMC-stochastic-vol pair** (multi-wrapper exception
+per analytical-class cohesion + shared engine module)
+- Wrappers: mcmc_sv_gaussian + mcmc_sv_student_t (2-wrapper
+  session per Decision 40-I1; analytical-class cohesion
+  permits multi-wrapper exception).
+- Engine touch includes Path A audit-field elevation in
+  `engine/techniques/_sv_mcmc.py` mirroring BYF Decision 12
+  pattern; pre-planned natural seam at trigger drafting:
+  S3-α (engine Path A elevation) + S3-β (wrapper integrations
+  + smoke tests).
 
-**S4 — Runner harness implementation Phase 3**
-- Final 3 wrapper integrations: mint_family,
-  transformer_attention, caviar_sav (INVERTED semantics per
-  B-Phase4-S9-3 codification); same engine touch + smoke
-  test pattern.
-- LOC estimate: ~150-200; empirical projection ~180-300
-  actual; §13.4 spill possible.
+**S4 — Heterogeneous group: per-wrapper sessions**
+(Q1=Option α per-wrapper default applies; multi-wrapper
+exception NOT met at this scope per analytical-class
+heterogeneity)
+- Sub-divided into per-wrapper sessions at trigger drafting:
+  - S4-α: mint_family (closed-form structural-decomposition)
+  - S4-β: transformer_attention (matrix-attention)
+  - S4-γ: caviar_sav (INVERTED quantile-statistic per
+    B-Phase4-S9-3 codification)
+- Decision 31ζ pre-split pattern applied per-wrapper;
+  trigger drafting at each sub-session.
 
 **S5 — Runner integration acceptance testing + p3_bond_yield_forecast**
 - Cross-wrapper acceptance testing across the 9 sub-domain (i)
   integrations; p3_bond_yield_forecast wrapper integration
-  (single wrapper; separate from prior batch).
-- LOC estimate: ~100-150; empirical projection ~110-195 actual.
+  (single wrapper; separate from prior batch per Decision
+  40-I1 wrapper grouping).
+- LOC estimate: ~100-150; empirical projection ~110-195
+  actual.
+
+**Cross-reference:** trigger drafting at S2-S5 references
+`docs/reference_parity_phase5/trigger_templates_v1.md` §6
+(execution-class projection multiplier guidance) + §1 (per-
+class LOC budget specification) + §7 (recursive-pattern
+protection); Decision 40-I1 Q2=Principle 2 jurisdictional
+split applies.
 
 ### Sub-domain (ii) — Smoke-test infrastructure upgrade
 
@@ -393,11 +488,71 @@ Phase 4 pattern.
   v1.2.0 doc-set. Landed via Decision 28 four-level cascading
   split: S0-MASTERPLAN-1-A (§1-§3, commit `9721852`) +
   S0-MASTERPLAN-1-B (§4-§5, commit `716421c`) +
-  S0-MASTERPLAN-2 (§15-§17, this commit).
+  S0-MASTERPLAN-2 (§15-§17, commit `4056bf6`).
+- **v1.1 (2026-05-05):** Cycle-internal amendment per Decision
+  34B-γ broad-scope consolidation; Q1=Option α per-wrapper
+  default + Q2=Principle 2 jurisdictional split locked at
+  Decision 40-I1. Amendments: §4.5 Phase 5 sub-domain (i)
+  opening empirical observations + cross-reference to
+  `trigger_templates_v1.md`; §15 sub-domain (i) session
+  structure standing discipline (per-wrapper default + multi-
+  wrapper exception criteria); §15 sub-domain (i) wrapper
+  grouping authoritative mapping for all 9 wrappers +
+  p3_bond_yield_forecast; §15 S1 locus correction per
+  B-Phase5-S1-1; §15 S2-S5 restructured (S2 closed-form-
+  numerical multi-wrapper exception; S3 MCMC pair multi-
+  wrapper exception; S4 per-wrapper sub-sessions; S5
+  unchanged); §18 Phase 5 reflective record. Inheritance to
+  Phase 6+ candidate pattern; actual disposition at S14 per
+  trigger_templates_v1.md §0 + §8 framing.
+
+## 18. Phase 5 reflective record (v1.1 amendment)
+
+Phase 5 cycle-internal amendment pattern as **candidate
+institutional precedent** for Phase 6+ (final inheritance
+disposition determined at Phase 5 cycle close S14 per
+remaining-cycle empirical validation; per
+`trigger_templates_v1.md` §0 + §8 candidate-pattern framing):
+
+When sub-domain-opening calibration errors exceed framework-
+amendment threshold, cycle-internal artifacts produced
+(`trigger_templates_v1.md` cycle-internal v1 + master plan
+v1.1 amendment) rather than deferring to S13 doc-set
+issuance per v1 standing pattern. Path 30E disposition +
+Decision 33C constructive Path 30E + Decision 34B-γ broad-
+scope cycle-internal amendment as empirical institutional
+learning sequence. The deferral-to-S13 default was
+provisional per cycle-establishment phase reasoning, not
+principled; Phase 5 cycle-internal amendment surfaces
+calibration-error pattern early enough to apply refinement
+mid-cycle rather than retrospectively at cycle close.
+
+Empirical sequence:
+- 3 institutional-inconsistency cases at Phase 5 sub-domain
+  (i) (S1-A-1 ORIGINAL band-absorption misclassification;
+  S1-A-1-a saturation-framing band-absorption repeat; S2-α
+  trim-disposition) reverted via Decisions 30B + 30D + 32B
+- Trigger-projection calibration errors persist despite
+  constraint-specification (S2-α-1 1.55× upper-bound;
+  Path 30E pre-flight required-artifact-uncounted recursion)
+- Constructive Path 30E pause (Decision 33C) → broad-scope
+  consolidation (Decision 34B-γ) producing 2 cycle-internal
+  artifacts: trigger_templates_v1.md (Phase 1 Consolidation
+  framework refinement) + master plan v1.1 (Phase 2
+  Consolidation cycle scope restructuring)
+
+Forward-looking: Phase 5 execution resumes per Q5=b-2
+sequence (Path 30E pre-flight commits + S2-α-1 commits +
+S2-α-2 onward) under refined framework + restructured master
+plan. Future Phase 5 sessions reference `trigger_templates_v1.md`
+for application discipline + master plan v1.1 §4.5 for
+empirical observations + master plan v1.1 §15 for sub-domain
+(i) session structure standing discipline.
 
 ---
 
-**End of Phase 5 master plan v1 (S0-MASTERPLAN-2 appending
-per Decision 28 cascading split, 3 of 3).** Master plan
-fully landed; Phase 5 cycle execution sessions begin per §15
-enumeration.
+**End of Phase 5 master plan v1.1 (Decision 34B-γ Phase 2
+Consolidation amendment).** Master plan v1 baseline + v1.1
+amendment fully landed; Phase 5 cycle execution sessions
+resume per §15 v1.1 enumeration under refined framework +
+restructured grouping.
