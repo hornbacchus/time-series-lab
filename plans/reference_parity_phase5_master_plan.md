@@ -344,42 +344,76 @@ hypothesised. S1 below references the authoritative locus.
 - LOC estimate: ~100-150 (design doc; content-density);
   empirical projection ~110-195 actual.
 
-**S2 — Closed-form-numerical trio** (multi-wrapper exception
-per analytical-class cohesion)
+**S2 — Closed-form-numerical trio** (multi-wrapper grouping
+pre-dating v1.1 standing discipline; per-wrapper natural seam
+Decision 31ζ pre-split applied)
 - Wrappers: kalman_filter + johansen_bartlett +
   evt_ferro_segers (Decision 31ζ pre-split S2-α + S2-β
   empirically established as natural seam).
 - Engine touch + smoke test for each integrated wrapper;
   shared lifecycle method + dispatch infrastructure landed
   per S2-α (B-Phase5-S2-α-INFRASTRUCTURE-COLOCATION pattern).
-- Multi-wrapper exception criteria (per discipline above):
-  ✓ analytical-class cohesion (closed-form-numerical);
-  ✓ pre-planned natural seam (Decision 31ζ S2-α + S2-β);
-  ✓ empirical-validation envelope (S1-C §3 + S2-α-1
-  empirical record).
+- **Note on standing discipline application:** S2 multi-
+  wrapper structure pre-dates the v1.1 standing discipline
+  3-criteria gate. The 3-criteria gate applies prospectively
+  to S3 + S4 trigger drafting. S2 multi-wrapper structure is
+  in-flight under empirical test (S2-α-1 1.55× upper-bound
+  calibration error) and may surface envelope-related
+  concerns during S2-α-1 + S2-α-2 + S2-β execution; resume
+  sequence per Q5=b-2 surfaces these empirically.
 
-**S3 — MCMC-stochastic-vol pair** (multi-wrapper exception
-per analytical-class cohesion + shared engine module)
-- Wrappers: mcmc_sv_gaussian + mcmc_sv_student_t (2-wrapper
-  session per Decision 40-I1; analytical-class cohesion
-  permits multi-wrapper exception).
-- Engine touch includes Path A audit-field elevation in
-  `engine/techniques/_sv_mcmc.py` mirroring BYF Decision 12
-  pattern; pre-planned natural seam at trigger drafting:
-  S3-α (engine Path A elevation) + S3-β (wrapper integrations
-  + smoke tests).
+**S3 — MCMC-stochastic-vol pair** (candidate multi-wrapper
+grouping; final session structure per S3 trigger drafting
+3-criteria gate)
+- Wrappers: mcmc_sv_gaussian + mcmc_sv_student_t (2 wrappers
+  in MCMC-stochastic-vol analytical class).
+- **Candidate** multi-wrapper grouping per analytical-class
+  cohesion + shared engine module
+  (`engine/techniques/_sv_mcmc.py` Path A audit-field
+  elevation per BYF Decision 12 pattern).
+- **Final session structure (multi-wrapper vs per-wrapper
+  sub-divided) determined at S3 trigger drafting time** per
+  v1.1 standing discipline 3-criteria gate:
+  1. Analytical-class cohesion (MCMC-stochastic-vol — likely
+     satisfied)
+  2. Pre-planned natural seam at trigger drafting (candidate:
+     S3-α engine Path A elevation + S3-β wrapper integrations
+     + smoke tests; mirrors Decision 31ζ S2 pattern)
+  3. Empirical-validation envelope assessment based on S2
+     sequence outcome + S3-α engine work assessment —
+     determined at trigger drafting after S2 sequence
+     empirical evidence available
+- If 3-criteria gate not met at S3 trigger drafting time,
+  per-wrapper default applies (S3-α: mcmc_sv_gaussian; S3-β:
+  mcmc_sv_student_t; with shared engine work distributed per
+  architectural cohesion).
 
-**S4 — Heterogeneous group: per-wrapper sessions**
-(Q1=Option α per-wrapper default applies; multi-wrapper
-exception NOT met at this scope per analytical-class
-heterogeneity)
-- Sub-divided into per-wrapper sessions at trigger drafting:
+**S4 — Heterogeneous group: per-wrapper sessions** (Q1=Option
+α per-wrapper default; v1.1 standing discipline 3-criteria
+gate applied):
+- Wrappers: mint_family + transformer_attention + caviar_sav
+  (INVERTED) span 3 distinct analytical classes (closed-form
+  structural-decomposition / matrix-attention / quantile-
+  statistic INVERTED per B-Phase4-S9-3 codification).
+- **3-criteria gate application:**
+  1. Analytical-class cohesion: NOT MET (3 distinct
+     analytical classes; no shared engine module or
+     analytical pattern)
+  2. Pre-planned natural seam: not assessed (criterion 1
+     failure terminates gate evaluation per logical AND
+     structure)
+  3. Empirical-validation envelope: not assessed (per
+     criterion 2)
+- Multi-wrapper exception not warranted; per-wrapper default
+  per Q1=Option α applies.
+- Sub-sessions at trigger drafting:
   - S4-α: mint_family (closed-form structural-decomposition)
   - S4-β: transformer_attention (matrix-attention)
   - S4-γ: caviar_sav (INVERTED quantile-statistic per
     B-Phase4-S9-3 codification)
-- Decision 31ζ pre-split pattern applied per-wrapper;
-  trigger drafting at each sub-session.
+- Decision 31ζ pre-split pattern applied per-wrapper if
+  natural seam surfaces during S4-α / S4-β / S4-γ trigger
+  drafting.
 
 **S5 — Runner integration acceptance testing + p3_bond_yield_forecast**
 - Cross-wrapper acceptance testing across the 9 sub-domain (i)
