@@ -3,6 +3,7 @@ invariants dispatch (Decision 32B per-wrapper natural seam).
 
 S2-α-1: kalman_filter dispatch smoke test.
 S2-α-2: johansen_bartlett dispatch smoke test (appended).
+S2-β: evt_ferro_segers dispatch smoke test (appended).
 
 Verifies the ``check_invariants`` lifecycle method on
 ``P3ParityCheck`` (added Phase 5 S2-α-1) dispatches each
@@ -30,6 +31,9 @@ from reference_parity.harness.checks.kalman_filter import (
 )
 from reference_parity.harness.checks.johansen_bartlett import (
     JohansenBartlettParity,
+)
+from reference_parity.harness.checks.evt_ferro_segers import (
+    EvtFerroSegersParity,
 )
 
 
@@ -73,6 +77,24 @@ def test_johansen_bartlett_check_invariants_dispatch() -> None:
     )
 
 
+def test_evt_ferro_segers_check_invariants_dispatch() -> None:
+    """EvtFerroSegersParity.check_invariants dispatches the
+    evt_extremal_index invariant; PASS on synthetic theta in
+    [0, 1] (Ferro-Segers 2003 intervals estimator output range
+    per Phase 4 S9 declaration; 0.01 abs slack tolerance).
+    """
+    check = EvtFerroSegersParity()
+    tsl = {"theta": 0.65}
+    results = check.check_invariants(tsl, {}, {})
+    assert "evt_extremal_index" in results, results
+    r = results["evt_extremal_index"]
+    assert r["status"] == "PASS", r
+    print(
+        f"  test_evt_ferro_segers_check_invariants_dispatch: "
+        f"PASS ({r['status']})"
+    )
+
+
 def main() -> int:
     print(
         "Phase 5 S2-alpha - per-wrapper structural-invariants "
@@ -81,6 +103,7 @@ def main() -> int:
     try:
         test_kalman_filter_check_invariants_dispatch()
         test_johansen_bartlett_check_invariants_dispatch()
+        test_evt_ferro_segers_check_invariants_dispatch()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
