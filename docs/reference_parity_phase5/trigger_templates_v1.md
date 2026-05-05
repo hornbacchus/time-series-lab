@@ -6,9 +6,13 @@ Phase 5 cycle-internal standing reference for trigger
 drafting. Decision 34B-γ Phase 1 Consolidation origin per
 Pre-flight Phase 1 (commit `9ad5ac6`) gap enumeration.
 Detailed application companion to master plan §4 (institutional
-discipline standing application). Status: cycle-internal v1;
-future versioning at S13 doc-set issuance + Phase 6+
-inheritance.
+discipline standing application).
+
+**Status:** cycle-internal v1. Inheritance to Phase 6+ is
+candidate pattern — actual inheritance disposition determined
+at Phase 5 cycle close (S14) based on whether
+`trigger_templates_v1.md` proves valuable across remaining
+Phase 5 sessions.
 
 ## §1 Per-class LOC budget specification
 
@@ -67,6 +71,11 @@ content separately.
 Empirical baseline: S2-α-1 test file 72 LOC = ~25 boilerplate
 + ~47 content (2 tests × ~23 LOC each).
 
+**Single empirical instance.** Baseline generalizability
+validated at S2-β + S3 + S4 test file pattern observations
+across remaining Phase 5 sub-domain (i) sessions. Refine §3
+baseline as additional test files land.
+
 ## §4 Banking-entry-as-principled-content budget
 
 Banking-entry-LOC-budget separate from findings-doc-overhead-
@@ -115,15 +124,23 @@ Phase 5 sub-domain (i) empirical multiplier observations:
   1.5-2.8× multipliers — DO NOT use for sub-domain (i) opening
 - **Constraint-specified triggers (design-class):** 0.84-1.07×
   multipliers (S1 sequence empirical record)
-- **Constraint-specified triggers (execution-class):**
-  empirical data thin (S2-α ORIGINAL trim-corrected; S2-α-1
-  1.55× upper-bound); recursive-pattern protection at Pre-
-  flight Phase 1 produced 0.99× upper-bound
+- **Constraint-specified triggers (execution-class):** S2-α
+  ORIGINAL 1.23× post-trim (institutionally inconsistent
+  disposition; reverted); S2-α-1 1.55× upper-bound
+  (calibration error). **NO execution-class clean validation
+  point exists yet.**
+- **Recursive-pattern protection (design-class read-only +
+  write-phase consolidation):** Pre-flight Phase 1 0.99×
+  upper-bound (read-only enumeration); Phase 1 Consolidation
+  1.10× deliverable + within-band combined (write-phase
+  consolidation). Both distinct from execution-class scope.
 
 Trigger drafting at sub-domain (i) opening MUST use
 constraint-specification + recursive-pattern protection per
 §1 + §2 + §3 + §4. Empirical observations updated as Phase 5
-cycle progresses (cycle-internal versioning).
+cycle progresses (cycle-internal versioning). Execution-class
+calibration awaits empirically clean S2-α-1 + S2-α-2 + S2-β
+validation under refined framework.
 
 ## §7 Recursive-pattern protection
 
@@ -160,6 +177,8 @@ Pre-flight Phase 1 applied protection: combined target ~130-
   S2-α-TRIGGER-OVERHEAD-DISPOSITION, S2-α-TRIM-AS-GOALPOST-
   MOVING
 
-**Status:** trigger_templates_v1.md cycle-internal v1.
-Future versioning at S13 doc-set issuance + Phase 6+
-inheritance.
+**Status:** `trigger_templates_v1.md` cycle-internal v1.
+Inheritance to Phase 6+ is candidate pattern — actual
+inheritance disposition determined at Phase 5 cycle close
+(S14) based on whether `trigger_templates_v1.md` proves
+valuable across remaining Phase 5 sessions.

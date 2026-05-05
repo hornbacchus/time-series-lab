@@ -56,7 +56,9 @@ standing application; Decision 34B-γ Phase 1 Consolidation
 origin per Pre-flight Phase 1 (commit `9ad5ac6`); Q1=a
 sequencing per Decision 36E. Forward-looking: future
 Phase 5 trigger drafts at sub-domain (i) opening reference
-this doc directly rather than re-deriving framework.
+this doc directly rather than re-deriving framework. Phase
+6+ inheritance is candidate pattern; determined at Phase 5
+cycle close (S14) per remaining-cycle empirical validation.
 
 ## Disposition
 
