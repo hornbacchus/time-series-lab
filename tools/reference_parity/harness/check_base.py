@@ -165,48 +165,6 @@ class P3ParityCheck(_BaseParityCheck):
         """
         return bool(self.reroll_on_caveat)
 
-    def check_invariants(
-        self,
-        tsl: dict[str, Any],
-        ref: dict[str, Any],
-        fixture: dict[str, Any],
-    ) -> dict[str, Any]:
-        """Phase 5 S2-α-1 — dispatch each declared structural
-        invariant via the registry. Returns dict mapping
-        ``invariant.name`` → result dict (status / metric /
-        diagnostic context per invariant). Empty dict if no
-        invariants declared (default; preserves backward-compat
-        with checks that opt out).
-
-        Per S1-B §2.b decision: class-attribute introspection
-        — runner reads ``self.structural_invariants`` tuple,
-        iterates entries, calls ``get_invariant_checker(
-        inv.invariant_type)``, dispatches with
-        ``(tsl, ref, fixture, inv)``.
-
-        Per S1-B §2.c decision: no special INVERTED-semantics
-        handling here; checker contract (PASS/CAVEAT/BLOCK) is
-        symmetric, inversion lives in checker internals.
-
-        Per S1-B §2.d decision: two-layer defensive discipline.
-        Concrete checkers SHOULD return clean BLOCK dict on
-        missing fields (post-S8 fix per B-Phase4-S7-1); runner
-        does NOT add defensive try/except around dispatch. If
-        a checker raises despite S8, the runner's existing
-        catch-all (``runner.py`` lines 257-263) maps to ERROR
-        outcome.
-        """
-        from reference_parity.harness.structural_invariants import (
-            get_invariant_checker,
-        )
-        results: dict[str, Any] = {}
-        for inv in self.structural_invariants:
-            if not inv.enabled:
-                continue
-            checker = get_invariant_checker(inv.invariant_type)
-            results[inv.name] = checker(tsl, ref, fixture, inv)
-        return results
-
 
 __all__ = [
     "P3ParityCheck",
