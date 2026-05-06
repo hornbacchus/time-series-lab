@@ -362,31 +362,58 @@ Decision 31ζ pre-split applied)
   concerns during S2-α-1 + S2-α-2 + S2-β execution; resume
   sequence per Q5=b-2 surfaces these empirically.
 
-**S3 — MCMC-stochastic-vol pair** (candidate multi-wrapper
-grouping; final session structure per S3 trigger drafting
-3-criteria gate)
+**S3 — MCMC-stochastic-vol pair** (multi-wrapper single-
+session grouping per v1.1 standing discipline 3-criteria gate
+empirical satisfaction; v1.2 framing per S3 pre-flight
+empirical findings at commit `1fd1ad3`)
 - Wrappers: mcmc_sv_gaussian + mcmc_sv_student_t (2 wrappers
   in MCMC-stochastic-vol analytical class).
-- **Candidate** multi-wrapper grouping per analytical-class
-  cohesion + shared engine module
-  (`engine/techniques/_sv_mcmc.py` Path A audit-field
-  elevation per BYF Decision 12 pattern).
-- **Final session structure (multi-wrapper vs per-wrapper
-  sub-divided) determined at S3 trigger drafting time** per
-  v1.1 standing discipline 3-criteria gate:
-  1. Analytical-class cohesion (MCMC-stochastic-vol — likely
-     satisfied)
-  2. Pre-planned natural seam at trigger drafting (candidate:
-     S3-α engine Path A elevation + S3-β wrapper integrations
-     + smoke tests; mirrors Decision 31ζ S2 pattern)
-  3. Empirical-validation envelope assessment based on S2
-     sequence outcome + S3-α engine work assessment —
-     determined at trigger drafting after S2 sequence
-     empirical evidence available
-- If 3-criteria gate not met at S3 trigger drafting time,
-  per-wrapper default applies (S3-α: mcmc_sv_gaussian; S3-β:
-  mcmc_sv_student_t; with shared engine work distributed per
-  architectural cohesion).
+- **Engine state finding (S3 pre-flight `1fd1ad3`):** Engine
+  Path A audit-field elevation in `_sv_mcmc.py` ALREADY
+  COMPLETE per Phase 4 S8 P4-1.2 codification (predates
+  Path 34B-γ Phase 2 Consolidation v1.1 authoring).
+  `_sv_mcmc.py` result dict (lines 311-321) exposes
+  `rhat_max` / `ess_min`; `stochastic_volatility.py` engine
+  wrapper (lines 647-650) elevates these to `audit_fields`
+  per BYF Decision 12 pattern. Both `mcmc_sv_gaussian` +
+  `mcmc_sv_student_t` `run_tsl()` expose `ess_min` (REQUIRED
+  for `mcmc_convergence` checker) at top level. Per-wrapper
+  field-availability protocol Case 0 outcome (no harness
+  expansion needed beyond allowlist + smoke test).
+- **3-criteria gate evaluation (per Q-S3-decomp-1=(γ)
+  disposition):**
+  1. Analytical-class cohesion: SATISFIED (both wrappers
+     MCMC-stochastic-vol; shared engine module + analytical
+     pattern)
+  2. Pre-planned natural seam: SATISFIED (analytical-class
+     cohesion as seam under no-engine-work scope; both
+     wrappers Case 0 outcome empirically established at
+     pre-flight; cross-wrapper acceptance test natural fit
+     in same sub-session)
+  3. Empirical-validation envelope: SATISFIED via chunking
+     discipline at staging time (combined envelope ~165-250
+     LOC engages §13.1 marginal-tolerance band at upper
+     bound; chunking judgment per Phase 5 standing pattern +
+     Code's §13.4 chunking judgment at staging time)
+- **Single-session decomposition declared.** Both wrappers
+  integrate at single S3 sub-session including cross-wrapper
+  acceptance test; chunking discipline applied at staging
+  time per §13.4 + Phase 5 standing pattern.
+- **Empirical finding (v1.2 amendment):** v1.1 §15 S3 framing
+  premise (engine Path A elevation as anticipated substantive
+  engine work + engine + harness decomposition seam)
+  empirically wrong. Path 34B-γ Phase 2 Consolidation v1.1
+  authoring at commits `021c778` + `c070c62` didn't audit
+  empirical engine state per wrapper before authoring. v1.2
+  reconciles framing per S3 pre-flight findings; banking
+  entry B-Phase5-MASTER-PLAN-V1.1-§15-S3-FRAMING-
+  RECONCILIATION codifies the design-gap pattern.
+- **Forward-looking:** v1.1 standing discipline 3-criteria
+  gate empirically validated at first prospective
+  application (S3); gate-evaluation framework stands as
+  authoritative at v1.2. Master plan amendments going
+  forward audit empirical engine state per wrapper before
+  authoring wrapper-grouping framing.
 
 **S4 — Heterogeneous group: per-wrapper sessions** (Q1=Option
 α per-wrapper default; v1.1 standing discipline 3-criteria
@@ -539,6 +566,24 @@ Phase 4 pattern.
   unchanged); §18 Phase 5 reflective record. Inheritance to
   Phase 6+ candidate pattern; actual disposition at S14 per
   trigger_templates_v1.md §0 + §8 framing.
+- **v1.2 (2026-05-06):** Cycle-internal amendment per S3
+  pre-flight empirical findings at commit `1fd1ad3` +
+  Q-S3-decomp-1=(γ) Chat disposition. Amendment: §15 S3
+  framing reconciliation under no-engine-work scope (engine
+  Path A elevation finding ALREADY COMPLETE per Phase 4 S8
+  P4-1.2 codification predating v1.1 authoring); v1.1
+  premise (engine + harness decomposition seam) empirically
+  wrong; (γ) single-session decomposition declared per
+  v1.1 standing discipline 3-criteria gate empirical
+  satisfaction (Criteria 1+2+3 SATISFIED via analytical-
+  class cohesion + Case 0 outcome + chunking discipline at
+  staging). First prospective application of v1.1 standing
+  discipline 3-criteria gate empirically validated at S3.
+  Banking entries B-Phase5-PER-WRAPPER-PROTOCOL-CASE-0-
+  EXTENSION + B-Phase5-MASTER-PLAN-V1.1-§15-S3-FRAMING-
+  RECONCILIATION codify Case 0 protocol extension +
+  amendment-design-gap pattern at separate findings doc
+  `docs/reference_parity_phase5/s3_amendment_banking.md`.
 
 ## 18. Phase 5 reflective record (v1.1 amendment)
 
@@ -583,10 +628,28 @@ for application discipline + master plan v1.1 §4.5 for
 empirical observations + master plan v1.1 §15 for sub-domain
 (i) session structure standing discipline.
 
+**v1.2 amendment record append (2026-05-06):** Second cycle-
+internal amendment per S3 pre-flight empirical findings.
+Distinct from v1.1 calibration-error class: v1.2 reconciles
+master plan framing premise (engine Path A elevation
+anticipated work) against empirical engine state (already
+complete per Phase 4 S8 P4-1.2). Pre-flight pattern
+established at Path 34B-γ for design-class extends to
+execution-class scope evaluation per S3 pre-flight
+precedent. v1.1 standing discipline 3-criteria gate
+empirically validated at first prospective application (S3
+single-session disposition under Criteria 1+2+3 satisfaction);
+gate-evaluation framework stands as authoritative going
+forward. Forward-looking: master plan amendments going
+forward audit empirical engine state per wrapper before
+authoring wrapper-grouping framing (per
+B-Phase5-MASTER-PLAN-V1.1-§15-S3-FRAMING-RECONCILIATION
+banking entry).
+
 ---
 
-**End of Phase 5 master plan v1.1 (Decision 34B-γ Phase 2
-Consolidation amendment).** Master plan v1 baseline + v1.1
-amendment fully landed; Phase 5 cycle execution sessions
-resume per §15 v1.1 enumeration under refined framework +
+**End of Phase 5 master plan v1.2 (S3 pre-flight framing
+reconciliation amendment).** Master plan v1 baseline + v1.1
++ v1.2 amendments fully landed; Phase 5 cycle execution
+sessions resume per §15 v1.2 enumeration under refined framework +
 restructured grouping.
