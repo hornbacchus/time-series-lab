@@ -179,7 +179,18 @@ class EvtFerroSegersParity(P3ParityCheck):
         u_iid = float(np.asarray(iid_fx["threshold_u"]))
         iid = self._run_tsl_one(abs_x, u_iid, "iid")
 
-        return {"garch": garch, "iid": iid}
+        # Phase 5 S2-β-redux: surface GARCH (main) fixture's
+        # theta at top level for evt_extremal_index structural
+        # invariant (single-side checker per
+        # _check_evt_extremal_index; consumes tsl["theta"]).
+        # Q-Field-α-2=(b) per-session scope: ONLY theta (not
+        # branch/method); Q-Field-α-3=(b) NO try/except — engine
+        # API change → loud failure.
+        return {
+            "garch": garch,
+            "iid": iid,
+            "theta": garch.get("theta"),
+        }
 
     # -----------------------------------------------------------------
     # Reference side: R extRemes::extremalindex

@@ -184,6 +184,9 @@ class P3ParityCheck(_BaseParityCheck):
         "vecm_cointegration_rank": (
             "cointegrating_rank",
         ),
+        "evt_extremal_index": (
+            "theta",
+        ),
     }
 
     def check_invariants(

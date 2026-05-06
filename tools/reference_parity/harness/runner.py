@@ -109,6 +109,7 @@ def discover_checks() -> dict[str, type[ParityCheck]]:
 _INVARIANTS_DISPATCH_ALLOWLIST = (
     "2a_kalman_filter_smoother",
     "3d_johansen_bartlett",
+    "3c_evt_ferro_segers",
 )
 
 

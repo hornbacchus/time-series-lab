@@ -1,8 +1,9 @@
-"""Phase 5 S2-α-1-redux + S2-α-2-redux per-wrapper smoke
-tests for structural-invariants dispatch (UPDATED per
-Q-Field-α dispositions; exercises REAL run_tsl + run_reference
-output, not synthetic inputs per B-Phase5-S2-CI-VS-LOCAL-
-GATES-DIVERGENCE banking discipline).
+"""Phase 5 S2-α-1-redux + S2-α-2-redux + S2-β-redux
+per-wrapper smoke tests + cross-wrapper acceptance + dispatch
+infrastructure for structural-invariants dispatch (exercises
+REAL run_tsl + run_reference output, not synthetic inputs
+per B-Phase5-S2-CI-VS-LOCAL-GATES-DIVERGENCE banking
+discipline).
 
 S2-α-1-redux: kalman_filter dispatch smoke test against real
 run_tsl output (verifies harness wrapper field exposure +
@@ -12,6 +13,11 @@ mechanism gates dispatch).
 S2-α-2-redux: johansen_bartlett dispatch smoke test against
 real run_tsl + run_reference output (multi-side invariant
 requires both TSL + ref `cointegrating_rank` fields).
+S2-β-redux: evt_ferro_segers dispatch smoke test (single-
+side invariant; theta surfaced from GARCH fixture);
+cross-wrapper acceptance (all 3 S2 wrappers fire + aggregate);
+dispatch infrastructure (BLOCK propagation; allowlist exclusion
+for non-S2 wrapper).
 
 Verifies:
 - Real run_tsl output exposes filtered_state_cov +
@@ -40,6 +46,10 @@ from reference_parity.harness.checks.kalman_filter import (
 from reference_parity.harness.checks.johansen_bartlett import (
     JohansenBartlettParity,
 )
+from reference_parity.harness.checks.evt_ferro_segers import (
+    EvtFerroSegersParity,
+)
+from reference_parity.harness.base import aggregate_outcomes
 from reference_parity.harness.fixtures import FixtureLoader
 from reference_parity.harness.runner import (
     _INVARIANTS_DISPATCH_ALLOWLIST,
@@ -93,23 +103,24 @@ def test_kalman_filter_real_run_tsl_dispatch() -> None:
 
 
 def test_allowlist_gating() -> None:
-    """_INVARIANTS_DISPATCH_ALLOWLIST contains kalman + johansen
-    (Q-Allowlist-2=(a) S2-α-1-redux initial + S2-α-2-redux
-    johansen addition); evt + other wrappers excluded → runner
-    step 4.5 skips dispatch for them.
-
-    Tests the allowlist constant directly.
+    """_INVARIANTS_DISPATCH_ALLOWLIST contains full S2 trio
+    (kalman + johansen + evt_ferro_segers; S2-β-redux closes
+    trio addition); non-S2 wrappers still excluded.
     """
     kalman_tid = KalmanFilterParity.technique_id
     johansen_tid = JohansenBartlettParity.technique_id
+    evt_tid = EvtFerroSegersParity.technique_id
     assert kalman_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
         f"kalman {kalman_tid!r} expected in allowlist; "
         f"got {_INVARIANTS_DISPATCH_ALLOWLIST}"
     )
     assert johansen_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
-        f"johansen {johansen_tid!r} expected in allowlist "
-        f"after S2-α-2-redux addition; got "
-        f"{_INVARIANTS_DISPATCH_ALLOWLIST}"
+        f"johansen {johansen_tid!r} expected in allowlist; "
+        f"got {_INVARIANTS_DISPATCH_ALLOWLIST}"
+    )
+    assert evt_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
+        f"evt {evt_tid!r} expected in allowlist after S2-β-redux "
+        f"addition; got {_INVARIANTS_DISPATCH_ALLOWLIST}"
     )
     # Negative check — a non-S2 wrapper still excluded
     assert "p3_arima" not in _INVARIANTS_DISPATCH_ALLOWLIST, (
@@ -118,8 +129,109 @@ def test_allowlist_gating() -> None:
     )
     print(
         f"  test_allowlist_gating: PASS "
-        f"(kalman + johansen in; p3_arima out; "
+        f"(S2 trio in; p3_arima out; "
         f"len={len(_INVARIANTS_DISPATCH_ALLOWLIST)})"
+    )
+
+
+def test_evt_ferro_segers_real_dispatch() -> None:
+    """EvtFerroSegersParity.check_invariants dispatches the
+    evt_extremal_index invariant against REAL run_tsl output
+    (single-side invariant; checker consumes tsl["theta"]
+    only, no ref required).
+
+    Verifies:
+    - Real run_tsl output exposes `theta` at top level (S2-β-
+      redux harness wrapper expansion surfaces GARCH fixture's
+      theta from nested per-wrapper structure)
+    - Lifecycle method dispatches with single-side default
+    - evt_extremal_index invariant returns PASS (theta in
+      [0, 1] per Ferro-Segers 2003 intervals estimator)
+    """
+    check = EvtFerroSegersParity()
+    loader = FixtureLoader()
+    fixture_data, _meta, _sha = loader.load(check.fixture_id)
+    fixture = check.setup_fixture(42)
+    fixture.update(fixture_data)
+    tsl_out = check.run_tsl(fixture)
+    assert "theta" in tsl_out, (
+        f"theta missing from run_tsl output; "
+        f"keys={list(tsl_out.keys())}"
+    )
+    assert tsl_out["theta"] is not None
+    results = check.check_invariants(tsl_out)
+    assert "evt_extremal_index" in results, results
+    r = results["evt_extremal_index"]
+    assert r["status"] == "PASS", r
+    print(
+        f"  test_evt_ferro_segers_real_dispatch: "
+        f"PASS ({r['status']}; theta={tsl_out['theta']:.4f})"
+    )
+
+
+def test_cross_wrapper_acceptance() -> None:
+    """All 3 S2 wrappers fire check_invariants end-to-end
+    against real run_tsl + run_reference output; aggregate
+    outcome via aggregate_outcomes ranking is PASS (all 3
+    invariants PASS).
+
+    Cross-wrapper acceptance test verifying dispatch
+    infrastructure works coherently across the S2 closed-
+    form-numerical trio.
+    """
+    loader = FixtureLoader()
+    statuses = []
+    # Kalman (single-side)
+    kalman = KalmanFilterParity()
+    kf_data, _, _ = loader.load(kalman.fixture_id)
+    kf_fix = kalman.setup_fixture(42)
+    kf_fix.update(kf_data)
+    kf_tsl = kalman.run_tsl(kf_fix)
+    kf_results = kalman.check_invariants(kf_tsl)
+    statuses.extend(r["status"] for r in kf_results.values())
+    # Johansen (multi-side; needs ref)
+    johansen = JohansenBartlettParity()
+    jb_data, _, _ = loader.load(johansen.fixture_id)
+    jb_fix = johansen.setup_fixture(42)
+    jb_fix.update(jb_data)
+    jb_tsl = johansen.run_tsl(jb_fix)
+    jb_ref = johansen.run_reference(jb_fix)
+    jb_results = johansen.check_invariants(jb_tsl, jb_ref, jb_fix)
+    statuses.extend(r["status"] for r in jb_results.values())
+    # EVT (single-side)
+    evt = EvtFerroSegersParity()
+    ev_data, _, _ = loader.load(evt.fixture_id)
+    ev_fix = evt.setup_fixture(42)
+    ev_fix.update(ev_data)
+    ev_tsl = evt.run_tsl(ev_fix)
+    ev_results = evt.check_invariants(ev_tsl)
+    statuses.extend(r["status"] for r in ev_results.values())
+
+    worst = aggregate_outcomes(statuses)
+    assert worst == "PASS", (statuses, worst)
+    print(
+        f"  test_cross_wrapper_acceptance: PASS "
+        f"(3 wrappers; statuses={statuses}; aggregate={worst})"
+    )
+
+
+def test_dispatch_block_propagation() -> None:
+    """BLOCK from one invariant propagates via aggregate_outcomes
+    ranking (verifies runner step 4.5 outcome integration logic).
+    Synthetic invariant outcomes; not real-output dependent.
+    """
+    # Simulate runner step 4.5 outcome aggregation:
+    #   inv_outcomes = [r["status"] for r in results.values() if status != INFO]
+    #   worst_inv = aggregate_outcomes(inv_outcomes)
+    #   final = aggregate_outcomes([compare_outcome, worst_inv])
+    inv_statuses = ["PASS", "BLOCK", "PASS"]
+    worst = aggregate_outcomes(inv_statuses)
+    assert worst == "BLOCK", worst
+    final = aggregate_outcomes(["PASS", worst])
+    assert final == "BLOCK", final
+    print(
+        f"  test_dispatch_block_propagation: PASS "
+        f"(BLOCK propagates; final={final})"
     )
 
 
@@ -173,13 +285,16 @@ def test_johansen_bartlett_real_dispatch() -> None:
 
 def main() -> int:
     print(
-        "Phase 5 S2-alpha-redux - dispatch smoke tests "
-        "(real run_tsl + run_reference; allowlist gating)"
+        "Phase 5 S2-redux - dispatch smoke tests + cross-wrapper "
+        "acceptance + dispatch infrastructure"
     )
     try:
         test_kalman_filter_real_run_tsl_dispatch()
         test_allowlist_gating()
         test_johansen_bartlett_real_dispatch()
+        test_evt_ferro_segers_real_dispatch()
+        test_cross_wrapper_acceptance()
+        test_dispatch_block_propagation()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
