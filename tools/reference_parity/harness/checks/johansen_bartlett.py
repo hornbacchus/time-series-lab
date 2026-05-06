@@ -176,6 +176,15 @@ class JohansenBartlettParity(P3ParityCheck):
                 "trace_stat_corrected",
             ),
             "wrapper_status": wrapper_res.get("status"),
+            # Phase 5 S2-α-2-redux: expose cointegrating_rank for
+            # vecm_cointegration_rank structural invariant
+            # (engine wrapper audit_fields["cointegrating_rank"]
+            # populated per Phase 4 S8 P4-1.2; Q-Field-α-2=(b)
+            # per-session scope: ONLY rank field; Q-Field-α-3=(b)
+            # NO try/except — engine API change → loud failure).
+            "cointegrating_rank": wrapper_audit.get(
+                "cointegrating_rank",
+            ),
         }
 
     # -----------------------------------------------------------------
@@ -203,16 +212,19 @@ class JohansenBartlettParity(P3ParityCheck):
                          K = {K_urca}, spec = "longrun")
             trace_stats <- as.numeric(fit@teststat)
             eigvals <- as.numeric(fit@lambda)
+            cvals_5pct <- as.numeric(fit@cval[, 2])
             write.csv(data.frame(trace = trace_stats),
                       "{{{{OUTPUT_trace_raw}}}}", row.names = FALSE)
             write.csv(data.frame(lambda = eigvals),
                       "{{{{OUTPUT_eigvals}}}}", row.names = FALSE)
+            write.csv(data.frame(cv = cvals_5pct),
+                      "{{{{OUTPUT_cvals_5pct}}}}", row.names = FALSE)
         '''
 
         outputs, versions = bridge.rscript_call(
             r_code=r_code,
             inputs={"y": y},
-            output_names=["trace_raw", "eigvals"],
+            output_names=["trace_raw", "eigvals", "cvals_5pct"],
             timeout_sec=60,
             capture_versions_for=["urca"],
         )
@@ -220,6 +232,9 @@ class JohansenBartlettParity(P3ParityCheck):
         # while statsmodels returns r=0, ..., r=n-1. Reverse to align.
         urca_trace_raw = np.asarray(outputs["trace_raw"]).reshape(-1)[::-1]
         urca_eigvals = np.asarray(outputs["eigvals"]).reshape(-1)
+        # urca cval matrix rows are also in REVERSE order; reverse
+        # to align with trace_raw (r=0, ..., r=n-1 ordering).
+        urca_cvals_5pct = np.asarray(outputs["cvals_5pct"]).reshape(-1)[::-1]
 
         # statsmodels triangulation
         from statsmodels.tsa.vector_ar.vecm import coint_johansen
@@ -227,12 +242,21 @@ class JohansenBartlettParity(P3ParityCheck):
         sm_trace_raw = np.asarray(sm_result.lr1, dtype=np.float64)
         sm_eigvals = np.asarray(sm_result.eig, dtype=np.float64)
 
+        # Phase 5 S2-α-2-redux: compute cointegrating_rank from
+        # urca trace stats vs 5% critical values for
+        # vecm_cointegration_rank structural invariant. Rank =
+        # count of trace_stats[i] > cvals_5pct[i] (Johansen
+        # convention: rejecting H0: r ≤ i implies rank > i).
+        rank_5pct = int(np.sum(urca_trace_raw > urca_cvals_5pct))
+
         return {
             "urca_trace_raw": urca_trace_raw.astype(np.float64),
             "urca_eigvals": urca_eigvals.astype(np.float64),
+            "urca_cvals_5pct": urca_cvals_5pct.astype(np.float64),
             "sm_trace_raw": sm_trace_raw,
             "sm_eigvals": sm_eigvals,
             "urca_version": versions.get("urca", "unknown"),
+            "cointegrating_rank": rank_5pct,
         }
 
     # -----------------------------------------------------------------

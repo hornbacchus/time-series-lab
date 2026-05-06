@@ -174,18 +174,29 @@ class P3ParityCheck(_BaseParityCheck):
     # missing-fields cases surface in audit trail without
     # masquerading as invariant violations. Phase 5 S2-α-1-redux
     # baseline; extended per per-wrapper allowlist additions.
+    # Phase 5 S2-α-2-redux extension: vecm_cointegration_rank
+    # added (TSL-side field; ref-side check delegated to checker
+    # internal logic since defensive layer only sees TSL side).
     _INVARIANT_REQUIRED_FIELDS: dict[str, tuple] = {
         "kalman_covariance_ordering": (
             "filtered_state_cov", "predicted_state_cov",
+        ),
+        "vecm_cointegration_rank": (
+            "cointegrating_rank",
         ),
     }
 
     def check_invariants(
         self,
         tsl_output: dict[str, Any],
+        ref_output: dict[str, Any] | None = None,
+        fixture: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Phase 5 S2-α-1-redux — dispatch declared
-        ``structural_invariants`` against ``tsl_output``.
+        """Phase 5 S2-α-1-redux (extended at S2-α-2-redux) —
+        dispatch declared ``structural_invariants`` against
+        ``tsl_output`` (+ optional ``ref_output`` + ``fixture``
+        for invariants that need reference-side comparison
+        e.g. ``vecm_cointegration_rank``).
 
         Per-wrapper allowlist gating happens in
         ``runner.py:run_check`` step 4.5 (only allowlist
@@ -200,6 +211,11 @@ class P3ParityCheck(_BaseParityCheck):
         present, dispatch the registered checker per
         ``structural_invariants.get_invariant_checker``.
 
+        Backward-compat: ``ref_output`` + ``fixture`` are
+        optional with empty-dict defaults. S2-α-1-redux test
+        calling with single arg continues to work; S2-α-2-redux
+        adds ref-side support for multi-side invariants.
+
         Returns aggregated invariant outcomes dict:
         ``{name: {status, details, ...}}`` — one entry per
         declared invariant (regardless of dispatch / skip /
@@ -208,6 +224,8 @@ class P3ParityCheck(_BaseParityCheck):
         from reference_parity.harness.structural_invariants import (
             get_invariant_checker,
         )
+        ref_output = ref_output if ref_output is not None else {}
+        fixture = fixture if fixture is not None else {}
         results: dict[str, Any] = {}
         for inv in self.structural_invariants:
             if not inv.enabled:
@@ -232,7 +250,7 @@ class P3ParityCheck(_BaseParityCheck):
                 continue
             checker = get_invariant_checker(inv.invariant_type)
             results[inv.name] = checker(
-                tsl_output, {}, {}, inv,
+                tsl_output, ref_output, fixture, inv,
             )
         return results
 

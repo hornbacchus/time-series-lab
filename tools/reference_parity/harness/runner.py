@@ -106,7 +106,10 @@ def discover_checks() -> dict[str, type[ParityCheck]]:
 # evt + ...).
 # ---------------------------------------------------------------------
 
-_INVARIANTS_DISPATCH_ALLOWLIST = ("2a_kalman_filter_smoother",)
+_INVARIANTS_DISPATCH_ALLOWLIST = (
+    "2a_kalman_filter_smoother",
+    "3d_johansen_bartlett",
+)
 
 
 # ---------------------------------------------------------------------
@@ -219,7 +222,9 @@ def run_check(
             and hasattr(check, "check_invariants")
             and getattr(check, "structural_invariants", ())
         ):
-            invariant_results = check.check_invariants(tsl_out)
+            invariant_results = check.check_invariants(
+                tsl_out, ref_out, fixture,
+            )
             if invariant_results:
                 first_result.metrics["invariants"] = invariant_results
                 inv_outcomes = [
