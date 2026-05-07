@@ -171,9 +171,25 @@ class MintFamilyParity(P3ParityCheck):
                     "ok": False,
                     "error": f"{type(e).__name__}: {e}",
                 }
+        # Phase 5 S4-α — Case (i) handling per Q-S4-α-rep-method=
+        # (α) mint_shrinkage representative method. Compute L2 norm
+        # of summing-constraint violation post-reconciliation:
+        #   y_tilde[:n_top] should equal S[:n_top] @ y_tilde[n_top:]
+        # Per pre-flight empirical investigation at `d7e4cf7`,
+        # mint_shrinkage produces L2 = 0.0 exactly on real fixture
+        # (well within tolerance=1e-10). Closed-form deterministic
+        # per `_check_mint_coherence` invariant + verdict_class.
+        coherence_residual: float | None = None
+        rep = per_method.get("mint_shrinkage")
+        if rep is not None and rep.get("ok"):
+            n_top = n_total - S.shape[1]  # n_top = n_total - n_bottom
+            y_tilde = rep["y_tilde"]
+            violation = y_tilde[:n_top] - S[:n_top] @ y_tilde[n_top:]
+            coherence_residual = float(np.linalg.norm(violation))
         return {
             "per_method": per_method,
             "lambda_shrinkage": lambda_tsl,
+            "coherence_residual": coherence_residual,
         }
 
     # -----------------------------------------------------------------

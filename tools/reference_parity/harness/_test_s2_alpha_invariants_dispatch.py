@@ -60,6 +60,9 @@ from reference_parity.harness.checks.mcmc_sv_gaussian import (
 from reference_parity.harness.checks.mcmc_sv_student_t import (
     McmcSvStudentTParity,
 )
+from reference_parity.harness.checks.mint_family import (
+    MintFamilyParity,
+)
 from reference_parity.harness.base import aggregate_outcomes
 from reference_parity.harness.fixtures import FixtureLoader
 from reference_parity.harness.runner import (
@@ -118,13 +121,16 @@ def test_allowlist_gating() -> None:
     (kalman + johansen + evt_ferro_segers; S2-β-redux closes
     trio addition) + S3 MCMC SV pair (mcmc_sv_gaussian +
     mcmc_sv_student_t per Case 0 outcome at S3 pre-flight
-    `1fd1ad3`); non-allowlist wrappers still excluded.
+    `1fd1ad3`) + S4-alpha mint_family (per Case (i) outcome at
+    S4-alpha pre-flight `d7e4cf7`); non-allowlist wrappers still
+    excluded.
     """
     kalman_tid = KalmanFilterParity.technique_id
     johansen_tid = JohansenBartlettParity.technique_id
     evt_tid = EvtFerroSegersParity.technique_id
     gaussian_tid = McmcSvGaussianParity.technique_id
     student_t_tid = McmcSvStudentTParity.technique_id
+    mint_tid = MintFamilyParity.technique_id
     assert kalman_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
         f"kalman {kalman_tid!r} expected in allowlist; "
         f"got {_INVARIANTS_DISPATCH_ALLOWLIST}"
@@ -145,6 +151,10 @@ def test_allowlist_gating() -> None:
         f"student_t {student_t_tid!r} expected in allowlist after "
         f"S3 addition; got {_INVARIANTS_DISPATCH_ALLOWLIST}"
     )
+    assert mint_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
+        f"mint_family {mint_tid!r} expected in allowlist after "
+        f"S4-alpha addition; got {_INVARIANTS_DISPATCH_ALLOWLIST}"
+    )
     # Negative check — a non-allowlist wrapper still excluded
     assert "p3_arima" not in _INVARIANTS_DISPATCH_ALLOWLIST, (
         f"p3_arima unexpectedly in allowlist; "
@@ -152,8 +162,8 @@ def test_allowlist_gating() -> None:
     )
     print(
         f"  test_allowlist_gating: PASS "
-        f"(S2 trio + S3 MCMC SV pair in; p3_arima out; "
-        f"len={len(_INVARIANTS_DISPATCH_ALLOWLIST)})"
+        f"(S2 trio + S3 MCMC SV pair + S4-alpha mint_family in; "
+        f"p3_arima out; len={len(_INVARIANTS_DISPATCH_ALLOWLIST)})"
     )
 
 
@@ -451,9 +461,62 @@ def test_cross_wrapper_acceptance_mcmc_sv() -> None:
     )
 
 
+def test_mint_family_real_dispatch() -> None:
+    """MintFamilyParity.check_invariants dispatches the
+    mint_coherence invariant against REAL run_tsl output
+    (per B-Phase5-S2-CI-VS-LOCAL-GATES-DIVERGENCE discipline;
+    no synthesized inputs).
+
+    S4-α first per-wrapper sub-session of heterogeneous group
+    + first Phase 5 sub-session adding fast-tier wrapper to
+    allowlist with empirical field VALUE pre-verified (per
+    pre-flight `d7e4cf7`). Single-side invariant
+    (`mint_coherence` checker consumes tsl["coherence_residual"]
+    only). Per-wrapper field-availability protocol Case (i)
+    outcome (required field `coherence_residual` not exposed at
+    run_tsl top level pre-S4-α; harness wrapper expansion at
+    S4-α surfaces field via mint_shrinkage representative
+    method per Q-S4-α-rep-method=(α)).
+
+    PASS-deterministic assertion semantic per closed-form
+    invariant class (verdict_class = "closed_form"; Phase 1
+    audit at 4.66e-15 abs vs hts on mint_shrinkage; empirical
+    L2 = 0.0 on 3/4 methods at pre-flight). Distinct from S3
+    MCMC SV stochastic loose-assertion pattern.
+
+    Verifies:
+    - Real run_tsl output exposes `coherence_residual` at top
+      level (Case (i) handling at S4-α harness expansion)
+    - Lifecycle method dispatches with single-side default
+    - mint_coherence invariant returns PASS (residual <= 1e-10
+      tolerance per closed-form deterministic math)
+    """
+    check = MintFamilyParity()
+    loader = FixtureLoader()
+    fixture_data, _meta, _sha = loader.load(check.fixture_id)
+    fixture = check.setup_fixture(42)
+    fixture.update(fixture_data)
+    tsl_out = check.run_tsl(fixture)
+    assert "coherence_residual" in tsl_out, (
+        f"coherence_residual missing from run_tsl output; "
+        f"keys={list(tsl_out.keys())}"
+    )
+    assert tsl_out["coherence_residual"] is not None
+    results = check.check_invariants(tsl_out)
+    assert "mint_coherence" in results, results
+    r = results["mint_coherence"]
+    # PASS-deterministic per closed-form class
+    assert r["status"] == "PASS", r
+    print(
+        f"  test_mint_family_real_dispatch: "
+        f"PASS ({r['status']}; "
+        f"coherence_residual={tsl_out['coherence_residual']:.3e})"
+    )
+
+
 def main() -> int:
     print(
-        "Phase 5 S2-redux + S3 - dispatch smoke tests + "
+        "Phase 5 S2-redux + S3 + S4-alpha - dispatch smoke tests + "
         "cross-wrapper acceptance + dispatch infrastructure"
     )
     try:
@@ -466,13 +529,14 @@ def main() -> int:
         test_mcmc_sv_gaussian_real_dispatch()
         test_mcmc_sv_student_t_real_dispatch()
         test_cross_wrapper_acceptance_mcmc_sv()
+        test_mint_family_real_dispatch()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
     except Exception as e:
         print(f"\nERROR: {type(e).__name__}: {e}", file=sys.stderr)
         return 2
-    print("\nAll S2-redux + S3 dispatch smoke tests PASS.")
+    print("\nAll S2-redux + S3 + S4-alpha dispatch smoke tests PASS.")
     return 0
 
 

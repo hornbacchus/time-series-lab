@@ -112,6 +112,7 @@ _INVARIANTS_DISPATCH_ALLOWLIST = (
     "3c_evt_ferro_segers",
     "2b_mcmc_sv_gaussian",       # S3 — Case 0 outcome per pre-flight `1fd1ad3`
     "2c_mcmc_sv_student_t",      # S3 — Case 0 outcome per pre-flight `1fd1ad3`
+    "3e_mint_family",            # S4-α — Case (i) outcome per pre-flight `d7e4cf7`
 )
 
 
