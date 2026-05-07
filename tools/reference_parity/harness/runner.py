@@ -110,6 +110,8 @@ _INVARIANTS_DISPATCH_ALLOWLIST = (
     "2a_kalman_filter_smoother",
     "3d_johansen_bartlett",
     "3c_evt_ferro_segers",
+    "2b_mcmc_sv_gaussian",       # S3 — Case 0 outcome per pre-flight `1fd1ad3`
+    "2c_mcmc_sv_student_t",      # S3 — Case 0 outcome per pre-flight `1fd1ad3`
 )
 
 
