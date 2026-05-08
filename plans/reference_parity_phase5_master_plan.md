@@ -584,6 +584,24 @@ Phase 4 pattern.
   RECONCILIATION codify Case 0 protocol extension +
   amendment-design-gap pattern at separate findings doc
   `docs/reference_parity_phase5/s3_amendment_banking.md`.
+- **Phase 5 close (2026-05-08; no version increment per
+  Q-Phase5-close-3=(γ)):** Phase 5 cycle CLOSED at close arc
+  step 6. Sub-domain (i) closed-form-numerical + MCMC
+  stochastic + INVERTED tolerance heterogeneous group
+  COMPLETE — 8-wrapper allowlist + 14 dispatch tests + 3
+  invariant class coverage + per-class cross-wrapper
+  acceptance dispatch framework. Framework reference doc LIVE
+  at `docs/reference_parity_phase5/framework_reference.md`
+  (473 LOC across 5 successor-utility sections; PASSES Phase
+  6+ inheritance test per Chat F1 review). Reserve sub-
+  domains (ii) + (iii) + (iv) deferred entirely to Phase 6+
+  per Q-S5-3=(δ) + Q-Phase5-forward=(γ) explicit transfer.
+  Master plan v1.2 remains authoritative through Phase 5
+  close; v1.3 increment deferred to Phase 6+ if cycle-
+  architecture recalibration produces structural amendment
+  per Code's banked findings + closeout banking
+  (B-Phase5-CLOSE-ARC-INSTITUTIONAL-PATTERN-CLOSEOUT at
+  `docs/reference_parity_phase5/phase_5_closeout_banking.md`).
 
 ## 18. Phase 5 reflective record (v1.1 amendment)
 
@@ -653,3 +671,46 @@ reconciliation amendment).** Master plan v1 baseline + v1.1
 + v1.2 amendments fully landed; Phase 5 cycle execution
 sessions resume per §15 v1.2 enumeration under refined framework +
 restructured grouping.
+
+---
+
+**Phase 5 cycle close reflection (2026-05-08; appended at
+close arc step 6 per Q-Phase5-close-3=(γ) §17 + §18 closure
+note WITHOUT v1.3 increment):**
+
+Phase 5 sub-domain (i) heterogeneous group integration
+COMPLETE: 8-wrapper allowlist active across 3 invariant
+classes (closed-form deterministic 5 wrappers + MCMC
+stochastic 2 wrappers + INVERTED tolerance 1 wrapper); 14
+dispatch tests + per-class cross-wrapper acceptance framework
+operational; framework reference doc LIVE as Phase 6+
+successor inheritance asset.
+
+Institutional learning codified across cycle:
+- Per-wrapper field-availability protocol with Cases
+  0/(i)/(iii) empirically observed (Cases (ii)+(iv) reserved)
+- Smoke test semantic bifurcation by invariant class (closed-
+  form deterministic / MCMC stochastic loose-assertion /
+  INVERTED orthogonality)
+- INVERTED tolerance handling at checker level (architectural
+  separation of comparison direction from dispatch + lifecycle
+  infrastructure)
+- Mitigation activation framework (mit-i)+(mit-ii)+(mit-iii)+
+  (mit-iv) with drift-evidence-driven activation discipline
+- Chat-instance-seam recalibration as institutionally-
+  legitimate disposition reversal pattern (informed by Code's
+  empirical recalibration response across Chat-instance
+  transition seam)
+- Q-Overshoot recalibration framework V1+V2 + execution-class
+  baseline + close findings class baseline empirically
+  emerging across cycle
+
+Forward-looking — Phase 6+ inheritance: reserve sub-domain
+activation + cycle-architecture recalibration handled at Phase
+6+ inheritance preparation sub-session per close arc step 7;
+Code's banked findings (chat-instance-seam recalibration
+banking) + Phase 5 closeout banking serve as agenda inputs
+for Phase 6+ kickoff cycle-architecture recalibration if
+warranted (compression candidates 1-4 + Q-disposition
+tightening + pre-flight class proportionality + recalibration
+runaway consolidation).
