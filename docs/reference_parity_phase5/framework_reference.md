@@ -80,3 +80,81 @@ After commit(s) push:
 
 For multi-commit sequences, CI verification at sequence END
 (intermediate commits informational only).
+
+---
+
+## §2 Operational discipline
+
+### 2.1 Chunking thresholds
+
+- **§13.1 default:** 200 LOC clean per single commit
+- **§13.1 marginal-tolerance band:** 200-220 LOC; (mit-i)
+  cascading split pre-authorized at this band per Phase 5
+  standing
+- **§13.4 hard threshold:** >220 LOC; surface to Chat per
+  UPDATED CONSTRAINT 4 (do NOT trim post-hoc)
+
+For multi-section docs, cascading split at categorical seam
+(content-type or file-boundary) keeps each commit clean per
+§13.1 default.
+
+### 2.2 Smoke test semantic decision tree by invariant class
+
+Before authoring per-wrapper smoke test, identify invariant
+class:
+
+- **Closed-form deterministic** (e.g., kalman, johansen, evt,
+  mint, transformer attention normalization): assert
+  PASS-deterministic. Invariant outcome is mathematically
+  determined; smoke test verifies dispatch fires + outcome
+  PASS on real fixture.
+
+- **MCMC stochastic** (e.g., mcmc_sv_gaussian,
+  mcmc_sv_student_t): loose-assertion. Invariant outcome may
+  be PASS / CAVEAT / BLOCK depending on chain quality at
+  fixture; smoke test verifies dispatch fires + valid status
+  returned. BLOCK on real fixture is NOT a smoke test failure
+  for this class.
+
+- **INVERTED tolerance** (e.g., caviar_sav christoffersen
+  p-value): PASS-deterministic + INVERTED orthogonality.
+  Checker handles INVERTED comparison internally (PASS if
+  pvalue > floor; CAVEAT/BLOCK at lower tail); smoke test
+  asserts on outcome status not raw value direction.
+
+If smoke test fails on real fixture for closed-form class,
+investigate (likely real bug). If MCMC class returns BLOCK,
+verify chain configuration but do NOT treat as test failure.
+
+### 2.3 CI verification protocol
+
+- **Doc-only commits:** pre-commit gates sufficient regression
+  verification; environmental CI failure (billing/spending
+  limit) deferrable per
+  Q-S5-CI-environmental-1=(β) substantive interpretation
+- **Code-modification commits:** STRICT CI verification
+  required; environmental failure blocks commit until
+  resolution
+- Watch: `gh run watch <run-id> --exit-status` on END commit
+- Multi-commit-sequence: CI verification at sequence END
+  (intermediate commits informational only)
+- Workflow exit codes: 0 (PASS/SKIP) → green; 1 (BLOCK) → red;
+  2 (CAVEAT) → green-mapped; 3 (ERROR) → red; 4
+  (DOCUMENTED-DIVERGENCE) → green-mapped
+
+### 2.4 Pre-commit gates per §19
+
+Run all four; commit only if all pass:
+
+1. `parity-fast --check-environment` — R/Python package
+   versions match MANIFEST
+2. `engine/tests/` pytest — 96/96 PASS preserved
+3. `_test_structural_invariants.py` — 7/7 PASS preserved
+4. `validate_install_matrix.py` — install-matrix consistency
+   (P-1 §8.5)
+
+For execution-class commits adding wrappers/dispatch, also run
+local parity-fast tier (`PYTHONPATH=tools python -m
+reference_parity --tier fast`) and verify NO new BLOCK +
+allowlist gating preserved + new wrapper PASS with invariant
+firing.
