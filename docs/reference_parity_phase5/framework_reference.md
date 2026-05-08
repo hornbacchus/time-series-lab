@@ -379,3 +379,95 @@ relative to `docs/reference_parity_phase5/`.
   findings (Q-S2-α-2-redux-followup-2=(a) discipline
   refinement establishing categorical strict over session-
   context judgment)
+
+---
+
+## §5 Reference
+
+Reference depth as appendix to §1-§4 operational sections.
+Access pattern by-need, not sequential.
+
+### 5.1 Master plan
+
+`plans/reference_parity_phase5_master_plan.md` —
+authoritative cycle-architecture document at v1.2 through
+Phase 5 close. §15 sub-domain framing:
+- S2 closed-form-numerical
+- S3 MCMC stochastic
+- S4 heterogeneous group (per-wrapper sub-sessions)
+- S5 cross-wrapper acceptance
+
+Per Q-Phase5-close-3=(γ) §17 + §18 closure note ships at
+Phase 5 close findings sub-session WITHOUT v1.3 increment;
+v1.2 remains authoritative.
+
+### 5.2 Sub-domain (i) final state — 8-wrapper allowlist
+
+| ID | Class | Case |
+|---|---|---|
+| 2a_kalman_filter_smoother | closed-form | (iii) |
+| 3d_johansen_bartlett | closed-form | (iii) |
+| 3c_evt_ferro_segers | closed-form | (iii) |
+| 2b_mcmc_sv_gaussian | MCMC stochastic | 0 |
+| 2c_mcmc_sv_student_t | MCMC stochastic | 0 |
+| 3e_mint_family | closed-form | (i) representative-choice |
+| 3f_transformer_attention | closed-form | (i) representative-choice |
+| 3a_caviar_sav | INVERTED | (i) variant rename mapping |
+
+3 invariant class coverage (closed-form deterministic 5 +
+MCMC stochastic 2 + INVERTED tolerance 1). 14 dispatch tests
++ 4 cross-wrapper acceptance variants per S5 per-class
+aggregation.
+
+### 5.3 Reserve sub-domains
+
+Sub-domains (ii) + (iii) + (iv) deferred entirely to Phase 6+
+per Q-S5-3=(δ) + Q-Phase5-forward=(γ) explicit transfer.
+Reserve documentation + scope + activation criteria handled
+at Phase 6+ inheritance preparation sub-session (close arc
+step 7).
+
+### 5.4 Cycle-architecture context (appendix)
+
+Q-mit-iii-1=(α) comprehensive scope preserved as reference
+content here (not interleaved with §1-§4 operational
+content):
+
+- **v1.1 → v1.2 amendment** (S3 framing reconciliation per
+  pre-flight finding; engine state already complete per
+  Phase 4 S8)
+- **Standing discipline framework** codified across cycle:
+  per-wrapper field-availability protocol; smoke test
+  bifurcation; chunking thresholds; CI verification protocol;
+  Q-banking-categorical strict; UPDATED CONSTRAINT 4; Option
+  E discipline
+- **Recalibration framework V1+V2:** pre-flight + execution
+  baselines empirically updated; mitigation activation
+  framework empirically validated at S4-γ ((mit-i) + (mit-ii)
+  + (mit-iv) effective at execution scope; (mit-iii)
+  activated at Phase 5 close pre-flight per drift evidence
+  sufficient)
+- **Pre-flight prospective discipline extensions:** per-
+  wrapper sub-session → cross-wrapper scope → cycle-closure
+  scope; redirected scope per chat-instance-seam recalibration
+- **Three-criteria gate** (analytical-class cohesion + pre-
+  planned natural seam + empirical-validation envelope) for
+  multi-wrapper grouping decisions
+
+### 5.5 Phase 6+ inheritance scope (preview)
+
+Phase 6+ kickoff inherits:
+- 8-wrapper allowlist + 14 dispatch tests + 3 invariant class
+  coverage as baseline
+- Standing discipline framework consolidated at this doc
+- Banking inheritance via §4 situation-keyed pointer index
+- Master plan v1.2 cycle-architecture document
+- Code's empirical recalibration findings per
+  `chat_instance_seam_recalibration_banking.md` as cycle-
+  architecture recalibration input candidates (compression
+  candidates 1-4; Q-disposition tightening; pre-flight class
+  proportionality; recalibration runaway consolidation)
+
+Reserve sub-domain activation + cycle-architecture
+recalibration handled at Phase 6+ kickoff per close arc step
+7 (Phase 6+ inheritance preparation).
