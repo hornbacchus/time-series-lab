@@ -158,3 +158,111 @@ local parity-fast tier (`PYTHONPATH=tools python -m
 reference_parity --tier fast`) and verify NO new BLOCK +
 allowlist gating preserved + new wrapper PASS with invariant
 firing.
+
+---
+
+## §3 Pattern recipes
+
+Recipe-with-worked-example for the three integration patterns:
+per-wrapper integration, cross-wrapper acceptance,
+banking-when-warranted.
+
+### 3.1 Per-wrapper integration recipe
+
+**Step 1 — Identify Case** per per-wrapper field-availability
+protocol:
+- **Case 0** — required field already exposed at `run_tsl()`
+  top level. No harness expansion; only allowlist + smoke
+  test.
+- **Case (i)** — required field NOT exposed. Harness wrapper
+  expansion required, with two variants:
+  - *Representative-choice*: select specific layer/family
+    member for invariant check (exemplar:
+    `mint_shrinkage` / Layer 0)
+  - *Rename mapping*: map engine field name to harness
+    expected field name (exemplar:
+    `engine.christoffersen_pval` →
+    `harness.chris_pvalue`)
+- **Case (iii)** — engine `audit_fields` exposed but harness
+  needs extraction at `run_tsl()` boundary
+- **Cases (ii) + (iv)** — unobserved across Phase 5; reserved
+  for future empirical observation
+
+**Step 2 — Allowlist add:** append `<technique_id>` to
+`_INVARIANTS_DISPATCH_ALLOWLIST` in
+`tools/reference_parity/harness/runner.py`.
+
+**Step 3 — Harness expansion** (Case (i) / (iii) only): edit
+`tools/reference_parity/harness/checks/<wrapper>.py` to expose
+required field at `run_tsl()` top level via representative
+choice OR rename mapping.
+
+**Step 4 — Smoke test:** add `test_<wrapper>_real_dispatch` in
+`_test_s2_alpha_invariants_dispatch.py` per invariant class
+semantic (§2.2).
+
+**Step 5 — Findings doc** at
+`docs/reference_parity_phase5/session_<N>_findings.md` per
+~150-200 LOC class baseline.
+
+**Worked example — S4-α `3e_mint_family` Case (i)
+representative-choice:** field `mint_shrinkage_lambda` not
+exposed at `run_tsl()` top level (Case (i)). Harness expansion
+selected `mint_shrinkage` family member as representative
+(closed-form deterministic). Smoke test asserts
+PASS-deterministic. Banked Case (i) representative-choice
+variant per Q-banking-categorical strict.
+
+**Worked example — S4-γ `3a_caviar_sav` INVERTED Case (i)
+rename mapping:** engine exposes `christoffersen_pval` but
+harness checker expects `chris_pvalue`. Harness expansion =
+rename map at `run_tsl()` boundary. INVERTED tolerance handled
+at checker level; smoke test PASS-deterministic on outcome
+status.
+
+### 3.2 Cross-wrapper acceptance recipe
+
+Per-class aggregation per S5 3-class structure (closed-form /
+MCMC stochastic / INVERTED). Single-class cross-wrapper test
+per class; aggregate via `aggregate_outcomes` ranking.
+
+**Steps:**
+1. Add per-class cross-wrapper test (e.g.,
+   `test_cross_wrapper_acceptance_<class>`) in
+   `_test_s2_alpha_invariants_dispatch.py`
+2. Iterate over wrappers in class; collect outcomes; aggregate
+3. Assert per class semantic (PASS-deterministic for
+   closed-form + INVERTED; loose for MCMC stochastic)
+4. Update `test_allowlist_gating` if new wrapper added to
+   allowlist
+
+**Worked example — S5 cross-wrapper acceptance:** 14 dispatch
+tests including 8 per-wrapper smoke + 1 allowlist gating + 1
+BLOCK propagation + 4 cross-wrapper acceptance variants
+(closed-form 5-wrapper + MCMC stochastic 2-wrapper + INVERTED
+1-wrapper + S2-redux 3-wrapper preserved subset). 8-wrapper
+allowlist baseline + 3 invariant class coverage.
+
+### 3.3 Banking-when-warranted recipe
+
+Banking entry codified per Q-banking-categorical strict
+classes:
+- Architectural decisions surfaced during execution
+- Dispatch infrastructure changes (allowlist mechanism;
+  lifecycle method; field-availability protocol Cases
+  enumeration)
+- Allowlist mechanism amendments
+- API-changing decisions
+
+**Format (S1-A-1-c):** banking ID + title + category + content
++ forward-looking guidance + cross-references via (mit-ii)
+brief mentions. Lives in
+`docs/reference_parity_phase5/<scope>_banking.md` (standalone)
+OR inline at findings doc per Q4 disposition.
+
+**Worked example — S2-α-2-redux lifecycle method extension:**
+`check_invariants(tsl, ref=None, fixture=None)` multi-side
+signature surfaced as architectural decision during execution
+(VECM cointegrating rank requires both tsl + ref). Banked per
+Q-banking-categorical strict per API-changing class with
+forward-looking guidance for future multi-side invariants.
