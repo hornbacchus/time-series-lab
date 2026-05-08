@@ -266,3 +266,116 @@ signature surfaced as architectural decision during execution
 (VECM cointegrating rank requires both tsl + ref). Banked per
 Q-banking-categorical strict per API-changing class with
 forward-looking guidance for future multi-side invariants.
+
+---
+
+## §4 Banking pointer index
+
+Situation-keyed access pattern. Coverage situation-driven, not
+enumeration-driven. Use this index to find prior context in
+<2 minutes vs enumerating ~30+ banking docs. All paths
+relative to `docs/reference_parity_phase5/`.
+
+### Chunking + overshoot
+
+- **For chunking threshold engagement (200-220 marginal /
+  >220 hard)** → `q_overshoot_recalibration_banking.md` (V1
+  pre-flight) +
+  `q_overshoot_preflight_recalibration_v2_banking.md` (V2
+  + (mit-i)/(ii)/(iv) activation) +
+  `q_overshoot_execution_recalibration_banking.md`
+  (execution-class baseline)
+
+- **For pre-flight findings doc baseline (~170-200 LOC)** →
+  recalibration V2 banking; informal carryover from S5 pre-
+  flight (180) + (mit-iii) v1 (174) + redirected (mit-iii)
+  (186)
+
+### Per-wrapper integration
+
+- **For Case 0 outcome (field already exposed)** →
+  `s3_amendment_banking.md`
+  (B-Phase5-PER-WRAPPER-PROTOCOL-CASE-0-EXTENSION)
+
+- **For Case (i) representative-choice variant** →
+  `session_4_alpha_findings.md`
+  (B-Phase5-S4-α-CASE-i-FIRST-EMPIRICAL-OBSERVATION) +
+  `session_4_beta_findings.md`
+  (B-Phase5-S4-β-CASE-i-CONSECUTIVE-OBSERVATION)
+
+- **For Case (i) rename mapping variant** →
+  `session_4_gamma_preflight_findings.md` +
+  `session_4_gamma_findings.md` (no banking inline; pre-
+  flight investigation captures rename mapping pattern)
+
+- **For Case (iii) extraction pattern** → S2-redux trio
+  precedents at S2-α-1-redux + S2-α-2-redux + S2-β-redux
+  findings docs
+
+### Smoke test + invariant class
+
+- **For smoke test semantic bifurcation (closed-form vs MCMC
+  vs INVERTED)** → `s3_execution_banking.md`
+  (B-Phase5-S3-SMOKE-TEST-SEMANTICS-INVARIANT-CLASS-DIVERGENCE)
+
+- **For MCMC stochastic ESS bottleneck** →
+  `s3_execution_banking.md`
+  (B-Phase5-S3-MCMC-SV-ESS-EMPIRICAL-FINDING)
+
+### CI verification
+
+- **For CI environmental failure (billing/spending limit)** →
+  `session_5_findings.md`
+  (B-Phase5-CI-ENVIRONMENTAL-FAILURE-VS-COMMIT-ATTRIBUTABLE)
+  + Q-S5-CI-environmental-1=(β) substantive interpretation
+  caveat for doc-only vs code-modification scope
+
+- **For local-vs-CI gates divergence (real vs synthesized
+  test inputs)** → `s2_revert_banking.md`
+  (B-Phase5-S2-CI-VS-LOCAL-GATES-DIVERGENCE)
+
+- **For parity-slow workflow scope (scheduled cron not push-
+  triggered)** → `s2_close_banking.md`
+  (B-Phase5-PARITY-SLOW-WORKFLOW-SCOPE-CONTEXT) +
+  `s3_execution_banking.md`
+  (B-Phase5-S3-ALLOWLIST-VS-PARITY-SLOW-LATENT-RISK)
+
+### Mitigation activation
+
+- **For drift-evidence-driven (mit-iii) activation** →
+  `q_overshoot_preflight_recalibration_v2_banking.md`
+  (B-Phase5-PRE-FLIGHT-MITIGATION-PATH-ACTIVATION)
+
+- **For chat-instance-seam recalibration pattern** →
+  `chat_instance_seam_recalibration_banking.md`
+  (B-Phase5-CHAT-INSTANCE-SEAM-RECALIBRATION-CODE-EMPIRICAL-
+  FINDINGS) — apparatus-substance ratio + disposition yield
+  + Phase 6+ recalibration deferred candidates
+
+### Cycle architecture
+
+- **For master plan amendment per pre-flight finding** →
+  `s3_amendment_banking.md`
+  (B-Phase5-MASTER-PLAN-V1.1-§15-S3-FRAMING-RECONCILIATION)
+
+- **For lifecycle method signature multi-side extension** →
+  `session_2_beta_redux_findings.md` (B-Phase5-S2-α-2-redux-
+  LIFECYCLE-METHOD-SIGNATURE-EXTENSION)
+
+- **For allowlist mechanism dispatch infrastructure** →
+  S2-α-1-redux findings doc (allowlist mechanism + lifecycle
+  method dispatch step 4.5)
+
+### Coordination + halt
+
+- **For Chat-Code halt coordination architectural gap** →
+  `s2_close_banking.md`
+  (B-Phase5-CHAT-CODE-HALT-COORDINATION-LIMITATION) — STOP-
+  AND-CONFIRM protocol refinement
+
+### Q-banking-categorical discipline
+
+- **For Q-banking-categorical strict criteria** → S2-α-2-redux
+  findings (Q-S2-α-2-redux-followup-2=(a) discipline
+  refinement establishing categorical strict over session-
+  context judgment)
