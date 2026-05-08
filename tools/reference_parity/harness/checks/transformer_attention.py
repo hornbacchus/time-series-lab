@@ -179,9 +179,27 @@ class TransformerAttentionParity(P3ParityCheck):
             per_layer[layer_idx] = (
                 weights.detach().cpu().numpy().astype(np.float64)
             )
+        # Phase 5 S4-β — Case (i) handling per Q-S4-β-rep-layer=
+        # (layer-α) Layer 0 representative layer choice. Expose
+        # `attention_matrix` field at run_tsl top level for
+        # `_check_attention_normalization` invariant consumption.
+        # Per pre-flight empirical investigation (commits
+        # `e3b55c0` + `ee6c973`), Layer 0 produces row-sum
+        # deviation ~3-5e-08 on real fixture (well within
+        # tolerance=1e-6). Closed-form deterministic per softmax
+        # math + frozen weights + model.eval(). Per
+        # Q-Field-α-2=(b) per-session scope: ONLY Layer 0
+        # exposed; aggregation logic across layers anticipatory-
+        # rejected.
+        attention_matrix = (
+            per_layer[0] if (
+                len(per_layer) > 0 and per_layer[0] is not None
+            ) else None
+        )
         return {
             "attention_per_layer": per_layer,
             "n_layers": n_layers,
+            "attention_matrix": attention_matrix,
         }
 
     # -----------------------------------------------------------------

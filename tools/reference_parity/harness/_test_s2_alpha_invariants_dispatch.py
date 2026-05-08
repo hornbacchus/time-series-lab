@@ -63,6 +63,9 @@ from reference_parity.harness.checks.mcmc_sv_student_t import (
 from reference_parity.harness.checks.mint_family import (
     MintFamilyParity,
 )
+from reference_parity.harness.checks.transformer_attention import (
+    TransformerAttentionParity,
+)
 from reference_parity.harness.base import aggregate_outcomes
 from reference_parity.harness.fixtures import FixtureLoader
 from reference_parity.harness.runner import (
@@ -122,7 +125,9 @@ def test_allowlist_gating() -> None:
     trio addition) + S3 MCMC SV pair (mcmc_sv_gaussian +
     mcmc_sv_student_t per Case 0 outcome at S3 pre-flight
     `1fd1ad3`) + S4-alpha mint_family (per Case (i) outcome at
-    S4-alpha pre-flight `d7e4cf7`); non-allowlist wrappers still
+    S4-alpha pre-flight `d7e4cf7`) + S4-beta transformer_attention
+    (per Case (i) outcome at S4-beta pre-flight
+    `e3b55c0`/`ee6c973`/`cc053fd`); non-allowlist wrappers still
     excluded.
     """
     kalman_tid = KalmanFilterParity.technique_id
@@ -131,6 +136,7 @@ def test_allowlist_gating() -> None:
     gaussian_tid = McmcSvGaussianParity.technique_id
     student_t_tid = McmcSvStudentTParity.technique_id
     mint_tid = MintFamilyParity.technique_id
+    transformer_tid = TransformerAttentionParity.technique_id
     assert kalman_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
         f"kalman {kalman_tid!r} expected in allowlist; "
         f"got {_INVARIANTS_DISPATCH_ALLOWLIST}"
@@ -155,6 +161,11 @@ def test_allowlist_gating() -> None:
         f"mint_family {mint_tid!r} expected in allowlist after "
         f"S4-alpha addition; got {_INVARIANTS_DISPATCH_ALLOWLIST}"
     )
+    assert transformer_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
+        f"transformer_attention {transformer_tid!r} expected in "
+        f"allowlist after S4-beta addition; "
+        f"got {_INVARIANTS_DISPATCH_ALLOWLIST}"
+    )
     # Negative check — a non-allowlist wrapper still excluded
     assert "p3_arima" not in _INVARIANTS_DISPATCH_ALLOWLIST, (
         f"p3_arima unexpectedly in allowlist; "
@@ -162,8 +173,9 @@ def test_allowlist_gating() -> None:
     )
     print(
         f"  test_allowlist_gating: PASS "
-        f"(S2 trio + S3 MCMC SV pair + S4-alpha mint_family in; "
-        f"p3_arima out; len={len(_INVARIANTS_DISPATCH_ALLOWLIST)})"
+        f"(S2 trio + S3 MCMC SV pair + S4-alpha mint_family + "
+        f"S4-beta transformer_attention in; p3_arima out; "
+        f"len={len(_INVARIANTS_DISPATCH_ALLOWLIST)})"
     )
 
 
@@ -514,10 +526,67 @@ def test_mint_family_real_dispatch() -> None:
     )
 
 
+def test_transformer_attention_real_dispatch() -> None:
+    """TransformerAttentionParity.check_invariants dispatches the
+    attention_normalization invariant against REAL run_tsl output
+    (per B-Phase5-S2-CI-VS-LOCAL-GATES-DIVERGENCE discipline;
+    no synthesized inputs).
+
+    S4-beta second per-wrapper sub-session of heterogeneous group
+    + second Phase 5 sub-session adding fast-tier wrapper to
+    allowlist with empirical field VALUE pre-verified (per
+    pre-flight commits `e3b55c0` + `ee6c973` + `cc053fd`).
+    Single-side invariant (`attention_normalization` checker
+    consumes tsl["attention_matrix"] only). Per-wrapper field-
+    availability protocol Case (i) outcome (required field
+    `attention_matrix` not exposed at run_tsl top level pre-S4-
+    beta; harness wrapper expansion at S4-beta surfaces field
+    via Layer 0 representative layer per Q-S4-beta-rep-layer=
+    (layer-alpha)).
+
+    PASS-deterministic assertion semantic per closed-form
+    structural invariant class (softmax row-sums = 1.0 by
+    softmax definition; Layer 0 empirical row-sum dev ~3-5e-08
+    well below tolerance 1e-6 per pre-flight investigation).
+    Note: parity-side `verdict_class="dl_seed_pinned"` is
+    orthogonal to structural invariant assertion semantic
+    (parity verdict class vs structural invariant class).
+
+    Verifies:
+    - Real run_tsl output exposes `attention_matrix` at top
+      level (Case (i) handling at S4-beta harness expansion)
+    - Lifecycle method dispatches with single-side default
+    - attention_normalization invariant returns PASS (row-sum
+      dev <= 1e-6 tolerance per closed-form softmax math)
+    """
+    check = TransformerAttentionParity()
+    loader = FixtureLoader()
+    fixture_data, _meta, _sha = loader.load(check.fixture_id)
+    fixture = check.setup_fixture(42)
+    fixture.update(fixture_data)
+    tsl_out = check.run_tsl(fixture)
+    assert "attention_matrix" in tsl_out, (
+        f"attention_matrix missing from run_tsl output; "
+        f"keys={list(tsl_out.keys())}"
+    )
+    assert tsl_out["attention_matrix"] is not None
+    results = check.check_invariants(tsl_out)
+    assert "attention_normalization" in results, results
+    r = results["attention_normalization"]
+    # PASS-deterministic per closed-form class
+    assert r["status"] == "PASS", r
+    print(
+        f"  test_transformer_attention_real_dispatch: "
+        f"PASS ({r['status']}; "
+        f"max_row_sum_deviation={r.get('max_row_sum_deviation', 'n/a')})"
+    )
+
+
 def main() -> int:
     print(
-        "Phase 5 S2-redux + S3 + S4-alpha - dispatch smoke tests + "
-        "cross-wrapper acceptance + dispatch infrastructure"
+        "Phase 5 S2-redux + S3 + S4-alpha + S4-beta - dispatch "
+        "smoke tests + cross-wrapper acceptance + dispatch "
+        "infrastructure"
     )
     try:
         test_kalman_filter_real_run_tsl_dispatch()
@@ -530,13 +599,17 @@ def main() -> int:
         test_mcmc_sv_student_t_real_dispatch()
         test_cross_wrapper_acceptance_mcmc_sv()
         test_mint_family_real_dispatch()
+        test_transformer_attention_real_dispatch()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
     except Exception as e:
         print(f"\nERROR: {type(e).__name__}: {e}", file=sys.stderr)
         return 2
-    print("\nAll S2-redux + S3 + S4-alpha dispatch smoke tests PASS.")
+    print(
+        "\nAll S2-redux + S3 + S4-alpha + S4-beta dispatch "
+        "smoke tests PASS."
+    )
     return 0
 
 
