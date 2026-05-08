@@ -114,6 +114,7 @@ _INVARIANTS_DISPATCH_ALLOWLIST = (
     "2c_mcmc_sv_student_t",      # S3 — Case 0 outcome per pre-flight `1fd1ad3`
     "3e_mint_family",            # S4-α — Case (i) outcome per pre-flight `d7e4cf7`
     "3f_transformer_attention",  # S4-β — Case (i) outcome per pre-flight `e3b55c0`/`ee6c973`/`cc053fd`
+    "3a_caviar_sav",             # S4-γ — Case (i) variant (rename mapping) per pre-flight `086592c`/`5120c81`/`75e9fcf`
 )
 
 

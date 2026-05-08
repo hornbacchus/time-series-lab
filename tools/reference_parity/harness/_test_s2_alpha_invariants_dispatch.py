@@ -66,6 +66,9 @@ from reference_parity.harness.checks.mint_family import (
 from reference_parity.harness.checks.transformer_attention import (
     TransformerAttentionParity,
 )
+from reference_parity.harness.checks.caviar_sav import (
+    CaviarSavParity,
+)
 from reference_parity.harness.base import aggregate_outcomes
 from reference_parity.harness.fixtures import FixtureLoader
 from reference_parity.harness.runner import (
@@ -127,7 +130,9 @@ def test_allowlist_gating() -> None:
     `1fd1ad3`) + S4-alpha mint_family (per Case (i) outcome at
     S4-alpha pre-flight `d7e4cf7`) + S4-beta transformer_attention
     (per Case (i) outcome at S4-beta pre-flight
-    `e3b55c0`/`ee6c973`/`cc053fd`); non-allowlist wrappers still
+    `e3b55c0`/`ee6c973`/`cc053fd`) + S4-gamma caviar_sav (per
+    Case (i) variant rename mapping at S4-gamma pre-flight
+    `086592c`/`5120c81`/`75e9fcf`); non-allowlist wrappers still
     excluded.
     """
     kalman_tid = KalmanFilterParity.technique_id
@@ -137,6 +142,7 @@ def test_allowlist_gating() -> None:
     student_t_tid = McmcSvStudentTParity.technique_id
     mint_tid = MintFamilyParity.technique_id
     transformer_tid = TransformerAttentionParity.technique_id
+    caviar_tid = CaviarSavParity.technique_id
     assert kalman_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
         f"kalman {kalman_tid!r} expected in allowlist; "
         f"got {_INVARIANTS_DISPATCH_ALLOWLIST}"
@@ -166,6 +172,10 @@ def test_allowlist_gating() -> None:
         f"allowlist after S4-beta addition; "
         f"got {_INVARIANTS_DISPATCH_ALLOWLIST}"
     )
+    assert caviar_tid in _INVARIANTS_DISPATCH_ALLOWLIST, (
+        f"caviar_sav {caviar_tid!r} expected in allowlist after "
+        f"S4-gamma addition; got {_INVARIANTS_DISPATCH_ALLOWLIST}"
+    )
     # Negative check — a non-allowlist wrapper still excluded
     assert "p3_arima" not in _INVARIANTS_DISPATCH_ALLOWLIST, (
         f"p3_arima unexpectedly in allowlist; "
@@ -174,7 +184,8 @@ def test_allowlist_gating() -> None:
     print(
         f"  test_allowlist_gating: PASS "
         f"(S2 trio + S3 MCMC SV pair + S4-alpha mint_family + "
-        f"S4-beta transformer_attention in; p3_arima out; "
+        f"S4-beta transformer_attention + S4-gamma caviar_sav "
+        f"in; p3_arima out; "
         f"len={len(_INVARIANTS_DISPATCH_ALLOWLIST)})"
     )
 
@@ -582,11 +593,62 @@ def test_transformer_attention_real_dispatch() -> None:
     )
 
 
+def test_caviar_sav_real_dispatch() -> None:
+    """CaviarSavParity.check_invariants dispatches the
+    intervals_test invariant against REAL run_tsl output (per
+    B-Phase5-S2-CI-VS-LOCAL-GATES-DIVERGENCE discipline; no
+    synthesized inputs).
+
+    S4-gamma third + final per-wrapper sub-session of
+    heterogeneous group; per Case (i) variant outcome at S4-gamma
+    pre-flight `086592c`/`5120c81`/`75e9fcf` (field rename
+    mapping `christoffersen_pval` → `chris_pvalue`; single scalar
+    per wrapper; no representative-choice question per
+    Q-S4-γ-rename-mapping=(α)).
+
+    INVERTED tolerance handled at checker level (PASS if pvalue
+    > floor 0.05); orthogonal to smoke test class semantic.
+    PASS-deterministic assertion per closed-form structural
+    invariant class (Christoffersen LR test deterministic on
+    real fixture; pre-flight investigation pval=1.0 well above
+    floor).
+
+    Verifies:
+    - Real run_tsl output exposes `chris_pvalue` at top level
+      (Case (i) variant rename mapping at S4-gamma harness
+      expansion)
+    - Lifecycle method dispatches with single-side default
+    - intervals_test invariant returns PASS (INVERTED: pvalue >
+      floor 0.05 deterministic per Christoffersen LR test)
+    """
+    check = CaviarSavParity()
+    loader = FixtureLoader()
+    fixture_data, _meta, _sha = loader.load(check.fixture_id)
+    fixture = check.setup_fixture(42)
+    fixture.update(fixture_data)
+    tsl_out = check.run_tsl(fixture)
+    assert "chris_pvalue" in tsl_out, (
+        f"chris_pvalue missing from run_tsl output; "
+        f"keys={list(tsl_out.keys())}"
+    )
+    assert tsl_out["chris_pvalue"] is not None
+    results = check.check_invariants(tsl_out)
+    assert "intervals_test" in results, results
+    r = results["intervals_test"]
+    # PASS-deterministic per closed-form class (INVERTED orthogonal)
+    assert r["status"] == "PASS", r
+    print(
+        f"  test_caviar_sav_real_dispatch: "
+        f"PASS ({r['status']}; "
+        f"chris_pvalue={tsl_out['chris_pvalue']:.4f})"
+    )
+
+
 def main() -> int:
     print(
-        "Phase 5 S2-redux + S3 + S4-alpha + S4-beta - dispatch "
-        "smoke tests + cross-wrapper acceptance + dispatch "
-        "infrastructure"
+        "Phase 5 S2-redux + S3 + S4-alpha + S4-beta + S4-gamma - "
+        "dispatch smoke tests + cross-wrapper acceptance + "
+        "dispatch infrastructure"
     )
     try:
         test_kalman_filter_real_run_tsl_dispatch()
@@ -600,6 +662,7 @@ def main() -> int:
         test_cross_wrapper_acceptance_mcmc_sv()
         test_mint_family_real_dispatch()
         test_transformer_attention_real_dispatch()
+        test_caviar_sav_real_dispatch()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
@@ -607,8 +670,8 @@ def main() -> int:
         print(f"\nERROR: {type(e).__name__}: {e}", file=sys.stderr)
         return 2
     print(
-        "\nAll S2-redux + S3 + S4-alpha + S4-beta dispatch "
-        "smoke tests PASS."
+        "\nAll S2-redux + S3 + S4-alpha + S4-beta + S4-gamma "
+        "dispatch smoke tests PASS."
     )
     return 0
 

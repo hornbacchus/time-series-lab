@@ -348,6 +348,18 @@ class CaviarSavParity(P3ParityCheck):
             "violation_ratio": a.get("violation_ratio"),
             "kupiec_pval": a.get("kupiec_pval"),
             "caviar_stationarity_ok": a.get("caviar_stationarity_ok"),
+            # Phase 5 S4-γ — Case (i) variant handling per
+            # Q-S4-γ-rename-mapping=(α) field rename mapping.
+            # Expose `chris_pvalue` at run_tsl top level for
+            # `_check_intervals_test` invariant consumption (per
+            # INVERTED tolerance: PASS if pvalue > floor 0.05).
+            # Engine `audit_fields["christoffersen_pval"]` rename
+            # mapped to checker-expected name `chris_pvalue`. Per
+            # pre-flight investigation `5120c81`: christoffersen_
+            # pval=1.0 deterministic PASS (well above floor).
+            "chris_pvalue": float(a["christoffersen_pval"]) if a.get(
+                "christoffersen_pval"
+            ) is not None else None,
             # Pass y forward to compare(); ParityCheck.compare()
             # signature does not receive the raw fixture dict, so
             # we stash y here. Underscore-prefixed key marks it
