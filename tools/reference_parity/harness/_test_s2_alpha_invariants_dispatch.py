@@ -432,7 +432,7 @@ def test_mcmc_sv_student_t_real_dispatch() -> None:
     )
 
 
-def test_cross_wrapper_acceptance_mcmc_sv() -> None:
+def test_cross_wrapper_acceptance_mcmc_stochastic_class() -> None:
     """Both MCMC SV wrappers fire check_invariants end-to-end
     against real run_tsl output; aggregate outcome via
     aggregate_outcomes ranking is a valid status (PASS /
@@ -479,8 +479,109 @@ def test_cross_wrapper_acceptance_mcmc_sv() -> None:
     for s in statuses:
         assert s in ("PASS", "CAVEAT", "BLOCK"), (statuses, s)
     print(
-        f"  test_cross_wrapper_acceptance_mcmc_sv: PASS "
-        f"(2 wrappers; statuses={statuses}; aggregate={worst})"
+        f"  test_cross_wrapper_acceptance_mcmc_stochastic_class: "
+        f"PASS (2 wrappers; statuses={statuses}; aggregate={worst})"
+    )
+
+
+def test_cross_wrapper_acceptance_closed_form_class() -> None:
+    """All 5 closed-form-deterministic wrappers fire
+    check_invariants end-to-end against real run_tsl + (where
+    needed) run_reference output; aggregate via
+    aggregate_outcomes ranking is PASS-deterministic per
+    closed-form invariant class semantic.
+
+    S5 closed-form-deterministic class cross-wrapper acceptance
+    test per Q-S5-aggregation=(B-per-class). Covers the 5
+    closed-form wrappers spanning S2-redux trio + S4-α + S4-β:
+    kalman + johansen + evt + mint_family + transformer_attention.
+    Distinct from existing test_cross_wrapper_acceptance
+    (S2-redux 3-wrapper subset preserved for sub-domain (i)
+    granular verification).
+    """
+    loader = FixtureLoader()
+    statuses = []
+    # Kalman (single-side)
+    kalman = KalmanFilterParity()
+    kf_data, _, _ = loader.load(kalman.fixture_id)
+    kf_fix = kalman.setup_fixture(42)
+    kf_fix.update(kf_data)
+    kf_tsl = kalman.run_tsl(kf_fix)
+    kf_results = kalman.check_invariants(kf_tsl)
+    statuses.extend(r["status"] for r in kf_results.values())
+    # Johansen (multi-side; needs ref)
+    johansen = JohansenBartlettParity()
+    jb_data, _, _ = loader.load(johansen.fixture_id)
+    jb_fix = johansen.setup_fixture(42)
+    jb_fix.update(jb_data)
+    jb_tsl = johansen.run_tsl(jb_fix)
+    jb_ref = johansen.run_reference(jb_fix)
+    jb_results = johansen.check_invariants(jb_tsl, jb_ref, jb_fix)
+    statuses.extend(r["status"] for r in jb_results.values())
+    # EVT (single-side)
+    evt = EvtFerroSegersParity()
+    ev_data, _, _ = loader.load(evt.fixture_id)
+    ev_fix = evt.setup_fixture(42)
+    ev_fix.update(ev_data)
+    ev_tsl = evt.run_tsl(ev_fix)
+    ev_results = evt.check_invariants(ev_tsl)
+    statuses.extend(r["status"] for r in ev_results.values())
+    # MintFamily (single-side; mint_coherence)
+    mint = MintFamilyParity()
+    m_data, _, _ = loader.load(mint.fixture_id)
+    m_fix = mint.setup_fixture(42)
+    m_fix.update(m_data)
+    m_tsl = mint.run_tsl(m_fix)
+    m_results = mint.check_invariants(m_tsl)
+    statuses.extend(r["status"] for r in m_results.values())
+    # TransformerAttention (single-side; attention_normalization)
+    trans = TransformerAttentionParity()
+    t_data, _, _ = loader.load(trans.fixture_id)
+    t_fix = trans.setup_fixture(42)
+    t_fix.update(t_data)
+    t_tsl = trans.run_tsl(t_fix)
+    t_results = trans.check_invariants(t_tsl)
+    statuses.extend(r["status"] for r in t_results.values())
+
+    worst = aggregate_outcomes(statuses)
+    # PASS-deterministic per closed-form class
+    assert worst == "PASS", (statuses, worst)
+    print(
+        f"  test_cross_wrapper_acceptance_closed_form_class: "
+        f"PASS (5 wrappers; statuses={statuses}; aggregate={worst})"
+    )
+
+
+def test_cross_wrapper_acceptance_inverted_tolerance_class() -> None:
+    """The 1 INVERTED-tolerance wrapper (caviar_sav) fires
+    check_invariants end-to-end against real run_tsl output;
+    aggregate via aggregate_outcomes ranking is PASS-deterministic
+    per closed-form structural invariant + INVERTED orthogonality.
+
+    S5 INVERTED-tolerance class cross-wrapper acceptance test
+    per Q-S5-aggregation=(B-per-class). Single-wrapper class
+    framing slightly degenerate but preserves per-class
+    semantic clarity at sub-domain (i) closure scope; future
+    Phase 6+ wrapper additions in INVERTED class extend this
+    test naturally.
+    """
+    loader = FixtureLoader()
+    statuses = []
+    caviar = CaviarSavParity()
+    c_data, _, _ = loader.load(caviar.fixture_id)
+    c_fix = caviar.setup_fixture(42)
+    c_fix.update(c_data)
+    c_tsl = caviar.run_tsl(c_fix)
+    c_results = caviar.check_invariants(c_tsl)
+    statuses.extend(r["status"] for r in c_results.values())
+
+    worst = aggregate_outcomes(statuses)
+    # PASS-deterministic per closed-form structural invariant
+    # class (INVERTED orthogonal to assertion class semantic)
+    assert worst == "PASS", (statuses, worst)
+    print(
+        f"  test_cross_wrapper_acceptance_inverted_tolerance_class: "
+        f"PASS (1 wrapper; statuses={statuses}; aggregate={worst})"
     )
 
 
@@ -646,9 +747,9 @@ def test_caviar_sav_real_dispatch() -> None:
 
 def main() -> int:
     print(
-        "Phase 5 S2-redux + S3 + S4-alpha + S4-beta + S4-gamma - "
-        "dispatch smoke tests + cross-wrapper acceptance + "
-        "dispatch infrastructure"
+        "Phase 5 S2-redux + S3 + S4 + S5 - dispatch smoke tests "
+        "+ per-class cross-wrapper acceptance + dispatch "
+        "infrastructure"
     )
     try:
         test_kalman_filter_real_run_tsl_dispatch()
@@ -659,10 +760,12 @@ def main() -> int:
         test_dispatch_block_propagation()
         test_mcmc_sv_gaussian_real_dispatch()
         test_mcmc_sv_student_t_real_dispatch()
-        test_cross_wrapper_acceptance_mcmc_sv()
+        test_cross_wrapper_acceptance_mcmc_stochastic_class()
         test_mint_family_real_dispatch()
         test_transformer_attention_real_dispatch()
         test_caviar_sav_real_dispatch()
+        test_cross_wrapper_acceptance_closed_form_class()
+        test_cross_wrapper_acceptance_inverted_tolerance_class()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
@@ -670,8 +773,7 @@ def main() -> int:
         print(f"\nERROR: {type(e).__name__}: {e}", file=sys.stderr)
         return 2
     print(
-        "\nAll S2-redux + S3 + S4-alpha + S4-beta + S4-gamma "
-        "dispatch smoke tests PASS."
+        "\nAll S2-redux + S3 + S4 + S5 dispatch smoke tests PASS."
     )
     return 0
 
