@@ -1,7 +1,11 @@
 # Phase 5 Master Plan — Runner Integration Cycle
 
-**Status:** v1 (drafted at S0-MASTERPLAN, 2026-05-03;
-Phase 4 cycle CLOSED at commit `3ac8c0e`)
+**Status:** v1.3 (Phase 6+ S2 follow-up codification of cycle-
+architecture recalibration synthesis recommendations; 2026-05-09).
+Originally drafted v1 at S0-MASTERPLAN (2026-05-03; Phase 4
+cycle CLOSED at commit `3ac8c0e`); v1.1 + v1.2 cycle-internal
+amendments + Phase 5 close §17/§18 closure note + v1.3 §15
+sub-domain (i) extension + NEW §19 apparatus discipline.
 **Cycle name:** Phase 5 (formerly forward-banked as "Phase
 4.5+"; promoted to Phase 5 per cycle-naming evolution
 documented in §1.1 below)
@@ -670,6 +674,28 @@ Phase 4 pattern.
   per Code's banked findings + closeout banking
   (B-Phase5-CLOSE-ARC-INSTITUTIONAL-PATTERN-CLOSEOUT at
   `docs/reference_parity_phase5/phase_5_closeout_banking.md`).
+- **v1.3 (2026-05-09):** Phase 6+ S2 follow-up codification of
+  cycle-architecture recalibration synthesis recommendations.
+  v1.3 increment trigger conditions met per S2 synthesis
+  (`docs/reference_parity_phase6/s2_cycle_architecture_recalibration_synthesis.md`)
+  Chat-ratified outcome. Amendments: §15 sub-domain (i)
+  extension codifying parameter-aware exclusion mechanism
+  (Phase 6+ S1 architectural amendment per
+  B-Phase6-S1-STRUCTURAL-INVARIANT-PARAMETER-AWARE-EXCLUSION
+  at `docs/reference_parity_phase6/s1_banking.md`); NEW §19
+  Phase 6+ apparatus discipline codifying S2 synthesis
+  Ranks 1-4 + §2 Q-disposition tightening + §4 Reading B
+  anecdote framing (sub-session class taxonomy + routine
+  targeted patch bounding criterion + Q-disposition contested-
+  decision threshold + living calibration baseline model +
+  cascading split context-dependent tool + Reading B
+  documentation-density observation status). Scope contraction
+  applied: §13.x calibration update deferred to first
+  recalibration moment via §19.4 living baseline file (not
+  shipped at v1.3 per Chat ratification scope contraction).
+  Landed via 3-commit cascading split: Commit 1 §15 amendment
+  (`b8f00c4`) + Commit 2 §19 authoring (`b9be048`) + Commit 3
+  version increment + closure note amendment (THIS commit).
 
 ## 18. Phase 5 reflective record (v1.1 amendment)
 
@@ -782,6 +808,22 @@ for Phase 6+ kickoff cycle-architecture recalibration if
 warranted (compression candidates 1-4 + Q-disposition
 tightening + pre-flight class proportionality + recalibration
 runaway consolidation).
+
+**v1.3 amendment append (2026-05-09):** Phase 6+ S1 + S1
+follow-up shipped architectural amendment closing Phase 5
+bridge handoff disposition (5) MCMC ess BLOCK (parameter-aware
+exclusion mechanism for structural invariant checker family;
+B-Phase6-S1-STRUCTURAL-INVARIANT-PARAMETER-AWARE-EXCLUSION).
+Phase 6+ S2 cycle-architecture recalibration synthesis
+ratified by Chat with scope contractions; v1.3 codification at
+S2 follow-up (THIS commit sequence) ships §15 mechanism
+codification + NEW §19 apparatus discipline. v1.3 increment
+trigger conditions met per S2 synthesis Chat-ratified outcome
+(prior v1.2 deferral resolved). §13.x calibration update
+deferred to first Phase 6+ recalibration moment via §19.4
+living baseline model per scope contraction. Reserve sub-
+domain (ii)+(iii)+(iv) activation enabled under settled
+apparatus framing per §19.1 sub-session class taxonomy.
 
 ## 19. Phase 6+ apparatus discipline (v1.3 codification)
 
