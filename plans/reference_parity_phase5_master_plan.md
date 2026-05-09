@@ -457,6 +457,74 @@ class LOC budget specification) + §7 (recursive-pattern
 protection); Decision 40-I1 Q2=Principle 2 jurisdictional
 split applies.
 
+**Phase 6+ S1 architectural amendment — parameter-aware
+exclusion mechanism for structural invariant checker family
+(v1.3 codification):**
+
+Phase 6+ Session 1 (commits `acebb96` + `906177e` + `3cddbbe`)
++ Session 1 follow-up (commit `8c1d191`) shipped architectural
+amendment closing Phase 5 bridge handoff disposition (5) MCMC
+ess BLOCK on `2b_mcmc_sv_gaussian` + `2c_mcmc_sv_student_t`
+parity-slow runs (B-Phase5-S3-MCMC-SV-ESS-EMPIRICAL-FINDING).
+Mechanism + wrapper-side opt-in codified here as cycle-
+architecture standing for sub-domain (i) MCMC-class wrappers
++ available pattern for future MCMC-class additions.
+
+**Mechanism (cycle-architecture standing):**
+- `StructuralInvariant` dataclass extended with
+  `non_gating_params: tuple = ()` field (default empty tuple
+  = no exclusion = prior strict-gating semantic preserved
+  for non-opted-in declarations)
+- `_check_mcmc_convergence` checker consumes
+  `ess_min_param` from tsl payload + applies
+  `non_gating_params` exclusion: when ess_min_param ∈
+  non_gating_params AND raw status would be CAVEAT/BLOCK,
+  downgrade to PASS for omnibus aggregation. Audit fields
+  `ess_status_raw` (preserved original) +
+  `non_gating_param_excluded` (excluded param name)
+  populated for forensic traceability
+- Mechanism is checker-family-scoped: applies to
+  `_check_mcmc_convergence` only at v1.3 codification per
+  YAGNI discipline; available for extension to other
+  checker families when warranted by empirical observation
+  (second-observation trigger: see B-Phase6-S1 banking +
+  S1-follow-up empirical sequence as precedent)
+
+**Wrapper-side opt-in pattern:**
+- Per-wrapper `structural_invariants` tuple declares
+  `non_gating_params=("param_name", ...)` per parameter that
+  should not gate omnibus on ess breach
+- Mirrors parity-side `ess_min_check` `gates_outcome_for`
+  exclusion wisdom (Phase 1 audit 2b/2c discipline: prior-
+  divergence-driven posteriors expected to mix less
+  efficiently under Gibbs)
+- Current opt-ins:
+  - `mcmc_sv_gaussian.py`: `non_gating_params=("sigma_eta",)`
+  - `mcmc_sv_student_t.py`: `non_gating_params=("sigma_eta",
+    "nu")`
+
+**Sub-domain (i) final state (Phase 5 close + Phase 6+ S1
+amendment):**
+- 8-wrapper allowlist LIVE: kalman_filter, johansen_bartlett,
+  evt_ferro_segers, mcmc_sv_gaussian, mcmc_sv_student_t,
+  mint_family, transformer_attention, caviar_sav
+- 17 dispatch tests (14 baseline + 3 synthetic for
+  parameter-aware exclusion semantic per S1 Commit 2)
+- 3 invariant class coverage (closed-form deterministic 5
+  wrappers + MCMC stochastic 2 wrappers + INVERTED
+  tolerance 1 wrapper)
+- Parameter-aware exclusion mechanism available at
+  `_check_mcmc_convergence`; opt-in declarations on 2b + 2c
+
+**Cross-references:** S1 banking entry
+B-Phase6-S1-STRUCTURAL-INVARIANT-PARAMETER-AWARE-EXCLUSION at
+`docs/reference_parity_phase6/s1_banking.md` (architectural
+amendment authoritative codification + empirical trigger
+documentation); S2 synthesis at
+`docs/reference_parity_phase6/s2_cycle_architecture_recalibration_synthesis.md`
+§3 v1.3 ship recommendation; S1 + S1-follow-up commits as
+empirical first + second observation.
+
 ### Sub-domain (ii) — Smoke-test infrastructure upgrade
 
 **S6 — Smoke-test infrastructure design**
