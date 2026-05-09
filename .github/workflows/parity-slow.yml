@@ -158,6 +158,21 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.11.0
           python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance numba pyyaml openpyxl
 
+      - name: Install system libraries for R package compilation (libcurl/libssl/libxml2)
+        # Post-Phase-5-cycle-close operational hygiene per
+        # B-Phase5-POST-CLOSE-PARITY-SLOW-LINUX-PROVISIONING-FRAGILITY.
+        # R packages quantmod/tseries/tsDyn (slow-tier exclusive)
+        # depend transitively on R `curl` package which compiles
+        # from source on Linux and requires libcurl4-openssl-dev
+        # system headers. Ubuntu runner does not include these by
+        # default; install before R setup to prevent curl-cascade
+        # failure during R package install. libssl-dev + libxml2-dev
+        # added defensively for analogous compile-time dependencies
+        # in the R package install set.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
