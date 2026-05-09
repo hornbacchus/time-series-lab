@@ -745,11 +745,121 @@ def test_caviar_sav_real_dispatch() -> None:
     )
 
 
+def test_mcmc_convergence_non_gating_param_exclusion_sigma_eta() -> None:
+    """Phase 6+ Session 1 — verify _check_mcmc_convergence
+    parameter-aware exclusion downgrades sigma_eta-only ess
+    breach from BLOCK to PASS for omnibus aggregation.
+
+    Synthetic input test (no real MCMC; checker logic only).
+    Mirrors mcmc_sv_gaussian + mcmc_sv_student_t wrapper-side
+    declaration (non_gating_params=("sigma_eta",); tolerance=200).
+    """
+    from reference_parity.harness.structural_invariants import (
+        StructuralInvariant,
+        _check_mcmc_convergence,
+    )
+    inv = StructuralInvariant(
+        name="mcmc_convergence",
+        invariant_type="mcmc_convergence",
+        tolerance=200.0,
+        non_gating_params=("sigma_eta",),
+    )
+    # sigma_eta ess breach (28.5 < 100 = threshold/2 → raw BLOCK)
+    tsl = {
+        "ess_min": 28.5,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.02,
+    }
+    r = _check_mcmc_convergence(tsl, {}, {}, inv)
+    assert r["status"] == "PASS", r
+    assert r["ess_status"] == "PASS", r
+    assert r["ess_status_raw"] == "BLOCK", r
+    assert r["non_gating_param_excluded"] == "sigma_eta", r
+    print(
+        f"  test_mcmc_convergence_non_gating_param_exclusion_sigma_eta: "
+        f"PASS (raw BLOCK on sigma_eta downgraded to PASS via "
+        f"non_gating_params; rhat PASS preserved)"
+    )
+
+
+def test_mcmc_convergence_block_preserved_on_non_excluded_param() -> None:
+    """Phase 6+ Session 1 — verify _check_mcmc_convergence
+    parameter-aware exclusion does NOT downgrade ess breach
+    when ess_min_param is NOT in non_gating_params.
+
+    Synthetic input test: mu/phi ess breach (hypothetical;
+    not empirically observed at Phase 5; defensive verification).
+    """
+    from reference_parity.harness.structural_invariants import (
+        StructuralInvariant,
+        _check_mcmc_convergence,
+    )
+    inv = StructuralInvariant(
+        name="mcmc_convergence",
+        invariant_type="mcmc_convergence",
+        tolerance=200.0,
+        non_gating_params=("sigma_eta",),
+    )
+    # mu ess breach (28.5 < 100 = threshold/2 → BLOCK; mu NOT excluded)
+    tsl = {
+        "ess_min": 28.5,
+        "ess_min_param": "mu",
+        "rhat_max": 1.02,
+    }
+    r = _check_mcmc_convergence(tsl, {}, {}, inv)
+    assert r["status"] == "BLOCK", r
+    assert r["ess_status"] == "BLOCK", r
+    assert r["ess_status_raw"] == "BLOCK", r
+    assert r["non_gating_param_excluded"] is None, r
+    print(
+        f"  test_mcmc_convergence_block_preserved_on_non_excluded_param: "
+        f"PASS (mu ess breach gates BLOCK; sigma_eta exclusion does "
+        f"NOT apply to non-excluded params)"
+    )
+
+
+def test_mcmc_convergence_default_no_exclusion_preserves_strict_gating() -> None:
+    """Phase 6+ Session 1 — verify _check_mcmc_convergence
+    default behavior (non_gating_params=()) preserves prior
+    strict-gating semantic (backward-compat verification for
+    pre-Phase-6+ wrapper declarations OR future wrappers
+    not opting in).
+
+    Synthetic input test: sigma_eta ess breach with empty
+    non_gating_params → BLOCK preserved (no exclusion applied).
+    """
+    from reference_parity.harness.structural_invariants import (
+        StructuralInvariant,
+        _check_mcmc_convergence,
+    )
+    inv = StructuralInvariant(
+        name="mcmc_convergence",
+        invariant_type="mcmc_convergence",
+        tolerance=200.0,
+        # Default: non_gating_params=() per dataclass field default
+    )
+    tsl = {
+        "ess_min": 28.5,
+        "ess_min_param": "sigma_eta",
+        "rhat_max": 1.02,
+    }
+    r = _check_mcmc_convergence(tsl, {}, {}, inv)
+    assert r["status"] == "BLOCK", r
+    assert r["ess_status"] == "BLOCK", r
+    assert r["ess_status_raw"] == "BLOCK", r
+    assert r["non_gating_param_excluded"] is None, r
+    print(
+        f"  test_mcmc_convergence_default_no_exclusion_preserves_strict_gating: "
+        f"PASS (default no exclusion; backward-compat strict-gating "
+        f"behavior preserved for non-opted-in declarations)"
+    )
+
+
 def main() -> int:
     print(
-        "Phase 5 S2-redux + S3 + S4 + S5 - dispatch smoke tests "
-        "+ per-class cross-wrapper acceptance + dispatch "
-        "infrastructure"
+        "Phase 5 S2-redux + S3 + S4 + S5 + Phase 6+ S1 - dispatch "
+        "smoke tests + per-class cross-wrapper acceptance + "
+        "dispatch infrastructure + parameter-aware exclusion semantic"
     )
     try:
         test_kalman_filter_real_run_tsl_dispatch()
@@ -766,6 +876,9 @@ def main() -> int:
         test_caviar_sav_real_dispatch()
         test_cross_wrapper_acceptance_closed_form_class()
         test_cross_wrapper_acceptance_inverted_tolerance_class()
+        test_mcmc_convergence_non_gating_param_exclusion_sigma_eta()
+        test_mcmc_convergence_block_preserved_on_non_excluded_param()
+        test_mcmc_convergence_default_no_exclusion_preserves_strict_gating()
     except AssertionError as e:
         print(f"\nFAILED: {e}", file=sys.stderr)
         return 1
