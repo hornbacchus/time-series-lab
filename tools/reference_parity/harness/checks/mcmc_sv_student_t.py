@@ -90,22 +90,24 @@ class McmcSvStudentTParity(P3ParityCheck):
     # geweke is None per S8 catalog.
     #
     # Phase 6+ Session 1 (B-Phase6-S1-STRUCTURAL-INVARIANT-
-    # PARAMETER-AWARE-EXCLUSION) — non_gating_params=("sigma_eta",)
-    # mirrors parity-side `ess_min_check` `gates_outcome_for`
-    # exclusion wisdom. Same Phase 1 audit 2b discipline as 2b
-    # Gaussian sibling: sigma_eta-only ess breach downgraded for
-    # omnibus aggregation. Note: 2c Student-t may also surface
-    # ess_min on `nu` parameter at slow chain mixing; current
-    # observation is sigma_eta only per S3 pre-flight findings;
-    # extension to nu deferred to second empirical observation
-    # per YAGNI discipline.
+    # PARAMETER-AWARE-EXCLUSION) — non_gating_params=("sigma_eta",
+    # "nu") mirrors parity-side `ess_min_check` declaration in
+    # `compare()` below (`gates_outcome_for: ["mu", "phi"]`;
+    # explicit note: "Sigma_eta and nu ESS breaches recorded but
+    # non-gating"). Phase 1 audit 2c discipline: sigma_eta + nu
+    # posteriors prior-divergence-driven; expected to mix less
+    # efficiently under Gibbs; non-gating for omnibus aggregation.
+    # Initial Session 1 declaration was sigma_eta-only; nu added
+    # per parity-slow run 25605525818 empirically observing nu
+    # ess breach (second observation triggered YAGNI extension
+    # anticipated in prior rationale).
     structural_invariants = (
         StructuralInvariant(
             name="mcmc_convergence",
             invariant_type="mcmc_convergence",
             tolerance=200.0,
             tolerance_type="absolute",
-            non_gating_params=("sigma_eta",),
+            non_gating_params=("sigma_eta", "nu"),
         ),
     )
 
