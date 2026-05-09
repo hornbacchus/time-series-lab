@@ -163,6 +163,21 @@ seam recalibration institutional pattern).
 - Q-disposition apparatus refinement = Phase 6+ Chat decision
 - Master plan v1.3 increment trigger = Phase 6+ Chat decision
   pending recalibration outcome
+- MCMC ess BLOCK fix (parity-slow substantive content) =
+  Phase 6+ Chat decision. `2b_mcmc_sv_gaussian` +
+  `2c_mcmc_sv_student_t` produce BLOCK on parity-slow real
+  fixtures per `ess_status` threshold; banked at Phase 5 per
+  B-Phase5-S3-MCMC-SV-ESS-EMPIRICAL-FINDING +
+  B-Phase5-S3-ALLOWLIST-VS-PARITY-SLOW-LATENT-RISK; post-
+  Phase-5-cycle-close operational hygiene declined to address
+  (engine modification scope; properly Phase 6+ work; user
+  explicitly deferred at post-close remediation disposition).
+  Disposition options: ess_min threshold adjustment / chain
+  length increase / sampler tuning / accept BLOCK as parity-
+  slow async backlog / suppress notification + defer further.
+  Cross-reference: B-Phase5-POST-CLOSE-PARITY-SLOW-LINUX-
+  PROVISIONING-FRAGILITY (separate slow-linux runner
+  architectural redesign disposition).
 
 **Step 7 institutional framing:** bridge sub-session preserves
 prior-cycle/successor-cycle authority division; prior cycle
