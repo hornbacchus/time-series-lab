@@ -206,12 +206,19 @@ def _check_var_eigenvalues(tsl, ref, fixture, inv):
     are deterministic given identical coefficient matrix).
     """
     import numpy as np
-    eigs = np.asarray(tsl.get("companion_eig_magnitudes"), dtype=np.float64)
-    if eigs.size == 0:
+    companion = tsl.get("companion_eig_magnitudes")
+    if companion is None:
         return {
             "name": inv.name,
             "status": "BLOCK",
             "error": "TSL output missing 'companion_eig_magnitudes' field",
+        }
+    eigs = np.asarray(companion, dtype=np.float64)
+    if eigs.size == 0:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output 'companion_eig_magnitudes' is empty",
         }
     max_abs_eig = float(np.max(np.abs(eigs)))
     # Tolerance interpretation: relative tolerance against unit
@@ -302,12 +309,19 @@ def _check_garch_conditional_variance(tsl, ref, fixture, inv):
     expect to detect ref-side violations.
     """
     import numpy as np  # local import; harness modules avoid top-level numpy
-    sigma2 = np.asarray(tsl.get("conditional_variance"), dtype=np.float64)
-    if sigma2.size == 0:
+    cv = tsl.get("conditional_variance")
+    if cv is None:
         return {
             "name": inv.name,
             "status": "BLOCK",
             "error": "TSL output missing 'conditional_variance' field",
+        }
+    sigma2 = np.asarray(cv, dtype=np.float64)
+    if sigma2.size == 0:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output 'conditional_variance' is empty",
         }
     n_nonpositive = int(np.sum(sigma2 <= 0))
     min_sigma2 = float(np.min(sigma2))
@@ -532,12 +546,19 @@ def _check_hmm_row_sums(tsl, ref, fixture, inv):
     bugs not user-relevant findings).
     """
     import numpy as np
-    P = np.asarray(tsl.get("transition_matrix"), dtype=np.float64)
+    tm = tsl.get("transition_matrix")
+    if tm is None:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output missing 'transition_matrix' field",
+        }
+    P = np.asarray(tm, dtype=np.float64)
     if P.size == 0 or P.ndim != 2:
         return {
             "name": inv.name,
             "status": "BLOCK",
-            "error": "TSL output missing 2-D 'transition_matrix' field",
+            "error": "TSL output 'transition_matrix' is empty or not 2-D",
         }
     row_sums = np.sum(P, axis=1)
     max_dev = float(np.max(np.abs(row_sums - 1.0)))
@@ -563,13 +584,27 @@ def _check_hmm_emission_normalization(tsl, ref, fixture, inv):
     on TSL side.
     """
     import numpy as np
-    means = np.asarray(tsl.get("emission_means"), dtype=np.float64)
-    covars = np.asarray(tsl.get("emission_covars"), dtype=np.float64)
-    if means.size == 0:
+    em_means = tsl.get("emission_means")
+    if em_means is None:
         return {
             "name": inv.name,
             "status": "BLOCK",
             "error": "TSL output missing 'emission_means' field",
+        }
+    em_covars = tsl.get("emission_covars")
+    if em_covars is None:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output missing 'emission_covars' field",
+        }
+    means = np.asarray(em_means, dtype=np.float64)
+    covars = np.asarray(em_covars, dtype=np.float64)
+    if means.size == 0:
+        return {
+            "name": inv.name,
+            "status": "BLOCK",
+            "error": "TSL output 'emission_means' is empty",
         }
     n_finite_means = int(np.sum(np.isfinite(means)))
     n_total_means = int(means.size)
@@ -779,12 +814,24 @@ def _check_conformal_interval_containment(tsl, ref, fixture, inv):
     """Interval containment: lower <= upper at all positions
     (no flipped intervals)."""
     import numpy as np
-    lower = np.asarray(tsl.get("lower"), dtype=np.float64)
-    upper = np.asarray(tsl.get("upper"), dtype=np.float64)
+    lo = tsl.get("lower")
+    if lo is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'lower' field",
+        }
+    up = tsl.get("upper")
+    if up is None:
+        return {
+            "name": inv.name, "status": "BLOCK",
+            "error": "TSL output missing 'upper' field",
+        }
+    lower = np.asarray(lo, dtype=np.float64)
+    upper = np.asarray(up, dtype=np.float64)
     if lower.size == 0 or upper.size == 0:
         return {
             "name": inv.name, "status": "BLOCK",
-            "error": "TSL output missing lower/upper arrays",
+            "error": "TSL output 'lower' or 'upper' is empty",
         }
     n_violations = int(np.sum(lower > upper))
     if n_violations == 0:

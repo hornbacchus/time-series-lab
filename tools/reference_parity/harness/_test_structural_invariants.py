@@ -128,23 +128,14 @@ def test_registry_enumeration() -> None:
 
 def test_checker_dispatch() -> None:
     """Each registered checker is callable. Stubs raise
-    NotImplementedError; concrete checkers either return a BLOCK
-    status dict on empty input OR raise a non-NotImplementedError
-    exception (some pre-S7 concrete checkers, e.g.
-    garch_conditional_variance / hmm_row_sums / var_eigenvalues,
-    call ``np.asarray(tsl.get(field), dtype=np.float64)`` directly
-    without a None pre-check; passing None here raises TypeError
-    rather than returning a clean BLOCK dict — this is a
-    pre-existing bug banked at Phase 4 S7 as B-Phase4-S7-1; not in
-    S7 scope to fix because §11.8 trigger discipline limits the
-    P4-1 cluster's blast radius). Both behaviors are accepted here
-    as long as the checker doesn't accidentally return PASS on
-    empty input.
+    NotImplementedError; concrete checkers MUST return a BLOCK
+    status dict on empty input (no exception fallthrough
+    accepted post-Phase-6+ S3 None-handling fix; B-Phase6-S3
+    closes B-Phase4-S7-1 banked bug).
     """
     types = list_registered_types()
     stub_count = 0
-    concrete_clean = 0       # returns BLOCK dict
-    concrete_raises = 0      # raises (non-NotImplementedError) exception
+    concrete_clean = 0
     for t in types:
         checker = get_invariant_checker(t)
         assert callable(checker), f"{t}: not callable"
@@ -168,19 +159,20 @@ def test_checker_dispatch() -> None:
             raise AssertionError(
                 f"{t} (expected stub) did not raise NotImplementedError"
             )
-        # Concrete checker: either returns a BLOCK status dict on
-        # empty input OR raises a non-NotImplementedError exception
-        # (pre-existing bug; B-Phase4-S7-1 banked).
+        # Concrete checker: MUST return a BLOCK status dict on empty
+        # input (Phase 6+ S3 tightened post B-Phase4-S7-1 fix).
         try:
             result = checker({}, {}, {}, inv)
         except NotImplementedError:
             raise AssertionError(
                 f"{t} (expected concrete) raised NotImplementedError"
             )
-        except Exception:
-            # Acceptable per B-Phase4-S7-1 banked behavior
-            concrete_raises += 1
-            continue
+        except Exception as e:
+            raise AssertionError(
+                f"{t}: concrete checker raised {type(e).__name__} on "
+                f"empty input instead of returning BLOCK dict — "
+                f"B-Phase6-S3 None-handling fix regression"
+            )
         assert isinstance(result, dict), (
             f"{t}: concrete checker returned non-dict: {type(result)}"
         )
@@ -194,17 +186,16 @@ def test_checker_dispatch() -> None:
             f"{t}: empty input MUST NOT return PASS"
         )
         concrete_clean += 1
-    concrete_count = concrete_clean + concrete_raises
-    assert stub_count + concrete_count == len(types)
+    assert stub_count + concrete_clean == len(types)
     assert stub_count == 4, f"expected 4 stub types; got {stub_count}"
-    assert concrete_count == 19, (
-        f"expected 19 concrete types; got {concrete_count}"
+    assert concrete_clean == 19, (
+        f"expected 19 concrete types returning BLOCK on empty input; "
+        f"got {concrete_clean}"
     )
     print(
         f"  test_checker_dispatch: PASS ({stub_count} stubs raise "
         f"NotImplementedError; {concrete_clean} concrete return "
-        f"BLOCK; {concrete_raises} concrete raise on empty input "
-        f"per B-Phase4-S7-1)"
+        f"BLOCK on empty input — strict-gating per B-Phase6-S3)"
     )
 
 
@@ -333,6 +324,117 @@ def test_s7_new_checkers_block_on_violation() -> None:
     print("  test_s7_new_checkers_block_on_violation: PASS")
 
 
+def test_phase6_s3_none_handling_var_eigenvalues() -> None:
+    """Phase 6+ S3 — verify _check_var_eigenvalues returns BLOCK
+    dict on None companion_eig_magnitudes input (B-Phase4-S7-1
+    closure)."""
+    inv = StructuralInvariant(
+        name="probe", invariant_type="var_eigenvalues",
+        tolerance=0.05, tolerance_type="relative",
+    )
+    result = get_invariant_checker("var_eigenvalues")(
+        {"companion_eig_magnitudes": None}, {}, {}, inv,
+    )
+    assert isinstance(result, dict), result
+    assert result["status"] == "BLOCK", result
+    assert "companion_eig_magnitudes" in result.get("error", ""), result
+    print("  test_phase6_s3_none_handling_var_eigenvalues: PASS")
+
+
+def test_phase6_s3_none_handling_garch_conditional_variance() -> None:
+    """Phase 6+ S3 — verify _check_garch_conditional_variance
+    returns BLOCK dict on None conditional_variance input
+    (B-Phase4-S7-1 closure)."""
+    inv = StructuralInvariant(
+        name="probe", invariant_type="garch_conditional_variance",
+        tolerance=0.0, tolerance_type="absolute",
+    )
+    result = get_invariant_checker("garch_conditional_variance")(
+        {"conditional_variance": None}, {}, {}, inv,
+    )
+    assert isinstance(result, dict), result
+    assert result["status"] == "BLOCK", result
+    assert "conditional_variance" in result.get("error", ""), result
+    print(
+        "  test_phase6_s3_none_handling_garch_conditional_variance: PASS"
+    )
+
+
+def test_phase6_s3_none_handling_hmm_row_sums() -> None:
+    """Phase 6+ S3 — verify _check_hmm_row_sums returns BLOCK
+    dict on None transition_matrix input (B-Phase4-S7-1 closure)."""
+    inv = StructuralInvariant(
+        name="probe", invariant_type="hmm_row_sums",
+        tolerance=1e-10, tolerance_type="absolute",
+    )
+    result = get_invariant_checker("hmm_row_sums")(
+        {"transition_matrix": None}, {}, {}, inv,
+    )
+    assert isinstance(result, dict), result
+    assert result["status"] == "BLOCK", result
+    assert "transition_matrix" in result.get("error", ""), result
+    print("  test_phase6_s3_none_handling_hmm_row_sums: PASS")
+
+
+def test_phase6_s3_none_handling_hmm_emission_normalization() -> None:
+    """Phase 6+ S3 — verify _check_hmm_emission_normalization
+    returns BLOCK dict on None emission_means OR None
+    emission_covars input (2 fields; B-Phase4-S7-1 closure)."""
+    inv = StructuralInvariant(
+        name="probe", invariant_type="hmm_emission_normalization",
+        tolerance=1e-10, tolerance_type="absolute",
+    )
+    # None emission_means
+    r1 = get_invariant_checker("hmm_emission_normalization")(
+        {"emission_means": None, "emission_covars": np.eye(2)},
+        {}, {}, inv,
+    )
+    assert isinstance(r1, dict), r1
+    assert r1["status"] == "BLOCK", r1
+    assert "emission_means" in r1.get("error", ""), r1
+    # None emission_covars (means provided)
+    r2 = get_invariant_checker("hmm_emission_normalization")(
+        {"emission_means": np.array([[0.0, 1.0]]),
+         "emission_covars": None},
+        {}, {}, inv,
+    )
+    assert isinstance(r2, dict), r2
+    assert r2["status"] == "BLOCK", r2
+    assert "emission_covars" in r2.get("error", ""), r2
+    print(
+        "  test_phase6_s3_none_handling_hmm_emission_normalization: "
+        "PASS (both fields)"
+    )
+
+
+def test_phase6_s3_none_handling_conformal_interval_containment() -> None:
+    """Phase 6+ S3 — verify _check_conformal_interval_containment
+    returns BLOCK dict on None lower OR None upper input (2
+    fields; B-Phase4-S7-1 closure)."""
+    inv = StructuralInvariant(
+        name="probe", invariant_type="conformal_interval_containment",
+        tolerance=0.0, tolerance_type="absolute",
+    )
+    # None lower
+    r1 = get_invariant_checker("conformal_interval_containment")(
+        {"lower": None, "upper": np.array([1.0, 2.0])}, {}, {}, inv,
+    )
+    assert isinstance(r1, dict), r1
+    assert r1["status"] == "BLOCK", r1
+    assert "lower" in r1.get("error", ""), r1
+    # None upper (lower provided)
+    r2 = get_invariant_checker("conformal_interval_containment")(
+        {"lower": np.array([0.0, 1.0]), "upper": None}, {}, {}, inv,
+    )
+    assert isinstance(r2, dict), r2
+    assert r2["status"] == "BLOCK", r2
+    assert "upper" in r2.get("error", ""), r2
+    print(
+        "  test_phase6_s3_none_handling_conformal_interval_containment: "
+        "PASS (both fields)"
+    )
+
+
 def test_unregistered_type_raises_keyerror() -> None:
     try:
         get_invariant_checker("does_not_exist")
@@ -459,8 +561,8 @@ def test_s9_inherited_wrapper_declarations() -> None:
 
 def main() -> int:
     print(
-        "Phase 4 Session 7 (P4-1.1) — structural_invariants registry "
-        "unit test"
+        "Phase 4 Session 7 (P4-1.1) + Phase 6+ S3 — "
+        "structural_invariants registry unit test + None-handling fix"
     )
     try:
         test_dataclass_instantiation()
@@ -468,6 +570,11 @@ def main() -> int:
         test_checker_dispatch()
         test_s7_new_checkers_pass_on_valid_inputs()
         test_s7_new_checkers_block_on_violation()
+        test_phase6_s3_none_handling_var_eigenvalues()
+        test_phase6_s3_none_handling_garch_conditional_variance()
+        test_phase6_s3_none_handling_hmm_row_sums()
+        test_phase6_s3_none_handling_hmm_emission_normalization()
+        test_phase6_s3_none_handling_conformal_interval_containment()
         test_unregistered_type_raises_keyerror()
         test_s9_inherited_wrapper_declarations()
     except AssertionError as e:
