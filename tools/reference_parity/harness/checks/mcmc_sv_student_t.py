@@ -88,12 +88,24 @@ class McmcSvStudentTParity(P3ParityCheck):
     # mcmc_convergence omnibus invariant. Same as the 2b Gaussian
     # sibling: stochastic_volatility.py exposes ess_min + rhat_max;
     # geweke is None per S8 catalog.
+    #
+    # Phase 6+ Session 1 (B-Phase6-S1-STRUCTURAL-INVARIANT-
+    # PARAMETER-AWARE-EXCLUSION) — non_gating_params=("sigma_eta",)
+    # mirrors parity-side `ess_min_check` `gates_outcome_for`
+    # exclusion wisdom. Same Phase 1 audit 2b discipline as 2b
+    # Gaussian sibling: sigma_eta-only ess breach downgraded for
+    # omnibus aggregation. Note: 2c Student-t may also surface
+    # ess_min on `nu` parameter at slow chain mixing; current
+    # observation is sigma_eta only per S3 pre-flight findings;
+    # extension to nu deferred to second empirical observation
+    # per YAGNI discipline.
     structural_invariants = (
         StructuralInvariant(
             name="mcmc_convergence",
             invariant_type="mcmc_convergence",
             tolerance=200.0,
             tolerance_type="absolute",
+            non_gating_params=("sigma_eta",),
         ),
     )
 

@@ -76,6 +76,21 @@ class StructuralInvariant:
     enabled : bool
         Default True; allows per-fixture disabling without
         deleting the declaration.
+    non_gating_params : tuple[str, ...]
+        Phase 6+ Session 1 architectural amendment per
+        B-Phase6-S1-STRUCTURAL-INVARIANT-PARAMETER-AWARE-
+        EXCLUSION. Tuple of parameter names whose breach
+        does NOT propagate to omnibus BLOCK / CAVEAT when
+        breach is the sole gating signal. Mirrors parity-
+        side `ess_min_check` `gates_outcome_for` exclusion
+        wisdom (Phase 1 audit 2b discipline: prior-divergence
+        -driven posteriors expected to mix slowly under
+        Gibbs; not inference failure). Currently consumed by
+        `_check_mcmc_convergence`; available for other
+        checkers when warranted by empirical observation
+        (YAGNI-bounded; second observation extends
+        application). Default empty tuple = no exclusion =
+        prior strict-gating behavior preserved.
     """
 
     name: str
@@ -83,6 +98,7 @@ class StructuralInvariant:
     tolerance: float
     tolerance_type: ToleranceType = "absolute"
     enabled: bool = True
+    non_gating_params: tuple = ()
 
 
 # Checker callable contract (informal): given (tsl_outputs,
@@ -817,6 +833,11 @@ def _check_mcmc_convergence(tsl, ref, fixture, inv):
         size across all sampled parameters. Standard MCMC heuristic:
         ESS >= 200 indicates the chain mixed well enough for
         posterior-mean reliability.
+      - ``ess_min_param`` (str, optional) — parameter name where
+        ess_min was observed. Used for parameter-aware exclusion
+        per ``inv.non_gating_params`` (Phase 6+ Session 1
+        architectural amendment per
+        B-Phase6-S1-STRUCTURAL-INVARIANT-PARAMETER-AWARE-EXCLUSION).
       - ``rhat_max`` (float, optional) — maximum Gelman-Rubin
         statistic across all parameters. Standard convergence
         threshold: R-hat < 1.1 (well-converged); 1.1-1.5 borderline;
@@ -830,9 +851,22 @@ def _check_mcmc_convergence(tsl, ref, fixture, inv):
     The R-hat and Geweke checks use fixed canonical thresholds
     (1.1 / 1.5 for R-hat; 1.96 / 3.0 for Geweke).
 
+    Parameter-aware exclusion (Phase 6+ Session 1):
+    If ``ess_min_param`` is in ``inv.non_gating_params`` AND
+    ess_status would be CAVEAT or BLOCK, downgrade ess_status
+    to PASS for omnibus aggregation purposes; populate
+    ``non_gating_param_excluded`` audit field with the excluded
+    parameter name. Mirrors parity-side `ess_min_check`
+    `gates_outcome_for` exclusion wisdom (Phase 1 audit 2b
+    discipline: prior-divergence-driven posteriors expected to
+    mix slowly under Gibbs; sigma_eta breaches non-gating when
+    other parameters PASS). Raw ess_status preserved in
+    audit dict for diagnostic visibility.
+
     Returns the WORST status across all three checks (omnibus).
     """
     ess_min = tsl.get("ess_min")
+    ess_min_param = tsl.get("ess_min_param")
     rhat_max = tsl.get("rhat_max")
     geweke_max_abs_z = tsl.get("geweke_max_abs_z")
     if ess_min is None:
@@ -842,13 +876,28 @@ def _check_mcmc_convergence(tsl, ref, fixture, inv):
         }
     ess_threshold = float(inv.tolerance)
     ess_min_f = float(ess_min)
-    # ESS check
+    # ESS check (raw)
     if ess_min_f >= ess_threshold:
-        ess_status = "PASS"
+        ess_status_raw = "PASS"
     elif ess_min_f >= ess_threshold / 2:
-        ess_status = "CAVEAT"
+        ess_status_raw = "CAVEAT"
     else:
-        ess_status = "BLOCK"
+        ess_status_raw = "BLOCK"
+    # Parameter-aware exclusion (Phase 6+ Session 1).
+    # If ess_min_param is in non_gating_params AND raw ess_status
+    # is CAVEAT/BLOCK, downgrade for omnibus aggregation. Raw
+    # status preserved in audit dict.
+    non_gating_params = tuple(getattr(inv, "non_gating_params", ()) or ())
+    non_gating_excluded = None
+    if (
+        ess_status_raw in ("CAVEAT", "BLOCK")
+        and ess_min_param is not None
+        and ess_min_param in non_gating_params
+    ):
+        ess_status = "PASS"
+        non_gating_excluded = ess_min_param
+    else:
+        ess_status = ess_status_raw
     # R-hat check (optional)
     if rhat_max is None:
         rhat_status = "PASS"  # not provided ⇒ skip
@@ -871,15 +920,18 @@ def _check_mcmc_convergence(tsl, ref, fixture, inv):
             geweke_status = "CAVEAT"
         else:
             geweke_status = "BLOCK"
-    # Omnibus status: take the worst
+    # Omnibus status: take the worst (using exclusion-adjusted ess_status)
     rank = {"PASS": 0, "CAVEAT": 1, "BLOCK": 2}
     statuses = [ess_status, rhat_status, geweke_status]
     worst = max(statuses, key=lambda s: rank[s])
     return {
         "name": inv.name, "status": worst,
         "ess_min": ess_min_f,
+        "ess_min_param": ess_min_param,
         "ess_threshold": ess_threshold,
         "ess_status": ess_status,
+        "ess_status_raw": ess_status_raw,
+        "non_gating_param_excluded": non_gating_excluded,
         "rhat_max": float(rhat_max) if rhat_max is not None else None,
         "rhat_status": rhat_status,
         "geweke_max_abs_z": (

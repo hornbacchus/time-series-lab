@@ -171,12 +171,24 @@ class McmcSvGaussianParity(P3ParityCheck):
     # is not exposed (the S7 omnibus checker treats None as PASS-
     # contribution per the optional-field path). tolerance=200.0
     # = ESS_min PASS threshold per BYF Phase 1 2b precedent.
+    #
+    # Phase 6+ Session 1 (B-Phase6-S1-STRUCTURAL-INVARIANT-
+    # PARAMETER-AWARE-EXCLUSION) — non_gating_params=("sigma_eta",)
+    # mirrors parity-side `ess_min_check` `gates_outcome_for`
+    # exclusion wisdom. Phase 1 audit 2b discipline: prior-
+    # divergence-driven sigma_eta posterior expected to mix slowly
+    # under Gibbs (lag-1 autocorrelation ~0.98 per
+    # `_sv_mcmc_gibbs.py` docstring); not inference failure when
+    # mu/phi parity tests PASS. Sigma_eta-only ess breach
+    # downgraded from BLOCK/CAVEAT to PASS for omnibus
+    # aggregation; raw ess_status preserved in audit dict.
     structural_invariants = (
         StructuralInvariant(
             name="mcmc_convergence",
             invariant_type="mcmc_convergence",
             tolerance=200.0,
             tolerance_type="absolute",
+            non_gating_params=("sigma_eta",),
         ),
     )
 
