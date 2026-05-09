@@ -782,3 +782,184 @@ for Phase 6+ kickoff cycle-architecture recalibration if
 warranted (compression candidates 1-4 + Q-disposition
 tightening + pre-flight class proportionality + recalibration
 runaway consolidation).
+
+## 19. Phase 6+ apparatus discipline (v1.3 codification)
+
+Codifies S2 cycle-architecture recalibration synthesis
+(`docs/reference_parity_phase6/s2_cycle_architecture_recalibration_synthesis.md`)
+recommendations as cycle-architecture standing per Chat
+ratifications. Authoritative for Phase 6+ trigger drafting +
+sub-session execution + apparatus weight discipline.
+
+NOTE on numbering: this section is §19 (next available section
+number; master plan §18 was last extant pre-v1.3). Framework
+reference doc §2.4 forward-references "§19 pre-commit gates";
+that reference predates v1.3 codification and becomes
+ambiguous post-v1.3. Cleanup deferred to separate sub-session.
+Pre-commit gates standing remains operational per framework
+reference doc §2.4 + cycle-wide standing; not codified at
+master plan locus by v1.3 scope.
+
+### 19.1 Sub-session class taxonomy
+
+Four sub-session classes; per-class pre-flight + banking +
+Q-disposition defaults:
+
+| Class | Pre-flight | Banking | Q-disposition |
+|---|---|---|---|
+| Novel-substantive | Full pre-flight (~170-200 LOC) | Q-banking-categorical strict | Formal Q-letter for contested decisions |
+| Consolidation | Scope-determination notes only | Brief inline banking acceptable | Standing thresholds via §13.x |
+| Routine-targeted-patch | None | None (trigger criterion gate; see §19.2) | None |
+| Synthesis | None | Synthesis IS the deliverable; no separate banking | None |
+
+Empirical grounding: Phase 5 S3 + S4-α earned full pre-flight
+(novel-substantive); S5 + (mit-iii) consolidation marginal
+yield (consolidation class); Phase 6+ S1 follow-up empirical
+demonstration (routine-targeted-patch class); Phase 6+ S2
+empirical demonstration (synthesis class).
+
+### 19.2 Routine targeted patch class — bounding criterion
+
+Routine targeted patch class triggers only when ALL four
+criteria met:
+
+(a) Mechanism already shipped + validated (no novel
+    architectural content)
+(b) Extension is enumeration-completion not novel mechanism
+    (e.g., adding parameter to existing tuple; adding
+    wrapper to existing allowlist)
+(c) Parity-side or other authoritative declaration exists
+    for cross-reference (alignment target external to the
+    patch itself)
+(d) ≤15 LOC projected per CONSTRAINT 3 surface threshold
+
+Empirical precedent: Phase 6+ S1 follow-up sigma_eta+nu
+extension (mechanism shipped at S1 Commit 1; nu enumeration
+completion; parity-side `ess_min_check.gates_outcome_for`
+declaration exists; ≤15 LOC projected — actual 22 LOC
+overshoot was comment hygiene not mechanism complexity).
+
+If any criterion fails → escalate to consolidation or novel-
+substantive class per scope evaluation.
+
+### 19.3 Q-disposition contested-decision threshold
+
+Q-disposition apparatus (formal Q-letter cycle) reserved for
+genuinely contested decisions per three-criterion gate:
+
+1. **Non-obvious:** outcome non-obvious to either party at
+   trigger time
+2. **Inversion-plausible:** Code's empirical evidence could
+   plausibly invert Chat's proposed disposition (or vice
+   versa)
+3. **Cascade-substantial:** downstream cascade impact
+   substantial (cross-cycle / cross-apparatus / multi-sub-
+   session)
+
+Routine work handled via standing thresholds (§13.x +
+sub-session class taxonomy §19.1) without per-instance
+Q-letter cycle.
+
+**Positive case (formal Q-disposition warranted):**
+Phase 6+ S1 VERIFICATION-FIRST PROTOCOL — Code surfaced
+empirical premise errors in original coupled-fix trigger
+(slow-linux g++ provisioning + MCMC ess BLOCK closure).
+Chat redrafted as architectural amendment Framing B.
+Three-criterion gate satisfaction:
+- Non-obvious: original premise plausible at trigger time
+- Inversion-plausible: Code's empirical evidence DID invert
+  the proposed disposition
+- Cascade-substantial: architectural amendment with cycle-
+  spanning implications
+
+**Negative case (formal Q-disposition NOT warranted):**
+Phase 6+ S1 follow-up sigma_eta+nu extension — adding "nu"
+to non_gating_params tuple per parity-slow run 25605525818
+empirical observation. Three-criterion gate failure:
+- Non-obvious: NO (mechanism shipped; precedent established;
+  empirical signal unambiguous)
+- Inversion-plausible: NO (only one disposition possible
+  given evidence)
+- Cascade-substantial: NO (single tuple element addition;
+  bounded scope)
+
+Routine-targeted-patch class applied (§19.2 criteria all
+satisfied).
+
+### 19.4 Living calibration baseline model
+
+Future recalibration content amends single living document
+in place rather than spawning V3, V4, V5 (Phase 5 V1+V2
+banking sequence pattern broken).
+
+**Activation:** at first Phase 6+ recalibration moment.
+**Locus:** `docs/reference_parity_phase6/calibration_baseline.md`
+(create at activation; not pre-authored at v1.3
+codification).
+**Update protocol:** dated amendments diff-trackable via git;
+new findings amend existing section or append new dated
+sub-section; do NOT spawn new V3.md / V4.md files.
+
+Empirical motivation: Phase 5 V1+V2 banking sequence (V1
+122 LOC + V2 banking 157 LOC) shows growth pattern that
+without intervention reaches V3+ at Phase 6+. Recalibration
+runaway compression candidate per Code's chat-instance-seam
+recalibration banking.
+
+### 19.5 Cascading split as context-dependent tool
+
+Cascading split (multi-sub-session sequence over single
+multi-commit sub-session) is a tool, NOT a default rule.
+
+**Use when:** investigation + synthesis stages have distinct
+empirical triggers AND clean boundary AND would be read
+together by future archaeology.
+**Skip when:** stages read as single thought; commit
+boundary suffices for chunking.
+
+Judgment at trigger drafting; surface to Chat when split-vs-
+single ambiguous.
+
+Empirical precedent: Phase 6+ S1 → S1-follow-up positive
+split (different empirical triggers — architectural
+amendment vs enumeration completion; clean boundary). Phase
+5 (mit-iii) v1 → redirected (mit-iii) less-clean split
+(triggered by Chat-instance-seam recalibration mid-arc;
+preservable but not exemplary).
+
+### 19.6 Reading B documentation-density observation status
+
+**Status: ANECDOTE.** Not pattern. First-observation framing
+preserved at v1.3 codification per S2 synthesis §4 + Chat
+ratification.
+
+**Origin:** Phase 6+ S1 commits showed 3 of 4 commits
+overshoot CONSTRAINT 3 thresholds (tests +66%, banking
++33%, follow-up +47%) with same root cause (comment hygiene
+density: cross-references + quoted in-file notes + explicit
+run-ID anchors).
+
+**Two competing readings:**
+- **Reading A:** thresholds need upward calibration;
+  Phase 5 informal carryovers undercalibrated for Phase 6+
+  inheritance scaffolding density
+- **Reading B:** comment density itself is apparatus
+  (cross-reference saturation analogous to recalibration
+  runaway pattern)
+
+**Deferred-confirmation criterion (Chat ratification):**
+Substance commits ONLY (synthesis class excluded from
+confirmation evidence; sub-session class taxonomy §19.1
+applies). Substance class = engine/harness/test
+modifications. Next 2-3 substance commits in v1.3 + beyond:
+- Same root cause persistence + similar overshoot pattern
+  → Reading B graduates from anecdote to observation +
+  apparatus tightening discipline
+- Root cause divergence or overshoots taper → Reading A
+  preferred + threshold recalibration at next §13.x update
+
+**v1.3 instrumentation:** v1.3 sequence (this multi-commit
+authoring) is doc-only / synthesis class — EXCLUDED from
+confirmation evidence per Chat ratification. Confirmation
+evidence accumulates from substance commits subsequent to
+v1.3 ship.
