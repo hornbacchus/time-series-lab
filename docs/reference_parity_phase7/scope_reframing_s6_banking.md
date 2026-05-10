@@ -89,12 +89,64 @@ lines 109-118) + BYF dormant (`p3_bond_yield_forecast`
 declaration). 9 catalog technique entries. Validated at structural-
 invariants dispatch layer + reference parity layer.
 
-**Tier II — Phase 3 cross-package bit-exact parity validated
-(Pattern A.2).** ~12 wrappers per P-3 v1.2.0 §1 estimate. TSL
-output validated bit-exact against independent-package
-reference (R `urca::ur.df`, R `vars::VAR`, R `numpy.fft`, etc.).
-Empirical re-verification of exact count deferred to S6+1 first-
-step-of-Q1.
+**Tier I.partial — Phase 1/2 sub-component validated; remainder
+uncovered (Phase 7+ S9 in-place §2 amendment per S8 first-
+consumption empirical re-verification + Disposition 3
+ratification).** Phase 1/2 wrapper validates a sub-component of
+the full catalog technique; remainder of technique scope NOT
+covered by parity infrastructure. Documented per technique with
+both validated and unvalidated components named explicitly.
+
+**Worked example — `bvar`:**
+- **Validated:** IRF/FEVD-given-coefs (Phase 1/2 `bvar.py` audit
+  `1c_bvar_irf_fevd`; Pattern A bit-exact 4.58e-16 abs per
+  phase3_cross_batch_findings.md S6 Pattern A table line 20
+  (S9 fresh re-Read at HEAD `5205779` verbatim); reference R
+  `vars` per P-4 status tracker line 46 Phase 1 audit citation)
+- **Unvalidated:** Bayesian estimation step (priors → posterior
+  coefs); Q2 scope per S6 §3 + Disposition 3 ratified Q2
+  estimate revision
+
+**Cross-reference S8 first-consumption empirical re-verification
++ S9 in-place §2 amendment.**
+
+**Tier II split into Tier II.bit-exact + Tier II.mle-band sub-
+classes (Phase 7+ S9 in-place §2 amendment per S8 first-
+consumption empirical re-verification + Disposition 2
+ratification).** Original Tier II label deprecated. Suffix
+labeling (".bit-exact" / ".mle-band") carries precision
+distinction semantically; sub-classes parallel not ordinal
+hierarchy.
+
+**Tier II.bit-exact — Phase 3 cross-package bit-exact parity
+validated (Pattern A.2).** **12 wrappers / 14 catalog
+techniques** (p3_ccf multi-maps to 3 catalog IDs per
+Disposition 4). TSL output validated bit-exact against
+independent-package reference (R `urca::ur.df`, R `vars::VAR`,
+numpy.fft, etc.). Empirical wrapper enumeration per S8
+empirical re-verification: p3_adf, p3_ccf (covers
+cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag),
+p3_classical_decompose, p3_denton_chowlin, p3_dtw,
+p3_fft_spectrum, p3_granger, p3_kpss, p3_pca,
+p3_robust_estimators, p3_var, p3_vecm.
+
+**Tier II.mle-band — Phase 3 cross-package PASS at MLE-fit
+band tolerance.** **13 wrappers per S8 empirical surfacing.**
+Cross-package PASSes against R references at MLE-fit band
+tolerances (typically 1e-2 to 1e-1 abs); operational R reference
+comparison; **NOT bit-exact at machine precision**. Empirical
+wrapper enumeration per S8: p3_arima, p3_sarima,
+p3_arimax_sarimax, p3_ets, p3_theta, p3_intervention_analysis,
+p3_dfm, p3_hmm, p3_markov_switching, p3_sgarch, p3_gjr_garch,
+p3_egarch, p3_tar_setar.
+
+**S4 spot-check classification consistency check:** sgarch +
+markov_switching now classified Tier II.mle-band per Disposition
+2; Pattern H DSCD distinction per S4 finding preserved within
+Tier II.mle-band sub-class.
+
+**Cross-reference S8 first-consumption empirical re-verification
++ S4 spot-check classification ambiguity findings.**
 
 **Tier III — Phase 3 same-library self-parity validated
 (Pattern A.1).** **18 wrappers** per P-3 v1.2.0 §1 (locked at
@@ -134,12 +186,45 @@ Matches except in stated regime (boundary, near-singular,
 iterative LOESS divergence, Tier C reference convergence
 failure).
 
-**Tier VII — No Phase 3 parity infrastructure.** ~3-5 catalog
-techniques without `p3_*.py` parity check file (per S3
-empirical surfacing; uncertain set: `auto_arima`, `bvar`,
-`critical_slowing_down`; `har_cj` uncertain — file exists but
-labeling differs from catalog ID). Empirical re-verification of
-exact uncovered set deferred to S6+1 first-step-of-Q1.
+**Tier VII — No Phase 3 parity infrastructure (Phase 7+ S9
+in-place §2 amendment per S8 first-consumption empirical
+re-verification + Disposition 1 ratification).** Original
+"~3-5" estimate **empirically falsified at S8**. Empirical
+reality at HEAD `5205779`: **Tier VII = 1 catalog technique
+(auto_arima only)**.
+
+S6 §2 candidates re-classified per S8 empirical findings:
+- `auto_arima` → CONFIRMED Tier VII (no p3_*.py wrapper; not
+  Phase 1/2 covered)
+- `bvar` → COVERED by Phase 1/2 `bvar.py` (IRF/FEVD-given-coefs
+  only); re-classified to Tier I.partial per Disposition 3
+- `critical_slowing_down` → COVERED by Phase 1/2
+  `critical_slowing_down.py` (verdict PASS via `ewstools` 2.1.2
+  reference per P-4 status tracker line 48)
+- `har_cj` → COVERED by Phase 1/2 `har_cj.py` (From-scratch
+  reimpl per ABD 2007 paper; OLS / closed-form; PASS per P-4
+  line 51)
+
+**Cross-reference S8 first-consumption empirical re-verification
++ Disposition 3 bvar Tier I.partial characterization.**
+
+### Multi-map catalog↔wrapper handling note (Phase 7+ S9 in-place §2 amendment per Disposition 4)
+
+**p3_ccf empirical multi-map:** single Phase 3 wrapper covers 3
+catalog techniques (`cross_correlation_lag` +
+`prewhitened_ccf_lag` + `rolling_ccf_lag`).
+
+**Per-catalog characterization at Q1 sub-sessions:** each of
+the 3 p3_ccf-covered catalog IDs documented separately in trust
+inventory amendment with cross-reference to shared p3_ccf
+wrapper. Per-wrapper characterization alone insufficient
+because catalog↔wrapper mapping is many-to-one in this case.
+
+**Forward instrumentation:** verify catalog↔wrapper mapping at
+each technique characterization at Q1 sub-sessions; do NOT
+assume 1:1 mapping; multi-mapping pattern likely recurs beyond
+p3_ccf and needs per-technique empirical surfacing analogous to
+S8 first-consumption protocol.
 
 **Note on tier composition:** Tiers are **not strictly ordered**;
 a technique can be in MULTIPLE tiers simultaneously (e.g.,
@@ -176,11 +261,21 @@ authoring time, not extracted from prior conversation context.
 **Estimated:** 3-5 sub-sessions (depends on S8 amendment scope vs
 deprecation-and-rewrite scope; Q1 first sub-session disposition).
 
-### Thread Q2 — Genuinely uncovered techniques
+### Thread Q2 — Genuinely uncovered techniques (Phase 7+ S9 revision per Dispositions 1 + 3 combined)
 
-~3-5 catalog techniques without Phase 3 parity infrastructure;
-net-new validation work. Per-technique workflow Steps 1-6 as
-originally framed in S9 handoff §3:
+**Original "~3-5 catalog techniques" estimate empirically
+falsified at S8 first-consumption empirical re-verification.**
+Revised Q2 scope per S8 Dispositions 1 + 3 ratifications:
+
+(a) `auto_arima` — full new validation work (Disposition 1
+ratified Tier VII = 1 catalog technique only)
+(b) `bvar` Bayesian estimation step uncovered-portion
+validation (Disposition 3 Tier I.partial framing; bvar IRF/FEVD
+already validated via Phase 1/2 `bvar.py`; Bayesian estimation
+step priors → posterior coefs uncovered)
+
+Per-technique workflow Steps 1-6 as originally framed in S9
+handoff §3 + Phase 7+ scope re-framing §3:
 1. Chat proposes upstream decisions with provenance metadata
 2. User ratifies or contests
 3. If contested, Chat redrafts; iterate to ratification
@@ -189,9 +284,13 @@ originally framed in S9 handoff §3:
 5. Validation output documented with provenance metadata
 6. Technique enters validated-pre-expert-review status
 
-Empirical re-verification at S6+1 to confirm uncovered set.
+**Revised estimate: 3-5 sub-sessions** (NOT 1-2; bvar Bayesian
+estimation step is non-trivial validation; NOT 5-8 per S6 §3
+inflated estimate).
 
-**Estimated:** 5-8 sub-sessions.
+**Total work program estimate** revises modestly downward per
+this Q2 scope contraction; S6 §3 18-30 month total range
+preserved with Q2 narrowing absorbed by other thread variance.
 
 ### Thread Q3a — Cross-package extension
 
@@ -333,6 +432,71 @@ as Tier II amendment, not Q2 first-technique.
 tier taxonomy known. Methodology disclosure templates draft
 against §2 tier taxonomy (validation evidence categories per
 template).
+
+### Path A precedent accumulation note (Phase 7+ S9 in-place §6 amendment per Adjustment 1 + 2)
+
+**Path A precedent accumulation: S1 + S7 + S9 = THIRD instance.**
+Per S7 §4 absorption-timing forward instrumentation cross-
+reference: "if Path A becomes dominant operational mode across
+3+ absorption sub-sessions, **§19.4 disposition 5 amendment
+candidate** can lock Path A as canonical interpretation." S9
+crosses 3-instance threshold; **disposition-5 lock candidate
+ELEVATED to ACTIVE candidate status**. Next §19.4 amendment
+cycle absorbs disposition-5 lock per amendment density
+criterion.
+
+**Two-pattern characterization per Adjustment 2:**
+- **Path A elevation-candidate-absorption (S1 + S7):** absorbs
+  elevation candidates from sub-session banking footers /
+  handoff documents into baseline file in-place; S1 absorbed
+  S8 elevation events (A2 graduation + A4 elevation); S7
+  absorbed 5 candidates from S1-S6 arc surfacing
+- **Path A first-consumption-correction (S9):** corrects
+  taxonomy claims that didn't survive empirical first-
+  consumption at downstream re-verification step; S8 first-
+  consumption surfaced 4 substantive issues with S6 §2
+  taxonomy; S9 amends in-place
+
+Both warrant Path A (immediate-on-discovery rather than
+deferred-to-recalibration); underlying mechanisms structurally
+distinct. Disposition-5 lock at next §19.4 amendment cycle
+clarifies whether these are unified disposition-5 (single Path
+A pattern with multiple sub-mechanisms) or parallel
+dispositions (two related but distinct dispositions).
+
+### Verify-state-at-first-consumption forward instrumentation (Phase 7+ S9 in-place §6 amendment per Adjustment 3)
+
+**Discipline shape: synthesis claims require empirical
+re-verification at first downstream consumption, not just
+authoring-time citation re-verification.**
+
+**Pattern observation per S8 first-consumption empirical
+re-verification:** A6 verify-state-at-narration as currently
+codified at §19.4 living baseline covers narrative claims about
+codebase state at narration moment; does NOT cover taxonomic
+claims that synthesize across codebase state. S6 §2 taxonomy
+is first concrete instance; S8 first-consumption empirical
+re-verification surfaced 4 substantive issues authoring-time
+discipline could not catch (Tier VII material divergence
+~3-5 → 1; Tier II classification ambiguity requiring split;
+bvar partial coverage requiring Tier I.partial; multi-map
+catalog↔wrapper requiring per-catalog characterization).
+
+**Operational implication:** any taxonomy or synthesis artifact
+requires empirical re-verification at first downstream
+consumption (Workstream B template authoring, Q1 trust
+documentation per-technique characterization, etc.) — not just
+authoring-time citation re-verification.
+
+**This discipline shape is more substantively important than
+the taxonomy corrections themselves**, because it identifies a
+gap in the discipline architecture that would otherwise
+propagate forward into Workstream B and Q1 work.
+
+**Codification path:** folding into Workstream B disposition 2
+artifact §4 verify-state-at-narration discipline operational
+spec; future §19.4 amendment cycle codifies. Sub-discipline-of-
+A6 vs new-amendment framing decision deferred to that cycle.
 
 ## §7 Banking footer
 
