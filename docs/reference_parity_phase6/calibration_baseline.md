@@ -26,8 +26,9 @@ amendment files).
 | ID | Date | Surfaced at | Status | Summary |
 |---|---|---|---|---|
 | A1 | 2026-05-09 | S6 (`12d6164`) | active | Master plan §15 sub-domain (ii) S6 framing scope-contracted at S6 activation |
-| A2 | 2026-05-09 | S3 (`6bac98e`) + graduated at S6 (`12d6164`) | active | §19 empirical-enumeration-over-soft-estimate + verify-state-at-activation protocols |
+| A2 | 2026-05-09 (S3 first observation); 2026-05-09 (S6 graduated to pattern); 2026-05-10 (S8 third observation → ESTABLISHED) | S3 (`6bac98e`) + S6 (`12d6164`) + S8 (`0b02c32`) | **ESTABLISHED** | §19 empirical-enumeration-over-soft-estimate + verify-state-at-activation protocols |
 | A3 | 2026-05-09 | S2-FU + S3 + S6 (`12d6164`) | active | Design/banking class LOC threshold recalibration |
+| A4 | 2026-05-10 (S8 first observation; elevated from informational to active) | S8 (`0b02c32`) | active | Trust-infrastructure documentation class taxonomy extension (v1.3 §19.1) + first empirical baseline |
 
 ## §3 Per-amendment content
 
@@ -72,10 +73,16 @@ graduation table).
 |---|---|---|---|---|
 | First | S3 | B-Phase4-S7-1 | "6 checkers / S6/8/9" | 5 functions / 7 sites; cross-batch (S7 + S13) |
 | Second | S6 | B-Phase4-S10-3 | "n_draws=1000" | n_draws=2000 (intervening Phase 4-5 work uncross-referenced) |
+| Third | S8 | CLAUDE.md memory "67 techniques" | 84 techniques in canonical catalog |
 
-**Pattern (graduated from anecdote at S6 second observation):**
-Phase-N-cycle banking entries become stale at Phase-(N+1)+
-activation when intervening work is uncross-referenced.
+**Pattern (ESTABLISHED at S8 third observation; graduated
+from anecdote at S6 second observation):** Phase-N-cycle
+banking entries become stale at Phase-(N+1)+ activation when
+intervening work is uncross-referenced. Three observations
+across three sub-sessions (S3 + S6 + S8) confirm pattern;
+same root cause (codebase state has drifted from documented
+state in load-bearing artifacts; verify-state-at-activation
+protocol catches the drift).
 
 **Protocol specification (codified at this baseline; eligible
 for future master plan §19 amendment at next major
@@ -96,12 +103,15 @@ state at activation time. Banking entries SHOULD include
 session pre-flight scope determination protocol IS the
 operationalization of this discipline.
 
-**Forward instrumentation:** track at next sub-domain
-activation (sub-domain (iv) if activated; or future
-substance-class activation) whether pattern continues. Three
-observations would solidify; one falsifying observation
-(banking entry remained current at activation) would weaken
-graduation status.
+**Forward instrumentation:** pattern ESTABLISHED at S8 third
+observation per criterion above. Continued operational
+application at Phase 7+ activation; if falsifying observation
+surfaces (banking entry remained current at activation),
+pattern weakens. **A2 elevation candidate for v1.4+ master
+plan amendment** as cycle-architecture observation: stale
+banking entries / stale memory / stale framing across cycle
+boundaries are recurrent and unavoidable; verify-state-at-
+activation protocol is the load-bearing mitigation.
 
 **Distinction from Reading B documentation-density observation:**
 A2 is a SEPARATE observation track from Reading B (see A3
@@ -197,6 +207,57 @@ trigger; equivalent to design class 200-300 + 80 buffer for
 ratification overhead), that's first empirical test of A3
 itself — recalibration estimate was wrong if overshot.
 
+### A4 — Trust-infrastructure documentation class taxonomy extension
+
+**Surfacing:** S8 (`0b02c32`) — first instance of trust-
+infrastructure documentation class (S8 trust inventory at
+`tsl_trust_inventory_techniques.md`); A4 ELEVATED from
+informational to active per first observation per Chat
+ratification at S8 closeout.
+
+**Pattern observation:** Trust-infrastructure documentation
+class is NEW for Phase 6+; does NOT fit existing v1.3 §19.1
+taxonomy cleanly. Current taxonomy: novel-substantive /
+consolidation / routine-targeted-patch / synthesis. Trust-
+infrastructure class characteristics (extracted from S8
+banking footer + S9 handoff §6 operational inheritance):
+
+- Output: per-technique inventory document with Phase 1
+  mechanical content + extractable Phase 2 trust content +
+  explicit gap markings
+- Authoring discipline: EXPLICIT FABRICATION PROHIBITION on
+  Phase 2; honest gap markings ("requires expert review of
+  underlying technique") in place of generated content
+- Audit-driven scope: enumeration of validated subset +
+  ID-only enumeration of unvalidated subset
+
+**First empirical baseline (S8; git-verified at commit
+`0b02c32`):** Total artifact ~653 LOC. Document body /
+banking footer split approximate (S8 banking footer
+narrative LOC counts diverged from empirical at multiple
+points within the same artifact; per fabrication-prohibition
+discipline, specific split not adopted).
+
+**Provisional class threshold proposal (loose; single data
+point; refine at second observation per A3 design-class
+precedent):**
+- Document body projection: 400-700 LOC
+- Surface threshold: ~800 LOC
+
+**Forward instrumentation:** if class recurs at Phase 6+
+S9-S11+ direct UDF inventory sub-sessions OR Phase 7+
+analogous trust-documentation work, A4 amendment candidate
+codifies class taxonomy + threshold at next recalibration
+moment per amendment density criterion. Second observation
+would confirm baseline; falsifying observation (~200 LOC OR
+~1000 LOC) would refine projection range.
+
+**Cross-reference:** S8 banking footer at
+`tsl_trust_inventory_techniques.md` (first-instance template
++ class characterization); S9 handoff
+`phase_7_plus_kickoff_handoff.md` §6 (operational
+inheritance reference).
+
 ## §4 Living baseline maintenance protocol
 
 **Amendment additions:** append new amendment to §2 register +
@@ -228,6 +289,33 @@ plan via v1.4+ amendment cycle, mark status = "closed at
 master plan v<X>"; preserve content at this baseline as
 archaeological reference; remove from active recalibration
 agenda.
+
+**Forward instrumentation note — absorption-timing
+clarification (Phase 7+ disposition 5 amendment candidate
+per Phase 7+ S1 ratification 3):** R3 maintenance protocol
+above specifies "Amendment additions: append to §2 register
++ §3 content; date-stamp; cross-reference surfacing
+sub-session" but does NOT explicitly disambiguate timing of
+absorption. Two operational interpretations have emerged:
+
+- **Interpretation A (immediate-on-elevation):** when
+  amendment candidate elevates from informational to active
+  OR graduates pattern status, baseline file amends
+  in-place at the same sub-session
+- **Interpretation B (deferred-to-recalibration-moment):**
+  elevation/graduation lives at sub-session banking footer
+  until next "recalibration moment" triggers absorption
+  into baseline file
+
+S8 elevation events (A2 graduation to ESTABLISHED; A4
+elevation to active) followed Interpretation B implicitly
+(lived at S8 banking footer + S9 handoff document; not
+absorbed at S8). Phase 7+ S1 sub-session (THIS amendment)
+absorbed retroactively per Interpretation A. **Phase 7+
+disposition 5 should clarify which interpretation is
+canonical going forward;** absorption-timing ambiguity is
+itself an amendment candidate distinct from the
+substantive amendments accumulated.
 
 ## §5 Cross-references
 
