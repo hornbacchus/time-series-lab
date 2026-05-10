@@ -29,6 +29,10 @@ amendment files).
 | A2 | 2026-05-09 (S3 first observation); 2026-05-09 (S6 graduated to pattern); 2026-05-10 (S8 third observation → ESTABLISHED) | S3 (`6bac98e`) + S6 (`12d6164`) + S8 (`0b02c32`) | **ESTABLISHED** | §19 empirical-enumeration-over-soft-estimate + verify-state-at-activation protocols |
 | A3 | 2026-05-09 | S2-FU + S3 + S6 (`12d6164`) | active | Design/banking class LOC threshold recalibration |
 | A4 | 2026-05-10 (S8 first observation; elevated from informational to active) | S8 (`0b02c32`) | active | Trust-infrastructure documentation class taxonomy extension (v1.3 §19.1) + first empirical baseline |
+| A5 | 2026-05-10 (Phase 7+ S4 first observation; S5 second observation → ESTABLISHED at n=2) | Phase 7+ S4 + S5 (in conversation; not committed; surfaced at S6 §6 forward instrumentation in `../reference_parity_phase7/scope_reframing_s6_banking.md` commit `53653f1`) | active | Audit/archaeology sub-session class threshold (n=2 baseline) |
+| A6 | 2026-05-10 (Phase 7+ S6 first codification per sixth A2 observation strengthening + scope drift surfacing) | Phase 7+ S6 (`53653f1`) | active | Verify-state-at-narration discipline calibration (blocking-checkpoint status; HEAD-stability + prior-step-discipline + marginal-returns boundary) |
+| A7 | 2026-05-10 (Phase 7+ S6 first instance) | Phase 7+ S6 (`53653f1`) | active | Scope-re-framing sub-session class (n=1 baseline; first taxonomy entry) |
+| A8 | 2026-05-10 (Phase 7+ S6 first codification per STOP 1.5 cycle execution) | Phase 7+ S6 (`53653f1`) | active | STOP-AND-CONFIRM 1.5 cycle pattern (revision-cycle STOP codification) |
 
 ## §3 Per-amendment content
 
@@ -67,22 +71,48 @@ looking guidance) + S6 second observation graduated to pattern
 (`s4_smoke_test_infrastructure_design.md` banking footer
 graduation table).
 
-**Pattern observation evidence:**
+**Pattern observation evidence — TWO sub-patterns codified at
+Phase 7+ S7 absorption per Path A precedent:**
 
-| # | Sub-session | Banking entry | Stale claim | Empirical at activation |
+**Narrative drift sub-pattern** (6 distinct observations across
+5 sub-sessions; Chat trigger imprecision (initial "5
+observations" framing) corrected to empirical enumeration
+("6 distinct observations across 5 sub-sessions") per A6
+verify-state-at-narration discipline applied at codification
+time):
+
+| # | Sub-session | Banking entry / claim source | Stale claim | Empirical at activation |
 |---|---|---|---|---|
 | First | S3 | B-Phase4-S7-1 | "6 checkers / S6/8/9" | 5 functions / 7 sites; cross-batch (S7 + S13) |
 | Second | S6 | B-Phase4-S10-3 | "n_draws=1000" | n_draws=2000 (intervening Phase 4-5 work uncross-referenced) |
 | Third | S8 | CLAUDE.md memory "67 techniques" | 84 techniques in canonical catalog |
+| Fourth | S9 self-reporting + Phase 7+ A2 verification | banking footer "11 entries (10 prior + this handoff)" | 10 entries empirical at HEAD (off-by-one in Code's S9 closeout reporting + handoff banking footer narrative) |
+| Fifth | Phase 7+ S1 | Code's pre-draft LOC estimate "~74 LOC" | +88 LOC actual (+19% over Code estimate) |
+| Sixth | S8 internal (surfaced at S5 archaeology cross-reference) | S8 banking footer narrative LOC counts (587/55=642 vs 615/95=710) | git-verified actual 653 LOC at commit `0b02c32`; neither narrative count matched empirical |
 
-**Pattern (ESTABLISHED at S8 third observation; graduated
-from anecdote at S6 second observation):** Phase-N-cycle
-banking entries become stale at Phase-(N+1)+ activation when
-intervening work is uncross-referenced. Three observations
-across three sub-sessions (S3 + S6 + S8) confirm pattern;
-same root cause (codebase state has drifted from documented
-state in load-bearing artifacts; verify-state-at-activation
-protocol catches the drift).
+**Scope drift sub-pattern** (1 observation; MATERIALLY DISTINCT
+from narrative drift):
+
+| # | Sub-session | Source claim | Empirical at activation |
+|---|---|---|---|
+| First | Phase 7+ S5 archaeology | S8 trust inventory framing: "75 unvalidated; no reference parity validation" | ~70 of 75 catalog "unvalidated" techniques HAVE Phase 3 reference parity infrastructure with PASS audit verdicts (P-3 v1.2.0: 70/70 wrappers covered; 0 BLOCK; 65 PASS; 5 CAVEAT; 1 SKIP-graceful) |
+
+**Pattern (ESTABLISHED at S8 third narrative drift observation;
+sub-pattern distinction codified at Phase 7+ S7 absorption):**
+Phase-N-cycle banking entries become stale at Phase-(N+1)+
+activation when intervening work is uncross-referenced.
+**Narrative drift sub-pattern** = banking entries / memory /
+counts diverging from empirical state via narrative-claim
+propagation across Chat boundaries without empirical
+re-verification at each propagation step. **Scope drift
+sub-pattern** = validation tier set narrowed implicitly through
+Phase-N+ scope-narrowing without explicit "what tiers exist"
+enumeration; parallel documentation streams not cross-walked
+at authoring time. Same root cause family (artifact-vs-empirical
+drift) but different failure modes; scope drift detection
+requires explicit "what tiers exist" enumeration at any artifact
+making validation-state claims (operationalized in
+verify-state-at-narration discipline per A6 codification).
 
 **Protocol specification (codified at this baseline; eligible
 for future master plan §19 amendment at next major
@@ -104,14 +134,20 @@ session pre-flight scope determination protocol IS the
 operationalization of this discipline.
 
 **Forward instrumentation:** pattern ESTABLISHED at S8 third
-observation per criterion above. Continued operational
-application at Phase 7+ activation; if falsifying observation
-surfaces (banking entry remained current at activation),
-pattern weakens. **A2 elevation candidate for v1.4+ master
-plan amendment** as cycle-architecture observation: stale
-banking entries / stale memory / stale framing across cycle
-boundaries are recurrent and unavoidable; verify-state-at-
-activation protocol is the load-bearing mitigation.
+narrative drift observation; sub-pattern distinction codified
+at Phase 7+ S7 absorption per Path A immediate-on-elevation
+precedent (S1 first instance; S7 second instance; pattern
+accumulating). Narrative drift sub-pattern: 6 observations;
+continued operational application at Phase 7+ activation. Scope
+drift sub-pattern: 1 observation; codified at Phase 7+ S6 banking
+artifact §1 + this baseline absorption; cross-reference
+Workstream B disposition 2 artifact pending for full operational
+spec. **A2 elevation candidate for v1.4+ master plan amendment**
+as cycle-architecture observation: stale banking entries / stale
+memory / stale framing across cycle boundaries are recurrent and
+unavoidable; verify-state-at-activation protocol is the
+load-bearing mitigation; scope drift detection requires explicit
+"what tiers exist" enumeration at validation-state claims.
 
 **Distinction from Reading B documentation-density observation:**
 A2 is a SEPARATE observation track from Reading B (see A3
@@ -258,6 +294,203 @@ would confirm baseline; falsifying observation (~200 LOC OR
 `phase_7_plus_kickoff_handoff.md` §6 (operational
 inheritance reference).
 
+### A5 — Audit/archaeology sub-session class threshold (n=2 baseline)
+
+**Surfacing:** Phase 7+ S4 (first observation) + Phase 7+ S5
+(second observation → ESTABLISHED at n=2). Both surfaced at
+S6 §6 forward instrumentation in `../reference_parity_phase7/scope_reframing_s6_banking.md`
+commit `53653f1`; not committed at S4/S5 sub-sessions
+themselves (in-conversation Code response artifacts).
+
+**Pattern observation:** Audit/archaeology sub-session class is
+NEW for Phase 7+; characteristics (per S4 + S5 empirical):
+- Stratified empirical surfacing across multiple source
+  artifacts (audit reports, banking entries, master plan
+  sections)
+- Verify-state-at-narration discipline applied at full force
+  per CONSTRAINT 5 (verbatim extraction with location
+  citations; "NOT DOCUMENTED" where absent)
+- Multi-step structured surfacing (Step 1-N enumeration)
+- No code modifications; pure reading + structured surfacing
+- Output: structured report rendered as Code response in
+  conversation; uncommitted by default
+
+**First empirical baseline:**
+- Phase 7+ S4 verdict spot-check: ~700 LOC
+- Phase 7+ S5 framing-out archaeology: ~700 LOC
+- n=2; class informally ESTABLISHED above current §19.4 A3
+  calibration
+
+**Provisional class threshold proposal (loose; n=2 data
+points; tighten with more observations per A3 design-class
+precedent):**
+- Document body projection: 600-900 LOC
+- Surface threshold: ~1100 LOC
+
+**Forward instrumentation:** if class recurs at Phase 7+ S7+
+(audit/archaeology sub-sessions for Q1 Tier II/Tier VII
+empirical re-verification per S6+1 first-step disposition),
+A5 amendment candidate codifies class taxonomy + threshold at
+next §19.4 recalibration moment per amendment density
+criterion. Third observation would solidify; falsifying
+observation (~300 LOC OR ~1500 LOC) would refine projection
+range.
+
+**Cross-reference:** S6 banking artifact §6 forward
+instrumentation at `../reference_parity_phase7/scope_reframing_s6_banking.md`
+(audit/archaeology class threshold candidate flagged); S4 + S5
+in-conversation source reports (not committed; preserved at
+S6 §6 forward instrumentation as authoritative reference).
+
+### A6 — Verify-state-at-narration discipline calibration (blocking-checkpoint status)
+
+**Surfacing:** Phase 7+ S6 first codification per sixth A2
+observation strengthening + scope drift sub-pattern surfacing
+at S5 archaeology. S6 trigger §2 ratification promoted
+verify-state-at-narration discipline from preliminary to
+blocking-checkpoint status; S6 banking artifact §1 + §5 + §6
+cross-references; S6 ratification trigger discipline-calibration
+framing.
+
+**Discipline specification:**
+
+**Verify-state-at-narration is BLOCKING for any artifact
+making validation-state claims.** Specifically: any artifact
+claiming a technique's validation status, parity verdict,
+tolerance band, fixture characteristic, or other empirical
+state attribute MUST empirically re-verify the claim against
+authoritative source artifacts at authoring time, not extract
+from prior conversation context.
+
+**Failure mode addressed:** narrative-claim propagation across
+Chat boundaries without empirical re-verification at each
+propagation step (root cause of A2 ESTABLISHED pattern across
+6 narrative drift observations + 1 scope drift observation).
+
+**HEAD-stability + prior-step-discipline + marginal-returns
+boundary** (per Chat ratification at S6 STOP 1.5):
+- HEAD-stability: if HEAD has not changed since prior
+  empirical extraction, prior extraction valid for current
+  authoring without re-extraction
+- Prior-step-discipline: if prior extraction was performed
+  per CONSTRAINT 5 verify-state-at-narration discipline at
+  same HEAD, current authoring may propagate without
+  re-extraction
+- Marginal-returns: alternative re-verification at every
+  propagation step produces apparatus inflation with marginal
+  returns; bounded application preserves discipline integrity
+  without operational overhead inflation
+
+**Operationalization:** any artifact authoring with
+validation-state claims at activation MUST include explicit
+verify-state-at-narration discipline application step (e.g.,
+CONSTRAINT 4 or analogous) prior to commit. Ratification of
+extracted-from-prior-conversation claims requires explicit
+HEAD-stability + prior-step-discipline + marginal-returns
+judgment per propagation step.
+
+**Cross-reference:** Workstream B disposition 2 artifact
+pending codification of full operational spec (validation
+provenance audit checklist per technique close); S6 banking
+artifact §1 sixth A2 observation strengthening + §5
+operational discipline carry-forward.
+
+**First operational application:** this codification sub-session
+(Phase 7+ S7) itself; A6 satisfaction conditions (HEAD-stability
++ prior-step-discipline + marginal-returns) verified at S7
+authoring. Recursive self-application establishes A6 as
+operationally live at codification rather than awaiting
+post-codification activation.
+
+### A7 — Scope-re-framing sub-session class (n=1 baseline)
+
+**Surfacing:** Phase 7+ S6 first instance (`53653f1`).
+
+**Pattern observation:** Scope-re-framing sub-session class is
+NEW for Phase 7+; characteristics (per S6 first instance):
+- Banking-class artifact establishing work program parameter
+  changes (vs A1-A4 amendment-of-existing baseline)
+- Substantive premise correction (S8 trust inventory
+  validation tier premise materially incorrect → Phase 3
+  doc-set authoritative)
+- Tier taxonomy or scope authority codification (7-tier
+  validation taxonomy at S6 §2)
+- Verify-state-at-narration discipline applied at full force
+  per CONSTRAINT 4 BLOCKING
+
+**First empirical baseline:**
+- Phase 7+ S6 scope re-framing artifact: 382 LOC (within
+  250-400 projection upper band; under 500 surface threshold;
+  novel scope-re-framing class informally calibrated at first
+  instance)
+
+**Provisional class threshold proposal (loose; n=1 data
+point; refine at second observation per A3 design-class
+precedent):**
+- Document body projection: 250-400 LOC
+- Surface threshold: ~500 LOC
+
+**Forward instrumentation:** if class recurs (e.g., Workstream
+B disposition 2 artifact may be analogous scope-re-framing
+class for methodology disclosure templates against §2 7-tier
+taxonomy), A7 amendment candidate codifies class taxonomy +
+threshold at next §19.4 recalibration moment. Second
+observation would confirm baseline; falsifying observation
+(~100 LOC OR ~700 LOC) would refine projection range.
+
+**Cross-reference:** S6 banking artifact at
+`../reference_parity_phase7/scope_reframing_s6_banking.md`
+(first instance template + class characterization).
+
+### A8 — STOP-AND-CONFIRM 1.5 cycle pattern (revision-cycle STOP codification)
+
+**Surfacing:** Phase 7+ S6 first codification per STOP 1.5
+cycle execution at S6 (Chat verification surfaced 3 issues at
+STOP 1; revisions applied; STOP 1.5 verification cycle
+ratified revisions; commit followed STOP 1.5 ratification).
+
+**Pattern specification:**
+
+**STOP 1.5 surfaces between STOP 1 (mandatory at draft
+complete; verbatim-fidelity verification) and commit when
+Chat verification surfaces divergences requiring
+revise-and-re-verify.** Operational sequence:
+1. STOP 1 mandatory at draft complete (Code surfaces drafted
+   artifact body for Chat verbatim-fidelity verification)
+2. Chat verification surfaces divergences (issue enumeration
+   with disposition options)
+3. Code applies revisions per Chat dispositions (with
+   CONSTRAINT 4 re-verification per discipline)
+4. STOP 1.5 verification cycle (Code surfaces revised
+   sections diff-only OR full body re-render; Chat verifies
+   revisions accurate)
+5. Chat ratifies revisions
+6. Code commits per HEREDOC + Co-Authored-By + push
+
+**Operationally distinct from STOP 2** (conditional anomaly
+STOP at extraction time per CONSTRAINT 4 verbatim divergence):
+- STOP 1 = mandatory pre-commit Chat verification
+- STOP 1.5 = conditional revision-cycle verification (when
+  STOP 1 surfaces divergences)
+- STOP 2 = conditional anomaly STOP at extraction time
+  (CONSTRAINT 4 source-artifact divergence at authoring step)
+
+**Forward instrumentation:** STOP 1.5 cycle pattern
+operationalized at any future scope-re-framing class or
+banking-class artifact with verify-state-at-narration
+discipline at full force. If pattern recurs (Workstream B
+disposition 2 artifact authoring may produce STOP 1 with
+divergences requiring STOP 1.5 cycle), A8 codification
+applies. If absent (STOP 1 ratifies cleanly without
+divergences), pattern remains operational-but-not-applied for
+that sub-session.
+
+**Cross-reference:** S6 STOP 1 + STOP 1.5 cycle execution at
+`../reference_parity_phase7/scope_reframing_s6_banking.md`
+authoring + Chat ratification triggers (in conversation;
+STOP 1 mandatory triggered + STOP 1.5 revision verification
+cycle triggered + ratifications applied).
+
 ## §4 Living baseline maintenance protocol
 
 **Amendment additions:** append new amendment to §2 register +
@@ -310,12 +543,18 @@ absorption. Two operational interpretations have emerged:
 S8 elevation events (A2 graduation to ESTABLISHED; A4
 elevation to active) followed Interpretation B implicitly
 (lived at S8 banking footer + S9 handoff document; not
-absorbed at S8). Phase 7+ S1 sub-session (THIS amendment)
-absorbed retroactively per Interpretation A. **Phase 7+
-disposition 5 should clarify which interpretation is
-canonical going forward;** absorption-timing ambiguity is
-itself an amendment candidate distinct from the
-substantive amendments accumulated.
+absorbed at S8). Phase 7+ S1 sub-session (FIRST Path A
+absorption instance) absorbed retroactively per Interpretation A.
+Phase 7+ S7 sub-session (SECOND Path A absorption instance;
+THIS amendment cycle) absorbed 5 candidates (A5 + A6 + A7 +
+A8 + A2 sub-pattern split) immediately-on-elevation per
+Path A precedent. **Path A pattern accumulating across S1 +
+S7;** both at consolidation/routine-targeted-patch class
+scope; if Path A becomes dominant operational mode across 3+
+absorption sub-sessions, **§19.4 disposition 5 amendment
+candidate** can lock Path A as canonical interpretation.
+Until then, absorption-timing ambiguity preserved per
+disposition 5 forward instrumentation.
 
 ## §5 Cross-references
 
