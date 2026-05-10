@@ -142,14 +142,15 @@ verify chain configuration but do NOT treat as test failure.
   2 (CAVEAT) → green-mapped; 3 (ERROR) → red; 4
   (DOCUMENTED-DIVERGENCE) → green-mapped
 
-### 2.4 Pre-commit gates per §19
+### 2.4 Pre-commit gates
 
 Run all four; commit only if all pass:
 
 1. `parity-fast --check-environment` — R/Python package
    versions match MANIFEST
-2. `engine/tests/` pytest — 96/96 PASS preserved
-3. `_test_structural_invariants.py` — 7/7 PASS preserved
+2. `engine/tests/` pytest — 106/106 PASS preserved (S3 baseline)
+3. `_test_structural_invariants.py` — 12/12 PASS preserved
+   (S3 baseline; 7 original + 5 None-handling per B-Phase6-S3)
 4. `validate_install_matrix.py` — install-matrix consistency
    (P-1 §8.5)
 
