@@ -402,6 +402,64 @@ authoring. Recursive self-application establishes A6 as
 operationally live at codification rather than awaiting
 post-codification activation.
 
+**Sub-discipline — verify-state-at-first-consumption
+(codified at Phase 7+ S11 per S9 §6 deferral resolution):**
+
+Per Phase 7+ S9 §6 amendment forward instrumentation deferral
++ Workstream B operational disciplines artifact §4.5 forward
+codification path: verify-state-at-first-consumption codified
+as sub-discipline of A6 (rather than new A9 amendment) per
+discipline shape continuity — A6 verify-state-at-narration
+covers "narration time" semantics;
+verify-state-at-first-consumption refines this to "narration
+time happens at downstream consumption for synthesis claims
+that authoring-time discipline structurally cannot catch."
+Same discipline shape; refined application protocol for
+synthesis-claim class.
+
+**Sub-discipline specification:** Any artifact making
+synthesis claims (taxonomic; cross-cutting;
+multi-source-derived) MUST empirically re-verify those claims
+at first downstream consumption, not just at authoring time.
+Authoring-time citation re-verification
+(verify-state-at-narration per A6 primary discipline) covers
+verbatim-quote claims; first-consumption re-verification
+covers synthesis claims that authoring-time discipline cannot
+catch (per S8 first-consumption taxonomy correction worked
+example — 4 substantive issues with S6 §2 taxonomy that
+authoring-time CONSTRAINT 4 verification could not surface).
+
+**Authoritative operational spec:**
+`docs/reference_parity_phase7/operational_disciplines_disposition_2_banking.md`
+§4 (Workstream B disposition 2 artifact at HEAD `8b8bf76`).
+§19.4 A6 entry cross-references that artifact for full
+operational spec; future amendments to discipline ship at
+Workstream B artifact in-place per established precedent
+(analogous to scope re-framing artifact in-place amendments
+at S9).
+
+**Worked examples count post-S11: 6 instances** (3 codified
+at Workstream B §4.3 + 3 cross-referenced post-codification):
+- Workstream B §4.3 (α): S7 trigger imprecision case
+  (cross-cycle scale)
+- Workstream B §4.3 (β): S8 first-consumption taxonomy
+  correction (artifact-level scale)
+- Workstream B §4.3 (γ): S9 STOP 1.5 fresh re-Read
+  (micro-iteration scale)
+- S10 attempt 1: Chat-side cross-context conversation
+  reference failure caught by Code at first consumption
+  (sub-session-trigger scale; cross-referenced at A6
+  sub-discipline; full fold-in deferred to next Workstream B
+  amendment cycle)
+- S10 attempt 2: Operational post-summarization context loss
+  caught by Code at execution (sub-session-trigger scale;
+  same deferral)
+- S11 pre-STOP-1 catch: Chat-side baseline-state assertion
+  failure caught by Code at empirical state verification
+  (trigger-drafting scale; pre-STOP-1 surfacing operating
+  preemptively before STOP 1; cross-referenced at A6
+  sub-discipline; full fold-in deferred)
+
 ### A7 — Scope-re-framing sub-session class (n=1 baseline)
 
 **Surfacing:** Phase 7+ S6 first instance (`53653f1`).
@@ -523,38 +581,99 @@ master plan v<X>"; preserve content at this baseline as
 archaeological reference; remove from active recalibration
 agenda.
 
-**Forward instrumentation note — absorption-timing
-clarification (Phase 7+ disposition 5 amendment candidate
-per Phase 7+ S1 ratification 3):** R3 maintenance protocol
-above specifies "Amendment additions: append to §2 register
-+ §3 content; date-stamp; cross-reference surfacing
-sub-session" but does NOT explicitly disambiguate timing of
-absorption. Two operational interpretations have emerged:
+**Absorption-timing canonical lock (Phase 7+ disposition 5
+LOCKED at S11; per Phase 7+ S1 ratification 3 origin + S9 §6
+lock candidate elevation):** R3 maintenance protocol above
+specifies "Amendment additions: append to §2 register + §3
+content; date-stamp; cross-reference surfacing sub-session"
+but did not originally disambiguate timing of absorption.
+Two operational interpretations emerged:
 
-- **Interpretation A (immediate-on-elevation):** when
+- **Interpretation A (immediate-on-discovery):** when
   amendment candidate elevates from informational to active
-  OR graduates pattern status, baseline file amends
-  in-place at the same sub-session
+  OR graduates pattern status OR is corrected at first
+  downstream consumption, baseline file amends in-place at
+  the same sub-session
 - **Interpretation B (deferred-to-recalibration-moment):**
-  elevation/graduation lives at sub-session banking footer
-  until next "recalibration moment" triggers absorption
-  into baseline file
+  elevation/graduation/correction lives at sub-session
+  banking footer until next "recalibration moment" triggers
+  absorption into baseline file
 
 S8 elevation events (A2 graduation to ESTABLISHED; A4
 elevation to active) followed Interpretation B implicitly
 (lived at S8 banking footer + S9 handoff document; not
 absorbed at S8). Phase 7+ S1 sub-session (FIRST Path A
 absorption instance) absorbed retroactively per Interpretation A.
-Phase 7+ S7 sub-session (SECOND Path A absorption instance;
-THIS amendment cycle) absorbed 5 candidates (A5 + A6 + A7 +
-A8 + A2 sub-pattern split) immediately-on-elevation per
-Path A precedent. **Path A pattern accumulating across S1 +
-S7;** both at consolidation/routine-targeted-patch class
-scope; if Path A becomes dominant operational mode across 3+
-absorption sub-sessions, **§19.4 disposition 5 amendment
-candidate** can lock Path A as canonical interpretation.
-Until then, absorption-timing ambiguity preserved per
-disposition 5 forward instrumentation.
+Phase 7+ S7 sub-session (SECOND Path A absorption instance)
+absorbed 5 candidates (A5 + A6 + A7 + A8 + A2 sub-pattern
+split) immediately-on-elevation per Path A precedent. Phase
+7+ S9 sub-session (THIRD Path A absorption instance) executed
+in-place amendments to scope re-framing artifact at first
+downstream consumption per S8 dispositions. Phase 7+ S11
+sub-session (FOURTH Path A absorption instance; THIS
+amendment cycle) absorbs 5 candidates per multi-amendment
+absorption.
+
+**LOCKED 2026-05-10 (Phase 7+ S11): Path A
+(immediate-on-discovery) is canonical interpretation of §19.4
+absorption-timing protocol.** Disposition 5 lock executed at
+fourth instance; n=4 instances across two distinct
+sub-mechanisms warrants canonical-status codification.
+Cross-reference: S9 §6 forward instrumentation in
+`../reference_parity_phase7/scope_reframing_s6_banking.md`
+(disposition-5 lock candidate elevation to ACTIVE); S11
+trigger ratifications (in conversation; lock execution).
+
+**Two sub-mechanisms within Path A canonical lock (codified
+at S11 alongside lock; sub-mechanisms operationally distinct
+with different LOC baselines):**
+
+- **Elevation-candidate-absorption sub-mechanism (S1 + S7
+  baseline):** absorption sub-session triggered by amendment
+  candidate elevation/graduation events (A2 graduation, A4
+  elevation, A5+A6+A7+A8 + A2 sub-pattern split graduations).
+  Multi-amendment absorption typical. LOC baseline ~44-47
+  LOC/candidate (S1: 88 LOC / 2 candidates = 44 LOC/candidate;
+  S7: 234 LOC / 5 candidates ≈ 47 LOC/candidate; n=2 baseline
+  observations).
+- **First-consumption-correction sub-mechanism (S9 baseline):**
+  absorption sub-session triggered by
+  first-downstream-consumption empirical re-verification
+  surfacing material divergence requiring in-place artifact
+  amendment. LOC baseline ~23 LOC/amendment (S9: 164 LOC / 7
+  amendments ≈ 23 LOC/amendment; n=1 baseline observation).
+
+**Forward instrumentation:** second observation of each
+sub-mechanism would tighten class projection per A3
+design-class precedent. Sub-mechanism characterization may
+itself be candidate for promotion to A-numbered amendment if
+cross-class generalization warrants (n=3+ observations of
+distinct sub-mechanism patterns).
+
+**Forward instrumentation note — structural workflow
+observation (n=1 baseline; not codified amendment):** S10
+attempt 3 empirically validated
+file-creation-before-other-tool-calls priority under
+summarization risk for embedded-body workflows. Mitigation
+worked: file created at first action of attempt 3; no
+summarization between paste and execution; attempt 3 executed
+cleanly. Codification candidate at next
+embedded-body-workflow recurrence (n=2 observation).
+
+**Forward instrumentation note — Chat trigger drafting
+baseline-state assertion failure mode (n=2 informal baseline;
+not codified amendment):** S10 attempt 1 (trigger asserted
+artifact body present in Code CLI conversation context when
+not present) + S11 pre-STOP-1 catch (trigger asserted "A5
+multi-amendment absorption class" when empirical baseline
+state shows A5 = audit/archaeology sub-session class
+threshold). Failure mode: Chat trigger drafting prone to
+baseline-state assertion without empirical re-Read at
+trigger-drafting time. Mitigation candidate: Chat trigger
+drafting includes baseline-state empirical Read at
+trigger-drafting time, not just at trigger-execution time.
+Codification candidate at next
+baseline-state-assertion-failure recurrence (n=3 observation).
 
 ## §5 Cross-references
 
