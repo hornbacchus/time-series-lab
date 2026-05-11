@@ -22,7 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 75 catalog techniques without reference-parity validation
+- 1 catalog technique with Phase 7+ Q1 trust documentation
+  remediation (§2.5; Tier-characterization + disclosure
+  templates + validation provenance audit checklist;
+  post-Phase-7+-S12 amendment)
+- 74 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -393,7 +397,116 @@ banking):**
   as un-cross-validated regardless of TSL internal Pattern F
   invariants holding
 
-## §3 Unvalidated catalog techniques (75 entries; ID-only enumeration)
+## §2.5 — Phase 7+ Q1 trust documentation remediation entries
+
+**Class context:** Per Phase 7+ S6 scope re-framing (premise correction
+at §1 of `docs/reference_parity_phase7/scope_reframing_s6_banking.md`)
++ S9 amendments (tier taxonomy split + Tier I.partial introduction +
+Tier VII correction + multi-map handling) + Workstream B disposition
+2 artifact (`docs/reference_parity_phase7/operational_disciplines_disposition_2_banking.md`)
+operational disciplines: per-technique trust documentation remediation
+amends inventory entries from pre-correction premise framing to
+post-correction tier-characterization-with-disclosure-templates framing.
+
+§2.5 entries follow Workstream B §3 disclosure templates + Workstream B
+§1 validation provenance audit checklist applied at technique close.
+Path α expert review preparation: per-technique audit checklist
+applications + disclosure templates + status documented per entry.
+
+### granger_causality (Phase 7+ S12; first §2.5 entry)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2; synthesis attribution per audit Pattern A + §2 sub-class
+taxonomy).
+
+**Reference:** R `lmtest::grangertest` (lmtest 0.9.40)
+**Verdict:** PASS Pattern A bit-exact
+**Audit:** `tools/reference_parity/reports/p3_granger_audit.md`
+**Audit date:** 2026-04-29
+**f_stat abs diff:** 8.53e-14
+**p_value abs diff:** 5.20e-25
+
+**Source files:** `tools/reference_parity/harness/checks/p3_granger.py`
++ `tools/reference_parity/reports/p3_granger_audit.md`
+
+**Validation claim scope:** TSL granger_causality output bit-exact
+against R `lmtest::grangertest` at single seeded fixture configuration.
+Single-fixture parity established at machine precision; parameter-
+sensitivity coverage NOT established at this validation tier (Q3b
+extension pending). Reference selection + tolerance specification
+AI-assisted with user ratification per Phase 7+ work program; pre-Path
+α expert review status; expert review pending end-of-work-program.
+
+**Methodology disclosure templates** (per Workstream B §3 Tier
+II.bit-exact templates):
+
+*Pattern (i) Research note footnote:*
+> This analysis uses TSL technique granger_causality, cross-package
+> bit-exact parity validated against R `lmtest::grangertest` (lmtest
+> 0.9.40) per Phase 3 audit dated 2026-04-29 (f_stat abs diff 8.53e-14).
+> Pre-Path α expert review status.
+
+*Pattern (ii) Technical appendix:*
+> Methodology: TSL technique granger_causality validated per Phase 3
+> reference parity infrastructure. **Reference:** R `lmtest::grangertest`
+> (lmtest 0.9.40). **Verdict:** PASS Pattern A.2 bit-exact at machine
+> precision; f_stat abs diff 8.53e-14, p_value abs diff 5.20e-25.
+> **Audit date:** 2026-04-29. **Fixture:** seeded single-fixture
+> configuration; parameter-sensitivity coverage NOT established at
+> this validation tier; Q3b extension pending. Reference selection +
+> tolerance specification AI-assisted with user ratification. Pre-Path
+> α expert review status; expert review pending end-of-Phase-7+-work-
+> program.
+
+*Pattern (iii) Risk model documentation:*
+> granger_causality validation: TSL Tier II.bit-exact. Reference: R
+> `lmtest::grangertest` (lmtest 0.9.40). Audit: `tools/reference_parity/reports/p3_granger_audit.md`
+> dated 2026-04-29. Verdict: PASS Pattern A.2 bit-exact at machine
+> precision (f_stat abs diff 8.53e-14). Fixture: single-seeded;
+> parameter-sensitivity coverage NOT established; Q3b extension scope.
+> Risk attribution conditional on parameter configurations matching
+> fixture-similar conditions. Pre-Path α expert review status.
+
+*Pattern (iv) Internal use disclosure:*
+> granger_causality cross-package bit-exact validated against R
+> `lmtest::grangertest`; pre-Path α.
+
+**Validation provenance audit checklist (per Workstream B §1; applied
+at technique close):**
+
+- **Q-A (decision substance extracted/cited vs inferred):** Extracted/
+  cited. Reference selection from MANIFEST.toml + audit report;
+  tolerance bands from Phase 3 closed-form class per tolerances.py
+  ladder; fixture characteristics from p3_granger_audit.md; Pattern
+  classification from audit report verbatim.
+- **Q-B (user genuine contestation vs default ratification):** Default
+  ratification at first-technique selection (user ratified
+  granger_causality under Tier 2 case-against framing per Phase 7+
+  S12 Path 1 disposition; case-against weighted but not invalidating).
+  Pro-forma elements present; not pro-forma across all upstream
+  decisions for this technique.
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes, defensible to all three audiences (published audience: bit-exact
+  PASS verdict at machine precision is institutional-grade evidence;
+  Morgan Stanley compliance review: precise audit citation + tier
+  taxonomy + reference package version; external expert reviewer at
+  Path α close: verbatim audit numerics + disclosure language
+  acknowledging single-fixture limitation + Q3b extension pending).
+  Confidence: yes.
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-to-low. granger_causality typically appears as supporting
+  evidence in causal-inference research; not headline-driving for
+  strategic recommendations or client positioning; not typically
+  referenced in public commentary at single-technique level.
+  Retraction surface: limited; per-note retroactive disclosure
+  correction would suffice if expert review surfaces upstream error.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; first technique to enter status per S12
+ratification.
+
+## §3 Unvalidated catalog techniques (74 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -413,8 +526,8 @@ Cross-reference: `resources/catalog/techniques_catalog.json`
 for catalog-side documentation (parameters, presets,
 descriptions, summaries).
 
-### Causality / Relationships / Lead-Lag (6 unvalidated)
-`cross_correlation_lag`, `dtw_alignment_lag`, `gcc_phat_delay`, `granger_causality`, `prewhitened_ccf_lag`, `rolling_ccf_lag`
+### Causality / Relationships / Lead-Lag (5 unvalidated; granger_causality moved to §2.5 per Phase 7+ S12)
+`cross_correlation_lag`, `dtw_alignment_lag`, `gcc_phat_delay`, `prewhitened_ccf_lag`, `rolling_ccf_lag`
 
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
@@ -452,7 +565,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 75 unvalidated technique IDs across 13 catalog categories.**
+**Total: 74 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12 amendment; granger_causality moved to §2.5).
 
 ## §4 How to use this document
 
@@ -495,7 +608,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (75 catalog techniques; §3 enumeration):**
+**Tier 3 — UNVALIDATED (74 catalog techniques; §3 enumeration; post-Phase-7+-S12 amendment):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
