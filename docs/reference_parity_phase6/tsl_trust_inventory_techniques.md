@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 1 catalog technique with Phase 7+ Q1 trust documentation
+- 2 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12 amendment)
-- 74 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13 amendments)
+- 73 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -506,7 +506,152 @@ at technique close):**
 documentation remediation; first technique to enter status per S12
 ratification.
 
-## §3 Unvalidated catalog techniques (74 entries; ID-only enumeration)
+### cross_correlation_lag (Phase 7+ S13; second §2.5 entry; first of p3_ccf-covered triple per Workstream B §3.3 multi-map handling)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2; synthesis attribution per audit Pattern A + §2 sub-class
+taxonomy).
+
+**Multi-map note (per Workstream B §3.3):** cross_correlation_lag is
+one of 3 catalog techniques covered by shared Phase 3 wrapper p3_ccf
+(covers cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag);
+validation evidence per p3_ccf_audit.md applies to the underlying
+closed-form Pearson cross-correlation computation; per-catalog
+interpretation per technique-specific output mapping. For
+cross_correlation_lag specifically: raw CCF across positive lags
+0..MAX_LAG (no prewhitening; no rolling window); p3_ccf audit's
+`ccf_positive` metric directly applies. prewhitened_ccf_lag (S14
+candidate) + rolling_ccf_lag (S15 candidate) entries pending per
+sequential disposition.
+
+**Reference:** R `stats::ccf` (base R 4.5.3)
+**Verdict:** PASS Pattern A bit-exact
+**Audit:** `tools/reference_parity/reports/p3_ccf_audit.md`
+**Audit date:** 2026-04-29
+**ccf_positive max abs diff:** 1.33e-15
+**ccf_positive max rel diff:** 1.46e-15
+
+**Source files:** `tools/reference_parity/harness/checks/p3_ccf.py`
++ `engine/techniques/cross_correlation_lag.py` (per-catalog engine
+module; shared p3_ccf wrapper covers prewhitened_ccf_lag +
+rolling_ccf_lag engine modules in addition)
++ `tools/reference_parity/reports/p3_ccf_audit.md`
+
+**Validation claim scope:** TSL cross_correlation_lag output bit-exact
+against R `stats::ccf` at single seeded fixture configuration
+(lagged-pair series, T=200, true lag=3, seed=42). Single-fixture
+parity established at machine precision; parameter-sensitivity
+coverage NOT established at this validation tier (Q3b extension
+pending). Lag-convention reconciliation per audit:
+statsmodels.ccf(x,y)[k] = cor(x[t+k], y[t]); R ccf(x,y) at lag k =
+same; both arms use POSITIVE lags 0..MAX_LAG; initial run blocked at
+9% abs diff due to R lag-sign extraction error, corrected pre-PASS.
+Reference selection + tolerance specification AI-assisted with user
+ratification per Phase 7+ work program; pre-Path α expert review
+status; expert review pending end-of-work-program.
+
+**Methodology disclosure templates** (per Workstream B §3 Tier
+II.bit-exact templates; multi-map cross-reference per §3.3):
+
+*Pattern (i) Research note footnote:*
+> This analysis uses TSL technique cross_correlation_lag, cross-package
+> bit-exact parity validated against R `stats::ccf` (base R 4.5.3) per
+> Phase 3 audit dated 2026-04-29 (ccf_positive max abs diff 1.33e-15;
+> shared p3_ccf wrapper covers cross_correlation_lag +
+> prewhitened_ccf_lag + rolling_ccf_lag with per-catalog interpretation
+> per technique-specific output mapping). Pre-Path α expert review
+> status.
+
+*Pattern (ii) Technical appendix:*
+> Methodology: TSL technique cross_correlation_lag validated per
+> Phase 3 reference parity infrastructure. **Reference:** R `stats::ccf`
+> (base R 4.5.3). **Verdict:** PASS Pattern A.2 bit-exact at machine
+> precision; ccf_positive max abs diff 1.33e-15, max rel diff
+> 1.46e-15. **Audit date:** 2026-04-29. **Multi-map coverage:**
+> cross_correlation_lag is one of 3 catalog techniques covered by
+> shared Phase 3 wrapper p3_ccf (covers cross_correlation_lag +
+> prewhitened_ccf_lag + rolling_ccf_lag); validation evidence per
+> p3_ccf audit applies to the underlying closed-form Pearson
+> cross-correlation computation; per-catalog interpretation per
+> technique-specific output mapping. For cross_correlation_lag
+> specifically: raw CCF across positive lags 0..MAX_LAG. **Fixture:**
+> seeded single-fixture configuration (lagged-pair series, T=200,
+> true lag=3, seed=42); parameter-sensitivity coverage NOT
+> established at this validation tier; Q3b extension pending.
+> Reference selection + tolerance specification AI-assisted with
+> user ratification. Pre-Path α expert review status; expert review
+> pending end-of-Phase-7+-work-program.
+
+*Pattern (iii) Risk model documentation:*
+> cross_correlation_lag validation: TSL Tier II.bit-exact. Reference:
+> R `stats::ccf` (base R 4.5.3). Audit:
+> `tools/reference_parity/reports/p3_ccf_audit.md` dated 2026-04-29.
+> Verdict: PASS Pattern A.2 bit-exact at machine precision
+> (ccf_positive max abs diff 1.33e-15). Multi-map coverage:
+> cross_correlation_lag is one of 3 catalog techniques covered by
+> shared Phase 3 wrapper p3_ccf; per-catalog interpretation per
+> technique-specific output mapping (for cross_correlation_lag: raw
+> CCF across positive lags 0..MAX_LAG). Fixture: single-seeded;
+> parameter-sensitivity coverage NOT established; Q3b extension
+> scope. Risk attribution conditional on parameter configurations
+> matching fixture-similar conditions. Pre-Path α expert review
+> status.
+
+*Pattern (iv) Internal use disclosure:*
+> cross_correlation_lag cross-package bit-exact validated against R
+> `stats::ccf` via shared p3_ccf wrapper (one of 3 catalog techniques
+> covered); pre-Path α.
+
+**Validation provenance audit checklist (per Workstream B §1; applied
+at technique close):**
+
+- **Q-A (decision substance extracted/cited vs inferred):** Extracted/
+  cited. Reference selection from p3_ccf_audit.md verbatim (R
+  `stats::ccf` base R 4.5.3); verdict + Pattern + date verbatim from
+  audit; numeric metrics (ccf_positive max abs diff 1.33e-15 / max
+  rel diff 1.46e-15) verbatim from audit. Multi-map characterization
+  extracted from scope_reframing §2 lines 122-131 + Workstream B §3.3
+  multi-map handling guidance (per S9 Disposition 4 codification).
+  Engine path mapping (cross_correlation_lag.py separate from
+  prewhitened_ccf_lag.py and rolling_ccf_lag.py) verified empirically
+  via Step 0 file enumeration.
+- **Q-B (user genuine contestation vs default ratification):** Default
+  ratification at second-technique selection (user ratified
+  cross_correlation_lag under Tier 2 case-against framing per Phase 7+
+  S12-close proposal; case-against weighted but not invalidating per
+  efficient ratification disposition). Pro-forma elements present per
+  Mark 3 efficient-ratification pattern (operating-context preservation
+  per Workstream B §5.3); not pro-forma across all upstream decisions
+  for this technique (multi-map characterization required substantive
+  Step 0 empirical verification of catalog↔wrapper mapping + per-catalog
+  output mapping clarification).
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes, defensible to all three audiences (published audience: bit-exact
+  PASS verdict at machine precision against canonical R `stats::ccf`
+  is institutional-grade evidence; Morgan Stanley compliance review:
+  precise audit citation + tier taxonomy + reference package version
+  + multi-map coverage clarity; external expert reviewer at Path α
+  close: verbatim audit numerics + disclosure language acknowledging
+  single-fixture limitation + multi-map shared wrapper note + Q3b
+  extension pending). Confidence: yes.
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-to-low. cross_correlation_lag typically appears as
+  diagnostic / preliminary lead-lag analysis in time-series research;
+  not headline-driving for strategic recommendations or client
+  positioning at single-technique level; multi-map shared wrapper
+  framing means expert review surfacing upstream error in CCF
+  computation would propagate to all 3 p3_ccf-covered techniques
+  (cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag).
+  Retraction surface: limited per single technique; medium across
+  multi-map triple if shared-wrapper-level error found.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; second technique to enter status per S13
+ratification; first of p3_ccf-covered triple (prewhitened_ccf_lag +
+rolling_ccf_lag pending S14 + S15 per sequential disposition).
+
+## §3 Unvalidated catalog techniques (73 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -526,8 +671,8 @@ Cross-reference: `resources/catalog/techniques_catalog.json`
 for catalog-side documentation (parameters, presets,
 descriptions, summaries).
 
-### Causality / Relationships / Lead-Lag (5 unvalidated; granger_causality moved to §2.5 per Phase 7+ S12)
-`cross_correlation_lag`, `dtw_alignment_lag`, `gcc_phat_delay`, `prewhitened_ccf_lag`, `rolling_ccf_lag`
+### Causality / Relationships / Lead-Lag (4 unvalidated; granger_causality + cross_correlation_lag moved to §2.5 per Phase 7+ S12 + S13)
+`dtw_alignment_lag`, `gcc_phat_delay`, `prewhitened_ccf_lag`, `rolling_ccf_lag`
 
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
@@ -565,7 +710,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 74 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12 amendment; granger_causality moved to §2.5).
+**Total: 73 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13 amendments; granger_causality + cross_correlation_lag moved to §2.5).
 
 ## §4 How to use this document
 
@@ -608,7 +753,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (74 catalog techniques; §3 enumeration; post-Phase-7+-S12 amendment):**
+**Tier 3 — UNVALIDATED (73 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
