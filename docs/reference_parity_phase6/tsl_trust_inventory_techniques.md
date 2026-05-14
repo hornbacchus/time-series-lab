@@ -413,7 +413,7 @@ post-correction tier-characterization-with-disclosure-templates framing.
 Path α expert review preparation: per-technique audit checklist
 applications + disclosure templates + status documented per entry.
 
-### granger_causality (Phase 7+ S12; first §2.5 entry)
+### granger_causality (Phase 7+ S12; first §2.5 entry; S14b refinement applied per S14a harness-vs-engine empirical findings)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
 II.bit-exact — Phase 3 cross-package bit-exact parity validated
@@ -427,16 +427,36 @@ taxonomy).
 **f_stat abs diff:** 8.53e-14
 **p_value abs diff:** 5.20e-25
 
-**Source files:** `tools/reference_parity/harness/checks/p3_granger.py`
+**Source files (refined per S14b informational clarification):**
+`tools/reference_parity/harness/checks/p3_granger.py` lines 53-69
+(harness TSL arm invokes `statsmodels.tsa.stattools.grangercausalitytests`
+directly on np.column_stack([y, x]) and extracts ssr_ftest result)
++ `engine/techniques/granger_causality.py` lines 9, 119, 122 (engine
+module delegates to SAME `statsmodels.tsa.stattools.grangercausalitytests`
+function with orchestration wrapper around it: input validation lines
+49-76, NaN drop line 78, preset-based max_lag lines 93-105, multi-lag
+sweep finding best by p-value lines 131-147, reverse-direction Thorough
+test lines 200-220, plain English construction, audit field population)
 + `tools/reference_parity/reports/p3_granger_audit.md`
 
 **Validation claim scope:** TSL granger_causality output bit-exact
 against R `lmtest::grangertest` at single seeded fixture configuration.
 Single-fixture parity established at machine precision; parameter-
 sensitivity coverage NOT established at this validation tier (Q3b
-extension pending). Reference selection + tolerance specification
-AI-assisted with user ratification per Phase 7+ work program; pre-Path
-α expert review status; expert review pending end-of-work-program.
+extension pending). **Harness-vs-engine code path clarification (per
+S14b informational refinement):** bit-exact PASS verdict applies to
+`statsmodels.tsa.stattools.grangercausalitytests` (the harness TSL arm
+AND the function engine module delegates to for core F-test math per
+S14a empirical investigation Step 1+3). Engine module orchestration
+layer (multi-lag sweep, reverse causality test in Thorough preset,
+plain English construction, audit field population) NOT directly
+tested by harness but inherits validity of the delegated F-test math
+the orchestration consumes; engine module uses the SAME validated
+statsmodels function for core computation, so the validation claim
+maps cleanly from harness scope to engine module behavior. Reference
+selection + tolerance specification AI-assisted with user ratification
+per Phase 7+ work program; pre-Path α expert review status; expert
+review pending end-of-work-program.
 
 **Methodology disclosure templates** (per Workstream B §3 Tier
 II.bit-exact templates):
@@ -479,7 +499,15 @@ at technique close):**
   cited. Reference selection from MANIFEST.toml + audit report;
   tolerance bands from Phase 3 closed-form class per tolerances.py
   ladder; fixture characteristics from p3_granger_audit.md; Pattern
-  classification from audit report verbatim.
+  classification from audit report verbatim. **S14b additional Q-A
+  verification per S14a empirical investigation:** harness-vs-engine
+  code path alignment confirmed at S14a Step 1+3 — harness wrapper
+  (p3_granger.py lines 53-69) invokes
+  `statsmodels.tsa.stattools.grangercausalitytests` directly; engine
+  module (granger_causality.py lines 9, 119, 122) delegates to SAME
+  function for core F-test math; clean engine-uses-same-function
+  pattern (4 of 5 contextually sampled harnesses follow this
+  convention).
 - **Q-B (user genuine contestation vs default ratification):** Default
   ratification at first-technique selection (user ratified
   granger_causality under Tier 2 case-against framing per Phase 7+
@@ -504,104 +532,174 @@ at technique close):**
 
 **Status:** validated-pre-expert-review per Phase 7+ Q1 trust
 documentation remediation; first technique to enter status per S12
-ratification.
+ratification. **S14b refinement: framing clarified per S14a empirical
+findings — harness validates `statsmodels.tsa.stattools.grangercausalitytests`
+directly; engine module delegates to same function with orchestration
+wrapper around it; validation claim maps cleanly from harness scope
+to engine module behavior.**
 
-### cross_correlation_lag (Phase 7+ S13; second §2.5 entry; first of p3_ccf-covered triple per Workstream B §3.3 multi-map handling)
+### cross_correlation_lag (Phase 7+ S13; second §2.5 entry; first of p3_ccf-covered triple per Workstream B §3.3 multi-map handling; S14b layered framing amendment per S14a harness-vs-engine empirical findings)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
 II.bit-exact — Phase 3 cross-package bit-exact parity validated
 (Pattern A.2; synthesis attribution per audit Pattern A + §2 sub-class
-taxonomy).
+taxonomy). **Important nuance (per S14b layered framing per S14a
+empirical findings):** tier classification applies to the CCF math
+layer validated by harness (statsmodels.tsa.stattools.ccf vs R
+stats::ccf); engine module uses custom numpy CCF implementation NOT
+directly validated by p3_ccf audit; bit-exact equivalence between
+statsmodels.ccf and engine module custom numpy CCF plausible but NOT
+empirically verified (see Validation claim scope below for layered
+framing).
 
 **Multi-map note (per Workstream B §3.3):** cross_correlation_lag is
 one of 3 catalog techniques covered by shared Phase 3 wrapper p3_ccf
 (covers cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag);
-validation evidence per p3_ccf_audit.md applies to the underlying
-closed-form Pearson cross-correlation computation; per-catalog
-interpretation per technique-specific output mapping. For
-cross_correlation_lag specifically: raw CCF across positive lags
-0..MAX_LAG (no prewhitening; no rolling window); p3_ccf audit's
-`ccf_positive` metric directly applies. prewhitened_ccf_lag (S14
-candidate) + rolling_ccf_lag (S15 candidate) entries pending per
-sequential disposition.
+validation evidence per p3_ccf_audit.md applies to the
+`statsmodels.tsa.stattools.ccf` computation against R `stats::ccf`
+at the harness TSL arm. **Per-catalog interpretation per
+technique-specific output mapping AND per-catalog code path mapping
+(per S14b refinement per S14a Step 3 findings):** for
+cross_correlation_lag specifically, engine module
+(`engine/techniques/cross_correlation_lag.py` lines 95-121) uses
+custom numpy CCF implementation (manual normalized cross-covariance
+computation across lags -max_lag..+max_lag), NOT
+statsmodels.tsa.stattools.ccf. The two implementations compute the
+same mathematical quantity (Pearson cross-correlation across lags)
+using the same formula in principle, but represent DIFFERENT code
+paths with potentially different floating-point rounding behavior at
+machine-precision level; bit-exact equivalence plausible but
+unverified. prewhitened_ccf_lag (S14c candidate) + rolling_ccf_lag
+(S15 candidate) entries pending per sequential disposition; both have
+similar layered framing requirement.
 
 **Reference:** R `stats::ccf` (base R 4.5.3)
-**Verdict:** PASS Pattern A bit-exact
+**Verdict:** PASS Pattern A bit-exact (CCF math layer at
+statsmodels.ccf; see Validation claim scope for engine module layer
+coverage)
 **Audit:** `tools/reference_parity/reports/p3_ccf_audit.md`
 **Audit date:** 2026-04-29
 **ccf_positive max abs diff:** 1.33e-15
 **ccf_positive max rel diff:** 1.46e-15
 
-**Source files:** `tools/reference_parity/harness/checks/p3_ccf.py`
-+ `engine/techniques/cross_correlation_lag.py` (per-catalog engine
-module; shared p3_ccf wrapper covers prewhitened_ccf_lag +
-rolling_ccf_lag engine modules in addition)
+**Source files (amended per S14b layered framing per S14a Step 1-3
+empirical findings):** `tools/reference_parity/harness/checks/p3_ccf.py`
+lines 51-59 (harness TSL arm invokes `statsmodels.tsa.stattools.ccf`
+directly on input fixture; does NOT invoke engine modules)
++ `engine/techniques/cross_correlation_lag.py` lines 95-121 (engine
+module computes raw CCF using custom numpy implementation: x_dm =
+x_clean - np.mean(x_clean); y_dm = y_clean - np.mean(y_clean); denom
+= sx*sy; ccf_vals[idx] = np.sum(x_dm[:n - k] * y_dm[k:]) / denom for
+positive lags + separate branch for negative lags; computes CCF
+across lags -max_lag..+max_lag whereas harness validates positive
+lags 0..MAX_LAG only)
++ `engine/techniques/prewhitened_ccf_lag.py` + `engine/techniques/rolling_ccf_lag.py`
+(per-catalog engine modules for other p3_ccf-covered catalog
+techniques; not exercised by p3_ccf harness)
 + `tools/reference_parity/reports/p3_ccf_audit.md`
 
-**Validation claim scope:** TSL cross_correlation_lag output bit-exact
-against R `stats::ccf` at single seeded fixture configuration
-(lagged-pair series, T=200, true lag=3, seed=42). Single-fixture
-parity established at machine precision; parameter-sensitivity
-coverage NOT established at this validation tier (Q3b extension
-pending). Lag-convention reconciliation per audit:
-statsmodels.ccf(x,y)[k] = cor(x[t+k], y[t]); R ccf(x,y) at lag k =
-same; both arms use POSITIVE lags 0..MAX_LAG; initial run blocked at
-9% abs diff due to R lag-sign extraction error, corrected pre-PASS.
-Reference selection + tolerance specification AI-assisted with user
-ratification per Phase 7+ work program; pre-Path α expert review
-status; expert review pending end-of-work-program.
+**Validation claim scope (LAYERED per S14b amendment per S14a
+empirical findings):** TSL cross_correlation_lag output relies on
+custom numpy CCF implementation in engine module. p3_ccf audit
+validates `statsmodels.tsa.stattools.ccf` (the harness TSL arm) vs R
+`stats::ccf` at single seeded fixture configuration (lagged-pair
+series, T=200, true lag=3, seed=42); ccf_positive metric measures
+statsmodels.ccf vs R stats::ccf agreement, NOT engine module custom
+numpy CCF vs R stats::ccf agreement. **Layered framing:**
+- **Layer 1 — CCF math at statsmodels.ccf:** bit-exact PASS verdict
+  applies at machine precision; parity covers Pearson cross-correlation
+  across positive lags 0..MAX_LAG. Lag-convention reconciliation per
+  audit: statsmodels.ccf(x,y)[k] = cor(x[t+k], y[t]); R ccf(x,y) at
+  lag k = same; both arms use POSITIVE lags 0..MAX_LAG; initial run
+  blocked at 9% abs diff due to R lag-sign extraction error, corrected
+  pre-PASS.
+- **Layer 2 — engine module custom numpy CCF:** NOT empirically
+  verified bit-exact against statsmodels.ccf at p3_ccf audit. Bit-exact
+  equivalence plausible (same mathematical formula — normalized
+  Pearson cross-correlation; same float64 arithmetic underlying), but
+  requires expert review OR engine-output cross-check against
+  statsmodels.ccf to close the gap empirically. Engine module also
+  computes negative lags (-max_lag..0) which p3_ccf audit does NOT
+  cover; negative-lag CCF validity inherits from same formula but is
+  one further step removed from validated evidence.
+
+Single-fixture parity established at machine precision for Layer 1;
+parameter-sensitivity coverage NOT established at this validation
+tier (Q3b extension pending); Layer 2 closure pending engine-output
+cross-check OR expert review. Reference selection + tolerance
+specification AI-assisted with user ratification per Phase 7+ work
+program; pre-Path α expert review status; expert review pending
+end-of-work-program.
 
 **Methodology disclosure templates** (per Workstream B §3 Tier
-II.bit-exact templates; multi-map cross-reference per §3.3):
+II.bit-exact templates; multi-map cross-reference per §3.3;
+institutional-grade three-tier disclosure shape per S14b layered
+framing):
 
 *Pattern (i) Research note footnote:*
-> This analysis uses TSL technique cross_correlation_lag, cross-package
-> bit-exact parity validated against R `stats::ccf` (base R 4.5.3) per
-> Phase 3 audit dated 2026-04-29 (ccf_positive max abs diff 1.33e-15;
-> shared p3_ccf wrapper covers cross_correlation_lag +
-> prewhitened_ccf_lag + rolling_ccf_lag with per-catalog interpretation
-> per technique-specific output mapping). Pre-Path α expert review
-> status.
+> This analysis uses TSL technique cross_correlation_lag. CCF math
+> layer (statsmodels.tsa.stattools.ccf) is cross-package bit-exact
+> parity validated against R `stats::ccf` (base R 4.5.3) per Phase 3
+> audit dated 2026-04-29 (ccf_positive max abs diff 1.33e-15; shared
+> p3_ccf wrapper covers cross_correlation_lag + prewhitened_ccf_lag
+> + rolling_ccf_lag). TSL engine module uses custom numpy CCF
+> implementation mathematically equivalent to validated math but
+> not directly tested by parity audit; engine-output equivalence to
+> validated statsmodels.ccf plausible but unverified; requires
+> expert review or cross-check for published use. Pre-Path α expert
+> review status.
 
 *Pattern (ii) Technical appendix:*
-> Methodology: TSL technique cross_correlation_lag validated per
-> Phase 3 reference parity infrastructure. **Reference:** R `stats::ccf`
-> (base R 4.5.3). **Verdict:** PASS Pattern A.2 bit-exact at machine
-> precision; ccf_positive max abs diff 1.33e-15, max rel diff
-> 1.46e-15. **Audit date:** 2026-04-29. **Multi-map coverage:**
-> cross_correlation_lag is one of 3 catalog techniques covered by
-> shared Phase 3 wrapper p3_ccf (covers cross_correlation_lag +
-> prewhitened_ccf_lag + rolling_ccf_lag); validation evidence per
-> p3_ccf audit applies to the underlying closed-form Pearson
-> cross-correlation computation; per-catalog interpretation per
-> technique-specific output mapping. For cross_correlation_lag
-> specifically: raw CCF across positive lags 0..MAX_LAG. **Fixture:**
-> seeded single-fixture configuration (lagged-pair series, T=200,
-> true lag=3, seed=42); parameter-sensitivity coverage NOT
-> established at this validation tier; Q3b extension pending.
-> Reference selection + tolerance specification AI-assisted with
-> user ratification. Pre-Path α expert review status; expert review
-> pending end-of-Phase-7+-work-program.
+> Methodology: TSL technique cross_correlation_lag validated at
+> **CCF math layer** per Phase 3 reference parity infrastructure.
+> **Reference:** R `stats::ccf` (base R 4.5.3). **Verdict:** PASS
+> Pattern A.2 bit-exact at machine precision; ccf_positive max abs
+> diff 1.33e-15, max rel diff 1.46e-15. **Audit date:** 2026-04-29.
+> **Multi-map coverage:** cross_correlation_lag is one of 3 catalog
+> techniques covered by shared Phase 3 wrapper p3_ccf; validation
+> evidence per p3_ccf audit applies to `statsmodels.tsa.stattools.ccf`
+> (the harness TSL arm) vs R `stats::ccf`; per-catalog interpretation
+> per technique-specific output mapping. **Layered validation
+> framing:** p3_ccf harness invokes statsmodels.ccf directly; TSL
+> engine module (`engine/techniques/cross_correlation_lag.py` lines
+> 95-121) uses custom numpy CCF implementation NOT directly tested
+> by parity audit. Bit-exact equivalence between statsmodels.ccf and
+> engine module custom numpy CCF is plausible (same Pearson
+> cross-correlation formula; same float64 arithmetic) but is NOT
+> empirically verified; requires expert review of engine
+> implementation OR engine-output cross-check against statsmodels.ccf
+> to close the gap. **Fixture:** seeded single-fixture configuration
+> (lagged-pair series, T=200, true lag=3, seed=42);
+> parameter-sensitivity coverage NOT established at this validation
+> tier; Q3b extension pending. Reference selection + tolerance
+> specification AI-assisted with user ratification. Pre-Path α
+> expert review status; expert review pending end-of-Phase-7+-work-
+> program.
 
 *Pattern (iii) Risk model documentation:*
-> cross_correlation_lag validation: TSL Tier II.bit-exact. Reference:
-> R `stats::ccf` (base R 4.5.3). Audit:
-> `tools/reference_parity/reports/p3_ccf_audit.md` dated 2026-04-29.
-> Verdict: PASS Pattern A.2 bit-exact at machine precision
-> (ccf_positive max abs diff 1.33e-15). Multi-map coverage:
+> cross_correlation_lag validation: TSL Tier II.bit-exact (CCF math
+> layer at statsmodels.ccf only). Reference: R `stats::ccf` (base R
+> 4.5.3). Audit: `tools/reference_parity/reports/p3_ccf_audit.md`
+> dated 2026-04-29. Verdict: PASS Pattern A.2 bit-exact at machine
+> precision (ccf_positive max abs diff 1.33e-15). Multi-map coverage:
 > cross_correlation_lag is one of 3 catalog techniques covered by
 > shared Phase 3 wrapper p3_ccf; per-catalog interpretation per
-> technique-specific output mapping (for cross_correlation_lag: raw
-> CCF across positive lags 0..MAX_LAG). Fixture: single-seeded;
-> parameter-sensitivity coverage NOT established; Q3b extension
-> scope. Risk attribution conditional on parameter configurations
-> matching fixture-similar conditions. Pre-Path α expert review
-> status.
+> technique-specific output mapping. **Engine module layer (custom
+> numpy CCF) NOT directly parity-validated; bit-exact equivalence to
+> validated statsmodels.ccf plausible but unverified.** Fixture:
+> single-seeded; parameter-sensitivity coverage NOT established;
+> Q3b extension scope. Risk attribution conditional on (a) parameter
+> configurations matching fixture-similar conditions AND (b) engine
+> module CCF implementation equivalence to validated statsmodels.ccf
+> (not covered by parity audit; expert review recommended). Pre-Path
+> α expert review status.
 
 *Pattern (iv) Internal use disclosure:*
-> cross_correlation_lag cross-package bit-exact validated against R
-> `stats::ccf` via shared p3_ccf wrapper (one of 3 catalog techniques
-> covered); pre-Path α.
+> cross_correlation_lag CCF math layer (statsmodels.ccf) cross-package
+> bit-exact validated against R `stats::ccf` via shared p3_ccf
+> wrapper (one of 3 catalog techniques covered); engine module
+> custom numpy CCF NOT directly parity-validated, bit-exact
+> equivalence plausible but unverified; pre-Path α.
 
 **Validation provenance audit checklist (per Workstream B §1; applied
 at technique close):**
@@ -615,7 +713,26 @@ at technique close):**
   multi-map handling guidance (per S9 Disposition 4 codification).
   Engine path mapping (cross_correlation_lag.py separate from
   prewhitened_ccf_lag.py and rolling_ccf_lag.py) verified empirically
-  via Step 0 file enumeration.
+  via Step 0 file enumeration. **S14b layered framing extracted per
+  S14a empirical investigation:** harness-vs-engine code path
+  divergence verified at S14a Step 1+3 — p3_ccf.py lines 51-59
+  invokes statsmodels.tsa.stattools.ccf directly;
+  cross_correlation_lag.py lines 95-121 uses custom numpy CCF
+  (manual normalized cross-covariance computation, NOT
+  statsmodels.ccf); two implementations compute same mathematical
+  quantity using same formula but represent DIFFERENT code paths.
+  Layered framing (Layer 1 statsmodels.ccf validated; Layer 2
+  engine module custom numpy CCF plausibly equivalent but
+  unverified) is institutional-grade disclosure decision per
+  verify-state-at-first-consumption sub-discipline. S13 entry's
+  "p3_ccf audit's ccf_positive metric directly applies" framing was
+  synthesis claim misaligned with empirical harness-engine
+  relationship; misalignment caught at S14 prewhitened_ccf_lag Step 0
+  first downstream consumption (Code's Step 0 empirical re-read of
+  p3_ccf.py harness wrapper surfaced the harness-engine code path
+  divergence); S14a investigation confirmed pattern at p3_ccf scope;
+  S14b amendment corrects S13 retroactively + applies layered framing
+  forward.
 - **Q-B (user genuine contestation vs default ratification):** Default
   ratification at second-technique selection (user ratified
   cross_correlation_lag under Tier 2 case-against framing per Phase 7+
@@ -625,31 +742,56 @@ at technique close):**
   per Workstream B §5.3); not pro-forma across all upstream decisions
   for this technique (multi-map characterization required substantive
   Step 0 empirical verification of catalog↔wrapper mapping + per-catalog
-  output mapping clarification).
+  output mapping clarification; S14b layered framing additionally
+  required substantive Step 0 + S14a empirical investigation of
+  harness-engine code path divergence).
 - **Q-C (Chat confidence for publication tomorrow with disclosure):**
-  Yes, defensible to all three audiences (published audience: bit-exact
-  PASS verdict at machine precision against canonical R `stats::ccf`
-  is institutional-grade evidence; Morgan Stanley compliance review:
-  precise audit citation + tier taxonomy + reference package version
-  + multi-map coverage clarity; external expert reviewer at Path α
-  close: verbatim audit numerics + disclosure language acknowledging
-  single-fixture limitation + multi-map shared wrapper note + Q3b
-  extension pending). Confidence: yes.
+  Yes for **Layer 1 (CCF math at statsmodels.ccf)** per bit-exact PASS
+  verdict at machine precision against canonical R `stats::ccf`;
+  disclosure language clearly delineates layered validation coverage.
+  **Conditional for Layer 2 (engine module custom numpy CCF)** —
+  requires expert review of engine implementation OR engine-output
+  cross-check against validated statsmodels.ccf to close the
+  equivalence gap empirically; published research using
+  cross_correlation_lag output relies on Layer 2 engine implementation
+  (Layer 1 is what the harness validates, NOT what the engine
+  produces). Defensible to all three audiences with disclosure
+  language as drafted: published audience (layered validation framing
+  transparent); Morgan Stanley compliance review (precise audit
+  citation + tier taxonomy + Layer 1/Layer 2 scope delineation);
+  external expert reviewer at Path α close (verbatim audit numerics
+  + honest disclosure of what's validated and what's not + Q3b
+  extension pending + Layer 2 equivalence verification candidate for
+  expert review scope).
 - **Q-D (retraction surface if expert review later finds inadequacy):**
-  Medium-to-low. cross_correlation_lag typically appears as
-  diagnostic / preliminary lead-lag analysis in time-series research;
-  not headline-driving for strategic recommendations or client
-  positioning at single-technique level; multi-map shared wrapper
-  framing means expert review surfacing upstream error in CCF
-  computation would propagate to all 3 p3_ccf-covered techniques
-  (cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag).
-  Retraction surface: limited per single technique; medium across
-  multi-map triple if shared-wrapper-level error found.
+  Medium. cross_correlation_lag typically appears as diagnostic /
+  preliminary lead-lag analysis in time-series research; not
+  headline-driving for strategic recommendations or client
+  positioning at single-technique level. **Layer-specific retraction
+  surface (per S14b layered framing):**
+  - Layer 1 (CCF math at statsmodels.ccf): low retraction surface;
+    bit-exact PASS verdict against canonical R reference at machine
+    precision; expert review surfacing upstream error would propagate
+    to all 3 p3_ccf-covered techniques (multi-map propagation risk).
+  - Layer 2 (engine module custom numpy CCF): MEDIUM retraction
+    surface specifically for cross_correlation_lag (and analogously
+    for prewhitened_ccf_lag + rolling_ccf_lag); if engine
+    implementation found to diverge from validated statsmodels.ccf at
+    machine-precision level, retraction would affect all
+    engine-produced outputs from these catalog techniques (per-note
+    retroactive disclosure correction + engine code remediation OR
+    cross-check addition).
 
 **Status:** validated-pre-expert-review per Phase 7+ Q1 trust
 documentation remediation; second technique to enter status per S13
 ratification; first of p3_ccf-covered triple (prewhitened_ccf_lag +
-rolling_ccf_lag pending S14 + S15 per sequential disposition).
+rolling_ccf_lag pending S14c + S15 per sequential disposition).
+**S14b amendment: layered framing per S14a empirical findings —
+validation evidence applies to statsmodels.ccf math layer (Layer 1;
+bit-exact PASS); engine module custom numpy CCF (Layer 2) bit-exact
+equivalence to validated math plausible but unverified; expert review
+OR engine-output cross-check required to close Layer 2 gap
+empirically.**
 
 ## §3 Unvalidated catalog techniques (73 entries; ID-only enumeration)
 
