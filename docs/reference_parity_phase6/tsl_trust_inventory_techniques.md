@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 2 catalog techniques with Phase 7+ Q1 trust documentation
+- 3 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13 amendments)
-- 73 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c amendments)
+- 72 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -793,7 +793,282 @@ equivalence to validated math plausible but unverified; expert review
 OR engine-output cross-check required to close Layer 2 gap
 empirically.**
 
-## §3 Unvalidated catalog techniques (73 entries; ID-only enumeration)
+### prewhitened_ccf_lag (Phase 7+ S14c; third §2.5 entry; second of p3_ccf-covered triple per Workstream B §3.3 multi-map handling; THREE-LAYER framing per S14b layered framing precedent + S14a harness-vs-engine empirical findings + prewhitened_ccf_lag-specific AR-prewhitening upstream addition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2). **Important nuance (three-layer framing per S14c
+extending S14b two-layer framing):** tier classification applies to
+Layer 1 (statsmodels.tsa.stattools.ccf vs R stats::ccf); Layer 2a
+(engine module CCF implementation on prewhitened residuals)
+plausibly equivalent but unverified; Layer 2b (AR-prewhitening
+pipeline upstream of CCF) NOT covered by p3_ccf parity audit. See
+Validation claim scope below.
+
+**Multi-map note (per Workstream B §3.3):** prewhitened_ccf_lag is
+one of 3 catalog techniques covered by shared Phase 3 wrapper p3_ccf
+(covers cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag);
+validation evidence per p3_ccf_audit.md applies to the
+`statsmodels.tsa.stattools.ccf` computation against R `stats::ccf`
+at the harness TSL arm. **Per-catalog interpretation + per-catalog
+code path mapping (per S14b multi-map refinement + S14c three-layer
+extension):** for prewhitened_ccf_lag specifically, engine module
+applies AR-prewhitening to input series X upstream of CCF
+computation (`engine/techniques/prewhitened_ccf_lag.py` lines 99-118:
+pmdarima.auto_arima fit on X OR user-specified ARIMA order; ARIMA
+filter applied to Y per "purist prewhitening" via `_apply_arima_filter`
+helper lines 319-353 with fallback to differencing; residual
+extraction) and computes CCF on prewhitened residuals via custom
+numpy implementation (lines 356-375 `_compute_ccf`: normalized
+Pearson cross-correlation across positive lags 0..max_lag; separate
+positive + negative lag branches for full -max_lag..+max_lag
+coverage). cross_correlation_lag (S13 shipped + S14b layered framing
+amendment) handled raw CCF without prewhitening; rolling_ccf_lag
+(S15 candidate) computes rolling-window CCF without prewhitening;
+AR-prewhitening is prewhitened_ccf_lag-specific (not shared with
+other p3_ccf-covered catalog techniques).
+
+**Reference:** R `stats::ccf` (base R 4.5.3)
+**Verdict:** PASS Pattern A bit-exact (Layer 1 only; see Validation
+claim scope for Layer 2a + Layer 2b coverage)
+**Audit:** `tools/reference_parity/reports/p3_ccf_audit.md`
+**Audit date:** 2026-04-29
+**ccf_positive max abs diff:** 1.33e-15
+**ccf_positive max rel diff:** 1.46e-15
+
+**Source files (three-layer per S14c framing extending S14b layered
+framing):** `tools/reference_parity/harness/checks/p3_ccf.py` lines
+51-59 (harness TSL arm invokes `statsmodels.tsa.stattools.ccf`
+directly on input fixture; does NOT invoke engine modules OR
+AR-prewhitening pipeline)
++ `engine/techniques/prewhitened_ccf_lag.py` lines 99-118
+(AR-prewhitening: pmdarima.auto_arima fit on X with stepwise mode
+for Fast/Balanced presets + non-stepwise for Thorough; ARIMA filter
+applied to Y via `_apply_arima_filter` helper lines 319-353;
+fallback to differencing if filtering fails; residual extraction)
++ `engine/techniques/prewhitened_ccf_lag.py` lines 356-375
+(`_compute_ccf` custom numpy CCF: manual normalized cross-covariance
+on prewhitened residuals; separate ccf_pos + ccf_neg branches for
+full -max_lag..+max_lag coverage)
++ `engine/techniques/cross_correlation_lag.py` + `engine/techniques/rolling_ccf_lag.py`
+(per-catalog engine modules for other p3_ccf-covered catalog
+techniques; not exercised by p3_ccf harness)
++ `tools/reference_parity/reports/p3_ccf_audit.md`
+
+**Validation claim scope (THREE-LAYER per S14c amendment per S14b
+layered framing precedent + AR-prewhitening upstream addition):**
+TSL prewhitened_ccf_lag output relies on three layered computations.
+p3_ccf audit validates Layer 1 (statsmodels.ccf) vs R stats::ccf at
+single seeded fixture configuration (lagged-pair series, T=200, true
+lag=3, seed=42); ccf_positive metric measures statsmodels.ccf vs R
+stats::ccf agreement, NOT engine module CCF agreement, NOT
+AR-prewhitening pipeline correctness.
+
+- **Layer 1 — CCF math at statsmodels.ccf (validated):** bit-exact
+  PASS verdict applies at machine precision; parity covers Pearson
+  cross-correlation across positive lags 0..MAX_LAG.
+- **Layer 2a — engine module custom numpy CCF on prewhitened
+  residuals (plausibly equivalent but unverified):** Engine module
+  `_compute_ccf` (lines 356-375) implements same normalized Pearson
+  cross-correlation formula as cross_correlation_lag's manual numpy
+  CCF; bit-exact equivalence to validated statsmodels.ccf plausible
+  (same formula; same float64 arithmetic) but unverified at p3_ccf
+  audit; analogous to S14b-amended cross_correlation_lag Layer 2
+  framing.
+- **Layer 2b — AR-prewhitening pipeline upstream of CCF
+  (engine-specific; NOT parity-validated):** Engine module lines
+  99-118 apply ARIMA prewhitening to input X (auto_arima fit via
+  pmdarima OR user-specified order; ARIMA filter applied to Y per
+  "purist prewhitening"; residual extraction) BEFORE CCF computation.
+  AR-prewhitening pipeline is prewhitened_ccf_lag-specific (NOT
+  shared with cross_correlation_lag or rolling_ccf_lag) and NOT
+  covered by p3_ccf parity audit. Pipeline correctness requires
+  expert review of: (i) auto_arima model selection logic via
+  pmdarima; (ii) ARIMA filter application to Y via `_apply_arima_filter`
+  ("purist prewhitening" with same-order fallback); (iii) residual
+  independence assumption underlying Bartlett band effective-n
+  correction; (iv) fallback behavior when filtering fails.
+
+Single-fixture parity established at machine precision for Layer 1;
+parameter-sensitivity coverage NOT established (Q3b extension
+pending); Layer 2a closure pending engine-output cross-check OR
+expert review (analogous to S14b-amended cross_correlation_lag);
+Layer 2b closure pending expert review of AR-prewhitening pipeline
+(no parity validation available without separate prewhitening
+reference). Reference selection + tolerance specification AI-assisted
+with user ratification per Phase 7+ work program; pre-Path α expert
+review status; expert review pending end-of-work-program.
+
+**Methodology disclosure templates** (per Workstream B §3 Tier
+II.bit-exact templates; multi-map cross-reference per §3.3;
+three-layer framing per S14c Bundle option II depth distribution):
+
+*Pattern (i) Research note footnote:*
+> This analysis uses TSL technique prewhitened_ccf_lag. CCF math
+> layer (statsmodels.tsa.stattools.ccf) is cross-package bit-exact
+> parity validated against R `stats::ccf` (base R 4.5.3) per Phase 3
+> audit dated 2026-04-29 (ccf_positive max abs diff 1.33e-15; shared
+> p3_ccf wrapper covers cross_correlation_lag + prewhitened_ccf_lag
+> + rolling_ccf_lag). TSL engine module's custom numpy CCF on
+> prewhitened residuals plausibly equivalent to validated math but
+> not directly tested. AR-prewhitening pipeline upstream (auto_arima
+> fit + ARIMA filter) is engine-specific and NOT covered by parity
+> audit; requires expert review for published use. Pre-Path α
+> expert review status.
+
+*Pattern (ii) Technical appendix:*
+> Methodology: TSL technique prewhitened_ccf_lag implements three
+> layered computations validated separately. **Layer 1 — CCF math
+> at statsmodels.ccf:** validated per Phase 3 reference parity
+> infrastructure. **Reference:** R `stats::ccf` (base R 4.5.3).
+> **Verdict:** PASS Pattern A.2 bit-exact at machine precision;
+> ccf_positive max abs diff 1.33e-15, max rel diff 1.46e-15.
+> **Audit date:** 2026-04-29. **Multi-map coverage:**
+> prewhitened_ccf_lag is one of 3 catalog techniques covered by
+> shared Phase 3 wrapper p3_ccf; validation evidence per p3_ccf
+> audit applies to `statsmodels.tsa.stattools.ccf` (the harness TSL
+> arm) vs R `stats::ccf`. **Layer 2a — engine module CCF
+> implementation:** TSL engine module
+> (`engine/techniques/prewhitened_ccf_lag.py` lines 356-375
+> `_compute_ccf`) uses custom numpy CCF on prewhitened residuals;
+> bit-exact equivalence to validated statsmodels.ccf plausible (same
+> Pearson cross-correlation formula; same float64 arithmetic) but
+> NOT empirically verified; requires expert review OR engine-output
+> cross-check to close the gap. **Layer 2b — AR-prewhitening
+> pipeline upstream:** engine module lines 99-118 apply ARIMA
+> prewhitening to input X via pmdarima.auto_arima and apply same-order
+> ARIMA filter to Y per "purist prewhitening" approach (with fallback
+> to differencing); residuals feed Layer 2a CCF computation.
+> AR-prewhitening pipeline is prewhitened_ccf_lag-specific and NOT
+> covered by p3_ccf parity audit; pipeline correctness requires
+> expert review of auto_arima model selection + ARIMA filter
+> application + residual independence assumption. **Fixture:** seeded
+> single-fixture configuration (lagged-pair series, T=200, true
+> lag=3, seed=42); parameter-sensitivity coverage NOT established;
+> Q3b extension pending. Pre-Path α expert review status; expert
+> review pending end-of-Phase-7+-work-program.
+
+*Pattern (iii) Risk model documentation:*
+> prewhitened_ccf_lag validation: TSL Tier II.bit-exact (Layer 1 CCF
+> math at statsmodels.ccf only). Reference: R `stats::ccf` (base R
+> 4.5.3). Audit: `tools/reference_parity/reports/p3_ccf_audit.md`
+> dated 2026-04-29. Verdict: PASS Pattern A.2 bit-exact at machine
+> precision (ccf_positive max abs diff 1.33e-15). Multi-map coverage:
+> shared p3_ccf wrapper covers cross_correlation_lag +
+> prewhitened_ccf_lag + rolling_ccf_lag. **Three-layer framing:**
+> Layer 1 (statsmodels.ccf) parity-validated; Layer 2a (engine CCF
+> on prewhitened residuals) bit-exact equivalence plausible but
+> unverified; Layer 2b (AR-prewhitening pipeline) NOT parity-validated,
+> engine-specific implementation requires expert review. Fixture:
+> single-seeded; Q3b extension pending. Risk attribution conditional
+> on (a) parameter configurations matching fixture-similar conditions
+> AND (b) Layer 2a engine CCF equivalence AND (c) Layer 2b
+> AR-prewhitening correctness — (b) + (c) require expert review.
+> Pre-Path α expert review status.
+
+*Pattern (iv) Internal use disclosure:*
+> prewhitened_ccf_lag CCF math layer (statsmodels.ccf) cross-package
+> bit-exact validated against R `stats::ccf` via shared p3_ccf
+> wrapper; Layer 2a (engine module custom numpy CCF on prewhitened
+> residuals) bit-exact equivalence plausible but unverified;
+> Layer 2b (AR-prewhitening pipeline) NOT parity-validated,
+> engine-specific implementation requires expert review; pre-Path α.
+
+**Validation provenance audit checklist (per Workstream B §1; applied
+at technique close):**
+
+- **Q-A (decision substance extracted/cited vs inferred):** Extracted/
+  cited. Reference selection from p3_ccf_audit.md verbatim (R
+  `stats::ccf` base R 4.5.3); verdict + Pattern + date + numerics
+  verbatim from audit. Multi-map characterization extracted from
+  scope_reframing §2 lines 122-131 + Workstream B §3.3 multi-map
+  handling guidance. Three-layer framing extracted per S14a empirical
+  investigation (harness-vs-engine code path divergence at p3_ccf
+  scope) + S14b layered framing precedent (two-layer for
+  cross_correlation_lag; S14c three-layer extension for
+  prewhitened_ccf_lag-specific AR-prewhitening upstream addition).
+  Engine module behavior at Layer 2a (lines 356-375 `_compute_ccf`)
+  + Layer 2b (lines 99-118 AR-prewhitening pipeline + lines 319-353
+  `_apply_arima_filter` helper) verified empirically per Step 0
+  re-reads. Three-layer framing is institutional-grade disclosure
+  per verify-state-at-first-consumption sub-discipline applied
+  forward at entry authoring time (8th instance application of
+  sub-discipline; preemptive rather than retroactive vs S14b
+  application).
+- **Q-B (user genuine contestation vs default ratification):** Default
+  ratification at third-technique selection (user ratified
+  prewhitened_ccf_lag under Tier 2 case-against framing per
+  Phase 7+ S13-close proposal; case-against weighted but not
+  invalidating per efficient ratification disposition). Pro-forma
+  elements present per Mark 3 efficient-ratification pattern
+  (operating-context preservation per Workstream B §5.3); Q-B
+  pattern persists at n=4 across S12 + S13 + S14b cross_correlation_lag
+  amendment + S14c (Q1 audit checklist operational pattern codification
+  candidate per S13 forward instrumentation; n=4 threshold reached;
+  forward instrumentation for §19.4 absorption). Not pro-forma across
+  all upstream decisions for this technique (three-layer framing
+  required substantive Step 0 + S14a empirical investigation + S14b
+  layered framing precedent extension; user three-layer disclosure
+  depth ratification at S14b STOP 1 disposition surfacing reflects
+  substantive engagement with layered framing structure).
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 (CCF math at statsmodels.ccf)** per bit-exact
+  PASS verdict at machine precision against canonical R `stats::ccf`.
+  **Conditional for Layer 2a (engine module custom numpy CCF on
+  prewhitened residuals)** — requires expert review of engine
+  implementation OR engine-output cross-check against validated
+  statsmodels.ccf (analogous to S14b-amended cross_correlation_lag
+  Layer 2 framing). **Conditional for Layer 2b (AR-prewhitening
+  pipeline)** — requires expert review of auto_arima model selection
+  + ARIMA filter application + residual independence assumption +
+  Y-arm "purist" filtering vs same-order fallback behavior;
+  AR-prewhitening is engine-specific and has NO parity validation
+  available within p3_ccf audit scope. Defensible to all three
+  audiences with disclosure language as drafted: published audience
+  (three-layer framing transparent); Morgan Stanley compliance review
+  (precise audit citation + tier taxonomy + Layer 1 / Layer 2a /
+  Layer 2b scope delineation); external expert reviewer at Path α
+  close (verbatim audit numerics + honest disclosure of what's
+  validated and what's not + Q3b extension pending + Layer 2a +
+  Layer 2b expert review scope identified).
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-to-high. prewhitened_ccf_lag is typically used for
+  causal-inference lead-lag identification where prewhitening adds
+  credibility over raw CCF; widely cited Box-Jenkins methodology in
+  financial time-series research. **Layer-specific retraction
+  surface (per S14c three-layer framing):**
+  - Layer 1 (CCF math at statsmodels.ccf): low; multi-map propagation
+    risk if shared CCF error found.
+  - Layer 2a (engine module custom numpy CCF on prewhitened residuals):
+    MEDIUM analogous to S14b-amended cross_correlation_lag Layer 2.
+  - Layer 2b (AR-prewhitening pipeline): MEDIUM-HIGH specifically
+    for prewhitened_ccf_lag (NOT shared with other p3_ccf-covered
+    techniques). AR-prewhitening is the operational distinctive of
+    prewhitened_ccf_lag — Box-Jenkins methodology relies on
+    prewhitening for cleaner CCF estimates; expert review surfacing
+    material errors (auto_arima model selection; ARIMA filter
+    application; residual independence violation; "purist" filtering
+    fallback behavior) would invalidate the cleaner-CCF claim
+    motivating prewhitened_ccf_lag use over raw cross_correlation_lag.
+    Higher surface than Layer 2a because Layer 2b errors affect
+    published-research framing ("prewhitened" provides cleaner
+    lead-lag than raw CCF) rather than just engine-vs-validated-math
+    equivalence.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; third technique to enter status per S14c
+ratification; second of p3_ccf-covered triple under corrected
+layered framing (cross_correlation_lag shipped S13 with S14b
+layered framing amendment; rolling_ccf_lag pending S15 per sequential
+disposition; rolling_ccf_lag likely two-layer not three-layer per
+absence of upstream prewhitening). **S14c three-layer framing:
+Layer 1 (statsmodels.ccf vs R stats::ccf) bit-exact PASS; Layer 2a
+(engine module custom numpy CCF on prewhitened residuals) plausibly
+equivalent but unverified; Layer 2b (AR-prewhitening pipeline) NOT
+parity-validated, engine-specific implementation requires expert
+review.**
+
+## §3 Unvalidated catalog techniques (72 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -813,8 +1088,8 @@ Cross-reference: `resources/catalog/techniques_catalog.json`
 for catalog-side documentation (parameters, presets,
 descriptions, summaries).
 
-### Causality / Relationships / Lead-Lag (4 unvalidated; granger_causality + cross_correlation_lag moved to §2.5 per Phase 7+ S12 + S13)
-`dtw_alignment_lag`, `gcc_phat_delay`, `prewhitened_ccf_lag`, `rolling_ccf_lag`
+### Causality / Relationships / Lead-Lag (3 unvalidated; granger_causality + cross_correlation_lag + prewhitened_ccf_lag moved to §2.5 per Phase 7+ S12 + S13 + S14c)
+`dtw_alignment_lag`, `gcc_phat_delay`, `rolling_ccf_lag`
 
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
@@ -852,7 +1127,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 73 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13 amendments; granger_causality + cross_correlation_lag moved to §2.5).
+**Total: 72 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag moved to §2.5).
 
 ## §4 How to use this document
 
@@ -895,7 +1170,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (73 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13 amendments):**
+**Tier 3 — UNVALIDATED (72 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
