@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 7 catalog techniques with Phase 7+ Q1 trust documentation
+- 8 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21 amendments)
-- 68 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22 amendments)
+- 67 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -2681,7 +2681,449 @@ accumulation + Block 1 Causality completion milestone). **A9 Class
 A counter post-S21: n=5 ACTIVE** (unchanged; no Class A 6th instance
 at S21 Step 0).
 
-## §3 Unvalidated catalog techniques (68 entries; ID-only enumeration)
+### kpss_test (Phase 7+ S22; eighth §2.5 entry; SECOND Block 12 Stationarity Tests entry; FIRST two-layer-primary-with-dual-role-disclosure entry; A10 Sub-class 2a first-instance baseline observation resolves pending status; TWO-LAYER PRIMARY + DUAL-ROLE DISCLOSURE framing per S22 STOP 2 empirical investigation + β disposition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2 per scope_reframing §2 line 130). **Important nuance
+(two-layer-primary + dual-role-disclosure framing per S22 β
+disposition; FIRST-INSTANCE A10 Sub-class 2a baseline; topology
+distinct from S14c three-layer-upstream + S15/S17/S18 three-layer-
+downstream + S21 three-layer-parallel-tests):** tier classification
+applies to Layer 1 (statsmodels.tsa.stattools.kpss vs R urca::ur.kpss
+at pinned LAG=5 / regression="c"); Layer 2 (engine module
+kpss_test.py orchestration: regression/nlags allowlist gating + NaN
+handling + per-series loop + significance disclosure + interpretation)
+plausibly equivalent at base pinned config but variants engine-
+specific. **Critical operational nuance — DUAL-ROLE engine module
+per Step 0 (g) empirical (kpss_test.py module docstring lines 11-13
+verbatim):** kpss_test engine plays two roles — (a) standalone-
+technique role via `run()` entry point for direct ribbon `kpss_test`
+invocation (two-layer framing applies); (b) helper-export role via
+`_run_kpss_single` (lines 68-110) called by `adf_test.py`'s
+`_run_triage` as S21 adf_test entry Layer 3 sub-component 3b
+"parallel KPSS + PP test invocation". See Dual-role disclosure
+section below for Q-D retraction surface compounding.
+
+**Framing precedent note (1:1 catalog↔wrapper; TWO-LAYER PRIMARY +
+DUAL-ROLE DISCLOSURE; FIRST-INSTANCE A10 Sub-class 2a baseline):**
+kpss_test is 1:1 catalog↔wrapper mapping per p3_kpss audit Wrapper
+field (`engine/techniques/kpss_test.py` sole engine module). Two-
+layer-primary framing applies per S22 STOP 2 empirical finding:
+harness invokes statsmodels.kpss directly at pinned single-test
+config; engine module uses SAME statsmodels.kpss at math layer (clean
+engine-uses-same-function pattern per Forward Q1 Step 0 discipline
+§4.7) AND extends moderately beyond harness via Layer 2 orchestration
+(regression/nlags allowlist + NaN handling + per-series loop +
+interpretation; NO Layer 3 of its own — joint triage mode is OWNED BY
+adf_test.py NOT kpss_test.py). **A10 Sub-class 2a first-instance
+baseline observation: resolves "Sub-class 2a baseline observation
+pending" status from §19.4 S16-absorption codification.** Topology
+distinct from existing A10 sub-class instances:
+- S14b cross_correlation_lag (amendment context; not first-instance
+  Sub-class 2a baseline per §19.4 codification)
+- S14c three-layer-upstream Sub-class 2b (prewhitened_ccf_lag)
+- S15/S17 three-layer-downstream Sub-class 2c (rolling_ccf_lag +
+  dtw_alignment_lag)
+- S18 three-layer-downstream Tier IV variant Sub-class 2c-IV
+  (gcc_phat_delay)
+- S21 three-layer-parallel-tests Sub-class 2d candidate (adf_test)
+- **S22 TWO-LAYER PRIMARY + DUAL-ROLE Sub-class 2a first-instance
+  baseline (kpss_test direct-invocation + helper-export)**
+
+**Dual-role disclosure section (institutional-grade per (β) ratification;
+operational coupling explicit):** Per `engine/techniques/kpss_test.py`
+module docstring lines 11-13 (verbatim): *"This wrapper exposes
+`_run_kpss_single(clean, regression, nlags)` for the triage path in
+`adf_test.py` to call directly, bypassing the per-series progress-
+callback / response-building overhead."* Operational consequence:
+
+- **Standalone-technique role** — direct ribbon `kpss_test` invocation
+  (or pane_kpss / udf_kpss); two-layer framing per primary structure
+  above; Layer 1 statsmodels.kpss + Layer 2 engine orchestration
+- **Helper-export role** — `_run_kpss_single` helper (lines 68-110)
+  invoked by `adf_test.py`'s `_run_triage` (lines 506-714 per S21
+  adf_test entry Layer 3 sub-component 3b enumeration "parallel KPSS
+  + PP test invocation"); kpss_test correctness PROPAGATES to
+  adf_test ribbon joint verdict publication output (S21 adf_test
+  ribbon-default publication context)
+- **Cross-reference:** S21 adf_test §2.5 entry (line 2233) cites
+  `kpss_test._run_kpss_single` invocation at Layer 3 sub-component 3b;
+  S22 kpss_test entry reciprocally cites adf_test joint triage as
+  helper-consumer per institutional-grade disclosure
+- **Retraction surface compounding:** kpss_test errors propagate to
+  BOTH standalone publication context AND adf_test ribbon publication
+  context; see Q-D below
+
+**Engine-extends-beyond-harness pattern characterization (NEW per §4.7
+Forward Q1 Step 0 discipline forward observation; SECOND OBSERVATION
+with scale-of-extension variation per S21 first observation):**
+kpss_test engine module is NOT harness-bypasses-engine outlier (S14a
+p3_ccf + S18 p3_gcc_phat pattern); engine module uses SAME
+statsmodels.kpss function as harness (Layer 1 shared-math pattern
+confirmed). Pattern is engine-extends-beyond-harness AT LAYER 2 SCALE
+ONLY (orchestration only — regression/nlags allowlist + NaN handling
++ per-series loop + interpretation; NO Layer 3 of its own). Distinct
+from S21 adf_test engine-extends-beyond-harness AT LAYER 3 SCALE
+(entirely new joint triage sub-system). **§4.7 codification refinement
+candidate** at next Workstream B amendment cycle distinguishing:
+(i) Layer 3 extension pattern (adf_test) — DRAMATIC extension via
+    entirely new computational sub-system
+(ii) Layer 2 extension pattern (kpss_test) — MODERATE extension via
+     orchestration only
+(iii) potentially other patterns at S23+ entries
+
+**A10 Sub-class 2a taxonomy resolution deferred to §19.4 absorption #3:**
+S22 first-instance baseline observation under Sub-class 2a (originally
+framed at S16-absorption as "two-layer multi-map" with cross_correlation_lag
+context). Empirical kpss_test entry is 1:1 catalog↔wrapper (NOT multi-
+map); Sub-class 2a taxonomy refinement (does Sub-class 2a require
+multi-map context OR generalize to any two-layer framing regardless
+of catalog mapping?) deferred to absorption #3 alongside Sub-class 2d
+codification (S21 first-instance) + new Class B sub-pattern
+subdivision (B.i simpler-than-expected + B.ii different-topology-than-
+expected) + Class A 5th sub-pattern accumulation + Block 1 Causality
+completion milestone.
+
+**Reference:** R `urca::ur.kpss` (urca 1.3.4)
+**Verdict:** PASS Pattern A bit-exact (Layer 1 only; see Validation
+claim scope for Layer 2 + Dual-role coverage)
+**Audit:** `tools/reference_parity/reports/p3_kpss_audit.md`
+**Audit date:** 2026-04-29
+**test_statistic (η) abs diff:** 5.55e-17 (TSL 0.09170600105152636 vs
+Reference 0.0917060010515263; rel diff 6.05e-16)
+**Tolerance class:** closed_form
+
+**Source files (two-layer-primary + dual-role per S22 β framing):**
+`tools/reference_parity/harness/checks/p3_kpss.py` lines 72-87
+(harness TSL arm invokes `statsmodels.tsa.stattools.kpss` directly
+with pinned regression="c", nlags=LAG=5; returns test_statistic +
+p_value + used_lags + cv5)
++ `tools/reference_parity/harness/checks/p3_kpss.py` lines 89-113
+(harness reference arm invokes R `urca::ur.kpss(y, type="mu",
+use.lag=5)` via RBridge; extracts test_statistic + 5pct critical
+value)
++ `engine/techniques/kpss_test.py` line 18 + lines 89-94 (Layer 1
+shared math: engine module imports SAME `statsmodels.tsa.stattools.kpss`
+function harness validates; `_run_kpss_single` helper calls
+`kpss(clean, regression=regression, nlags=nlags)` at line 92)
++ `engine/techniques/kpss_test.py` lines 113-359 + 42-65 + 126-174 +
+68-110 + 187-296 + 298-346 (Layer 2 orchestration: `run()` main
+entry lines 113-359 + `_prepare_series` NaN handling lines 42-65 +
+regression/nlags allowlist gating lines 126-174 + `_run_kpss_single`
+helper lines 68-110 + per-series loop lines 187-296 + result
+formatting + significance disclosure + interpretation + audit_fields
+construction lines 298-346)
++ `engine/techniques/kpss_test.py` lines 11-13 (DUAL-ROLE engine
+module docstring verbatim: helper-export disclosure for adf_test
+triage path)
++ `engine/techniques/kpss_test.py` lines 68-110 (helper-export call
+site: `_run_kpss_single(clean, regression, nlags)` invoked by
+adf_test.py `_run_triage` lines 506-714 per S21 adf_test entry Layer
+3 sub-component 3b enumeration "parallel KPSS + PP test invocation")
++ `tools/reference_parity/reports/p3_kpss_audit.md`
+
+**Validation claim scope (TWO-LAYER PRIMARY + DUAL-ROLE DISCLOSURE per
+S22 amendment per S14b two-layer-amendment precedent + S14c upstream +
+S15/S17/S18 downstream + S21 parallel-tests topology precedents +
+A10 Sub-class 2a first-instance baseline observation per β disposition):**
+TSL kpss_test output relies on two layered computations (Layer 1
+statsmodels.kpss math + Layer 2 engine module orchestration; no Layer
+3 within kpss_test invocation path itself; topologically distinct from
+S21 three-layer-parallel-tests where Layer 3 invokes parallel math
+calls). p3_kpss audit validates Layer 1 (statsmodels.kpss) vs R
+urca::ur.kpss at single seeded fixture (stationary AR(1), φ=0.7,
+σ=1.0, T=500, seed=42, burn-in 100, LAG=5 bandwidth pinned both
+sides via Schwert "short" rule, regression="c"); test_statistic
+metric measures statsmodels.kpss η output vs urca::ur.kpss η
+agreement (abs diff 5.55e-17 PASS), NOT engine module orchestration
+correctness, NOT dual-role helper-export correctness.
+
+- **Layer 1 — statsmodels.kpss math layer (validated):** bit-exact
+  PASS verdict at machine precision (abs diff 5.55e-17; rel diff
+  6.05e-16) against canonical R `urca::ur.kpss` reference; closed-
+  form ratio of partial-sum-of-residuals to Newey-West-style long-
+  run variance estimator; statsmodels and urca compute identical
+  statistic given identical bandwidth per audit verdict_class_rationale.
+- **Layer 2 — engine module kpss_test.py orchestration (validation
+  scope conditional):**
+  - regression/nlags allowlist gating (lines 126-174; CAI Phase 2
+    Session 17 fix F-ST-KPSS-REGRESSION + F-ST-KPSS-NLAGS):
+    appropriateness of allowlist scope for published-research input
+    validation
+  - `_prepare_series` NaN handling (lines 42-65): edge NaN stripping
+    + interior NaN linear interpolation correctness
+  - Per-series loop (lines 187-296): multi-series invocation pattern
+    correctness; first-series interpretation_dict capture for
+    multi-series cases (lines 230-260)
+  - Result formatting + significance disclosure (lines 298-346):
+    significance_level threshold logic + decision flag construction
+    + critical_values_ordered representation + interpretation block
+    construction + audit_fields significance disclosure
+- **Dual-role helper-export — `_run_kpss_single` (lines 68-110;
+  validation scope conditional + cross-references S21 Layer 3
+  sub-component 3b):**
+  - Helper-export contract correctness: returned dict structure
+    (stat, pvalue, used_lag, critical_values_ordered,
+    decision_h0_rejected, pvalue_clipped) consumed by adf_test
+    `_run_triage` per S21 entry Layer 3 sub-component 3b
+    enumeration; contract correctness impacts adf_test joint verdict
+    computation
+  - Helper-export error path correctness: error capture (lines 86-
+    101) propagates to adf_test triage error handling
+
+#### Disclosure pattern (i) — Research note footnote (Tier II.bit-exact + two-layer + dual-role)
+
+> This analysis uses TSL technique `kpss_test`, cross-package bit-
+> exact parity validated against R `urca::ur.kpss` (urca 1.3.4) per
+> Phase 3 audit dated 2026-04-29 (test_statistic abs diff 5.55e-17).
+> TSL output relies on a two-layer computation (Layer 1 statsmodels
+> KPSS math + Layer 2 engine orchestration including regression/nlags
+> allowlist + NaN handling + per-series loop + interpretation); Layer
+> 1 bit-exact validated, Layer 2 conditional on expert review.
+> Engine module is dual-role per `engine/techniques/kpss_test.py`
+> module docstring: also exposes `_run_kpss_single` helper to
+> `adf_test.py` triage path. Pre-Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier II.bit-exact + two-layer + dual-role)
+
+> Methodology: TSL technique `kpss_test` validated per Phase 3
+> reference parity infrastructure under two-layer primary framing
+> with dual-role disclosure. **Reference:** R `urca::ur.kpss` (urca
+> 1.3.4). **Verdict:** PASS Pattern A.2 bit-exact at machine
+> precision; test_statistic abs diff 5.55e-17 (TSL
+> 0.09170600105152636 vs reference 0.0917060010515263; rel diff
+> 6.05e-16). **Audit date:** 2026-04-29. **Fixture:** seeded single-
+> fixture configuration (stationary AR(1), φ=0.7, σ=1.0, T=500,
+> seed=42, burn-in 100, bandwidth pinned 5 via Schwert "short" rule,
+> regression="c"); parameter-sensitivity coverage NOT established at
+> this validation tier; Q3b extension pending. Reference selection +
+> tolerance specification AI-assisted with user ratification. **Two-
+> layer framing scope:** parity validation covers Layer 1
+> (statsmodels.tsa.stattools.kpss math layer; closed-form ratio per
+> KPSS 1992 formula) vs canonical R reference at machine precision;
+> Layer 2 (engine module orchestration: regression/nlags allowlist
+> gating per CAI Phase 2 Session 17 fix + NaN handling via
+> `_prepare_series` + per-series loop + significance disclosure +
+> interpretation) NOT parity-validated and engine-specific. **Dual-
+> role engine module:** `engine/techniques/kpss_test.py` plays two
+> operational roles per module docstring lines 11-13: (a) standalone-
+> technique role for direct ribbon invocation (two-layer framing
+> applies); (b) helper-export role via `_run_kpss_single` (lines 68-
+> 110) called by `adf_test.py`'s `_run_triage` as Layer 3 sub-
+> component 3b "parallel KPSS + PP test invocation" per S21 adf_test
+> entry codification; kpss_test correctness propagates to adf_test
+> ribbon joint verdict publication context. Pre-Path α expert review
+> status; expert review pending [target date].
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier II.bit-exact + two-layer + dual-role + audit citation)
+
+> `kpss_test` validation: TSL Tier II.bit-exact under two-layer-
+> primary + dual-role-disclosure framing. **Reference:** R
+> `urca::ur.kpss` (urca 1.3.4). **Audit:**
+> `tools/reference_parity/reports/p3_kpss_audit.md` dated 2026-04-29.
+> **Verdict:** PASS Pattern A.2 bit-exact at machine precision;
+> test_statistic abs diff 5.55e-17 / rel diff 6.05e-16. **Fixture:**
+> stationary AR(1), φ=0.7, σ=1.0, T=500, seed=42, burn-in 100,
+> bandwidth pinned 5 (Schwert "short"), regression="c"; single-seeded
+> fixture; parameter-sensitivity coverage NOT established at this
+> validation tier; Q3b extension scope. **Two-layer-framing risk
+> attribution:** Layer 1 (statsmodels.kpss math) bit-exact validated;
+> attribution from kpss_test output for parameter configurations
+> matching fixture-similar conditions conditional on Layer 2 engine
+> orchestration correctness (regression/nlags allowlist + NaN handling
+> + per-series loop + significance disclosure + interpretation;
+> validation scope per `engine/techniques/kpss_test.py` lines 113-359
+> + 42-65 + 126-174 + 68-110 + 187-296 + 298-346). **Dual-role
+> retraction surface elevation:** kpss_test engine module plays both
+> standalone-technique role AND helper-export role per module
+> docstring lines 11-13 verbatim; `_run_kpss_single` (lines 68-110)
+> consumed by `adf_test.py` `_run_triage` as S21 adf_test Layer 3
+> sub-component 3b; kpss_test errors propagate to adf_test ribbon
+> joint verdict publication output. Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier II.bit-exact + two-layer + dual-role)
+
+> `kpss_test` cross-package bit-exact validated against R `urca::ur.kpss`
+> (Layer 1; statsmodels.kpss math layer); Layer 2 engine orchestration
+> pending expert review. Dual-role engine module: also exposes
+> `_run_kpss_single` helper to `adf_test.py` triage. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (R urca::ur.kpss 1.3.4) per
+  audit Reference field (verbatim). Audit date (2026-04-29) per
+  audit Date field (verbatim). Verdict + Pattern (Pattern A bit-exact)
+  per audit Verdict line (verbatim). Tolerance class (closed_form)
+  per audit Tolerance class line (verbatim). Numeric metric (abs diff
+  5.55e-17; rel diff 6.05e-16; TSL 0.09170600105152636 vs Reference
+  0.0917060010515263) per audit Result table (verbatim). Fixture (AR(1)
+  φ=0.7 σ=1.0 T=500 seed=42 burn-in 100 bandwidth=5 regression="c")
+  per audit Fixture + Diagnostics sections (verbatim). Tier II.bit-
+  exact characterization per scope_reframing §2 line 130 (`p3_kpss`
+  in Tier II.bit-exact 12-wrapper enumeration). Two-layer-primary +
+  dual-role-disclosure framing per S22 STOP 2 Step 0 empirical
+  investigation (verbatim re-Reads of p3_kpss_audit.md + p3_kpss.py
+  harness + 360 LOC engine module) + S14b two-layer-amendment +
+  S14c upstream + S15/S17/S18 downstream + S21 parallel-tests
+  topology precedent + β disposition. Layer 2 (lines 113-359 + 42-65
+  + 126-174 + 187-296 + 298-346) sub-components empirically grounded
+  per Step 0 (g) verbatim line ranges. Dual-role engine module
+  characterization per module docstring lines 11-13 verbatim. Helper-
+  export consumption by adf_test.py `_run_triage` per S21 adf_test
+  entry Layer 3 sub-component 3b codification (cross-reference).
+  Catalog mapping (1:1) verified per audit Wrapper field sole engine
+  module reference. **A9 Class B 4th instance acknowledgment:** S22
+  STOP 2 caught three-layer-parallel-tests framing assumption
+  empirical falsification at Step 0 per A9 Class B mitigation pattern;
+  Class B counter n=3 → n=4 ACTIVE; codification reinforced per §19.4
+  forward instrumentation post-S19-absorption stated "3rd instance
+  would reinforce codification" (already triggered at S21; S22
+  continues reinforcement); sub-pattern subdivision candidate (B.i
+  simpler-than-expected at S15+S17; B.ii different-topology-than-
+  expected at S21+S22) deferred to §19.4 absorption #3. **Engine-
+  extends-beyond-harness pattern second observation per §4.7 with
+  scale-of-extension variation:** kpss_test Layer 2 scale extension
+  (orchestration only) distinct from S21 adf_test Layer 3 scale
+  extension (entirely new joint triage sub-system); codification
+  refinement candidate at next Workstream B §4.7 amendment cycle.
+  Verify-state-at-first-consumption sub-discipline 13th instance
+  application (forward-at-authoring + STOP 2 caught three-layer-
+  parallel-tests assumption empirical falsification at Step 0;
+  matures from S21 12th-instance single-layer falsification with
+  second different-topology-than-expected observation now codified
+  as B.ii sub-pattern candidate).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at eighth-technique selection (user ratified
+  kpss_test under Tier 2 case-against framing per S21-close proposal
+  as "Block 12 Stationarity Tests second entry; sequential
+  disposition per (c) γ; coordinated framing decision deferred to
+  S22 close per S22 empirical findings"; case-against weighted but
+  not invalidating per efficient ratification disposition). Pro-
+  forma elements present per Mark 3 efficient-ratification pattern
+  (operating-context preservation per Workstream B §5.3) **per
+  Workstream B §1.4 Q-B operational pattern codification at S20**.
+  **Q-B pattern persists at n=9 across S12 + S13 + S14b + S14c + S15
+  + S17 + S18 + S21 + S22; well past n=4 codification candidate
+  threshold; §1.4 codified observation refinement at empirical
+  pattern accumulation** (n=7 at §1.4 S20 codification → n=8 at S21
+  → n=9 at S22 reinforcement). Not pro-forma across all upstream
+  decisions for this technique (two-layer-primary + dual-role-
+  disclosure framing required STOP 2 empirical investigation + β
+  disposition ratification + Layer 2 five-sub-component enumeration
+  + dual-role disclosure section institutional-grade authoring +
+  engine-extends-beyond-harness pattern scale-of-extension variation
+  characterization).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 (statsmodels.kpss math layer)** per bit-exact
+  PASS verdict at machine precision (test_statistic abs diff 5.55e-17;
+  closed-form ratio per KPSS 1992 formula) against canonical R
+  `urca::ur.kpss` reference; reproducibility + cross-package
+  agreement institutional-grade evidence. **Conditional for Layer 2
+  (engine kpss_test orchestration)** — requires expert review of
+  engine implementation OR engine-output cross-check against harness
+  statsmodels.kpss at base pinned config for variant correctness
+  review (regression/nlags allowlist appropriateness + NaN handling
+  via `_prepare_series` correctness + per-series loop pattern +
+  significance disclosure construction + interpretation block
+  construction). **Conditional for Dual-role helper-export** —
+  requires expert review of: `_run_kpss_single` returned-dict
+  contract correctness (consumed by adf_test._run_triage Layer 3
+  3b); error path correctness (consumed by adf_test triage error
+  handling); critical_values_ordered ordering correctness (consumed
+  by interpretation block AND adf_test joint verdict logic).
+  **Critical Q-C framing per dual-role context:** published-research
+  user invoking `kpss_test` directly receives standalone single-test
+  output (two-layer framing applies); published-research user
+  invoking `adf_test` from ribbon receives joint verdict that
+  CONSUMES kpss_test._run_kpss_single output; defensibility to all
+  three audiences (published audience + Morgan Stanley compliance +
+  Path α expert reviewer) UNDER Layer 2 + Dual-role helper-export
+  expert review acknowledgment. Defensible to all three audiences
+  with disclosure language as drafted: published audience (two-
+  layer + dual-role framing transparent with helper-export caveat);
+  Morgan Stanley compliance review (precise audit citation + tier
+  taxonomy + Layer 1 / Layer 2 / Dual-role scope delineation + dual-
+  role retraction surface compounding disclosure); external expert
+  reviewer at Path α close (verbatim audit numerics + honest
+  disclosure of Layer 2 orchestration + dual-role helper-export
+  contract scope; Q3b extension pending).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-HIGH compounding. kpss_test is canonical stationarity
+  testing methodology (complementary null to ADF; widely used in
+  joint stationarity inference per published research + risk model
+  documentation). **Layer-specific + dual-role retraction surface
+  (per S22 two-layer-primary + dual-role-disclosure framing):**
+  - Layer 1 (statsmodels.kpss math layer): LOW; bit-exact PASS
+    verdict against canonical R urca::ur.kpss at machine precision;
+    closed-form KPSS 1992 formula; expert review surfacing upstream
+    error would affect kpss_test specifically (NO multi-map
+    propagation risk; 1:1 catalog↔wrapper).
+  - Layer 2 (engine kpss_test orchestration: regression/nlags
+    allowlist + NaN handling + per-series loop + significance
+    disclosure + interpretation): MEDIUM analogous to S14b/S15/S21
+    Layer 2 (engine implementation equivalence) + KPSS-specific
+    regression/nlags allowlist scope + interpretation block
+    construction + significance disclosure formula.
+  - **Dual-role helper-export (`_run_kpss_single`): MEDIUM-HIGH
+    COMPOUNDING** — kpss_test correctness affects BOTH standalone
+    publication output AND adf_test ribbon joint verdict publication
+    output (the S21 adf_test ribbon-default publication context per
+    `_is_triage_mode` dispatch). Expert review surfacing material
+    errors in `_run_kpss_single` contract (returned-dict structure;
+    error path; critical_values_ordered ordering; decision_h0_rejected
+    logic) would invalidate BOTH the standalone "stationarity testing
+    via KPSS" claim AND the adf_test "joint ADF + KPSS + PP verdict"
+    claim (Layer 3 sub-component 3b "parallel KPSS + PP test
+    invocation" consumes this helper). **Topologically distinct from
+    S14b/S15/S17/S18 Layer 2 MEDIUM downstream framings, S14c Layer
+    2b MEDIUM-HIGH upstream framing, and S21 Layer 3 MEDIUM-HIGH-
+    CRITICAL parallel-tests framings:** S22 dual-role helper-export
+    propagates kpss_test errors INTO adf_test ribbon publication
+    context (operational coupling across techniques); operationally
+    distinct risk surface from single-technique upstream/downstream/
+    parallel-tests patterns. **Critical dual-role publication-context
+    elevation:** adf_test ribbon-default publication output IS the
+    joint verdict per `_is_triage_mode` dispatch (per S21 Layer 3
+    framing); kpss_test errors via `_run_kpss_single` propagate into
+    that publication output; expert review surfacing kpss_test errors
+    specifically also invalidates adf_test ribbon publication output,
+    not just standalone kpss_test output.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; eighth technique to enter status per S22
+ratification; **SECOND Block 12 Stationarity Tests entry** (continues
+Q1 work program in Block 12 after S21 adf_test first-entry; calibrates
+per-block continuation pattern); **FIRST two-layer-primary-with-dual-
+role-disclosure entry** (topologically distinct from S14c three-layer-
+upstream + S15/S17/S18 three-layer-downstream + S21 three-layer-
+parallel-tests + S14b two-layer-amendment context); **A10 Sub-class 2a
+first-instance baseline observation** (resolves "Sub-class 2a baseline
+observation pending" status from §19.4 S16-absorption codification;
+taxonomy refinement deferred to absorption #3). **S22 two-layer-primary
++ dual-role-disclosure framing: Layer 1 (statsmodels.kpss vs R
+urca::ur.kpss) bit-exact PASS; Layer 2 (engine kpss_test orchestration)
+plausibly equivalent at base pinned config but variants engine-
+specific; Dual-role helper-export (`_run_kpss_single` consumed by
+adf_test `_run_triage` Layer 3 3b) NOT parity-validated, engine-
+specific operational coupling driving compounded retraction surface
+requires expert review.** **A9 Class B counter post-S22: n=4 ACTIVE**
+(S15 + S17 + S21 + S22; codification reinforced; sub-pattern
+subdivision candidate (B.i simpler-than-expected at S15+S17; B.ii
+different-topology-than-expected at S21+S22 with two distinct topology
+classes) deferred to §19.4 absorption #3 alongside A10 Sub-class 2a
+taxonomy resolution + A10 Sub-class 2d codification + A9 Class A 5th
+sub-pattern accumulation + Block 1 Causality completion milestone +
+engine-extends-beyond-harness Layer-scale-variation pattern §4.7
+codification refinement). **A9 Class A counter post-S22: n=5 ACTIVE**
+(unchanged; no Class A 6th instance at S22 Step 0).
+
+## §3 Unvalidated catalog techniques (67 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -2734,13 +3176,13 @@ descriptions, summaries).
 ### State Space / Filtering (4 unvalidated; kalman_filter + kalman_smoother validated separately)
 `local_level`, `local_linear_trend`, `particle_filter`, `structural_ts`
 
-### Stationarity / Tests (2 unvalidated; adf_test moved to §2.5 per Phase 7+ S21)
-`kpss_test`, `pp_test`
+### Stationarity / Tests (1 unvalidated; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22)
+`pp_test`
 
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 68 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test moved to §2.5; **Block 1 Causality FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; Block 12 Stationarity Tests Q1 work initiated with first entry per S21**).
+**Total: 67 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test moved to §2.5; **Block 1 Causality FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; Block 12 Stationarity Tests Q1 work in progress with 2 entries per S21+S22; pp_test sole remaining Block 12 unvalidated**).
 
 ## §4 How to use this document
 
@@ -2783,7 +3225,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (68 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21 amendments):**
+**Tier 3 — UNVALIDATED (67 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
