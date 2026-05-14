@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 4 catalog techniques with Phase 7+ Q1 trust documentation
+- 5 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15 amendments)
-- 71 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17 amendments)
+- 70 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -1426,7 +1426,373 @@ flagging + structural break detection via ruptures.Pelt with
 scaling + split-regime summary). Both topologically distinct; same
 layer depth (three); different operational risk surface.
 
-## §3 Unvalidated catalog techniques (71 entries; ID-only enumeration)
+### dtw_alignment_lag (Phase 7+ S17; fifth §2.5 entry; first 1:1 catalog↔wrapper entry under layered framing; THREE-LAYER DOWNSTREAM-TOPOLOGY framing per S15 rolling_ccf_lag precedent + S17 STOP 2 empirical investigation + α disposition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A cross-package per p3_dtw audit). **Important nuance
+(three-layer downstream-topology framing per S17 α disposition;
+analogous to S15 rolling_ccf_lag precedent with catalog-mapping
+distinction):** tier classification applies to Layer 1 (DTW math at
+harness reference DP + dtaidistance.dtw); Layer 2 (engine module DTW
+core with Sakoe-Chiba window + step_pattern variants + pre-processing
+helpers) plausibly equivalent at base case but parameter variants +
+pre-processing engine-specific; Layer 3 (engine-specific
+post-processing DOWNSTREAM of DTW core: warping path extraction +
+time-varying lag extraction + lag segmentation + multi-table output)
+NOT covered by p3_dtw parity audit. See Validation claim scope below.
+
+**Framing precedent note (1:1 catalog↔wrapper; layered framing per
+empirical engine module complexity):** dtw_alignment_lag is 1:1
+catalog↔wrapper mapping per scope_reframing §2 line 129 (p3_dtw NOT
+in multi-map list; distinct from p3_ccf-covered triple of S13-S15).
+Layered framing applies despite 1:1 mapping per S17 STOP 2 empirical
+finding: framing shape orthogonal to catalog mapping. Three-layer-
+downstream framing analogous to S15 rolling_ccf_lag (multi-map
+three-layer-downstream baseline; A10 Sub-class 2c) but with
+DTW-methodology-specific Layer 2 + Layer 3 sub-components instead
+of CCF-methodology. **A10 sub-class disposition deferred to next
+§19.4 absorption cycle:** does S17 count as A10 Sub-class 2c
+three-layer-downstream n=2 (treating 1:1 vs multi-map as orthogonal
+to framing topology) OR establish new A10 Sub-class 2d 1:1-three-
+layer-downstream n=1 (treating catalog mapping as structurally
+relevant)? Both interpretations plausible; resolution pending
+absorption with both empirical observations available.
+
+**Reference:** Python `dtaidistance.dtw` (dtaidistance 2.4.0)
+**Verdict:** PASS Pattern A cross-package bit-exact (Layer 1 only;
+see Validation claim scope for Layer 2 + Layer 3 coverage)
+**Audit:** `tools/reference_parity/reports/p3_dtw_audit.md`
+**Audit date:** 2026-04-29
+**dtw_distance abs diff:** 0.0 (exact match)
+
+**Source files (three-layer downstream-topology per S17 framing
+extending S15 precedent for DTW methodology):**
+`tools/reference_parity/harness/checks/p3_dtw.py` lines 36-69
+(harness TSL arm invokes harness-internal `_dtw_distance` reference
+DP defined inside p3_dtw.py — 10-line unconstrained DP with squared
+Euclidean local cost; does NOT invoke engine module's `run()` OR
+`_dtw` helper; harness comment line 68: "Use numpy reference DTW
+(mirrors TSL's custom impl)" — mirrors engine BASE CASE only,
+without window or step_pattern variants)
++ `tools/reference_parity/harness/checks/p3_dtw.py` lines 71-82
+(harness reference arm invokes `dtaidistance.dtw.distance(x, y)`
+directly; canonical C-implementation)
++ `engine/techniques/dtw_alignment_lag.py` lines 416-491 (Layer 2
+forward DP + Layer 3 3a backtrack DP per Layer 2/Layer 3 boundary
+clarification below; engine module `_dtw` helper; 76-LOC custom
+numpy DTW with Sakoe-Chiba window constraint via j_start/j_end
+bounds AND step_pattern variants — symmetric1 diagonal-only OR
+symmetric2 diagonal+horizontal+vertical; harness's `_dtw_distance`
+has NEITHER window NOR step_pattern variants)
++ `engine/techniques/dtw_alignment_lag.py` lines 140-164 (Layer 2
+pre-processing helpers: subsampling for large series + z-normalization;
+folded into Layer 2 as DTW pre-processing helpers per α disposition;
+NOT elevated to separate Layer 2a upstream per rationale "pre-
+processing is wrapper-level standard time-series preparation, not
+operational distinctive")
++ `engine/techniques/dtw_alignment_lag.py` lines 178-198 + 494-525
+(Layer 3 post-processing sub-components 3b + 3c; see Validation
+claim scope below)
++ `tools/reference_parity/reports/p3_dtw_audit.md`
+
+**Validation claim scope (THREE-LAYER DOWNSTREAM-TOPOLOGY per S17
+amendment per S15 precedent + DTW-methodology adaptation):** TSL
+dtw_alignment_lag output relies on three layered computations with
+downstream topology (Layer 3 post-processing follows DTW core;
+analogous to S15 rolling_ccf_lag downstream topology). p3_dtw audit
+validates Layer 1 (harness reference DP vs dtaidistance.dtw) at
+single seeded fixture (warped sinusoid pair, T=100, warp_factor=1.2,
+σ=0.05, seed=42); dtw_distance metric measures harness's
+`_dtw_distance` vs dtaidistance.dtw agreement (0.0 abs diff PASS),
+NOT engine module DTW core agreement, NOT engine post-processing
+correctness.
+
+- **Layer 1 — DTW math at harness reference DP + dtaidistance.dtw
+  (validated):** bit-exact 0.0 abs diff PASS verdict against
+  canonical dtaidistance C-implementation; parity covers unconstrained
+  DTW dynamic programming with squared Euclidean local cost; DGP
+  is warped sinusoid pair establishing closed-form DP recurrence
+  produces byte-identical distances modulo numpy float64 vs C-double
+  drift (empirically zero drift on test fixture).
+
+- **Layer 2 — engine module DTW core (custom numpy with Sakoe-Chiba
+  window + step_pattern variants + pre-processing helpers;
+  plausibly equivalent at base case but variants engine-specific):**
+  Engine module `_dtw` (lines 416-468 forward DP) implements DTW with
+  j_start = max(1, i - window) + j_end = min(ny, i + window) bounding
+  (Sakoe-Chiba window constraint) + symmetric1 (diagonal-only) OR
+  symmetric2 (diagonal + horizontal + vertical) step_pattern
+  variants. Bit-exact equivalence to validated harness reference
+  DP plausible at default settings (no window OR window >= max(nx,
+  ny); symmetric2 default) but variants unverified at p3_dtw audit.
+  Pre-processing helpers (lines 140-164 subsampling for large
+  series + z-normalization) fold into Layer 2 per α disposition.
+
+**Layer 2/Layer 3 boundary clarification:** Cost matrix construction
+(DTW DP forward pass via `_dtw` helper lines 416-468) is Layer 2 —
+engine module's core DTW computation. Cost matrix backtrack-to-
+warping-path (lines 469-491) is Layer 3 sub-component 3a —
+post-processing that consumes Layer 2 output to produce warping
+path as engine-specific output. Lines 416-491 are physically
+contiguous within `_dtw` helper but operationally distinct (forward
+DP = Layer 2; backtrack DP = Layer 3 3a). Expert review scope:
+Layer 2 forward DP correctness vs Layer 3 3a backtrack
+step-pattern-aware path reconstruction.
+
+- **Layer 3 — engine-specific post-processing DOWNSTREAM of DTW
+  core (NOT parity-validated):** Engine module applies four
+  post-processing sub-components AFTER DTW core distance + path
+  computation:
+  - **3a — Warping path backtrack + extraction** (lines 469-491):
+    backtrack through cost matrix from (nx, ny) to (0, 0)
+    selecting minimum-cost step at each cell per step_pattern;
+    builds path as list of (i, j) tuples. Engine-specific
+    backtrack logic; correctness depends on step_pattern
+    implementation matching forward DP.
+  - **3b — Time-varying lag extraction** (lines 178-198): builds
+    `x_to_y` dict mapping each x_index to list of matched
+    y_indices; per-x-index averaging produces local_lags array;
+    carry-forward heuristic for unmatched indices (line 198:
+    "elif xi > 0: local_lags[xi] = local_lags[xi - 1]"). Engine-
+    specific lag-extraction methodology; correctness depends on
+    averaging + carry-forward heuristic appropriateness.
+  - **3c — Lag segmentation via change-point heuristic**
+    (`_segment_lags` lines 494-525): segments local_lags into
+    regions of approximately constant lag using running-mean +
+    deviation threshold (default 2.0); minimum 5-window segment
+    length. Engine-specific change-point heuristic; correctness
+    depends on threshold + minimum-length appropriateness for
+    lag-segmentation analysis.
+  - **3d — Multi-table output construction** (4 tables: lag
+    time-series + warping path + segments + summary): engine-
+    specific output decomposition; correctness depends on table
+    construction matching analytical use case.
+
+Single-fixture parity established at machine precision for Layer 1
+(0.0 abs diff bit-exact); parameter-sensitivity coverage NOT
+established at this validation tier (Q3b extension pending); Layer
+2 closure pending engine-output cross-check at default settings OR
+expert review of Sakoe-Chiba window + step_pattern variants
+implementation; Layer 3 closure pending expert review of
+post-processing sub-components (engine-specific; no parity
+validation available; dtw_alignment_lag's value-add for
+time-varying lead-lag detection IS the Layer 3 post-processing
+functionality, so expert review of these sub-components is
+operationally distinctive). Reference selection + tolerance
+specification AI-assisted with user ratification per Phase 7+
+work program; pre-Path α expert review status; expert review
+pending end-of-work-program.
+
+**Methodology disclosure templates** (per Workstream B §3 Tier
+II.bit-exact templates; three-layer downstream-topology framing
+per S17 α disposition + S15 precedent; Bundle option II depth
+distribution):
+
+*Pattern (i) Research note footnote:*
+> This analysis uses TSL technique dtw_alignment_lag. DTW math
+> layer is cross-package bit-exact parity validated against Python
+> `dtaidistance.dtw` (dtaidistance 2.4.0) per Phase 3 audit dated
+> 2026-04-29 (dtw_distance abs diff 0.0). TSL engine module's
+> custom numpy DTW core with Sakoe-Chiba window + step_pattern
+> variants plausibly equivalent at base case but variants
+> engine-specific. Downstream post-processing (warping path
+> extraction + time-varying lag extraction + lag segmentation +
+> multi-table output) is engine-specific and NOT covered by
+> parity audit; requires expert review for published use.
+> Pre-Path α expert review status.
+
+*Pattern (ii) Technical appendix:*
+> Methodology: TSL technique dtw_alignment_lag implements three
+> layered computations with downstream topology (Layer 3
+> post-processing follows DTW core; analogous to rolling_ccf_lag
+> downstream topology). **Layer 1 — DTW math at harness reference
+> DP + dtaidistance.dtw:** validated per Phase 3 reference parity
+> infrastructure. **Reference:** Python `dtaidistance.dtw`
+> (dtaidistance 2.4.0). **Verdict:** PASS Pattern A cross-package
+> bit-exact at machine precision; dtw_distance abs diff 0.0 (exact
+> match). **Audit date:** 2026-04-29. **Catalog mapping:** 1:1
+> catalog↔wrapper (distinct from multi-map p3_ccf-covered triple).
+> **Layer 2 — engine module DTW core:** TSL engine module
+> (`engine/techniques/dtw_alignment_lag.py` lines 416-468 forward
+> DP) implements custom numpy DTW with Sakoe-Chiba window constraint
+> + step_pattern variants (symmetric1 diagonal-only OR symmetric2
+> diagonal + horizontal + vertical); pre-processing helpers
+> (subsampling + z-normalization lines 140-164) fold into Layer 2;
+> bit-exact equivalence to validated DP plausible at base case
+> (no window, symmetric2 default) but parameter variants
+> unverified. **Layer 3 — engine-specific post-processing
+> downstream:** engine module applies four post-processing
+> sub-components AFTER DTW core: (3a) warping path backtrack +
+> extraction (lines 469-491); (3b) time-varying lag extraction via
+> x_to_y dict + per-index averaging + carry-forward heuristic
+> (lines 178-198); (3c) lag segmentation via change-point heuristic
+> with deviation threshold 2.0 (lines 494-525); (3d) multi-table
+> output construction (lag time-series + warping path + segments
+> + summary). Layer 3 post-processing is engine-specific and NOT
+> covered by p3_dtw parity audit; correctness requires expert
+> review of backtrack logic + lag extraction heuristic +
+> segmentation threshold + output construction. **Fixture:**
+> seeded single-fixture (warped sinusoid pair, T=100,
+> warp_factor=1.2, σ=0.05, seed=42); parameter-sensitivity
+> coverage NOT established; Q3b extension pending. Pre-Path α
+> expert review status; expert review pending end-of-Phase-7+-
+> work-program.
+
+*Pattern (iii) Risk model documentation:*
+> dtw_alignment_lag validation: TSL Tier II.bit-exact (Layer 1 DTW
+> math at harness reference DP + dtaidistance.dtw only). Reference:
+> Python `dtaidistance.dtw` (dtaidistance 2.4.0). Audit:
+> `tools/reference_parity/reports/p3_dtw_audit.md` dated 2026-04-29.
+> Verdict: PASS Pattern A cross-package bit-exact at machine
+> precision (dtw_distance abs diff 0.0). Catalog mapping: 1:1
+> catalog↔wrapper. **Three-layer downstream-topology framing:**
+> Layer 1 (dtaidistance.dtw) parity-validated; Layer 2 (engine DTW
+> core with Sakoe-Chiba window + step_pattern variants +
+> pre-processing helpers) bit-exact equivalence at base case
+> plausible but variants engine-specific; Layer 3 (post-processing)
+> NOT parity-validated, engine-specific implementation requires
+> expert review of (3a) warping path backtrack + (3b) time-varying
+> lag extraction + (3c) lag segmentation + (3d) multi-table
+> output construction. Fixture: single-seeded; Q3b extension
+> pending. Risk attribution conditional on (a) parameter
+> configurations matching fixture-similar conditions AND (b)
+> Layer 2 engine DTW core + window/step_pattern variants
+> correctness AND (c) Layer 3 post-processing correctness across
+> 3a/3b/3c/3d sub-components — (b) + (c) require expert review.
+> Pre-Path α expert review status.
+
+*Pattern (iv) Internal use disclosure:*
+> dtw_alignment_lag DTW math layer (harness reference DP +
+> dtaidistance.dtw) cross-package bit-exact validated; 1:1
+> catalog↔wrapper. Layer 2 (engine DTW core + Sakoe-Chiba window +
+> step_pattern variants + pre-processing helpers) bit-exact
+> equivalence at base case plausible but variants engine-specific;
+> Layer 3 (post-processing: warping path extraction + time-varying
+> lag extraction + lag segmentation + multi-table output) NOT
+> parity-validated, requires expert review; pre-Path α.
+
+**Validation provenance audit checklist (per Workstream B §1; applied
+at technique close):**
+
+- **Q-A (decision substance extracted/cited vs inferred):**
+  Extracted/cited. Reference selection from p3_dtw_audit.md verbatim
+  (Python `dtaidistance.dtw` 2.4.0); verdict + Pattern + date +
+  numerics verbatim from audit. Three-layer downstream-topology
+  framing extracted per S17 STOP 2 empirical investigation (Step 0
+  (e)+(f)+(g) reads of p3_dtw_audit.md + p3_dtw.py harness + 526
+  LOC engine module) + S15 rolling_ccf_lag three-layer-downstream
+  precedent + α disposition ratification. Layer 2 (lines 416-468
+  forward DP + 140-164 pre-processing) + Layer 3 sub-components
+  3a/3b/3c/3d (lines 469-491 + 178-198 + 494-525 + multi-table
+  construction) empirically grounded per Step 0 (g) verbatim line
+  ranges. Catalog mapping (1:1) verified per scope_reframing §2
+  line 129. Verify-state-at-first-consumption sub-discipline 10th
+  instance application (forward-at-authoring + STOP 2 caught 1:1
+  simple-case framing assumption empirical falsification at Step 0
+  per A9 Class B mitigation pattern; matures from S15 9th-instance
+  proactive-with-assumption-falsification-catch with reinforced
+  pattern at second observation — Stage 3 lifecycle now n=2
+  observations calibrating it as established pattern).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at fifth-technique selection (user ratified
+  dtw_alignment_lag under Tier 2 case-against framing per Phase 7+
+  S16-absorption-close proposal; case-against weighted but not
+  invalidating per efficient ratification disposition). Pro-forma
+  elements present per Mark 3 efficient-ratification pattern
+  (operating-context preservation per Workstream B §5.3). **Q-B
+  pattern persists at n=6 across S12 + S13 + S14b + S14c + S15 +
+  S17; well past n=4 codification candidate threshold; sub-class
+  refinement candidate at next §19.4 absorption cycle** (cross-
+  reference §4 forward instrumentation note "Q-B audit checklist
+  operational pattern" codified at S16-absorption). Not pro-forma
+  across all upstream decisions for this technique (three-layer
+  downstream-topology framing required STOP 2 empirical
+  investigation + α disposition ratification + Layer 3 sub-component
+  4-fold enumeration; catalog-mapping framing precedent note
+  required substantive Step 0 + S17 STOP 2 disposition trigger
+  framing; Layer 2/Layer 3 boundary clarification required
+  operational distinction codification per Adjustment).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 (DTW math at harness reference DP +
+  dtaidistance.dtw)** per bit-exact 0.0 abs diff PASS verdict
+  against canonical Python `dtaidistance.dtw` C-implementation.
+  **Conditional for Layer 2 (engine DTW core with Sakoe-Chiba
+  window + step_pattern variants + pre-processing helpers)** —
+  requires expert review of engine implementation OR engine-output
+  cross-check against validated harness reference DP (analogous to
+  S15 Layer 2 framing). Default-settings equivalence (no window,
+  symmetric2) plausible but variant correctness (window
+  constraint handling + symmetric1 diagonal-only path; subsampling
+  threshold + z-normalization correctness) unverified.
+  **Conditional for Layer 3 (post-processing)** — requires expert
+  review of: 3a warping path backtrack logic (step_pattern-aware
+  minimum-cost step selection); 3b time-varying lag extraction
+  heuristic (x_to_y dict + per-index averaging + carry-forward);
+  3c lag segmentation threshold + minimum-segment-length
+  appropriateness; 3d multi-table output construction for
+  analytical use case. Defensible to all three audiences with
+  disclosure language as drafted: published audience (three-layer
+  downstream-topology framing transparent); Morgan Stanley
+  compliance review (precise audit citation + tier taxonomy +
+  Layer 1 / Layer 2 / Layer 3 scope delineation + catalog-mapping
+  precedent note); external expert reviewer at Path α close
+  (verbatim audit numerics + honest disclosure of what's validated
+  and what's not + Q3b extension pending + Layer 2 + Layer 3
+  sub-components expert review scope identified with specific
+  line ranges).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-to-high. dtw_alignment_lag is typically used for
+  time-varying lead-lag analysis in financial/macro time-series
+  research where non-linear time distortions complicate cross-
+  correlation interpretation; widely cited DTW methodology with
+  warping path interpretation as lead-lag tracking. **Layer-specific
+  retraction surface (per S17 three-layer downstream-topology
+  framing):**
+  - Layer 1 (DTW math at harness reference DP + dtaidistance.dtw):
+    LOW; bit-exact 0.0 abs diff PASS verdict against canonical
+    dtaidistance C-implementation; expert review surfacing
+    upstream error would affect dtw_alignment_lag specifically
+    (NO multi-map propagation risk distinct from S15 multi-map
+    framing; 1:1 catalog↔wrapper).
+  - Layer 2 (engine DTW core + Sakoe-Chiba window + step_pattern
+    variants + pre-processing helpers): MEDIUM analogous to S15
+    Layer 2 (engine implementation equivalence) + engine-specific
+    window/step_pattern variant correctness + pre-processing
+    heuristic appropriateness.
+  - Layer 3 (downstream post-processing): MEDIUM-HIGH specifically
+    for dtw_alignment_lag (NOT shared with other catalog techniques
+    due to 1:1 mapping). Downstream post-processing is the
+    operational distinctive of dtw_alignment_lag — DTW methodology's
+    value-add over raw CCF for time-varying lead-lag detection
+    IS the warping path extraction + local lag extraction +
+    segmentation functionality; expert review surfacing material
+    errors (backtrack step-pattern correctness; x_to_y averaging
+    heuristic; segmentation threshold; multi-table output
+    construction) would invalidate the time-varying lead-lag claim
+    motivating dtw_alignment_lag use over raw cross_correlation_lag.
+    **Analogous to S15 Layer 3 MEDIUM-HIGH but for DTW methodology
+    distinctive ("time-varying lead-lag claim invalidated" vs S15's
+    "regime/break-aware claim invalidated"); both downstream-topology
+    Layer 3 surfaces operationally distinct but parallel risk
+    structures.**
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; fifth technique to enter status per S17
+ratification; first 1:1 catalog↔wrapper entry under layered framing.
+**S17 three-layer-downstream framing applies to 1:1 catalog entry**
+(distinct from S15 three-layer-downstream for multi-map p3_ccf-covered
+triple); framing shape orthogonal to catalog mapping per S17 empirical
+observation. A10 sub-class disposition (Sub-class 2c n=2 OR new
+Sub-class 2d 1:1-three-layer-downstream n=1) deferred to next §19.4
+absorption cycle. **A9 Class B counter post-S17: n=2 ACTIVE**
+(codification threshold reached per A9 forward instrumentation;
+sub-class refinement candidate for next §19.4 absorption).
+
+## §3 Unvalidated catalog techniques (70 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -1446,8 +1812,8 @@ Cross-reference: `resources/catalog/techniques_catalog.json`
 for catalog-side documentation (parameters, presets,
 descriptions, summaries).
 
-### Causality / Relationships / Lead-Lag (2 unvalidated; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15)
-`dtw_alignment_lag`, `gcc_phat_delay`
+### Causality / Relationships / Lead-Lag (1 unvalidated; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15 + S17)
+`gcc_phat_delay`
 
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
@@ -1485,7 +1851,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 71 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag moved to §2.5).
+**Total: 70 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag moved to §2.5).
 
 ## §4 How to use this document
 
@@ -1528,7 +1894,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (71 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15 amendments):**
+**Tier 3 — UNVALIDATED (70 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
