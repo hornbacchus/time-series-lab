@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 6 catalog techniques with Phase 7+ Q1 trust documentation
+- 7 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18 amendments)
-- 69 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21 amendments)
+- 68 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -2230,7 +2230,458 @@ next §19.4 absorption). **A9 Class B counter post-S18: n=2 ACTIVE**
 (unchanged; revised default layered-framing-applicable expectation
 empirically confirmed at S18 Step 0).
 
-## §3 Unvalidated catalog techniques (69 entries; ID-only enumeration)
+### adf_test (Phase 7+ S21; seventh §2.5 entry; FIRST Block 12 Stationarity Tests entry; FIRST three-layer-parallel-tests topology entry; A10 Sub-class 2d NEW topology candidate; THREE-LAYER-PARALLEL-TESTS framing per S21 STOP 2 empirical investigation + γ disposition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2 per scope_reframing §2 line 130). **Important nuance
+(three-layer-parallel-tests framing per S21 γ disposition; NOVEL
+topology distinct from S14c three-layer-upstream + S15/S17/S18
+three-layer-downstream):** tier classification applies to Layer 1
+(statsmodels.tsa.stattools.adfuller vs R urca::ur.df); Layer 2
+(engine module ADF single-test orchestration: Schwert lag bound +
+AIC autolag + trend detection + NaN handling) plausibly equivalent
+at base pinned config but variants engine-specific; Layer 3 (joint
+triage mode parallel tests + verdict computation; DEFAULT FOR RIBBON
+PATH) NOT covered by p3_adf parity audit. **Critical operational
+implication:** published-research output from `adf_test` ribbon
+invocation is the joint verdict from ADF + KPSS + PP, NOT pure ADF;
+p3_adf audit validates single pinned ADF call only; Layer 3
+operational distinctive drives ribbon publication output but has
+ZERO parity validation. See Validation claim scope below.
+
+**Framing precedent note (1:1 catalog↔wrapper; NOVEL three-layer-
+parallel-tests topology):** adf_test is 1:1 catalog↔wrapper mapping
+per p3_adf audit Wrapper field (`engine/techniques/adf_test.py` sole
+engine module). Three-layer-parallel-tests topology applies per S21
+STOP 2 empirical finding: harness invokes statsmodels.adfuller
+directly at pinned single-test config; engine module uses SAME
+statsmodels.adfuller at math layer (clean engine-uses-same-function
+pattern per Forward Q1 Step 0 discipline §4.7) BUT engine module
+extends substantially beyond harness exercise via joint triage mode
+(default for ribbon path) running ADF + KPSS + PP in parallel and
+computing joint verdict. **NOVEL topology distinct from existing
+A10 sub-classes:**
+- S14c three-layer-upstream (Layer 2b pipeline BEFORE math; AR-
+  prewhitening for prewhitened_ccf_lag)
+- S15/S17 three-layer-downstream Tier II.bit-exact (Layer 3 pipeline
+  AFTER math; rolling_ccf_lag + dtw_alignment_lag)
+- S18 three-layer-downstream Tier IV variant (Sub-class 2c-IV;
+  gcc_phat_delay Pattern A.3 self-parity)
+- **S21 three-layer-parallel-tests NEW (Layer 3 INVOKES PARALLEL
+  math calls + computes verdict from combined results; adf_test
+  joint triage mode running ADF + KPSS + PP)**
+
+**Engine-extends-beyond-harness pattern characterization (NEW per
+§4.7 Forward Q1 Step 0 discipline forward observation):** adf_test
+is NOT harness-bypasses-engine outlier (S14a p3_ccf + S18 p3_gcc_phat
+pattern); engine module uses SAME statsmodels.adfuller function as
+harness. Pattern instead is engine-extends-beyond-harness — engine
+module has substantial additional functionality (joint triage mode
++ KPSS + PP integration) beyond what harness exercises. Forward
+observation for §4.7 codification refinement at next Workstream B
+amendment cycle if pattern recurs (KPSS + PP entries may surface
+analogous pattern).
+
+**A10 sub-class disposition deferred to next §19.4 absorption cycle:**
+S21 first-instance observation calibrates Sub-class 2d (three-layer-
+parallel-tests) baseline candidate (distinct from existing 2a + 2b
++ 2c + 2c-IV). Codification deferred per accumulation pattern;
+absorption #3 resolves Sub-class 2d codification + Sub-class 2c-IV
+n=2 if observed + Block 1 Causality completion milestone + A9
+Class A 5th sub-pattern accumulation + A9 Class B n=3 codification
+reinforcement + etc.
+
+**Reference:** R `urca::ur.df` (urca 1.3.4)
+**Verdict:** PASS Pattern A bit-exact (Layer 1 only; see Validation
+claim scope for Layer 2 + Layer 3 coverage)
+**Audit:** `tools/reference_parity/reports/p3_adf_audit.md`
+**Audit date:** 2026-04-29
+**test_statistic (tau) abs diff:** 1.07e-14 (TSL -9.46555379266110
+vs Reference -9.46555379266109; rel diff 1.13e-15)
+
+**Source files (three-layer-parallel-tests per S21 γ framing):**
+`tools/reference_parity/harness/checks/p3_adf.py` lines 62-73
+(harness TSL arm invokes `statsmodels.tsa.stattools.adfuller`
+directly with pinned LAG=1, autolag=None, regression="c"; returns
+test_statistic + p_value + n_used)
++ `tools/reference_parity/harness/checks/p3_adf.py` lines 75-99
+(harness reference arm invokes R `urca::ur.df(y, type="drift",
+lags=1)` via RBridge; extracts tau-stat + 5pct critical value)
++ `engine/techniques/adf_test.py` line 23 + lines 151-153 (Layer 1
+shared math: engine module imports SAME `statsmodels.tsa.stattools.adfuller`
+function harness validates; `_run_adf_single` helper calls
+`adfuller(clean, maxlag=maxlag, regression=regression, autolag=autolag)`
+at line 151)
++ `engine/techniques/adf_test.py` lines 351-474 + 57-118 + 65-88
+(Layer 2: engine ADF single-test orchestration; `_run_single_test`
+helper lines 351-474 + Schwert lag bound `_schwert_bound` lines
+57-62 + trend detection `_detect_trend` lines 91-118 + NaN handling
+`_prepare_series` lines 65-88 + regression specification allowlist
+gating lines 282-326)
++ `engine/techniques/adf_test.py` lines 506-714 + 200-228 + 559-565
++ 568-650 (Layer 3: joint triage mode; `_run_triage` helper lines
+506-714 + joint verdict logic `_joint_verdict` lines 200-228 + PP
+tie-breaker for CONFLICTING lines 559-565 + triage table + summary
+construction lines 568-650)
++ `engine/techniques/adf_test.py` lines 231-239 (Layer 3 dispatch:
+`_is_triage_mode` helper detecting ctx.run_id prefix; udf_* → single
+test; pane_* / anything else → triage default for ribbon path)
++ `tools/reference_parity/reports/p3_adf_audit.md`
+
+**Validation claim scope (THREE-LAYER-PARALLEL-TESTS per S21
+amendment per S14c upstream + S15/S17/S18 downstream precedent + γ
+parallel-tests topology disposition):** TSL adf_test output relies
+on three layered computations with parallel-tests topology (Layer 3
+invokes parallel math calls — KPSS + PP alongside ADF — and computes
+joint verdict from combined results; contrasts with S14c upstream
+topology where Layer 2b prewhitening precedes math AND S15/S17/S18
+downstream topology where Layer 3 post-processing follows math).
+p3_adf audit validates Layer 1 (statsmodels.adfuller) vs R urca::ur.df
+at single seeded fixture (stationary AR(1), φ=0.7, σ=1.0, T=500,
+seed=42, burn-in 100, LAG=1 pinned, regression="c"); test_statistic
+metric measures statsmodels.adfuller tau output vs urca::ur.df tau
+agreement (abs diff 1.07e-14 PASS), NOT engine module orchestration
+correctness, NOT joint triage mode correctness, NOT KPSS or PP
+integration correctness.
+
+- **Layer 1 — statsmodels.adfuller math layer (validated):** bit-
+  exact PASS verdict at machine precision (abs diff 1.07e-14; rel
+  diff 1.13e-15); parity covers ADF tau statistic at OLS-on-
+  differenced-series regression with pinned LAG=1 + autolag=None +
+  regression="c"; MacKinnon critical values via statsmodels +
+  urca::ur.df identical tables; both packages compute identical
+  closed-form statistic given identical lag specification.
+
+- **Layer 2 — engine module ADF single-test orchestration (plausibly
+  equivalent at pinned config but variants engine-specific):**
+  Engine module uses SAME `statsmodels.tsa.stattools.adfuller`
+  function harness validates (clean engine-uses-same-function
+  pattern per §4.7 Forward Q1 Step 0 discipline; NOT harness-
+  bypasses-engine outlier). Engine ADF single-test mode (`_run_single_test`
+  lines 351-474) extends beyond harness exercise via: Schwert lag
+  bound rule (max_lag = floor(12 × (T/100)^(1/4)); lines 57-62) vs
+  harness pinned LAG=1; AIC autolag selection (default per `autolag`
+  parameter) vs harness pinned autolag=None; regression specification
+  allowlist gating ({c, ct, ctt, n, nc}; lines 282-326) vs harness
+  pinned regression="c"; trend detection heuristic (t-stat threshold
+  2.0 on linear time regressor; lines 91-118; advisory note for
+  regression='c' on apparently trending series); per-series NaN
+  handling (edge NaN strip + interior NaN linear interp; lines 65-88);
+  multi-series support (loop through `all_series`). Bit-exact
+  equivalence to validated math plausible at base pinned config
+  (LAG=1, autolag=None, regression="c"; no trend; no NaN) but variants
+  unverified at p3_adf audit.
+
+- **Layer 3 — joint triage mode parallel tests + verdict computation
+  DEFAULT FOR RIBBON PATH (NOT parity-validated; engine-specific
+  operational distinctive driving published research output):**
+  Engine module applies five Layer 3 sub-components in triage mode
+  (default for ribbon invocations per `_is_triage_mode` dispatch
+  lines 231-239 detecting ctx.run_id prefix):
+  - **3a — Triage dispatch** (lines 231-239): ctx.run_id prefix
+    detection; `udf_*` → single-test mode; `pane_*` or anything else
+    → triage mode default. Engine-specific dispatch logic; ribbon
+    publication output goes through triage path.
+  - **3b — Parallel KPSS + PP test invocation** (lines 511-512 +
+    529-535 in `_run_triage`): imports `_run_kpss_single` from
+    techniques.kpss_test + `_run_pp_single` from techniques.pp_test;
+    invokes both tests alongside ADF on same fixture; KPSS regression
+    spec ("ct" if ADF regression "ct" else "c"); PP trend spec ("ct"
+    if ADF regression "ct" else "n" if regression in {n, nc} else
+    "c"). Engine-specific parallel-tests orchestration NOT exercised
+    by harness.
+  - **3c — Joint verdict logic** (`_joint_verdict` lines 200-228):
+    four-outcome verdict computation based on ADF + KPSS rejection
+    pattern: (ADF rejected + KPSS not rejected) → STATIONARY;
+    (ADF not rejected + KPSS rejected) → UNIT ROOT (I(1));
+    (both rejected) → CONFLICTING; (neither rejected) → INCONCLUSIVE.
+    Engine-specific verdict heuristic; correctness depends on ADF
+    + KPSS hypothesis-test rejection logic being appropriate for
+    joint stationarity inference.
+  - **3d — PP tie-breaker for CONFLICTING verdicts** (lines 559-565):
+    if joint verdict is CONFLICTING, PP test acts as tie-breaker;
+    "PP agrees with ADF (unit root rejected)" if PP rejects null;
+    "PP agrees with KPSS (unit root not rejected)" if PP fails to
+    reject. Engine-specific tie-breaker heuristic; correctness
+    depends on PP rejection logic being appropriate for tie-breaking
+    between ADF + KPSS disagreement.
+  - **3e — Triage table + per-series summary construction** (lines
+    568-650): triage table with per-test rows per series + critical
+    value detail tables + per-series summary string with joint
+    verdict + per-test rejection phrases + trend advisory if
+    applicable. Engine-specific output construction; correctness
+    depends on summary phrasing + table construction matching
+    published-research presentation expectations.
+
+Single-fixture parity established at machine precision for Layer 1
+(test_statistic abs diff 1.07e-14); parameter-sensitivity coverage
+NOT established at this validation tier (Q3b extension pending);
+Layer 2 closure pending engine-output cross-check at base pinned
+config OR expert review of Schwert + AIC + trend detection + NaN
+handling implementation; Layer 3 closure pending expert review of
+joint triage mode + KPSS + PP integration + joint verdict heuristic
++ PP tie-breaker (engine-specific; no parity validation available;
+adf_test ribbon publication output IS the joint verdict, so expert
+review of Layer 3 is operationally distinctive AND high-stakes).
+**Critical Layer 3 framing per ribbon-default-publication context:**
+published-research user invoking `adf_test` from ribbon receives
+joint verdict from three tests + heuristic verdict computation;
+publishing under their name relies on Layer 3 correctness, not just
+Layer 1 ADF math. Expert review of Layer 3 sub-components 3b/3c/3d
+operationally critical. Reference selection + tolerance specification
+AI-assisted with user ratification per Phase 7+ work program;
+pre-Path α expert review status; expert review pending end-of-work-
+program.
+
+**Methodology disclosure templates** (per Workstream B §3 Tier
+II.bit-exact templates; three-layer-parallel-tests framing per S21
+γ disposition; Bundle option II depth distribution):
+
+*Pattern (i) Research note footnote:*
+> This analysis uses TSL technique adf_test. ADF math layer
+> (statsmodels.tsa.stattools.adfuller) is cross-package bit-exact
+> parity validated against R `urca::ur.df` (urca 1.3.4) per Phase 3
+> audit dated 2026-04-29 (test_statistic abs diff 1.07e-14). TSL
+> engine module ADF single-test orchestration (Schwert lag bound +
+> AIC autolag + trend detection + NaN handling) plausibly equivalent
+> at base pinned config but variants engine-specific. **Joint triage
+> mode (DEFAULT for ribbon invocations; engine module's default
+> publication output): ADF + KPSS + PP parallel tests + joint verdict
+> + PP tie-breaker** is engine-specific and NOT covered by parity
+> audit; requires expert review for published use. Published-research
+> output from ribbon invocation is the joint verdict, NOT pure ADF
+> result. Pre-Path α expert review status.
+
+*Pattern (ii) Technical appendix:*
+> Methodology: TSL technique adf_test implements three layered
+> computations with parallel-tests topology (Layer 3 invokes
+> parallel math calls — KPSS + PP alongside ADF — and computes joint
+> verdict from combined results; NOVEL topology distinct from
+> upstream/downstream layered framings of prior Q1 entries). **Layer
+> 1 — statsmodels.adfuller math layer:** validated per Phase 3
+> reference parity infrastructure. **Reference:** R `urca::ur.df`
+> (urca 1.3.4). **Verdict:** PASS Pattern A.2 bit-exact at machine
+> precision; test_statistic (tau) abs diff 1.07e-14 (TSL -9.46555379266110
+> vs Reference -9.46555379266109; rel diff 1.13e-15). **Audit date:**
+> 2026-04-29. **Catalog mapping:** 1:1 catalog↔wrapper. **Layer 2 —
+> engine module ADF single-test orchestration:** TSL engine module
+> (`engine/techniques/adf_test.py` line 23 + lines 151-153) uses
+> SAME statsmodels.adfuller function harness validates (clean
+> engine-uses-same-function pattern); orchestration extends beyond
+> harness exercise via Schwert lag bound (`_schwert_bound` lines
+> 57-62; max_lag = floor(12 × (T/100)^(1/4))) + AIC autolag
+> selection + regression specification allowlist gating + trend
+> detection heuristic + per-series NaN handling + multi-series
+> support; bit-exact equivalence to validated math plausible at base
+> pinned config (LAG=1, autolag=None, regression="c") but variants
+> unverified. **Layer 3 — joint triage mode parallel tests + verdict
+> computation (DEFAULT FOR RIBBON PATH):** engine module applies
+> five Layer 3 sub-components in triage mode (default for ribbon
+> invocations per ctx.run_id prefix dispatch): (3a) triage dispatch;
+> (3b) parallel KPSS + PP test invocation alongside ADF; (3c) joint
+> verdict logic (4 outcomes: STATIONARY / UNIT ROOT I(1) /
+> CONFLICTING / INCONCLUSIVE); (3d) PP tie-breaker for CONFLICTING
+> verdicts; (3e) triage table + per-series summary construction.
+> Layer 3 is engine-specific and NOT covered by p3_adf parity audit;
+> correctness requires expert review of joint verdict heuristic +
+> KPSS/PP integration + PP tie-breaker logic. **Published-research
+> output from ribbon invocation is the joint verdict, NOT pure ADF
+> result.** **Fixture:** seeded single-fixture (stationary AR(1),
+> φ=0.7, σ=1.0, T=500, seed=42, burn-in 100; LAG=1 pinned);
+> parameter-sensitivity coverage NOT established at this validation
+> tier; Q3b extension pending. Pre-Path α expert review status;
+> expert review pending end-of-Phase-7+-work-program.
+
+*Pattern (iii) Risk model documentation:*
+> adf_test validation: TSL Tier II.bit-exact (Layer 1 statsmodels.adfuller
+> math layer only). Reference: R `urca::ur.df` (urca 1.3.4). Audit:
+> `tools/reference_parity/reports/p3_adf_audit.md` dated 2026-04-29.
+> Verdict: PASS Pattern A.2 bit-exact at machine precision
+> (test_statistic abs diff 1.07e-14). Catalog mapping: 1:1
+> catalog↔wrapper. **Three-layer-parallel-tests framing (NOVEL
+> topology):** Layer 1 (statsmodels.adfuller) parity-validated;
+> Layer 2 (engine ADF orchestration: Schwert + AIC + trend detection
+> + NaN handling) bit-exact equivalence at base pinned config
+> plausible but variants engine-specific; Layer 3 (joint triage
+> mode parallel tests + verdict computation; DEFAULT FOR RIBBON
+> PATH) NOT parity-validated, engine-specific implementation requires
+> expert review of (3a) triage dispatch + (3b) parallel KPSS + PP
+> invocation + (3c) joint verdict logic + (3d) PP tie-breaker +
+> (3e) triage table/summary construction. **Critical risk
+> consideration:** ribbon-default publication output is joint
+> verdict from three tests + heuristic verdict computation, NOT
+> pure ADF; risk attribution from ribbon invocation conditional on
+> (a) parameter configurations matching fixture-similar conditions
+> AND (b) Layer 2 engine ADF orchestration correctness AND (c)
+> Layer 3 joint triage mode + KPSS + PP + verdict heuristic
+> correctness — (b) + (c) require expert review. Pre-Path α expert
+> review status.
+
+*Pattern (iv) Internal use disclosure:*
+> adf_test ADF math layer (statsmodels.adfuller) cross-package
+> bit-exact validated against R `urca::ur.df`; 1:1 catalog↔wrapper.
+> Layer 2 (engine ADF orchestration: Schwert + AIC + trend +
+> NaN) bit-exact equivalence at base pinned config plausible but
+> variants engine-specific; Layer 3 (joint triage mode parallel
+> tests + KPSS + PP + verdict logic; DEFAULT FOR RIBBON PATH) NOT
+> parity-validated, requires expert review; **ribbon publication
+> output IS the joint verdict, NOT pure ADF**; pre-Path α.
+
+**Validation provenance audit checklist (per Workstream B §1; applied
+at technique close):**
+
+- **Q-A (decision substance extracted/cited vs inferred):** Extracted/
+  cited. Reference selection from p3_adf_audit.md verbatim (R
+  `urca::ur.df` 1.3.4); verdict + Pattern + date + numerics (test_statistic
+  abs diff 1.07e-14; TSL -9.46555379266110 vs Reference -9.46555379266109)
+  verbatim from audit. Three-layer-parallel-tests framing extracted
+  per S21 STOP 2 empirical investigation (Step 0 (e)+(f)+(g) reads
+  of p3_adf_audit.md + p3_adf.py harness + 756 LOC engine module) +
+  S14c upstream / S15/S17/S18 downstream layered framing precedent
+  + γ parallel-tests topology disposition. Layer 2 (lines 351-474 +
+  57-118 + 65-88 + 282-326) + Layer 3 sub-components 3a/3b/3c/3d/3e
+  (lines 231-239 + 506-714 + 200-228 + 559-565 + 568-650) empirically
+  grounded per Step 0 (g) verbatim line ranges. Catalog mapping
+  (1:1) verified per audit Wrapper field sole engine module
+  reference. **A9 Class B 3rd instance acknowledgment:** S21 STOP 2
+  caught single-layer simple-case framing assumption empirical
+  falsification at Step 0 per A9 Class B mitigation pattern; Class
+  B counter n=2 → n=3 ACTIVE; codification reinforced per §19.4
+  forward instrumentation (post-S19-absorption codification stated
+  "3rd instance would reinforce codification"). **Engine-extends-
+  beyond-harness pattern characterization (NEW per §4.7 Forward Q1
+  Step 0 discipline forward observation):** adf_test NOT harness-
+  bypasses-engine outlier (engine uses same statsmodels function
+  harness validates); pattern is engine-extends-beyond-harness via
+  joint triage mode + KPSS + PP integration; forward observation
+  for §4.7 codification refinement at next Workstream B amendment
+  cycle if pattern recurs (KPSS + PP entries may surface analogous
+  pattern). Verify-state-at-first-consumption sub-discipline 12th
+  instance application (forward-at-authoring + STOP 2 caught
+  single-layer assumption empirical falsification at Step 0;
+  matures from S18 11th-instance Tier IV framing falsification with
+  reinforced parallel-tests topology pattern as third Stage 3
+  observation now operationally established as recurring).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at seventh-technique selection (user
+  ratified adf_test under Tier 2 case-against framing per Phase 7+
+  S20-close proposal as "Block 12 Stationarity Tests first entry
+  per operational priority; calibrates per-block baseline at first-
+  instance new-block observation"; case-against weighted but not
+  invalidating per efficient ratification disposition). Pro-forma
+  elements present per Mark 3 efficient-ratification pattern
+  (operating-context preservation per Workstream B §5.3) **per
+  Workstream B §1.4 Q-B operational pattern codification at S20**.
+  **Q-B pattern persists at n=8 across S12 + S13 + S14b + S14c +
+  S15 + S17 + S18 + S21; well past n=4 codification candidate
+  threshold; §1.4 codified observation refinement at empirical
+  pattern accumulation** (n=7 at §1.4 S20 codification → n=8 at
+  S21 reinforcement). Not pro-forma across all upstream decisions
+  for this technique (three-layer-parallel-tests novel topology
+  framing required STOP 2 empirical investigation + γ disposition
+  ratification + Layer 3 five-sub-component enumeration + engine-
+  extends-beyond-harness pattern characterization).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 (statsmodels.adfuller math layer)** per bit-
+  exact PASS verdict at machine precision (test_statistic abs diff
+  1.07e-14) against canonical R `urca::ur.df` reference;
+  reproducibility + cross-package agreement institutional-grade
+  evidence. **Conditional for Layer 2 (engine ADF orchestration)**
+  — requires expert review of engine implementation OR engine-
+  output cross-check against harness statsmodels.adfuller at base
+  pinned config for variant correctness review (Schwert + AIC +
+  trend detection + NaN handling appropriateness). **Conditional
+  for Layer 3 (joint triage mode parallel tests)** — requires expert
+  review of: 3a triage dispatch (ctx.run_id prefix logic
+  appropriateness); 3b parallel KPSS + PP test invocation
+  (cross-test parameter mapping correctness); 3c joint verdict logic
+  (four-outcome verdict heuristic appropriateness for stationarity
+  inference); 3d PP tie-breaker (CONFLICTING resolution
+  appropriateness); 3e triage table + summary construction
+  (published-research presentation correctness). **Critical Q-C
+  framing per ribbon-default-publication context:** published-
+  research user invoking `adf_test` from ribbon receives joint
+  verdict from three tests + heuristic verdict computation;
+  defensibility to all three audiences (published audience + Morgan
+  Stanley compliance + Path α expert reviewer) UNDER Layer 3
+  expert review acknowledgment. Defensible to all three audiences
+  with disclosure language as drafted: published audience (three-
+  layer-parallel-tests framing transparent with joint-verdict
+  caveat); Morgan Stanley compliance review (precise audit citation
+  + tier taxonomy + Layer 1 / Layer 2 / Layer 3 scope delineation +
+  Layer 3 expert review scope); external expert reviewer at Path α
+  close (verbatim audit numerics + honest disclosure of Layer 3
+  joint triage mode + KPSS/PP integration + verdict heuristic +
+  PP tie-breaker scope; Q3b extension pending).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-HIGH-CRITICAL. adf_test is canonical stationarity testing
+  methodology in time-series research; widely used for unit-root
+  hypothesis testing in published research + risk model
+  documentation. **Layer-specific retraction surface (per S21 three-
+  layer-parallel-tests framing):**
+  - Layer 1 (statsmodels.adfuller math layer): LOW; bit-exact
+    PASS verdict against canonical R urca::ur.df at machine
+    precision; expert review surfacing upstream error would affect
+    adf_test specifically (NO multi-map propagation risk; 1:1
+    catalog↔wrapper).
+  - Layer 2 (engine ADF orchestration: Schwert + AIC + trend +
+    NaN): MEDIUM analogous to S14b/S15 Layer 2 (engine
+    implementation equivalence) + engine-specific Schwert lag bound
+    + AIC autolag selection + trend detection heuristic + NaN
+    handling correctness.
+  - Layer 3 (joint triage mode parallel tests + verdict logic):
+    **MEDIUM-HIGH-CRITICAL** specifically for adf_test (NOT shared
+    with other catalog techniques due to 1:1 mapping; engine-
+    specific operational distinctive). Joint triage mode is the
+    operational distinctive of adf_test ribbon invocation —
+    stationarity-testing methodology's value-add over pure ADF
+    is the joint ADF + KPSS + PP verdict via four-outcome
+    heuristic + PP tie-breaker; expert review surfacing material
+    errors (joint verdict logic; KPSS/PP integration; PP tie-
+    breaker correctness; triage dispatch appropriateness) would
+    invalidate the "stationarity testing with joint verdict" claim
+    motivating adf_test ribbon use. **Topologically distinct from
+    S15/S17/S18 Layer 3 MEDIUM-HIGH downstream framings and S14c
+    Layer 2b MEDIUM-HIGH upstream framing:** S21 Layer 3 invokes
+    PARALLEL math calls (additional tests) + computes verdict
+    from combined results; operationally distinct risk surface
+    from upstream pipeline OR downstream post-processing patterns.
+    **Critical ribbon-publication context elevation:** ribbon-
+    default publication output IS the joint verdict per `_is_triage_mode`
+    dispatch; expert review surfacing Layer 3 errors specifically
+    invalidates ribbon publication output (the typical user-facing
+    output channel), not just an optional analytical alternative.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; seventh technique to enter status per
+S21 ratification; **FIRST Block 12 Stationarity Tests entry**
+(transitions Q1 work program from Block 1 Causality completion to
+Block 12; calibrates per-block baseline at first-instance new-block
+observation); **FIRST three-layer-parallel-tests topology entry**
+(NOVEL topology distinct from S14c three-layer-upstream + S15/S17
+three-layer-downstream + S18 three-layer-downstream Tier IV variant);
+**A10 Sub-class 2d NEW topology candidate** (codification deferred
+to next §19.4 absorption cycle). **S21 three-layer-parallel-tests
+framing: Layer 1 (statsmodels.adfuller vs R urca::ur.df) bit-exact
+PASS; Layer 2 (engine ADF orchestration) plausibly equivalent at
+base pinned config but variants engine-specific; Layer 3 (joint
+triage mode parallel tests + verdict computation; DEFAULT FOR
+RIBBON PATH) NOT parity-validated, engine-specific operational
+distinctive driving published research output requires expert
+review.** **A9 Class B counter post-S21: n=3 ACTIVE** (S15 + S17 +
+S21; codification reinforced per §19.4 forward instrumentation post-
+S19-absorption stated "3rd instance would reinforce codification";
+sub-class refinement codification candidate for §19.4 absorption #3
+alongside A10 Sub-class 2d codification + A9 Class A 5th sub-pattern
+accumulation + Block 1 Causality completion milestone). **A9 Class
+A counter post-S21: n=5 ACTIVE** (unchanged; no Class A 6th instance
+at S21 Step 0).
+
+## §3 Unvalidated catalog techniques (68 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -2283,13 +2734,13 @@ descriptions, summaries).
 ### State Space / Filtering (4 unvalidated; kalman_filter + kalman_smoother validated separately)
 `local_level`, `local_linear_trend`, `particle_filter`, `structural_ts`
 
-### Stationarity / Tests (3 unvalidated)
-`adf_test`, `kpss_test`, `pp_test`
+### Stationarity / Tests (2 unvalidated; adf_test moved to §2.5 per Phase 7+ S21)
+`kpss_test`, `pp_test`
 
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 69 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay moved to §2.5; **Block 1 Causality FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope**).
+**Total: 68 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test moved to §2.5; **Block 1 Causality FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; Block 12 Stationarity Tests Q1 work initiated with first entry per S21**).
 
 ## §4 How to use this document
 
@@ -2332,7 +2783,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (69 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18 amendments):**
+**Tier 3 — UNVALIDATED (68 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
