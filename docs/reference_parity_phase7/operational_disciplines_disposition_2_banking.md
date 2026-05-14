@@ -136,6 +136,63 @@ The combination signals that single-fixture parity validation
 alone insufficient grounds for publication-ready status; multiple
 validation evidence streams required.
 
+### §1.4 Q-B operational pattern observation
+
+Per §19.4 forward instrumentation note "Q-B audit checklist
+operational pattern" deferred from S16-absorption + S19-absorption
+absorption cycles per structural belonging at Workstream B §1 (not
+§19.4 absorption discipline). Codified at this artifact per S20
+Workstream B amendment cycle.
+
+**Pattern observation:** Q-B (user genuine contestation vs default
+ratification) response across Q1 entries surfaces persistent
+operational pattern: default ratification under Tier 2 case-against
+framing per respective prior-sub-session-close proposal; case-against
+weighted but not invalidating per efficient ratification disposition;
+pro-forma elements present per Mark 3 efficient-ratification pattern
+(operating-context preservation per §5.3).
+
+**Empirical observation count: n=7** across Q1 sub-sessions (S12
+granger_causality; S13 cross_correlation_lag; S14b coordinated
+amendment; S14c prewhitened_ccf_lag; S15 rolling_ccf_lag; S17
+dtw_alignment_lag; S18 gcc_phat_delay). Well past n=4 codification
+threshold per S13 forward instrumentation; reinforced at S14b +
+S14c + S15 + S17 + S18 + S16-absorption + S19-absorption
+dispositions.
+
+**Operational shape characterization:** pro-forma elements present
+at all 7 observations BUT not pro-forma across all upstream
+decisions for the respective technique. Substantive framing
+investigation required at S14b/c + S15 + S17 + S18 STOP 2 cycles
+(Class B mitigation operating); user engagement at those substantive
+points shifts Q-B from pure-pro-forma to mixed-pro-forma-substantive.
+Pattern reflects efficient ratification at orchestration-level
+decisions (technique selection; framing class) combined with
+substantive verification at empirical-grounding decisions (Step 0
+findings; STOP 2 dispositions).
+
+**Cross-references:**
+- §5.3 Mark 3 efficient-ratification pattern (operating-context
+  preservation; Q-B pattern is one operational manifestation of
+  Mark 3 standing within audit checklist semantics)
+- §19.4 A9 Class A + Class B failure modes (Q-B response patterns
+  reflect Option II workflow mitigation operating correctly when
+  empirical-grounding decisions surface substantive divergence)
+- §19.4 forward instrumentation note "Q-B audit checklist operational
+  pattern" at calibration_baseline.md (n=7; cross-reference preserved
+  at §19.4 historical audit trail; status update to "codified at
+  Workstream B §1.4" deferred to next §19.4 absorption cycle per
+  S20 ratification 3)
+
+**Forward instrumentation:** codification refinement candidate at
+n-count observation if pattern shifts materially. Shift markers
+warranting refinement: (a) genuine contestation surfaced at Q-B
+(user pushes back substantively on tier characterization or framing
+class); (b) pro-forma elements absent across all upstream decisions;
+(c) Mark 3 efficient-ratification pattern itself shifts. Absent
+these markers, n-count continues to accumulate at codification-
+stable rate.
+
 ## §2 Layered smooth-ratification countermeasures
 
 Per S9 handoff §6 + S6 §5 operational discipline carry-forward.
@@ -779,6 +836,174 @@ deferred to that cycle.
 
 This artifact (Workstream B disposition 2) is the operational spec;
 §19.4 baseline absorption authoritative-state codification follows.
+
+### §4.6 Option II workflow
+
+Per §19.4 forward instrumentation note "Option II workflow
+codification" deferred from S16-absorption + S19-absorption absorption
+cycles per structural belonging at Workstream B §1 + §4 (Option II
+operationalizes verify-state-at-narration discipline at trigger-
+execution-time empirical re-Read). Codified at this artifact per
+S20 Workstream B amendment cycle.
+
+**Workflow operational protocol (4-stage):**
+
+1. **Chat trigger drafts under Code Step 0 empirical re-Read
+   expectation:** Chat trigger surfaces directives + scope expectations
+   under operational assumption that Code performs Step 0 empirical
+   re-Read at trigger-execution time. Chat trigger drafting does NOT
+   assume Chat-side baseline-state assertion correctness; relies on
+   Code Step 0 to catch divergence.
+2. **Code Step 0 empirical re-Read at trigger-execution time per
+   CONSTRAINT 4 BLOCKING:** Code reads authoritative source artifacts
+   at HEAD before any drafting/editing action. Step 0 scope per
+   sub-session class. Verbatim citations from source artifacts; no
+   propagation of Chat-side assumptions.
+3. **STOP 2 mandatory if divergence surfaces:** if Step 0 surfaces
+   empirical divergence from Chat trigger framing assumptions (A9
+   Class A baseline-state or A9 Class B empirical-complexity
+   sub-classes), Code STOPs immediately and surfaces findings + 3+
+   disposition options to Chat. Code does NOT proceed to drafting
+   under wrong framing.
+4. **Chat re-disposition trigger ratifies correct framing; Code
+   proceeds under corrected scope:** Chat reviews STOP 2 findings +
+   disposition options; selects framing class; ratifies for
+   re-activation. Code proceeds under ratified framing with Step 0
+   findings already grounded.
+
+**Workflow operates as primary structural mitigation** for A9 Class A
+(Chat-trigger baseline-state assertion failure) + Class B (Chat-
+trigger empirical-complexity assumption failure) sub-classes per
+§19.4 codification. Trigger-drafting-time discipline (Chat-side
+empirical re-Read at trigger drafting) is NOT required when Option
+II workflow operates correctly; Code Step 0 re-Read provides
+equivalent mitigation at trigger-execution time.
+
+**Empirical validation across sub-sessions:**
+
+| Sub-session | Empirical context | Option II outcome |
+|---|---|---|
+| S13 cross_correlation_lag | first multi-map two-layer (Tier II.bit-exact) | clean Step 0 match; entry drafted under ratified framing |
+| S14a investigation | harness-vs-engine code path divergence at p3_ccf scope | Step 0 + Step 5 contextual sampling surfaced outlier |
+| S14b coordinated amendment | 2-entry amendment | clean Step 0 match; amendments drafted under ratified framing |
+| S14c prewhitened_ccf_lag | three-layer-upstream | clean Step 0 match |
+| S15 rolling_ccf_lag | two-layer assumption falsified at Step 0 | STOP 2 triggered; α three-layer-downstream ratified; A9 Class B 1st instance |
+| S17 dtw_alignment_lag | 1:1 simple-case assumption falsified at Step 0 | STOP 2 triggered; α three-layer-downstream ratified; A9 Class B 2nd instance |
+| S18 gcc_phat_delay | Tier II.bit-exact assumption falsified at Step 0 | STOP 2 triggered; β Tier IV three-layer-downstream ratified; A9 Class A 5th instance |
+| S11 pre-STOP-1 | A5 schema misattribution catch | pre-STOP-1 caught Class A 2nd instance |
+| S12 Step 0 | granger_causality entry presupposition | Step 0 caught Class A 3rd instance |
+| S16-absorption pre-STOP-1 | A5 schema misattribution recurrence | pre-STOP-1 caught Class A 4th instance |
+| S19-absorption Step 0 | no divergence (revised default operating) | clean Step 0 match per Class B revised default |
+
+**Cross-references:**
+- §19.4 A9 Class A + Class B failure modes (Option II workflow is
+  primary structural mitigation; cross-codified at A9 sub-class
+  refinement per S19-absorption)
+- §19.4 forward instrumentation note "Option II workflow codification"
+  at calibration_baseline.md (cross-reference preserved at §19.4
+  historical audit trail; status update to "codified at Workstream B
+  §4.6" deferred to next §19.4 absorption cycle)
+- §4.4 Operational application protocol (Option II operationalizes
+  verify-state-at-narration at trigger-execution time; complements
+  §4.4 narration-time application)
+- §4.5 Forward codification path (verify-state-at-first-consumption
+  sub-discipline at A6 codifies synthesis-claim refinement; §4.6
+  Option II workflow operationalizes trigger-drafting-vs-trigger-
+  execution discipline boundary)
+- §1.1 Q-A (Step 0 empirical re-Read is Q-A foundation; Option II
+  workflow ensures Q-A is empirically grounded rather than asserted)
+
+**Forward instrumentation:** workflow performance metric observation
+candidates: (a) STOP 2 catch rate (proportion of sub-sessions where
+Step 0 surfaces divergence; currently ~50% across Q1 entries); (b)
+Chat re-disposition cycle time (1 cycle per STOP 2 currently); (c)
+LOC overshoot rate (variable per framing complexity). Codification
+refinement at empirical metric accumulation per A3 design-class
+precedent.
+
+### §4.7 Forward Q1 Step 0 discipline
+
+Per §19.4 forward instrumentation note "Forward Q1 Step 0 discipline"
+deferred from S16-absorption + S19-absorption absorption cycles per
+codification threshold reached at n=2 informal observations per A3
+design-class precedent. Codified at this artifact per S20 Workstream B
+amendment cycle.
+
+**Discipline shape:** Step 0 sub-step for techniques where harness-
+vs-engine code path alignment matters for layered framing
+characterization. Empirical question requiring verification at Step
+0: does the harness wrapper invoke the same code path as the engine
+module's main computation?
+
+**Empirical observations (n=2 informal):**
+
+**Observation 1 — S14a Step 5 contextual sampling (p3_ccf outlier):**
+4 of 5 sampled harnesses (p3_kpss + p3_adf + p3_var + p3_granger
+sample) follow clean engine-uses-same-function convention (harness
+invokes the same statsmodels function the engine module uses).
+**p3_ccf is outlier:** harness validates `statsmodels.tsa.stattools.ccf`
+while engine modules (cross_correlation_lag, prewhitened_ccf_lag,
+rolling_ccf_lag) use custom numpy CCF implementation. Surfaced as
+S14a investigation outcome; informed S14b layered framing amendment
++ S14c + S15 three-layer framing for p3_ccf-covered triple.
+
+**Observation 2 — S18 Step 0 (p3_gcc_phat second observation):**
+p3_gcc_phat harness defines own `_gcc_phat` reference function inside
+p3_gcc_phat.py (literal-identity self-parity; both run_tsl and
+run_reference call same harness-internal `_gcc_phat`). Harness comment
+"mirrors TSL's custom impl" but engine module 386 LOC is materially
+more complex than harness's 12-LOC `_gcc_phat` (engine has 4 weighting
+variants + interpolation + zero-mean normalization + 6 post-processing
+sub-components vs harness's plain Knapp-Carter 1976 formula). Harness-
+bypasses-engine pattern recurring at second observation.
+
+**Pattern characterization:** harness-bypasses-engine pattern
+operates via multiple structural mechanisms:
+- Harness imports library function directly (e.g., p3_ccf imports
+  statsmodels.ccf) while engine module uses custom implementation
+- Harness defines harness-internal reference function (e.g., p3_dtw
+  + p3_gcc_phat define `_dtw_distance` / `_gcc_phat` inside harness
+  file) while engine module is materially more complex
+- Combinations of above
+
+Alignment between harness and engine code paths is empirical question
+requiring Step 0 verification per technique; cannot be inferred from
+audit Reference field or wrapper engine path citation alone.
+
+**Operational application (Q1 sub-session Step 0 sub-step):** for
+each Q1 technique under layered framing characterization, Step 0
+verifies (cross-referencing S14c-S18 STOP 2 report lettering
+convention for cross-session continuity): (e) audit reference +
+verdict + numerics; (f) harness wrapper run_tsl + run_reference code
+paths (specific to harness-vs-engine alignment verification); (g)
+engine module computation + post-processing complexity. Step 0 (f)
+specifically establishes harness code path; comparison against Step 0
+(g) engine code path surfaces alignment OR divergence. Divergence
+informs layered framing class determination (single-layer applies
+only when harness invokes same code path as engine; layered framing
+applies otherwise per A9 Class B revised default).
+
+**Cross-references:**
+- §1.1 Q-A (Step 0 empirical re-Read is Q-A foundation; harness-vs-
+  engine alignment is one Q-A sub-question)
+- §4.6 Option II workflow (Step 0 (f)/(g) harness-vs-engine
+  alignment verification is one operational step within Option II
+  Step 0 empirical re-Read)
+- §19.4 A9 Class A + Class B failure modes (harness-vs-engine
+  alignment verification is one mitigation surface for Class B
+  empirical-complexity assumption failures)
+- §19.4 forward instrumentation note "Forward Q1 Step 0 discipline"
+  at calibration_baseline.md (cross-reference preserved at §19.4
+  historical audit trail; status update to "codified at Workstream B
+  §4.7" deferred to next §19.4 absorption cycle)
+
+**Forward instrumentation:** codification refinement candidate at
+third analogous outlier observation per A3 design-class precedent.
+Refinement markers: (a) third outlier pattern surfacing; (b) pattern
+variant surfacing (new harness-vs-engine alignment failure mode not
+anticipated by n=2 baseline); (c) codification of harness-engine
+alignment as gate rather than Step 0 sub-step if pattern materially
+affects publication confidence.
 
 ## §5 Operating context preservation
 
