@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 5 catalog techniques with Phase 7+ Q1 trust documentation
+- 6 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17 amendments)
-- 70 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18 amendments)
+- 69 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -1792,7 +1792,445 @@ absorption cycle. **A9 Class B counter post-S17: n=2 ACTIVE**
 (codification threshold reached per A9 forward instrumentation;
 sub-class refinement candidate for next §19.4 absorption).
 
-## §3 Unvalidated catalog techniques (70 entries; ID-only enumeration)
+### gcc_phat_delay (Phase 7+ S18; sixth §2.5 entry; FIRST Tier IV Q1 entry; FIRST Pattern A.3 self-parity Q1 entry; completes Block 1 Causality; THREE-LAYER DOWNSTREAM-TOPOLOGY framing per S15/S17 precedent + Tier IV adaptation per S18 STOP 2 empirical investigation + β disposition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+IV — Phase 3 self-parity / paper-formula validated (Pattern A.3 per
+scope_reframing §2 lines 159-168 codification; ~10 wrappers per
+P-3 v1.2.0 §1 estimate). **CRITICAL DISTINCTION from S12-S17
+Tier II.bit-exact entries:** gcc_phat_delay validation is paper-
+formula self-parity (Knapp-Carter 1976 formula reimplemented and
+validated against itself; harness validates from-scratch
+implementation against same from-scratch implementation), NOT
+cross-package bit-exact validation. **Important nuance (three-layer
+downstream-topology framing per S18 β disposition; analogous to S15
+rolling_ccf_lag + S17 dtw_alignment_lag precedent with Tier IV +
+Pattern A.3 self-parity adaptations):** tier classification applies
+to Layer 1 (Knapp-Carter 1976 paper-formula self-parity at harness
+`_gcc_phat` reproducibility); Layer 2 (engine module GCC-PHAT core
+with 4 weighting variants + interpolation + zero-mean normalization)
+plausibly equivalent at base case but variants engine-specific;
+Layer 3 (engine-specific post-processing DOWNSTREAM of GCC core:
+GCC fftshift + lag-axis construction + max_lag restriction + peak
+detection + bootstrap CI + multi-table output + sampling-frequency
+handling) NOT covered by p3_gcc_phat parity audit. See Validation
+claim scope below for Pattern A.3 self-parity caveat + Layer 1
+retraction surface calibration (MEDIUM, elevated from S17 LOW per
+self-parity weaker than cross-package).
+
+**Framing precedent note (Tier IV three-layer-downstream;
+operationally distinct from Tier II.bit-exact three-layer-downstream
+of S15+S17):** gcc_phat_delay is 1:1 catalog↔wrapper mapping per
+p3_gcc_phat audit Wrapper field (`engine/techniques/gcc_phat_delay.py`
+sole engine module); analogous to S17 dtw_alignment_lag 1:1 entry
+under layered framing but with Tier IV (paper-formula self-parity)
+instead of Tier II.bit-exact (cross-package). Three-layer-downstream
+framing applies per S18 STOP 2 empirical finding (engine module 386
+LOC with 4 weighting variants + interpolation + peak detection +
+bootstrap CI + multi-table output is structurally analogous to S15/
+S17 Layer 3 post-processing complexity). **Tier IV adaptation** per
+Workstream B §3 Tier IV templates (Pattern A.3 self-parity framing
+replaces Tier II.bit-exact cross-package framing): Layer 1
+validation evidence is paper-formula reproducibility (harness
+validates Knapp-Carter formula against itself; reproducibility not
+cross-package correctness); Layer 2 + Layer 3 substantively
+unchanged in framing pattern from S15/S17 (engine-specific code
+unverified at audit). **A10 sub-class disposition deferred to next
+§19.4 absorption cycle:** S18 calibrates new Tier IV three-layer-
+downstream sub-class (distinct from S15/S17 Tier II.bit-exact
+three-layer-downstream); A10 taxonomy decisions (including pending
+S17 2c-vs-2d resolution AND S18 Tier IV three-layer-downstream
+sub-class placement) deferred per accumulation pattern.
+
+**Reference:** From-scratch self-parity (Knapp-Carter 1976 formula)
+**Verdict:** PASS Pattern A bit-exact under Pattern A.3 self-parity
+caveat (Layer 1 only; reproducibility validated NOT cross-package
+correctness; see Validation claim scope for Layer 2 + Layer 3
+coverage + self-parity caveat operational implication)
+**Audit:** `tools/reference_parity/reports/p3_gcc_phat_audit.md`
+**Audit date:** 2026-04-29
+**delay abs diff:** 0.0 (exact, integer-valued)
+
+**Source files (Tier IV three-layer-downstream per S18 β framing
+extending S15/S17 precedent with Tier IV adaptations):**
+`tools/reference_parity/harness/checks/p3_gcc_phat.py` lines 32-43
+(harness `_gcc_phat` reference function defined INSIDE p3_gcc_phat.py;
+12-LOC implementation of Knapp-Carter 1976 formula: FFT + cross-power
+spectrum + PHAT weighting + IFFT + argmax delay extraction)
++ `tools/reference_parity/harness/checks/p3_gcc_phat.py` lines 65-78
+(BOTH run_tsl AND run_reference call SAME `_gcc_phat(x, y)` function;
+literal-identity self-parity — both arms compute byte-identical
+output; harness comment line 69-71: "TSL's gcc_phat_delay computes
+the same formula — bypass wrapper output rounding by calling the
+math directly (mirrors TSL implementation exactly)"; harness claims
+to mirror engine module but engine is materially more complex per
+Step 0 (g))
++ `engine/techniques/gcc_phat_delay.py` lines 116-145 (Layer 2:
+engine module GCC-PHAT core; 4 weighting variants — phat default +
+scot + roth + unfiltered per lines 129-139; FFT zero-padding for
+interpolation per line 121 + preset interp_factor 1/4/16; zero-mean
+normalization per lines 117-118; cross-power spectrum + weighting +
+IFFT per lines 124-145; harness's `_gcc_phat` does NOT exercise
+weighting variants, interpolation factor, OR zero-mean preprocessing)
++ `engine/techniques/gcc_phat_delay.py` lines 145-156 + 161-175 +
+357-385 + 179-210 + multi-table construction (Layer 3 post-processing
+sub-components; see Validation claim scope below)
++ `tools/reference_parity/reports/p3_gcc_phat_audit.md`
+
+**Validation claim scope (TIER IV THREE-LAYER DOWNSTREAM-TOPOLOGY
+per S18 amendment per S15/S17 precedent + Tier IV self-parity
+adaptation):** TSL gcc_phat_delay output relies on three layered
+computations with downstream topology (Layer 3 post-processing
+follows GCC core; analogous to S15 rolling_ccf_lag + S17
+dtw_alignment_lag downstream topology). p3_gcc_phat audit validates
+Layer 1 (harness `_gcc_phat` vs same harness `_gcc_phat`; Pattern
+A.3 self-parity at literal identity) at single seeded fixture
+(delayed pair, T=512, true_delay=5, σ=0.05 noise, seed=42); delay
+metric measures harness `_gcc_phat` self-consistency (0.0 abs diff
+PASS), NOT cross-package agreement, NOT engine module GCC-PHAT core
+agreement, NOT engine post-processing correctness.
+
+- **Layer 1 — Knapp-Carter 1976 paper-formula self-parity (validated
+  under Pattern A.3 SELF-PARITY caveat):** bit-exact 0.0 abs diff
+  PASS verdict at literal-identity self-parity (both arms compute
+  byte-identical output); validates **reproducibility of paper
+  formula implementation**, NOT cross-package correctness.
+  **Pattern A.3 self-parity caveat (per Workstream B §3 Tier IV
+  template):** if Knapp-Carter 1976 paper formula implementation
+  has subtle error (sign convention, FFT convention, indexing
+  off-by-one, normalization convention), both harness arms
+  propagate identically and 0.0 abs diff PASS verdict does NOT
+  catch it. Pattern A.3 validates implementation matches paper-
+  defined formula; paper formula is itself the reference. If
+  paper formula is incorrect or under-specified, parity does not
+  catch it. Materially weaker validation evidence than Tier
+  II.bit-exact cross-package validation; Layer 1 retraction
+  surface calibrated MEDIUM (elevated from S17 1:1 cross-package
+  framing LOW).
+
+- **Layer 2 — engine module GCC-PHAT core (custom numpy with 4
+  weighting variants + interpolation + zero-mean normalization;
+  plausibly equivalent to validated Knapp-Carter formula at base
+  case but variants engine-specific):** Engine module lines 116-145
+  implement GCC-PHAT with configurable weighting (phat default +
+  scot + roth + unfiltered variants per lines 92-110 + 129-139);
+  zero-padding for interpolation (line 121 with preset-based
+  interp_factor 1/4/16); zero-mean normalization (lines 117-118);
+  uses `np.fft.rfft` (real FFT) while harness uses `np.fft.fft`
+  (complex FFT) — different code paths producing mathematically
+  equivalent base-case output. Bit-exact equivalence to validated
+  paper formula plausible at default settings (phat weighting +
+  interp_factor=1 + zero-mean as pre-processing) but variants +
+  interpolation + rfft-vs-fft code path unverified at p3_gcc_phat
+  audit. **Compound with Layer 1 Pattern A.3 caveat:** Layer 2
+  cross-validation against Layer 1 only validates against paper
+  formula reproducibility, NOT cross-package correctness; expert
+  review of paper formula AND engine implementation both required
+  for full validation confidence.
+
+- **Layer 3 — engine-specific post-processing DOWNSTREAM of GCC
+  core (NOT parity-validated):** Engine module applies six
+  post-processing sub-components AFTER GCC core distance + path
+  computation:
+  - **3a — GCC fftshift + lag-axis construction** (lines 145-150):
+    fftshift to center zero lag; lag-axis with interpolation
+    factor scaling. Engine-specific output preparation;
+    correctness depends on fftshift convention matching IFFT
+    output ordering.
+  - **3b — max_lag restriction** (lines 152-156): boolean mask
+    restricting GCC output to |lags_samples| ≤ max_lag (default
+    N//4). Engine-specific heuristic; correctness depends on
+    max_lag default + user-override appropriateness for
+    analysis use case.
+  - **3c — Peak detection with multi-peak support** (lines
+    161-175 + `_find_peaks` helper lines 357-385): primary peak
+    via argmax + secondary peaks via local-maximum detection
+    (preset-based n_peaks 3/5/10); peak detection beyond argmax
+    is engine-specific feature NOT in harness `_gcc_phat`.
+  - **3d — Bootstrap CI for delay estimate** (lines 179-210):
+    block bootstrap with block_size = n//10 (preset-based
+    bootstrap count 0/200/1000); 95% percentile CI on delay
+    estimate. Engine-specific uncertainty quantification NOT in
+    harness `_gcc_phat`; correctness depends on block bootstrap
+    appropriateness for delay-estimate uncertainty quantification.
+  - **3e — Multi-table output construction** (3 tables: peaks +
+    summary + GCC function): engine-specific output decomposition;
+    correctness depends on table construction matching analytical
+    use case.
+  - **3f — Sampling-frequency handling** (lines 149-150 + 162-163):
+    fs parameter for time-unit delay conversion; lags_time =
+    lags_samples / fs. Engine-specific feature; correctness depends
+    on fs interpretation matching user expectation.
+
+Single-fixture parity established at literal-identity self-parity
+for Layer 1 (0.0 abs diff bit-exact; reproducibility only NOT
+cross-package); parameter-sensitivity coverage NOT established at
+this validation tier (Q3b extension pending); Layer 2 closure
+pending engine-output cross-check at default settings (phat
+weighting + interp_factor=1) OR expert review of weighting variants
++ interpolation + zero-mean normalization implementation; Layer 3
+closure pending expert review of post-processing sub-components
+(engine-specific; no parity validation available; gcc_phat_delay's
+value-add for time-delay estimation IS the Layer 3 post-processing
+functionality — multi-peak detection + bootstrap CI + sampling-
+frequency handling — so expert review of these sub-components is
+operationally distinctive). **Critical Pattern A.3 self-parity
+caveat at Layer 1:** even at base case, Layer 1 validates paper
+formula reproducibility NOT correctness; if Knapp-Carter 1976
+implementation has subtle error, downstream Layer 2 + Layer 3
+inherit the error without detection. Expert review of paper formula
+implementation correctness recommended alongside Layer 2 + Layer 3
+review. Reference selection + tolerance specification AI-assisted
+with user ratification per Phase 7+ work program; pre-Path α expert
+review status; expert review pending end-of-work-program.
+
+**Methodology disclosure templates** (per Workstream B §3 Tier IV
+templates — paper-formula self-parity; multi-map cross-reference
+N/A per 1:1 mapping; three-layer downstream-topology framing per S18
+β disposition + S15/S17 precedent with Tier IV adaptations):
+
+*Pattern (i) Research note footnote:*
+> This analysis uses TSL technique gcc_phat_delay, paper-formula
+> from-scratch reimplementation validated per Phase 3 audit dated
+> 2026-04-29 (Pattern A.3 self-parity; Knapp-Carter 1976 formula
+> reimplemented and validated against itself; delay abs diff 0.0).
+> TSL engine module's GCC-PHAT core with 4 weighting variants +
+> interpolation + zero-mean normalization plausibly equivalent at
+> base case but variants engine-specific. Downstream post-processing
+> (peak detection + bootstrap CI + sampling-frequency handling +
+> multi-table output) is engine-specific and NOT covered by parity
+> audit; requires expert review for published use. **Critical
+> Pattern A.3 self-parity caveat:** validation is paper-formula
+> reproducibility NOT cross-package correctness; if Knapp-Carter
+> 1976 formula implementation has subtle error, both arms propagate
+> identically. Pre-Path α expert review status.
+
+*Pattern (ii) Technical appendix:*
+> Methodology: TSL technique gcc_phat_delay validated against
+> from-scratch reimplementation of Knapp-Carter 1976 paper-defined
+> formula; Pattern A.3 self-parity (Tier IV per Phase 7+ tier
+> taxonomy). **Paper reference:** Knapp & Carter 1976 (Generalized
+> Cross-Correlation Method for Estimation of Time Delay).
+> **Verdict:** PASS Pattern A bit-exact at machine precision; delay
+> abs diff 0.0 (exact, integer-valued). **Audit date:** 2026-04-29.
+> **Catalog mapping:** 1:1 catalog↔wrapper. **Validation claim
+> scope:** TSL `_gcc_phat` harness implementation matches Knapp-
+> Carter formula; paper formula is itself the reference. **Validation
+> claim exclusion:** if Knapp-Carter formula implementation has
+> subtle error (sign convention, FFT convention, indexing, or
+> normalization), both arms propagate identically and 0.0 abs diff
+> PASS verdict does NOT catch it. **Three-layer downstream-topology
+> framing per S18 β disposition (Tier IV adaptation of S15/S17
+> precedent):** **Layer 2 — engine module GCC-PHAT core:** TSL
+> engine module (`engine/techniques/gcc_phat_delay.py` lines 116-145)
+> implements GCC-PHAT with 4 weighting variants (phat / scot / roth
+> / unfiltered) + zero-padding interpolation + zero-mean
+> normalization; uses np.fft.rfft (real FFT) while harness uses
+> np.fft.fft (complex FFT); bit-exact equivalence to validated
+> Knapp-Carter formula plausible at base case (phat default +
+> interp_factor=1) but variants unverified. **Layer 3 — engine-
+> specific post-processing downstream:** engine module applies six
+> post-processing sub-components AFTER GCC core: (3a) GCC fftshift
+> + lag-axis construction; (3b) max_lag restriction; (3c) peak
+> detection with multi-peak support via _find_peaks helper; (3d)
+> bootstrap CI for delay estimate via block bootstrap; (3e)
+> multi-table output construction; (3f) sampling-frequency
+> handling. Layer 3 post-processing is engine-specific and NOT
+> covered by p3_gcc_phat parity audit; correctness requires expert
+> review across sub-components. **Fixture:** seeded single-fixture
+> (delayed pair, T=512, true_delay=5, σ=0.05 noise, seed=42);
+> parameter-sensitivity coverage NOT established; Q3b extension
+> pending. Pre-Path α expert review status; expert review pending
+> end-of-Phase-7+-work-program.
+
+*Pattern (iii) Risk model documentation:*
+> gcc_phat_delay validation: TSL Tier IV (paper-formula self-parity;
+> Pattern A.3). Paper reference: Knapp-Carter 1976. Audit:
+> `tools/reference_parity/reports/p3_gcc_phat_audit.md` dated
+> 2026-04-29. Verdict: PASS Pattern A bit-exact at machine precision
+> (delay abs diff 0.0). Catalog mapping: 1:1 catalog↔wrapper.
+> Validated against from-scratch reimplementation; paper formula is
+> reference; if paper formula incorrect or under-specified, parity
+> does not catch it. **Three-layer downstream-topology framing:**
+> Layer 1 (Knapp-Carter paper-formula self-parity) reproducibility-
+> validated under Pattern A.3 caveat; Layer 2 (engine GCC core +
+> weighting variants + interpolation + zero-mean) bit-exact
+> equivalence at base case plausible but variants engine-specific;
+> Layer 3 (post-processing) NOT parity-validated, engine-specific
+> implementation requires expert review of (3a) fftshift + lag-axis
+> + (3b) max_lag restriction + (3c) peak detection + (3d) bootstrap
+> CI + (3e) multi-table output + (3f) sampling-frequency handling.
+> Fixture: single-seeded; Q3b extension pending. Risk attribution
+> conditional on (a) parameter configurations matching fixture-
+> similar conditions AND (b) Knapp-Carter formula implementation
+> correctness (self-parity caveat) AND (c) Layer 2 engine variant
+> correctness AND (d) Layer 3 post-processing correctness — (b)+(c)+(d)
+> require expert review. Pre-Path α expert review status.
+
+*Pattern (iv) Internal use disclosure:*
+> gcc_phat_delay paper-formula self-parity validated (Pattern A.3;
+> Knapp-Carter 1976; reproducibility NOT cross-package); 1:1
+> catalog↔wrapper. Layer 2 (engine GCC core + 4 weighting variants
+> + interpolation + zero-mean) bit-exact equivalence at base case
+> plausible but variants engine-specific; Layer 3 (post-processing:
+> peak detection + bootstrap CI + multi-table output +
+> sampling-frequency handling) NOT parity-validated, requires
+> expert review; Pattern A.3 self-parity caveat applies (paper
+> formula correctness inherits to downstream layers); pre-Path α.
+
+**Validation provenance audit checklist (per Workstream B §1; applied
+at technique close):**
+
+- **Q-A (decision substance extracted/cited vs inferred):**
+  Extracted/cited. Reference selection from p3_gcc_phat_audit.md
+  verbatim ("from-scratch self-parity (Knapp-Carter 1976 formula)");
+  verdict + Pattern A.3 + date + delay abs diff 0.0 verbatim from
+  audit. Tier IV classification per scope_reframing §2 lines
+  159-168 codification (Pattern A.3 self-parity / paper-formula
+  validated). Three-layer downstream-topology framing extracted per
+  S18 STOP 2 empirical investigation (Step 0 (e)+(f)+(g) reads of
+  p3_gcc_phat_audit.md + p3_gcc_phat.py harness + 386 LOC engine
+  module) + S15 rolling_ccf_lag + S17 dtw_alignment_lag three-layer-
+  downstream precedent + β disposition + Tier IV adaptation
+  ratification. Layer 2 (lines 116-145 engine GCC core) + Layer 3
+  sub-components 3a/3b/3c/3d/3e/3f (lines 145-150 + 152-156 + 161-175
+  + 357-385 + 179-210 + multi-table construction + 149-150) empirically
+  grounded per Step 0 (g) verbatim line ranges. Catalog mapping
+  (1:1) verified per audit Wrapper field sole engine module
+  reference. **A9 Class A 5th instance acknowledgment:** S18 STOP 2
+  caught tier-enumeration incompleteness in Chat Ratification 3
+  (omitted Tier IV; 5 of 7 tiers enumerated); Class A counter
+  n=4 → n=5 ACTIVE; codification reinforced at §19.4 LOCKED state;
+  sub-class refinement candidate (identical-misattribution-recurrence
+  sub-pattern instances #2+#4; tier-enumeration-omission sub-pattern
+  instance #5) for next §19.4 absorption cycle. Verify-state-at-first-
+  consumption sub-discipline 11th instance application (S18 STOP 2
+  caught Tier II.bit-exact framing assumption + tier-enumeration
+  omission at Step 0 per A9 Class A + Class B mitigation patterns
+  both operating).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at sixth-technique selection (user ratified
+  gcc_phat_delay under Tier 2 case-against framing per Phase 7+
+  S17-close proposal as "completes Block 1 Causality"; case-against
+  weighted but not invalidating per efficient ratification
+  disposition). Pro-forma elements present per Mark 3 efficient-
+  ratification pattern. **Q-B pattern persists at n=7 across S12 +
+  S13 + S14b + S14c + S15 + S17 + S18; well past n=4 codification
+  candidate threshold; sub-class refinement candidate at next §19.4
+  absorption cycle** (cross-reference §4 forward instrumentation
+  note "Q-B audit checklist operational pattern" codified at
+  S16-absorption alongside A9 Class A 5th instance + Class B n=2 +
+  A10 sub-class taxonomy 2c/2d/Tier-IV-three-layer-downstream
+  resolution + Option II workflow + forward Q1 Step 0 discipline +
+  Workstream B amendment cycle deferrals). Not pro-forma across all
+  upstream decisions for this technique (Tier IV three-layer
+  downstream-topology framing required STOP 2 empirical
+  investigation + β disposition ratification + Pattern A.3 self-
+  parity caveat surfacing + Layer 3 six-sub-component enumeration).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 (Knapp-Carter 1976 paper-formula self-parity
+  reproducibility)** per bit-exact 0.0 abs diff PASS verdict at
+  literal-identity self-parity AND Pattern A.3 self-parity caveat
+  explicit in disclosure language; reproducibility evidence
+  defensible to all three audiences UNDER Pattern A.3 caveat
+  acknowledging weaker validation than cross-package. **Conditional
+  for Layer 2 (engine GCC core with weighting variants +
+  interpolation + zero-mean normalization)** — requires expert
+  review of engine implementation OR engine-output cross-check
+  against harness `_gcc_phat` at default settings (phat +
+  interp_factor=1) for base-case equivalence verification + variant
+  correctness review. **Conditional for Layer 3 (post-processing)** —
+  requires expert review of: 3a fftshift convention + 3b max_lag
+  default heuristic + 3c peak detection logic + 3d bootstrap CI
+  appropriateness for delay-estimate uncertainty + 3e multi-table
+  output construction + 3f sampling-frequency handling. **Compound
+  caveat across layers:** Pattern A.3 self-parity caveat at Layer 1
+  applies to downstream Layer 2 + Layer 3 (if Knapp-Carter formula
+  implementation has subtle error, all downstream layers inherit).
+  Defensible to all three audiences with disclosure language as
+  drafted: published audience (Tier IV three-layer downstream-
+  topology framing transparent with Pattern A.3 caveat); Morgan
+  Stanley compliance review (precise audit citation + tier taxonomy
+  + Layer 1 / Layer 2 / Layer 3 scope delineation + Pattern A.3
+  self-parity caveat surfacing); external expert reviewer at Path α
+  close (verbatim audit numerics + honest disclosure of self-parity
+  caveat + Q3b extension pending + Layer 2 + Layer 3 sub-components
+  expert review scope identified + paper formula implementation
+  correctness review recommended alongside engine review).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-to-high. gcc_phat_delay is typically used for time-delay
+  estimation in signal processing + sensor-array applications
+  (audio source localization; sensor synchronization; cross-modality
+  alignment) where Knapp-Carter 1976 formula is canonical methodology
+  with widespread implementation. **Layer-specific retraction
+  surface (per S18 Tier IV three-layer downstream-topology framing
+  with Pattern A.3 self-parity caveat):**
+  - Layer 1 (Knapp-Carter paper-formula self-parity): **MEDIUM
+    (elevated from S17 LOW per Pattern A.3 self-parity caveat).**
+    Self-parity is materially weaker validation than cross-package
+    bit-exact (S17 framing). If paper formula implementation has
+    subtle error (sign convention; FFT convention; indexing
+    off-by-one; normalization convention), 0.0 abs diff PASS
+    verdict does NOT catch it because both arms compute byte-
+    identical output. Expert review of paper formula
+    implementation correctness recommended; Knapp-Carter 1976
+    formula is well-established but TSL's specific implementation
+    (FFT conventions; argmax handling; sign for delay
+    interpretation) requires verification.
+  - Layer 2 (engine GCC core + weighting variants + interpolation
+    + zero-mean): MEDIUM analogous to S15/S17 Layer 2 (engine
+    implementation equivalence) + engine-specific weighting variant
+    correctness + interpolation factor correctness + zero-mean
+    normalization appropriateness.
+  - Layer 3 (downstream post-processing): MEDIUM-HIGH specifically
+    for gcc_phat_delay (NOT shared with other catalog techniques
+    due to 1:1 mapping). Downstream post-processing is the
+    operational distinctive of gcc_phat_delay — GCC-PHAT
+    methodology's value-add for time-delay estimation IS the peak
+    detection + bootstrap CI uncertainty quantification +
+    sampling-frequency handling functionality; expert review
+    surfacing material errors (peak detection logic; bootstrap CI
+    appropriateness; sampling-frequency interpretation) would
+    invalidate the time-delay-estimate-with-uncertainty claim
+    motivating gcc_phat_delay use. **Analogous to S15 Layer 3
+    MEDIUM-HIGH and S17 Layer 3 MEDIUM-HIGH but for GCC-PHAT
+    methodology distinctive ("time-delay-estimate-with-uncertainty
+    claim invalidated" vs S17's "time-varying lead-lag claim
+    invalidated" vs S15's "regime/break-aware claim invalidated");
+    three downstream-topology Layer 3 surfaces now observed
+    operationally distinct but parallel risk structures.**
+  **Compound retraction surface (Pattern A.3 self-parity caveat
+  Layer 1 + Layer 2 unverified + Layer 3 unverified):** if any
+  combination of Layer 1 paper formula error + Layer 2 variant
+  error + Layer 3 sub-component error surfaces, retraction
+  surface compounds across layers; conservative publication
+  pacing recommended pending Path α expert review.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; sixth technique to enter status per S18
+ratification; **FIRST Tier IV Q1 entry under layered framing**
+(distinct from S12-S17 all Tier II.bit-exact entries); FIRST Pattern
+A.3 self-parity Q1 entry; **COMPLETES Block 1 Causality (first
+catalog block fully Q1-amended per Q1 work program scope)**.
+**S18 Tier IV three-layer-downstream framing** applies with Pattern
+A.3 self-parity caveat at Layer 1 (retraction surface MEDIUM
+elevated from S17 LOW per self-parity weaker than cross-package);
+catalog-mapping-distinct from S15 multi-map three-layer-downstream;
+tier-distinct from S15/S17 Tier II.bit-exact three-layer-downstream.
+A10 sub-class disposition (Tier IV three-layer-downstream as new
+sub-class observation distinct from existing 2a/2b/2c) deferred to
+next §19.4 absorption cycle. **A9 Class A counter post-S18: n=5
+ACTIVE** (tier-enumeration-omission sub-pattern instance #5;
+identical-misattribution-recurrence sub-pattern observation across
+instances #2+#4; sub-class refinement codification candidate per
+next §19.4 absorption). **A9 Class B counter post-S18: n=2 ACTIVE**
+(unchanged; revised default layered-framing-applicable expectation
+empirically confirmed at S18 Step 0).
+
+## §3 Unvalidated catalog techniques (69 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -1812,8 +2250,8 @@ Cross-reference: `resources/catalog/techniques_catalog.json`
 for catalog-side documentation (parameters, presets,
 descriptions, summaries).
 
-### Causality / Relationships / Lead-Lag (1 unvalidated; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15 + S17)
-`gcc_phat_delay`
+### Causality / Relationships / Lead-Lag (0 unvalidated; Block 1 FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15 + S17 + S18)
+(all 6 techniques moved to §2.5)
 
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
@@ -1851,7 +2289,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 70 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag moved to §2.5).
+**Total: 69 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay moved to §2.5; **Block 1 Causality FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope**).
 
 ## §4 How to use this document
 
@@ -1894,7 +2332,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (70 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17 amendments):**
+**Tier 3 — UNVALIDATED (69 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
