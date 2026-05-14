@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 3 catalog techniques with Phase 7+ Q1 trust documentation
+- 4 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c amendments)
-- 72 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15 amendments)
+- 71 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -1068,7 +1068,365 @@ equivalent but unverified; Layer 2b (AR-prewhitening pipeline) NOT
 parity-validated, engine-specific implementation requires expert
 review.**
 
-## §3 Unvalidated catalog techniques (72 entries; ID-only enumeration)
+### rolling_ccf_lag (Phase 7+ S15; fourth §2.5 entry; third of p3_ccf-covered triple per Workstream B §3.3 multi-map handling; completes triple; THREE-LAYER DOWNSTREAM-TOPOLOGY framing per S15 STOP 2 empirical investigation + S14b + S14c precedent + α disposition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2). **Important nuance (three-layer downstream-topology
+framing per S15 extending S14b/S14c precedent):** tier classification
+applies to Layer 1 (statsmodels.tsa.stattools.ccf vs R stats::ccf);
+Layer 2 (engine module CCF + rolling-window orchestration) plausibly
+equivalent at CCF math but rolling-window orchestration
+engine-specific; Layer 3 (engine-specific post-processing DOWNSTREAM
+of CCF: boundary-hit flagging + structural break detection via
+ruptures.Pelt + AC-corrected Bartlett band + split-regime summary)
+NOT covered by p3_ccf parity audit. **Topology distinction from S14c
+three-layer:** S14c had Layer 2b AR-prewhitening UPSTREAM of CCF
+(engine-specific upstream layer between input and CCF computation);
+S15 has Layer 3 post-processing DOWNSTREAM of CCF (engine-specific
+downstream layer between CCF computation and final output). Both
+topologically distinct; same layer depth (three); different
+operational risk surface. See Validation claim scope below.
+
+**Multi-map note (per Workstream B §3.3):** rolling_ccf_lag is one of
+3 catalog techniques covered by shared Phase 3 wrapper p3_ccf
+(covers cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag);
+validation evidence per p3_ccf_audit.md applies to
+`statsmodels.tsa.stattools.ccf` vs R `stats::ccf` at harness TSL arm.
+**Per-catalog interpretation + per-catalog code path mapping
+(completes p3_ccf-covered triple under corrected layered framing):**
+for rolling_ccf_lag specifically, engine module computes CCF on
+rolling-window sub-series (engine-specific window iteration +
+per-window custom numpy CCF) + applies substantial DOWNSTREAM
+post-processing (boundary-hit flagging + ruptures.Pelt structural
+break detection + AC-corrected Bartlett band + split-regime summary).
+cross_correlation_lag (S13 + S14b two-layer) handled raw CCF without
+rolling-window or post-processing; prewhitened_ccf_lag (S14c
+three-layer-upstream) applied AR-prewhitening BEFORE CCF but no
+post-processing; rolling_ccf_lag (S15 three-layer-downstream) applies
+rolling-window + substantial post-processing AFTER CCF. Completes
+p3_ccf-covered triple sequential disposition.
+
+**Reference:** R `stats::ccf` (base R 4.5.3)
+**Verdict:** PASS Pattern A bit-exact (Layer 1 only; see Validation
+claim scope for Layer 2 + Layer 3 coverage)
+**Audit:** `tools/reference_parity/reports/p3_ccf_audit.md`
+**Audit date:** 2026-04-29
+**ccf_positive max abs diff:** 1.33e-15
+**ccf_positive max rel diff:** 1.46e-15
+
+**Source files (three-layer downstream-topology per S15 framing
+extending S14b/S14c precedent):**
+`tools/reference_parity/harness/checks/p3_ccf.py` lines 51-59 (harness
+TSL arm invokes `statsmodels.tsa.stattools.ccf` directly on input
+fixture; does NOT invoke engine modules)
++ `engine/techniques/rolling_ccf_lag.py` lines 396-462 (Layer 2:
+rolling-window orchestration + per-window custom numpy CCF;
+window_starts = list(range(0, n - window + 1, step)); per-window
+x_dm + y_dm + denom + ccf_val across lags -max_lag..+max_lag;
+preset-based window/step/max_lag config lines 55-72)
++ `engine/techniques/rolling_ccf_lag.py` lines 464-472 (Layer 3a:
+boundary-hit flagging via flag_boundary_hits helper; threshold
+default 0.8; excludes boundary-lag windows from summary statistics)
++ `engine/techniques/rolling_ccf_lag.py` lines 75-254 + 492-498
+(Layer 3b: structural break detection via ruptures.Pelt;
+_detect_structural_break helper; 4-criteria validation —
+min-segment run-length, modal-sign consistency ≥2/3, sign contrast,
+magnitude contrast ≥0.25; PELT penalty `pen = log(len(arr)) *
+max(var, 1e-6)`)
++ `engine/techniques/rolling_ccf_lag.py` lines 412-490 (Layer 3c:
+AC-corrected Bartlett band with per-window scaling;
+`bartlett_effective_n` on full series + per-window scaling
+`n_eff_window = max(3.0, min(window, n_eff_full * window / n))`)
++ `engine/techniques/rolling_ccf_lag.py` lines 651-715 + helper
+`_regime_stats` (Layer 3d: split-regime summary; regime-specific
+lag/correlation summary when break detected)
++ `engine/techniques/cross_correlation_lag.py` +
+`engine/techniques/prewhitened_ccf_lag.py` (other p3_ccf-covered
+engine modules; not exercised by p3_ccf harness)
++ `tools/reference_parity/reports/p3_ccf_audit.md`
+
+**Validation claim scope (THREE-LAYER DOWNSTREAM-TOPOLOGY per S15
+amendment per S14b/S14c precedent + α disposition):** TSL
+rolling_ccf_lag output relies on three layered computations with
+downstream topology (Layer 3 post-processing follows CCF; contrasts
+with S14c prewhitened_ccf_lag upstream topology where Layer 2b
+prewhitening precedes CCF). p3_ccf audit validates Layer 1
+(statsmodels.ccf) vs R stats::ccf at single seeded fixture
+(lagged-pair series, T=200, true lag=3, seed=42); ccf_positive
+metric measures statsmodels.ccf vs R stats::ccf agreement, NOT
+engine module CCF agreement, NOT rolling-window orchestration
+correctness, NOT downstream post-processing correctness.
+
+- **Layer 1 — CCF math at statsmodels.ccf (validated):** bit-exact
+  PASS verdict at machine precision; parity covers Pearson
+  cross-correlation across positive lags 0..MAX_LAG.
+
+- **Layer 2 — engine module CCF + rolling-window orchestration
+  (plausibly equivalent at CCF math; rolling-window engine-specific):**
+  Engine module lines 396-462 iterate over windows (preset-based
+  window/step/max_lag config) + per-window custom numpy CCF
+  computation (manual normalized cross-covariance: x_dm - mean;
+  y_dm - mean; ccf_val = sum(x_dm * y_dm) / denom across lags).
+  CCF math bit-exact equivalence to validated statsmodels.ccf
+  plausible (same Pearson formula; same float64) but unverified
+  analogous to S14b cross_correlation_lag Layer 2 framing.
+  Rolling-window iteration engine-specific (window sizing heuristic
+  per preset; step size; max_lag_frac); NOT covered by p3_ccf
+  parity audit; correctness depends on window/step/max_lag
+  heuristics being appropriate for the analysis use case.
+
+- **Layer 3 — engine-specific post-processing DOWNSTREAM of CCF
+  (NOT parity-validated):** Engine module applies four post-processing
+  sub-components AFTER per-window CCF computation:
+  - **3a — Boundary-hit flagging** (lines 464-472 + flag_boundary_hits
+    helper from base): windows with optimal lag at/near ±max_lag
+    (threshold default 0.8) flagged as unreliable; excluded from
+    summary statistics. Engine-specific threshold heuristic;
+    correctness requires expert review of threshold
+    appropriateness.
+  - **3b — Structural break detection via ruptures.Pelt** (lines
+    75-254 helper `_detect_structural_break` + lines 492-498
+    invocation): 180+ LOC engine-specific changepoint detection
+    logic. Runs PELT on optimal_ccfs + sign-of-CCF series; applies
+    4-criteria validation — (1) min-segment run-length, (2)
+    modal-sign consistency ≥2/3, (3) sign contrast across segments,
+    (4) magnitude contrast ≥0.25. PELT penalty `pen = log(len(arr))
+    * max(var, 1e-6)`. NOT covered by p3_ccf parity audit;
+    correctness depends on ruptures.Pelt library + 4-criteria
+    heuristic + penalty formula appropriateness for rolling-CCF
+    output series.
+  - **3c — AC-corrected Bartlett band with per-window scaling**
+    (lines 412-490): `bartlett_effective_n` on full series + per-window
+    scaling `n_eff_window = max(3.0, min(window, n_eff_full * window
+    / n))`. Engine-specific scaling heuristic; AC correction has its
+    own assumptions (Bartlett formula validity for cross-correlation;
+    per-window scaling appropriateness).
+  - **3d — Split-regime summary** (lines 651-715 + helper
+    `_regime_stats`): regime-specific lag/correlation summary when
+    break detected; format_pairwise_summary with pre/post regime
+    stats; engine-specific summary construction.
+
+Single-fixture parity established at machine precision for Layer 1;
+parameter-sensitivity coverage NOT established (Q3b extension
+pending); Layer 2 CCF math closure pending engine-output cross-check
+OR expert review (analogous to S14b cross_correlation_lag Layer 2);
+Layer 2 rolling-window orchestration + Layer 3 post-processing
+closure pending expert review (engine-specific; no parity validation
+available; rolling_ccf_lag's value-add over raw cross_correlation_lag
+IS the rolling + post-processing functionality, so expert review of
+these layers is operationally distinctive). Reference selection +
+tolerance specification AI-assisted with user ratification per
+Phase 7+ work program; pre-Path α expert review status; expert
+review pending end-of-work-program.
+
+**Methodology disclosure templates** (per Workstream B §3 Tier
+II.bit-exact templates; multi-map cross-reference per §3.3;
+three-layer downstream-topology framing per S15 α disposition;
+Bundle option II depth distribution):
+
+*Pattern (i) Research note footnote:*
+> This analysis uses TSL technique rolling_ccf_lag. CCF math layer
+> (statsmodels.tsa.stattools.ccf) is cross-package bit-exact parity
+> validated against R `stats::ccf` (base R 4.5.3) per Phase 3 audit
+> dated 2026-04-29 (ccf_positive max abs diff 1.33e-15; shared
+> p3_ccf wrapper covers cross_correlation_lag + prewhitened_ccf_lag
+> + rolling_ccf_lag). TSL engine module's custom numpy CCF +
+> rolling-window orchestration plausibly equivalent at CCF math but
+> rolling-window engine-specific. Downstream post-processing
+> (boundary flagging + structural break detection via ruptures.Pelt
+> + AC-corrected Bartlett band + split-regime summary) is
+> engine-specific and NOT covered by parity audit; requires expert
+> review for published use. Pre-Path α expert review status.
+
+*Pattern (ii) Technical appendix:*
+> Methodology: TSL technique rolling_ccf_lag implements three layered
+> computations with downstream topology (Layer 3 post-processing
+> follows CCF; contrasts with prewhitened_ccf_lag upstream topology).
+> **Layer 1 — CCF math at statsmodels.ccf:** validated per Phase 3
+> reference parity infrastructure. **Reference:** R `stats::ccf` (base
+> R 4.5.3). **Verdict:** PASS Pattern A.2 bit-exact at machine
+> precision; ccf_positive max abs diff 1.33e-15, max rel diff
+> 1.46e-15. **Audit date:** 2026-04-29. **Multi-map coverage:**
+> rolling_ccf_lag is one of 3 catalog techniques covered by shared
+> Phase 3 wrapper p3_ccf; validation evidence applies to
+> `statsmodels.tsa.stattools.ccf` (the harness TSL arm) vs R
+> `stats::ccf`. **Layer 2 — engine module CCF + rolling-window
+> orchestration:** TSL engine module (`engine/techniques/rolling_ccf_lag.py`
+> lines 396-462) computes CCF on rolling-window sub-series via custom
+> numpy implementation; bit-exact equivalence to validated
+> statsmodels.ccf plausible (same Pearson cross-correlation formula;
+> same float64 arithmetic) but NOT empirically verified; rolling-window
+> iteration is engine-specific (preset-based window/step/max_lag
+> heuristics). **Layer 3 — engine-specific post-processing downstream:**
+> engine module applies four post-processing sub-components AFTER
+> per-window CCF: (3a) boundary-hit flagging with threshold default
+> 0.8 (lines 464-472); (3b) structural break detection via
+> ruptures.Pelt with 4-criteria validation (min-segment run-length,
+> modal-sign consistency ≥2/3, sign contrast, magnitude contrast
+> ≥0.25; PELT penalty pen = log(len(arr)) * max(var, 1e-6); lines
+> 75-254 + 492-498; 180+ LOC); (3c) AC-corrected Bartlett band with
+> per-window scaling (n_eff_window = max(3.0, min(window,
+> n_eff_full * window / n)); lines 412-490); (3d) split-regime
+> summary when break detected (lines 651-715). Layer 3
+> post-processing is engine-specific and NOT covered by p3_ccf
+> parity audit; correctness requires expert review of boundary
+> threshold + ruptures.Pelt 4-criteria heuristic + AC correction
+> scaling + split-regime construction. **Fixture:** seeded
+> single-fixture (lagged-pair series, T=200, true lag=3, seed=42);
+> parameter-sensitivity coverage NOT established; Q3b extension
+> pending. Reference selection + tolerance specification AI-assisted
+> with user ratification. Pre-Path α expert review status; expert
+> review pending end-of-Phase-7+-work-program.
+
+*Pattern (iii) Risk model documentation:*
+> rolling_ccf_lag validation: TSL Tier II.bit-exact (Layer 1 CCF
+> math at statsmodels.ccf only). Reference: R `stats::ccf` (base R
+> 4.5.3). Audit: `tools/reference_parity/reports/p3_ccf_audit.md`
+> dated 2026-04-29. Verdict: PASS Pattern A.2 bit-exact at machine
+> precision (ccf_positive max abs diff 1.33e-15). Multi-map coverage:
+> shared p3_ccf wrapper covers cross_correlation_lag +
+> prewhitened_ccf_lag + rolling_ccf_lag. **Three-layer
+> downstream-topology framing:** Layer 1 (statsmodels.ccf)
+> parity-validated; Layer 2 (engine CCF + rolling-window) bit-exact
+> equivalence plausible but unverified at CCF math, rolling-window
+> engine-specific; Layer 3 (post-processing) NOT parity-validated,
+> engine-specific implementation requires expert review of (3a)
+> boundary-hit flagging threshold + (3b) ruptures.Pelt 4-criteria
+> structural break detection + (3c) AC-corrected Bartlett band
+> per-window scaling + (3d) split-regime summary construction.
+> Fixture: single-seeded; Q3b extension pending. Risk attribution
+> conditional on (a) parameter configurations matching
+> fixture-similar conditions AND (b) Layer 2 engine CCF +
+> rolling-window correctness AND (c) Layer 3 post-processing
+> correctness across 3a/3b/3c/3d sub-components — (b) + (c) require
+> expert review. Pre-Path α expert review status.
+
+*Pattern (iv) Internal use disclosure:*
+> rolling_ccf_lag CCF math layer (statsmodels.ccf) cross-package
+> bit-exact validated against R `stats::ccf` via shared p3_ccf
+> wrapper; Layer 2 (engine custom numpy CCF + rolling-window)
+> bit-exact equivalence at CCF math plausible but unverified +
+> rolling-window engine-specific; Layer 3 (post-processing: boundary
+> flagging + structural break detection via ruptures.Pelt with
+> 4-criteria validation + AC-corrected Bartlett band per-window
+> scaling + split-regime summary) NOT parity-validated, requires
+> expert review; pre-Path α.
+
+**Validation provenance audit checklist (per Workstream B §1; applied
+at technique close):**
+
+- **Q-A (decision substance extracted/cited vs inferred):**
+  Extracted/cited. Reference selection from p3_ccf_audit.md verbatim
+  (R `stats::ccf` base R 4.5.3); verdict + Pattern + date + numerics
+  verbatim. Multi-map characterization extracted from scope_reframing
+  §2 + Workstream B §3.3. Three-layer downstream-topology framing
+  extracted per S15 STOP 2 empirical investigation (Step 0 (f) read
+  of `engine/techniques/rolling_ccf_lag.py` 845 LOC) + S14b two-layer
+  precedent + S14c three-layer-upstream precedent + α disposition
+  ratification. Layer 2 (lines 396-462 rolling-window + custom numpy
+  CCF) + Layer 3 (lines 464-472 3a + 75-254 + 492-498 3b + 412-490
+  3c + 651-715 3d) sub-components empirically grounded per Step 0
+  (f) verbatim line ranges. Topology distinction from S14c
+  (downstream post-processing vs upstream prewhitening) surfaced
+  per institutional-grade disclosure decision. Verify-state-at-first-consumption
+  sub-discipline 9th instance application (forward-at-authoring +
+  STOP 2 caught two-layer framing assumption empirical falsification;
+  matures from S14c 8th-instance proactive-disclosure to S15
+  9th-instance proactive-disclosure-with-assumption-falsification-catch).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at fourth-technique selection (user ratified
+  rolling_ccf_lag under Tier 2 case-against framing per Phase 7+
+  S14c-close proposal; case-against weighted but not invalidating
+  per efficient ratification disposition). Pro-forma elements
+  present per Mark 3 efficient-ratification pattern (operating-context
+  preservation per Workstream B §5.3); **Q-B pattern persists at n=5
+  across S12 + S13 + S14b + S14c + S15; well past n=4 codification
+  candidate threshold** (ratified at S14b STOP 1 + S14c STOP 1 +
+  S15 STOP 2 disposition; forward instrumentation for §19.4
+  absorption — Q1 audit checklist operational pattern observation
+  alongside Class A + Class B + forward Q1 Step 0 discipline + Q1
+  amendment class baseline + Option II workflow + sub-discipline
+  maturation). Not pro-forma across all upstream decisions for this
+  technique (three-layer downstream-topology framing required STOP 2
+  empirical investigation + α disposition ratification + Layer 3
+  sub-component 4-fold enumeration).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 (CCF math at statsmodels.ccf)** per bit-exact
+  PASS verdict at machine precision against canonical R `stats::ccf`.
+  **Conditional for Layer 2 (engine CCF + rolling-window
+  orchestration)** — CCF math bit-exact equivalence to validated
+  statsmodels.ccf plausible but unverified (analogous to S14b
+  cross_correlation_lag Layer 2); rolling-window iteration engine-specific
+  (window/step/max_lag heuristics require expert review of
+  appropriateness). **Conditional for Layer 3 (post-processing)** —
+  requires expert review of: 3a boundary-hit threshold heuristic
+  (0.8 default; appropriateness for analysis use case); 3b
+  ruptures.Pelt structural break detection (4-criteria validation
+  + PELT penalty formula; correctness for rolling-CCF output
+  series); 3c AC-corrected Bartlett band per-window scaling
+  (formula appropriateness for rolling cross-correlation
+  significance assessment); 3d split-regime summary construction
+  (regime-specific aggregation methodology). Defensible to all
+  three audiences with disclosure language as drafted: published
+  audience (three-layer downstream-topology framing transparent);
+  Morgan Stanley compliance review (precise audit citation + tier
+  taxonomy + Layer 1 / Layer 2 / Layer 3 scope delineation +
+  topology distinction from S14c); external expert reviewer at
+  Path α close (verbatim audit numerics + honest disclosure of
+  what's validated and what's not + Q3b extension pending + Layer
+  2 + Layer 3 sub-components expert review scope identified with
+  specific line ranges).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-to-high. rolling_ccf_lag is typically used for time-varying
+  lead-lag analysis in financial/macro time-series research where
+  structural break detection is a value-add over raw or prewhitened
+  CCF; widely cited rolling-window methodology with regime-shift
+  awareness. **Layer-specific retraction surface (per S15
+  three-layer downstream-topology framing):**
+  - Layer 1 (CCF math at statsmodels.ccf): low; multi-map
+    propagation risk if shared CCF error found.
+  - Layer 2 (engine CCF + rolling-window orchestration): MEDIUM
+    analogous to S14b cross_correlation_lag Layer 2 (CCF math
+    equivalence) + engine-specific window/step/max_lag heuristic
+    appropriateness.
+  - Layer 3 (downstream post-processing): MEDIUM-HIGH specifically
+    for rolling_ccf_lag (NOT shared with cross_correlation_lag or
+    prewhitened_ccf_lag). Downstream post-processing is the
+    operational distinctive of rolling_ccf_lag — rolling-CCF
+    methodology relies on boundary flagging + structural break
+    detection + AC-corrected significance + split-regime summary
+    to deliver value-add over raw CCF; expert review surfacing
+    material errors (boundary threshold; ruptures.Pelt 4-criteria
+    validation; AC correction scaling; split-regime construction)
+    would invalidate the regime/break-aware lead-lag claim
+    motivating rolling_ccf_lag use over raw cross_correlation_lag.
+    **Topologically distinct from S14c Layer 2b MEDIUM-HIGH:**
+    S14c upstream prewhitening errors affect what CCF sees
+    (cleaner-CCF claim invalidated); S15 downstream post-processing
+    errors affect what user sees (regime/break-aware claim
+    invalidated); both MEDIUM-HIGH but operationally distinct risk
+    surfaces.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; fourth technique to enter status per S15
+ratification; third of p3_ccf-covered triple under corrected
+layered framing (cross_correlation_lag S13 + S14b two-layer
+amendment; prewhitened_ccf_lag S14c three-layer-upstream;
+rolling_ccf_lag S15 three-layer-downstream). **Completes
+p3_ccf-covered triple sequential disposition.** **S15 three-layer
+downstream-topology framing topologically distinct from S14c
+three-layer-upstream:** S14c had Layer 2b AR-prewhitening UPSTREAM
+of CCF; S15 has Layer 3 post-processing DOWNSTREAM of CCF (boundary
+flagging + structural break detection via ruptures.Pelt with
+4-criteria validation + AC-corrected Bartlett band per-window
+scaling + split-regime summary). Both topologically distinct; same
+layer depth (three); different operational risk surface.
+
+## §3 Unvalidated catalog techniques (71 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -1088,8 +1446,8 @@ Cross-reference: `resources/catalog/techniques_catalog.json`
 for catalog-side documentation (parameters, presets,
 descriptions, summaries).
 
-### Causality / Relationships / Lead-Lag (3 unvalidated; granger_causality + cross_correlation_lag + prewhitened_ccf_lag moved to §2.5 per Phase 7+ S12 + S13 + S14c)
-`dtw_alignment_lag`, `gcc_phat_delay`, `rolling_ccf_lag`
+### Causality / Relationships / Lead-Lag (2 unvalidated; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15)
+`dtw_alignment_lag`, `gcc_phat_delay`
 
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
@@ -1127,7 +1485,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 72 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag moved to §2.5).
+**Total: 71 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag moved to §2.5).
 
 ## §4 How to use this document
 
@@ -1170,7 +1528,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (72 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c amendments):**
+**Tier 3 — UNVALIDATED (71 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
