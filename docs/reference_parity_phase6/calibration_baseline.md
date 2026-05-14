@@ -33,8 +33,8 @@ amendment files).
 | A6 | 2026-05-10 (Phase 7+ S6 first codification per sixth A2 observation strengthening + scope drift surfacing) | Phase 7+ S6 (`53653f1`) | active | Verify-state-at-narration discipline calibration (blocking-checkpoint status; HEAD-stability + prior-step-discipline + marginal-returns boundary) |
 | A7 | 2026-05-10 (Phase 7+ S6 first instance) | Phase 7+ S6 (`53653f1`) | active | Scope-re-framing sub-session class (n=1 baseline; first taxonomy entry) |
 | A8 | 2026-05-10 (Phase 7+ S6 first codification per STOP 1.5 cycle execution) | Phase 7+ S6 (`53653f1`) | active | STOP-AND-CONFIRM 1.5 cycle pattern (revision-cycle STOP codification) |
-| A9 | 2026-05-10 (Phase 7+ S16-absorption first codification per Class A n=4 + Class B n=1 accumulation; S10/S11/S12/S15/S16-absorption Step 0 observations) | Phase 7+ S16-absorption (this commit) | active | Chat-trigger empirical-state-assumption failure mode (two sub-classes: Class A baseline-state assertion n=4 + Class B empirical-complexity assumption n=1; common shape + common Option II mitigation) |
-| A10 | 2026-05-10 (Phase 7+ S16-absorption first codification per Q1 trust documentation remediation work program S12+S13+S14b+S14c+S15 observations) | Phase 7+ S16-absorption (this commit); Q1 entries S12 + S13 + S14b + S14c + S15 cross-reference | active | Q1 trust documentation remediation sub-session class baselines (Sub-class 1 amendment class + Sub-class 2 multi-map entry class with topology differentiation 2a/2b/2c) |
+| A9 | 2026-05-10 (Phase 7+ S16-absorption first codification per Class A n=4 + Class B n=1 accumulation; S10/S11/S12/S15/S16-absorption Step 0 observations; post-S19-absorption extension per S17+S18 STOP 2 observations) | Phase 7+ S16-absorption (initial commit) + S19-absorption (extension; this commit) | active | Chat-trigger empirical-state-assumption failure mode (two sub-classes: Class A baseline-state assertion n=5 ACTIVE with 4 sub-patterns + Class B empirical-complexity assumption n=2 ACTIVE with revised default; common shape + common Option II mitigation) |
+| A10 | 2026-05-10 (Phase 7+ S16-absorption first codification per Q1 trust documentation remediation work program S12+S13+S14b+S14c+S15 observations; post-S19-absorption extension per S17+S18 entries) | Phase 7+ S16-absorption (initial commit) + S19-absorption (extension; this commit); Q1 entries S12 + S13 + S14b + S14c + S15 + S17 + S18 cross-reference | active | Q1 trust documentation remediation sub-session class baselines (Sub-class 1 amendment class + Sub-class 2 multi-map entry class with topology differentiation 2a/2b/2c + Sub-class 2c resolved n=2 ACTIVE + Sub-class 2c-IV three-layer-downstream Tier IV variant n=1 ACTIVE; topology-primary tier-variant taxonomy) |
 
 ## §3 Per-amendment content
 
@@ -503,6 +503,40 @@ post-S11 + 3 added at S16-absorption):
   S11 instance #2 recurrence; cross-referenced at A9 Class A
   instance #4)
 
+**Stage 3 reinforcement (codified at S19-absorption per n=3 Stage 3
+observations across consecutive sub-sessions):** Stage 3 (proactive-
+with-assumption-falsification-catch) lifecycle pattern reinforced
+at three observations:
+- S15 STOP 2 (first observation; rolling_ccf_lag two-layer assumption
+  falsified)
+- S17 STOP 2 (second observation; dtw_alignment_lag 1:1 simple-case
+  assumption falsified)
+- S18 STOP 2 (third observation; gcc_phat_delay Tier II.bit-exact
+  assumption falsified + tier-enumeration omission)
+
+Lifecycle pattern observation update: Stage 3 established as
+RECURRING pattern (n=3 across consecutive sub-sessions where Class B
+mitigation operating) rather than singular instance. Sub-discipline
+maturity at Stage 3 codification-ready; future analogous lifecycle
+observations per A3 design-class precedent.
+
+**Worked examples count post-S19-absorption: 12 instances** (9 prior
+post-S16-absorption + 3 added at S19-absorption):
+- Existing 9 instances per post-S16-absorption codification (3
+  codified at Workstream B §4.3 + 6 cross-referenced)
+- S17 STOP 2: 1:1 simple-case assumption falsification catch
+  (dtw_alignment_lag three-layer-downstream framing required;
+  cross-referenced at A9 Class B instance #2; sub-discipline
+  lifecycle Stage 3 second observation)
+- S18 STOP 2: tier characterization assumption falsification catch
+  (gcc_phat_delay Tier IV per audit Reference field; cross-referenced
+  at A9 Class A instance #5 sub-pattern 4 + A9 Class B mitigation
+  operating correctly; sub-discipline lifecycle Stage 3 third
+  observation)
+- S19-absorption Step 0: empirical baseline state verification (no
+  Class A 6th instance triggered; framing per Chat ratifications
+  matches empirical state per pre-STOP-1 expectation)
+
 ### A7 — Scope-re-framing sub-session class (n=1 baseline)
 
 **Surfacing:** Phase 7+ S6 first instance (`53653f1`).
@@ -592,19 +626,23 @@ authoring + Chat ratification triggers (in conversation;
 STOP 1 mandatory triggered + STOP 1.5 revision verification
 cycle triggered + ratifications applied).
 
-### A9 — Chat-trigger empirical-state-assumption failure mode (n=4 Class A + n=1 Class B; two sub-classes)
+### A9 — Chat-trigger empirical-state-assumption failure mode (n=5 Class A + n=2 Class B; two sub-classes; post-S19-absorption extension)
 
 **Surfacing:** Phase 7+ S16-absorption first codification per Class A
 n=3 codification candidate threshold reached (per S11 §4 forward
 instrumentation note) + Class B n=1 informal observation per S15
 STOP 2 + recursive S16-absorption Step 0 4th Class A instance catch.
+**S19-absorption extension** per S18 Step 0 5th Class A instance
+catch (tier-enumeration omission sub-pattern; new sub-pattern at
+this absorption) + S17 STOP 2 2nd Class B instance reinforcing
+revised default.
 
 **Discipline shape:** Chat trigger drafting prone to asserting state
 about file/conversation/codebase reality WITHOUT empirical re-Read at
 trigger-drafting time. Two operationally distinct sub-classes
 observed:
 
-**Sub-class Class A — Baseline-state assertion failure (n=4 ACTIVE):**
+**Sub-class Class A — Baseline-state assertion failure (n=5 ACTIVE):**
 Chat trigger asserts baseline-state schema or content without re-Read
 of authoritative source artifact at trigger-drafting time.
 
@@ -614,6 +652,7 @@ of authoritative source artifact at trigger-drafting time.
 | 2 | S11 pre-STOP-1 | A5 schema = multi-amendment absorption sub-mechanism characterization | A5 = audit/archaeology sub-session class threshold; sub-mechanism characterization lives at §4 | Code S11 pre-STOP-1 empirical baseline state Read |
 | 3 | S12 Step 0 | granger_causality structured §2 entry exists | Only ID-only enumeration in §3 Causality block; no §2 structured entry | Code S12 Step 0 empirical inventory Read |
 | 4 | S16-absorption Step 0 | A5 schema = multi-amendment absorption sub-mechanism characterization | A5 unchanged; sub-mechanism characterization remains at §4 per S11 codification + this absorption codification | Code S16-absorption Step 0 empirical baseline state Read |
+| 5 | S18 Step 0 | Tier-enumeration omission in Chat Ratification 3 (5 of 7 tiers listed; Tier IV omitted) | gcc_phat_delay = Tier IV per audit Reference field "from-scratch self-parity (Knapp-Carter 1976 formula)" + S6 §2 + S9 codification (Pattern A.3) | Code S18 Step 0 empirical audit Read |
 
 **Recursive S11 → S16-absorption recurrence:** Instance #4 = same A5
 schema misattribution as instance #2 despite S11 correction in
@@ -621,13 +660,45 @@ conversation context. Demonstrates: Chat trigger drafting memory
 drift across sub-sessions; codification at this absorption persists
 correction at artifact level rather than conversation context level.
 
-**Sub-class Class B — Empirical-complexity assumption failure (n=1):**
+**Sub-pattern enumeration (codified at S19-absorption per S18 Step 0
+5th instance + accumulated pattern observation across S10-S18):**
+
+| Sub-pattern | n | Instances |
+|---|---|---|
+| 1 — Artifact-body assertion | 1 | #1 (S10 attempt 1) |
+| 2 — Schema-misattribution recurrence | 2 | #2 (S11 pre-STOP-1) + #4 (S16-absorption Step 0) — identical A5 misattribution; conversation-context correction at S11 insufficient to prevent S16-absorption recurrence; demonstrates artifact-level codification (A9 itself) is structural mitigation |
+| 3 — Entry-presupposition | 1 | #3 (S12 Step 0 granger_causality entry assumption) |
+| 4 — Tier-enumeration omission | 1 | #5 (S18 Step 0 Tier IV omission) — new sub-pattern at this absorption; trigger asserts incomplete tier enumeration despite tier being directly evident from audit Reference field |
+
+Sub-pattern observation: Class A operates at multiple content layers
+(artifact-body / schema-content / entry-existence / tier-taxonomy).
+Sub-pattern n-counts (1+2+1+1 = 5 total) inform forward observation
+calibration; sub-pattern 2 (schema-misattribution recurrence)
+demonstrates conversation-context corrections insufficient at sub-
+pattern level; codification at A9 with sub-pattern granularity
+strengthens artifact-level mitigation.
+
+**Sub-class Class B — Empirical-complexity assumption failure (n=2 ACTIVE; codification status upgraded from informal n=1 to ACTIVE n=2 at S19-absorption):**
 Chat trigger asserts file content complexity/structural pattern
 without empirical re-Read of file at trigger-drafting time.
 
 | # | Sub-session | Assertion | Empirical reality | Caught at |
 |---|---|---|---|---|
 | 1 | S15 STOP 2 | rolling_ccf_lag two-layer framing applies analogous to S14b | rolling_ccf_lag.py 845 LOC has substantial post-processing complexity (ruptures.Pelt 180+ LOC + boundary flagging + AC correction + split-regime summary); three-layer downstream-topology required | Code S15 Step 0 (f) empirical engine module Read |
+| 2 | S17 STOP 2 | dtw_alignment_lag 1:1 simple-case assumption applies (analogous to S12 granger_causality 1:1) | dtw_alignment_lag.py 526 LOC has substantial complexity (Sakoe-Chiba window + step_pattern variants + 4 post-processing sub-components); three-layer downstream-topology required analogous to S15 multi-map | Code S17 Step 0 (e)+(f)+(g) empirical engine module Read |
+
+**Revised default assumption (codified at S19-absorption per Class B
+n=2 empirical observation; analogous to A3 design-class precedent
+for second-observation codification):** Q1 trigger drafting default
+expectation shifts from "simple-case-default" to "layered-framing-
+applicable-default". Simple-case requires empirical evidence of
+simplicity (engine module simplicity verified per Step 0); not
+assumption of simplicity. Burden of proof shifted per S15 + S17
+empirical observations (both 800+ LOC engine modules contained
+substantial complexity despite Chat trigger optimistic-complexity
+assumption). Validated empirically at S18 (no Class B 3rd instance —
+revised default operating correctly when trigger drafted under
+revised expectation).
 
 **Common shape:** Chat trigger drafting asserts state about
 file/conversation/codebase reality. Class A asserts state schema
@@ -657,17 +728,21 @@ pre-STOP-1 catches.
   codification (text preserved per R3 maintenance protocol audit
   trail; status field updated)
 
-**Forward instrumentation:** A9 codification establishes sub-class
-taxonomy. Future observations: Class A pattern reinforced at n=5+
-instances; Class B threshold for codification candidate at n=2
-observation per A3 design-class precedent.
+**Forward instrumentation (updated at S19-absorption):** Class A
+pattern reinforced at n=5 with sub-pattern taxonomy (4 sub-patterns;
+codification refinement at next absorption if sub-pattern n-counts
+shift materially). Class B pattern codified at n=2 ACTIVE; revised
+default assumption empirically operative; 3rd instance would
+reinforce codification.
 
-### A10 — Q1 trust documentation remediation sub-session class baselines (n=4 first-instance observations across 2 sub-classes + topology differentiation)
+### A10 — Q1 trust documentation remediation sub-session class baselines (n=6 observations across 2 sub-classes + topology differentiation + tier-variant; sub-class 2c resolved at n=2 ACTIVE + 2c-IV variant at n=1 ACTIVE; post-S19-absorption extension)
 
 **Surfacing:** Phase 7+ Q1 work program S12 + S13 + S14b + S14c + S15
 trust documentation remediation entries codify ongoing Q1 operational
 class structurally distinct from existing A4 (S8 trust inventory class;
 static artifact) and A5 (audit/archaeology sub-session class).
+**S19-absorption extension** per S17 + S18 entries reinforcing
+topology + tier-variant distinctions per Q1 work program accumulation.
 
 **Pattern observation:** Q1 trust documentation remediation is NEW
 sub-session class for Phase 7+ with two distinct operational
@@ -704,16 +779,42 @@ investigation:
   engine-specific pre-processing layer between input and CCF
   computation; "cleaner-CCF claim invalidated" operational
   distinctive at risk.
-- **Sub-class 2c — Three-layer-downstream framing (S15 n=1 baseline):**
+- **Sub-class 2c — Three-layer-downstream framing (S15 + S17 n=2 ACTIVE baseline; codified at S19-absorption):**
   Layer 1 + Layer 2 engine CCF + rolling-window + Layer 3 engine
-  downstream post-processing NOT parity-validated. ~358 net LOC for
-  rolling_ccf_lag S15 entry. Topology characteristic: engine-specific
-  post-processing layer between CCF computation and final output
-  (boundary flagging + ruptures.Pelt structural break detection +
-  AC-corrected Bartlett band + split-regime summary; 4 sub-components
-  drive +83 LOC vs 2b reflecting Layer 3 enumeration depth);
-  "regime/break-aware claim invalidated" operational distinctive at
-  risk.
+  downstream post-processing NOT parity-validated. Two empirical
+  baseline observations: S15 rolling_ccf_lag (multi-map p3_ccf-covered)
+  ~358 net LOC; S17 dtw_alignment_lag (1:1 catalog↔wrapper) ~366 net
+  LOC; ratio 1.02x — **catalog-mapping orthogonal to framing topology**
+  empirically established (multi-map vs 1:1 does NOT materially
+  affect LOC; framing topology is dominant LOC driver). A10
+  sub-class taxonomy codifies framing topology as primary
+  distinction; catalog-mapping as orthogonal disclosure axis.
+  Topology characteristic: engine-specific post-processing layer
+  between core computation and final output (e.g., for
+  rolling_ccf_lag S15: boundary flagging + ruptures.Pelt structural
+  break detection + AC-corrected Bartlett band + split-regime
+  summary; for dtw_alignment_lag S17: warping path extraction +
+  time-varying lag extraction + lag segmentation + multi-table
+  output); "operational distinctive at risk" varies per technique
+  (S15: "regime/break-aware claim invalidated"; S17: "time-varying
+  lead-lag claim invalidated").
+- **Sub-class 2c-IV — Three-layer-downstream Tier IV variant (S18
+  n=1 ACTIVE; codified at S19-absorption):** Three-layer-downstream
+  framing applied to Tier IV (paper-formula self-parity / Pattern
+  A.3) entries. Distinct from Sub-class 2c proper (Tier II.bit-exact
+  cross-package). Empirical baseline: S18 gcc_phat_delay (1:1
+  catalog↔wrapper; Tier IV per Knapp-Carter 1976 paper-formula
+  self-parity) ~438 net LOC; ratio 1.20x vs S17 Tier II.bit-exact
+  three-layer-downstream baseline. LOC increase per Pattern A.3
+  self-parity caveat compound framing + Layer 3 six-sub-component
+  depth (vs S15/S17 four-sub-component baseline) reflecting
+  GCC-PHAT-methodology-specific sub-components (peak detection +
+  bootstrap CI + sampling-frequency handling + multi-table output).
+  **Topology-primary tier-variant taxonomy structure** codified:
+  framing topology is dominant LOC driver (Sub-class 2c framework
+  applies); tier-distinctness reflected as variant suffix (-IV)
+  rather than separate sub-class. "Time-delay-estimate-with-
+  uncertainty claim invalidated" operational distinctive at risk.
 
 **Provisional class threshold proposal (loose; n=1 per sub-class
 data points; tighten with more observations per A3 design-class
@@ -724,7 +825,8 @@ precedent):**
 | Sub-class 1 (amendment class) | S14b ~142 net LOC | 100-160 LOC | ~200 LOC |
 | Sub-class 2a (two-layer) | pending first-instance | 130-170 LOC (projected per S14b two-layer amendment context) | ~200 LOC |
 | Sub-class 2b (three-layer-upstream) | S14c ~275 net LOC | 240-310 LOC | ~350 LOC |
-| Sub-class 2c (three-layer-downstream) | S15 ~358 net LOC | 320-400 LOC | ~430 LOC |
+| Sub-class 2c (three-layer-downstream Tier II.bit-exact) | S15 ~358 + S17 ~366 net LOC (n=2 ACTIVE) | 340-380 LOC | ~430 LOC |
+| Sub-class 2c-IV (three-layer-downstream Tier IV variant) | S18 ~438 net LOC | 400-470 LOC | ~500 LOC |
 
 **Topology differentiation rationale:** Sub-class 2b vs 2c distinction
 codified per S14c + S15 empirical observation. Both same layer depth
@@ -732,6 +834,17 @@ codified per S14c + S15 empirical observation. Both same layer depth
 post-CCF). Topology distinction institutional-grade disclosure
 decision per Bundle option II three-layer framing ratification at
 S14c STOP 1 + S15 STOP 1.
+
+**Topology-primary tier-variant taxonomy (codified at S19-absorption):**
+Framing topology (two-layer / three-layer-upstream / three-layer-
+downstream) is dominant LOC driver per S14b/S14c/S15/S17 observations.
+Tier characterization (II.bit-exact / IV self-parity) drives marginal
+LOC variation within topology class (Sub-class 2c S17 366 vs 2c-IV
+S18 438 = ~20% within-topology variance from tier characterization +
+Pattern A.3 compound caveat content). Taxonomy structure: topology
+primary classification; tier reflected as variant suffix (e.g., 2c-IV)
+rather than separate sub-class. Future tier-variant observations
+follow same suffix convention.
 
 **Cross-reference §4 absorption-timing sub-mechanism baselines:**
 A10 codifies operational-class baselines per Q1 sub-session class;
@@ -743,13 +856,15 @@ amendment absorb into baseline?"). Cross-reference for inheritor
 clarity; do NOT conflate per S11 + S16-absorption Class A
 misattribution pattern (A9 instances #2 + #4).
 
-**Forward instrumentation:** Sub-class 1 second observation tightens
-amendment class projection. Sub-class 2a first-instance observation
-calibrates two-layer multi-map baseline (currently pending).
-Sub-class 2b + 2c second observations tighten respective topology
-projections. Topology differentiation codification candidate at
-n=3 observations across topologies if differentiation pattern
-persists per A3 design-class precedent.
+**Forward instrumentation (updated at S19-absorption):** Sub-class 2c
+resolved at n=2 ACTIVE with catalog-mapping orthogonality empirically
+established. Sub-class 2c-IV variant n=1 ACTIVE; second observation
+tightens variant baseline. Sub-class 2a baseline observation pending
+(unchanged). Sub-class 2b S14c n=1 ACTIVE (unchanged; second
+observation tightens). Sub-class 1 second observation tightens
+amendment class projection. Topology-primary tier-variant taxonomy
+structure codified; future analogous tier-variant observations apply
+suffix convention.
 
 **Cross-reference:** S12 + S13 + S14a + S14b + S14c + S15 §2.5
 entries at `tsl_trust_inventory_techniques.md` (Q1 work program
@@ -821,9 +936,12 @@ downstream consumption per S8 dispositions. Phase 7+ S11
 sub-session (FOURTH Path A absorption instance) absorbs 5
 candidates per multi-amendment absorption. Phase 7+
 S16-absorption sub-session (FIFTH Path A absorption instance;
-FOURTH elevation-candidate-absorption sub-mechanism instance;
-THIS amendment cycle) absorbs 8 candidates per multi-amendment
-absorption with expanded scope.
+FOURTH elevation-candidate-absorption sub-mechanism instance)
+absorbs 8 candidates per multi-amendment absorption with expanded
+scope. Phase 7+ S19-absorption sub-session (SIXTH Path A absorption
+instance; FIFTH elevation-candidate-absorption sub-mechanism
+instance; THIS amendment cycle) absorbs 8 candidates per multi-
+amendment absorption #2.
 
 **LOCKED 2026-05-10 (Phase 7+ S11): Path A
 (immediate-on-discovery) is canonical interpretation of §19.4
@@ -835,31 +953,41 @@ instance + FOURTH elevation-candidate-absorption sub-mechanism
 instance; n=5 instances across two sub-mechanisms (n=4 elevation +
 n=1 first-consumption-correction) empirically robust at canonical
 lock.
+**Reinforced at Phase 7+ S19-absorption:** SIXTH overall Path A
+instance + FIFTH elevation-candidate-absorption sub-mechanism
+instance; n=6 instances across two sub-mechanisms (n=5 elevation +
+n=1 first-consumption-correction) empirically robust at canonical
+lock.
 Cross-reference: S9 §6 forward instrumentation in
 `../reference_parity_phase7/scope_reframing_s6_banking.md`
 (disposition-5 lock candidate elevation to ACTIVE); S11
 trigger ratifications (in conversation; lock execution);
-S16-absorption Path A reinforcement (this commit).
+S16-absorption Path A reinforcement (S16-absorption commit);
+S19-absorption Path A reinforcement (this commit).
 
 **Two sub-mechanisms within Path A canonical lock (codified
 at S11 alongside lock; sub-mechanisms operationally distinct
 with different LOC baselines):**
 
 - **Elevation-candidate-absorption sub-mechanism (S1 + S7 + S11 +
-  S16-absorption baseline; n=4 baseline observations):** absorption
-  sub-session triggered by amendment candidate elevation/graduation
-  events (A2 graduation, A4 elevation, A5+A6+A7+A8 + A2 sub-pattern
-  split graduations at S7; A9 Class A+B + A10 Q1 sub-class baselines
-  + A6 sub-discipline lifecycle + §4 Path A reinforcement + 3
-  forward instrumentation notes at S16-absorption).
+  S16-absorption + S19-absorption baseline; n=5 baseline observations):**
+  absorption sub-session triggered by amendment candidate elevation/
+  graduation events (A2 graduation, A4 elevation, A5+A6+A7+A8 + A2
+  sub-pattern split graduations at S7; A9 Class A+B + A10 Q1
+  sub-class baselines + A6 sub-discipline lifecycle + §4 Path A
+  reinforcement + 3 forward instrumentation notes at S16-absorption;
+  A9 Class A sub-pattern + Class B codification + A10 Sub-class 2c
+  + 2c-IV + A6 Stage 3 reinforcement + §4 Path A reinforcement + 4
+  forward instrumentation note updates/additions at S19-absorption).
   Multi-amendment absorption typical. LOC baseline empirical range
   ~24-47 LOC/candidate (S1: 88 LOC / 2 candidates = 44 LOC/candidate;
   S7: 234 LOC / 5 candidates ≈ 47 LOC/candidate; S11: 119 LOC / 5
-  candidates ≈ 24 LOC/candidate; S16-absorption: LOC materializes
-  at close [TBD; will surface at VERIFY AT CLOSE]; n=4 baseline
-  observations with significant LOC/candidate variance suggesting
-  candidate-substance-dependent dispersion rather than fixed
-  per-candidate budget).
+  candidates ≈ 24 LOC/candidate; S16-absorption: 269 LOC / 8
+  candidates ≈ 34 LOC/candidate; S19-absorption: LOC materializes
+  at close [TBD; will surface at VERIFY AT CLOSE]; n=5 baseline
+  observations confirming candidate-substance-dependent dispersion
+  pattern; LOC/candidate is structurally variable rather than
+  convergent budget).
 - **First-consumption-correction sub-mechanism (S9 baseline):**
   absorption sub-session triggered by
   first-downstream-consumption empirical re-verification
@@ -901,9 +1029,10 @@ Codification candidate at next
 baseline-state-assertion-failure recurrence (n=3 observation).
 
 **Forward instrumentation note — Q-B audit checklist operational
-pattern (n=5 observations across S12 + S13 + S14b + S14c + S15;
-well past n=4 codification threshold per S13 forward instrumentation;
-not codified at §19.4 — structurally belongs at Workstream B §1):**
+pattern (n=7 observations across S12 + S13 + S14b + S14c + S15 +
+S17 + S18 [post-S19-absorption update]; well past n=4 codification
+threshold per S13 forward instrumentation; not codified at §19.4 —
+structurally belongs at Workstream B §1):**
 Q-B audit checklist question across Q1 entries surfaces persistent
 pattern: default ratification under Tier 2 case-against framing per
 respective prior-sub-session-close proposal; case-against weighted
@@ -916,21 +1045,31 @@ affects audit checklist operational protocol, not §19.4 absorption
 discipline; deferred to separate Workstream B sub-session).
 
 **Forward instrumentation note — Forward Q1 Step 0 discipline
-(harness-vs-engine code path verification per technique; n=1 outlier
-observation at S14a investigation; not codified at §19.4):** S14a
+(harness-vs-engine code path verification per technique; n=2
+informal observations [post-S19-absorption update]; codification
+threshold reached per A3 design-class precedent; not codified at
+§19.4 — structurally belongs at Workstream B §1 + §4):** S14a
 Step 5 contextual sampling found p3_ccf outlier pattern (4 of 5
-sampled harnesses follow clean engine-uses-same-function convention;
-p3_ccf validates statsmodels.ccf while engine modules use custom
-numpy CCF). Codification candidate at second analogous outlier
-observation per A3 design-class precedent. Forward instrumentation:
-Q1 sub-sessions surface harness-vs-engine alignment verification as
-Step 0 sub-step (informational; not enforced absent second observation).
+sampled harnesses follow clean engine-uses-same-function
+convention; p3_ccf validates statsmodels.ccf while engine modules
+use custom numpy CCF). **S18 Step 0 second observation:** p3_gcc_phat
+harness defines own `_gcc_phat` reference function inside
+p3_gcc_phat.py (literal-identity self-parity); harness comment
+"mirrors TSL's custom impl" but engine module 386 LOC is materially
+more complex than harness's 12-LOC `_gcc_phat`. Harness-bypasses-
+engine pattern recurring; **codification candidate at this absorption
+per A3 design-class precedent (n=2 observations)**; deferred to
+Workstream B amendment cycle for full operational codification.
+Forward instrumentation: Q1 sub-sessions surface harness-vs-engine
+alignment verification as Step 0 sub-step (now empirically reinforced;
+not yet enforced absent Workstream B codification).
 
 **Forward instrumentation note — Option II workflow codification
 (Chat trigger surfaces directives + scope; Code drafts entry from
 Workstream B §3 templates + ratified tier taxonomy + Step 0
 empirical re-Read; validated empirically across S13 + S14b + S14c +
-S15 + S16-absorption pre-STOP-1 catches; not codified at §19.4 —
+S15 + S17 + S18 + S16-absorption + S19-absorption pre-STOP-1 +
+STOP 2 catches [post-S19-absorption update]; not codified at §19.4 —
 structurally belongs at Workstream B §1 + §4):** Option II workflow
 operates as primary structural mitigation for A9 failure modes
 (Class A + Class B). Workflow operational protocol: (1) Chat trigger
@@ -943,6 +1082,29 @@ II Step 0 discipline. Forward instrumentation: codification candidate
 for Workstream B §1 audit checklist + §4 verify-state discipline
 operational protocol amendment cycle (deferred to separate
 Workstream B sub-session).
+
+**Forward instrumentation note — Block 1 Causality completion +
+per-block Q1 baseline calibration (NEW at S19-absorption; first
+catalog block fully Q1-amended per Q1 work program scope):** Phase
+7+ Q1 work program completed Block 1 Causality / Relationships /
+Lead-Lag at S18 (6 techniques across S12 + S13 + S14b + S14c + S15
++ S17 + S18; cumulative ~1700 net LOC across all entries +
+amendments). Block coverage mix: 1 single-layer Tier II.bit-exact
+1:1 (granger_causality S12 ~113 LOC); 1 two-layer Tier II.bit-exact
+multi-map (cross_correlation_lag S13 + S14b ~287 LOC); 1 three-layer-
+upstream Tier II.bit-exact multi-map (prewhitened_ccf_lag S14c ~275
+LOC); 1 three-layer-downstream Tier II.bit-exact multi-map
+(rolling_ccf_lag S15 ~358 LOC); 1 three-layer-downstream Tier
+II.bit-exact 1:1 (dtw_alignment_lag S17 ~366 LOC); 1 three-layer-
+downstream Tier IV self-parity 1:1 (gcc_phat_delay S18 ~438 LOC).
+Mixed coverage provides comprehensive empirical baseline for
+per-block Q1 calibration at forward Q2/Q3/etc work program scoping.
+Per-block Q1 baseline reserves: 6 entries / ~1700 LOC / 6 sub-sessions
++ 1 amendment commit (S14b) + 1 absorption commit (S16-absorption)
+empirically established as one-catalog-block-completion footprint.
+Forward instrumentation: per-block Q1 baseline calibration available
+for Q2/Q3 work program scoping; first-block-completion milestone
+codified at this §4 note for institutional reference.
 
 ## §5 Cross-references
 
