@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 12 catalog techniques with Phase 7+ Q1 trust documentation
+- 13 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28 amendments)
-- 63 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31 amendments)
+- 62 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -5518,7 +5518,632 @@ absorption); Block 8 (3 entries / [TBD LOC at S28 close] / S26-S28
 S28); per-block continuation pattern characterization tighter at
 n=3 observation.
 
-## §3 Unvalidated catalog techniques (63 entries; ID-only enumeration)
+### classical_decompose (Phase 7+ S31; THIRTEENTH §2.5 entry; FIRST Block 3 Decomposition entry — FOURTH catalog block transition opens per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; FIRST Tier II.bit-exact CLEAN PASS Q1 §2.5 entry under Sub-class 2a (αa) reimplementation variant at operational-coupling-count = 3 NEW axis extension; Sub-class 2a (αa) variant tagging n=4 reinforcement preserves codification-stable status from S29-absorption #4; SINGLE-LAYER framing per S31 STOP 2 empirical investigation + α disposition; analogous to S26 denton_chowlin Block 8 first-entry precedent for clean Block-opening selection)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact** per S31 (α) Chat disposition. Cross-package PASS
+Pattern A bit-exact at machine precision (abs diff 7.11e-14 trend
++ 5.33e-15 seasonal + 1.73e-14 residual per `p3_classical_decompose_audit.md`)
+against canonical R `stats::decompose`. Closed-form arithmetic
+(centered moving average → trend; detrend → group seasonal averages;
+residual = y - trend - seasonal); Tier II.bit-exact per scope_reframing
+§2 line 130 12-wrapper enumeration if explicit (post-S6 inference
+analogous to S23 p3_pp Tier II.bit-exact extension if not explicit;
+Pattern A bit-exact verdict at audit grounds the inference). STOP 2
+BLOCKING discharged on Tier anchor per ITEM 2 PRE-RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER + §4.7.A
+PRESENT engine-uses-same-library-function-via-different-code-path
+per CHAT RATIFICATION ITEM 3 CONFIRMED at Step 0; Sub-class 2a (αa)
+reimplementation variant extension at operational-coupling-count = 3
+NEW axis value per (αa-S31) ratification):** classical_decompose is
+1:1 catalog↔wrapper mapping per `p3_classical_decompose_audit.md`
+audit Wrapper field (`engine/techniques/classical_decompose.py` sole
+engine module).
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S28
+n=5 OBSERVATION per S31 banking per S30 (G.1) generalized
+definitional scope codification — §4.7.A pattern count tightening
+forward observation; banking only, NOT §4.7.A taxonomy modification
+at S31; NOT A9 Class A counter increment):**
+`tools/reference_parity/harness/checks/p3_classical_decompose.py`
+line 83 imports `statsmodels.tsa.seasonal.seasonal_decompose`
+directly and invokes the library function at line 91 — harness does
+NOT invoke `classical_decompose.py::run()` engine entry point.
+`engine/techniques/classical_decompose.py` line 10 imports the SAME
+`statsmodels.tsa.seasonal.seasonal_decompose` library function and
+invokes it at line 142 within engine `run()` orchestration. Harness +
+engine use SAME underlying library function (statsmodels seasonal_decompose);
+harness BYPASSES engine `run()` wrapper. §4.7.A reimplementation
+variant (αa) manifestation: harness reimplements the dispatch path
+to the underlying library function rather than reusing engine's
+dispatch+orchestration. Distinct from S26 denton_chowlin reimplementation
+(harness reimplements MATH directly in numpy); S31 classical_decompose
+reimplementation is DISPATCH-only (harness re-imports + re-invokes
+SAME library function bypassing engine `run()`). Post-S31 §4.7.A
+observations = n=5 across §2.5 entries (S14a granger + S18 gcc_phat +
+S26 denton_chowlin + S27 loess + S31 classical_decompose); **§4.7.A
+pattern count tightening forward observation at absorption #5 per
+A3 precedent** (NOT A9 Class A counter increment per S30 (G.1)
+generalized definitional scope codification — §4.7.A pattern
+observations track mechanism variant accumulation distinct from A9
+Class A empirical-state-assumption failure mode tracking).
+
+**A10 Sub-class disposition: Sub-class 2a (αa) reimplementation
+variant extension at operational-coupling-count = 3 NEW axis value
+per (αa-S31) Chat ratification:** Sub-class 2a (αa) general two-
+layer class with variant tagging UPGRADES from n=3 codification-
+stable (S22 + S23 + S28 per S29-absorption #4 codification) to
+**n=4 reinforcement at S31** (S22 + S23 + S28 + S31) per axis-
+extension-within-general-class accommodation. Sub-class 2a (αa)
+variant tagging operational-coupling-count axis EXTENDS from
+codified ∈ {0, 1, 2} to ∈ {0, 1, 2, 3} per ITEM 3 PRE-RATIFICATION:
+- **Dual-role variant (S22 kpss_test):** operational-coupling-count
+  = 1 (helper-export to adf_test triage 3b parallel-test invocation)
+- **Triple-role variant (S23 pp_test):** operational-coupling-count
+  = 2 (helper-export to adf_test triage 3b parallel + 3d CONFLICTING
+  tie-breaker)
+- **Standalone-only variant (S28 kalman_imputation):** operational-
+  coupling-count = 0 (NO helper-export role; engine `run()` is sole
+  top-level function)
+- **Standalone-with-orchestration-load variant (S31 classical_decompose;
+  NEW fourth variant per (αa-S31) ratification):** operational-
+  coupling-count = 3 (NO helper-export role + Layer 2 engine
+  orchestration carries THREE operations of approximately equal
+  weight: NaN-fill pre-pass with interior-interpolation + edge-strip
+  semantics + auto-additive-downgrade gate when multiplicative
+  encounters non-positive value + seasonal/trend strength diagnostics
+  via valid-mask residual variance ratio)
+
+**Operational-coupling-count axis semantic generalization at S31:**
+the codified axis ∈ {0, 1, 2} interpreted helper-export-role-count
+under S29-absorption #4. S31 extends axis to ∈ {0, 1, 2, 3} per
+"general two-layer class" semantic accommodation per ITEM 3 Tier 2
+case-against acknowledgment ("Operational-coupling-count axis
+extension is structural variation, not redundancy; n=4 observation
+across coupling-count ∈ {0, 1, 2, 3} preserves axis-variation
+evidence within codified general class"). The count = 3 NEW value
+semantically distinguishes "standalone + heavy orchestration"
+(classical_decompose) from "standalone + minimal orchestration"
+(kalman_imputation at count = 0): both lack helper-export but
+classical_decompose carries three named orchestration operations
+absent or thinner at kalman_imputation. Variant tagging mechanism
+preserves Sub-class 2a stability while documenting axis variation
+empirically. Codification-stable status from S29-absorption #4
+PRESERVED at n=4 reinforcement; NO sub-class scope expansion.
+
+**Block 3 Decomposition first entry — FOURTH catalog block transition
+opens (per-block continuation pattern n=4 catalog block observation
+candidate at Block 3 completion):** S31 classical_decompose opens
+the fourth catalog block transition after Block 1 Causality (6
+entries S12-S18) + Block 12 Stationarity Tests (3 entries S21-S23)
++ Block 8 Missing Data (3 entries S26-S28). Forward instrumentation:
+Block 3 Decomposition completion arc projected at S31 + S31+1 +
+S31+2 + S31+3 (4 entries total; per Code Step 0 forward look —
+banking only per ITEM 4 forward instrumentation banking; NOT
+codified at S31; each subsequent entry surfaces at its respective
+sub-session per A9 Class B revised default discipline operating
+proactively). Per-block continuation pattern at n=4 catalog block
+observations (Block 1 + Block 12 + Block 8 + Block 3 [in-progress])
+codification candidate at absorption #5 refinement disposition;
+NEW characterization "Block heterogeneous-Tier-surface variant"
+candidate per ITEM 7 forward instrumentation banking (Block 3
+mixed Tier surface Tier II.bit-exact + Tier VI + Tier VI + Tier VII
+distinct from Block 1 homogeneous Tier II.bit-exact-throughout +
+Block 8 Tier II.bit-exact + Tier III + Tier II.mle-band heterogeneous
++ Block 12 Tier II.bit-exact-throughout).
+
+**Reference:** R `stats::decompose` (base R 4.5.3; same algorithm
+family — centered moving average + group seasonal averages)
+**Verdict:** **PASS Pattern A bit-exact at machine precision**
+**Audit:** `tools/reference_parity/reports/p3_classical_decompose_audit.md`
+**Audit date:** 2026-04-28
+**trend abs diff:** 7.11e-14 (max abs diff across vector)
+**seasonal abs diff:** 5.33e-15
+**resid abs diff:** 1.73e-14
+**Tolerance class:** closed_form
+**Fixture:** seasonal AR(1) DGP (φ=0.7, σ=1.0) + linear trend + sin
+seasonality at m=12 monthly via `_generate_seasonal_ar_dgp` (shared
+generator from p3_theta); T=120, seed=42
+
+**Source files (SINGLE-LAYER + §4.7.A PRESENT per S31 α framing):**
+`tools/reference_parity/harness/checks/p3_classical_decompose.py`
+lines 81-103 (harness TSL arm imports `statsmodels.tsa.seasonal.seasonal_decompose`
+at line 83 + invokes at line 91 with `model="additive"`, `period=m`,
+`two_sided=True`, `extrapolate_trend=0`; extracts trend/seasonal/
+resid arrays at lines 95-97; harness does NOT invoke
+`classical_decompose.py::run()` engine entry point; §4.7.A
+reimplementation-of-dispatch variant manifestation)
++ `tools/reference_parity/harness/checks/p3_classical_decompose.py`
+lines 105-143 (harness reference arm invokes R `stats::decompose(y,
+type="additive")` via RBridge with `frequency = {m}` ts() wrapper;
+extracts d$trend + d$seasonal + d$random)
++ `engine/techniques/classical_decompose.py` lines 1-7 (module
+docstring: "Classical Decomposition technique for Time Series Lab.
+Decomposes a time series into trend, seasonal, and residual
+components using either additive (Y = T + S + R) or multiplicative
+(Y = T * S * R) models via statsmodels seasonal_decompose.")
++ `engine/techniques/classical_decompose.py` line 10 (Layer 1 math
+import: `from statsmodels.tsa.seasonal import seasonal_decompose`
+— SAME library function as harness imports at line 83 of
+p3_classical_decompose.py)
++ `engine/techniques/classical_decompose.py` lines 26-46
+(`_infer_period`: frequency-to-period mapping {D:7, B:5, W:52,
+M:12, MS:12, Q:4, QS:4, H:24, T:60, min:60, S:60}; helper internal
+to module — NOT exported)
++ `engine/techniques/classical_decompose.py` lines 49-68
+(`_prepare_series`: NaN-fill pre-pass with linear interpolation
+on interior NaN positions + n_valid ≥ 4 threshold + nan_mask
+preservation for output restoration; first of three operational-
+coupling-count = 3 orchestration operations)
++ `engine/techniques/classical_decompose.py` lines 71-148 (Layer 2
+engine orchestration: `run(ctx, progress_callback)` main entry; sole
+top-level function; standalone-technique-only invocation)
++ `engine/techniques/classical_decompose.py` lines 113-127 (CAI
+Phase 2 Session 16 fix F-CD-CLASSIC-MODEL allowlist gate: model_type
+∈ {"additive", "multiplicative"} explicit gate per institutional
+fail-loud-not-silent standard)
++ `engine/techniques/classical_decompose.py` lines 130-136 (auto-
+additive-downgrade gate: multiplicative + any non-positive value
+→ warn + switch to additive; second of three operational-coupling-
+count = 3 orchestration operations)
++ `engine/techniques/classical_decompose.py` lines 142-148 (Layer 1
+math invocation: `seasonal_decompose(filled, model=model_type,
+period=period, two_sided=two_sided, extrapolate_trend="freq")` —
+SAME library function as harness invokes at line 91 of
+p3_classical_decompose.py but with engine-orchestrated parameter
+dispatch; NOTE engine default `extrapolate_trend="freq"` vs harness
+audit pin `extrapolate_trend=0` — engine production behavior fills
+trend endpoints while audit measures un-extrapolated trend; per-
+component bit-exact PASS validates the centered-MA trend body, NOT
+the engine-default endpoint extrapolation)
++ `engine/techniques/classical_decompose.py` lines 188-216
+(seasonal/trend strength diagnostics via valid-mask residual
+variance ratio: F_s = max(0, 1 - Var(R) / Var(S + R)) + F_t =
+max(0, 1 - Var(R) / Var(T + R)); third of three operational-
+coupling-count = 3 orchestration operations)
++ `engine/techniques/classical_decompose.py` lines 247-269 (audit
+fields construction + plain English summary + interpretation
+delegation)
++ `tools/reference_parity/reports/p3_classical_decompose_audit.md`
+
+**Validation claim scope (TIER II.BIT-EXACT + §4.7.A REIMPLEMENTATION-
+OF-DISPATCH VARIANT + Sub-class 2a (αa) standalone-with-orchestration-
+load variant per S31 (α) + (αa-S31) ratifications):** TSL
+classical_decompose output relies on two layered computations
+within standalone-technique role (Layer 1 statsmodels.seasonal_decompose
+centered-MA + group-seasonal-averages closed-form arithmetic + Layer
+2 engine orchestration). p3_classical_decompose audit validates
+Layer 1 statsmodels.seasonal_decompose math (harness reimplements
+library-function dispatch path + R `stats::decompose` cross-package
+validation) at single seeded fixture (seasonal AR(1) DGP n=120
+seed=42 + m=12 monthly + extrapolate_trend=0 pinned); trend/seasonal/
+resid metrics measure statsmodels seasonal_decompose output vs R
+stats::decompose output agreement (abs diff 7.11e-14 trend / 5.33e-15
+seasonal / 1.73e-14 residual PASS Pattern A bit-exact). NOT engine
+standalone orchestration correctness, NOT NaN-fill interior-
+interpolation correctness, NOT auto-additive-downgrade gate
+correctness, NOT seasonal/trend strength diagnostic correctness,
+NOT model_type allowlist gate correctness, NOT engine-default
+endpoint extrapolation (`extrapolate_trend="freq"`) correctness.
+
+- **Layer 1 statsmodels.seasonal_decompose math (validated Pattern A
+  bit-exact at machine precision):** PASS verdict per audit p3_classical_decompose_audit.md
+  trend abs diff 7.11e-14 + seasonal abs diff 5.33e-15 + residual
+  abs diff 1.73e-14 against canonical R `stats::decompose`. **Tier
+  II.bit-exact characterization** per scope_reframing §2 line 130
+  12-wrapper enumeration if explicit (post-S6 inference per S23
+  p3_pp precedent if not explicit; closed-form Pattern A bit-exact
+  verdict grounds the inference). Validation scope: SAME underlying
+  library function as engine module invokes at line 142; bit-exact
+  PASS transfers to engine Layer 1 math invocation per same-library-
+  function alignment. **§4.7.A reimplementation-of-dispatch variant
+  caveat:** engine module `run()` is DIFFERENT code path from
+  harness library-function direct invocation; engine adds Layer 2
+  orchestration (NaN-fill + auto-additive-downgrade + strength
+  diagnostics + allowlist gate) NOT exercised by audit. Engine-
+  default `extrapolate_trend="freq"` differs from audit pin
+  `extrapolate_trend=0`; per-component bit-exact PASS validates
+  centered-MA trend BODY (interior indices where centered MA is
+  defined) NOT engine-default endpoint extrapolation.
+- **Layer 2 engine orchestration (validation scope conditional):**
+  - F-CD-CLASSIC-MODEL allowlist gate (lines 113-127; CAI Phase 2
+    Session 16 fix): model_type ∈ {"additive", "multiplicative"}
+    explicit gate; pre-fix invalid `model` strings silently coerced
+    to "additive" while user believed multiplicative engaged; NOT
+    audit-validated
+  - NaN-fill pre-pass with linear interpolation (lines 49-68
+    `_prepare_series`): interior NaN positions filled via
+    `np.interp` + n_valid ≥ 4 threshold + nan_mask preservation for
+    output restoration; first of three operational-coupling-count =
+    3 orchestration operations; NOT audit-validated
+  - Auto-additive-downgrade gate (lines 130-136): multiplicative
+    requested + any non-positive value present → warn + switch to
+    additive; second of three orchestration operations; NOT audit-
+    validated
+  - Seasonal/trend strength diagnostics (lines 188-216): F_s = max
+    (0, 1 - Var(R) / Var(S + R)) + F_t = max(0, 1 - Var(R) / Var
+    (T + R)) via valid-mask residual variance ratio; third of three
+    orchestration operations; reported in plain-English summary +
+    diagnostics table + audit_fields; NOT audit-validated
+  - Engine-default `extrapolate_trend="freq"` (line 147) vs audit
+    pin `extrapolate_trend=0`: engine production behavior fills
+    trend endpoints via frequency-aware extrapolation; audit-
+    validated body matches at machine precision but endpoint
+    extrapolation NOT audit-validated
+  - Result formatting + significance disclosure + interpretation +
+    audit_fields construction (lines 220-269)
+
+#### Disclosure pattern (i) — Research note footnote (Tier II.bit-exact + Sub-class 2a standalone-with-orchestration-load variant)
+
+> This analysis uses TSL technique `classical_decompose`, cross-
+> package bit-exact parity validated against R `stats::decompose`
+> per Phase 3 audit dated 2026-04-28 (trend abs diff 7.11e-14;
+> seasonal abs diff 5.33e-15; residual abs diff 1.73e-14). **Tier
+> II.bit-exact characterization** per S31 (α) disposition; closed-
+> form Pattern A bit-exact at machine precision. Engine adds Layer
+> 2 orchestration (model_type allowlist gating + NaN-fill pre-pass
+> + auto-additive-downgrade gate + seasonal/trend strength
+> diagnostics); NOT audit-validated. Engine-default endpoint
+> extrapolation `extrapolate_trend="freq"` differs from audit pin
+> `extrapolate_trend=0`; centered-MA trend BODY validated at machine
+> precision but endpoint extrapolation NOT audit-validated. Pre-
+> Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier II.bit-exact + §4.7.A reimplementation-of-dispatch variant + endpoint-extrapolation caveat)
+
+> Methodology: TSL technique `classical_decompose` validated per
+> Phase 3 reference parity infrastructure under Tier II.bit-exact
+> framing per S31 codification. **Reference:** R `stats::decompose`
+> (base R 4.5.3; same algorithm family — centered moving average +
+> group seasonal averages + additive detrending). **Verdict:** PASS
+> Pattern A bit-exact at machine precision; trend abs diff 7.11e-14,
+> seasonal abs diff 5.33e-15, residual abs diff 1.73e-14. **Audit
+> date:** 2026-04-28. **Fixture:** seasonal AR(1) DGP (φ=0.7) +
+> linear trend + sin seasonality at m=12 monthly; T=120; seed=42;
+> additive model pinned. **Tier II.bit-exact characterization** per
+> scope_reframing §2 closed-form arithmetic class. **§4.7.A
+> reimplementation-of-dispatch variant caveat:** harness imports +
+> invokes `statsmodels.tsa.seasonal.seasonal_decompose` directly
+> (does NOT invoke engine `run()` entry point); engine module
+> invokes SAME library function within `run()` orchestration. Bit-
+> exact PASS transfers to engine Layer 1 math invocation; engine
+> Layer 2 orchestration (allowlist gating + NaN-fill + auto-
+> downgrade + strength diagnostics) NOT exercised by audit.
+> **Engine-default endpoint-extrapolation caveat:** engine module
+> default `extrapolate_trend="freq"` (line 147) differs from audit
+> pin `extrapolate_trend=0`; per-component bit-exact PASS validates
+> centered-MA trend BODY (interior indices where centered MA is
+> defined) NOT engine-default frequency-aware endpoint extrapolation;
+> users invoking with `two_sided=True` (default) get trend values
+> at all T indices including endpoints but only interior body is
+> audit-validated. Reference selection + tolerance specification AI-
+> assisted with user ratification per Phase 7+ work program; pre-
+> Path α expert review status; expert review pending end-of-Phase-
+> 7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier II.bit-exact + Sub-class 2a (αa) reimplementation variant at operational-coupling-count = 3)
+
+> `classical_decompose` validation: TSL Tier II.bit-exact per S31
+> (α) codification + Sub-class 2a (αa) reimplementation variant
+> extension at operational-coupling-count = 3 NEW axis value per
+> (αa-S31) ratification. **Reference:** R `stats::decompose` (base
+> R 4.5.3). **Audit:** `tools/reference_parity/reports/p3_classical_decompose_audit.md`
+> dated 2026-04-28. **Verdict:** PASS Pattern A bit-exact at machine
+> precision (trend 7.11e-14 / seasonal 5.33e-15 / residual 1.73e-14
+> abs diff). **Fixture:** seasonal AR(1) DGP n=120 seed=42 + m=12
+> monthly + additive model + extrapolate_trend=0 pinned; single-
+> seeded fixture; parameter-sensitivity coverage NOT established;
+> Q3b extension scope. **Sub-class 2a (αa) standalone-with-
+> orchestration-load variant** per S31 (αa-S31) ratification
+> (operational-coupling-count = 3 NEW axis value: NaN-fill pre-
+> pass + auto-additive-downgrade gate + seasonal/trend strength
+> diagnostics; standalone-technique role with NO helper-export to
+> other engine modules). **Risk attribution:** **(a) Layer 1
+> statsmodels.seasonal_decompose math (validated Pattern A bit-
+> exact):** PASS at machine precision; SAME underlying library
+> function as engine module invokes at line 142; bit-exact PASS
+> transfers to engine Layer 1 math invocation. **(b) Layer 2
+> engine orchestration (NOT audit-validated):** F-CD-CLASSIC-MODEL
+> allowlist gating (lines 113-127) + NaN-fill pre-pass (lines 49-
+> 68 `_prepare_series`) + auto-additive-downgrade gate (lines 130-
+> 136) + seasonal/trend strength diagnostics (lines 188-216) +
+> engine-default `extrapolate_trend="freq"` endpoint extrapolation
+> (line 147); validation scope per `engine/techniques/classical_decompose.py`
+> lines 71-283; **(c) Endpoint-extrapolation caveat (engine-default
+> differs from audit pin):** engine default `extrapolate_trend="freq"`
+> fills trend endpoints via frequency-aware extrapolation; audit
+> pin `extrapolate_trend=0` measures un-extrapolated trend BODY
+> only; per-component bit-exact PASS validates centered-MA trend
+> body, NOT endpoint extrapolation; downstream consumers of trend
+> values AT ENDPOINTS get engine-default extrapolation behavior
+> NOT audit-validated. Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier II.bit-exact + Sub-class 2a (αa) variant + endpoint-extrapolation caveat)
+
+> `classical_decompose` Tier II.bit-exact per S31 codification +
+> Sub-class 2a (αa) standalone-with-orchestration-load variant
+> (operational-coupling-count = 3); cross-package PASS Pattern A
+> bit-exact vs R `stats::decompose` at machine precision (trend
+> 7.11e-14 / seasonal 5.33e-15 / residual 1.73e-14 abs diff).
+> Engine Layer 2 orchestration (allowlist gating + NaN-fill + auto-
+> additive-downgrade + strength diagnostics) NOT audit-validated;
+> engine-default `extrapolate_trend="freq"` endpoint extrapolation
+> differs from audit pin `extrapolate_trend=0` — centered-MA trend
+> body validated at machine precision but endpoint extrapolation
+> NOT audit-validated. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+codified first-application — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (R `stats::decompose`) per
+  `p3_classical_decompose_audit.md` line 4 verbatim ("Reference: R
+  `stats::decompose` (base R 4.5.3)"). Verdict (PASS Pattern A bit-
+  exact) per `p3_classical_decompose_audit.md` audit Verdict field
+  verbatim. trend/seasonal/residual abs diff numerics per
+  `p3_classical_decompose_audit.md` Result table verbatim (trend
+  7.11e-14 + seasonal 5.33e-15 + residual 1.73e-14). Audit date
+  (2026-04-28) per `p3_classical_decompose_audit.md` header verbatim.
+  Fixture (seasonal AR(1) DGP n=120 seed=42 + m=12 monthly + additive
+  model pinned) per harness `p3_classical_decompose.py` lines 70-79
+  + `_generate_seasonal_ar_dgp` shared generator from p3_theta
+  verbatim. Tier II.bit-exact characterization per scope_reframing §2
+  closed-form arithmetic class + Pattern A bit-exact verdict ground
+  per audit (post-S6 inference analogous to S23 p3_pp Tier II.bit-
+  exact extension precedent). Sub-class 2a (αa) reimplementation
+  variant extension at operational-coupling-count = 3 per harness
+  line 83 + engine line 10 verbatim — both import SAME library
+  function `statsmodels.tsa.seasonal.seasonal_decompose`; harness
+  line 91 + engine line 142 verbatim — both invoke SAME library
+  function but harness bypasses engine `run()` orchestration.
+  Operational-coupling-count = 3 orchestration operations per
+  engine lines 49-68 `_prepare_series` (NaN-fill) + lines 130-136
+  (auto-additive-downgrade) + lines 188-216 (strength diagnostics)
+  verbatim. Engine-default `extrapolate_trend="freq"` (line 147)
+  vs audit pin `extrapolate_trend=0` per harness line 93 verbatim.
+  Layer 1 / Layer 2 framework operative per S26 STOP 1.5 second
+  close ratification carried forward. Catalog mapping (1:1) verified
+  per audit Wrapper field. **§4.7.A pattern OBSERVED at S31 as
+  reimplementation-of-dispatch variant** (post-S31 §4.7.A
+  observations = n=5 across §2.5 entries S14a + S18 + S26 + S27 +
+  S31; **§4.7.A pattern count tightening per S30 (G.1) generalized
+  definitional scope codification** — NOT A9 Class A counter
+  increment; NOT §4.7.A taxonomy modification at S31; forward
+  observation banking only per ITEM 6 forward instrumentation
+  banking discipline). **Sub-class 2a (αa) variant tagging n=4
+  reinforcement preserves codification-stable status from S29-
+  absorption #4** per axis-extension-within-general-class
+  accommodation per ITEM 3 PRE-RATIFICATION (operational-coupling-
+  count axis ∈ {0, 1, 2, 3} with S22 dual-role + S23 triple-role +
+  S28 standalone-only + S31 standalone-with-orchestration-load).
+  **A9 Class B counter post-S31: n=4 ACTIVE (unchanged at S31; no
+  new Class B catch); sustained-observation count under Class B
+  revised default discipline n=7 (S22 + S23 + S25 + S26 + S27 + S28
+  + S31 = n=7 Q1 entries only counting basis per Chat preference;
+  absorption + Workstream B amendment cycles operate with analogous
+  discipline but Class B codified scope is Q1 entry empirical-
+  complexity-assumption failure mode)** (framing class working
+  hypothesis CONFIRMED at Step 0 per A9 Class B revised default
+  discipline). **Maturation observation EIGHTH SUSTAINED
+  OBSERVATION REACHED at S31 (S23 + S25 + S26 + S27 + S28 + S29 +
+  S30 + S31 = n=8 cross-session trajectory)** + SIX-timing-point
+  empirical surface preserved per S27 codification (no new timing
+  point variant at S31; proactive-prevention operation SUSTAINED
+  across established timing points (i)-(vi)). Verify-state-at-
+  first-consumption sub-discipline 24th instance application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at thirteenth-technique selection per Mark 3
+  efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20 + S25 + S26 +
+  S27 + S28 reinforcement. **Q-B pattern persists at n=14 across
+  S12 + S13 + S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 + S26
+  + S27 + S28 + S31; §1.4 codified observation refinement at
+  empirical pattern accumulation** (n=7 at §1.4 S20 codification →
+  n=13 at S28 reinforcement → n=14 at S31 reinforcement; Workstream
+  B amendment cycle candidate A continues at next cycle). Substantive
+  Chat engagement at structural-decision points empirically observed
+  (Step 0 STOP 2 7-item ratifications + Tier (α) ratification +
+  Sub-class (αa-S31) variant tagging extended + Items 4-7 forward
+  instrumentation banking discipline + first-application of S30 §1.6
+  Q-A density convention + S30 §5.5 forward-instrumentation hygiene
+  at status line).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 statsmodels.seasonal_decompose math (Pattern A
+  bit-exact at machine precision)** per PASS verdict at machine
+  precision (trend 7.11e-14 / seasonal 5.33e-15 / residual 1.73e-14
+  abs diff). Defensibility to all three audiences (published audience
+  + Morgan Stanley compliance + Path α expert reviewer) UNDER Tier
+  II.bit-exact + §4.7.A reimplementation-of-dispatch variant
+  disclosure + endpoint-extrapolation caveat acknowledgment.
+  **Conditional for Layer 2 engine orchestration** — F-CD-CLASSIC-
+  MODEL allowlist gating + NaN-fill pre-pass + auto-additive-
+  downgrade gate + seasonal/trend strength diagnostics + engine-
+  default endpoint extrapolation; requires expert review of engine
+  implementation OR engine-output cross-check at base pinned config.
+  **Critical Q-C framing per endpoint-extrapolation caveat:**
+  publication-research user invoking `classical_decompose` from
+  ribbon receives trend values at all T indices including endpoints
+  via engine-default `extrapolate_trend="freq"`; centered-MA trend
+  BODY validated at machine precision but endpoint extrapolation
+  NOT audit-validated; defensibility conditional on disclosure of
+  endpoint-extrapolation scope.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  LOW-MEDIUM per Tier II.bit-exact primary characterization scope
+  bound + §4.7.A reimplementation-of-dispatch variant disclosure.
+  classical_decompose is canonical centered-MA + group-seasonal-
+  averages decomposition methodology (textbook standard; widely
+  used since Persons 1919). **Layer-specific + Tier II.bit-exact +
+  Sub-class 2a (αa) variant retraction surface (per S31 (α) + (αa-
+  S31) ratifications):**
+  - Layer 1 statsmodels.seasonal_decompose math (Pattern A bit-exact
+    validated): LOW; PASS verdict at machine precision; expert review
+    surfacing upstream error would affect classical_decompose
+    specifically (NO multi-map propagation risk; 1:1 catalog↔wrapper).
+  - **Layer 2 engine orchestration: LOW-MEDIUM** — F-CD-CLASSIC-
+    MODEL allowlist gating + NaN-fill pre-pass + auto-additive-
+    downgrade gate + seasonal/trend strength diagnostics NOT audit-
+    validated; expert review of engine implementation conditional
+    on Layer 2 correctness; orchestration operations are operationally
+    straightforward (interpolation + value-positivity check + variance-
+    ratio formula); retraction surface lower than e.g. S28 kalman_imputation
+    Layer 2 (state-space orchestration + CI construction higher
+    complexity).
+  - **Endpoint-extrapolation caveat retraction surface: MEDIUM** —
+    engine-default `extrapolate_trend="freq"` fills trend endpoints
+    via frequency-aware extrapolation; audit validates body only;
+    expert review surfacing endpoint-extrapolation issue (e.g.,
+    frequency-aware extrapolation introducing artifacts at series
+    boundaries) would prompt extrapolation-method scope disclosure
+    update (NOT invalidate body validation; asymmetric retraction
+    surface between body and endpoints).
+  - **§4.7.A reimplementation-of-dispatch variant retraction surface
+    caveat: LOW** — harness + engine use SAME underlying library
+    function (statsmodels.seasonal_decompose); reimplementation
+    scope limited to dispatch-path (re-import + re-invoke vs engine
+    `run()` orchestration); bit-exact PASS at machine precision
+    transfers to engine Layer 1 math invocation cleanly per same-
+    library-function alignment; reimplementation-of-dispatch variant
+    is structurally weaker §4.7.A manifestation than S26 denton_chowlin
+    reimplementation-of-math variant.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; thirteenth technique to enter status
+per S31 ratification; **FIRST Block 3 Decomposition entry — FOURTH
+catalog block transition opens** per Q1 work program scope after
+Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 +
+Block 8 Missing Data at S28; **FIRST Tier II.bit-exact CLEAN PASS
+Q1 §2.5 entry under Sub-class 2a (αa) reimplementation variant at
+operational-coupling-count = 3 NEW axis extension** per S31 (α) +
+(αa-S31) ratifications (Sub-class 2a (αa) variant tagging n=4
+reinforcement preserves codification-stable status from S29-
+absorption #4; axis-extension-within-general-class accommodation
+∈ {0, 1, 2, 3}); **SINGLE-LAYER framing per S31 STOP 2 empirical
+investigation + α disposition** (distinct from S28 kalman_imputation
+two-layer + Pattern A overlay framing; SINGLE-LAYER suffices for
+clean Pattern A bit-exact PASS at machine precision); **§4.7.A
+reimplementation-of-dispatch variant manifestation at n=5 post-S31
+observations across §2.5 entries** (S14a granger + S18 gcc_phat +
+S26 denton_chowlin + S27 loess + S31 classical_decompose; **§4.7.A
+pattern count tightening per S30 (G.1) generalized definitional
+scope codification** — NOT A9 Class A counter increment; forward
+observation banking only per ITEM 6 forward instrumentation
+banking discipline; NOT §4.7.A taxonomy modification at S31);
+**FIRST-APPLICATION of S30 Workstream B codifications:** §1.6 Q-A
+density convention (verbatim citation density in Q-A per S30
+codification — operative at S31 Q-A field) + §5.5 forward-
+instrumentation hygiene at status line (predictive claims about
+future state with clear expiration semantics — operative at S31
+status line per "absorption #5 anticipated" + "Block 3 completion
+arc projected at S31 + S31+1 + S31+2 + S31+3" forward instrumentation
+banking discipline per ITEMS 4-7; expiration semantics: each
+forward observation banks at S31 close pending second-observation
+tightening at respective sub-session OR absorption #5 codification
+refinement disposition); §1.5 novelty enumeration sub-section NOT
+APPLICABLE at S31 (≥5 observations threshold per S23 first-instance
+codification not met at S31; standard four-disclosure-pattern
+structure applied per CONSTRAINT 4); §2.5 Tier primary+overlay
+convention NOT APPLICABLE at S31 (single-layer framing per S31 (α)
+disposition; no overlay needed for clean Pattern A bit-exact PASS).
+**A10 Sub-class disposition (αa-S31) Sub-class 2a (αa)
+reimplementation variant extension at operational-coupling-count = 3
+NEW axis value** per Chat ratification ITEM 3 (operational-coupling-
+count axis extension from codified ∈ {0, 1, 2} to ∈ {0, 1, 2, 3};
+NEW fourth variant "standalone-with-orchestration-load" at
+classical_decompose alongside codified dual-role S22 + triple-role
+S23 + standalone-only S28 variants). **A9 Class B counter post-S31:
+n=4 ACTIVE (unchanged at S31; no new Class B catch); sustained-
+observation count under Class B revised default discipline n=7
+(S22 + S23 + S25 + S26 + S27 + S28 + S31 = n=7 Q1 entries only
+counting basis per Chat preference; absorption + Workstream B
+amendment cycles operate with analogous discipline but Class B
+codified scope is Q1 entry empirical-complexity-assumption failure
+mode)** (framing class working hypothesis CONFIRMED at Step 0 per
+A9 Class B revised default discipline; expiration semantics:
+sustained-observation counter continues incrementing at each
+subsequent Q1 entry per A9 Class B revised default operating
+proactively, codification-stable status preserved at n=4 ACTIVE
+counter; n=4 increments only on NEW Class B catch). **A9 Class A
+counter post-S31: n=10 ACTIVE + candidates n=11 + n=12 + n=13 + n=14
+pending absorption #5 codification** (n=11-13 candidates carried
+forward from S30 absorption #4 close; **n=14 NEW candidate at S31
+per STOP-1-close-content-completeness verification catch** —
+Chat→Code direction at S31 STOP 1 close where Code Step 1 response
+surfaced integrations checklist + file LOC delta + edit count
+metadata but did NOT include verbatim entry text body for STOP 1
+verbatim-fidelity verification; **sustained Chat→Code direction
+across n=11 + n=12 + n=13 + n=14 sub-pattern variant codification
+candidate at absorption #5 per A3 precedent** (4 consecutive
+Chat→Code direction catches: S29 STOP 1.5 close STOP-1.5-close-
+application-verification + S30 Step 0 trigger structure placement
+schema-misattribution + S30 STOP 1.5 close Code Edit 3 (H)
+speculation surfacing + S31 STOP 1 close metadata-only-surface-
+without-entry-text-body); expiration semantics: A9 Class A
+candidate inventory accumulates until absorption #5 codification
+refinement disposition adopts/declines each candidate; sub-pattern
+variant codification candidate sufficient at n=4 for absorption #5
+adoption per A3 second-observation tightening precedent).
+**§4.7.A pattern n=5 observation count post-S31 per S30 (G.1)
+generalized definitional scope codification:** S14a + S18 + S26 +
+S27 + S31 = n=5 observations across 4 codified mechanism variants
+(n=4 at S30 codification + S31 classical_decompose adds harness-
+imports-library-directly OR harness-defines-internal-reference-
+function variant per Step 0 empirical structure determination);
+**§4.7.A pattern count tightening forward observation at absorption
+#5 per A3 precedent** (distinct tracking surface from A9 Class A
+counter per S30 (G.1) codification; §4.7.A pattern observations
+track mechanism variant accumulation; A9 Class A counter tracks
+empirical-state-assumption failure mode).
+**A9 Class A + Class B discipline maturation EIGHTH SUSTAINED
+OBSERVATION REACHED at S31 (S23 + S25 + S26 + S27 + S28 + S29 +
+S30 + S31 = n=8 cross-session trajectory)** per A3 second-
+observation tightening precedent threshold satisfied + SIX-timing-
+point empirical surface preserved per S27 codification (no new
+timing point variant at S31; proactive-prevention operation
+SUSTAINED across established timing points (i)-(vi)); promoted to
+§4.5 NEW sub-section at S29-absorption #4 per CHAT RATIFICATION
+carried forward (codification-stable status). **Block 3 Decomposition first-entry status framing**
+(analogous to S26 denton_chowlin Block 8 first-entry precedent for
+clean Block-opening selection; per-block continuation pattern n=4
+catalog block observation candidate at Block 3 completion S31+3 per
+ITEM 7 forward instrumentation banking; expiration semantics:
+per-block continuation pattern n=4 codification at absorption #5
+refinement disposition pending Block 3 completion arc close);
+**Block 3 forward completion arc S31 + S31+1 + S31+2 + S31+3
+projected per Code Step 0 forward look** (banking only per ITEM 4
+forward instrumentation banking; NOT codified at S31; expiration
+semantics: Block 3 ordering working hypothesis (classical → mstl →
+stl → x13) banked at S31 commit message body per ITEM 4 forward
+observation; each subsequent Block 3 entry trigger drafting per A9
+Class B revised default discipline operating proactively at
+respective sub-session); **heterogeneous-Tier-surface variant
+observation banking** (Block 3 Tier surface heterogeneity Tier
+II.bit-exact + Tier VI + Tier VI + Tier VII distinct from Block 1
+homogeneous + Block 12 homogeneous + Block 8 heterogeneous per
+ITEM 7 forward instrumentation banking; expiration semantics:
+per-block continuation pattern note 6 refinement candidate at
+absorption #5 with NEW characterization "Block heterogeneous-
+Tier-surface variant" candidate pending Block 3 completion). **NEW
+Sub-class candidates 2f / 2g / 2h projection (mstl / stl / x13 at
+S31+1 / S31+2 / S31+3) NOT codified at S31** per ITEM 5 (first-
+instance precedent per A3; codification deferred to absorption #5+
+second-observation tightening if recurs; expiration semantics:
+NEW Sub-class candidate trajectory observation banks at S31 close
+pending respective sub-session first-instance baseline observation).
+**§4.7.A 5th variant "REMEDIATED" status codification candidate at
+S31+3 x13 entry NOT codified at S31** per ITEM 6 (first-instance
+precedent per A3; forward observation banking only; codification at
+absorption #5+ or future Workstream B amendment cycle pending
+second-observation tightening; expiration semantics: §4.7.A
+REMEDIATED 5th variant observation banks at S31 close pending S31+3
+x13 first-instance baseline observation OR future Q1 entry second
+observation if §4.7.A REMEDIATED recurs).
+
+## §3 Unvalidated catalog techniques (62 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -5544,8 +6169,8 @@ descriptions, summaries).
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
 
-### Decomposition & Seasonal Adjustment (4 unvalidated)
-`classical_decompose`, `mstl_decompose`, `stl_decompose`, `x13_seasonal_adjust`
+### Decomposition & Seasonal Adjustment (3 unvalidated; classical_decompose moved to §2.5 per Phase 7+ S31 — FIRST Block 3 Decomposition entry; Block 3 Q1-amendment in-progress — FOURTH catalog block transition opens)
+`mstl_decompose`, `stl_decompose`, `x13_seasonal_adjust`
 
 ### Evaluation / Uncertainty (5 unvalidated)
 `block_bootstrap`, `conformal_intervals`, `forecast_combination`, `robust_estimators`, `rolling_origin_cv`
@@ -5577,7 +6202,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 63 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data ALL THREE FULLY Q1-AMENDED — first three catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=3 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #4**).
+**Total: 62 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data ALL THREE FULLY Q1-AMENDED — first three catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=3 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #4; Block 3 Decomposition Q1-amendment IN-PROGRESS — FOURTH catalog block transition opens at S31 with classical_decompose first entry; Block 3 forward completion arc S31 + S31+1 + S31+2 + S31+3 projected banking only per ITEM 4 forward instrumentation banking discipline; per-block continuation pattern n=4 catalog block observation candidate at Block 3 completion S31+3 per ITEM 7 forward instrumentation banking; codification candidate at absorption #5 refinement disposition with NEW characterization "Block heterogeneous-Tier-surface variant" candidate**).
 
 ## §4 How to use this document
 
@@ -5620,7 +6245,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (63 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28 amendments):**
+**Tier 3 — UNVALIDATED (62 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
