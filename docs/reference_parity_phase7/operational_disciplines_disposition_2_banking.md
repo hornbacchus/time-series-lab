@@ -152,13 +152,16 @@ weighted but not invalidating per efficient ratification disposition;
 pro-forma elements present per Mark 3 efficient-ratification pattern
 (operating-context preservation per §5.3).
 
-**Empirical observation count: n=7** across Q1 sub-sessions (S12
+**Empirical observation count: n=10** across Q1 sub-sessions (S12
 granger_causality; S13 cross_correlation_lag; S14b coordinated
 amendment; S14c prewhitened_ccf_lag; S15 rolling_ccf_lag; S17
-dtw_alignment_lag; S18 gcc_phat_delay). Well past n=4 codification
-threshold per S13 forward instrumentation; reinforced at S14b +
-S14c + S15 + S17 + S18 + S16-absorption + S19-absorption
-dispositions.
+dtw_alignment_lag; S18 gcc_phat_delay; S21 adf_test; S22 kpss_test;
+S23 pp_test). Well past n=4 codification threshold per S13 forward
+instrumentation; reinforced at S14b + S14c + S15 + S17 + S18 +
+S16-absorption + S19-absorption + S21 + S22 + S23 dispositions;
+codified at S20 Workstream B amendment cycle at n=7 baseline;
+updated to n=10 at S25 Workstream B amendment cycle (this commit)
+per S21+S22+S23 Q1 entries reinforcement.
 
 **Operational shape characterization:** pro-forma elements present
 at all 7 observations BUT not pro-forma across all upstream
@@ -170,6 +173,32 @@ Pattern reflects efficient ratification at orchestration-level
 decisions (technique selection; framing class) combined with
 substantive verification at empirical-grounding decisions (Step 0
 findings; STOP 2 dispositions).
+
+**Mark 3 efficient-ratification + unprompted case-against discipline
+reinforcement (NEW at S25 Workstream B amendment cycle per S23-pre
+meta ratification + S24-absorption maturation observation):** Per
+§5.3 Mark 3 efficient-ratification observation codification, Q-B
+pattern reflects efficient ratification at orchestration-level
+decisions. **S23-pre meta ratification** elevated Mark 3 operation
+from on-request case-against framing (Doc 2 handoff script literal
+text) to proactive unprompted case-against framing at structural-
+decision points (Tier characterization; framing class; novel-
+substantive scope expansion). **S24-absorption §4 forward
+instrumentation note 7 discipline maturation observation** codified
+reactive-catch → proactive-prevention shift across A9 Class A +
+Class B both shifting in same direction at S23 first-instance.
+Operational implication for Q-B pattern: substantive Chat engagement
+shifts from POST-STOP-2 re-disposition (reactive surface; per S15-
+S22 precedent where Class B mitigation surfaced empirical divergence
+requiring re-disposition) toward PRE-trigger empirical re-Read +
+ratification-declined-at-trigger-drafting (proactive surface; per
+S23 first-instance Tier disposition pre-ratification-declined
+discipline). Q-B pattern maturation observation tracks alongside
+A9 Class A + B maturation observation: if S26+ sustains proactive-
+prevention operation, Q-B pattern shifts toward pure-pro-forma at
+orchestration-level decisions WITH substantive engagement
+exclusively at empirical-grounding decisions (Step 0 findings +
+trigger-drafting disposition).
 
 **Cross-references:**
 - §5.3 Mark 3 efficient-ratification pattern (operating-context
@@ -184,14 +213,21 @@ findings; STOP 2 dispositions).
   Workstream B §1.4" deferred to next §19.4 absorption cycle per
   S20 ratification 3)
 
-**Forward instrumentation:** codification refinement candidate at
-n-count observation if pattern shifts materially. Shift markers
-warranting refinement: (a) genuine contestation surfaced at Q-B
-(user pushes back substantively on tier characterization or framing
-class); (b) pro-forma elements absent across all upstream decisions;
-(c) Mark 3 efficient-ratification pattern itself shifts. Absent
-these markers, n-count continues to accumulate at codification-
-stable rate.
+**Forward instrumentation (updated at S25):** codification refinement
+candidate at n-count observation if pattern shifts materially. Shift
+markers warranting refinement: (a) genuine contestation surfaced at
+Q-B (user pushes back substantively on tier characterization or
+framing class); (b) pro-forma elements absent across all upstream
+decisions; (c) Mark 3 efficient-ratification pattern itself shifts;
+(d) discipline maturation observation regression (proactive-
+prevention reverts to reactive-catch operation per §4.7 cross-
+reference). Absent these markers, n-count continues to accumulate at
+codification-stable rate. **Q-B pattern maturation tracking
+alongside §4 forward instrumentation note 7 discipline maturation
+observation:** if S26+ sustains proactive-prevention at second
+observation, Q-B pattern maturation observation tightens per A3
+second-observation tightening precedent at n=2 maturation
+observations.
 
 ## §2 Layered smooth-ratification countermeasures
 
@@ -921,7 +957,7 @@ LOC overshoot rate (variable per framing complexity). Codification
 refinement at empirical metric accumulation per A3 design-class
 precedent.
 
-### §4.7 Forward Q1 Step 0 discipline
+### §4.7 Forward Q1 Step 0 discipline — harness-vs-engine pattern observations (dual-pattern codification; harness-bypasses-engine + engine-extends-beyond-harness)
 
 Per §19.4 forward instrumentation note "Forward Q1 Step 0 discipline"
 deferred from S16-absorption + S19-absorption absorption cycles per
@@ -931,11 +967,20 @@ amendment cycle.
 
 **Discipline shape:** Step 0 sub-step for techniques where harness-
 vs-engine code path alignment matters for layered framing
-characterization. Empirical question requiring verification at Step
-0: does the harness wrapper invoke the same code path as the engine
-module's main computation?
+characterization. TWO empirical questions requiring verification at
+Step 0: (i) does the harness wrapper invoke the same code path as
+the engine module's main computation? (harness-bypasses-engine
+pattern); (ii) does the engine module extend beyond what harness
+exercises, and if so at what scale? (engine-extends-beyond-harness
+pattern). Patterns are operationally distinct (different mitigation
+surfaces) and concurrently operative (a single technique may exhibit
+both — e.g., S23 pp_test exhibits engine-uses-same-function Layer 1
+alignment AND backend-dispatcher engine extension beyond harness
+fixed-implementation invocation).
 
-**Empirical observations (n=2 informal):**
+#### §4.7.A Harness-bypasses-engine pattern (n=2 informal observations; codified at S20 Workstream B amendment cycle)
+
+**Empirical observations:**
 
 **Observation 1 — S14a Step 5 contextual sampling (p3_ccf outlier):**
 4 of 5 sampled harnesses (p3_kpss + p3_adf + p3_var + p3_granger
@@ -970,40 +1015,187 @@ Alignment between harness and engine code paths is empirical question
 requiring Step 0 verification per technique; cannot be inferred from
 audit Reference field or wrapper engine path citation alone.
 
-**Operational application (Q1 sub-session Step 0 sub-step):** for
-each Q1 technique under layered framing characterization, Step 0
-verifies (cross-referencing S14c-S18 STOP 2 report lettering
-convention for cross-session continuity): (e) audit reference +
-verdict + numerics; (f) harness wrapper run_tsl + run_reference code
-paths (specific to harness-vs-engine alignment verification); (g)
-engine module computation + post-processing complexity. Step 0 (f)
-specifically establishes harness code path; comparison against Step 0
-(g) engine code path surfaces alignment OR divergence. Divergence
-informs layered framing class determination (single-layer applies
-only when harness invokes same code path as engine; layered framing
-applies otherwise per A9 Class B revised default).
+#### §4.7.B Engine-extends-beyond-harness pattern (n=3 observations triad; codification refinement EMPIRICALLY COMPLETE at n=3 per A3 second-observation tightening precedent; NEW codification at S25 Workstream B amendment cycle)
 
-**Cross-references:**
+**Discipline shape (Pattern 2-specific):** engine module uses SAME
+underlying function/library as harness validates at Layer 1 math
+(clean engine-uses-same-function convention; distinct from §4.7.A
+harness-bypasses-engine pattern) AND extends substantially beyond
+harness invocation scope via additional engine-specific computation
+layers. Empirical question requiring verification at Step 0: when
+engine uses same Layer 1 math function as harness, at what scale
+does engine extend beyond harness exercise (Layer 1 / Layer 2 /
+Layer 3)?
+
+**Empirical observations (n=3 triad; codification EMPIRICALLY
+COMPLETE at A3 second-observation tightening precedent threshold):**
+
+**Observation 1 — S21 Layer 3 extension scale (adf_test):** Engine
+module `engine/techniques/adf_test.py` uses SAME
+`statsmodels.tsa.stattools.adfuller` function harness validates at
+Layer 1 math (clean engine-uses-same-function pattern). Engine
+extends DRAMATICALLY beyond harness via Layer 3 joint triage sub-
+system (`_run_triage` lines 506-714 + `_joint_verdict` lines 200-228
++ PP tie-breaker lines 559-565); entirely new computational sub-
+system invoking parallel KPSS + PP test invocations + computing
+four-outcome verdict heuristic. Layer 3 NOT exercised by harness;
+engine-specific operational distinctive drives adf_test ribbon-
+default publication output per `_is_triage_mode` dispatch.
+
+**Observation 2 — S22 Layer 2 extension scale (kpss_test):** Engine
+module `engine/techniques/kpss_test.py` uses SAME
+`statsmodels.tsa.stattools.kpss` function harness validates at Layer
+1 math. Engine extends MODERATELY beyond harness via Layer 2
+orchestration only (regression/nlags allowlist gating per CAI Phase
+2 Session 17 fix + NaN handling via `_prepare_series` + per-series
+loop + significance disclosure + interpretation); NO Layer 3 of its
+own (joint triage mode is OWNED BY adf_test.py NOT kpss_test.py).
+Engine module dual-role: standalone-technique role + helper-export
+role via `_run_kpss_single` to adf_test triage Layer 3 sub-component
+3b.
+
+**Observation 3 — S23 Layer 1 backend-dispatcher extension scale
+(pp_test):** Engine module `engine/techniques/pp_test.py` uses SAME
+`arch.unitroot.PhillipsPerron` function harness validates at base
+config (audit-time backend was arch path). Engine extends Layer 1
+dimension via BACKEND-DISPATCHER variant — 3-tier fallback chain
+across THREE underlying library implementations
+(statsmodels.tsa.stattools.phillips_perron → arch.unitroot.PhillipsPerron
+→ `_manual_pp` 64 LOC Newey-West Bartlett kernel implementation);
+harness validates arch path specifically; statsmodels-path +
+manual-path NOT audit-validated. Engine module triple-role:
+standalone-technique role + helper-export to adf_test triage 3b
+parallel-test invocation + helper-export to adf_test triage 3d
+CONFLICTING tie-breaker.
+
+**Pattern characterization (scale-of-extension variation across
+Layer 1 / Layer 2 / Layer 3):** engine-extends-beyond-harness
+pattern operates with three operationally distinct scale-of-
+extension variations:
+- **Layer 3 extension scale (S21 adf_test):** DRAMATIC extension via
+  entirely new computational sub-system (joint triage parallel-tests
+  + verdict heuristic + tie-breaker logic); engine-specific Layer 3
+  computation NOT exercised by harness; ribbon publication output
+  drives Layer 3 publication context
+- **Layer 2 extension scale (S22 kpss_test):** MODERATE extension
+  via orchestration only (allowlist gating + NaN handling + per-
+  series loop + significance disclosure + interpretation); engine
+  Layer 2 NOT parity-validated; helper-export coupling extends
+  retraction surface to adf_test triage publication context
+- **Layer 1 backend-dispatcher extension scale (S23 pp_test):**
+  BACKEND-DISPATCHER variant via fallback chain across underlying
+  implementations; engine Layer 1 alternative paths NOT audit-
+  validated (statsmodels-path + manual-path); runtime backend
+  selection drives published output; helper-export triple-role
+  coupling extends retraction surface to adf_test triage at TWO
+  sub-component coupling points (3b + 3d)
+
+**Pattern characterization sub-observation (orthogonal axis to scale-
+of-extension; forward observation NOT load-bearing claim at n=3
+codification baseline):** helper-export-role-presence is empirically
+orthogonal to scale-of-extension at n=3 observations. Layer 3
+extension (S21 adf_test) is the CONSUMER of helper-exports from
+Layer 2 + Layer 1 engines (Sub-class 2d cross-class coupling per
+§19.4 A10 codification); Layer 2 (S22 kpss_test) is dual-role
+helper-export to Layer 3 consumer; Layer 1 (S23 pp_test) is triple-
+role helper-export to Layer 3 consumer at TWO sub-component coupling
+points (3b + 3d). Helper-export-role-presence + role-count (none /
+dual / triple) operates as orthogonal characterization axis to
+scale-of-extension; informs Q-D retraction surface compounding per
+S23 pp_test entry MEDIUM-HIGH-CRITICAL triple-role compounding
+observation. Forward instrumentation: if S26+ surfaces engine-
+extends-beyond-harness observation at any Layer scale WITHOUT
+helper-export role, axis decoupling confirms; if pattern only
+observes WITH helper-export role at Q1 entries, axes may be
+empirically correlated rather than orthogonal. Per Previous Chat
+1.4 walkback honest mark: "Helper-export-role-presence is better
+candidate variable than Layer-scale-of-extension" — surfaced as
+forward observation pending S26+ empirical disambiguation; NOT
+elevated to load-bearing variable at S25 codification baseline.
+
+#### §4.7.C Operational application (Q1 sub-session Step 0 sub-step; both patterns)
+
+For each Q1 technique under layered framing characterization, Step
+0 verifies (acknowledging step lettering convention varies across
+sub-sessions per Step 0 scope; (e)/(f)/(g) reference below is
+canonical-convention placeholder for audit + harness + engine sub-
+steps per S15-S22 §2.5 entry precedent; S23 + S23-pre + S24+ apply
+variant lettering per per-sub-session Step 0 scope): audit reference
++ verdict + numerics (canonical (e)); harness wrapper run_tsl +
+run_reference code paths (canonical (f); specific to §4.7.A harness-
+bypasses-engine alignment verification); engine module computation
++ post-processing complexity (canonical (g); specific to §4.7.B
+engine-extends-beyond-harness alignment verification). Canonical
+(f) specifically establishes harness code path; canonical (g)
+specifically establishes engine extension scale; comparison against
+canonical (g) engine code path surfaces alignment OR divergence per
+BOTH patterns concurrently. Divergence informs layered framing
+class determination (single-layer applies only when harness invokes
+same code path as engine AND engine does NOT extend substantially
+beyond harness; layered framing applies otherwise per A9 Class B
+revised default discipline).
+
+#### §4.7.D Cross-references (dual-pattern; both §4.7.A + §4.7.B)
+
 - §1.1 Q-A (Step 0 empirical re-Read is Q-A foundation; harness-vs-
-  engine alignment is one Q-A sub-question)
+  engine alignment AND engine-extends-beyond-harness scale are both
+  Q-A sub-questions)
 - §4.6 Option II workflow (Step 0 (f)/(g) harness-vs-engine
-  alignment verification is one operational step within Option II
-  Step 0 empirical re-Read)
+  alignment + engine-extends-beyond-harness scale verification are
+  operational steps within Option II Step 0 empirical re-Read)
 - §19.4 A9 Class A + Class B failure modes (harness-vs-engine
-  alignment verification is one mitigation surface for Class B
-  empirical-complexity assumption failures)
+  alignment + engine-extends-beyond-harness verification are
+  mitigation surfaces for Class B empirical-complexity assumption
+  failures)
 - §19.4 forward instrumentation note "Forward Q1 Step 0 discipline"
   at calibration_baseline.md (cross-reference preserved at §19.4
   historical audit trail; status update to "codified at Workstream B
   §4.7" deferred to next §19.4 absorption cycle)
+- §19.4 §4 forward instrumentation note 6 Block 1 + Block 12 milestone
+  refinement at S24-absorption (per-block continuation pattern at
+  n=2 catalog block observations; per-entry LOC elevation reflects
+  novelty enumeration + triple-role + dual-tier framing scope)
 
-**Forward instrumentation:** codification refinement candidate at
-third analogous outlier observation per A3 design-class precedent.
-Refinement markers: (a) third outlier pattern surfacing; (b) pattern
-variant surfacing (new harness-vs-engine alignment failure mode not
-anticipated by n=2 baseline); (c) codification of harness-engine
-alignment as gate rather than Step 0 sub-step if pattern materially
-affects publication confidence.
+#### §4.7.E Forward instrumentation (updated at S25 Workstream B amendment cycle)
+
+**§4.7.A Harness-bypasses-engine pattern forward instrumentation:**
+codification refinement candidate at third analogous outlier
+observation per A3 design-class precedent. Refinement markers: (a)
+third outlier pattern surfacing; (b) pattern variant surfacing (new
+harness-vs-engine alignment failure mode not anticipated by n=2
+baseline); (c) codification of harness-engine alignment as gate
+rather than Step 0 sub-step if pattern materially affects publication
+confidence.
+
+**§4.7.B Engine-extends-beyond-harness pattern forward instrumentation
+(NEW at S25):** codification refinement triad EMPIRICALLY COMPLETE
+at n=3 observations per A3 second-observation tightening precedent
+threshold satisfied (Layer 1 backend-dispatcher S23 + Layer 2 S22 +
+Layer 3 S21). Refinement markers for next codification cycle: (a)
+fourth Layer-scale-variation observation surfacing (e.g., NEW Layer
+0 extension scale or Layer 4 extension scale at S26+ Q1 entries);
+(b) pattern interaction with §4.7.A harness-bypasses-engine pattern
+(e.g., technique exhibiting BOTH patterns surfaces compound
+operational distinctive); (c) codification of engine-extends-beyond-
+harness scale-of-extension variation as Tier characterization
+sub-class candidate (analogous to scope_reframing §2 Tier II split
+precedent at S9 in-place §2 amendment).
+
+**Pattern relationship (NEW at S25):** §4.7.A + §4.7.B are
+operationally distinct patterns; technique may exhibit ONE pattern
+only, BOTH patterns concurrently, or NEITHER pattern (clean engine-
+uses-same-function with no Layer 2/3 extension). Step 0 sub-step
+verifies both patterns concurrently; mitigation surface differs per
+pattern: §4.7.A mitigation = layered framing class determination at
+Step 0 disposition; §4.7.B mitigation = scale-of-extension
+disclosure at Q-A bullet + Q-D retraction surface compounding
+characterization. Discipline maturation observation cross-reference:
+A9 Class A + B reactive-catch → proactive-prevention shift codified
+at §19.4 §4 forward instrumentation note 7 at S24-absorption;
+applies symmetrically across both §4.7 pattern observation timing
+points; second-observation tightening confirmed at S25 Workstream B
+amendment cycle Step 0 anchors empirically CONFIRMED per CHAT
+RATIFICATION #8 disposition.
 
 ## §5 Operating context preservation
 
@@ -1063,6 +1255,76 @@ Future readers should understand: efficient-ratification pattern was
 explicitly noted; Chat-side discipline was preserved against
 momentum; the pattern recurrence is itself instrumentation data for
 forward smooth-ratification countermeasure calibration.
+
+### §5.4 Operational permission grants — β grant scope discipline (NEW at S25 Workstream B amendment cycle per Candidate D bounded β grant disposition)
+
+**Codification scope distinction from Mark 1/2/3:** §5.1 Mark 1 +
+§5.2 Mark 2 + §5.3 Mark 3 codify operating-context preservation
+observations (empirical preservations that emerged at Phase 5/Phase
+6+ work program). §5.4 codifies operational permission grant scope
+discipline; NOT a "Mark 4" candidate per S24-absorption discipline
+maturation observation framing distinction (institutional discipline
+observation vs operating-context preservation). β grant is a
+specific operational permission (harness allowing direct push to
+master bypassing PR review) with scope-aware ratification discipline.
+
+**β grant operational origin:** Phase 7+ S21-push sub-session
+surfaced harness gate denial on `git push origin master` ("Push to
+master (default branch) bypasses pull request review"). Chat
+ratified (β) grant per S21-push trigger Step 1 disposition; granted
+direct-push permission active for S21+ commits. Empirical operation:
+S21 + S22 + S23 + S24-absorption commits all pushed direct to master
+under β grant operative without re-ratification.
+
+**β grant scope-tightening (codified at S25 per Candidate D bounded
+β grant disposition):** β grant scope is **bounded to Phase 7+ Q1
+work program**. Revocation triggers (either-or):
+- Phase 7+ Q1 work program close (work program completion event;
+  empirical milestone; absorption #N if applicable)
+- Path α expert review handoff (work program transition event;
+  empirical milestone)
+
+Either trigger event occurs → β grant scope expires → next
+direct-push attempt requires fresh ratification (e.g., extending
+grant to Q2 OR Q3 OR Q3b scope per work program continuation; OR
+transitioning to PR-review workflow per institutional standard at
+Path α close).
+
+**Operational implications during bounded scope (S21-current
+operative; will remain operative through Phase 7+ Q1 close):**
+- Direct push to master permitted for Phase 7+ Q1 work program
+  commits (per-technique §2.5 entries + §19.4 absorption commits +
+  Workstream B amendment cycle commits + Q1 work program close
+  artifact commits if applicable)
+- No re-ratification per commit; β grant operative as standing
+  permission during bounded scope
+- Scope boundary at Q1 close: fresh Chat ratification required for
+  Q2 / Q3 / Q3b / Path α handoff direct-push permissions if
+  operational continuity warrants
+
+**Forward instrumentation:** β grant scope-tightening codification
+serves Path α expert review preparation discipline + multi-cycle
+work program operational hygiene. If Phase 7+ work program extends
+beyond Q1 without explicit Q1-close ratification event, β grant
+implicit-extension risk surfaces — operational discipline candidate
+for re-ratification trigger codification at S26+ if Q2/Q3 work
+program activates without explicit Q1 close. Revocation event
+codification candidate at A11 NEW amendment OR §19.4 absorption
+#4+ if operational permission scope discipline warrants amendment-
+class status per A3 second-observation precedent.
+
+**Cross-references:**
+- S21-push sub-session β grant origin (in conversation; not
+  committed; surfaced at S21-push VERIFY AT CLOSE)
+- S22 + S23 + S24-absorption commits push operations (empirical
+  operation under β grant operative without re-ratification)
+- §1.4 Q-B operational pattern (Q-B pattern operates within bounded
+  ratification scope; β grant is one operational permission scope
+  within broader work program ratification discipline)
+- §4 verify-state-at-narration discipline (β grant operates within
+  CONSTRAINT 4 A6 BLOCKING + verify-state-at-first-consumption
+  sub-discipline; grant scope-tightening preserves discipline
+  operation at scope boundaries)
 
 ## §6 Banking footer
 
