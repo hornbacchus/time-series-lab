@@ -229,6 +229,61 @@ observation, Q-B pattern maturation observation tightens per A3
 second-observation tightening precedent at n=2 maturation
 observations.
 
+### §1.5 Novelty enumeration sub-section pattern (NEW at S30 Workstream B amendment cycle per Candidate C codification; S23 pp_test first-instance precedent)
+
+Per Workstream B amendment cycle separate-lane Candidate C deferred from S22+S23 banking + S24-absorption candidate inventory + S29-absorption #4 preserved candidates; codified at this artifact per S30 Workstream B amendment cycle.
+
+**Pattern observation:** Q1 §2.5 entries that surface ≥3 novel structural observations within standard entry structure benefit from dedicated novelty enumeration sub-section. First-instance: S23 pp_test entry codified novelty enumeration sub-section with six sub-items (3a-3f) covering Sub-class 2a candidate + Tier overlay + backend-dispatcher + Layer 1 engine-extends-beyond-harness variant + triple-role + auto-bandwidth divergence. Sub-section pattern surfaced when novel observations exceed standard entry structure accommodation.
+
+**Threshold criterion (codified per Previous Chat 1.6 framing observation):** ≥5 novel structural observations in main entry text body warrants novelty enumeration sub-section adoption. <5 novel observations accommodate within standard structure (Tier line + framing precedent + Source files + Validation claim scope + 4 disclosure templates + Q-A through Q-D + Status line). Threshold prevents apparatus extension at insufficient observation density.
+
+**Sub-section structure pattern:**
+- Header: "**Novelty enumeration sub-section (FIRST-INSTANCE per S<N>; novel sub-section pattern; codification candidate for Workstream B §3 addendum or §5.4 if S<N+1>+ Q1 entries replicate pattern per A3 design-class second-observation precedent)**"
+- Enumerated items 3a / 3b / 3c / etc. — each items surfaces ONE novel structural observation with: (i) observation characterization; (ii) empirical grounding (line ranges + verbatim text); (iii) disposition framing (codification candidate / deferred to absorption / etc.); (iv) cross-reference to related observations + precedents
+- Forward instrumentation references absorption #N+ codification disposition
+
+**Empirical observations:**
+
+**Observation 1 — S23 pp_test first-instance (sub-section pattern codification baseline):** S23 pp_test §2.5 entry surfaced 6 novel structural observations (3a-3f) exceeding standard entry accommodation: Sub-class 2a candidate second-observation + Tier II.bit-exact-loose + Tier V Pattern J B.2 overlay + Backend-dispatcher engine pattern + Engine-extends-beyond-harness Layer 1 variant + Triple-role helper-export + Auto-bandwidth rule divergence. Novelty enumeration sub-section pattern adopted; first-instance baseline ~50-70 LOC sub-section + ~480-540 total entry LOC.
+
+**Observation 2 — S26 denton_chowlin + S27 loess_interpolation + S28 kalman_imputation (post-S23 entries; sub-section pattern NOT applied per <5 observations threshold):** S26-S28 entries each surfaced ≤4 novel structural observations within standard entry structure accommodation; novelty enumeration sub-section NOT applied per CHAT RATIFICATION threshold criterion preservation. Pattern operational at first-instance + subsequent threshold-respecting non-applications across Block 8 completion arc.
+
+**Forward instrumentation:** second-instance novelty enumeration sub-section adoption at S31+ Q1 entry would tighten pattern per A3 second-observation tightening precedent. Threshold refinement candidate at sub-pattern variant observations (e.g., 4-observation entry adopting novelty enumeration vs not) at Workstream B amendment cycle disposition. Codification refinement at n=3+ adoption instances per A3 design-class precedent.
+
+**Cross-references:**
+- S23 pp_test §2.5 entry (tsl_trust_inventory_techniques.md) — first-instance novelty enumeration sub-section
+- §1.6 Q-A density convention (NEW at S30; cross-references novelty enumeration as Q-A density driver)
+- §3 disclosure templates (novelty enumeration items within standard 4-template structure preserved)
+
+### §1.6 Q-A density convention with LOC overshoot pattern scope expansion (NEW at S30 Workstream B amendment cycle per Candidate F codification; scope expansion per S29-absorption #4 §4 forward instrumentation note 11)
+
+Per Workstream B amendment cycle separate-lane Candidate F deferred from S23 pp_test Q-A density acknowledgment banking + S29-absorption #4 LOC overshoot pattern codification at §4 forward instrumentation note 11; codified at this artifact per S30 Workstream B amendment cycle.
+
+**Pattern observation:** Q-A bullets at Q1 §2.5 entries surface elevated density at first-instance NEW framings (novel topology + novel tier characterization + novel sub-class + audit-content-distribution variants); Q-A density compounding correlates with LOC overshoot pattern at entry level.
+
+**Empirical observations:**
+
+| Sub-session | Q-A density driver | LOC actual vs projected | Overshoot |
+|---|---|---|---|
+| S23 pp_test | Novelty enumeration sub-section + triple-role + Pattern J overlay + backend-dispatcher + Layer 1 engine-extends-beyond-harness + bandwidth divergence | 844 vs ~330-400 projected | +444 LOC (+111-156%) |
+| S27 loess_interpolation | Tier III FIRST §2.5 + §4.7.A use-case-divergence variant + Sub-class 2e candidate scope refinement | 513 vs ~330 projected | +183 LOC (+55%) |
+| S28 kalman_imputation | Tier II.mle-band + Pattern A overlay FIRST primary+overlay + Sub-class 2a UPGRADE + audit-content-distribution variant | 536 vs ~440 projected | +96 LOC (+22%) |
+
+**LOC overshoot pattern characterization:** first-instance NEW framings drive Q-A density compounding via structural codification depth requirements (each novel observation requires Q-A bullet contextualization + Q-D retraction surface integration + 4-disclosure-template adaptation). Overshoot pattern decreases monotonically across sustained Block sequence as accumulating empirical groundedness reduces per-entry novelty (S27 +55% → S28 +22%).
+
+**Q-A density convention (codified at S30):**
+
+- **Acknowledge density elevation in-line** at Q-A bullet close: "Q-A bullet density acknowledgment: Q-A density at S<N> elevated per [novel framings list]; Workstream B amendment cycle codification candidate if pattern recurs at S<N+1>+ Q1 entries per A3 precedent." (S23 pp_test established this convention pattern)
+- **Forward instrumentation banking** at entry status line: cite §1.6 Q-A density convention codification at Workstream B amendment cycle + cross-reference §4 forward instrumentation note 11 LOC overshoot pattern (per S29-absorption #4 codification)
+- **LOC overshoot acceptance per CONSTRAINT 3** (do NOT trim post-hoc): overshoot reflects substantive structural codification depth; trimming sacrifices Q-D retraction surface integrity + 4-disclosure-template parallelism. Acceptance documented at status line per CONSTRAINT 3 institutional preservation.
+
+**Forward instrumentation:** third LOC overshoot observation at S31+ Q1 entry tightens pattern characterization per A3 second-observation tightening precedent. Convention refinement candidate at Workstream B amendment cycle if overshoot pattern shifts (e.g., approaches zero overshoot across sustained S31-S35 sequence indicating apparatus maturity; OR re-accelerates indicating new structural codification depth at NEW first-instances).
+
+**Cross-references:**
+- §19.4 §4 forward instrumentation note 11 (LOC overshoot pattern observation; S29-absorption #4 codification)
+- §1.5 novelty enumeration sub-section pattern (Q-A density driver; cross-references novelty enumeration as primary Q-A density driver at S23 first-instance)
+- §1.4 Q-B operational pattern observation (Q-B pattern distinct from Q-A density; Q-A = within-entry density characterization; Q-B = cross-entry ratification pattern)
+
 ## §2 Layered smooth-ratification countermeasures
 
 Per S9 handoff §6 + S6 §5 operational discipline carry-forward.
@@ -359,6 +414,42 @@ Forward instrumentation for streamlining-vs-apparatus tension:
   surface aggregate streamlining election count
 - At Path α expert review preparation, surface streamlining election
   history per technique for expert reviewer awareness
+
+### §2.5 Tier primary+overlay framing convention (NEW at S30 Workstream B amendment cycle per Candidate H codification; A3 second-observation tightening precedent threshold satisfied at n=2 empirical observations S23 + S28)
+
+Per Workstream B amendment cycle separate-lane Candidate H surfaced at S28 close banking + S29-absorption #4 candidate inventory; codified at this artifact per S30 Workstream B amendment cycle.
+
+**Pattern observation:** Q1 §2.5 entries where empirical Tier characterization spans MULTIPLE codified Tier definitions can adopt primary+overlay framing convention: primary Tier characterization + secondary Tier overlay characterization. Convention emerged at S23 pp_test first-instance and reinforced at S28 kalman_imputation second observation per A3 precedent.
+
+**Empirical observations (n=2 empirical baseline; codification-stable per A3 second-observation tightening precedent):**
+
+**Observation 1 — S23 pp_test (first-instance precedent):** Tier characterization at "Tier II.bit-exact-loose + Tier V Pattern J B.2 overlay":
+- Primary: Tier II.bit-exact-loose per closed_form tolerance class + abs diff 2.09e-06 within ladder accommodating Pattern J widening
+- Overlay: Tier V Pattern J B.2 (internal-default divergence per scope_reframing §2 line 176-177) per audit Pattern J observation
+- Overlay treatment per scope_reframing §2 line 236-237 ("distributed across other tiers as overlay")
+- Empirical structure surfaces dual-tier characterization where verdict_class semantic AND Pattern J widening accommodation both apply
+
+**Observation 2 — S28 kalman_imputation (second observation; codification-stable per A3 precedent):** Tier characterization at "Tier II.mle-band primary + Pattern A conditional-on-MLE-alignment overlay":
+- Primary: Tier II.mle-band per verdict_class "mle_fit" + MLE-fit-band tolerance scope per scope_reframing §2 lines 134-137
+- Overlay: Pattern A conditional-on-MLE-alignment per p3_batch_5_summary Pattern A characterization + phase3_cross_batch_findings cross-batch Pattern A list
+- Empirical structure surfaces dual-tier characterization where verdict_class semantic AND Pattern A regime alignment both apply
+- Analogous structural framing to S23 (primary tier + overlay characterization); A3 second-observation tightening precedent satisfied
+
+**Convention codification (per n=2 observation tightening):**
+
+- **Primary tier characterization:** dominant Tier classification per scope_reframing §2 definitional scope (Tier II.bit-exact / Tier II.mle-band / Tier III / Tier IV / etc.); empirically grounded at verdict_class semantic OR audit verdict structural classification
+- **Overlay tier characterization:** secondary Tier (Tier V Pattern J variant OR Pattern A regime characterization OR analogous) per audit-content-distribution OR cross-batch findings OR scope_reframing §2 line 236-237 overlay permission
+- **Cross-reference structure:** primary+overlay framing codified at Tier line + Validation claim scope + 4 disclosure templates + Q-A + Q-D; cross-reference scope_reframing §2 line(s) for primary AND overlay characterization
+- **A3 second-observation tightening precedent satisfied at n=2;** third primary+overlay observation at S31+ Q1 entry tightens convention per A3 precedent
+
+**Forward instrumentation:** third primary+overlay observation at S31+ Q1 entry would extend convention codification with additional empirical examples + potential sub-class variant emergence (novel primary+overlay combinations beyond Tier II.bit-exact-loose + Pattern J B.2 + Tier II.mle-band + Pattern A as observed at S23 + S28). Convention refinement candidate at Workstream B amendment cycle if pattern shifts.
+
+**Cross-references:**
+- scope_reframing §2 line 236-237 (Tier V overlay permission: "distributed across other tiers as overlay")
+- scope_reframing §2 line 176-177 (Pattern J B.2 sub-class: internal-default divergence; p3_egarch exemplar)
+- scope_reframing §2 lines 134-137 (Tier II.mle-band definitional scope)
+- S23 pp_test §2.5 entry (tsl_trust_inventory_techniques.md) — first-instance primary+overlay precedent
+- S28 kalman_imputation §2.5 entry — second-observation primary+overlay precedent
 
 ## §3 Methodology disclosure templates
 
@@ -957,7 +1048,7 @@ LOC overshoot rate (variable per framing complexity). Codification
 refinement at empirical metric accumulation per A3 design-class
 precedent.
 
-### §4.7 Forward Q1 Step 0 discipline — harness-vs-engine pattern observations (dual-pattern codification; harness-bypasses-engine + engine-extends-beyond-harness)
+### §4.7 Forward Q1 Step 0 discipline — harness-vs-engine pattern observations (dual-pattern codification REFINED at S30 Workstream B amendment cycle per Candidate G.1 generalized definitional scope per A10 Sub-class 2e codification alignment at S29-absorption #4: §4.7.A harness-uses-different-code-path-from-engine (reimplementation + use-case-divergence variants) + §4.7.B engine-extends-beyond-harness with sub-scale variant taxonomy per Candidate G.2)
 
 Per §19.4 forward instrumentation note "Forward Q1 Step 0 discipline"
 deferred from S16-absorption + S19-absorption absorption cycles per
@@ -978,7 +1069,18 @@ both — e.g., S23 pp_test exhibits engine-uses-same-function Layer 1
 alignment AND backend-dispatcher engine extension beyond harness
 fixed-implementation invocation).
 
-#### §4.7.A Harness-bypasses-engine pattern (n=2 informal observations; codified at S20 Workstream B amendment cycle)
+#### §4.7.A Harness-uses-different-code-path-from-engine pattern (REFINED at S30 Workstream B amendment cycle per Candidate G.1 generalized definitional scope per A10 Sub-class 2e codification alignment at S29-absorption #4; n=4 observations across structural mechanism variants: harness-bypasses-engine + harness-reimplements-engine-math + harness-validates-different-use-case-of-same-library-function)
+
+**Generalized definitional scope (REFINED at S30 per A10 Sub-class 2e codification alignment at S29-absorption #4):** §4.7.A pattern definitional scope generalizes from "harness-bypasses-engine" (S25 codification baseline) to "harness-uses-different-code-path-from-engine" — covering all structural mechanisms where harness validates DIFFERENT code path than engine module's primary computation, regardless of bypass mechanism. Generalized scope covers:
+
+1. **Harness-imports-library-directly variant** (S14a p3_ccf): harness imports library function directly while engine module uses custom implementation
+2. **Harness-defines-internal-reference-function variant** (S18 p3_gcc_phat): harness defines harness-internal reference function while engine module is materially more complex
+3. **Harness-reimplements-engine-math variant** (S26 p3_denton_chowlin): harness REIMPLEMENTS engine math directly (numpy KKT vs engine `_denton_proportional`); SAME use case, DIFFERENT code paths
+4. **Harness-validates-different-use-case-of-same-library-function variant** (S27 p3_loess): harness AND engine import SAME library function BUT use for DIFFERENT purposes (harness: smoothing self-parity; engine: interpolation of missing values)
+
+**Cross-class alignment per A10 Sub-class 2e codification at S29-absorption #4:** Sub-class 2e (αa) reimplementation variant (S26) + (αb) use-case-divergence variant (S27) at A10 Sub-class taxonomy aligns with §4.7.A variants 3 + 4 at Workstream B §4.7.A operational discipline scope. Both apparatus locations (§19.4 A10 + Workstream B §4.7.A) characterize same empirical phenomenon at different abstraction levels: A10 = sub-session class taxonomy; §4.7.A = operational discipline structural mechanism. Generalized definitional scope at S30 codification removes cross-class label divergence (S25 §4.7.A "harness-bypasses-engine" semantic narrower than A10 Sub-class 2e generalized scope; S30 refinement aligns labels).
+
+**Historical S25 codification baseline (preserved per R3 audit trail):**
 
 **Empirical observations:**
 
@@ -1015,7 +1117,27 @@ Alignment between harness and engine code paths is empirical question
 requiring Step 0 verification per technique; cannot be inferred from
 audit Reference field or wrapper engine path citation alone.
 
-#### §4.7.B Engine-extends-beyond-harness pattern (n=3 observations triad; codification refinement EMPIRICALLY COMPLETE at n=3 per A3 second-observation tightening precedent; NEW codification at S25 Workstream B amendment cycle)
+#### §4.7.B Engine-extends-beyond-harness pattern (REFINED at S30 Workstream B amendment cycle per Candidate G.2 sub-scale variant taxonomy codification; n=5 observations across sub-scale variants: Layer 2 orchestration + Layer 2 method-extension + Layer 1E use-case-extension; codification triad EMPIRICALLY COMPLETE at n=3 base layers extended with sub-scale variants per S25+S26+S27 observations)
+
+**Sub-scale variant taxonomy (NEW codification at S30 Workstream B amendment cycle per Candidate G.2):**
+
+Engine-extends-beyond-harness pattern operates at multiple sub-scales within Layer characterization (Layer 1 / Layer 2 / Layer 3); sub-scale variant taxonomy distinguishes operational granularity within Layer base categorization:
+
+- **Layer 2 orchestration sub-scale (S21 + S22 + S23 triad baseline; codified at S25):** engine extends Layer 2 beyond harness via orchestration only (allowlist gating + NaN handling + per-series loop + significance disclosure + interpretation); no NEW math function added at Layer 1E (engine uses same Layer 1 math function as harness)
+- **Layer 2 method-extension sub-scale (S26 denton_chowlin variant; NEW codification per S30):** engine extends Layer 2 via NEW math function addition (engine `_chowlin` Chow-Lin GLS regression + `_estimate_rho` ML grid search alongside Denton method); engine adds Layer 1E math function NOT in harness audit scope; Layer 2 method dispatch (allowlist + selection) added orchestration
+- **Layer 1E use-case-extension sub-scale (S27 loess_interpolation variant; NEW codification per S30):** engine extends Layer 1E use case of SAME library function (statsmodels.lowess) from harness audit scope (smoothing self-parity) to NEW use case (interpolation of missing values); no NEW math function added (same library function); use case divergence with associated Layer 2 orchestration scope expansion
+
+**Empirical sub-scale variant distribution (n=5 observations across 3 sub-scales):**
+- Layer 2 orchestration sub-scale: n=3 (S21 + S22 + S23 triad)
+- Layer 2 method-extension sub-scale: n=1 (S26 denton_chowlin Chow-Lin extension)
+- Layer 1E use-case-extension sub-scale: n=1 (S27 loess_interpolation smoothing-to-interpolation extension)
+
+**Forward instrumentation (UPDATED at S30):**
+- Codification refinement triad EMPIRICALLY COMPLETE at n=3 Layer scales (Layer 1 / Layer 2 / Layer 3) per A3 second-observation tightening precedent threshold satisfied at S26+S27 sub-scale variant codification
+- Sub-scale variant taxonomy tightens at second observation per sub-scale: Layer 2 method-extension second observation at S31+ Q1 entry; Layer 1E use-case-extension second observation at S31+ Q1 entry
+- Cross-class alignment with A10 Sub-class taxonomy at §19.4 codification per S30 Candidate G refinement scope (G.1 generalized §4.7.A + G.2 §4.7.B sub-scale variant taxonomy)
+
+**Historical S25 codification baseline (preserved per R3 audit trail):**
 
 **Discipline shape (Pattern 2-specific):** engine module uses SAME
 underlying function/library as harness validates at Layer 1 math
@@ -1325,6 +1447,38 @@ class status per A3 second-observation precedent.
   CONSTRAINT 4 A6 BLOCKING + verify-state-at-first-consumption
   sub-discipline; grant scope-tightening preserves discipline
   operation at scope boundaries)
+
+### §5.5 Forward-instrumentation hygiene — predictive-claim-expiration discipline (NEW at S30 Workstream B amendment cycle per Candidate E codification; extends §5.4 operating-context preservation precedent)
+
+Per Workstream B amendment cycle separate-lane Candidate E deferred from S24-absorption NEW Finding 1 stale text removal observation + S29-absorption #4 candidate inventory; codified at this artifact per S30 Workstream B amendment cycle.
+
+**Codification scope distinction from Mark 1/2/3 + §5.4 β grant:** §5.1 Mark 1 + §5.2 Mark 2 + §5.3 Mark 3 codify operating-context preservation observations; §5.4 codifies operational permission grant scope discipline (S25 codification); §5.5 codifies forward-instrumentation hygiene discipline — operating-context-aware narrative maintenance pattern. Discipline operates alongside Mark 1/2/3 + §5.4 within §5 "operating context preservation" semantic scope.
+
+**Pattern observation:** Forward-instrumentation notes in §19.4 baseline + Workstream B artifact often contain predictive operational claims (e.g., "3rd instance would reinforce codification" + "second observation tightens variant baseline" + "codification candidate at next absorption cycle"). Predictive claims represent operational expectations contingent on future empirical state. When prediction is empirically settled (observation occurs OR doesn't), forward-instrumentation note text should expire OR transition to status-update characterization per R3 maintenance protocol audit trail discipline.
+
+**Empirical observation (first-instance baseline):**
+
+**Observation 1 — S24-absorption NEW Finding 1 stale text removal (S24-absorption codification baseline):** §19.4 A9 forward instrumentation note text "Class B pattern codified at n=2 ACTIVE; revised default assumption empirically operative; 3rd instance would reinforce codification." (S19-absorption codification) became stale at S21+S22 (Class B n=3+n=4 observations triggered "3rd instance would reinforce" prediction). NEW Finding 1 at S24-absorption codified text supersession + n=4 codification + maturation observation cross-reference. Predictive claim ("3rd instance would reinforce") expired when prediction empirically settled at S21 Class B Instance #3; text transitioned to status-update characterization at S24-absorption.
+
+**Forward-instrumentation hygiene discipline (codified at S30):**
+
+- **Predictive-claim-expiration triggers:** when forward-instrumentation note contains predictive operational claim AND prediction is empirically settled, note text should transition per R3 maintenance protocol audit trail discipline:
+  - (i) Status update: replace predictive claim with empirical-state characterization (e.g., "3rd instance would reinforce" → "3rd instance occurred at S21; pattern reinforced at n=3")
+  - (ii) Supersession: mark text SUPERSEDED + preserve per R3 audit trail + add cross-reference to current codification location (e.g., S29-absorption §4 forward instrumentation note 7 SUPERSEDED → §4.5 NEW sub-section)
+  - (iii) Closure: mark text CLOSED + preserve per R3 audit trail + reference completion event (e.g., absorption cycle completion + amendment closure status)
+- **Avoid stale narrative persistence:** predictive claims should NOT persist beyond empirical settlement; persistence creates downstream audit overhead at inheritor activation time + risks inheritor following stale soft-estimate as authoritative scope (analogous to A2 narrative drift sub-pattern observations)
+- **Maintenance discipline operational application:** forward-instrumentation note review at absorption cycle close OR Workstream B amendment cycle close per CONSTRAINT 2 banking discipline; stale predictive claims surface during absorption candidate accumulation
+
+**Cross-reference to A2 narrative drift sub-pattern:** §5.5 forward-instrumentation hygiene discipline shares root pattern with A2 narrative drift sub-pattern (banking entries / memory / counts diverging from empirical state via narrative-claim propagation across Chat boundaries). A2 codifies CROSS-CYCLE staleness; §5.5 codifies WITHIN-CYCLE forward-instrumentation note staleness; both operate per verify-state-at-activation protocol discipline.
+
+**Forward instrumentation:** second predictive-claim-expiration observation at S31+ would tighten pattern per A3 second-observation tightening precedent. Codification refinement candidate at Workstream B amendment cycle if pattern surfaces additional structural variants (e.g., predictive claim expiring at non-absorption sub-session vs predictive claim transitioning to status-update across multiple absorptions).
+
+**Cross-references:**
+- §19.4 A2 amendment (narrative drift sub-pattern observations)
+- §19.4 §4 maintenance protocol (R3 amendment supersession discipline)
+- §5.3 Mark 3 efficient-ratification (operating-context preservation precedent)
+- §5.4 operational permission grants — β grant scope discipline (S25 codification; sub-section-within-§5 precedent)
+- §19.4 §4 forward instrumentation note 7 [SUPERSEDED at S29-absorption #4] (predictive-claim-expiration via supersession example)
 
 ## §6 Banking footer
 
