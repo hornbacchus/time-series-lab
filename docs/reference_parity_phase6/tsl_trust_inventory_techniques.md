@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 13 catalog techniques with Phase 7+ Q1 trust documentation
+- 14 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31 amendments)
-- 62 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32 amendments)
+- 61 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -6143,7 +6143,685 @@ REMEDIATED 5th variant observation banks at S31 close pending S31+3
 x13 first-instance baseline observation OR future Q1 entry second
 observation if §4.7.A REMEDIATED recurs).
 
-## §3 Unvalidated catalog techniques (62 entries; ID-only enumeration)
+### mstl_decompose (Phase 7+ S32; FOURTEENTH §2.5 entry; SECOND Block 3 Decomposition entry — 2 of 4 entries Q1-amended; FIRST POST-S30-CODIFICATION APPLICATION of §2.5 Tier primary+overlay convention per S30 codification; A3 third-observation tightening reinforcement at n=3 post-codification observations (S23 + S28 + S32); FIRST NEW Sub-class 2f candidate first-instance baseline observation per A3 first-instance precedent (n=1 baseline, NOT codification); LAYERED framing per S32 STOP 2 empirical investigation + α disposition; analogous to S22 kpss_test Block 12 second-entry + S27 loess_interpolation Block 8 second-entry precedents)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+VI CAVEAT primary + Pattern A bit-exact structural-identity overlay**
+per S32 (α) Chat disposition. **Tier VI CAVEAT primary characterization
+directly grounded** at scope_reframing §2 line 184 5-wrapper enumeration
+("Tier VI — Phase 3 CAVEAT. 5 wrappers per P-3 v1.2.0 §1:
+`p3_emd_hht`, `p3_mstl`, `p3_nar_narx`, `p3_star`, `p3_stl`"); **NO
+post-S6 inference required** (distinct from S23 p3_pp + S28
+p3_kalman_imputation post-S6 inference precedents — p3_mstl
+explicitly enumerated). Per-component CAVEAT verdict per audit
+`p3_mstl_audit.md` line 7 verbatim ("**CAVEAT** (matches structurally;
+per-component decomposition is non-unique)") + per-component max
+abs diff metrics: trend 8.48e-02 PASS via rel_tol + seasonal_1 1.14
+CAVEAT + residual 1.06 CAVEAT + seasonal_2 1.03 CAVEAT (audit lines
+59-67). **Pattern A bit-exact structural-identity overlay
+characterization** per audit recon_cross_max_abs_diff 7.11e-14 at
+machine precision both sides (audit line 73 verbatim "7.11e-14") +
+audit line 75 verbatim ("Both TSL and R **decompose the same y
+faithfully** at machine precision. The non-uniqueness of the
+decomposition produces ~1.0 absolute divergence in the per-component
+breakdown, but the underlying signal is reconstructed identically").
+**Tier primary+overlay convention APPLIED per S30 §2.5 codification**
+(third-observation tightening reinforcement at A3 precedent;
+post-codification observations S23 + S28 + S32 = n=3 baseline).
+STOP 2 BLOCKING discharged on Tier anchor per ITEM 1 RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; LAYERED + §4.7.A
+PRESENT engine-uses-same-library-function-via-different-code-path
+per CHAT RATIFICATION ITEM 3 CONFIRMED at Step 0; NEW Sub-class 2f
+candidate first-instance baseline observation per (αa-S32)
+ratification):** mstl_decompose is 1:1 catalog↔wrapper mapping per
+`p3_mstl_audit.md` audit Wrapper field (`engine/techniques/mstl_decompose.py`
+sole engine module).
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S31
+n=6 OBSERVATION per S32 banking per S30 (G.1) generalized
+definitional scope codification — §4.7.A pattern count tightening
+forward observation; banking only, NOT §4.7.A taxonomy modification
+at S32; NOT A9 Class A counter increment per S30 (G.1) codification
+distinction):**
+`tools/reference_parity/harness/checks/p3_mstl.py` line 116
+imports `statsmodels.tsa.seasonal.MSTL` directly and invokes
+`MSTL(y, periods=periods).fit()` at lines 124-125 — harness does
+NOT invoke `mstl_decompose.py::run()` engine entry point.
+`engine/techniques/mstl_decompose.py` line 9 imports the SAME
+`statsmodels.tsa.seasonal.MSTL` class and invokes it at line 136
+within engine `run()` orchestration. Harness + engine use SAME
+underlying library class (statsmodels MSTL); harness BYPASSES
+engine `run()` wrapper. §4.7.A reimplementation variant (αa)
+manifestation: harness reimplements the dispatch path to the
+underlying library class rather than reusing engine's dispatch+
+orchestration. **DIRECT INHERITANCE from S31 classical_decompose
+reimplementation-of-dispatch variant** (S31 used statsmodels
+`seasonal_decompose` function; S32 uses statsmodels `MSTL` class;
+both reimplementation-of-dispatch with SAME library invocation
+pattern). Post-S32 §4.7.A observations = n=6 across §2.5 entries
+(S14a granger + S18 gcc_phat + S26 denton_chowlin + S27 loess +
+S31 classical_decompose + S32 mstl_decompose); **§4.7.A pattern
+count tightening forward observation at absorption #5 per A3
+precedent** (NOT A9 Class A counter increment per S30 (G.1)
+generalized definitional scope codification — §4.7.A pattern
+observations track mechanism variant accumulation distinct from
+A9 Class A empirical-state-assumption failure mode tracking).
+
+**A10 Sub-class disposition: NEW Sub-class 2f candidate first-
+instance baseline observation per (αa-S32) Chat ratification (A3
+first-instance precedent n=1 baseline; NOT codification):** S32
+mstl_decompose surfaces NEW Sub-class 2f candidate at first-instance
+baseline observation per A3 precedent. Sub-class 2f definitional
+scope working hypothesis: **"layered iterative-loess primary CAVEAT
++ closed-form structural-identity overlay"** — Layer 1 iterative
+LOESS-based decomposition primary measurement (per-component CAVEAT
+~1.0 abs reflecting documented non-uniqueness within constraint y =
+trend + Σ seasonal_k + residual per audit lines 13-19) + structural
+identity overlay measurement (recon_cross_max_abs_diff 7.11e-14 at
+machine precision both sides per audit line 73). Distinct from
+codified Sub-class 2a (αa) "general two-layer class" semantic
+(Tier II.bit-exact + single-Tier framing; helper-export variant
+tagging axis ∈ {0, 1, 2, 3}) — Sub-class 2f preserves the layered-
+iterative-loess + closed-form-overlay distinction at first-instance
+baseline observation. **n=1 baseline observation status per A3
+first-instance precedent** (Previous Chat 1.2 operational pattern:
+first-instance n=1 = baseline observation only; codification deferred
+to absorption #5+ second-observation tightening if recurs at S32+1
+stl OR S32+2 x13 OR future Q1 entry). Variant tagging mechanism
+NOT applied at n=1 first-instance per A3 precedent; Sub-class 2f
+definitional scope working hypothesis only.
+
+**Block 3 Decomposition second entry — 2 of 4 entries Q1-amended
+(per-block continuation pattern n=4 catalog block observation
+candidate at Block 3 completion S32+2):** S32 mstl_decompose
+continues Block 3 Decomposition Q1-amendment after S31 classical_decompose
+first-entry. Forward instrumentation: Block 3 completion arc
+projected at S31 + S32 + S32+1 + S32+2 (4 entries total; per Code
+S31 Step 0 forward look — banking only per ITEM 4 forward
+instrumentation banking; NOT codified at S32; each subsequent entry
+surfaces at its respective sub-session per A9 Class B revised
+default discipline operating proactively). Per-block continuation
+pattern at n=4 catalog block observations (Block 1 + Block 12 +
+Block 8 + Block 3 [in-progress at S32 = 2 of 4]) codification
+candidate at absorption #5 refinement disposition; **Block
+heterogeneous-Tier-surface variant observation banking** (Block 3
+mixed Tier surface Tier II.bit-exact at S31 + Tier VI at S32 +
+Tier VI projected at S32+1 stl + Tier VII projected at S32+2 x13
+distinct from Block 1 homogeneous Tier II.bit-exact-throughout +
+Block 12 homogeneous Tier II.bit-exact-throughout + Block 8
+heterogeneous Tier II.bit-exact + Tier III + Tier II.mle-band).
+
+**Reference:** R `forecast::mstl(msts(y, seasonal.periods=c(m1, m2)))`
+(forecast 9.0.2; both implementations apply STL iteratively across
+multiple seasonal periods per Bandara, Hyndman, Bergmeir 2021)
+**Verdict:** **CAVEAT** (matches structurally; per-component
+decomposition is non-unique) per audit line 7 verbatim
+**Audit:** `tools/reference_parity/reports/p3_mstl_audit.md`
+**Audit date:** 2026-04-28
+**Primary metrics (max_abs_diff):** trend 8.48e-02 PASS via rel_tol
++ seasonal_1 1.14 CAVEAT + residual 1.06 CAVEAT (audit lines 59-61)
+**Secondary metric (max_abs_diff):** seasonal_2 1.03 CAVEAT (audit
+line 67)
+**Pattern A overlay metric (structural identity):** recon_cross_max_abs_diff
+**7.11e-14** at machine precision both sides (audit line 73)
+**Tolerance class:** caveat (Tier VI deterministic non-uniqueness;
+`reroll_on_caveat = False` per Phase 3 Session 5 class default)
+**Fixture:** dual-seasonal series n=300, m1=7, m2=30, seed=42,
+amp1=2.0, amp2=3.0, trend_slope=0.05, sigma=1.0 via
+`_generate_dual_seasonal_dgp` (harness `p3_mstl.py` lines 43-63;
+own DGP generator NOT shared with p3_theta)
+
+**Source files (LAYERED + §4.7.A PRESENT per S32 α framing):**
+`tools/reference_parity/harness/checks/p3_mstl.py` lines 114-142
+(harness TSL arm imports `statsmodels.tsa.seasonal.MSTL` at line
+116 + invokes `MSTL(y, periods=periods).fit()` at lines 124-125;
+extracts trend at line 127 + seasonal_1/seasonal_2 at lines 130-134
++ resid at line 135; harness does NOT invoke `mstl_decompose.py::run()`
+engine entry point; §4.7.A reimplementation-of-dispatch variant
+manifestation)
++ `tools/reference_parity/harness/checks/p3_mstl.py` lines 144-194
+(harness reference arm invokes R `forecast::mstl(msts(y,
+seasonal.periods=c(m1, m2)))` via RBridge with `msts()` multi-
+seasonal-period ts wrapper; extracts trend + seasonal columns
+matching grep "^Seasonal" + remainder column)
++ `tools/reference_parity/harness/checks/p3_mstl.py` lines 196-242
+(harness compare arm: per-component primary {trend + seasonal_1
++ resid} via `_compare_vector` ladder + secondary {seasonal_2} +
+**structural-identity diagnostic recon_cross_max_abs_diff inline
+computation** at lines 227-242 verifying TSL recon = REF recon at
+machine precision)
++ `engine/techniques/mstl_decompose.py` lines 1-6 (module docstring:
+"MSTL (Multiple Seasonal-Trend decomposition using LOESS) for Time
+Series Lab. Handles series with multiple seasonal periods (e.g.
+daily data with both weekly and yearly seasonality) using statsmodels
+MSTL.")
++ `engine/techniques/mstl_decompose.py` line 9 (Layer 1 math import:
+`from statsmodels.tsa.seasonal import MSTL` — SAME library class as
+harness imports at line 116 of p3_mstl.py)
++ `engine/techniques/mstl_decompose.py` lines 25-36
+(`_FREQ_PERIODS`: frequency-to-periods mapping {H:[24,168],
+T:[60,1440], min:[60,1440], D:[7,365], B:[5,252], W:[52], M:[12],
+MS:[12], Q:[4], QS:[4]}; multi-period support distinct from S31
+classical_decompose single-period mapping)
++ `engine/techniques/mstl_decompose.py` lines 39-57 (`_infer_periods`:
+frequency-to-periods inference + user-supplied periods list handling;
+helper internal to module — NOT exported)
++ `engine/techniques/mstl_decompose.py` lines 60-76 (`_prepare_series`:
+NaN-fill pre-pass with linear interpolation on interior NaN positions
++ n_valid ≥ 4 threshold + nan_mask preservation for output
+restoration)
++ `engine/techniques/mstl_decompose.py` lines 79-244 (Layer 2 engine
+orchestration: `run(ctx, progress_callback)` main entry; sole top-
+level function; standalone-technique-only invocation)
++ `engine/techniques/mstl_decompose.py` lines 126-132 (preset config
+dispatch: `preset_kwargs = {"Fast": {"seasonal_deg": 0}, "Balanced":
+{"seasonal_deg": 1}, "Thorough": {"seasonal_deg": 1}}`;
+preset-specific seasonal_deg passed to inner STL iterations)
++ `engine/techniques/mstl_decompose.py` line 136 (Layer 1 math
+invocation: `MSTL(filled, periods=periods, stl_kwargs=base_kwargs)`
++ line 137 `result = mstl.fit()` — SAME library class as harness
+invokes at lines 124-125 of p3_mstl.py but with engine-orchestrated
+parameter dispatch including preset stl_kwargs)
++ `engine/techniques/mstl_decompose.py` lines 174-187 (per-period
+seasonal strength diagnostics: F_s = max(0, 1 - Var(R) / Var(S + R))
+via valid-mask residual variance ratio; per-period reporting via
+`strengths` list)
++ `engine/techniques/mstl_decompose.py` lines 222-244 (audit fields
+construction + plain English summary + interpretation delegation)
++ `tools/reference_parity/reports/p3_mstl_audit.md`
+
+**Validation claim scope (TIER VI CAVEAT PRIMARY + PATTERN A BIT-
+EXACT STRUCTURAL-IDENTITY OVERLAY + §4.7.A REIMPLEMENTATION-OF-
+DISPATCH VARIANT + NEW Sub-class 2f candidate first-instance
+baseline observation per S32 (α) + (αa-S32) ratifications):** TSL
+mstl_decompose output relies on two layered computations within
+standalone-technique role (Layer 1 statsmodels.MSTL iterative-
+LOESS multi-period decomposition + Layer 2 engine orchestration).
+p3_mstl audit validates Layer 1 statsmodels.MSTL iterative-LOESS
+math (harness reimplements library-class dispatch path + R
+`forecast::mstl` cross-package validation) at single seeded fixture
+(dual-seasonal DGP n=300 seed=42 + m1=7 + m2=30 pinned); per-
+component primary metrics (trend / seasonal_1 / residual) +
+secondary metric (seasonal_2) measure statsmodels MSTL output vs
+R forecast::mstl output agreement — **PER-COMPONENT CAVEAT
+~1.0 abs reflecting documented algorithmic non-uniqueness within
+constraint y = trend + Σ seasonal_k + residual** (audit lines 13-19
+verbatim); **structural-identity overlay metric (recon_cross_max_abs_diff
+7.11e-14)** measures both implementations decompose the same y
+faithfully at machine precision (audit lines 73-75). NOT engine
+standalone orchestration correctness, NOT NaN-fill interior-
+interpolation correctness, NOT preset config dispatch correctness,
+NOT per-period seasonal strength diagnostic correctness, NOT engine
+multi-period iteration order correctness.
+
+- **Layer 1 statsmodels.MSTL math (Tier VI CAVEAT primary;
+  validated structurally non-unique per audit line 7 verbatim):**
+  CAVEAT verdict per audit `p3_mstl_audit.md` line 7 verbatim
+  ("**CAVEAT** (matches structurally; per-component decomposition
+  is non-unique)") + per-component max abs diff trend 8.48e-02 PASS
+  via rel_tol + seasonal_1 1.14 CAVEAT + residual 1.06 CAVEAT (audit
+  lines 59-61) + seasonal_2 1.03 CAVEAT (audit line 67) against
+  canonical R `forecast::mstl`. **Tier VI CAVEAT primary
+  characterization directly grounded** at scope_reframing §2 line
+  184 5-wrapper enumeration (`p3_mstl` explicitly enumerated; NO
+  post-S6 inference required). **Pattern A bit-exact structural-
+  identity overlay characterization** per audit recon_cross_max_abs_diff
+  7.11e-14 at machine precision both sides (audit line 73 verbatim)
+  + audit line 75 verbatim ("Both TSL and R decompose the same y
+  faithfully at machine precision"). Validation scope: SAME
+  underlying library class as engine module invokes at line 136;
+  per-component CAVEAT + structural-identity overlay PASS transfer
+  to engine Layer 1 math invocation per same-library-class alignment.
+  **§4.7.A reimplementation-of-dispatch variant caveat:** engine
+  module `run()` is DIFFERENT code path from harness library-class
+  direct invocation; engine adds Layer 2 orchestration (NaN-fill +
+  preset config dispatch + per-period strength diagnostics) NOT
+  exercised by audit.
+- **Layer 2 engine orchestration (validation scope conditional):**
+  - NaN-fill pre-pass with linear interpolation (lines 60-76
+    `_prepare_series`): interior NaN positions filled via
+    `np.interp` + n_valid ≥ 4 threshold + nan_mask preservation for
+    output restoration; NOT audit-validated
+  - Preset config dispatch (lines 126-132): Fast `seasonal_deg=0`
+    / Balanced + Thorough `seasonal_deg=1` passed to inner STL
+    iterations via `base_kwargs`; NOT audit-validated (audit uses
+    default seasonal_deg=1)
+  - Per-period seasonal strength diagnostics (lines 174-187): F_s
+    = max(0, 1 - Var(R) / Var(S + R)) via valid-mask residual
+    variance ratio; per-period reporting via `strengths` list; NOT
+    audit-validated
+  - Multi-period iteration order: statsmodels MSTL iterates
+    periods in increasing order (smallest period first per audit
+    line 81); engine inherits library default; NOT audit-validated
+    independently of library default
+  - Result formatting + significance disclosure + interpretation +
+    audit_fields construction (lines 222-244)
+
+#### Disclosure pattern (i) — Research note footnote (Tier VI CAVEAT primary + Pattern A bit-exact structural-identity overlay + NEW Sub-class 2f candidate first-instance baseline)
+
+> This analysis uses TSL technique `mstl_decompose`, cross-package
+> structurally-faithful but per-component-non-unique parity
+> validated against R `forecast::mstl` per Phase 3 audit dated
+> 2026-04-28 (verdict CAVEAT; per-component max abs diff ~1.0
+> reflecting documented algorithmic non-uniqueness; structural
+> identity recon_cross_max_abs_diff 7.11e-14 at machine precision
+> both sides). **Tier VI CAVEAT primary + Pattern A bit-exact
+> structural-identity overlay characterization** per S32 (α)
+> disposition; both implementations decompose the same input
+> faithfully at machine precision but pick different feasible
+> points in the seasonal decomposition polytope. Per-component
+> trend / seasonal_k / residual values NOT expected to match
+> bitwise across implementations; forecast operations derived from
+> MSTL components re-apply the structural identity and converge
+> more closely. Engine adds Layer 2 orchestration (NaN-fill pre-
+> pass + preset config dispatch + per-period strength diagnostics);
+> NOT audit-validated. Pre-Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier VI CAVEAT primary + Pattern A overlay + §4.7.A reimplementation-of-dispatch variant + algorithmic-non-uniqueness caveat)
+
+> Methodology: TSL technique `mstl_decompose` validated per Phase
+> 3 reference parity infrastructure under Tier VI CAVEAT primary +
+> Pattern A bit-exact structural-identity overlay framing per S32
+> codification. **Reference:** R `forecast::mstl(msts(y,
+> seasonal.periods=c(m1, m2)))` (forecast 9.0.2; both implementations
+> apply STL iteratively across multiple seasonal periods per
+> Bandara, Hyndman, Bergmeir 2021). **Verdict:** CAVEAT (matches
+> structurally; per-component decomposition is non-unique); per-
+> component max abs diff trend 8.48e-02 (PASS via rel_tol),
+> seasonal_1 1.14 (CAVEAT), residual 1.06 (CAVEAT), seasonal_2 1.03
+> (CAVEAT). **Pattern A overlay metric:** structural-identity
+> recon_cross_max_abs_diff 7.11e-14 at machine precision both sides.
+> **Audit date:** 2026-04-28. **Fixture:** dual-seasonal DGP n=300
+> seed=42 + m1=7 + m2=30 pinned + amp1=2.0 + amp2=3.0 +
+> trend_slope=0.05 + sigma=1.0; additive structural-identity
+> constraint y = trend + Σ seasonal_k + residual. **Tier VI CAVEAT
+> primary characterization** per scope_reframing §2 line 184 5-
+> wrapper enumeration (`p3_mstl` explicitly enumerated). **Pattern
+> A overlay characterization** per audit recon_cross_max_abs_diff
+> machine-precision verdict. **§4.7.A reimplementation-of-dispatch
+> variant caveat:** harness imports + invokes `statsmodels.tsa.seasonal.MSTL`
+> directly (does NOT invoke engine `run()` entry point); engine
+> module invokes SAME library class within `run()` orchestration.
+> Per-component CAVEAT + structural-identity overlay PASS transfer
+> to engine Layer 1 math invocation; engine Layer 2 orchestration
+> (NaN-fill + preset config dispatch + per-period strength
+> diagnostics) NOT exercised by audit. **Algorithmic-non-uniqueness
+> caveat:** seasonal decomposition is non-unique within constraint
+> y = trend + Σ seasonal_k + residual; statsmodels MSTL and R
+> forecast::mstl converge to different (but equally valid) feasible
+> points in the decomposition polytope per audit lines 79-81;
+> practitioners should NOT expect per-component MSTL trend or per-
+> period seasonal components to match bitwise across implementations
+> (audit line 105 verbatim). Reference selection + tolerance
+> specification AI-assisted with user ratification per Phase 7+
+> work program; pre-Path α expert review status; expert review
+> pending end-of-Phase-7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier VI CAVEAT primary + Pattern A overlay + NEW Sub-class 2f candidate first-instance baseline)
+
+> `mstl_decompose` validation: TSL Tier VI CAVEAT primary +
+> Pattern A bit-exact structural-identity overlay framing per S32
+> (α) codification + NEW Sub-class 2f candidate first-instance
+> baseline observation per (αa-S32) ratification. **Reference:** R
+> `forecast::mstl` (forecast 9.0.2). **Audit:** `tools/reference_parity/reports/p3_mstl_audit.md`
+> dated 2026-04-28. **Verdict:** CAVEAT (per-component non-unique
+> ~1.0 abs); structural-identity overlay PASS Pattern A at machine
+> precision (recon_cross_max_abs_diff 7.11e-14). **Fixture:** dual-
+> seasonal DGP n=300 seed=42 + m1=7 + m2=30 + amp1=2.0 + amp2=3.0
+> + trend_slope=0.05 + sigma=1.0 pinned; single-seeded fixture;
+> parameter-sensitivity coverage NOT established; Q3b extension
+> scope. **NEW Sub-class 2f candidate first-instance baseline
+> observation** per S32 (αa-S32) ratification (definitional scope
+> working hypothesis: "layered iterative-loess primary CAVEAT +
+> closed-form structural-identity overlay"; A3 first-instance
+> precedent n=1 baseline; NOT codification; codification deferred
+> to absorption #5+ second-observation tightening if recurs).
+> **Risk attribution:** **(a) Layer 1 statsmodels.MSTL math (Tier
+> VI CAVEAT primary; validated structurally non-unique):** CAVEAT
+> verdict per audit; per-component decomposition is non-unique
+> algorithmically; SAME underlying library class as engine module
+> invokes at line 136; per-component CAVEAT + structural-identity
+> overlay PASS transfer to engine Layer 1 math invocation.
+> **(b) Pattern A bit-exact structural-identity overlay (validated
+> machine precision):** recon_cross_max_abs_diff 7.11e-14 both
+> sides; both implementations decompose the same y faithfully at
+> machine precision per audit lines 73-75. **(c) Layer 2 engine
+> orchestration (NOT audit-validated):** NaN-fill pre-pass (lines
+> 60-76 `_prepare_series`) + preset config dispatch (lines 126-132)
+> + per-period seasonal strength diagnostics (lines 174-187);
+> validation scope per `engine/techniques/mstl_decompose.py` lines
+> 79-244. **(d) Algorithmic-non-uniqueness retraction surface:**
+> practitioners invoking `mstl_decompose` from ribbon receive per-
+> component decomposition values that are NOT bitwise-comparable
+> against alternative implementations; defensibility conditional
+> on disclosure of non-uniqueness scope; downstream operations
+> deriving forecasts from MSTL components re-apply structural
+> identity and converge more closely (audit line 105 verbatim).
+> Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier VI CAVEAT primary + Pattern A overlay + algorithmic-non-uniqueness caveat)
+
+> `mstl_decompose` Tier VI CAVEAT primary + Pattern A bit-exact
+> structural-identity overlay per S32 codification + NEW Sub-class
+> 2f candidate first-instance baseline; cross-package structurally-
+> faithful but per-component-non-unique vs R `forecast::mstl`
+> (per-component max abs diff ~1.0; structural-identity
+> recon_cross_max_abs_diff 7.11e-14 at machine precision).
+> Algorithmic-non-uniqueness caveat operative: seasonal decomposition
+> polytope feasible-point divergence between statsmodels MSTL and
+> R forecast::mstl; per-component values NOT bitwise-comparable
+> across implementations; structural identity verified at machine
+> precision. Engine Layer 2 orchestration (NaN-fill + preset config
+> + per-period strength) NOT audit-validated. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31 first-application precedent —
+verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (R `forecast::mstl`) per
+  `p3_mstl_audit.md` line 11 verbatim ("Primary: R `forecast::mstl(msts(y,
+  seasonal.periods=c(m1, m2)))` — `forecast` 9.0.2"). Verdict
+  (CAVEAT) per `p3_mstl_audit.md` line 7 verbatim ("**CAVEAT**
+  (matches structurally; per-component decomposition is non-
+  unique)"). Per-component max abs diff metrics per `p3_mstl_audit.md`
+  lines 59-61 verbatim (trend 8.48e-02 / seasonal_1 1.14 / residual
+  1.06) + line 67 verbatim (seasonal_2 1.03). Pattern A overlay
+  metric recon_cross_max_abs_diff 7.11e-14 per `p3_mstl_audit.md`
+  line 73 verbatim. Audit date (2026-04-28) per `p3_mstl_audit.md`
+  line 6 verbatim. Fixture (dual-seasonal DGP n=300 seed=42 + m1=7
+  + m2=30 + amp1=2.0 + amp2=3.0 + trend_slope=0.05 + sigma=1.0)
+  per `p3_mstl_audit.md` lines 25-34 verbatim Fixture table +
+  harness `p3_mstl.py` lines 43-63 `_generate_dual_seasonal_dgp`
+  generator verbatim. Tier VI CAVEAT primary characterization
+  directly grounded at `scope_reframing_s6_banking.md` line 184
+  verbatim ("Tier VI — Phase 3 CAVEAT. 5 wrappers per P-3 v1.2.0
+  §1: `p3_emd_hht`, `p3_mstl`, `p3_nar_narx`, `p3_star`, `p3_stl`")
+  — NO post-S6 inference required at S32 (distinct from S23 p3_pp
+  + S28 p3_kalman_imputation post-S6 inference precedents).
+  Pattern A bit-exact structural-identity overlay characterization
+  per audit recon_cross_max_abs_diff 7.11e-14 (line 73 verbatim) +
+  audit line 75 verbatim ("Both TSL and R **decompose the same y
+  faithfully** at machine precision"). §4.7.A reimplementation-of-
+  dispatch variant per harness line 116 + engine line 9 verbatim —
+  both import SAME library class `statsmodels.tsa.seasonal.MSTL`;
+  harness lines 124-125 + engine line 136-137 verbatim — both
+  invoke SAME library class but harness bypasses engine `run()`
+  orchestration. Layer 1 / Layer 2 framework operative per S26
+  STOP 1.5 second close ratification carried forward + S31
+  reinforcement. Catalog mapping (1:1) verified per audit Wrapper
+  field. **§4.7.A pattern OBSERVED at S32 as reimplementation-of-
+  dispatch variant** (post-S32 §4.7.A observations = n=6 across
+  §2.5 entries S14a + S18 + S26 + S27 + S31 + S32; **§4.7.A
+  pattern count tightening per S30 (G.1) generalized definitional
+  scope codification** — NOT A9 Class A counter increment; NOT
+  §4.7.A taxonomy modification at S32; forward observation banking
+  only per ITEM 6 forward instrumentation banking discipline).
+  **NEW Sub-class 2f candidate first-instance baseline observation
+  per (αa-S32) ratification** (A3 first-instance precedent n=1
+  baseline; NOT codification; codification deferred to absorption
+  #5+ second-observation tightening if recurs at S32+1 stl OR
+  S32+2 x13 OR future Q1 entry; definitional scope working
+  hypothesis "layered iterative-loess primary CAVEAT + closed-
+  form structural-identity overlay"). **§2.5 Tier primary+overlay
+  convention APPLIED at S32 per S30 codification** (third-
+  observation tightening reinforcement at A3 precedent;
+  post-codification observations S23 + S28 + S32 = n=3 baseline).
+  **A9 Class B counter post-S32: n=4 ACTIVE (unchanged at S32; no
+  new Class B catch); sustained-observation count under Class B
+  revised default discipline n=8 (S22 + S23 + S25 + S26 + S27 +
+  S28 + S31 + S32 = n=8 Q1 entries only counting basis per Chat
+  preference; absorption + Workstream B amendment cycles operate
+  with analogous discipline but Class B codified scope is Q1
+  entry empirical-complexity-assumption failure mode)** (framing
+  class working hypothesis CONFIRMED at Step 0 per A9 Class B
+  revised default discipline). **Maturation observation NINTH
+  SUSTAINED OBSERVATION REACHED at S32 (S23 + S25 + S26 + S27 +
+  S28 + S29 + S30 + S31 + S32 = n=9 cross-session trajectory)** +
+  SIX-timing-point empirical surface preserved per S27 codification
+  (no new timing point variant at S32; proactive-prevention
+  operation SUSTAINED across established timing points (i)-(vi));
+  §4.5 codification operational at n=3 post-codification sustained
+  observations S30 + S31 + S32 per CHAT RATIFICATION #10. Verify-
+  state-at-first-consumption sub-discipline 25th instance application.
+  **A6 filename divergence informational surface at S32 Step 0**
+  (trigger reference to `p3_mstl_decompose_audit.md` / `p3_mstl_decompose.py`
+  vs empirical `p3_mstl_audit.md` / `p3_mstl.py`; A6 BLOCKING
+  discipline operating as designed at empirical re-Read; A6
+  informational surface only per ITEM 5 ratification; NOT A9
+  Class A 15th-instance candidate per naming shorthand vs material
+  content misattribution distinction).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at fourteenth-technique selection per Mark 3
+  efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20 + S25 + S26 +
+  S27 + S28 + S31 reinforcement. **Q-B pattern persists at n=15
+  across S12 + S13 + S14b + S14c + S15 + S17 + S18 + S21 + S22 +
+  S23 + S26 + S27 + S28 + S31 + S32; §1.4 codified observation
+  refinement at empirical pattern accumulation** (n=7 at §1.4 S20
+  codification → n=14 at S31 reinforcement → n=15 at S32
+  reinforcement; Workstream B amendment cycle candidate A continues
+  at next cycle). Substantive Chat engagement at structural-decision
+  points empirically observed (Step 0 STOP 2 5-item ratifications +
+  Tier (α) ratification + Sub-class (αa-S32) NEW 2f candidate
+  first-instance baseline + Items 3-5 forward instrumentation +
+  filename divergence A6 informational surface).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Pattern A bit-exact structural-identity overlay
+  (machine precision)** per recon_cross_max_abs_diff 7.11e-14
+  verdict + audit line 75 verbatim ("Both TSL and R decompose the
+  same y faithfully at machine precision"). Defensibility to all
+  three audiences (published audience + Morgan Stanley compliance
+  + Path α expert reviewer) UNDER Tier VI CAVEAT primary disclosure
+  + Pattern A overlay disclosure + §4.7.A reimplementation-of-
+  dispatch variant disclosure + algorithmic-non-uniqueness
+  disclosure acknowledgment. **Conditional for Layer 1 per-
+  component CAVEAT primary** — practitioners invoking
+  `mstl_decompose` from ribbon receive per-component decomposition
+  values that are NOT bitwise-comparable against alternative
+  implementations; defensibility conditional on disclosure of non-
+  uniqueness scope. **Conditional for Layer 2 engine orchestration**
+  — NaN-fill pre-pass + preset config dispatch + per-period
+  seasonal strength diagnostics; requires expert review of engine
+  implementation OR engine-output cross-check at base pinned
+  config. **Critical Q-C framing per algorithmic-non-uniqueness
+  caveat:** seasonal decomposition polytope feasible-point
+  divergence is intrinsic to MSTL methodology (not a TSL defect);
+  downstream operations deriving forecasts from MSTL components
+  re-apply structural identity and converge more closely (audit
+  line 105 verbatim); defensibility conditional on disclosure that
+  per-component MSTL trend or per-period seasonal components are
+  NOT expected to match bitwise across implementations.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  MEDIUM per Tier VI CAVEAT primary characterization scope bound +
+  Pattern A overlay scope bound + §4.7.A reimplementation-of-
+  dispatch variant disclosure + algorithmic-non-uniqueness caveat.
+  mstl_decompose is canonical MSTL methodology (Bandara, Hyndman,
+  Bergmeir 2021; multi-period iterative STL extension). **Layer-
+  specific + Tier VI CAVEAT primary + Pattern A overlay + NEW
+  Sub-class 2f candidate retraction surface (per S32 (α) + (αa-S32)
+  ratifications):**
+  - Layer 1 statsmodels.MSTL math (Tier VI CAVEAT primary;
+    structurally non-unique): MEDIUM; CAVEAT verdict per audit;
+    per-component decomposition is non-unique algorithmically;
+    expert review surfacing structural defect (e.g., constraint
+    violation y ≠ trend + Σ seasonal_k + residual) would affect
+    mstl_decompose specifically (NO multi-map propagation risk;
+    1:1 catalog↔wrapper). **Algorithmic-non-uniqueness caveat:**
+    per-component CAVEAT is intrinsic to MSTL methodology not a
+    TSL defect; retraction surface bounded by methodology scope.
+  - **Pattern A bit-exact structural-identity overlay (validated
+    machine precision):** LOW; recon_cross_max_abs_diff 7.11e-14
+    both sides; expert review surfacing upstream error would
+    affect mstl_decompose specifically; structural identity
+    constraint y = trend + Σ seasonal_k + residual operationally
+    well-defined.
+  - **Layer 2 engine orchestration: LOW-MEDIUM** — NaN-fill pre-
+    pass + preset config dispatch + per-period seasonal strength
+    diagnostics NOT audit-validated; expert review of engine
+    implementation conditional on Layer 2 correctness;
+    orchestration operations are operationally straightforward
+    (interpolation + dict dispatch + variance-ratio formula);
+    retraction surface lower than e.g. S28 kalman_imputation
+    Layer 2 (state-space orchestration + CI construction higher
+    complexity).
+  - **§4.7.A reimplementation-of-dispatch variant retraction
+    surface caveat: LOW** — harness + engine use SAME underlying
+    library class (statsmodels.MSTL); reimplementation scope
+    limited to dispatch-path (re-import + re-invoke vs engine
+    `run()` orchestration); per-component CAVEAT + structural-
+    identity overlay PASS transfer to engine Layer 1 math
+    invocation cleanly per same-library-class alignment;
+    reimplementation-of-dispatch variant is structurally weaker
+    §4.7.A manifestation than S26 denton_chowlin reimplementation-
+    of-math variant.
+  - **NEW Sub-class 2f candidate first-instance baseline retraction
+    surface: LOW** — A3 first-instance precedent n=1 baseline
+    observation; codification deferred to absorption #5+ second-
+    observation tightening if recurs; sub-class definitional scope
+    working hypothesis "layered iterative-loess primary CAVEAT +
+    closed-form structural-identity overlay" preserves layered
+    framing structure at first-instance observation without
+    codification commitment.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; fourteenth technique to enter status
+per S32 ratification; **SECOND Block 3 Decomposition entry — 2 of
+4 entries Q1-amended** per Q1 work program scope (Block 3
+completion arc S31 + S32 + S32+1 + S32+2 projected; banking only
+per ITEM 8 forward instrumentation; expiration semantics: Block 3
+ordering working hypothesis (classical → mstl → stl → x13) banked
+at S31 commit message body + S32 commit message body per ITEM 8
+forward observation continuation); **FIRST POST-S30-CODIFICATION
+APPLICATION of §2.5 Tier primary+overlay convention** per S30
+codification; **A3 third-observation tightening reinforcement at
+n=3 post-codification observations (S23 + S28 + S32)** satisfies
+A3 second-observation tightening precedent threshold post-
+codification at n=3 (expiration semantics: post-codification
+observation count continues incrementing at each subsequent §2.5
+Tier primary+overlay entry per A3 precedent operative continuation
+discipline; codification-stable status preserved);
+**LAYERED framing per S32 STOP 2 empirical investigation + α
+disposition** (distinct from S31 classical_decompose SINGLE-LAYER
+Tier II.bit-exact framing; LAYERED required for Tier VI CAVEAT
+primary + Pattern A bit-exact structural-identity overlay layered
+measurement structure); **§4.7.A reimplementation-of-dispatch
+variant manifestation at n=6 post-S32 observations across §2.5
+entries** (S14a granger + S18 gcc_phat + S26 denton_chowlin + S27
+loess + S31 classical_decompose + S32 mstl_decompose; **§4.7.A
+pattern count tightening per S30 (G.1) generalized definitional
+scope codification** — NOT A9 Class A counter increment; forward
+observation banking only per ITEM 3 forward instrumentation banking
+discipline; NOT §4.7.A taxonomy modification at S32);
+**CONTINUATION of S30 Workstream B codifications at S32:** §1.6
+Q-A density convention operative continuation from S31 first-
+application precedent (verbatim citation density at Q-A field) +
+§5.5 forward-instrumentation hygiene at status line operative
+continuation from S31 first-application precedent (expiration
+semantics on each predictive claim) + §2.5 Tier primary+overlay
+convention APPLIED at S32 third-observation tightening reinforcement;
+§1.5 novelty enumeration sub-section NOT APPLICABLE at S32 (<5
+observations threshold per S23 first-instance codification not met
+at S32; standard four-disclosure-pattern structure applied per
+CONSTRAINT 4); §4.7 in-place codification operative reference at
+§4.7.A pattern characterization.
+**A10 Sub-class disposition (αa-S32) NEW Sub-class 2f candidate
+first-instance baseline observation** per Chat ratification ITEM 2
+(A3 first-instance precedent n=1 baseline; NOT codification;
+codification deferred to absorption #5+ second-observation
+tightening if recurs at S32+1 stl OR S32+2 x13 OR future Q1 entry;
+definitional scope working hypothesis "layered iterative-loess
+primary CAVEAT + closed-form structural-identity overlay";
+expiration semantics: Sub-class 2f candidate observation banks at
+S32 close pending second-observation tightening at respective
+sub-session OR absorption #5 codification refinement disposition).
+**A9 Class B counter post-S32: n=4 ACTIVE (unchanged at S32; no
+new Class B catch); sustained-observation count under Class B
+revised default discipline n=8 (S22 + S23 + S25 + S26 + S27 +
+S28 + S31 + S32 = n=8 Q1 entries only counting basis per Chat
+preference; absorption + Workstream B amendment cycles operate
+with analogous discipline but Class B codified scope is Q1 entry
+empirical-complexity-assumption failure mode)** (framing class
+working hypothesis CONFIRMED at Step 0 per A9 Class B revised
+default discipline; expiration semantics: sustained-observation
+counter continues incrementing at each subsequent Q1 entry per A9
+Class B revised default operating proactively, codification-stable
+status preserved at n=4 ACTIVE counter; n=4 increments only on
+NEW Class B catch). **A9 Class A counter post-S32: n=10 ACTIVE +
+candidates n=11 + n=12 + n=13 + n=14 pending absorption #5
+codification** (n=11-14 candidates carried forward from S31 close;
+NO new A9 Class A candidate at S32 per Step 0 empirical surface;
+expiration semantics: A9 Class A candidate inventory accumulates
+until absorption #5 codification refinement disposition adopts/
+declines each candidate; sub-pattern variant codification candidate
+sufficient at n=4 for absorption #5 adoption per A3 second-
+observation tightening precedent).
+**§4.7.A pattern n=6 observation count post-S32 per S30 (G.1)
+generalized definitional scope codification:** S14a + S18 + S26 +
+S27 + S31 + S32 = n=6 observations across mechanism variants;
+**§4.7.A pattern count tightening forward observation at absorption
+#5 per A3 precedent** (distinct tracking surface from A9 Class A
+counter per S30 (G.1) codification; §4.7.A pattern observations
+track mechanism variant accumulation; A9 Class A counter tracks
+empirical-state-assumption failure mode).
+**A9 Class A + Class B discipline maturation NINTH SUSTAINED
+OBSERVATION REACHED at S32 (S23 + S25 + S26 + S27 + S28 + S29 +
+S30 + S31 + S32 = n=9 cross-session trajectory)** per A3 second-
+observation tightening precedent threshold satisfied + SIX-timing-
+point empirical surface preserved per S27 codification (no new
+timing point variant at S32; proactive-prevention operation
+SUSTAINED across established timing points (i)-(vi)); promoted to
+§4.5 NEW sub-section at S29-absorption #4 per CHAT RATIFICATION
+carried forward; **§4.5 codification operational at n=3 post-
+codification sustained observations S30 + S31 + S32** per CHAT
+RATIFICATION #10 (codification-stable status preserved at sustained
+post-codification operation).
+**Block 3 Decomposition second-entry status framing** (analogous
+to S22 kpss_test Block 12 second-entry + S27 loess_interpolation
+Block 8 second-entry precedents; per-block continuation pattern
+n=4 catalog block observation candidate at Block 3 completion
+S32+2 per ITEM 8 forward instrumentation banking; expiration
+semantics: per-block continuation pattern n=4 codification at
+absorption #5 refinement disposition pending Block 3 completion
+arc close at S32+2);
+**Block 3 forward completion arc S31 + S32 + S32+1 + S32+2
+projected per Code S31 + S32 Step 0 forward look** (banking only
+per ITEM 8 forward instrumentation banking; NOT codified at S32;
+expiration semantics: Block 3 ordering working hypothesis
+(classical → mstl → stl → x13) banked at S31 + S32 commit message
+bodies per ITEM 8 forward observation continuation; each subsequent
+Block 3 entry trigger drafting per A9 Class B revised default
+discipline operating proactively at respective sub-session);
+**heterogeneous-Tier-surface variant observation banking
+reinforcement** (Block 3 mixed Tier surface Tier II.bit-exact at
+S31 + Tier VI at S32 + Tier VI projected at S32+1 stl + Tier VII
+projected at S32+2 x13 distinct from Block 1 homogeneous + Block
+12 homogeneous + Block 8 heterogeneous per ITEM 8 forward
+instrumentation banking; expiration semantics: per-block
+continuation pattern note 6 refinement candidate at absorption #5
+with NEW characterization "Block heterogeneous-Tier-surface
+variant" candidate pending Block 3 completion at S32+2).
+**NEW Sub-class candidates 2g / 2h projection (stl / x13 at S32+1
+/ S32+2) NOT codified at S32** per ITEM 8 (first-instance precedent
+per A3; codification deferred to absorption #5+ second-observation
+tightening if recurs; expiration semantics: NEW Sub-class candidate
+trajectory observation banks at S32 close pending respective sub-
+session first-instance baseline observation).
+**§4.7.A 5th variant "REMEDIATED" status codification candidate at
+S32+2 x13 entry NOT codified at S32** per ITEM 8 (first-instance
+precedent per A3; forward observation banking only; codification
+at absorption #5+ or future Workstream B amendment cycle pending
+second-observation tightening; expiration semantics: §4.7.A
+REMEDIATED 5th variant observation banks at S32 close pending
+S32+2 x13 first-instance baseline observation OR future Q1 entry
+second observation if §4.7.A REMEDIATED recurs).
+
+## §3 Unvalidated catalog techniques (61 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -6169,8 +6847,8 @@ descriptions, summaries).
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
 
-### Decomposition & Seasonal Adjustment (3 unvalidated; classical_decompose moved to §2.5 per Phase 7+ S31 — FIRST Block 3 Decomposition entry; Block 3 Q1-amendment in-progress — FOURTH catalog block transition opens)
-`mstl_decompose`, `stl_decompose`, `x13_seasonal_adjust`
+### Decomposition & Seasonal Adjustment (2 unvalidated; classical_decompose moved to §2.5 per Phase 7+ S31 — FIRST Block 3 Decomposition entry; mstl_decompose moved to §2.5 per Phase 7+ S32 — SECOND Block 3 Decomposition entry; Block 3 Q1-amendment in-progress at 2 of 4 entries Q1-amended — FOURTH catalog block transition continues)
+`stl_decompose`, `x13_seasonal_adjust`
 
 ### Evaluation / Uncertainty (5 unvalidated)
 `block_bootstrap`, `conformal_intervals`, `forecast_combination`, `robust_estimators`, `rolling_origin_cv`
@@ -6202,7 +6880,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 62 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data ALL THREE FULLY Q1-AMENDED — first three catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=3 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #4; Block 3 Decomposition Q1-amendment IN-PROGRESS — FOURTH catalog block transition opens at S31 with classical_decompose first entry; Block 3 forward completion arc S31 + S31+1 + S31+2 + S31+3 projected banking only per ITEM 4 forward instrumentation banking discipline; per-block continuation pattern n=4 catalog block observation candidate at Block 3 completion S31+3 per ITEM 7 forward instrumentation banking; codification candidate at absorption #5 refinement disposition with NEW characterization "Block heterogeneous-Tier-surface variant" candidate**).
+**Total: 61 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data ALL THREE FULLY Q1-AMENDED — first three catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=3 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #4; Block 3 Decomposition Q1-amendment IN-PROGRESS at 2 of 4 entries Q1-amended — FOURTH catalog block transition continues at S32 with mstl_decompose second entry; Block 3 forward completion arc S31 + S32 + S32+1 + S32+2 projected banking only per ITEM 8 forward instrumentation banking discipline; per-block continuation pattern n=4 catalog block observation candidate at Block 3 completion S32+2 per ITEM 8 forward instrumentation banking; codification candidate at absorption #5 refinement disposition with NEW characterization "Block heterogeneous-Tier-surface variant" candidate (Block 3 mixed Tier surface Tier II.bit-exact at S31 + Tier VI at S32 + Tier VI projected at S32+1 + Tier VII projected at S32+2)**).
 
 ## §4 How to use this document
 
@@ -6245,7 +6923,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (62 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31 amendments):**
+**Tier 3 — UNVALIDATED (61 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
