@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 11 catalog techniques with Phase 7+ Q1 trust documentation
+- 12 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27 amendments)
-- 64 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28 amendments)
+- 63 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -4982,7 +4982,543 @@ third catalog block completion triggers per-block continuation
 pattern n=3 codification at §19.4 §4 forward instrumentation note
 6 refinement at next absorption cycle (absorption #4)**.
 
-## §3 Unvalidated catalog techniques (64 entries; ID-only enumeration)
+### kalman_imputation (Phase 7+ S28; TWELFTH §2.5 entry; THIRD-AND-FINAL Block 8 Missing Data entry; **BLOCK 8 FULLY Q1-AMENDED milestone** = THIRD catalog block fully Q1-amended after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23; FIRST Tier II.mle-band + Pattern A conditional-on-MLE-alignment overlay §2.5 precedent; FIRST Sub-class 2a standalone-only variant Q1 §2.5 entry; Sub-class 2a (αa) variant tagging n=3 baseline UPGRADE to codification-stable per A3 second-observation tightening precedent threshold; FIRST audit-content-distribution variant disclosure per S28 dedicated-audit-absent structural anomaly per CHAT RATIFICATION #6 (α) ratification)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.mle-band primary + Pattern A conditional-on-MLE-alignment overlay**
+per S28 (α) Chat disposition (analogous to S23 pp_test "Tier II.bit-
+exact-loose + Tier V Pattern J B.2 overlay" primary+overlay framing
+structure). **Tier II.mle-band primary characterization per
+verdict_class "mle_fit" semantic** (harness wrapper code line 56:
+`verdict_class = "mle_fit"`); cross-package PASS at MLE-fit band
+tolerance per scope_reframing §2 lines 134-137 definitional scope
+("operational R reference comparison; NOT bit-exact at machine
+precision"). **Pattern A conditional-on-MLE-alignment overlay
+characterization** per p3_batch_5_summary.md lines 21-23 verbatim
+("`p3_local_level` and `p3_kalman_imputation` join the Pattern A
+regime when KFAS + statsmodels agree on the MLE optimum. Pattern A
+now 11 wrappers.") + phase3_cross_batch_findings.md line 23 verbatim
+("`p3_local_level`, `p3_kalman_imputation` (state-space closed-form
+when MLE optima align)"). **Empirical bit-exact-within-MLE-alignment-
+window behavior alongside Tier II.mle-band primary characterization;
+honest validation strength surface per primary+overlay structure.**
+`p3_kalman_imputation` NOT in scope_reframing §2 Tier II.mle-band
+13-wrapper explicit enumeration (lines 138-141: arima/sarima/
+arimax_sarimax/ets/theta/intervention_analysis/dfm/hmm/markov_switching/
+sgarch/gjr_garch/egarch/tar_setar); added per S28 (α) disposition
+under post-S6 inference grounded at empirical p3_batch_5_summary
+Pattern A characterization + verdict_class "mle_fit" + phase3_cross_batch_findings
+Pattern A conditional cross-batch finding (analogous to S23 p3_pp
+inference precedent at Tier II.bit-exact addition).
+
+**Framing precedent note (1:1 catalog↔wrapper; CLEAN TWO-LAYER +
+ENGINE-USES-SAME-FUNCTION alignment per CHAT RATIFICATION #4
+CONFIRMED at Step 0; **NO §4.7.A pattern** distinct from S26 +
+S27 §4.7.A variant observations; Sub-class 2a (αa) variant tagging
+EXTENDED to standalone-only variant per (αa-S28) ratification):**
+kalman_imputation is 1:1 catalog↔wrapper mapping per audit-content-
+distribution Wrapper field (`engine/techniques/kalman_imputation.py`
+sole engine module).
+
+**Clean engine-uses-same-function alignment empirically confirmed:**
+`p3_kalman_imputation.py` line 82 verbatim: `wrapper_resp = ki_mod.run(ctx,
+lambda *a, **kw: None)` — harness INVOKES engine module `run()`
+directly; engine + harness both use `statsmodels.tsa.statespace.structural.UnobservedComponents`
+Kalman smoother via engine module direct invocation; R reference via
+KFAS smoother (different package; same Kalman smoother math; Pattern
+A conditional alignment regime). **NO §4.7.A harness-bypasses-engine
+pattern manifestation** — distinct from S26 denton_chowlin reimplementation
+variant + S27 loess_interpolation use-case-divergence variant; S28
+kalman_imputation breaks §4.7.A pattern recurrence at Block 8 final
+entry; §4.7.A pattern post-S28 n=4 observations across §2.5 entries
+(S14a + S18 + S26 + S27); kalman_imputation does NOT add §4.7.A
+fifth observation.
+
+**Sub-class 2a (αa) variant tagging EXTENDED per (αa-S28) Chat
+ratification:** Sub-class 2a (αa) general two-layer class with
+variant tagging UPGRADES from n=2 codified (S22 dual-role + S23
+triple-role per S25 codification) to **n=3 baseline tightening at
+S28** (S22 + S23 + S28) per A3 second-observation tightening
+precedent threshold satisfied at n=3 observations. Sub-class 2a
+(αa) variant tagging UPGRADES to codification-stable status at n=3:
+- **Dual-role variant (S22 kpss_test):** operational-coupling-count
+  = 1 (helper-export to adf_test triage 3b parallel-test invocation)
+- **Triple-role variant (S23 pp_test):** operational-coupling-count
+  = 2 (helper-export to adf_test triage 3b parallel + 3d CONFLICTING
+  tie-breaker)
+- **Standalone-only variant (S28 kalman_imputation; NEW third
+  variant per (αa-S28) ratification):** operational-coupling-count
+  = 0 (NO helper-export role; engine `run()` is sole top-level
+  function; standalone-technique-only invocation per ribbon
+  kalman_imputation direct call)
+
+Variant tagging mechanism generalized to operational-coupling-count
+∈ {0, 1, 2} with per-variant disclosure framing within Sub-class
+2a (αa) "general two-layer class" semantic per S25 codification.
+
+**Block 8 Missing Data fully Q1-amended milestone status (THIRD
+CATALOG BLOCK COMPLETION):** S26 denton_chowlin + S27 loess_interpolation
++ S28 kalman_imputation = 3-entry Block 8 cumulative completion.
+THIRD catalog block fully Q1-amended after Block 1 Causality (6
+entries S12-S18) + Block 12 Stationarity Tests (3 entries S21-S23).
+Per-block continuation pattern at n=3 catalog block observations
+satisfies A3 second-observation tightening precedent threshold;
+codification candidate at §19.4 §4 forward instrumentation note 6
+refinement at absorption #4.
+
+**Reference:** R `KFAS` smoother (per p3_batch_5_summary.md line 17
++ harness `p3_kalman_imputation.py` reference arm via RBridge)
+**Verdict:** PASS (Pattern A regime when KFAS + statsmodels agree
+on MLE optimum; per audit-content-distribution disclosure per
+CHAT RATIFICATION #6 (α) ratification)
+**Audit content distribution (FIRST-INSTANCE STRUCTURAL ANOMALY VARIANT per S28 (α) ratification):**
+- `tools/reference_parity/reports/p3_batch_5_summary.md` line 17
+  (PASS verdict: "Smoothed-state imputation at NA positions")
+- `tools/reference_parity/reports/p3_batch_5_summary.md` lines 21-23
+  (Pattern A characterization: "`p3_local_level` and `p3_kalman_imputation`
+  join the Pattern A regime when KFAS + statsmodels agree on the
+  MLE optimum. Pattern A now 11 wrappers.")
+- `tools/reference_parity/reports/phase3_cross_batch_findings.md`
+  line 23 ("`p3_local_level`, `p3_kalman_imputation` (state-space
+  closed-form when MLE optima align)")
+- **NO dedicated `p3_kalman_imputation_audit.md` file** (audit-
+  content-distribution structural anomaly first-instance variant
+  per S28; distinct from S23 pp_test variant where audit file
+  PRESENT but scope_reframing §2 enumeration ABSENT)
+
+**Audit date:** 2026-04-29 (per p3_batch_5_summary.md header)
+**Numeric metric:** specific abs/rel diff NOT in surfaced audit
+artifacts (audit-content-distribution structural anomaly variant
+implication: dedicated audit file absent precludes specific abs
+diff numeric extraction; PASS verdict + Pattern A conditional
+characterization is load-bearing audit content)
+**Tolerance class:** mle_fit (per harness wrapper code line 56
+`verdict_class = "mle_fit"`)
+**Fixture:** local-level state-space DGP via `_kalman_helpers.generate_local_level_dgp`
+(seed=42; n=200 per harness `DGP_N`); 15% missing values injected
+at random positions (per harness `MISSING_FRAC=0.15` + `_inject_missing`
+helper lines 34-46)
+
+**Source files (CLEAN TWO-LAYER + ENGINE-USES-SAME-FUNCTION +
+AUDIT-CONTENT-DISTRIBUTION variant per S28 (α) ratification):**
+`tools/reference_parity/harness/checks/p3_kalman_imputation.py`
+lines 79-130 (harness TSL arm invokes engine module `kalman_imputation.run(ctx)`
+directly at line 82 via `wrapper_resp = ki_mod.run(...)`; extracts
+imputed values from wrapper response tables; CLEAN engine-uses-
+same-function alignment; NO §4.7.A harness-bypasses-engine pattern
+manifestation)
++ `tools/reference_parity/harness/checks/p3_kalman_imputation.py`
+lines 132-178 (harness reference arm invokes R `KFAS` smoother via
+RBridge: `SSModel(y ~ SSMtrend(degree=1, Q=list(matrix(NA))), H =
+matrix(NA))` + `fitSSM(mod, inits, method="BFGS")` + `KFS(mod_fitted)`
++ extract smoothed state at missing positions)
++ `engine/techniques/kalman_imputation.py` lines 1-7 (module
+docstring: "Kalman Smoother Imputation... uses a local linear trend
+state-space model (UnobservedComponents from statsmodels) to impute
+missing values via the Kalman smoother. The smoother provides
+optimal estimates and uncertainty bounds for each imputed value.")
++ `engine/techniques/kalman_imputation.py` line 110 (Layer 1 math
+import: `from statsmodels.tsa.statespace.structural import UnobservedComponents`
+— SAME library function as harness invokes via engine.run())
++ `engine/techniques/kalman_imputation.py` lines 27-31 (`_PRESET_CONFIG`:
+Fast=local level / Balanced=local linear trend / Thorough=local
+linear trend; preset config dispatches model_type)
++ `engine/techniques/kalman_imputation.py` lines 34-330+ (Layer 2
+engine orchestration: `run(ctx, progress_callback)` main entry; sole
+top-level function; NO helper-export to other engine module;
+standalone-technique-only invocation)
++ `engine/techniques/kalman_imputation.py` lines 89-106 (CAI Phase 2
+Session 19 fix F-MD-KALMAN-MODELTYPE allowlist gate: model_type ∈
+{"local level", "local linear trend"})
++ `engine/techniques/kalman_imputation.py` lines 115-131 (model fit
+with fallback to local level if model fails to converge; convergence
+fallback warning)
++ `engine/techniques/kalman_imputation.py` lines 135-160 (smoothed
+state extraction + confidence interval construction via `scipy.stats.norm.ppf`
+z-score)
++ `engine/techniques/kalman_imputation.py` lines 144-151 (internal
+disclosure: model-misspecification CI band understatement risk;
+"disclose this honestly rather than applying a pseudo-correction
+that the state-space math does not support" — engine-level honest
+disclosure built into code per institutional standard)
++ Audit content distribution (NO dedicated audit file):
+  - `tools/reference_parity/reports/p3_batch_5_summary.md` lines 11-17
+    (Coverage matrix row 5: PASS verdict; Smoothed-state imputation)
+  - `tools/reference_parity/reports/p3_batch_5_summary.md` lines 21-23
+    (Pattern A section: kalman_imputation Pattern A regime
+    conditional-on-MLE-alignment)
+  - `tools/reference_parity/reports/phase3_cross_batch_findings.md`
+    line 23 (cross-batch Pattern A list: state-space closed-form
+    when MLE optima align)
+
+**Validation claim scope (TIER II.MLE-BAND PRIMARY + PATTERN A
+CONDITIONAL-ON-MLE-ALIGNMENT OVERLAY + CLEAN TWO-LAYER + Sub-class
+2a (αa) standalone-only variant per S28 (α) + (αa-S28) ratifications;
+audit-content-distribution variant per (α) Q-A disclosure):** TSL
+kalman_imputation output relies on two layered computations within
+standalone-technique role (Layer 1 statsmodels.UnobservedComponents
+Kalman smoother math + Layer 2 engine orchestration). p3_kalman_imputation
+audit-content-distribution validates Pattern A regime conditional-
+on-MLE-alignment between statsmodels + KFAS at single seeded fixture
+(local-level DGP n=200 seed=42 + 15% missing positions); imputed
+values metric measures statsmodels UnobservedComponents smoothed-
+state imputation at NA positions vs R KFAS smoother imputation
+agreement (PASS verdict per p3_batch_5_summary.md line 17; Pattern
+A bit-exact-within-MLE-alignment-window when KFAS + statsmodels MLE
+optima align). NOT engine standalone orchestration correctness, NOT
+model-misspecification handling correctness, NOT confidence interval
+construction correctness.
+
+- **Layer 1 statsmodels.UnobservedComponents Kalman smoother math
+  (validated Pattern A regime conditional-on-MLE-alignment):** PASS
+  verdict per audit-content-distribution disclosure (p3_batch_5_summary.md
+  line 17 + lines 21-23 Pattern A section). **Tier II.mle-band
+  primary characterization per verdict_class "mle_fit" semantic** —
+  MLE-fit band tolerance scope per scope_reframing §2 lines 134-137
+  ("typically 1e-2 to 1e-1 abs"); operational R reference comparison
+  via KFAS smoother. **Pattern A conditional-on-MLE-alignment
+  overlay** — bit-exact within MLE alignment window when KFAS +
+  statsmodels agree on MLE optimum; MLE-fit-band tolerance when
+  optima diverge. Validation strength bounded by MLE alignment
+  conditional; honest Q-D retraction surface characterization per
+  primary+overlay structure.
+- **Layer 2 engine orchestration (validation scope conditional):**
+  - F-MD-KALMAN-MODELTYPE allowlist gate (lines 89-106; CAI Phase 2
+    Session 19 fix): model_type ∈ {"local level", "local linear
+    trend"} explicit gate
+  - Preset config dispatch (lines 87-88, `_PRESET_CONFIG` lines
+    27-31): Fast → local level; Balanced + Thorough → local linear
+    trend
+  - NaN handling + missing-value validation (lines 53-82): nan_mask
+    construction + n_valid >= 5 threshold + missing-fraction > 0.5
+    warning + n_missing == 0 error path
+  - Model fit fallback (lines 115-131): UnobservedComponents.fit()
+    with maxiter=500; fallback to local level if local linear trend
+    fails to converge
+  - Smoothed state extraction + confidence interval construction
+    (lines 135-160): `smoothed_state[0]` level component + state
+    covariance posterior_se + z-score CI via scipy.stats.norm.ppf
+  - Model-misspecification disclosure built into engine code (lines
+    144-151): CI band understatement risk disclosed honestly;
+    institutional-standard built-in
+  - Result formatting + significance disclosure + interpretation +
+    audit_fields construction
+
+#### Disclosure pattern (i) — Research note footnote (Tier II.mle-band primary + Pattern A overlay + audit-content-distribution variant)
+
+> This analysis uses TSL technique `kalman_imputation`, cross-
+> package PASS validated against R `KFAS` smoother per Phase 3
+> audit dated 2026-04-29 (verdict PASS per audit-content-distribution
+> in `p3_batch_5_summary.md` lines 17 + 21-23 + cross-batch findings
+> Pattern A regime conditional-on-MLE-alignment per
+> `phase3_cross_batch_findings.md` line 23). **Tier II.mle-band
+> primary + Pattern A conditional-on-MLE-alignment overlay framing
+> per S28 (α) disposition:** verdict_class "mle_fit" semantic;
+> bit-exact within MLE alignment window when KFAS + statsmodels MLE
+> optima align; MLE-fit-band tolerance when optima diverge. **Audit-
+> content-distribution variant disclosure:** dedicated
+> `p3_kalman_imputation_audit.md` absent; verdict + Pattern
+> characterization distributed across batch summary + cross-batch
+> findings. Engine extends to Layer 2 orchestration (allowlist
+> gating + preset config + model fit fallback + CI construction);
+> NOT audit-validated. Pre-Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier II.mle-band primary + Pattern A overlay + audit-content-distribution variant + model-misspecification CI disclosure)
+
+> Methodology: TSL technique `kalman_imputation` validated per
+> Phase 3 reference parity infrastructure under Tier II.mle-band
+> primary + Pattern A conditional-on-MLE-alignment overlay framing
+> with audit-content-distribution variant disclosure per S28
+> codification. **Reference:** R `KFAS` smoother (per
+> p3_batch_5_summary.md Batch 5 R state-space wrappers). **Verdict:**
+> PASS per audit-content-distribution: p3_batch_5_summary.md line
+> 17 (PASS smoothed-state imputation at NA positions) + lines 21-23
+> (Pattern A regime when MLE optima align; Pattern A now 11
+> wrappers) + phase3_cross_batch_findings.md line 23 (state-space
+> closed-form when MLE optima align). **Audit date:** 2026-04-29.
+> **Fixture:** local-level DGP via `_kalman_helpers.generate_local_level_dgp`
+> seed=42 + n=200 + 15% missing values injected at random positions
+> (`_inject_missing` helper). **Tier II.mle-band primary
+> characterization** per verdict_class "mle_fit" semantic;
+> scope_reframing §2 lines 134-137: "cross-package PASSes against R
+> references at MLE-fit band tolerances (typically 1e-2 to 1e-1
+> abs); operational R reference comparison; NOT bit-exact at machine
+> precision". **Pattern A conditional-on-MLE-alignment overlay:**
+> bit-exact-within-MLE-alignment-window behavior when KFAS +
+> statsmodels MLE optima agree; MLE-fit-band tolerance when optima
+> diverge. **Audit-content-distribution variant caveat:** dedicated
+> `p3_kalman_imputation_audit.md` ABSENT; verdict + Pattern
+> characterization distributed across batch summary + cross-batch
+> findings artifacts; specific abs/rel diff numerics NOT in surfaced
+> audit content. **Engine-level honest disclosure (lines 144-151 of
+> engine module):** "If the model is misspecified, the reported
+> band understates true imputation uncertainty — disclose this
+> honestly rather than applying a pseudo-correction that the state-
+> space math does not support." Q3b extension pending. Pre-Path α
+> expert review status; expert review pending [target date].
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier II.mle-band + Pattern A overlay + audit-content-distribution + Sub-class 2a standalone-only variant)
+
+> `kalman_imputation` validation: TSL Tier II.mle-band primary +
+> Pattern A conditional-on-MLE-alignment overlay framing per S28 (α)
+> codification + audit-content-distribution variant disclosure per
+> (α) Q-A ratification. **Reference:** R `KFAS` smoother.
+> **Audit content distribution:** `tools/reference_parity/reports/p3_batch_5_summary.md`
+> line 17 (PASS verdict) + lines 21-23 (Pattern A regime conditional
+> on MLE alignment) + `tools/reference_parity/reports/phase3_cross_batch_findings.md`
+> line 23 (state-space closed-form when MLE optima align); dedicated
+> `p3_kalman_imputation_audit.md` ABSENT per audit-content-
+> distribution structural anomaly variant. **Audit date:** 2026-04-29.
+> **Verdict:** PASS Pattern A regime conditional-on-MLE-alignment
+> (Tier II.mle-band primary + Pattern A overlay). **Fixture:**
+> local-level DGP via `_kalman_helpers.generate_local_level_dgp`
+> seed=42 + n=200 + 15% missing positions; single-seeded fixture;
+> parameter-sensitivity coverage NOT established; Q3b extension
+> scope. **Sub-class 2a standalone-only variant** per S28 (αa-S28)
+> ratification (Sub-class 2a (αa) variant tagging EXTENDED to
+> operational-coupling-count = 0 third variant alongside dual-role
+> S22 + triple-role S23; n=3 baseline UPGRADE to codification-stable
+> per A3 second-observation tightening precedent). **Tier II.mle-band
+> + Pattern A overlay risk attribution:** **(a) Layer 1
+> statsmodels.UnobservedComponents Kalman smoother math (validated
+> Pattern A regime conditional-on-MLE-alignment):** bit-exact within
+> MLE alignment window; MLE-fit-band tolerance when optima diverge;
+> validation strength conditional on KFAS + statsmodels MLE
+> convergence to compatible optima; **(b) Layer 2 standalone engine
+> orchestration (CAI Phase 2 Session 19 F-MD-KALMAN-MODELTYPE
+> allowlist gating + preset config + NaN handling + model fit
+> fallback + smoothed state extraction + CI construction + model-
+> misspecification disclosure):** validation scope per
+> `engine/techniques/kalman_imputation.py` lines 34-330+;
+> **(c) Confidence interval construction caveat (engine internal
+> disclosure):** CI band assumes model-specification correctness;
+> if UnobservedComponents variant fails to capture true dynamics,
+> reported band understates true imputation uncertainty (per engine
+> lines 144-151 honest disclosure). Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier II.mle-band primary + Pattern A overlay + audit-content-distribution variant)
+
+> `kalman_imputation` Tier II.mle-band primary + Pattern A
+> conditional-on-MLE-alignment overlay; cross-package PASS vs R
+> KFAS smoother (audit-content-distribution: dedicated audit file
+> absent; verdict + Pattern characterization distributed across
+> batch summary + cross-batch findings). Sub-class 2a standalone-
+> only variant. Engine Layer 2 orchestration + CI construction
+> pending expert review. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (R KFAS smoother) per
+  p3_batch_5_summary.md line 17 (verbatim). Verdict (PASS) per
+  p3_batch_5_summary.md line 17 (verbatim). Pattern A regime
+  conditional-on-MLE-alignment characterization per
+  p3_batch_5_summary.md lines 21-23 + phase3_cross_batch_findings.md
+  line 23 (verbatim). Audit date (2026-04-29) per
+  p3_batch_5_summary.md header (verbatim). Fixture (local-level DGP
+  n=200 seed=42 + 15% missing) per harness `p3_kalman_imputation.py`
+  lines 65-66 + `_inject_missing` helper (verbatim). Tier II.mle-
+  band primary characterization per verdict_class "mle_fit" (harness
+  line 56 verbatim) + scope_reframing §2 lines 134-137 definitional
+  scope (verbatim). Pattern A conditional-on-MLE-alignment overlay
+  characterization per cross-batch findings (verbatim). **AUDIT-
+  CONTENT-DISTRIBUTION FIRST-INSTANCE VARIANT DISCLOSURE per S28 (α)
+  Chat ratification:** dedicated `p3_kalman_imputation_audit.md`
+  file ABSENT; verdict + Pattern characterization distributed
+  across `p3_batch_5_summary.md` (PASS + Pattern A section) +
+  `phase3_cross_batch_findings.md` (Pattern A cross-batch list);
+  specific abs/rel diff numerics NOT in surfaced audit content;
+  audit content distribution structural anomaly variant analogous
+  to S23 pp_test (different structural form: S23 = scope_reframing
+  §2 enumeration absent; S28 = dedicated audit file absent). Layer
+  1 / Layer 2 framework operative per S26 STOP 1.5 second close
+  ratification carried forward. Catalog mapping (1:1) verified per
+  audit Wrapper field. **§4.7.A pattern NOT observed at S28**
+  (clean engine-uses-same-function alignment; harness line 82
+  invokes engine.run() directly); distinct from S26 + S27 §4.7.A
+  variant observations; S28 breaks §4.7.A pattern recurrence at
+  Block 8 final entry; post-S28 §4.7.A pattern observations = n=4
+  across §2.5 entries (S14a + S18 + S26 + S27); kalman_imputation
+  does NOT add fifth observation. **Sub-class 2a (αa) variant tagging
+  EXTENDED to standalone-only variant** per (αa-S28) Chat
+  ratification; n=3 baseline UPGRADE to codification-stable per A3
+  second-observation tightening precedent threshold satisfied at
+  n=3 observations (S22 dual-role + S23 triple-role + S28 standalone-
+  only). **A9 Class A 10th-instance candidate** (Chat trigger CHAT
+  RATIFICATION #5 Sub-class 2a (αa) variant tagging second-
+  observation candidate empirically refined per S28 Step 0 (e) catch
+  — kalman_imputation is two-layer standalone-only NOT helper-export-
+  bearing analogous to S22 + S23 codified variants; banked for
+  absorption #4 codification alongside A9 Class A n=7 + n=8 + n=9
+  candidates). **A9 Class B counter unchanged post-S28 n=4 ACTIVE**:
+  framing class working hypothesis CONFIRMED at Step 0 per A9 Class
+  B revised default discipline operating proactively per S22+S23+
+  S25+S26+S27+S28 sustained pattern. **Maturation observation FIFTH
+  SUSTAINED OBSERVATION REACHED at S28** + SIX-timing-point empirical
+  surface preserved per CHAT RATIFICATION #11 (no new timing point
+  variant at S28; proactive-prevention operation SUSTAINED across
+  established timing points (i)-(vi) per S27 codification). Promotion
+  candidate ROBUSTNESS REINFORCED for absorption #4 codification per
+  Chat ITEM 7 AFFIRMED at S27. Verify-state-at-first-consumption
+  sub-discipline 23rd instance application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at twelfth-technique selection per Mark 3
+  efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20+S25+S26+S27
+  reinforcement. **Q-B pattern persists at n=13 across S12 + S13 +
+  S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 + S26 + S27 +
+  S28; §1.4 codified observation refinement at empirical pattern
+  accumulation** (n=7 at §1.4 S20 codification → n=10 at S25
+  refinement → n=11 at S26 → n=12 at S27 → n=13 at S28 reinforcement;
+  Workstream B amendment cycle candidate A continues at next cycle).
+  Substantive Chat engagement at structural-decision points
+  empirically observed (Step 0 STOP 2 5-item ratifications + Tier
+  (α) primary+overlay + Sub-class (αa-S28) variant tagging extended
+  + audit-content-distribution disclosure framing + A9 Class A 10th
+  candidate banking + maturation observation fifth sustained
+  observation surface).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 statsmodels.UnobservedComponents Kalman smoother
+  math (Pattern A regime conditional-on-MLE-alignment)** per PASS
+  verdict at audit-content-distribution (p3_batch_5_summary +
+  cross-batch findings). **CRITICAL Q-C framing per Tier II.mle-band
+  + Pattern A overlay structure:** validation evidence is bit-exact-
+  within-MLE-alignment-window when KFAS + statsmodels MLE optima
+  agree; MLE-fit-band tolerance when optima diverge; defensibility
+  conditional on MLE alignment. **Conditional for Layer 2 engine
+  orchestration** — F-MD-KALMAN-MODELTYPE allowlist gating + preset
+  config + NaN handling + model fit fallback + smoothed state
+  extraction + CI construction + model-misspecification disclosure;
+  requires expert review of engine implementation OR engine-output
+  cross-check at base pinned config. **Critical Q-C framing per
+  audit-content-distribution variant:** dedicated audit file ABSENT;
+  specific abs/rel diff numerics NOT in surfaced audit content;
+  publication-research user invoking `kalman_imputation` from ribbon
+  receives smoothed-state imputation per Pattern A regime;
+  defensibility to all three audiences (published audience + Morgan
+  Stanley compliance + Path α expert reviewer) UNDER Tier II.mle-
+  band primary + Pattern A overlay + audit-content-distribution
+  variant + Layer 2 orchestration + model-misspecification CI
+  caveat expert review acknowledgment.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  MEDIUM per Tier II.mle-band primary + Pattern A overlay scope
+  bound + audit-content-distribution variant. kalman_imputation is
+  canonical Kalman-smoother-based imputation methodology (widely
+  used for missing-value imputation in time series with state-space
+  structure). **Layer-specific + Tier II.mle-band + Pattern A overlay
+  + standalone-only variant retraction surface (per S28 (α) + (αa-S28)
+  + (α) ratifications):**
+  - Layer 1 statsmodels.UnobservedComponents Kalman smoother math
+    (Pattern A regime conditional-on-MLE-alignment): LOW-MEDIUM;
+    PASS verdict + Pattern A characterization per audit-content-
+    distribution; expert review surfacing upstream error would
+    affect kalman_imputation specifically (NO multi-map propagation
+    risk; 1:1 catalog↔wrapper). **Tier II.mle-band primary +
+    Pattern A overlay caveat:** validation strength conditional on
+    KFAS + statsmodels MLE convergence to compatible optima; non-
+    aligned MLE optima → MLE-fit-band tolerance only (not bit-exact).
+  - **Layer 2 engine orchestration: MEDIUM** — F-MD-KALMAN-MODELTYPE
+    allowlist gating + preset config + NaN handling + model fit
+    fallback + smoothed state extraction + CI construction + model-
+    misspecification disclosure NOT audit-validated; expert review
+    of engine implementation conditional on Layer 2 correctness.
+  - **Confidence interval construction caveat (engine lines 144-151
+    internal disclosure): MEDIUM-HIGH** — CI band assumes model-
+    specification correctness; if UnobservedComponents variant
+    fails to capture true dynamics, reported band understates true
+    imputation uncertainty; expert review surfacing model-
+    misspecification cases would invalidate CI bounds specifically
+    (imputation point estimates may remain valid; CI bounds may not).
+    **Asymmetric retraction surface:** point estimates vs CI bounds
+    independently conditional.
+  - **Audit-content-distribution variant retraction surface caveat:
+    LOW** — audit content present but distributed; expert review
+    surfacing audit-content-distribution issue (e.g., specific
+    numeric metric absence) would prompt audit content recovery
+    (audit re-run to extract numerics); does NOT invalidate Pattern
+    A characterization per cross-batch findings.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; twelfth technique to enter status per
+S28 ratification; **THIRD-AND-FINAL Block 8 Missing Data entry —
+BLOCK 8 FULLY Q1-AMENDED milestone** = THIRD catalog block fully
+Q1-amended after Block 1 Causality at S18 + Block 12 Stationarity
+Tests at S23; **per-block continuation pattern at n=3 catalog block
+observations** satisfies A3 second-observation tightening precedent
+threshold at n=3 — codification candidate at §19.4 §4 forward
+instrumentation note 6 refinement at absorption #4; **FIRST Tier
+II.mle-band primary + Pattern A conditional-on-MLE-alignment overlay
+§2.5 precedent** (analogous to S23 pp_test "Tier II.bit-exact-loose
++ Tier V Pattern J B.2 overlay" primary+overlay framing structure;
+institutional pattern for Q1 work program Tier II.mle-band techniques
++ Pattern A conditional overlay characterization); **FIRST Sub-class
+2a standalone-only variant Q1 §2.5 entry** (operational-coupling-
+count = 0 third variant beyond dual-role S22 + triple-role S23
+helper-export-bearing variants per S25 codification); **Sub-class
+2a (αa) variant tagging n=3 baseline UPGRADE to codification-stable
+per A3 second-observation tightening precedent threshold** satisfied
+at n=3 observations (S22 + S23 + S28); **FIRST audit-content-
+distribution variant disclosure per S28 (α) ratification**
+(dedicated `p3_kalman_imputation_audit.md` absent; verdict + Pattern
+characterization distributed across `p3_batch_5_summary.md` PASS
+verdict + Pattern A section + `phase3_cross_batch_findings.md`
+Pattern A cross-batch list; analogous to S23 pp_test audit-content-
+distribution Q-A precedent but DIFFERENT structural variant — S23 =
+scope_reframing §2 enumeration absent; S28 = dedicated audit file
+absent). **S28 clean two-layer + engine-uses-same-function alignment
++ Tier II.mle-band primary + Pattern A overlay framing per CHAT
+RATIFICATION #4 CONFIRMED at Step 0: Layer 1 statsmodels.UnobservedComponents
+Kalman smoother (engine + harness both use SAME library function
+via engine module direct invocation per harness line 82); Layer 2
+engine orchestration (F-MD-KALMAN-MODELTYPE allowlist + preset
+config + NaN handling + model fit fallback + smoothed state
+extraction + CI construction + model-misspecification disclosure);
+NO §4.7.A harness-bypasses-engine pattern observation at S28
+(distinct from S26 + S27 §4.7.A variant observations); engine-level
+model-misspecification CI band understatement disclosure built into
+engine code (lines 144-151) per institutional standard.** **A10
+Sub-class disposition (αa-S28) Sub-class 2a (αa) variant tagging
+EXTENDED to standalone-only variant** per Chat ratification ITEM 3
+(operational-coupling-count = 0 third variant; n=3 baseline UPGRADE
+to codification-stable per A3 second-observation tightening
+precedent). **A9 Class B counter post-S28: n=4 ACTIVE** (unchanged;
+framing class working hypothesis CONFIRMED at Step 0 per A9 Class B
+revised default discipline operating proactively per S22+S23+S25+
+S26+S27+S28 sustained pattern). **A9 Class A counter post-S28: n=6
+ACTIVE + candidates n=7 + n=8 + n=9 + n=10 pending absorption #4
+codification** (n=7 candidate per S23-pre Doc 2 tier-enumeration
+omission proactive-catch variant; n=8 candidate per S26-pre
+catalog-count-baseline misattribution catch; n=9 candidate per S27
+trigger drafting reimplementation-vs-use-case-divergence schema-
+misattribution catch; **n=10 candidate per S28 trigger drafting
+Sub-class 2a variant tagging scope-misattribution catch NEW at
+S28**). **A9 Class A + Class B discipline maturation FIFTH SUSTAINED
+OBSERVATION REACHED at S28** per A3 second-observation tightening
+precedent threshold satisfied at n=5 observations (S23 + S25 + S26
++ S27 + S28 sustained proactive-prevention operation across SIX-
+timing-point empirical surface preserved per S27 codification).
+**Promotion candidate (§19.4 §4.5 NEW sub-section OR A11 NEW
+amendment) ROBUSTNESS REINFORCED for absorption #4 codification
+disposition** per Chat ratification ITEM 7 AFFIRMED at S27 STOP 2
+(maturation observation WILL codify at absorption #4). **Block 8
+FULLY Q1-AMENDED milestone** at S28 close = THIRD catalog block
+fully Q1-amended (Block 1 Causality 6 entries + Block 12 Stationarity
+Tests 3 entries + Block 8 Missing Data 3 entries = 12 §2.5 entries
+total across 3 catalog blocks). **Per-block continuation pattern at
+n=3 catalog block observations** codification candidate at §19.4 §4
+forward instrumentation note 6 refinement at absorption #4: Block
+1 (6 entries / ~1837 LOC / S12-S18 / 1 amendment + 1 absorption);
+Block 12 (3 entries / ~1737 LOC / S21-S23 / 0 amendments + 1
+absorption); Block 8 (3 entries / [TBD LOC at S28 close] / S26-S28
+/ 0 amendments + 0 absorptions; absorption #4 anticipated post-
+S28); per-block continuation pattern characterization tighter at
+n=3 observation.
+
+## §3 Unvalidated catalog techniques (63 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -5023,8 +5559,8 @@ descriptions, summaries).
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
 
-### Missing Data / Temporal Disaggregation (1 unvalidated; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27)
-`kalman_imputation`
+### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
+(all 3 techniques moved to §2.5)
 
 ### Multivariate Systems (5 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately)
 `bvar`, `dynamic_factor_model`, `pca_analysis`, `var`, `vecm`
@@ -5041,7 +5577,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 64 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests BOTH FULLY Q1-AMENDED; Block 8 Missing Data Q1 work in progress with 2 entries per S26+S27; kalman_imputation sole remaining Block 8 unvalidated; S28 kalman_imputation third-entry triggers Block 8 fully Q1-amended milestone = THIRD catalog block fully Q1-amended; per-block continuation pattern at n=3 catalog block observations available at absorption #4**).
+**Total: 63 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data ALL THREE FULLY Q1-AMENDED — first three catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=3 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #4**).
 
 ## §4 How to use this document
 
@@ -5084,7 +5620,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (64 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27 amendments):**
+**Tier 3 — UNVALIDATED (63 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
