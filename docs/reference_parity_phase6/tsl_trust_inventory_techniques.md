@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 15 catalog techniques with Phase 7+ Q1 trust documentation
+- 16 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33 amendments)
-- 60 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34 amendments)
+- 59 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -7666,7 +7666,985 @@ informational surface framing preserved per S32 + S33 ratification
 continuity; NOT A9 Class A counter increment per naming shorthand
 vs material content misattribution distinction).
 
-## §3 Unvalidated catalog techniques (60 entries; ID-only enumeration)
+### x13_seasonal_adjust (Phase 7+ S34; SIXTEENTH §2.5 entry; FOURTH-AND-FINAL Block 3 Decomposition entry — **BLOCK 3 FULLY Q1-AMENDED milestone** = FOURTH catalog block fully Q1-amended after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; FIRST Tier VII SKIP-graceful §2.5 entry per Tier VII via post-S6 inference + audit "Tier C" reference acknowledgment hybrid characterization; FIRST §4.7.A REMEDIATED 5th variant first-instance baseline observation per A3 first-instance precedent (n=1 baseline, NOT codification); FIRST Pattern A.1 same-binary parity CONDITIONAL framing potential disclosure; FIRST NEW Sub-class 2h candidate first-instance baseline with REFINED definitional scope per A3 precedent (NOT codification); THIRD filename divergence sub-pattern variant n=3 third-observation reinforcement (S32 mstl + S33 stl + S34 x13 Block 3 Decomposition wrappers); SECOND §1.5 novelty enumeration sub-section APPLIED per S30 codification at n=6 observations ≥5 threshold; analogous to S28 kalman_imputation Block 8 third-AND-FINAL entry precedent)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+VII SKIP-graceful via post-S6 inference + audit "Tier C" reference
+acknowledgment hybrid characterization** per S34 (α) Chat
+disposition. **Tier VII via post-S6 inference characterization**
+analogous to S23 p3_pp + S28 p3_kalman_imputation post-S6 inference
+precedents: p3_x13 NOT explicitly enumerated at scope_reframing §2
+line 197 5-wrapper Tier VII enumeration (auto_arima-only per
+scope_reframing §2 line 193-197 verbatim "reality at HEAD `5205779`:
+**Tier VII = 1 catalog technique (auto_arima only)**"); p3_x13 has
+p3_*.py wrapper file (exists per audit + harness empirical
+verification) BUT verdict is SKIP-graceful (NOT PASS/CAVEAT/BLOCK
+parity verdict per audit line 5 verbatim "**SKIP** (graceful —
+X-13 binary unavailable on host)"); operationally equivalent to
+Tier VII "no parity infrastructure" outcome at runtime level when
+binary unavailable. **Audit "Tier C" reference acknowledgment**
+per `p3_x13_audit.md` line 4 verbatim ("Reference: R `seasonal::seas`
+(NOT installed — Tier C)") + master plan §15.12 deferred / Tier C
+disposition reference per audit line 25-26 verbatim ("Per Session 1
+inventory, X-13 was flagged as a deferred / Tier C candidate.
+Session 14 confirms this disposition"). **Hybrid characterization
+preserves scope_reframing §2 7-tier taxonomy alignment AND
+empirical fidelity to audit content** per ITEM 1 RATIFICATION; NO
+scope_reframing taxonomy modification at S34 + audit "Tier C"
+reference disclosed at entry text per A6 BLOCKING empirical content
+preservation. STOP 2 BLOCKING discharged on Tier anchor per ITEM 1
+RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SKIP-graceful Tier
+VII via post-S6 inference + §4.7.A REMEDIATED 5th variant first-
+instance baseline observation per (αa-S34) ratification; NEW Sub-
+class 2h candidate first-instance baseline with REFINED definitional
+scope per ITEM 4 ratification):** x13_seasonal_adjust is 1:1
+catalog↔wrapper mapping per `p3_x13_audit.md` audit Wrapper field
+(`engine/techniques/x13_seasonal_adjust.py` sole engine module;
+largest engine module in Block 3 at 884 LOC vs S31 classical 283 +
+S32 mstl 257 + S33 stl 281; reflects subprocess invocation of
+external X-13 binary + ARIMA fallback chain + BLS-style COVID
+outlier regressors + fit-window truncation + allowlist gates + X-13
+spec writing + .d10/.d11/.d12/.d13 output parsing).
+
+#### §1.5 Novelty enumeration sub-section (S34 application — second post-S23 first-instance codification application per S30 codification; ≥5 observations threshold satisfied at n=6)
+
+S34 surfaces 6 NEW observations across compound first-instance
+disclosures + Block 3 milestone framings, satisfying ≥5 observations
+threshold per S23 first-instance codification at S30 §1.5
+codification scope. n=2 post-codification observations across S23 +
+S34; A3 second-observation tightening precedent threshold satisfied
+for §1.5 novelty enumeration sub-section pattern; codification
+refinement candidate at absorption #5.
+
+**Novelty 1 — Tier VII SKIP-graceful via post-S6 inference + audit
+"Tier C" reference hybrid characterization:** FIRST Tier VII §2.5
+entry candidate per post-S6 inference; p3_x13 NOT explicitly
+enumerated at scope_reframing §2 line 197 auto_arima-only Tier VII
+enumeration; post-S6 inference grounds Tier VII characterization
+via SKIP-graceful runtime-equivalence to Tier VII "no parity
+infrastructure" outcome. Audit "Tier C" reference acknowledged per
+A6 BLOCKING. Hybrid characterization preserves scope_reframing §2
+7-tier taxonomy alignment + empirical fidelity to audit content.
+
+**Novelty 2 — §4.7.A REMEDIATED 5th variant first-instance baseline
+observation:** FIRST observed §4.7.A REMEDIATION instance across
+Q1 §2.5 work program per (αa-S34) Chat ratification. Empirically
+confirmed per harness `p3_x13.py` docstring lines 9-30 verbatim
+("Phase 4 Session 2 (2026-05-01) — P4-2 pathway (c) closure:
+``run_tsl`` now invokes TSL's actual wrapper (``engine/techniques/x13_seasonal_adjust.py:run``)
+via the dispatch entry point") + line 89 `from techniques.x13_seasonal_adjust
+import run as tsl_x13_run` + line 125 `res = tsl_x13_run(ctx, lambda
+*a, **k: None)`. §4.7.A status dimension orthogonal to mechanism
+variant dimension per S30 (G.1) codification: mechanism variants
+(4 codified at S30) + status PRESENT (n=7 post-S33) + status
+REMEDIATED (n=1 NEW at S34). A3 first-instance precedent n=1
+baseline; NOT codification; codification deferred to absorption #5+
+second-observation tightening if recurs OR Workstream B amendment
+cycle disposition.
+
+**Novelty 3 — Pattern A.1 same-binary parity CONDITIONAL framing
+potential disclosure:** Audit lines 30-32 verbatim grounds same-
+binary fact ("Both arms (TSL via `statsmodels.tsa.x13` and reference
+via R `seasonal`) require the same X-13 binary"). HOWEVER verdict
+is SKIP-graceful — NO parity execution at this audit. Pattern A.1
+framing is conditional-on-binary-available; NOT empirically grounded
+at SKIP verdict (Pattern A.1 = same-library sub-class with executed
+parity validation per scope_reframing §2 line 52). Surfaced as
+CONDITIONAL framing potential per Code S31 Step 0 forward look;
+NOT first-instance baseline observation per A6 BLOCKING (no actual
+Pattern A.1 verdict).
+
+**Novelty 4 — NEW Sub-class 2h candidate first-instance baseline
+with REFINED definitional scope:** REVISED definitional scope
+working hypothesis per (αa-S34) Chat ratification: **"SKIP-graceful
++ §4.7.A REMEDIATED + same-binary parity conditional potential"**
+combined. Drops "Pattern A.1" actual claim from CHAT RATIFICATION
+#6 working hypothesis per ITEM 3 empirical refinement. Distinct
+from S32 Sub-class 2f (algorithmic-non-uniqueness LAYERED) + S33
+Sub-class 2g (deterministic-implementation-difference SINGLE-LAYER).
+A3 first-instance precedent n=1 baseline; NOT codification.
+
+**Novelty 5 — Block 3 FULLY Q1-AMENDED milestone:** FOURTH catalog
+block fully Q1-amended at S34 entry close (Block 1 Causality + Block
+12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition
+= 4 of 13 catalog blocks complete). Per-block continuation pattern
+at n=4 catalog block observations satisfies A3 second-observation
+tightening precedent threshold; codification candidate at §19.4 §4
+forward instrumentation note 6 refinement at absorption #5. Block
+heterogeneous-Tier-surface variant observation completion at S34
+(Tier II.bit-exact + Tier VI LAYERED + Tier VI SINGLE-LAYER + Tier
+VII SKIP-graceful across Block 3 entries). Block 3 sub-class
+taxonomy growth observation completion (Sub-class 2f + 2g + 2h
+candidates at n=1 first-instance baselines across S32 + S33 + S34).
+
+**Novelty 6 — Filename divergence sub-pattern variant n=3 third-
+observation reinforcement:** S32 mstl + S33 stl + S34 x13 = n=3
+across Block 3 Decomposition wrappers; empirical filenames
+`p3_mstl_audit.md` + `p3_stl_audit.md` + `p3_x13_audit.md` +
+`p3_mstl.py` + `p3_stl.py` + `p3_x13.py` (mstl + stl omit `_decompose`
+suffix; x13 omits `_seasonal_adjust` suffix). Generalized sub-
+pattern definitional scope: "Block 3 Decomposition wrapper filename
+omits catalog-id suffix from catalog-id-to-wrapper-filename mapping".
+A3 third-observation tightening reinforcement at n=3 + Block 3
+completion provides codification-ready candidate at absorption #5
+refinement disposition; codification placement candidates: §19.4 §4
+NEW forward instrumentation note OR Workstream B separate-lane
+candidate. A6 informational surface framing preserved; NOT A9
+Class A counter increment per naming shorthand vs material content
+misattribution distinction.
+
+**§1.5 novelty enumeration sub-section second post-codification
+application observations:** S23 pp_test FIRST application surfaced
+3a-3f 6-item enumeration at first-instance codification; S34
+x13_seasonal_adjust SECOND application surfaces 6-item enumeration
+at post-codification operation per S30 §1.5 codification. Pattern
+empirically grounded at n=2 applications across S23 + S34 per A3
+precedent.
+
+**§4.7.A harness-bypasses-engine pattern manifestation post-S34
+(REMEDIATED 5th variant status dimension first-instance baseline
+observation per S30 (G.1) generalized definitional scope codification
+— §4.7.A pattern STATUS tightening forward observation; banking
+only, NOT §4.7.A taxonomy modification at S34; NOT A9 Class A
+counter increment per S30 (G.1) codification distinction):**
+**EMPIRICAL EVIDENCE for REMEDIATED status:**
+- `tools/reference_parity/harness/checks/p3_x13.py` docstring lines
+  9-30 verbatim: "**Phase 4 Session 2 (2026-05-01) — P4-2 pathway
+  (c) closure:** ``run_tsl`` now invokes TSL's actual wrapper
+  (``engine/techniques/x13_seasonal_adjust.py:run``) via the
+  dispatch entry point rather than calling
+  ``statsmodels.x13_arima_analysis`` directly. The pre-S2
+  implementation called statsmodels because it produced the
+  seasadj+trend output in a single library call; that path fails
+  on Linux CI because statsmodels' temp-file naming convention is
+  incompatible with the ``x13ashtml`` binary's output convention
+  (statsmodels expects ``.err`` files at a specific prefix;
+  ``x13ashtml`` writes elsewhere). TSL's wrapper does direct
+  binary invocation + .d10/.d11/.d12/.d13 parsing, which is fully
+  x13ashtml-compatible. Linux CI now PASSes ``p3_x13`` (was
+  SKIP-graceful). Windows CI behavior unchanged — the wrapper still
+  SKIPs gracefully via ImportError when no binary is found locally."
+- `tools/reference_parity/harness/checks/p3_x13.py` line 89 verbatim:
+  `from techniques.x13_seasonal_adjust import run as tsl_x13_run`
+- `tools/reference_parity/harness/checks/p3_x13.py` line 125 verbatim:
+  `res = tsl_x13_run(ctx, lambda *a, **k: None)`
+
+Harness INVOKES engine module `run()` directly via dispatch entry
+post-Phase 4 Session 2 (2026-05-01) — distinct from S14a + S18 +
+S26 + S27 + S31 + S32 + S33 §4.7.A PRESENT manifestations. **§4.7.A
+status TRANSITIONED from PRESENT (pre-S2) to REMEDIATED (post-S2)**
+per Phase 4 Session 2 P4-2 pathway (c) closure. **Post-S34 §4.7.A
+observations:** n=7 PRESENT across §2.5 entries (S14a granger + S18
+gcc_phat + S26 denton_chowlin + S27 loess + S31 classical_decompose
++ S32 mstl_decompose + S33 stl_decompose) + n=1 REMEDIATED at S34
+x13_seasonal_adjust; **§4.7.A status dimension orthogonal to
+mechanism variant dimension per S30 (G.1) codification** (mechanism
+variants 4 codified at S30 + status PRESENT/REMEDIATED dimension
+NEW at S34 first-instance baseline observation); **§4.7.A pattern
+count tightening forward observation at absorption #5 per A3
+precedent** (NOT A9 Class A counter increment per S30 (G.1)
+generalized definitional scope codification — §4.7.A pattern
+observations track mechanism variant + status accumulation distinct
+from A9 Class A empirical-state-assumption failure mode tracking).
+
+**A10 Sub-class disposition: NEW Sub-class 2h candidate first-
+instance baseline observation with REFINED definitional scope per
+(αa-S34) Chat ratification (A3 first-instance precedent n=1
+baseline; NOT codification):** S34 x13_seasonal_adjust surfaces NEW
+Sub-class 2h candidate at first-instance baseline observation per
+A3 precedent. Sub-class 2h definitional scope REVISED working
+hypothesis per ITEM 4 empirical refinement: **"SKIP-graceful +
+§4.7.A REMEDIATED + same-binary parity conditional potential"**
+combined novelty. Drops "Pattern A.1" actual claim from CHAT
+RATIFICATION #6 working hypothesis per ITEM 3 empirical refinement
+(no actual Pattern A.1 verdict at SKIP-graceful audit; same-binary
+parity is conditional-on-binary-available framing potential).
+Distinct from codified Sub-class 2a (αa) "general two-layer class"
+semantic (Tier II.bit-exact + single-Tier framing) + NEW Sub-class
+2f candidate (S32 mstl "layered iterative-loess primary CAVEAT +
+closed-form structural-identity overlay" LAYERED) + NEW Sub-class
+2g candidate (S33 stl "deterministic-implementation-difference
+iterative-loess CAVEAT" SINGLE-LAYER).
+
+**Sub-class 2h vs Sub-class 2f vs Sub-class 2g distinction rationale
+at first-instance baseline observations across Block 3 Decomposition:**
+- **Sub-class 2f (S32 mstl):** Algorithmic non-uniqueness within
+  constraint y = trend + Σ seasonal_k + residual; per-component
+  ~1.0 abs; structural-identity overlay PASS at machine precision;
+  LAYERED framing
+- **Sub-class 2g (S33 stl):** Deterministic implementation-difference
+  per-index divergence (NOT algorithmic non-uniqueness); per-index
+  divergence ~9e-2 abs reproducible across seeds; NO structural-
+  identity overlay metric in audit; SINGLE-LAYER framing
+- **Sub-class 2h (S34 x13):** SKIP-graceful binary-unavailable
+  outcome (NOT parity verdict; informative-not-failing per audit
+  line 14 verbatim); §4.7.A REMEDIATED 5th variant status dimension
+  (harness invokes engine via dispatch entry post-Phase 4 Session
+  2); same-binary parity conditional-on-binary-available potential
+  (NOT actual Pattern A.1 verdict); Tier VII via post-S6 inference
+  + Tier C audit reference hybrid
+
+**Block 3 sub-class taxonomy growth observation completion at S34:**
+Sub-class 2f + 2g + 2h candidates all at n=1 first-instance baselines
+across S32 + S33 + S34; sub-class taxonomy growth pattern observation
+candidate at absorption #5 refinement disposition; codification
+deferred to absorption #5+ second-observation tightening per A3
+precedent for each individual sub-class candidate (S32+1 mstl
+reroll OR future Q1 entry for Sub-class 2f; S33+1 stl reroll OR
+future Q1 entry for Sub-class 2g; S34+1 x13 reroll OR future Q1
+entry for Sub-class 2h). **n=1 baseline observation status per A3
+first-instance precedent** (Previous Chat 1.2 operational pattern:
+first-instance n=1 = baseline observation only; codification
+deferred). Variant tagging mechanism NOT applied at n=1 first-
+instance per A3 precedent; Sub-class 2h definitional scope working
+hypothesis only.
+
+**Pattern A.1 same-binary parity CONDITIONAL framing potential
+disclosure per ITEM 3 Chat ratification (NOT first-instance baseline
+observation per A6 BLOCKING):** Audit line 30-32 verbatim grounds
+same-binary fact: "Both arms (TSL via `statsmodels.tsa.x13` and
+reference via R `seasonal`) require the same X-13 binary." HOWEVER
+verdict is SKIP-graceful per audit line 5 — NO parity execution at
+this audit. Pattern A.1 framing scope per scope_reframing §2 line
+52 verbatim ("Pattern A.1 same-library sub-class | **18** (locked
+at scale)") requires executed parity validation; p3_x13 has NO
+executed parity at SKIP-graceful verdict. **CONDITIONAL framing
+potential per Code S31 Step 0 forward look:** Pattern A.1 framing
+becomes applicable IF X-13 binary becomes available on host
+(scope_reframing §2 line 22 verbatim "Pattern A.1 same-library
+sub-class | **18** (locked at scale)" enumeration would extend to
+n=19 with p3_x13 conditional-on-binary). **NOT first-instance
+baseline observation per A6 BLOCKING:** no actual Pattern A.1
+verdict at p3_x13 audit; conditional-on-binary-available framing
+potential disclosed but NOT banked as Pattern A.1 first-instance
+baseline observation. Forward observation banking only as
+conditional framing potential; codification deferred indefinitely
+absent actual Pattern A.1 verdict.
+
+**Block 3 Decomposition FOURTH-AND-FINAL entry — Block 3 FULLY
+Q1-AMENDED milestone (FOURTH catalog block fully Q1-amended):** S34
+x13_seasonal_adjust completes Block 3 Decomposition Q1-amendment
+arc after S31 classical_decompose first-entry + S32 mstl_decompose
+second-entry + S33 stl_decompose third-entry. **Block 3 progression:
+3 of 4 pre-S34 → 4 of 4 post-S34 (FULLY Q1-AMENDED milestone).**
+**FOURTH catalog block fully Q1-amended after Block 1 Causality at
+S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at
+S28 = 4 of 13 catalog blocks complete (31% catalog block-level
+completion).** Per-block continuation pattern at n=4 catalog block
+observations (Block 1 + Block 12 + Block 8 + Block 3) satisfies A3
+second-observation tightening precedent threshold; codification
+candidate at §19.4 §4 forward instrumentation note 6 refinement at
+absorption #5 refinement disposition. **Block heterogeneous-Tier-
+surface variant observation completion at S34** (Block 3 mixed
+Tier surface Tier II.bit-exact at S31 + Tier VI LAYERED at S32 +
+Tier VI SINGLE-LAYER at S33 + Tier VII SKIP-graceful at S34 via
+post-S6 inference distinct from Block 1 homogeneous Tier II.bit-
+exact-throughout + Block 12 homogeneous Tier II.bit-exact-throughout
++ Block 8 heterogeneous Tier II.bit-exact + Tier III + Tier II.mle-
+band — codification candidate at absorption #5 per "Block
+heterogeneous-Tier-surface variant" sub-pattern). **Block 3 sub-
+class taxonomy growth observation completion** (Sub-class 2f at S32
++ 2g at S33 + 2h at S34 candidates all at n=1 first-instance
+baselines — sub-class taxonomy growth pattern observation candidate
+at absorption #5).
+
+**Reference:** R `seasonal::seas` (NOT installed — Tier C per audit
+line 4 verbatim; R `seasonal` package wraps same X-13 binary per
+audit lines 18-26)
+**Verdict:** **SKIP** (graceful — X-13 binary unavailable on host)
+per audit line 5 verbatim; "**Informative-not-failing**" per audit
+line 14 verbatim
+**Audit:** `tools/reference_parity/reports/p3_x13_audit.md`
+**Audit date:** 2026-04-29 (PRE-Phase 4 Session 2 2026-05-01;
+audit describes pre-S2 mechanism `statsmodels.tsa.x13.x13_arima_analysis`
+direct invocation; post-S2 mechanism via dispatch entry per
+p3_x13.py docstring lines 9-30 verbatim)
+**Tolerance class:** SKIP-graceful (Tier VII via post-S6 inference
++ Tier C audit reference hybrid; no parity execution; ImportError
+translation to SKIP outcome per audit lines 10-14)
+**Fixture:** `_generate_seasonal_dgp` own generator (harness
+`p3_x13.py` lines 47-54); n=120, period=12, seed=42; monthly trend +
+seasonal + noise; DGP defined for fixture-readiness even though
+parity NOT executed at SKIP-graceful verdict
+**Pattern J catalog entry:** B.6.2 per audit lines 51-57 verbatim
+("Documented as B.6.2 in `docs/engineering/parity_diagnostic_reference.md`
+Appendix B — 'X-13 binary not installable on Windows CI; seasonal
+package unusable in CI matrix; resolution via SKIP-graceful
+ImportError translation'")
+
+**Source files (Tier VII SKIP-graceful via post-S6 inference + Tier
+C audit reference hybrid + §4.7.A REMEDIATED 5th variant first-
+instance baseline + Sub-class 2h candidate first-instance baseline
+per S34 α framing; empirical filenames per ITEM 8 ratification):**
+`tools/reference_parity/harness/checks/p3_x13.py` lines 9-30
+(class docstring verbatim documenting Phase 4 Session 2 P4-2
+pathway (c) closure: harness run_tsl invokes engine module via
+dispatch entry post-S2; pre-S2 implementation called
+statsmodels.x13_arima_analysis directly; post-S2 fully x13ashtml-
+compatible; Linux CI now PASSes; Windows CI behavior unchanged —
+SKIP-graceful via ImportError when no binary found locally;
+§4.7.A REMEDIATED 5th variant status dimension empirical evidence)
++ `tools/reference_parity/harness/checks/p3_x13.py` lines 76-165
+(harness TSL arm: line 89 `from techniques.x13_seasonal_adjust
+import run as tsl_x13_run` + line 125 `res = tsl_x13_run(ctx,
+lambda *a, **k: None)` — harness INVOKES engine module `run()`
+directly via dispatch entry; SKIP-graceful translation at lines
+130-136: if engine response status != "success" + error_message
+contains "binary not found" → raise ImportError; runner translates
+to SKIP outcome)
++ `tools/reference_parity/harness/checks/p3_x13.py` lines 167-194
+(harness reference arm: R `seasonal::seas` via RBridge with
+`ts(y, start=c(2010,1), frequency=12)` ts wrapper; raises
+RPackageMissingError → SKIP if seasonal package not installed
+typical Windows scenario; extracts seasadj + trend from final(res)
++ trend(res))
++ `tools/reference_parity/harness/checks/p3_x13.py` lines 47-54
+(`_generate_seasonal_dgp` own generator: monthly trend + seasonal
++ noise at n=120 + period=12 + seed=42; DGP defined for fixture-
+readiness even though parity NOT executed at SKIP-graceful verdict)
++ `engine/techniques/x13_seasonal_adjust.py` lines 1-34 (module
+docstring: "X-13 ARIMA-SEATS Seasonal Adjustment for Time Series
+Lab. Wraps the US Census Bureau's X-13ARIMA-SEATS program for
+seasonal adjustment. Per Phase 4 Session 2 (P4-2 pathway c bypass),
+invokes the ``x13ashtml`` binary directly and parses its output
+(.d10/.d11/.d12/.d13) rather than going through statsmodels'
+``x13_arima_analysis`` abstraction (which has incompatibilities
+with the HTML-aware build of X-13ARIMA-SEATS)..." + binary discovery
+cascade: TSL_X13_BINARY_PATH env var → resources/x13/ → PATH;
+references US Census Bureau X-13ARIMA-SEATS Reference Manual +
+Dagum & Bianconcini 2016)
++ `engine/techniques/x13_seasonal_adjust.py` lines 64-135
+(`_find_x13_binary`: 3-priority discovery cascade — Phase 4 S2
+TSL_X13_BINARY_PATH env var highest priority + resources/x13/
+relative search paths + system PATH fallback via subprocess
+which-check; binary names per platform — Windows `x13as_html.exe`
+/ `x13as_ascii.exe` / `x13ashtml.exe` / `x13as.exe` + Linux/macOS
+`x13as_html` / `x13as_ascii` / `x13ashtml` / `x13as`)
++ `engine/techniques/x13_seasonal_adjust.py` lines 138-147
+(`_infer_period`: period inference from frequency M/MS=12 + Q/QS=4
++ user override via `ctx.get_param("period")`)
++ `engine/techniques/x13_seasonal_adjust.py` lines 150-239
+(`_write_x13_spec`: X-13 spec file writer; series block + transform
+block + regression block for BLS-style COVID outlier regressors
+(ao2020.mar + ls2020.apr) + automdl OR fixed ARIMA model + outlier
+block + x11 block with .d10/.d11/.d12/.d13 save directives)
++ `engine/techniques/x13_seasonal_adjust.py` lines 242-266
+(`_try_statsmodels_x13`: statsmodels x13_arima_analysis fallback
+path if direct binary invocation fails; pre-Phase 4 Session 2
+behavior preserved as fallback)
++ `engine/techniques/x13_seasonal_adjust.py` lines 269-884 (Layer 2
+engine orchestration: `run(ctx, progress_callback)` main entry;
+sole top-level function; standalone-technique-only invocation;
+LARGEST engine module in Block 3 at 884 LOC reflecting subprocess
+invocation + ARIMA fallback chain automdl→(0 1 1)(0 1 1)→(0 0 1)
+(0 1 1)→(0 0 0)(0 1 1) + BLS-style COVID outlier regressors +
+fit-window truncation default 120 months/40 quarters BLS CES
+rolling window + hard cap 83 years + F-CD-X13-TRANSFORM allowlist
+gate transform ∈ {"auto", "log", "none"} at lines 411-426 + X-13
+spec writing + .d10/.d11/.d12/.d13 output parsing)
++ `tools/reference_parity/reports/p3_x13_audit.md`
+
+**Validation claim scope (TIER VII SKIP-GRACEFUL VIA POST-S6
+INFERENCE + AUDIT "TIER C" REFERENCE HYBRID + §4.7.A REMEDIATED
+5TH VARIANT FIRST-INSTANCE BASELINE + Pattern A.1 SAME-BINARY
+PARITY CONDITIONAL FRAMING POTENTIAL + NEW Sub-class 2h candidate
+first-instance baseline observation REFINED definitional scope per
+S34 (α) + (αa-S34) ratifications):** TSL x13_seasonal_adjust output
+relies on Layer 1 X-13ARIMA-SEATS binary subprocess invocation +
+Layer 2 engine orchestration. p3_x13 audit at HEAD 9240ed8 produces
+SKIP-graceful verdict per audit line 5 verbatim ("**SKIP** (graceful
+— X-13 binary unavailable on host)") at single seeded fixture
+(n=120, period=12, seed=42) per harness `_generate_seasonal_dgp`;
+SKIP-graceful outcome operationally Tier VII-equivalent per post-S6
+inference (no parity execution at runtime when binary unavailable).
+**Pattern A.1 same-binary parity CONDITIONAL framing potential per
+audit lines 30-32 verbatim** ("Both arms (TSL via
+`statsmodels.tsa.x13` and reference via R `seasonal`) require the
+same X-13 binary") — applicable IF binary becomes available;
+conditional-on-binary-available framing potential NOT actual at
+SKIP-graceful audit. NOT engine standalone orchestration
+correctness, NOT binary discovery cascade correctness, NOT X-13
+spec writing correctness, NOT ARIMA fallback chain correctness,
+NOT BLS-style COVID outlier regressor correctness, NOT fit-window
+truncation correctness, NOT F-CD-X13-TRANSFORM allowlist gate
+correctness, NOT .d10/.d11/.d12/.d13 output parsing correctness.
+
+- **Layer 1 X-13ARIMA-SEATS binary math (Tier VII via post-S6
+  inference SKIP-graceful primary; Pattern A.1 same-binary parity
+  CONDITIONAL potential):** SKIP-graceful verdict per audit line 5
+  verbatim ("**SKIP** (graceful — X-13 binary unavailable on host)"
+  + line 14 verbatim "**Informative-not-failing**"). **Tier VII
+  via post-S6 inference characterization** analogous to S23 p3_pp +
+  S28 p3_kalman_imputation post-S6 inference precedents; p3_x13
+  NOT explicitly enumerated at scope_reframing §2 line 197 Tier
+  VII 1-wrapper enumeration (auto_arima-only per verbatim "reality
+  at HEAD `5205779`: **Tier VII = 1 catalog technique (auto_arima
+  only)**"); operationally Tier VII-equivalent via SKIP-graceful
+  runtime-equivalence. **Audit "Tier C" reference acknowledgment**
+  per audit line 4 verbatim + master plan §15.12 deferred / Tier C
+  disposition per audit lines 25-26 verbatim. **Pattern A.1
+  CONDITIONAL framing potential** per audit lines 30-32 verbatim —
+  applicable IF binary becomes available; conditional-on-binary-
+  available framing potential NOT actual at SKIP-graceful audit;
+  NOT first-instance baseline observation per A6 BLOCKING.
+  Validation scope: SAME underlying X-13 binary as engine module
+  invokes via subprocess at lines 269-884; SKIP-graceful translates
+  to engine response status != "success" + ImportError raise at
+  harness lines 130-136. **§4.7.A REMEDIATED 5th variant first-
+  instance baseline observation caveat:** harness invokes engine
+  `run()` directly via dispatch entry post-Phase 4 Session 2
+  (2026-05-01); REMEDIATED status dimension orthogonal to mechanism
+  variant dimension per S30 (G.1) codification.
+- **Layer 2 engine orchestration (validation scope conditional;
+  NOT exercised at SKIP-graceful audit):**
+  - `_find_x13_binary` 3-priority discovery cascade (lines 64-135):
+    TSL_X13_BINARY_PATH env var highest priority + resources/x13/
+    relative search + system PATH fallback; NOT audit-validated
+    (audit SKIPs when binary unavailable; success path NOT
+    exercised)
+  - `_infer_period` (lines 138-147): period inference M/MS=12 +
+    Q/QS=4; NOT audit-validated
+  - `_write_x13_spec` (lines 150-239): X-13 spec file writer with
+    series + transform + regression (BLS COVID outliers ao2020.mar
+    + ls2020.apr) + automdl OR fixed ARIMA + outlier + x11 blocks;
+    NOT audit-validated
+  - `_try_statsmodels_x13` fallback path (lines 242-266): pre-Phase
+    4 Session 2 statsmodels.x13_arima_analysis behavior preserved
+    as fallback; NOT audit-validated at HEAD 9240ed8
+  - ARIMA fallback chain (orchestration within `run()`): automdl→
+    (0 1 1)(0 1 1)→(0 0 1)(0 1 1)→(0 0 0)(0 1 1); NOT audit-validated
+  - BLS-style COVID outlier regressors (regression block in spec):
+    ao2020.mar + ls2020.apr added when monthly data + March/April
+    2020 in series range + covid_outliers=True; NOT audit-validated
+  - Fit-window truncation default 120 months/40 quarters BLS CES
+    rolling window + hard cap 83 years; NOT audit-validated
+  - F-CD-X13-TRANSFORM allowlist gate (lines 411-426; CAI Phase 2
+    Session 16 fix): transform ∈ {"auto", "log", "none"} explicit
+    gate; NOT audit-validated
+  - .d10/.d11/.d12/.d13 output parsing: X-13 binary writes
+    deterministic output files to tmpdir; engine parses for
+    seasonal factors / seasonally-adjusted / trend / irregular;
+    NOT audit-validated
+  - Result formatting + significance disclosure + interpretation +
+    audit_fields construction
+
+#### Disclosure pattern (i) — Research note footnote (Tier VII SKIP-graceful via post-S6 inference + audit "Tier C" reference + §4.7.A REMEDIATED 5th variant first-instance baseline)
+
+> This analysis uses TSL technique `x13_seasonal_adjust`, which
+> wraps the US Census Bureau X-13ARIMA-SEATS binary for seasonal
+> adjustment. Per Phase 3 audit dated 2026-04-29, verdict was
+> **SKIP** (graceful — X-13 binary unavailable on host;
+> informative-not-failing); reference R `seasonal::seas` (NOT
+> installed — Tier C per master plan §15.12 deferred disposition).
+> Cross-package parity validation requires X-13 binary availability
+> on both sides; without binary, both arms produce SKIP-graceful
+> ImportError translation. **Tier VII SKIP-graceful via post-S6
+> inference characterization** per S34 (α) disposition (analogous
+> to S23 p3_pp + S28 p3_kalman_imputation post-S6 inference
+> precedents); audit "Tier C" reference acknowledged per A6 BLOCKING
+> empirical content preservation. **§4.7.A REMEDIATED 5th variant
+> first-instance baseline observation** per Phase 4 Session 2
+> (2026-05-01) P4-2 pathway (c) closure: harness now invokes engine
+> module via dispatch entry rather than statsmodels.x13_arima_analysis
+> directly. Practitioners invoking `x13_seasonal_adjust` from
+> ribbon receive SKIP-graceful outcome when X-13 binary unavailable;
+> binary installation required for parity execution (Census Bureau
+> distribution; non-trivial Windows install). Pre-Path α expert
+> review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier VII SKIP-graceful + Pattern A.1 CONDITIONAL framing potential + §4.7.A REMEDIATED 5th variant + binary-unavailable caveat)
+
+> Methodology: TSL technique `x13_seasonal_adjust` validated per
+> Phase 3 reference parity infrastructure under Tier VII SKIP-
+> graceful via post-S6 inference + audit "Tier C" reference
+> hybrid characterization per S34 codification. **Reference:** R
+> `seasonal::seas` (NOT installed — Tier C per audit line 4
+> verbatim + master plan §15.12 deferred / Tier C disposition).
+> **Verdict:** SKIP (graceful — X-13 binary unavailable on host;
+> informative-not-failing per audit line 14 verbatim). **Audit
+> date:** 2026-04-29 (PRE-Phase 4 Session 2 2026-05-01; audit
+> describes pre-S2 mechanism statsmodels.tsa.x13.x13_arima_analysis
+> direct invocation; post-S2 mechanism via dispatch entry per
+> harness p3_x13.py docstring lines 9-30 verbatim). **Fixture:**
+> `_generate_seasonal_dgp` own generator n=120 + period=12 + seed=42;
+> DGP defined for fixture-readiness even though parity NOT executed
+> at SKIP-graceful verdict. **Tier VII SKIP-graceful via post-S6
+> inference characterization** per scope_reframing §2 line 193-197
+> verbatim Tier VII auto_arima-only enumeration; p3_x13 has
+> p3_*.py wrapper file but SKIP-graceful verdict (NOT PASS/CAVEAT/
+> BLOCK parity verdict); operationally Tier VII-equivalent at
+> runtime level when binary unavailable. **Pattern A.1 same-binary
+> parity CONDITIONAL framing potential** per audit lines 30-32
+> verbatim ("Both arms (TSL via `statsmodels.tsa.x13` and reference
+> via R `seasonal`) require the same X-13 binary"); applicable IF
+> binary becomes available; conditional-on-binary-available framing
+> potential NOT actual at SKIP-graceful audit; NOT first-instance
+> baseline observation per A6 BLOCKING. **§4.7.A REMEDIATED 5th
+> variant first-instance baseline caveat:** harness invokes engine
+> module `run()` directly via dispatch entry post-Phase 4 Session
+> 2 (2026-05-01); REMEDIATED status dimension orthogonal to
+> mechanism variant dimension per S30 (G.1) codification; first
+> observed §4.7.A REMEDIATION instance across Q1 §2.5 work program.
+> **Binary-unavailable caveat:** X-13ARIMA-SEATS requires US Census
+> Bureau binary distribution; Windows install non-trivial (separate
+> download + PATH configuration); CI runners typically lack binary
+> unless explicitly provisioned per audit lines 19-23 verbatim.
+> Reference selection + tolerance specification AI-assisted with
+> user ratification per Phase 7+ work program; pre-Path α expert
+> review status; expert review pending end-of-Phase-7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier VII SKIP-graceful + §4.7.A REMEDIATED 5th variant + NEW Sub-class 2h candidate first-instance baseline + Pattern A.1 CONDITIONAL framing potential)
+
+> `x13_seasonal_adjust` validation: TSL Tier VII SKIP-graceful via
+> post-S6 inference + audit "Tier C" reference acknowledgment
+> hybrid characterization per S34 (α) codification + §4.7.A
+> REMEDIATED 5th variant first-instance baseline observation per
+> (αa-S34) ratification + NEW Sub-class 2h candidate first-instance
+> baseline with REFINED definitional scope ("SKIP-graceful +
+> §4.7.A REMEDIATED + same-binary parity conditional potential")
+> per ITEM 4 empirical refinement. **Reference:** R `seasonal::seas`
+> (NOT installed — Tier C). **Audit:** `tools/reference_parity/reports/p3_x13_audit.md`
+> dated 2026-04-29. **Verdict:** SKIP (graceful — X-13 binary
+> unavailable on host; informative-not-failing). **Fixture:** own
+> `_generate_seasonal_dgp` n=120 + period=12 + seed=42 monthly
+> trend + seasonal + noise; DGP defined for fixture-readiness even
+> though parity NOT executed at SKIP-graceful verdict. **NEW Sub-
+> class 2h candidate first-instance baseline observation** per
+> S34 (αa-S34) ratification (definitional scope working hypothesis:
+> "SKIP-graceful + §4.7.A REMEDIATED + same-binary parity
+> conditional potential" combined novelty; A3 first-instance
+> precedent n=1 baseline; NOT codification; codification deferred
+> to absorption #5+ second-observation tightening if recurs;
+> distinct from S32 Sub-class 2f algorithmic-non-uniqueness LAYERED
+> + S33 Sub-class 2g deterministic-implementation-difference
+> SINGLE-LAYER). **Risk attribution:** **(a) Layer 1 X-13ARIMA-SEATS
+> binary math (Tier VII via post-S6 inference SKIP-graceful;
+> Pattern A.1 same-binary parity CONDITIONAL potential):** SKIP-
+> graceful verdict per audit; no parity execution at binary-
+> unavailable runtime; Pattern A.1 framing conditional-on-binary-
+> available NOT actual at audit; same-binary fact per audit lines
+> 30-32 verbatim. **(b) §4.7.A REMEDIATED 5th variant status
+> dimension first-instance baseline observation:** harness invokes
+> engine module run() directly via dispatch entry post-Phase 4
+> Session 2 (2026-05-01); REMEDIATED status dimension orthogonal
+> to mechanism variant dimension per S30 (G.1) codification; first
+> observed §4.7.A REMEDIATION instance across Q1 §2.5 work program.
+> **(c) Layer 2 engine orchestration (NOT audit-validated; SKIP-
+> graceful path):** binary discovery cascade (lines 64-135) + X-13
+> spec writing (lines 150-239) + ARIMA fallback chain orchestration
+> + BLS-style COVID outlier regressors + fit-window truncation +
+> F-CD-X13-TRANSFORM allowlist gate (lines 411-426) + .d10/.d11/
+> .d12/.d13 output parsing; validation scope per
+> `engine/techniques/x13_seasonal_adjust.py` lines 269-884.
+> **(d) Binary-unavailable retraction surface:** practitioners
+> invoking `x13_seasonal_adjust` from ribbon receive SKIP-graceful
+> outcome when X-13 binary unavailable; binary installation
+> required for parity execution; alternative recommendation —
+> STL Decomposition technique for non-monthly/non-quarterly
+> frequencies. Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier VII SKIP-graceful + §4.7.A REMEDIATED + binary-unavailable caveat)
+
+> `x13_seasonal_adjust` Tier VII SKIP-graceful via post-S6 inference
+> + audit "Tier C" reference hybrid characterization per S34
+> codification + NEW Sub-class 2h candidate first-instance baseline
+> + §4.7.A REMEDIATED 5th variant first-instance baseline observation
+> + Pattern A.1 same-binary parity CONDITIONAL framing potential;
+> SKIP-graceful verdict at audit (X-13 binary unavailable on host
+> per audit line 5 verbatim). Binary-unavailable caveat operative:
+> X-13ARIMA-SEATS requires US Census Bureau binary distribution;
+> CI runners typically lack binary; both arms (TSL + R `seasonal`)
+> require same X-13 binary per audit lines 30-32 verbatim. Engine
+> Layer 2 orchestration (binary discovery + X-13 spec writing +
+> ARIMA fallback chain + BLS COVID regressors + fit-window
+> truncation + allowlist gate + output parsing) NOT exercised at
+> SKIP-graceful audit. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31 + S32 + S33 first/second/third
+applications — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (R `seasonal::seas` NOT
+  installed — Tier C) per `p3_x13_audit.md` line 4 verbatim
+  ("**Reference:** R `seasonal::seas` (NOT installed — Tier C)").
+  Verdict (SKIP graceful) per `p3_x13_audit.md` line 5 verbatim
+  ("**Verdict:** **SKIP** (graceful — X-13 binary unavailable on
+  host)") + line 14 verbatim ("**Informative-not-failing**").
+  Audit date (2026-04-29) per `p3_x13_audit.md` line 6 verbatim.
+  Result mechanism per `p3_x13_audit.md` lines 10-14 verbatim
+  ("The harness translates `X13NotFoundError` (raised by
+  `statsmodels.tsa.x13.x13_arima_analysis` when the X-13 binary
+  is missing from the host PATH) into an `ImportError`, which the
+  runner's SKIP-on-import-error path translates to a SKIP outcome.
+  **Informative-not-failing.**"). Rationale per `p3_x13_audit.md`
+  lines 18-35 verbatim (X-13ARIMA-SEATS binary requirement; Windows
+  install non-trivial; R `seasonal` wraps same binary; CI runners
+  typically lack binary; both arms require same binary; SKIP
+  correct verdict). Pattern J catalog entry per audit lines 51-57
+  verbatim ("Documented as B.6.2 in
+  `docs/engineering/parity_diagnostic_reference.md` Appendix B —
+  'X-13 binary not installable on Windows CI; seasonal package
+  unusable in CI matrix; resolution via SKIP-graceful ImportError
+  translation'"). Tier VII characterization via post-S6 inference
+  grounded at `scope_reframing_s6_banking.md` line 193-197 verbatim
+  ("Tier VII — No Phase 3 parity infrastructure (Phase 7+ S9...
+  reality at HEAD `5205779`: **Tier VII = 1 catalog technique
+  (auto_arima only)**...auto_arima → CONFIRMED Tier VII (no
+  p3_*.py wrapper; not in P-3 enumeration)") — analogous to S23
+  p3_pp + S28 p3_kalman_imputation post-S6 inference precedents.
+  §4.7.A REMEDIATED 5th variant first-instance baseline observation
+  per harness `p3_x13.py` docstring lines 9-30 verbatim ("Phase 4
+  Session 2 (2026-05-01) — P4-2 pathway (c) closure: ``run_tsl``
+  now invokes TSL's actual wrapper (``engine/techniques/x13_seasonal_adjust.py:run``)
+  via the dispatch entry point rather than calling
+  ``statsmodels.x13_arima_analysis`` directly") + line 89 verbatim
+  (`from techniques.x13_seasonal_adjust import run as tsl_x13_run`)
+  + line 125 verbatim (`res = tsl_x13_run(ctx, lambda *a, **k:
+  None)`). Pattern A.1 same-binary parity CONDITIONAL framing
+  potential per audit lines 30-32 verbatim ("Both arms (TSL via
+  `statsmodels.tsa.x13` and reference via R `seasonal`) require
+  the same X-13 binary"). Fixture (`_generate_seasonal_dgp` n=120
+  + period=12 + seed=42 monthly trend + seasonal + noise) per
+  harness `p3_x13.py` lines 47-54 verbatim. Layer 1 / Layer 2
+  framework operative per S26 STOP 1.5 second close ratification
+  carried forward + S31 + S32 + S33 reinforcement. Catalog mapping
+  (1:1) verified per audit Wrapper field. **§4.7.A pattern OBSERVED
+  at S34 as REMEDIATED 5th variant first-instance baseline
+  observation** (post-S34 §4.7.A observations: n=7 PRESENT across
+  §2.5 entries S14a + S18 + S26 + S27 + S31 + S32 + S33 + n=1
+  REMEDIATED at S34 x13; **§4.7.A status dimension orthogonal to
+  mechanism variant dimension per S30 (G.1) codification** — NOT
+  A9 Class A counter increment; NOT §4.7.A taxonomy modification
+  at S34; forward observation banking only per ITEM 2 forward
+  instrumentation banking discipline). **NEW Sub-class 2h candidate
+  first-instance baseline observation with REFINED definitional
+  scope per (αa-S34) ratification** (A3 first-instance precedent
+  n=1 baseline; NOT codification; codification deferred to
+  absorption #5+ second-observation tightening if recurs at S34+1
+  OR future Q1 entry; REVISED definitional scope working hypothesis
+  "SKIP-graceful + §4.7.A REMEDIATED + same-binary parity
+  conditional potential"; drops "Pattern A.1" actual claim per
+  ITEM 3 empirical refinement). **Pattern A.1 same-binary parity
+  CONDITIONAL framing potential per ITEM 3 ratification** (audit
+  lines 30-32 verbatim same-binary fact; SKIP-graceful verdict
+  precludes actual Pattern A.1 verdict; conditional-on-binary-
+  available framing potential NOT first-instance baseline
+  observation per A6 BLOCKING). **§2.5 Tier primary+overlay
+  convention NOT APPLICABLE at S34** (Tier VII SKIP-graceful single-
+  tier framing; S32 third-observation tightening reinforcement at
+  n=3 post-codification observations S23 + S28 + S32 preserved
+  unchanged at S33 + S34). **§1.5 novelty enumeration sub-section
+  APPLIED at S34** per ITEM 6 ratification (≥5 observations
+  threshold satisfied at n=6; second post-S23 application of §1.5
+  novelty enumeration sub-section pattern per S30 codification;
+  A3 second-observation tightening precedent threshold satisfied;
+  codification refinement candidate at absorption #5). **Filename
+  empirical verification per ITEM 8 RATIFICATION** (empirical
+  filenames `p3_x13_audit.md` + `p3_x13.py` + `x13_seasonal_adjust.py`;
+  trigger shorthand `p3_x13_seasonal_adjust_*` reference
+  informational only; sub-pattern variant n=3 third-observation
+  reinforcement across S32 mstl + S33 stl + S34 x13 Block 3
+  Decomposition wrappers — all omit catalog-id suffix; A3 third-
+  observation tightening reinforcement at n=3 + Block 3 completion
+  provides codification-ready candidate at absorption #5; A6
+  informational surface framing preserved per S32 + S33 + S34
+  ratification continuity; NOT A9 Class A counter increment per
+  naming shorthand vs material content misattribution distinction).
+  **A9 Class B counter post-S34: n=4 ACTIVE (unchanged at S34; no
+  new Class B catch); sustained-observation count under Class B
+  revised default discipline n=10 (S22 + S23 + S25 + S26 + S27 +
+  S28 + S31 + S32 + S33 + S34 = n=10 Q1 entries only counting
+  basis per Chat preference; absorption + Workstream B amendment
+  cycles operate with analogous discipline but Class B codified
+  scope is Q1 entry empirical-complexity-assumption failure mode)**
+  (framing class working hypothesis CONFIRMED at Step 0 per A9
+  Class B revised default discipline). **Maturation observation
+  ELEVENTH SUSTAINED OBSERVATION REACHED at S34 (S23 + S25 + S26 +
+  S27 + S28 + S29 + S30 + S31 + S32 + S33 + S34 = n=11 cross-
+  session trajectory)** + SIX-timing-point empirical surface
+  preserved per S27 codification (no new timing point variant at
+  S34; proactive-prevention operation SUSTAINED across established
+  timing points (i)-(vi)); §4.5 codification operational at n=5
+  post-codification sustained observations S30 + S31 + S32 + S33 +
+  S34 per CHAT RATIFICATION #12. Verify-state-at-first-consumption
+  sub-discipline 27th instance application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at sixteenth-technique selection per Mark 3
+  efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20 + S25 + S26 +
+  S27 + S28 + S31 + S32 + S33 reinforcement. **Q-B pattern persists
+  at n=17 across S12 + S13 + S14b + S14c + S15 + S17 + S18 + S21 +
+  S22 + S23 + S26 + S27 + S28 + S31 + S32 + S33 + S34; §1.4
+  codified observation refinement at empirical pattern accumulation**
+  (n=7 at §1.4 S20 codification → n=16 at S33 reinforcement → n=17
+  at S34 reinforcement; Workstream B amendment cycle candidate A
+  continues at next cycle). Substantive Chat engagement at
+  structural-decision points empirically observed (Step 0 STOP 2
+  8-item ratifications + Tier (α) hybrid characterization + Sub-
+  class (αa-S34) REFINED definitional scope + §4.7.A REMEDIATED
+  5th variant first-instance baseline + §1.5 novelty enumeration
+  sub-section APPLIED + Block 3 FULLY Q1-AMENDED milestone +
+  filename divergence sub-pattern variant n=3 reinforcement +
+  Pattern A.1 CONDITIONAL framing potential disclosure).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Conditional Yes for **Layer 1 X-13ARIMA-SEATS binary math**
+  CONTINGENT ON binary availability — practitioners with X-13
+  binary installed receive cross-package parity-conditional output
+  via Pattern A.1 same-binary parity framework potential (audit
+  lines 30-32 same-binary fact); practitioners without binary
+  receive SKIP-graceful ImportError translation. Defensibility to
+  all three audiences (published audience + Morgan Stanley
+  compliance + Path α expert reviewer) UNDER Tier VII SKIP-graceful
+  via post-S6 inference + audit "Tier C" reference disclosure +
+  Pattern A.1 CONDITIONAL framing potential disclosure + §4.7.A
+  REMEDIATED 5th variant first-instance baseline disclosure +
+  binary-unavailable caveat acknowledgment. **Conditional for
+  Layer 2 engine orchestration** — binary discovery cascade + X-13
+  spec writing + ARIMA fallback chain + BLS COVID regressors +
+  fit-window truncation + allowlist gate + output parsing; requires
+  expert review of engine implementation OR engine-output cross-
+  check at base pinned config IF binary becomes available.
+  **Critical Q-C framing per binary-unavailable caveat:**
+  practitioners invoking `x13_seasonal_adjust` from ribbon receive
+  SKIP-graceful outcome at runtime when binary unavailable; binary
+  installation required for parity execution; alternative
+  recommendation surfaces STL Decomposition for non-monthly/non-
+  quarterly frequencies; defensibility conditional on disclosure
+  that X-13 parity execution requires binary availability on both
+  arms (TSL + R `seasonal` package).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  MEDIUM-LOW per Tier VII SKIP-graceful via post-S6 inference
+  characterization scope bound + audit "Tier C" reference + §4.7.A
+  REMEDIATED 5th variant first-instance baseline disclosure +
+  Pattern A.1 CONDITIONAL framing potential + binary-unavailable
+  caveat. x13_seasonal_adjust is canonical X-13ARIMA-SEATS
+  methodology (US Census Bureau X-13 Reference Manual + Dagum &
+  Bianconcini 2016). **Layer-specific + Tier VII SKIP-graceful +
+  §4.7.A REMEDIATED + NEW Sub-class 2h candidate retraction
+  surface (per S34 (α) + (αa-S34) ratifications):**
+  - Layer 1 X-13ARIMA-SEATS binary math (Tier VII via post-S6
+    inference SKIP-graceful; Pattern A.1 CONDITIONAL potential):
+    LOW; SKIP-graceful verdict at binary-unavailable runtime is
+    operationally correct disposition (informative-not-failing);
+    no parity validation claims made at SKIP outcome; Pattern A.1
+    framing conditional-on-binary-available NOT actual at audit;
+    retraction surface bounded by audit verdict scope.
+  - **Layer 2 engine orchestration: MEDIUM-LOW** — binary discovery
+    cascade + X-13 spec writing + ARIMA fallback chain + BLS COVID
+    regressors + fit-window truncation + allowlist gate + output
+    parsing NOT audit-validated at SKIP outcome; expert review of
+    engine implementation conditional on Layer 2 correctness IF
+    binary becomes available; orchestration operations are
+    substantial (largest engine module in Block 3 at 884 LOC vs
+    S31 + S32 + S33 ~250-280 LOC); retraction surface MEDIUM-LOW
+    reflects orchestration complexity but no false parity claims
+    made at SKIP verdict.
+  - **§4.7.A REMEDIATED 5th variant first-instance baseline
+    retraction surface: LOW** — harness invokes engine module
+    `run()` directly via dispatch entry post-Phase 4 Session 2;
+    REMEDIATED status dimension orthogonal to mechanism variant
+    dimension; first observed REMEDIATION instance across Q1
+    §2.5 work program; A3 first-instance precedent n=1 baseline;
+    codification deferred to absorption #5+ if recurs; discipline
+    transparency does NOT introduce retraction surface
+    independently of underlying SKIP-graceful verdict scope.
+  - **NEW Sub-class 2h candidate first-instance baseline retraction
+    surface: LOW** — A3 first-instance precedent n=1 baseline
+    observation; codification deferred; REVISED definitional scope
+    working hypothesis "SKIP-graceful + §4.7.A REMEDIATED + same-
+    binary parity conditional potential" preserves SKIP-graceful +
+    REMEDIATED + conditional-binary distinction at first-instance
+    observation without codification commitment.
+  - **Pattern A.1 same-binary parity CONDITIONAL framing potential
+    retraction surface: LOW** — conditional-on-binary-available
+    framing potential NOT actual; same-binary fact disclosed per
+    audit lines 30-32 verbatim; NOT first-instance baseline
+    observation per A6 BLOCKING; conditional framing potential
+    does NOT introduce retraction surface independently of binary
+    availability.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; sixteenth technique to enter status per
+S34 ratification; **FOURTH-AND-FINAL Block 3 Decomposition entry —
+BLOCK 3 FULLY Q1-AMENDED milestone** = FOURTH catalog block fully
+Q1-amended after Block 1 Causality at S18 + Block 12 Stationarity
+Tests at S23 + Block 8 Missing Data at S28; **per-block continuation
+pattern at n=4 catalog block observations** satisfies A3 second-
+observation tightening precedent threshold; codification candidate
+at §19.4 §4 forward instrumentation note 6 refinement at absorption
+#5 (expiration semantics: per-block continuation pattern n=4
+codification at absorption #5 refinement disposition pending Block
+3 completion arc close at S34); **FIRST Tier VII SKIP-graceful via
+post-S6 inference + audit "Tier C" reference acknowledgment hybrid
+characterization** per S34 (α) Chat disposition (analogous to S23
+p3_pp + S28 p3_kalman_imputation post-S6 inference precedents);
+**FIRST §4.7.A REMEDIATED 5th variant first-instance baseline
+observation per A3 first-instance precedent** (n=1 baseline; NOT
+codification; §4.7.A status dimension orthogonal to mechanism
+variant dimension per S30 (G.1) codification; first observed
+REMEDIATION instance across Q1 §2.5 work program; codification
+deferred to absorption #5+ second-observation tightening if recurs
+OR Workstream B amendment cycle disposition); **FIRST Pattern A.1
+same-binary parity CONDITIONAL framing potential disclosure** per
+ITEM 3 ratification (NOT first-instance baseline observation per
+A6 BLOCKING; conditional-on-binary-available framing potential per
+audit lines 30-32 verbatim same-binary fact); **FIRST NEW Sub-class
+2h candidate first-instance baseline observation with REFINED
+definitional scope** per A3 first-instance precedent (n=1 baseline;
+NOT codification; definitional scope working hypothesis "SKIP-
+graceful + §4.7.A REMEDIATED + same-binary parity conditional
+potential"; drops "Pattern A.1" actual claim from CHAT RATIFICATION
+#6 per ITEM 3 empirical refinement); **THIRD filename divergence
+sub-pattern variant n=3 third-observation reinforcement** per ITEM
+8 ratification (S32 mstl + S33 stl + S34 x13 = n=3 Block 3
+Decomposition wrappers all omit catalog-id suffix; A3 third-
+observation tightening reinforcement at n=3 + Block 3 completion
+provides codification-ready candidate at absorption #5 refinement
+disposition; codification placement candidates: §19.4 §4 NEW
+forward instrumentation note OR Workstream B separate-lane
+candidate; A6 informational surface framing preserved); **SECOND
+§1.5 novelty enumeration sub-section APPLIED at S34** per ITEM 6
+ratification (≥5 observations threshold satisfied at n=6; second
+post-S23 application of §1.5 novelty enumeration sub-section
+pattern per S30 codification; A3 second-observation tightening
+precedent threshold satisfied; codification refinement candidate at
+absorption #5); **CONTINUATION of S30 Workstream B codifications
+at S34:** §1.6 Q-A density convention operative continuation from
+S31 + S32 + S33 first/second/third applications (verbatim citation
+density at Q-A field; n=4 post-codification applications at S31 +
+S32 + S33 + S34) + §5.5 forward-instrumentation hygiene at status
+line operative continuation from S31 + S32 + S33 precedents
+(expiration semantics on each predictive claim per S30 codification;
+n=4 post-codification applications at S31 + S32 + S33 + S34) +
+§1.5 novelty enumeration sub-section APPLIED at S34 (≥5
+observations threshold satisfied; second post-S23 application);
+§2.5 Tier primary+overlay convention NOT APPLICABLE at S34 (Tier
+VII SKIP-graceful single-tier framing; S32 third-observation
+tightening reinforcement at n=3 post-codification observations
+S23 + S28 + S32 preserved unchanged at S33 + S34); §4.7 in-place
+codification operative reference at §4.7.A REMEDIATED status
+dimension first-instance baseline.
+**A10 Sub-class disposition (αa-S34) NEW Sub-class 2h candidate
+first-instance baseline observation with REFINED definitional
+scope** per Chat ratification ITEM 4 (A3 first-instance precedent
+n=1 baseline; NOT codification; codification deferred to absorption
+#5+ second-observation tightening if recurs at S34+1 OR future Q1
+entry; REVISED definitional scope working hypothesis "SKIP-graceful
++ §4.7.A REMEDIATED + same-binary parity conditional potential";
+expiration semantics: Sub-class 2h candidate observation banks at
+S34 close pending second-observation tightening at respective sub-
+session OR absorption #5 codification refinement disposition).
+**A9 Class B counter post-S34: n=4 ACTIVE (unchanged at S34; no
+new Class B catch); sustained-observation count under Class B
+revised default discipline n=10 (S22 + S23 + S25 + S26 + S27 +
+S28 + S31 + S32 + S33 + S34 = n=10 Q1 entries only counting basis
+per Chat preference; absorption + Workstream B amendment cycles
+operate with analogous discipline but Class B codified scope is Q1
+entry empirical-complexity-assumption failure mode)** (framing
+class working hypothesis CONFIRMED at Step 0 per A9 Class B revised
+default discipline; expiration semantics: sustained-observation
+counter continues incrementing at each subsequent Q1 entry per A9
+Class B revised default operating proactively, codification-stable
+status preserved at n=4 ACTIVE counter; n=4 increments only on
+NEW Class B catch).
+**A9 Class A counter post-S34: n=10 ACTIVE + candidates n=11 +
+n=12 + n=13 + n=14 pending absorption #5 codification** (n=11-14
+candidates carried forward from S31 + S32 + S33 close; NO new A9
+Class A candidate at S34 per Step 0 empirical surface; expiration
+semantics: A9 Class A candidate inventory accumulates until
+absorption #5 codification refinement disposition adopts/declines
+each candidate; sub-pattern variant codification candidate
+sufficient at n=4 for absorption #5 adoption per A3 second-
+observation tightening precedent).
+**§4.7.A pattern observations post-S34: n=7 PRESENT (S14a + S18 +
+S26 + S27 + S31 + S32 + S33) + n=1 REMEDIATED (S34 x13) per S30
+(G.1) generalized definitional scope codification with NEW status
+dimension orthogonal to mechanism variant dimension; §4.7.A
+pattern status dimension first-instance baseline observation at
+S34 per A3 first-instance precedent (n=1 REMEDIATED baseline;
+NOT codification; codification deferred to absorption #5+ second-
+observation tightening if recurs);** **§4.7.A pattern count
+tightening + status dimension tightening forward observation at
+absorption #5 per A3 precedent** (distinct tracking surface from
+A9 Class A counter per S30 (G.1) codification; §4.7.A pattern
+observations track mechanism variant + status dimension
+accumulation; A9 Class A counter tracks empirical-state-assumption
+failure mode).
+**A9 Class A + Class B discipline maturation ELEVENTH SUSTAINED
+OBSERVATION REACHED at S34 (S23 + S25 + S26 + S27 + S28 + S29 +
+S30 + S31 + S32 + S33 + S34 = n=11 cross-session trajectory)** per
+A3 second-observation tightening precedent threshold satisfied +
+SIX-timing-point empirical surface preserved per S27 codification
+(no new timing point variant at S34; proactive-prevention operation
+SUSTAINED across established timing points (i)-(vi)); promoted to
+§4.5 NEW sub-section at S29-absorption #4 per CHAT RATIFICATION
+carried forward; **§4.5 codification operational at n=5 post-
+codification sustained observations S30 + S31 + S32 + S33 + S34**
+per CHAT RATIFICATION #12 (codification-stable status preserved at
+sustained post-codification operation).
+**Block 3 Decomposition FOURTH-AND-FINAL entry status framing
+(BLOCK 3 FULLY Q1-AMENDED milestone)** (analogous to S28
+kalman_imputation Block 8 third-AND-FINAL precedent; Block 3 is
+LARGEST Block to complete to-date at 4 entries vs Block 8 + Block
+12 at 3 entries + Block 1 at 6 entries; per-block continuation
+pattern n=4 catalog block observations satisfies A3 second-
+observation tightening precedent threshold; codification candidate
+at §19.4 §4 forward instrumentation note 6 refinement at absorption
+#5 refinement disposition; expiration semantics: per-block
+continuation pattern n=4 codification at absorption #5 pending
+post-Block-3-close absorption opportunity).
+**Block 3 forward completion arc S31 + S32 + S33 + S34 COMPLETED
+per Code S31 + S32 + S33 + S34 Step 0 forward look** (Block 3
+ordering working hypothesis (classical → mstl → stl → x13)
+EMPIRICALLY CONFIRMED at S34 close per 100% completion of forward
+projection from S31 close; banking now CONFIRMED OBSERVATION rather
+than forward instrumentation; codification candidate at absorption
+#5 per "Block ordering working hypothesis empirical confirmation"
+sub-pattern across Block 3); **Block heterogeneous-Tier-surface
+variant observation completion at S34** (Block 3 mixed Tier surface
+Tier II.bit-exact at S31 + Tier VI LAYERED at S32 + Tier VI
+SINGLE-LAYER at S33 + Tier VII SKIP-graceful via post-S6 inference
+at S34 distinct from Block 1 homogeneous + Block 12 homogeneous +
+Block 8 heterogeneous Tier II.bit-exact + Tier III + Tier II.mle-
+band per ITEM 5 forward instrumentation banking; expiration
+semantics: per-block continuation pattern note 6 refinement
+candidate at absorption #5 with NEW characterization "Block
+heterogeneous-Tier-surface variant" candidate banked at S34 close).
+**Block 3 sub-class taxonomy growth observation completion at S34**
+(Sub-class 2f at S32 + 2g at S33 + 2h at S34 candidates all at n=1
+first-instance baselines across S32 + S33 + S34; sub-class taxonomy
+growth pattern observation candidate at absorption #5 refinement
+disposition; expiration semantics: each individual sub-class
+candidate codification deferred to absorption #5+ second-observation
+tightening per A3 precedent — S32+1 reroll for Sub-class 2f /
+S33+1 reroll for Sub-class 2g / S34+1 reroll for Sub-class 2h).
+**Filename divergence sub-pattern variant n=3 third-observation
+reinforcement banking per ITEM 8 RATIFICATION** (S32 mstl + S33 stl
++ S34 x13 Block 3 Decomposition wrappers all omit catalog-id suffix
+from catalog-id-to-wrapper-filename mapping; A3 third-observation
+tightening reinforcement at n=3 + Block 3 completion provides
+codification-ready candidate at absorption #5; expiration semantics:
+codification candidate at absorption #5 refinement disposition
+post-Block-3-close; codification placement candidates: §19.4 §4
+NEW forward instrumentation note OR Workstream B separate-lane
+candidate; A6 informational surface framing preserved per S32 +
+S33 + S34 ratification continuity; NOT A9 Class A counter increment
+per naming shorthand vs material content misattribution distinction).
+**Post-Block-3 absorption #5 candidate inventory consolidation
+forward instrumentation banking** (S35+ either initiates absorption
+#5 amendment cycle OR opens FIFTH catalog block transition; banking
+only at S34 close per CONSTRAINT 1 NOT IN SCOPE; expiration
+semantics: absorption #5 candidate inventory accumulates through
+S34 close pending Chat disposition at S35 trigger).
+
+## §3 Unvalidated catalog techniques (59 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -7692,8 +8670,8 @@ descriptions, summaries).
 ### Change Points / Anomalies / Interventions (5 unvalidated)
 `bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
 
-### Decomposition & Seasonal Adjustment (1 unvalidated; classical_decompose moved to §2.5 per Phase 7+ S31 — FIRST Block 3 Decomposition entry; mstl_decompose moved to §2.5 per Phase 7+ S32 — SECOND Block 3 Decomposition entry; stl_decompose moved to §2.5 per Phase 7+ S33 — THIRD Block 3 Decomposition entry; Block 3 Q1-amendment in-progress at 3 of 4 entries Q1-amended — FOURTH catalog block transition continues; FULLY Q1-AMENDED milestone projected at S33+1 x13)
-`x13_seasonal_adjust`
+### Decomposition & Seasonal Adjustment (0 unvalidated; Block 3 FULLY Q1-AMENDED — FOURTH catalog block to complete per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; classical_decompose moved to §2.5 per Phase 7+ S31; mstl_decompose moved to §2.5 per Phase 7+ S32; stl_decompose moved to §2.5 per Phase 7+ S33; x13_seasonal_adjust moved to §2.5 per Phase 7+ S34 — FOURTH-AND-FINAL Block 3 entry)
+(all 4 techniques moved to §2.5)
 
 ### Evaluation / Uncertainty (5 unvalidated)
 `block_bootstrap`, `conformal_intervals`, `forecast_combination`, `robust_estimators`, `rolling_origin_cv`
@@ -7725,7 +8703,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 60 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data ALL THREE FULLY Q1-AMENDED — first three catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=3 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #4; Block 3 Decomposition Q1-amendment IN-PROGRESS at 3 of 4 entries Q1-amended — FOURTH catalog block transition continues at S33 with stl_decompose third entry; Block 3 forward completion arc S31 + S32 + S33 + S33+1 projected banking only per ITEM 9 forward instrumentation banking discipline; FULLY Q1-AMENDED milestone projected at S33+1 x13 entry; per-block continuation pattern n=4 catalog block observation candidate at Block 3 completion S33+1 per ITEM 9 forward instrumentation banking; codification candidate at absorption #5 refinement disposition with NEW characterization "Block heterogeneous-Tier-surface variant" candidate (Block 3 mixed Tier surface Tier II.bit-exact at S31 + Tier VI LAYERED at S32 + Tier VI SINGLE-LAYER at S33 + Tier VII projected at S33+1)**).
+**Total: 59 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #5 refinement disposition; Block 3 Decomposition completion arc S31 + S32 + S33 + S34 COMPLETED at S34 close per Code S31 + S32 + S33 + S34 Step 0 forward look (Block 3 ordering working hypothesis classical → mstl → stl → x13 EMPIRICALLY CONFIRMED at 100% completion); Block heterogeneous-Tier-surface variant observation completion at S34 (Block 3 mixed Tier surface Tier II.bit-exact at S31 + Tier VI LAYERED at S32 + Tier VI SINGLE-LAYER at S33 + Tier VII SKIP-graceful via post-S6 inference at S34); Block 3 sub-class taxonomy growth observation completion (Sub-class 2f + 2g + 2h candidates at n=1 first-instance baselines across S32 + S33 + S34); filename divergence sub-pattern variant n=3 third-observation reinforcement at S34 (S32 mstl + S33 stl + S34 x13 all omit catalog-id suffix); codification candidates at absorption #5 refinement disposition pending post-Block-3-close absorption opportunity**).
 
 ## §4 How to use this document
 
@@ -7768,7 +8746,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (60 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33 amendments):**
+**Tier 3 — UNVALIDATED (59 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
