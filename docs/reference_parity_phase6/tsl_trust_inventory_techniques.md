@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 10 catalog techniques with Phase 7+ Q1 trust documentation
+- 11 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26 amendments)
-- 65 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27 amendments)
+- 64 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -4469,7 +4469,520 @@ third catalog block completion triggers per-block continuation
 pattern n=3 codification at §19.4 §4 forward instrumentation note
 6 refinement at next absorption cycle**.
 
-## §3 Unvalidated catalog techniques (65 entries; ID-only enumeration)
+### loess_interpolation (Phase 7+ S27; eleventh §2.5 entry; SECOND Block 8 Missing Data entry; FIRST Tier III §2.5 precedent per scope_reframing §2 lines 151-157 Pattern A.1 same-library self-parity definition; FOURTH §4.7.A pattern observation per S25 codification with NEW STRUCTURAL MECHANISM VARIANT "harness-validates-different-use-case-of-same-library-function" per S27 (α) reframe; TWO-LAYER + HARNESS-AND-ENGINE-USE-SAME-LIBRARY-FOR-DIFFERENT-PURPOSES framing per S27 STOP 2 + Chat α reframe disposition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+III — Phase 3 same-library self-parity validated (Pattern A.1 per
+scope_reframing §2 lines 151-157 "18 wrappers per P-3 v1.2.0 §1
+locked at scale")**. **FIRST §2.5 Tier III entry precedent** —
+prior §2.5 entries (S12-S26) all Tier II.bit-exact OR Tier IV OR
+Tier II.bit-exact-loose+V Pattern J overlay; S27 loess_interpolation
+establishes Tier III handling pattern for Q1 work program forward
+continuation. **Important nuance (Tier III definitional scope per
+scope_reframing §2 line 154 verbatim):** "Verifies wrapper-integrity
+claim only (preprocessing, parameter resolution, audit-field
+rounding); does NOT validate against independent implementation."
+Tier III strength bounded vs Tier II cross-package validation;
+honest Q-D retraction surface characterization per Tier III scope.
+
+**Framing precedent note (1:1 catalog↔wrapper; TWO-LAYER + HARNESS-
+AND-ENGINE-USE-SAME-LIBRARY-FOR-DIFFERENT-PURPOSES; NEW §4.7.A
+structural mechanism variant per S27 (α) reframe; Sub-class 2e
+candidate scope refined per (αb-S27) deferred codification at
+absorption #4 with Code S27 Step 0 empirical reframing):**
+loess_interpolation is 1:1 catalog↔wrapper mapping per p3_loess
+audit Wrapper field (`engine/techniques/loess_interpolation.py`
+sole engine module).
+
+**§4.7.A harness-bypasses-engine pattern FOURTH observation per S25
+§4.7.A codification (n=4 post-triad reinforcement at S26 + NEW
+structural mechanism variant at S27)**:
+- S14a p3_ccf + S18 p3_gcc_phat = n=2 baseline (codified at S25)
+- S26 denton_chowlin = n=3 codification triad EMPIRICALLY COMPLETE
+  per A3 second-observation tightening precedent threshold
+- **S27 loess_interpolation = n=4 reinforcement WITH NEW STRUCTURAL
+  MECHANISM VARIANT** ("harness-validates-different-use-case-of-
+  same-library-function"; distinct from S25 §4.7.A 3-mechanism list
+  lines 960-967)
+
+**NEW §4.7.A structural mechanism variant per S27 (α) reframe
+ratification:** Both harness AND engine import SAME library function
+(`statsmodels.nonparametric.smoothers_lowess.lowess`); use it for
+DIFFERENT PURPOSES:
+- **Harness use case (Layer 1H):** `statsmodels.lowess` for SMOOTHING
+  validation per Pattern A.1 same-library self-parity (`p3_loess.py`
+  lines 44-52 `_smooth` helper invoking `lowess(y, x, frac=0.3,
+  return_sorted=True)`; both `run_tsl` lines 54-56 + `run_reference`
+  lines 58-62 call SAME `_smooth` helper; lowess output validated
+  bit-exact against itself per Pattern A.1)
+- **Engine use case (Layer 1E):** `statsmodels.lowess` for
+  INTERPOLATION OF MISSING VALUES per module docstring lines 1-7
+  verbatim: *"LOESS/LOWESS Interpolation for Time Series Lab. Uses
+  locally weighted scatterplot smoothing (LOWESS) from statsmodels
+  to interpolate missing values in a time series. The smoother is
+  fit on observed values and used to predict at missing positions."*
+
+**Structural distinction from S26 denton_chowlin §4.7.A variant:**
+S26 denton_chowlin §4.7.A variant = "HARNESS REIMPLEMENTS ENGINE
+MATH" (numpy KKT vs engine `_denton_proportional`; SAME use case,
+DIFFERENT code paths; mathematically equivalent at machine
+precision). S27 loess_interpolation §4.7.A variant = "HARNESS-AND-
+ENGINE-USE-SAME-LIBRARY-FUNCTION-FOR-DIFFERENT-PURPOSES" (SAME
+library function, DIFFERENT use cases). Empirically distinct §4.7.A
+structural mechanism variants per S27 (α) reframe; Workstream B
+amendment cycle candidate G refinement scope EXPANDED at S27:
+§4.7.A codification refinement at next Workstream B cycle disposes
+(a) S25 §4.7.A 3-mechanism list completeness vs (b) §4.7.A 4+
+mechanism list inclusion of S27 use-case-divergence variant.
+
+**§4.7.B engine-extends-beyond-harness pattern PARTIAL observation
+(Layer 1E use-case extension + Layer 2 orchestration extension):**
+Engine extends statsmodels.lowess use case from SMOOTHING (harness
+audit scope) to INTERPOLATION (engine primary purpose); engine
+adds:
+- Fit LOWESS on observed values + predict at missing positions
+  (lines 159-160 + missing-value error handling lines 97-115)
+- Cross-validation auto-frac selection via LOO-CV (`_auto_select_frac`
+  lines 32-74; 43 LOC ML-style cross-validation implementation)
+- Preset-based frac + iteration configuration (`_PRESET_CONFIG`
+  lines 25-29: Fast/Balanced/Thorough variants with frac + it)
+- CAI Phase 2 Session 19 fix F-MD-LOESS-FRAC allowlist gate
+  (lines 142-153)
+- NaN handling + missing-fraction warning + interpolation result
+  formatting
+
+**A10 Sub-class disposition (Sub-class 2e candidate scope refined
+per S27 (α) reframe):** loess_interpolation does NOT count toward
+Sub-class 2e n=2 second-observation tightening (per S26 (αa-S26)
+candidate "harness-reimplements-engine-math + engine-method-
+extension" scope). Sub-class 2e n=1 baseline UNCHANGED at
+denton_chowlin S26 first-instance only. loess_interpolation S27 =
+DIFFERENT §4.7.A variant (use-case divergence; NOT reimplementation);
+operationally distinct from Sub-class 2e Sub-class 2c codified
+instances.
+
+**Absorption #4 Sub-class taxonomy disposition options per S27 (α)
+reframe ratification:**
+- (i) Sub-class 2e codification at denton_chowlin n=1 first-instance
+  baseline ONLY; Sub-class 2e n=2 tightening deferred to next
+  reimplementation observation
+- (ii) NEW Sub-class 2f candidate codification at loess_interpolation
+  n=1 first-instance baseline ("harness-validates-different-use-case-
+  of-same-library-function" variant); separate sub-class from
+  Sub-class 2e reimplementation variant
+- (iii) Generalize Sub-class 2e definitional scope to "harness-uses-
+  different-code-path-from-engine" (covering BOTH reimplementation
+  AND use-case divergence variants); denton_chowlin + loess_interpolation
+  = n=2 Sub-class 2e generalized baseline
+
+S27 entry surfaces empirical structure; absorption #4 dispositions
+taxonomy with full empirical surface across denton_chowlin +
+loess_interpolation + accumulated candidates.
+
+**Reference:** direct `statsmodels.nonparametric.smoothers_lowess.lowess`
+(statsmodels 0.14.6)
+**Verdict:** PASS Pattern A.1 same-library bit-exact
+**Audit:** `tools/reference_parity/reports/p3_loess_audit.md`
+**Audit date:** 2026-04-29
+**smoothed_y abs diff:** 0.0 (EXACT, 200 points)
+**Tolerance class:** closed_form
+**Fixture:** noisy sinusoid x∈[0,10], y=sin(x)+N(0,0.09) (T=200,
+seed=42); frac=0.3 pinned
+
+**Source files (TWO-LAYER + HARNESS-AND-ENGINE-USE-SAME-LIBRARY-FOR-
+DIFFERENT-PURPOSES per S27 (α) reframe framing):**
+`tools/reference_parity/harness/checks/p3_loess.py` lines 44-52
+(harness `_smooth` helper invokes `statsmodels.nonparametric.smoothers_lowess.lowess(y,
+x, frac=0.3, return_sorted=True)` directly for SMOOTHING use case;
+shared helper for both `run_tsl` + `run_reference` per Pattern A.1
+same-library self-parity validation)
++ `tools/reference_parity/harness/checks/p3_loess.py` lines 54-56
+(harness TSL arm calls `self._smooth(fixture)`; does NOT invoke
+`loess_interpolation.py::run()` engine entry point; §4.7.A harness-
+bypasses-engine pattern manifestation via use-case-divergence
+variant)
++ `tools/reference_parity/harness/checks/p3_loess.py` lines 58-62
+(harness reference arm calls SAME `self._smooth(fixture)` + extracts
+statsmodels version; same-library self-parity per Pattern A.1)
++ `engine/techniques/loess_interpolation.py` lines 1-7 (module
+docstring: "LOESS/LOWESS Interpolation... interpolate missing
+values in a time series. The smoother is fit on observed values
+and used to predict at missing positions." — INTERPOLATION use
+case distinct from harness SMOOTHING audit scope)
++ `engine/techniques/loess_interpolation.py` line 37 + line 91
+(statsmodels.lowess import: SAME library function as harness; used
+for DIFFERENT purpose)
++ `engine/techniques/loess_interpolation.py` lines 25-29
+(`_PRESET_CONFIG`: Fast/Balanced/Thorough preset variants with frac
++ iteration count configuration)
++ `engine/techniques/loess_interpolation.py` lines 32-74
+(`_auto_select_frac`: 43 LOC LOO-CV implementation for optimal
+LOWESS fraction selection via leave-one-out cross-validation;
+n_obs >= 10 threshold; default frac=0.3 for small samples; grid
+search over [0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]; NOT validated
+by audit)
++ `engine/techniques/loess_interpolation.py` lines 77-314 (Layer 2
+standalone orchestration: `run()` main entry with input validation
++ missing-value handling + preset config + frac selection via CV
+or explicit param + CAI Phase 2 Session 19 fix F-MD-LOESS-FRAC
+allowlist gate lines 142-153 + LOWESS fitting + interpolation at
+missing positions + result formatting + significance disclosure +
+interpretation + audit_fields construction)
++ `tools/reference_parity/reports/p3_loess_audit.md`
+
+**Validation claim scope (TIER III + §4.7.A harness-bypasses-engine
+pattern with NEW use-case-divergence variant per S27 (α) reframe;
+Layer 1H smoothing / Layer 1E interpolation / Layer 2 orchestration
+framework operative):** TSL loess_interpolation output relies on
+two layered computations within standalone-technique role (Layer
+1E statsmodels.lowess INTERPOLATION use case + Layer 2 engine
+orchestration). p3_loess audit validates Layer 1H statsmodels.lowess
+SMOOTHING use case via same-library self-parity at single seeded
+fixture (noisy sinusoid T=200 seed=42 frac=0.3 pinned); smoothed_y
+metric measures `_smooth` helper output vs itself agreement
+(abs diff 0.0 EXACT PASS), NOT Layer 1E engine interpolation use
+case correctness, NOT engine `_auto_select_frac` CV correctness,
+NOT engine Layer 2 standalone orchestration correctness.
+
+- **Layer 1H statsmodels.lowess SMOOTHING use case (HARNESS audit
+  scope; validated Pattern A.1 same-library bit-exact):** PASS
+  Pattern A.1 at exact precision (abs diff 0.0; 200 points)
+  against itself via `_smooth` helper self-parity; **Tier III
+  scope per scope_reframing §2 line 154 verbatim:** "Verifies
+  wrapper-integrity claim only (preprocessing, parameter resolution,
+  audit-field rounding); does NOT validate against independent
+  implementation." Tier III strength bounded — same-library
+  determinism + identical inputs verification ONLY; NOT cross-
+  package agreement; NOT engine implementation validation.
+- **Layer 1E statsmodels.lowess INTERPOLATION use case (ENGINE
+  primary purpose; NOT validated by audit):** engine `run()`
+  (lines 77-314) fits LOWESS on observed values (lines 159-160)
+  and predicts at missing positions via interpolation; harness
+  audit Pattern A.1 self-parity validates smoothing use case ONLY;
+  engine interpolation use case correctness NOT directly audit-
+  validated. **§4.7.A new structural mechanism variant per S27:**
+  "harness-validates-different-use-case-of-same-library-function"
+  — both harness AND engine import SAME `statsmodels.lowess` BUT
+  use for DIFFERENT purposes.
+- **Layer 1E engine CV auto-frac selection (NOT VALIDATED):** engine
+  `_auto_select_frac` (lines 32-74) LOO-CV grid search over
+  [0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5] for optimal LOWESS fraction;
+  Thorough preset default per `_PRESET_CONFIG` line 28; NOT
+  exercised by audit (audit pins frac=0.3); engine extends Layer 1E
+  to ML-style cross-validation parameter selection.
+- **Layer 2 engine orchestration (validation scope conditional):**
+  - Input validation + missing-value handling (lines 88-122):
+    missing-value error path + n_valid >= 5 threshold + missing-
+    fraction > 0.5 warning
+  - Preset config dispatch (lines 124-138): `_PRESET_CONFIG` Fast/
+    Balanced/Thorough preset selection
+  - Frac selection logic (lines 131-153): explicit frac param OR
+    auto-select via CV + CAI Phase 2 Session 19 fix F-MD-LOESS-FRAC
+    allowlist gate (frac ∈ (0, 1]) + error_fixes guidance
+  - Iteration count selection (line 155): explicit it param OR
+    preset default
+  - LOWESS fitting + interpolation construction (lines 157+):
+    fit on observed values + predict at missing positions
+  - Result formatting + significance disclosure + interpretation +
+    audit_fields construction
+
+#### Disclosure pattern (i) — Research note footnote (Tier III + §4.7.A use-case-divergence variant)
+
+> This analysis uses TSL technique `loess_interpolation`, validated
+> per Phase 3 same-library self-parity (Pattern A.1) against direct
+> `statsmodels.nonparametric.smoothers_lowess.lowess` (statsmodels
+> 0.14.6) per audit dated 2026-04-29 (smoothed_y abs diff 0.0).
+> **Tier III scope caveat:** validation verifies wrapper-integrity
+> claim only (same-library self-parity for SMOOTHING use case);
+> does NOT validate against independent implementation. Engine
+> module uses SAME statsmodels.lowess function for INTERPOLATION
+> use case (engine primary purpose: fit on observed + predict at
+> missing positions); §4.7.A harness-bypasses-engine pattern via
+> use-case-divergence variant. Engine extends Layer 1E to CV auto-
+> frac selection + preset config; NOT audit-validated. Pre-Path α
+> expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier III + §4.7.A use-case-divergence variant + interpolation use case extension)
+
+> Methodology: TSL technique `loess_interpolation` validated per
+> Phase 3 reference parity infrastructure under Tier III + §4.7.A
+> harness-bypasses-engine pattern framing with NEW use-case-divergence
+> structural mechanism variant per S27 codification. **Reference:**
+> direct `statsmodels.nonparametric.smoothers_lowess.lowess`
+> (statsmodels 0.14.6); SAME library function as engine. **Verdict:**
+> PASS Pattern A.1 same-library bit-exact; smoothed_y abs diff 0.0
+> (EXACT, 200 points). **Audit date:** 2026-04-29. **Fixture:** noisy
+> sinusoid x∈[0,10], y=sin(x)+N(0,0.09) (T=200, seed=42); frac=0.3
+> pinned. **Tier III scope per scope_reframing §2 line 154 verbatim:
+> "Verifies wrapper-integrity claim only; does NOT validate against
+> independent implementation."** **§4.7.A use-case-divergence
+> variant caveat:** harness validates statsmodels.lowess for
+> SMOOTHING use case (same-library self-parity); engine uses SAME
+> statsmodels.lowess for INTERPOLATION use case (engine primary
+> purpose per module docstring lines 1-7); engine extends Layer 1E
+> to interpolation + CV auto-frac selection + preset config NOT
+> exercised by audit. Layer 2 (engine orchestration: missing-value
+> handling + preset config + F-MD-LOESS-FRAC allowlist gate +
+> interpretation) NOT parity-validated. Q3b extension pending. Pre-
+> Path α expert review status; expert review pending [target date].
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier III + §4.7.A use-case-divergence + audit citation)
+
+> `loess_interpolation` validation: TSL Tier III (same-library self-
+> parity per Pattern A.1) under §4.7.A harness-bypasses-engine
+> pattern framing with NEW use-case-divergence structural mechanism
+> variant per S27 codification. **Reference:** direct
+> `statsmodels.nonparametric.smoothers_lowess.lowess` (statsmodels
+> 0.14.6); SAME library function imported by both harness + engine.
+> **Audit:** `tools/reference_parity/reports/p3_loess_audit.md`
+> dated 2026-04-29. **Verdict:** PASS Pattern A.1 same-library bit-
+> exact; smoothed_y abs diff 0.0 (EXACT, 200 points). **Fixture:**
+> noisy sinusoid T=200 seed=42 frac=0.3 pinned; single-seeded
+> fixture; parameter-sensitivity coverage NOT established; Q3b
+> extension scope. **Tier III risk attribution scope:** per
+> scope_reframing §2 line 154 verbatim, "Verifies wrapper-integrity
+> claim only; does NOT validate against independent implementation."
+> Cross-package agreement NOT established; only same-library self-
+> parity. Validation evidence stronger for wrapper-preprocessing-
+> correctness claim than for math-implementation-correctness claim
+> (latter requires independent reference). **§4.7.A use-case-
+> divergence variant risk attribution:** **(a) Layer 1H
+> statsmodels.lowess SMOOTHING use case (harness audit scope):**
+> same-library self-parity at frac=0.3 pinned; Tier III bounded
+> validation; **(b) Layer 1E statsmodels.lowess INTERPOLATION use
+> case (engine primary purpose; NOT audit-validated):** engine fits
+> LOWESS on observed + predicts at missing positions; attribution
+> from `loess_interpolation` ribbon invocation conditional on
+> engine interpolation construction correctness + CV auto-frac
+> selection correctness + Layer 2 orchestration correctness;
+> **(c) Layer 1E CV auto-frac selection (NOT audit-validated):**
+> `_auto_select_frac` LOO-CV grid search (lines 32-74); Thorough
+> preset default; correctness conditional on expert review; **(d)
+> Layer 2 standalone orchestration (CAI Phase 2 Session 19 F-MD-
+> LOESS-FRAC allowlist gating + NaN handling + missing-value
+> handling + preset config + interpolation construction):**
+> validation scope per `engine/techniques/loess_interpolation.py`
+> lines 77-314. **Asymmetric retraction surface across use cases:**
+> SMOOTHING use case (engine standalone smoothing invocation IF
+> supported) relies on audit-validated Layer 1H Pattern A.1;
+> INTERPOLATION use case (engine primary purpose; ribbon-default)
+> relies on UNVALIDATED Layer 1E interpolation + CV auto-frac. Pre-
+> Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier III + §4.7.A use-case-divergence variant)
+
+> `loess_interpolation` same-library self-parity validated against
+> statsmodels.lowess (Pattern A.1; SMOOTHING use case ONLY per
+> harness audit scope); engine INTERPOLATION use case (primary
+> purpose) + CV auto-frac + Layer 2 orchestration pending expert
+> review. Engine ribbon-default = INTERPOLATION (UNVALIDATED). Tier
+> III bounded validation per scope_reframing §2 line 154; does NOT
+> validate against independent implementation. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (direct statsmodels.lowess
+  0.14.6) per audit Reference field (verbatim). Audit date
+  (2026-04-29) per audit Date field (verbatim). Verdict + Pattern
+  (PASS Pattern A.1 same-library bit-exact) per audit Verdict line
+  (verbatim). Tolerance class (closed_form) per audit Tolerance
+  class line (verbatim). Numeric metric (smoothed_y abs diff 0.0
+  EXACT 200 points) per audit Result table (verbatim). Fixture
+  (noisy sinusoid T=200 seed=42 frac=0.3 pinned) per audit Fixture
+  section (verbatim). **Tier III characterization per scope_reframing
+  §2 lines 151-157 (Pattern A.1 same-library self-parity; 18
+  wrappers locked at scale; "Verifies wrapper-integrity claim only;
+  does NOT validate against independent implementation").** §4.7.A
+  harness-bypasses-engine pattern with NEW use-case-divergence
+  structural mechanism variant per S27 Step 0 (d) engine module
+  full re-Read empirical investigation (engine docstring lines 1-7
+  INTERPOLATION primary purpose + engine + harness BOTH import
+  statsmodels.lowess + harness lines 44-52 _smooth helper SMOOTHING
+  use case + (α) reframe at S27 STOP 2 disposition). Layer 1H /
+  Layer 1E / Layer 2 framework operative per S26 STOP 1.5 second
+  close ratification carried forward to S27. **§4.7.A pattern
+  FOURTH observation (n=4) per S25 §4.7.A codification + post-S26
+  triad reinforcement** (S14a + S18 + S26 + S27 = n=4); NEW
+  structural mechanism variant flagged per S27 (α) reframe:
+  "harness-validates-different-use-case-of-same-library-function"
+  distinct from S25 §4.7.A 3-mechanism codified list (lines 960-
+  967); Workstream B amendment cycle candidate G refinement scope
+  EXPANDED at S27 to dispose §4.7.A 3-mechanism vs 4+ mechanism
+  list at next cycle. **A9 Class A 9th-instance candidate** (Chat
+  trigger CHAT RATIFICATION #5 schema-misattribution: labeling
+  loess as "second harness-reimplements-engine-math observation"
+  when empirical structure is "harness-validates-different-use-
+  case-of-same-library-function"; caught at Step 0 (d) engine
+  module full re-Read per A9 Class A mitigation discipline
+  operating proactively; banked for absorption #4 codification
+  alongside A9 Class A n=7 + n=8 candidates). **A9 Class B counter
+  unchanged post-S27 n=4 ACTIVE**: framing class working hypothesis
+  CONFIRMED at Step 0 per A9 Class B revised default discipline
+  operating proactively per S22+S23+S25+S26+S27 sustained pattern.
+  **Maturation observation FOURTH SUSTAINED OBSERVATION REACHED at
+  S27** + **SIX proactive-prevention timing point empirical surface**
+  per Chat ratification ITEM 6: (i) pre-trigger session re-entry
+  (S23-pre + S26-pre); (ii) trigger-execution Step 0 (S25); (iii)
+  STOP-cycle revision-trigger completeness (S25 STOP 1.5); (iv)
+  numerical-claim-baseline pre-trigger (S26-pre); (v) framework-
+  consistency-at-STOP-1.5-close (S26 STOP 1.5 second close); (vi)
+  trigger-working-hypothesis-labeling-verification at Step 0 (d)
+  engine module full re-Read (S27 NEW catch). Promotion candidate
+  (§19.4 §4.5 NEW sub-section OR A11 NEW amendment) READY for
+  absorption #4 codification disposition per Chat ratification ITEM
+  7 AFFIRMED. Verify-state-at-first-consumption sub-discipline 22nd
+  instance application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at eleventh-technique selection per Mark 3
+  efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20+S25+S26
+  reinforcement. **Q-B pattern persists at n=12 across S12 + S13 +
+  S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 + S26 + S27;
+  §1.4 codified observation refinement at empirical pattern
+  accumulation** (n=7 at §1.4 S20 codification → n=10 at S25
+  refinement → n=11 at S26 → n=12 at S27 reinforcement; Workstream
+  B amendment cycle candidate A continues at next cycle). Substantive
+  Chat engagement at structural-decision points empirically observed
+  (Step 0 STOP 2 (α) reframe disposition + Items 1-7 ratifications
+  + Sub-class 2e candidate scope refinement + §4.7.A NEW mechanism
+  variant codification banking + A9 Class A 9th-instance candidate
+  banking + maturation observation absorption #4 codification
+  affirmation).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1H statsmodels.lowess SMOOTHING use case (audit-
+  validated Pattern A.1 same-library bit-exact)** per EXACT PASS
+  verdict (abs diff 0.0 200 points). **CRITICAL Q-C framing per
+  Tier III scope bound:** validation evidence verifies wrapper-
+  integrity claim only (same-library determinism + identical inputs)
+  per scope_reframing §2 line 154 verbatim; does NOT validate
+  against independent implementation; cross-package agreement NOT
+  established. **Conditional for Layer 1E statsmodels.lowess
+  INTERPOLATION use case (engine primary purpose)** — §4.7.A use-
+  case-divergence variant: engine fits LOWESS on observed values
+  and predicts at missing positions; harness audit Pattern A.1 self-
+  parity validates smoothing use case ONLY; engine interpolation
+  use case correctness NOT directly audit-validated; requires
+  expert review confirming engine interpolation construction
+  correctness OR engine cross-check against independent imputation
+  reference. **Conditional for Layer 1E CV auto-frac selection** —
+  `_auto_select_frac` LOO-CV grid search (lines 32-74); Thorough
+  preset default; correctness conditional on expert review of LOO-CV
+  implementation + frac grid appropriateness. **Conditional for
+  Layer 2 engine orchestration** — input validation + missing-value
+  handling + preset config + F-MD-LOESS-FRAC allowlist gate +
+  interpolation construction + interpretation; requires expert
+  review of engine implementation OR engine-output cross-check.
+  **Critical Q-C framing per ribbon-default use-case context:**
+  published-research user invoking `loess_interpolation` from
+  ribbon receives INTERPOLATION output (engine primary purpose);
+  smoothing output is NOT engine ribbon-default; defensibility to
+  all three audiences (published audience + Morgan Stanley
+  compliance + Path α expert reviewer) UNDER Tier III scope bound
+  + §4.7.A use-case-divergence variant + Layer 1E interpolation
+  expert review acknowledgment.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  MEDIUM-HIGH per Tier III scope bound + §4.7.A use-case-divergence
+  variant. loess_interpolation is canonical LOWESS-based imputation
+  methodology (widely used for missing-value interpolation in time
+  series). **Layer-specific + §4.7.A use-case-divergence retraction
+  surface (per S27 (α) reframe; Layer 1H smoothing / Layer 1E
+  interpolation / Layer 2 orchestration framework):**
+  - Layer 1H statsmodels.lowess SMOOTHING use case (harness audit
+    scope): LOW; EXACT PASS at same-library self-parity; expert
+    review surfacing upstream error would affect harness audit
+    scope specifically. **Tier III scope bound caveat:** validation
+    evidence does NOT extend to math-implementation-correctness
+    claim against independent reference; cross-package agreement
+    NOT established.
+  - **Layer 1E statsmodels.lowess INTERPOLATION use case (engine
+    primary purpose; §4.7.A use-case-divergence variant): MEDIUM-
+    HIGH** — engine `run()` fits LOWESS on observed + predicts at
+    missing positions; NOT audit-validated; ribbon-default
+    invocation goes through Layer 1E interpolation; expert review
+    surfacing material error in engine interpolation construction
+    would invalidate `loess_interpolation` ribbon publication
+    output specifically; **asymmetric retraction surface:** Layer
+    1H smoothing use case validated via same-library self-parity
+    (Tier III bounded); Layer 1E interpolation use case UNVALIDATED
+    (engine primary purpose).
+  - Layer 1E CV auto-frac selection: MEDIUM — `_auto_select_frac`
+    LOO-CV grid search NOT audit-validated; Thorough preset default;
+    expert review of LOO-CV implementation correctness +
+    appropriateness of frac grid for non-test data conditional.
+  - Layer 2 engine orchestration (input validation + missing-value
+    handling + preset config + F-MD-LOESS-FRAC allowlist gate +
+    interpolation construction + interpretation): MEDIUM analogous
+    to S14b/S15/S21/S22/S26 Layer 2 (engine implementation
+    equivalence) + loess-specific CAI Phase 2 Session 19 allowlist
+    + interpolation result formatting.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; eleventh technique to enter status per
+S27 ratification; **SECOND Block 8 Missing Data entry** (continues
+Block 8 completion arc; S28 third-entry triggers Block 8 fully Q1-
+amended milestone = THIRD catalog block fully Q1-amended after
+Block 1 Causality at S18 + Block 12 Stationarity Tests at S23);
+**FIRST Tier III §2.5 precedent** (institutional pattern for Q1
+work program Tier III techniques at scope_reframing §2 18-wrapper
+"locked at scale" enumeration; bounds expectations per Tier III
+scope "Verifies wrapper-integrity claim only" caveat per S6 §2 line
+154 verbatim); **FOURTH §4.7.A pattern observation (n=4) WITH NEW
+STRUCTURAL MECHANISM VARIANT per S27 (α) reframe** ("harness-
+validates-different-use-case-of-same-library-function" distinct
+from S25 §4.7.A 3-mechanism list lines 960-967; Workstream B
+amendment cycle candidate G refinement scope EXPANDED at S27).
+**S27 two-layer + §4.7.A use-case-divergence + Tier III scope bound
+framing; Layer 1H/Layer 1E/Layer 2 framework operative per S26
+STOP 1.5 second close ratification carried forward: Layer 1H
+statsmodels.lowess SMOOTHING (harness audit scope; same-library
+self-parity validated EXACT PASS); Layer 1E statsmodels.lowess
+INTERPOLATION (engine primary purpose; NOT audit-validated;
+ribbon-default goes through Layer 1E); Layer 1E CV auto-frac
+selection NOT audit-validated; Layer 2 engine orchestration NOT
+parity-validated; compound retraction surface across use cases
+requires expert review.** **A10 Sub-class disposition (Sub-class 2e
+candidate scope refined per S27 (α) reframe):** loess_interpolation
+does NOT count toward Sub-class 2e n=2 second-observation tightening
+per (αb-S27) deferred codification at absorption #4; Sub-class 2e
+n=1 baseline UNCHANGED at denton_chowlin S26 first-instance only;
+loess_interpolation S27 = DIFFERENT §4.7.A variant (use-case
+divergence; NOT reimplementation); absorption #4 disposes Sub-class
+taxonomy with full empirical surface (Sub-class 2e n=1 + Sub-class
+2f candidate at loess n=1 OR generalized Sub-class 2e at n=2 OR
+deferred). **A9 Class B counter post-S27: n=4 ACTIVE** (unchanged;
+framing class working hypothesis CONFIRMED at Step 0 per A9 Class B
+revised default discipline operating proactively per S22+S23+S25+S26+S27
+sustained pattern). **A9 Class A counter post-S27: n=6 ACTIVE +
+candidates n=7 + n=8 + n=9 pending absorption #4 codification** (n=7
+candidate per S23-pre Doc 2 tier-enumeration omission proactive-
+catch variant; n=8 candidate per S26-pre catalog-count-baseline
+misattribution catch; n=9 candidate per S27 trigger drafting
+reimplementation-vs-use-case-divergence schema-misattribution catch
+NEW at S27). **A9 Class A + Class B discipline maturation FOURTH
+SUSTAINED OBSERVATION REACHED at S27** per A3 second-observation
+tightening precedent threshold satisfied at n=4 observations (S23
++ S25 + S26 + S27 sustained proactive-prevention operation across
+SIX-timing-point empirical surface). **Promotion candidate (§19.4
+§4.5 NEW sub-section OR A11 NEW amendment) ROBUSTNESS REINFORCED
+for absorption #4 codification disposition** per Chat ratification
+ITEM 7 AFFIRMED at S27 STOP 2 (maturation observation WILL codify
+at absorption #4; forward instrumentation banking through S27-S28-
+absorption-#4 sequence operates as institutional preparation for
+codification surface, NOT self-perpetuating accretion). **Block 8
+second-entry status + Block 8 completion arc forward instrumentation:
+S26 denton_chowlin + S27 loess_interpolation (this entry) → S28
+kalman_imputation (anticipated; per default ordering OR Chat S28
+disposition) → Block 8 fully Q1-amended milestone at S28 close;
+third catalog block completion triggers per-block continuation
+pattern n=3 codification at §19.4 §4 forward instrumentation note
+6 refinement at next absorption cycle (absorption #4)**.
+
+## §3 Unvalidated catalog techniques (64 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -4510,8 +5023,8 @@ descriptions, summaries).
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
 
-### Missing Data / Temporal Disaggregation (2 unvalidated; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26)
-`kalman_imputation`, `loess_interpolation`
+### Missing Data / Temporal Disaggregation (1 unvalidated; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27)
+`kalman_imputation`
 
 ### Multivariate Systems (5 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately)
 `bvar`, `dynamic_factor_model`, `pca_analysis`, `var`, `vecm`
@@ -4528,7 +5041,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 65 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests BOTH FULLY Q1-AMENDED; Block 8 Missing Data Q1 work in progress with 1 entry per S26 first-entry; per-block continuation pattern at n=2 catalog block observations; third catalog block completion at Block 8 S26+1 + S26+2 anticipated**).
+**Total: 64 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests BOTH FULLY Q1-AMENDED; Block 8 Missing Data Q1 work in progress with 2 entries per S26+S27; kalman_imputation sole remaining Block 8 unvalidated; S28 kalman_imputation third-entry triggers Block 8 fully Q1-amended milestone = THIRD catalog block fully Q1-amended; per-block continuation pattern at n=3 catalog block observations available at absorption #4**).
 
 ## §4 How to use this document
 
@@ -4571,7 +5084,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (65 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26 amendments):**
+**Tier 3 — UNVALIDATED (64 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
