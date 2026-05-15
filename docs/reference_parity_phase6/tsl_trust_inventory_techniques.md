@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 9 catalog techniques with Phase 7+ Q1 trust documentation
+- 10 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23 amendments)
-- 66 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26 amendments)
+- 65 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -3967,7 +3967,509 @@ forward instrumentation for absorption #3 refinement of §19.4
 lines 1086-1107 Block 1 milestone characterizing per-block
 continuation pattern at n=2 catalog block observations.
 
-## §3 Unvalidated catalog techniques (66 entries; ID-only enumeration)
+### denton_chowlin_disaggregation (Phase 7+ S26; tenth §2.5 entry; FIRST Block 8 Missing Data entry; FIRST §4.7.A harness-bypasses-engine pattern Q1 §2.5 entry per S25 codification; FIRST §4.7.A + §4.7.B COMPOUND pattern Q1 §2.5 entry per S25 §4.7.E pattern relationship codification; TWO-LAYER + HARNESS-REIMPLEMENTS-ENGINE-MATH + ENGINE-METHOD-EXTENSION framing per S26 STOP 2 + Chat α disposition)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2 per scope_reframing §2 line 130 12-wrapper enumeration:
+`p3_denton_chowlin`). **Important nuance (compound §4.7.A + §4.7.B
+pattern framing per S25 §4.7.E codification; FIRST §2.5 entry
+exhibiting BOTH patterns concurrently):** tier classification
+applies to Layer 1 math (Denton PFD closed-form KKT system; harness
+reimplements TSL math directly + R `tempdisagg::td(method=
+"denton-cholette")` cross-package validated bit-exact). Layer 2
+(engine module orchestration: method allowlist gating + NaN handling
++ aggregation constraint verification + method dispatch) plausibly
+equivalent at base pinned config but variants engine-specific.
+**Engine extends substantially beyond harness audit scope via Layer
+2 method extension:** engine implements TWO methods (Denton +
+Chow-Lin GLS) + ML ρ estimation `_estimate_rho` (lines 188-234) +
+3-option allowlist gates per CAI Phase 2 Session 19 fixes (F-MD-
+DENTON-METHOD + F-MD-DENTON-CONVRATIO + F-MD-DENTON-RHO); p3_denton_chowlin
+audit validates Denton PFD path ONLY; Chow-Lin path + ML ρ estimation
+NOT audit-validated. See Validation claim scope below for compound
+pattern detail.
+
+**Framing precedent note (1:1 catalog↔wrapper; TWO-LAYER + HARNESS-
+REIMPLEMENTS-ENGINE-MATH + ENGINE-METHOD-EXTENSION; COMPOUND §4.7.A
++ §4.7.B pattern FIRST §2.5 instance; A10 Sub-class disposition
+(αa) Sub-class 2c variant tagging with fit-strained acknowledgment
+per S26 STOP 1.5 ratification):** denton_chowlin_disaggregation is
+1:1 catalog↔wrapper mapping per p3_denton_chowlin audit Wrapper
+field (`engine/techniques/denton_chowlin_disaggregation.py` sole
+engine module).
+
+**§4.7.A harness-bypasses-engine pattern THIRD observation candidate
+per S25 §4.7.A codification** (S14a p3_ccf + S18 p3_gcc_phat n=2
+baseline → S26 n=3 codification triad EMPIRICALLY COMPLETE per A3
+second-observation tightening precedent threshold). p3_denton_chowlin.py
+`run_tsl` lines 66-104 explicitly comments *"Mirror TSL math directly
+— proportional Denton (PFD) closed form"* (line 68); harness
+REIMPLEMENTS Denton math in numpy/KKT system + linalg.solve; does
+NOT invoke `denton_chowlin_disaggregation.py::run()` engine entry
+point; harness validates literal-identity-to-engine-Denton-math
+(both implement Denton PFD closed-form; mathematically equivalent
+at machine precision per audit Pattern A bit-exact 6.39e-14).
+
+**§4.7.B engine-extends-beyond-harness pattern PARTIAL observation
+(Layer 2 method extension scale):** Engine module 510 LOC implements
+TWO methods + ML ρ estimation + allowlist gates per CAI Phase 2
+Session 19 fixes; harness validates Denton PFD ONLY at pinned
+conversion_ratio=4 (n_low=12 → n_high=48). Engine Chow-Lin method
+(`_chowlin` lines 120-185 GLS regression + AR(1) residuals) + ML ρ
+estimation (`_estimate_rho` lines 188-234 log-likelihood grid search)
+NOT exercised by audit; engine extends beyond harness audit scope
+at Layer 2 method-dispatch scale. Distinct from S22 kpss_test Layer
+2 orchestration extension (orchestration-only; same single Layer 1
+math function) — S26 denton_chowlin Layer 2 extension adds NEW Layer
+1 math function (Chow-Lin GLS) NOT validated by Denton-only harness.
+
+**Compound §4.7.A + §4.7.B pattern observation (NEW per S25 §4.7.E
+Pattern relationship codification "technique may exhibit ONE
+pattern only, BOTH patterns concurrently, or NEITHER pattern";
+FIRST §2.5 entry exhibiting BOTH concurrently):** denton_chowlin
+exhibits BOTH §4.7.A (harness uses different code path for Denton
+math via reimplementation) AND §4.7.B (engine extends Layer 2
+beyond harness Denton-only audit scope via Chow-Lin method
+addition). Compound observation operationally distinct from single-
+pattern observations; mitigation surface compounds:
+- §4.7.A mitigation: layered framing class determination at Step 0
+  (Layer 1 Denton math harness-reimplementation vs engine Denton
+  implementation; mathematically equivalent but code-path-distinct)
+- §4.7.B mitigation: scale-of-extension disclosure (Chow-Lin method
+  + ML ρ estimation NOT audit-validated; Q-D retraction surface
+  elevated for non-Denton-method invocations)
+
+**A10 Sub-class disposition: (αa) Sub-class 2c three-layer-downstream
+variant tagging extension** (conservative working hypothesis per A3
+precedent at n=1 first-instance; ratified at S26 STOP 1.5 with
+explicit fit-strained acknowledgment): treats compound §4.7.A +
+§4.7.B observation as Sub-class 2c variant with harness-reimplements-
+math tag + method-extension tag. Preserves taxonomy stability +
+documents empirical variation at n=1 first-instance observation.
+**Fit-strained acknowledgment:** Sub-class 2c codified instances
+(S15 rolling_ccf_lag + S17 dtw_alignment_lag + S18 gcc_phat_delay)
+all use CLEAN engine-uses-same-function pattern (harness invokes
+engine module's underlying math function; engine extends downstream
+via post-processing). denton_chowlin BREAKS this convention: harness
+REIMPLEMENTS engine math directly (§4.7.A harness-bypasses-engine
+pattern manifestation) + engine extends LAYER 2 via NEW math
+function (Chow-Lin method addition; §4.7.B pattern manifestation).
+(αa) variant tagging at n=1 is operationally conservative per A3
+precedent BUT Sub-class 2c definitional fit is empirically strained.
+**Forward instrumentation (NEW per S26 STOP 1.5 ratification):**
+(αb) NEW Sub-class 2e codification candidate "harness-reimplements-
+engine-math + engine-method-extension" becomes codification-ready
+at absorption #4 IF second observation surfaces at S26+1
+(kalman_imputation) OR S26+2 (loess_interpolation) per A3 second-
+observation tightening precedent threshold at n=2. Absorption #4
+dispositions between (i) Sub-class 2c variant tagging preserved +
+(αb) deferred indefinitely if second observation absent vs (ii) NEW
+Sub-class 2e codified at n=2 with denton_chowlin retroactively
+migrated from Sub-class 2c variant to Sub-class 2e first-instance
+baseline.
+
+**Reference:** R `tempdisagg::td(method="denton-cholette")` (tempdisagg 1.2.0)
+**Verdict:** PASS Pattern A cross-package machine precision (Layer
+1 Denton PFD math only; see Validation claim scope for Layer 2 +
+Chow-Lin extension coverage)
+**Audit:** `tools/reference_parity/reports/p3_denton_chowlin_audit.md`
+**Audit date:** 2026-04-29
+**disaggregated abs diff:** 6.39e-14 (max abs diff across vector);
+rel diff: 1.35e-15
+**Tolerance class:** closed_form
+**Fixture:** 12 quarterly aggregates of 48 monthly indicator values
+(seed=42); pinned conversion_ratio=4 / method=denton-cholette
+
+**Source files (compound §4.7.A + §4.7.B per S26 α framing):**
+`tools/reference_parity/harness/checks/p3_denton_chowlin.py` lines
+66-104 (harness TSL arm REIMPLEMENTS Denton PFD math directly via
+numpy KKT system + linalg.solve; line 68 explicit comment "Mirror
+TSL math directly — proportional Denton (PFD) closed form"; harness
+does NOT invoke `denton_chowlin_disaggregation.py::run()` engine
+entry point; §4.7.A harness-bypasses-engine pattern manifestation)
++ `tools/reference_parity/harness/checks/p3_denton_chowlin.py` lines
+106-140 (harness reference arm invokes R `tempdisagg::td(agg_ts ~ 0
++ ind_ts, conversion="sum", method="denton-cholette")` via RBridge;
+extracts disaggregated vector)
++ `engine/techniques/denton_chowlin_disaggregation.py` lines 1-12
+(module docstring: "Denton and Chow-Lin Temporal Disaggregation...
+Implements: Denton (proportional first differences) method + Chow-
+Lin (GLS regression-based) method. Both implemented from scratch
+with numpy/scipy.")
++ `engine/techniques/denton_chowlin_disaggregation.py` lines 31-42
+(`_build_aggregation_matrix`: aggregation matrix C such that
+C @ y_high = y_low; shared helper)
++ `engine/techniques/denton_chowlin_disaggregation.py` lines 45-117
+(Layer 1E engine Denton implementation: `_denton_proportional` PFD
+method with KKT system + first-difference matrix + diagonal scaling;
+mathematically equivalent to Layer 1H harness reimplementation per
+audit PASS Pattern A bit-exact 6.39e-14 BUT distinct code path)
++ `engine/techniques/denton_chowlin_disaggregation.py` lines 120-185
+(Layer 1E engine Chow-Lin math extension: `_chowlin` GLS regression
+with AR(1) residuals + indicator-as-regressor + distribution matrix
+L = V_high @ C^T @ V_low^-1; NEW Layer 1E function NOT in harness
+audit scope; NOT validated by p3_denton_chowlin audit Denton-only
+scope)
++ `engine/techniques/denton_chowlin_disaggregation.py` lines 188-234
+(Layer 1E Chow-Lin math extension: `_estimate_rho` ML grid search
+over rho ∈ (0.01, 0.99) maximizing log-likelihood; n_grid=20 or 50
+per preset; NOT validated by audit)
++ `engine/techniques/denton_chowlin_disaggregation.py` lines 237-510
+(Layer 2 standalone orchestration: `run()` main entry with method
+dispatch denton/chowlin + 3-option allowlist gating per CAI Phase
+2 Session 19 fixes F-MD-DENTON-METHOD + F-MD-DENTON-CONVRATIO +
+F-MD-DENTON-RHO + NaN handling + indicator series handling +
+aggregation constraint verification + result formatting +
+significance disclosure + interpretation + audit_fields construction)
++ `tools/reference_parity/reports/p3_denton_chowlin_audit.md`
+
+**Validation claim scope (TIER II.BIT-EXACT + COMPOUND §4.7.A +
+§4.7.B PATTERN per S26 α + αa-conditional disposition; Layer 1H /
+Layer 1E (Denton) / Layer 1E (Chow-Lin) / Layer 2 framework operative
+per S26 STOP 1.5 second close):** TSL denton_chowlin_disaggregation
+output relies on two layered computations within standalone-technique
+role (Layer 1 Denton OR Chow-Lin math + Layer 2 engine orchestration).
+p3_denton_chowlin audit validates Layer 1H Denton PFD math (harness
+reimplementation vs R tempdisagg::td) at single seeded fixture (12
+quarterly aggregates / 48 monthly indicator / seed=42 /
+conversion_ratio=4 / method=denton-cholette pinned); disaggregated
+metric measures harness Denton PFD output vs R tempdisagg::td
+output agreement (abs diff 6.39e-14 PASS), NOT Layer 1E engine
+Denton implementation correctness, NOT Layer 1E engine Chow-Lin
+implementation correctness, NOT ML ρ estimation correctness, NOT
+Layer 2 engine standalone orchestration correctness.
+
+- **Layer 1H Denton PFD math (HARNESS REIMPLEMENTATION; validated
+  cross-package bit-exact):** PASS Pattern A at machine precision
+  (abs diff 6.39e-14; rel diff 1.35e-15) against canonical R
+  `tempdisagg::td(method="denton-cholette")`; closed-form quadratic
+  optimization (minimize sum of squared proportional first
+  differences subject to aggregation constraint). Validation
+  scope: harness's reimplementation of Denton PFD math equivalent
+  to R reference. **§4.7.A pattern caveat:** engine module
+  `_denton_proportional` (lines 45-117) is DIFFERENT code path
+  from harness reimplementation; mathematically equivalent per
+  audit PASS but engine implementation correctness NOT directly
+  audit-validated (audit validates harness reimplementation vs R,
+  not engine vs R).
+- **Layer 1E Denton implementation (ENGINE module; validation scope
+  conditional):** engine `_denton_proportional` lines 45-117 +
+  `_build_aggregation_matrix` lines 31-42 implement Denton PFD
+  closed-form with KKT system + diagonal scaling + first-difference
+  matrix; mathematically equivalent to Layer 1H harness
+  reimplementation but NOT directly audit-validated against R
+  reference. Q-D retraction surface conditional on Layer 1E engine
+  implementation correctness AT DENTON METHOD INVOCATION.
+- **Layer 1E engine Chow-Lin math extension (NEW Layer 1E function
+  NOT in harness audit scope; NOT VALIDATED):** engine `_chowlin`
+  lines 120-185 + `_estimate_rho` lines 188-234 implement Chow-Lin
+  GLS regression with AR(1) residuals + ML ρ estimation; NOT
+  exercised by p3_denton_chowlin audit (audit validates Denton Layer
+  1H harness reimplementation only at pinned method=denton-cholette).
+  Engine Chow-Lin Layer 1E path active when `method="chowlin"`
+  (default per engine line 280!) — ribbon-default invocation goes
+  through Chow-Lin Layer 1E NOT Denton Layer 1E. **Critical
+  operational nuance:** ribbon-default invocation receives
+  UNVALIDATED Chow-Lin Layer 1E output; Denton Layer 1E invocation
+  requires explicit `method="denton"` parameter selection (modulo
+  §4.7.A caveat that Denton Layer 1E itself is not directly audit-
+  validated; audit validates Denton Layer 1H harness reimplementation
+  only).
+- **Layer 2 engine orchestration (validation scope conditional):**
+  - 3-option allowlist gating per CAI Phase 2 Session 19 fixes
+    (F-MD-DENTON-METHOD + F-MD-DENTON-CONVRATIO + F-MD-DENTON-RHO
+    per lines 281-360): method allowlist (denton, chowlin) +
+    conversion_ratio >= 2 + rho ∈ (0, 1) explicit gates
+  - NaN handling (line 265-270): low-frequency series NaN removal
+  - Indicator series handling (lines 317-328): optional second
+    series; fallback to time trend if length insufficient
+  - Aggregation constraint verification (lines 367-369): post-
+    computation C @ x_high vs y_low check
+  - Result formatting + significance disclosure + interpretation +
+    audit_fields construction
+
+#### Disclosure pattern (i) — Research note footnote (Tier II.bit-exact + compound §4.7 pattern + Chow-Lin extension)
+
+> This analysis uses TSL technique `denton_chowlin_disaggregation`,
+> cross-package bit-exact validated against R `tempdisagg::td(method=
+> "denton-cholette")` (tempdisagg 1.2.0) per Phase 3 audit dated
+> 2026-04-29 (abs diff 6.39e-14). Validation scope: Denton PFD math
+> only at harness reimplementation vs R reference; engine
+> implementation conditional on expert review per §4.7.A harness-
+> bypasses-engine pattern. Engine module also implements Chow-Lin
+> GLS method (DEFAULT method per ribbon invocation) + ML ρ
+> estimation; Chow-Lin path NOT audit-validated. Pre-Path α expert
+> review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier II.bit-exact + compound §4.7 + Chow-Lin extension)
+
+> Methodology: TSL technique `denton_chowlin_disaggregation`
+> validated per Phase 3 reference parity infrastructure under
+> two-layer + compound §4.7.A + §4.7.B pattern framing. **Reference:**
+> R `tempdisagg::td(method="denton-cholette")` (tempdisagg 1.2.0).
+> **Verdict:** PASS Pattern A cross-package machine precision;
+> disaggregated abs diff 6.39e-14 (rel diff 1.35e-15). **Audit
+> date:** 2026-04-29. **Fixture:** 12 quarterly aggregates of 48
+> monthly indicator values (seed=42); conversion_ratio=4 pinned;
+> method=denton-cholette pinned. **Compound §4.7.A + §4.7.B pattern
+> caveats:** (a) §4.7.A harness-bypasses-engine: p3_denton_chowlin
+> harness REIMPLEMENTS Denton PFD math directly in numpy/KKT system;
+> validates harness reimplementation vs R reference; engine
+> `_denton_proportional` implementation NOT directly validated
+> against R; mathematically equivalent per audit PASS but code-path-
+> distinct from harness; (b) §4.7.B engine-extends-beyond-harness:
+> engine implements TWO methods (Denton + Chow-Lin); ribbon-default
+> invocation goes through Chow-Lin path (default per engine `method`
+> parameter); Chow-Lin path + ML ρ estimation NOT audit-validated;
+> Layer 2 method extension scale beyond Denton-only audit scope.
+> Q3b extension pending. Pre-Path α expert review status.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier II.bit-exact + compound §4.7 + audit citation)
+
+> `denton_chowlin_disaggregation` validation: TSL Tier II.bit-exact
+> under compound §4.7.A + §4.7.B pattern framing. **Reference:** R
+> `tempdisagg::td(method="denton-cholette")` (tempdisagg 1.2.0).
+> **Audit:** `tools/reference_parity/reports/p3_denton_chowlin_audit.md`
+> dated 2026-04-29. **Verdict:** PASS Pattern A bit-exact at machine
+> precision; disaggregated abs diff 6.39e-14 / rel diff 1.35e-15.
+> **Fixture:** 12 quarterly aggregates / 48 monthly indicator /
+> seed=42 / conversion_ratio=4 / method=denton-cholette pinned;
+> single-seeded fixture; parameter-sensitivity coverage NOT
+> established at this validation tier; Q3b extension scope.
+> **Compound §4.7.A + §4.7.B pattern risk attribution:**
+> **(a) Layer 1H Denton PFD math (harness reimplementation)
+> validated bit-exact against R; Layer 1E engine `_denton_proportional`
+> (lines 45-117) mathematically equivalent but code-path-distinct,
+> conditional on expert review of engine implementation matching
+> harness reimplementation OR engine cross-check against R at base
+> config; **(b) Layer 1E Chow-Lin math extension (engine `_chowlin`
+> lines 120-185 + `_estimate_rho` lines 188-234): NOT audit-
+> validated; ribbon-default invocation goes through Chow-Lin Layer
+> 1E; attribution from ribbon-default `denton_chowlin_disaggregation`
+> output conditional on Layer 1E Chow-Lin + ML ρ estimation
+> correctness AND appropriate AR(1) ρ parameter selection;
+> **(c) Layer 2 standalone orchestration (CAI Phase 2 Session 19
+> allowlist gating + NaN handling + indicator handling + aggregation
+> constraint verification): validation scope per
+> `engine/techniques/denton_chowlin_disaggregation.py` lines 237-510.
+> **Method-selection asymmetric retraction surface:** explicit
+> `method="denton"` invocation activates audit-validated path
+> (modulo §4.7.A caveat); ribbon-default OR explicit `method="chowlin"`
+> activates UNVALIDATED Chow-Lin path. Pre-Path α expert review
+> status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier II.bit-exact + compound §4.7)
+
+> `denton_chowlin_disaggregation` cross-package bit-exact validated
+> against R `tempdisagg::td` (Denton PFD only; harness
+> reimplementation per §4.7.A); engine Denton implementation +
+> Chow-Lin extension + ML ρ estimation + Layer 2 orchestration
+> pending expert review. Ribbon-default uses Chow-Lin (UNVALIDATED).
+> Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (R tempdisagg::td 1.2.0;
+  method="denton-cholette") per audit Reference field (verbatim).
+  Audit date (2026-04-29) per audit Date field (verbatim). Verdict
+  + Pattern (PASS Pattern A cross-package machine precision) per
+  audit Verdict line (verbatim). Tolerance class (closed_form) per
+  audit Tolerance class line (verbatim). Numeric metric (abs diff
+  6.39e-14; rel diff 1.35e-15) per audit Result table (verbatim).
+  Fixture (12 quarterly aggregates / 48 monthly indicator / seed=42
+  / conversion_ratio=4 / method=denton-cholette pinned) per audit
+  Fixture section (verbatim). Tier II.bit-exact characterization per
+  scope_reframing §2 line 130 (`p3_denton_chowlin` explicit in
+  12-wrapper enumeration). Compound §4.7.A + §4.7.B pattern framing
+  per S26 STOP 2 Step 0 empirical investigation (harness lines 66-
+  104 reimplementation comment line 68 verbatim + engine 510 LOC
+  method-dispatch structure lines 280-362 verbatim + audit Denton-
+  only scope per audit Fixture + harness pinned method) + S25 §4.7
+  dual-pattern codification + §4.7.E Pattern relationship "BOTH
+  patterns concurrently" framing + α Tier + αa-conditional A10
+  Sub-class disposition. Layer 1H / Layer 1E (Denton) / Layer 1E
+  (Chow-Lin) / Layer 2 framework operative throughout entry per
+  S26 STOP 1.5 second close ratification. **§4.7.A pattern THIRD
+  observation per A3 second-observation tightening precedent
+  threshold satisfied at n=3** (S14a p3_ccf + S18 p3_gcc_phat + S26
+  denton_chowlin = codification triad EMPIRICALLY COMPLETE);
+  Workstream B §4.7.A codification refinement candidate per next
+  amendment cycle (NEW Workstream B candidate G per S26 close
+  banking). **§4.7.B pattern PARTIAL observation Layer 2 method-
+  extension scale**: Chow-Lin Layer 1E math + ML ρ estimation NOT
+  audit-validated; engine extends beyond Denton-only audit scope.
+  **Compound pattern observation NEW per S25 §4.7.E codification:**
+  FIRST §2.5 entry exhibiting BOTH §4.7.A + §4.7.B patterns
+  concurrently per "ONE pattern only, BOTH patterns concurrently,
+  or NEITHER pattern" framing. **A9 Class A 7th-instance candidate
+  carry-forward from S26-pre** (Chat numerical-claim-baseline
+  catalog-count-misattribution catch per A2 codification;
+  codification at absorption #4 alongside §4.7.A pattern n=3
+  codification triad + compound pattern observation + maturation
+  observation promotion). **A9 Class B counter unchanged post-S26
+  n=4 ACTIVE**: working hypothesis anchors confirmed at Step 0 per
+  A9 Class B revised default discipline operating proactively per
+  S22 + S23 + S25 + S26 sustained pattern. **Maturation observation
+  third codification-stable observation REACHED at S26 + FIVE
+  proactive-prevention timing point empirical surface**: (i) pre-
+  trigger session re-entry (S23-pre + S26-pre); (ii) trigger-
+  execution Step 0 (S25); (iii) STOP-cycle revision-trigger
+  completeness (S25 STOP 1.5); (iv) numerical-claim-baseline pre-
+  trigger (S26-pre); (v) framework-consistency-at-STOP-1.5-close
+  (S26 STOP 1.5 second close); promotion candidate (§4.5 NEW sub-
+  section OR A11 NEW amendment) READY for absorption #4 codification
+  disposition. Verify-state-at-first-consumption sub-discipline
+  21st instance application (S26-pre catalog-count-baseline + Step
+  0 multi-technique empirical re-Read + STOP 2 disposition options
+  surface + Step 1 entry drafting under ratified anchors + STOP
+  1.5 second cycle Layer 1H/1E framework consistency catch).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at tenth-technique selection per Mark 3
+  efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20+S25
+  reinforcement. Tier 2 case-against surfaced at S26 Step 0 STOP 2
+  (3-option α/β/γ with LOC + framing-class trade-offs); Chat
+  ratified α denton_chowlin per Tier II.bit-exact strength priority
+  + §4.7.A pattern third observation value + scope_reframing §2
+  explicit enumeration. **Q-B pattern persists at n=11 across S12
+  + S13 + S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 + S26;
+  §1.4 codified observation refinement at empirical pattern
+  accumulation** (n=7 at §1.4 S20 codification → n=10 at S25
+  refinement → n=11 at S26 reinforcement; Workstream B amendment
+  cycle candidate A continues at next cycle). Substantive Chat
+  engagement at structural-decision points empirically observed
+  (first-technique 3-option ratification + framing class working
+  hypothesis confirmation + A10 Sub-class disposition deferred
+  with both (αa) and (αb) surfaced for STOP 1 + Layer 1H/1E
+  terminology disambiguation revisions + Chow-Lin Layer 1E framework
+  consistency extension).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1H Denton PFD math (validated cross-package via
+  harness reimplementation)** per bit-exact PASS verdict at
+  machine precision against R `tempdisagg::td`. **Conditional for
+  Layer 1E engine Denton implementation** — §4.7.A pattern caveat:
+  engine `_denton_proportional` mathematically equivalent to
+  harness reimplementation per audit PASS BUT distinct code path;
+  requires expert review confirming engine implementation matches
+  harness reimplementation correctness OR engine cross-check
+  against R reference at base config. **Conditional for Layer 1E
+  engine Chow-Lin math extension** — §4.7.B pattern: Chow-Lin
+  GLS + ML ρ estimation NOT audit-validated; ribbon-default
+  invocation goes through Chow-Lin Layer 1E (engine `method`
+  default per line 280: `"chowlin"`); attribution from ribbon-
+  default output conditional on Chow-Lin + ML ρ estimation
+  correctness. **Conditional for Layer 2 engine orchestration** —
+  CAI Phase 2 Session 19 allowlist gating + NaN handling +
+  indicator handling + aggregation constraint verification +
+  interpretation; requires expert review of engine implementation
+  OR engine-output cross-check at base pinned config. **Critical
+  Q-C framing per ribbon-default-method context:** published-
+  research user invoking `denton_chowlin_disaggregation` from
+  ribbon receives Chow-Lin Layer 1E output (DEFAULT method);
+  Denton-method output requires explicit `method="denton"`
+  parameter selection; defensibility to all three audiences
+  (published audience + Morgan Stanley compliance + Path α expert
+  reviewer) UNDER compound §4.7 pattern + Layer 1E method-
+  extension expert review acknowledgment.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  MEDIUM-HIGH compound-pattern retraction surface. denton_chowlin
+  is canonical temporal disaggregation methodology (quarterly →
+  monthly OR annual → quarterly conversion preserving aggregation
+  constraint; widely used in macroeconomic + financial time series
+  applications). **Layer-specific + compound-pattern retraction
+  surface (per S26 compound §4.7.A + §4.7.B framing; Layer 1H /
+  Layer 1E framework operative):**
+  - Layer 1H Denton PFD math harness-reimplementation: LOW; bit-
+    exact PASS against canonical R reference; expert review
+    surfacing upstream error would affect denton_chowlin Denton-
+    method-only invocation specifically (NO multi-map propagation
+    risk; 1:1 catalog↔wrapper).
+  - **Layer 1E engine Denton implementation (§4.7.A pattern
+    caveat): MEDIUM** — engine `_denton_proportional` (lines 45-
+    117) NOT directly audit-validated against R reference; expert
+    review surfacing material divergence from Layer 1H harness
+    reimplementation would invalidate engine Denton-method
+    invocations specifically; Tier II.bit-exact tier classification
+    holds at Layer 1H harness validation BUT Layer 1E engine
+    validation is conditional.
+  - **Layer 1E engine Chow-Lin math extension (§4.7.B pattern):
+    MEDIUM-HIGH** — engine `_chowlin` (lines 120-185) + ML ρ
+    estimation (`_estimate_rho` lines 188-234) NOT audit-validated;
+    ribbon-default invocation goes through Chow-Lin Layer 1E
+    (engine `method` default = "chowlin" per line 280); expert
+    review surfacing Chow-Lin GLS + ML ρ estimation errors would
+    invalidate the ribbon-default `denton_chowlin_disaggregation`
+    output specifically; **asymmetric retraction surface across
+    method invocations:** explicit `method="denton"` invocation
+    relies on Denton Layer 1E + Layer 1H harness validation (per
+    §4.7.A caveat that Denton Layer 1E itself is not directly
+    audit-validated; only Layer 1H is); ribbon-default + explicit
+    `method="chowlin"` relies on UNVALIDATED Chow-Lin Layer 1E.
+  - Layer 2 engine orchestration (allowlist gating + NaN handling
+    + indicator handling + aggregation constraint verification):
+    MEDIUM analogous to S14b/S15/S21/S22 Layer 2 (engine
+    implementation equivalence) + denton-specific CAI Phase 2
+    Session 19 allowlist scope + indicator series handling.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; tenth technique to enter status per S26
+ratification; **FIRST Block 8 Missing Data entry** (initiates third
+catalog block transition; Block 8 completion arc S26 + S26+1 + S26+2
+anticipated; third catalog block fully Q1-amended milestone at Block
+8 close; per-block continuation pattern at n=3 catalog block
+observations TBD at Block 8 close); **FIRST §4.7.A harness-bypasses-
+engine pattern Q1 §2.5 entry per S25 codification** (third
+observation of §4.7.A pattern completing codification triad
+EMPIRICALLY COMPLETE per A3 second-observation tightening precedent
+threshold at n=3 [S14a + S18 + S26]); **FIRST §4.7.A + §4.7.B
+COMPOUND pattern Q1 §2.5 entry per S25 §4.7.E Pattern relationship
+codification** ("technique may exhibit ONE pattern only, BOTH
+patterns concurrently, or NEITHER pattern"); S26 first-instance
+observation of BOTH patterns concurrently within single technique.
+**S26 two-layer + compound §4.7.A + §4.7.B + Chow-Lin method
+extension framing + Layer 1H/Layer 1E framework operative per S26
+STOP 1.5 second close: Layer 1H Denton PFD math harness-
+reimplementation vs R tempdisagg::td bit-exact PASS; Layer 1E engine
+Denton implementation §4.7.A caveat (mathematically equivalent but
+code-path-distinct from Layer 1H; NOT directly audit-validated);
+Layer 1E engine Chow-Lin math extension (§4.7.B) NOT audit-validated
+and DEFAULT method per ribbon invocation; Layer 2 engine orchestration
+NOT parity-validated; compound retraction surface across method-
+selection asymmetric paths requires expert review.** **A10 Sub-class
+disposition: (αa) Sub-class 2c variant tagging extension with
+explicit fit-strained acknowledgment per S26 STOP 1.5 ratification;
+(αb) NEW Sub-class 2e candidate codification-ready at absorption #4
+if second harness-reimplements-engine-math observation surfaces at
+S26+1 or S26+2 per A3 second-observation tightening precedent.**
+**A9 Class B counter post-S26: n=4 ACTIVE** (unchanged; working
+hypothesis anchors confirmed at Step 0 per A9 Class B revised
+default discipline operating proactively per S22+S23+S25+S26
+sustained pattern). **A9 Class A counter post-S26: n=6 ACTIVE +
+candidates n=7 + n=8 pending absorption #4 codification** (n=7
+candidate per S23-pre Doc 2 tier-enumeration omission proactive-
+catch variant; n=8 candidate per S26-pre catalog-count-baseline
+misattribution catch). **A9 Class A + Class B discipline maturation
+THIRD CODIFICATION-STABLE OBSERVATION REACHED at S26** per A3
+second-observation tightening precedent threshold satisfied at n=3
+observations (S23 + S25 + S26 sustained proactive-prevention
+operation across FIVE-timing-point empirical surface); **promotion
+candidate (§19.4 §4.5 NEW sub-section OR A11 NEW amendment)
+READY for absorption #4 codification disposition**. **Block 8 first-
+entry status + Block 8 completion arc forward instrumentation: S26
+denton_chowlin (this entry) → S26+1 [kalman_imputation OR
+loess_interpolation per Chat disposition] → S26+2 [remaining Block
+8 technique] → Block 8 fully Q1-amended milestone at S26+2 close;
+third catalog block completion triggers per-block continuation
+pattern n=3 codification at §19.4 §4 forward instrumentation note
+6 refinement at next absorption cycle**.
+
+## §3 Unvalidated catalog techniques (65 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -4008,8 +4510,8 @@ descriptions, summaries).
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
 
-### Missing Data / Temporal Disaggregation (3 unvalidated)
-`denton_chowlin_disaggregation`, `kalman_imputation`, `loess_interpolation`
+### Missing Data / Temporal Disaggregation (2 unvalidated; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26)
+`kalman_imputation`, `loess_interpolation`
 
 ### Multivariate Systems (5 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately)
 `bvar`, `dynamic_factor_model`, `pca_analysis`, `var`, `vecm`
@@ -4026,7 +4528,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 66 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests BOTH FULLY Q1-AMENDED — first and second catalog blocks to complete per Q1 work program scope; per-block continuation pattern instantiated at n=2 catalog block observations per S23 Block 12 completion**).
+**Total: 65 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests BOTH FULLY Q1-AMENDED; Block 8 Missing Data Q1 work in progress with 1 entry per S26 first-entry; per-block continuation pattern at n=2 catalog block observations; third catalog block completion at Block 8 S26+1 + S26+2 anticipated**).
 
 ## §4 How to use this document
 
@@ -4069,7 +4571,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (66 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23 amendments):**
+**Tier 3 — UNVALIDATED (65 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
