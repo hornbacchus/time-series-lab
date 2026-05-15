@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 8 catalog techniques with Phase 7+ Q1 trust documentation
+- 9 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22 amendments)
-- 67 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23 amendments)
+- 66 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -3123,7 +3123,851 @@ engine-extends-beyond-harness Layer-scale-variation pattern §4.7
 codification refinement). **A9 Class A counter post-S22: n=5 ACTIVE**
 (unchanged; no Class A 6th instance at S22 Step 0).
 
-## §3 Unvalidated catalog techniques (67 entries; ID-only enumeration)
+### pp_test (Phase 7+ S23; ninth §2.5 entry; THIRD Block 12 Stationarity Tests entry — Block 12 FULLY Q1-AMENDED; FIRST Tier II.bit-exact-loose + Tier V Pattern J B.2 overlay entry; FIRST triple-role helper-export entry; FIRST dedicated novelty enumeration sub-section; TRIPLE-ROLE + PATTERN J OVERLAY + BACKEND-DISPATCHER + LAYER 1 ENGINE-EXTENDS-BEYOND-HARNESS framing per S23 STOP 2 empirical investigation + α tier + αa-conditional A10 dispositions)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact-loose with Tier V Pattern J B.2 overlay** — Phase 3
+cross-package PASS at closed_form tolerance (2.09e-06 abs / 2.26e-07
+rel; within closed_form ladder accommodating internal HAC kernel
+divergence and residual variance divisor differences at sub-1e-6
+levels per audit Pattern J observation). **First §2.5 entry with
+dual-tier characterization (II.bit-exact-loose primary + V Pattern J
+B.2 overlay)** per S23 α disposition ratification; precedent for
+future Pattern J-affected wrappers entering §2.5. Pattern J B.2 sub-
+class per scope_reframing §2 line 176-177 (internal-default
+divergence; p3_egarch is existing exemplar). Tier V overlay
+treatment per scope_reframing §2 line 236-237 ("distributed across
+other tiers as overlay"). **Important nuance (triple-role + backend-
+dispatcher + Layer 1 engine-extends-beyond-harness framing per S23 α
++ αa-conditional disposition):** tier classification applies to
+Layer 1 (`arch.unitroot.PhillipsPerron` vs R `urca::ur.pp` at pinned
+LAG=5 / trend="c" / type="Z-tau"); Layer 2 (engine pp_test.py
+backend-dispatcher + manual fallback + standalone-technique
+orchestration) plausibly equivalent at base pinned config but variants
+engine-specific; **Triple-role coupling (standalone + 3b parallel-
+helper + 3d CONFLICTING tie-breaker) NOT parity-validated, engine-
+specific operational coupling driving compounded retraction surface
+across THREE publication contexts (standalone + adf_test ribbon
+parallel verdict + adf_test ribbon tie-breaker resolution)
+requires expert review.**
+
+**Framing precedent note (1:1 catalog↔wrapper; TRIPLE-ROLE
+helper-export + BACKEND-DISPATCHER engine + Layer 1 engine-extends-
+beyond-harness variant; A10 Sub-class 2a candidate second-observation
+with αa/αb taxonomy refinement deferred to absorption #3):** pp_test
+is 1:1 catalog↔wrapper mapping per p3_pp audit Wrapper field
+(`engine/techniques/pp_test.py` sole engine module). Triple-role +
+backend-dispatcher framing applies per S23 STOP 2 empirical finding:
+harness invokes `arch.unitroot.PhillipsPerron` directly at pinned
+single-test config (statsmodels < 0.14 on audit Python; comment per
+p3_pp.py line 76-78); engine module has 3-tier backend-dispatcher
+fallback chain (statsmodels.phillips_perron → arch.unitroot.PhillipsPerron
+→ `_manual_pp` 64 LOC Newey-West Bartlett kernel implementation per
+pp_test.py lines 106-169); engine extends moderately beyond harness
+via Layer 2 orchestration (4-option regression allowlist gating per
+CAI Phase 2 Session 17 fix F-ST-PP-REGRESSION + NaN handling + per-
+series loop + backend-dispatcher method recording + significance
+disclosure); AND engine `_run_pp_single` (lines 172-208) exposes
+helper to `adf_test.py` `_run_triage` consumed at TWO Layer 3 sub-
+components: 3b parallel-tests invocation (lines 533-535) AND 3d
+CONFLICTING tie-breaker (lines 559-565 per S21 adf_test entry
+codification). **A10 Sub-class 2a candidate second-observation under
+existing taxonomy** (resolves to n=2 with S22 kpss_test first-instance
+baseline). **Taxonomy refinement question — whether triple-role fits
+Sub-class 2a (αa keeps-2a-as-general-two-layer) or warrants Sub-class
+2a-triple-role split (αb splits-2a-vs-2a-triple-role) — deferred to
+§19.4 absorption #3 with both (αa) and (αb) surfaced as disposition
+options under full A3 second-observation tightening discipline.**
+Topology distinct from existing A10 sub-class instances:
+- S14b cross_correlation_lag (amendment context; not first-instance
+  Sub-class 2a baseline per §19.4 codification)
+- S14c three-layer-upstream Sub-class 2b (prewhitened_ccf_lag)
+- S15/S17 three-layer-downstream Sub-class 2c (rolling_ccf_lag +
+  dtw_alignment_lag)
+- S18 three-layer-downstream Tier IV variant Sub-class 2c-IV
+  (gcc_phat_delay)
+- S21 three-layer-parallel-tests Sub-class 2d candidate (adf_test)
+- S22 TWO-LAYER PRIMARY + DUAL-ROLE Sub-class 2a first-instance
+  baseline (kpss_test direct-invocation + helper-export)
+- **S23 TWO-LAYER + TRIPLE-ROLE + BACKEND-DISPATCHER Sub-class 2a
+  candidate second-observation (pp_test direct-invocation + 3b
+  helper-export + 3d tie-breaker; αa/αb taxonomy disposition
+  deferred)**
+
+**Novelty enumeration sub-section (FIRST-INSTANCE per S23; novel
+sub-section pattern; codification candidate for §4.7 amendment
+cycle OR Workstream B §3 addendum if S24+ Q1 entries replicate
+pattern per A3 design-class second-observation precedent):**
+
+- **3a — A10 Sub-class 2a candidate second-observation; taxonomy
+  disposition deferred to absorption #3:** pp_test is Sub-class 2a
+  candidate second-observation under existing taxonomy (S22 kpss_test
+  first-instance baseline → S23 pp_test second-observation candidate).
+  **Taxonomy refinement question carries to absorption #3:** (αa)
+  keeps Sub-class 2a as general two-layer class accommodating both
+  dual-role (kpss_test) and triple-role (pp_test) variants OR (αb)
+  splits into Sub-class 2a (dual-role) + Sub-class 2a-triple-role
+  (triple-role) per topology convention analogous to Sub-class 2c-IV
+  Tier-variant suffix taxonomy at §19.4 A10 codification. Both
+  options surfaced for absorption #3 under full A3 second-observation
+  tightening discipline; entry does NOT pre-commit. Cross-reference:
+  S22 kpss_test entry §2.5 lines 2776-2783 (Sub-class 2a first-
+  instance baseline observation + multi-map vs 1:1 generalization
+  taxonomy question deferred); analogous deferred-disposition pattern.
+
+- **3b — Tier II.bit-exact-loose + Tier V Pattern J B.2 overlay
+  first-instance §2.5 precedent:** First §2.5 entry with dual-tier
+  characterization. Tier V overlay treatment per scope_reframing §2
+  line 236-237 ("distributed across other tiers as overlay"); Pattern
+  J B.2 sub-class per scope_reframing §2 line 176-177 (internal-
+  default divergence; p3_egarch is existing exemplar). Establishes
+  precedent for future Pattern J-affected wrappers entering §2.5
+  (scope_reframing §2 lists 4 Pattern J wrappers in Tier V
+  enumeration: p3_ets + p3_var Pattern D + p3_egarch + p3_lomb_scargle;
+  p3_pp NOT in original enumeration — added by post-S6 inference per
+  audit Pattern J observation explicit). **Forward instrumentation:**
+  if S24+ surfaces second Pattern J overlay §2.5 entry, sub-class
+  formalization candidate per A3 second-observation precedent —
+  banked at this commit message for absorption #3 or Workstream B
+  amendment cycle disposition.
+
+- **3c — Backend-dispatcher engine pattern first observation
+  (statsmodels → arch → `_manual_pp` 64 LOC fallback chain):** Engine
+  module `_run_pp_test` (pp_test.py lines 70-103) implements 3-tier
+  fallback dispatcher: tries `statsmodels.tsa.stattools.phillips_perron`
+  (statsmodels ≥ 0.14) first; falls back to `arch.unitroot.PhillipsPerron`
+  if statsmodels unavailable; falls back to `_manual_pp` (lines 106-
+  169) if both library implementations unavailable. Manual fallback
+  is SUBSTANTIAL (64 LOC) with: OLS for ρ̂ (lines 121-122) + Schwert
+  (2/9) auto-bandwidth rule (line 128) + Newey-West Bartlett kernel
+  long-run variance (lines 132-138) + standard error for ρ̂ (lines
+  140-143) + Phillips-Perron correction (lines 146-147) + MacKinnonP
+  p-value with hardcoded fallback (lines 149-160) + hardcoded
+  critical values per regression (lines 162-167). Backend selection
+  recorded in `method` field of returned dict per audit Diagnostics
+  line 29-30 ("TSL backend: arch.PhillipsPerron — statsmodels < 0.14
+  on this Python; arch path used"); audit-time backend was arch path.
+  **Operational distinctive:** TSL output depends on which backend
+  was selected at runtime; p3_pp audit validates arch path
+  specifically; statsmodels path + manual fallback path NOT parity-
+  validated. Layer 2 sub-component for Q-A documentation + Q-D
+  retraction surface.
+
+- **3d — Engine-extends-beyond-harness Layer 1 backend-dispatcher
+  variant (THIRD observation completing §4.7 codification refinement
+  triad):** §4.7 Forward Q1 Step 0 discipline observed two engine-
+  extends-beyond-harness pattern variants pre-S23: (i) Layer 3
+  extension scale at S21 adf_test (entirely new joint triage sub-
+  system) + (ii) Layer 2 extension scale at S22 kpss_test
+  (orchestration only). **S23 pp_test surfaces THIRD variant: Layer 1
+  backend-dispatcher** — engine has fallback chain across THREE
+  underlying library implementations whereas harness invokes ONE
+  fixed library (arch); engine extends harness Layer 1 dimension via
+  optionality across implementations. Pattern recurs at n=3 with
+  three operationally distinct scale-of-extension variations (Layer 1
+  / Layer 2 / Layer 3); **§4.7 codification refinement triad
+  empirically complete per A3 design-class second-observation
+  tightening precedent threshold satisfied at n=3.** Forward
+  instrumentation for Workstream B §4.7 amendment cycle (separate
+  lane; Workstream B candidate B per S23 commit message banking).
+
+- **3e — Triple-role helper-export to adf_test triage 3b parallel +
+  3d CONFLICTING tie-breaker (operationally distinct from S22
+  kpss_test dual-role):** pp_test engine module plays THREE
+  operational roles vs kpss_test DUAL-ROLE (S22 codification): (i)
+  standalone-technique role via `run()` entry point for direct
+  ribbon `pp_test` invocation; (ii) **3b parallel-test helper-export
+  role** via `_run_pp_single` (lines 172-208) called by adf_test.py
+  `_run_triage` line 535 alongside ADF + KPSS on same fixture per
+  S21 adf_test entry Layer 3 sub-component 3b codification (line
+  2388); (iii) **3d CONFLICTING tie-breaker role** via same
+  `_run_pp_single` consumed by adf_test.py `_run_triage` lines 559-565
+  when joint ADF + KPSS verdict surfaces CONFLICTING outcome per S21
+  adf_test entry Layer 3 sub-component 3d codification (lines 2402-
+  2408). Triple-role compounds retraction surface beyond kpss_test
+  dual-role: pp_test errors propagate to THREE publication contexts
+  (standalone + adf_test ribbon 3b parallel verdict + adf_test ribbon
+  3d tie-breaker resolution); see Q-D below for compounded retraction
+  surface characterization.
+
+- **3f — Auto-bandwidth rule divergence (Schwert (2/9) standalone vs
+  Schwert (1/4) kpss) + triage-path bandwidth divergence from Layer 1
+  fixture (Q-A documentation depth + Q-D retraction surface):**
+  **(i) Auto-bandwidth rule divergence within triage members:**
+  pp_test `_manual_pp` auto rule (line 128) is `int(np.floor(4 * (n
+  / 100) ** (2 / 9)))` — **Schwert (2/9) rule**; kpss_test "short" rule
+  per harness/audit is `int(4 * (n / 100) ** (1/4))` — **Schwert (1/4)
+  rule**. Both pinned to 5 at p3_kpss + p3_pp audits (n=500 fixture
+  yields same numeric value at coincidence: (2/9)→5 vs (1/4)→5) which
+  MASKS the rule difference at audit time; rule difference is
+  operative at non-pinned production invocations at n≠500. **(ii)
+  Triage-path bandwidth divergence from Layer 1 fixture:** p3_pp
+  audit validates `arch.PhillipsPerron(y, trend="c", lags=5)` (pinned
+  LAG=5); adf_test triage invokes `_run_pp_single(clean, pp_trend,
+  lags=None)` (line 535) which `_run_pp_single` line 195 maps to
+  "auto" → Schwert (2/9) rule → varies with n. **Triage-path
+  bandwidth NOT in p3_pp-validated parameter space at non-fixture n;
+  Layer 3 sub-component 3b operational distinctive.** Asymmetric
+  disclosure vs S22 kpss_test (which did NOT surface analogous KPSS
+  triage-path bandwidth divergence — KPSS triage uses `nlags="auto"`
+  at adf_test.py line 532 ALSO not in pinned-LAG=5 audit parameter
+  space) ACCEPTED at S23 per Chat probing question disposition:
+  empirical discovery at S23 Step 0 not S22 Step 0; retroactive S22
+  amendment violates CHAT RATIFICATION #4 independent sequential;
+  absorption #3 dispositions retroactive S22 kpss_test Q-A disclosure
+  amendment candidate (symmetric to S23 disclosure) under full
+  structure visibility.
+
+**Triple-role disclosure section (institutional-grade per S22 dual-
+role precedent extended for 3d tie-breaker role; operational
+coupling explicit):** Per `engine/techniques/pp_test.py` module
+docstring lines 9-15 (verbatim): *"Tries in order: 1.
+`statsmodels.tsa.stattools.phillips_perron` (statsmodels ≥ 0.14); 2.
+`arch.unitroot.PhillipsPerron`; 3. A manual Z(t) implementation
+using Newey-West HAC correction. Exposes `_run_pp_single(clean,
+regression, lags)` for the triage path in `adf_test.py`."*
+Operational consequence:
+
+- **Standalone-technique role** — direct ribbon `pp_test` invocation
+  (or pane_pp_test / udf_pp_test); two-layer framing applies; Layer
+  1 math layer (backend selected by dispatcher at runtime; arch-path
+  audit-validated, statsmodels-path + manual-path unverified) +
+  Layer 2 engine orchestration. Audit-time backend was
+  arch.PhillipsPerron per audit Diagnostics; statsmodels-path +
+  manual-path NOT audit-validated.
+- **3b parallel-test helper-export role** — `_run_pp_single` helper
+  (lines 172-208) invoked by `adf_test.py`'s `_run_triage` line 535
+  (`pp = _run_pp_single(clean, pp_trend, lags=None)`); invocation
+  pattern alongside ADF + KPSS on same fixture per S21 adf_test
+  entry Layer 3 sub-component 3b enumeration; pp_trend mapping
+  ("ct" if ADF regression "ct" else "n" if regression in {n, nc}
+  else "c") per adf_test.py lines 533-534; lags=None resolves to
+  "auto" → Schwert (2/9) rule.
+- **3d CONFLICTING tie-breaker role** — SAME `_run_pp_single` output
+  consumed by adf_test.py `_run_triage` lines 559-565 for tie-
+  breaker resolution when joint ADF + KPSS verdict surfaces
+  CONFLICTING. Tie-breaker logic verbatim per adf_test.py:
+  *"PP agrees with ADF (unit root rejected)" if PP rejects null;
+  "PP agrees with KPSS (unit root not rejected)" if PP fails to
+  reject.* Engine-specific tie-breaker heuristic; correctness depends
+  on PP rejection logic appropriateness for tie-breaking between
+  ADF + KPSS disagreement.
+- **Cross-reference:** S21 adf_test §2.5 entry (line 2233) cites
+  `_run_pp_single from techniques.pp_test` at Layer 3 sub-component
+  3b (line 2388) AND PP tie-breaker logic at Layer 3 sub-component
+  3d (lines 2402-2408); S22 kpss_test §2.5 entry (line 2683) cites
+  reciprocal cross-reference precedent at lines 2750-2753; S23
+  pp_test entry reciprocally cites adf_test joint triage as helper-
+  consumer per institutional-grade disclosure (extending S22 precedent
+  for triple-role coupling).
+- **Retraction surface compounding (THREE publication contexts):**
+  pp_test errors propagate to (i) standalone pp_test publication
+  output; (ii) adf_test ribbon joint verdict publication output via
+  3b parallel-test invocation; (iii) adf_test ribbon tie-breaker
+  resolution via 3d CONFLICTING disposition. Compounds beyond S22
+  kpss_test dual-role retraction surface; see Q-D below.
+
+**Engine-extends-beyond-harness pattern characterization (NEW per §4.7
+Forward Q1 Step 0 discipline forward observation; THIRD OBSERVATION
+completing codification refinement triad per A3 second-observation
+tightening precedent threshold satisfied at n=3):** pp_test engine
+module is NOT harness-bypasses-engine outlier (S14a p3_ccf + S18
+p3_gcc_phat pattern); engine module uses SAME `arch.unitroot.PhillipsPerron`
+function as harness validates at base config (statsmodels-path +
+manual-path are engine-specific extensions). Pattern is engine-
+extends-beyond-harness AT LAYER 1 SCALE via BACKEND-DISPATCHER
+variant — engine has fallback chain across THREE underlying library
+implementations whereas harness invokes ONE fixed library. Distinct
+from S21 adf_test engine-extends-beyond-harness AT LAYER 3 SCALE
+(entirely new joint triage sub-system) AND S22 kpss_test engine-
+extends-beyond-harness AT LAYER 2 SCALE (orchestration only). **§4.7
+codification refinement triad EMPIRICALLY COMPLETE per A3 design-
+class second-observation tightening precedent threshold at n=3
+observations distinguishing:**
+(i) Layer 3 extension scale (S21 adf_test) — DRAMATIC extension via
+    entirely new computational sub-system
+(ii) Layer 2 extension scale (S22 kpss_test) — MODERATE extension
+     via orchestration only
+(iii) Layer 1 extension scale (S23 pp_test) — BACKEND-DISPATCHER
+      variant via fallback chain across underlying implementations
+
+**Workstream B §4.7 codification refinement candidate ratified for
+next amendment cycle** (Workstream B candidate B per S23 commit
+message banking; separate lane from §19.4 absorption #3).
+
+**Reference:** R `urca::ur.pp` (urca 1.3.4); type="Z-tau";
+model="constant"
+**Verdict:** PASS Pattern J widening (closed-form with internal HAC
+kernel divergence accommodated; Layer 1 only; see Validation claim
+scope for Layer 2 + Triple-role coverage)
+**Audit:** `tools/reference_parity/reports/p3_pp_audit.md`
+**Audit date:** 2026-04-29
+**test_statistic (Z(τ)) abs diff:** 2.09e-06 (TSL -9.25345071447954
+vs Reference -9.25345280545195; rel diff 2.26e-07)
+**Tolerance class:** closed_form (within ladder accommodating Pattern
+J widening per audit Pattern J observation lines 36-43)
+
+**Source files (TRIPLE-ROLE + BACKEND-DISPATCHER + Pattern J overlay
+per S23 α + αa-conditional framing):**
+`tools/reference_parity/harness/checks/p3_pp.py` lines 73-87
+(harness TSL arm invokes `arch.unitroot.PhillipsPerron(y, trend="c",
+lags=LAG=5)` directly; comment line 76-78 "statsmodels >= 0.14
+phillips_perron may not exist on this Python; arch is installed";
+returns test_statistic + p_value + lags + method)
++ `tools/reference_parity/harness/checks/p3_pp.py` lines 89-114
+(harness reference arm invokes R `urca::ur.pp(y, type="Z-tau",
+model="constant", use.lag=5)` via RBridge; extracts test_statistic
++ 5pct critical value)
++ `engine/techniques/pp_test.py` lines 70-103 (Layer 1 backend-
+dispatcher: `_run_pp_test` tries statsmodels.tsa.stattools.phillips_perron
+→ arch.unitroot.PhillipsPerron → `_manual_pp` fallback chain;
+harness validates arch path specifically; statsmodels-path + manual-
+path engine-specific extensions)
++ `engine/techniques/pp_test.py` lines 106-169 (Layer 2 manual
+fallback: `_manual_pp` 64 LOC Newey-West Bartlett kernel
+implementation; OLS for ρ̂ lines 121-122 + Schwert (2/9) auto-
+bandwidth line 128 + LRV via Bartlett kernel lines 132-138 + PP
+correction lines 146-147 + MacKinnonP p-value lines 149-160 +
+hardcoded critical values per regression lines 162-167)
++ `engine/techniques/pp_test.py` lines 172-208 (3b/3d helper-export:
+`_run_pp_single` thin helper for triage path; docstring "same shape
+as `_run_adf_single` / `_run_kpss_single` so the triage path can
+consume all three uniformly")
++ `engine/techniques/pp_test.py` lines 211-434 + 45-67 + 253-264 +
+274-368 + 372-422 (Layer 2 standalone orchestration: `run()` main
+entry lines 211-434 + `_prepare_series` NaN handling lines 45-67 +
+4-option regression allowlist gating lines 253-264 per CAI Phase 2
+Session 17 fix F-ST-PP-REGRESSION + per-series loop lines 274-368 +
+result formatting + significance disclosure + interpretation +
+audit_fields construction lines 372-422)
++ `engine/techniques/pp_test.py` lines 9-15 (TRIPLE-ROLE +
+BACKEND-DISPATCHER engine module docstring verbatim: backend-
+dispatcher fallback chain disclosure + helper-export disclosure for
+adf_test triage path)
++ `engine/techniques/adf_test.py` lines 510-512 (Layer 3 imports:
+`from techniques.kpss_test import _run_kpss_single` + `from
+techniques.pp_test import _run_pp_single`; local imports per inline
+comment "so unit-test/UDF paths don't eagerly import arch/kpss")
++ `engine/techniques/adf_test.py` lines 533-535 (Layer 3 sub-
+component 3b parallel invocation: pp_trend mapping per adf_test
+regression space + `pp = _run_pp_single(clean, pp_trend, lags=None)`;
+lags=None resolves to "auto" → Schwert (2/9) rule)
++ `engine/techniques/adf_test.py` lines 559-565 (Layer 3 sub-
+component 3d CONFLICTING tie-breaker: pp_note construction per PP
+rejection logic appropriateness for ADF + KPSS disagreement
+resolution)
++ `tools/reference_parity/reports/p3_pp_audit.md`
+
+**Validation claim scope (TIER II.BIT-EXACT-LOOSE + TIER V PATTERN J
+B.2 OVERLAY + TRIPLE-ROLE + BACKEND-DISPATCHER per S23 α + αa-
+conditional disposition):** TSL pp_test output relies on two layered
+computations within standalone-technique role (Layer 1 backend-
+dispatcher implementation math + Layer 2 engine orchestration) PLUS
+triple-role helper-export coupling (3b parallel + 3d tie-breaker) at
+adf_test ribbon publication context. p3_pp audit validates Layer 1
+arch-path (`arch.unitroot.PhillipsPerron`) vs R urca::ur.pp at single
+seeded fixture (stationary AR(1), φ=0.7, σ=1.0, T=500, seed=42,
+burn-in 100, LAG=5 bandwidth pinned both sides, trend="c");
+test_statistic metric measures arch.PhillipsPerron Z(τ) output vs
+urca::ur.pp Z(τ) agreement (abs diff 2.09e-06 PASS within Pattern J
+widening accommodation), NOT engine module orchestration correctness,
+NOT statsmodels-path / manual-path correctness, NOT triple-role
+helper-export correctness.
+
+- **Layer 1 — arch.PhillipsPerron math layer (validated within
+  Pattern J widening):** PASS Pattern J widening at closed_form
+  tolerance (abs diff 2.09e-06; rel diff 2.26e-07) against canonical
+  R `urca::ur.pp` reference; closed-form Newey-West correction to
+  Dickey-Fuller t-statistic. Pattern J B.2 internal-default
+  divergence accommodation per audit Pattern J observation: kernel
+  weights (triangular vs Bartlett vs identical) + residual variance
+  divisor (n-1 vs n-k) differ at sub-1e-6 levels; 1e-3 abs / 1e-2
+  rel ladder accommodates without masking real regressions.
+- **Layer 1 backend-dispatcher alternatives (validation scope
+  unverified):**
+  - statsmodels.phillips_perron path (preferred per pp_test.py line
+    78-87 fallback order): NOT exercised at audit time (statsmodels
+    < 0.14 on audit Python); validation pending statsmodels ≥ 0.14
+    environment + cross-check against arch path
+  - `_manual_pp` path (lines 106-169 fallback): NOT exercised at
+    audit time (arch installed per audit Diagnostics); validation
+    pending environment without arch + cross-check against arch path
+    AND/OR against urca reference
+- **Layer 2 — engine pp_test orchestration (validation scope
+  conditional):**
+  - 4-option regression allowlist gating (lines 253-264; CAI Phase 2
+    Session 17 fix F-ST-PP-REGRESSION): appropriateness of allowlist
+    scope for published-research input validation; 4 options ("c",
+    "ct", "n", "nc") vs kpss_test 2 options ("c", "ct") — broader
+    parameter space requires correspondingly broader expert review
+  - `_prepare_series` NaN handling (lines 45-67): edge NaN stripping
+    + interior NaN linear interpolation correctness (analogous to
+    kpss_test pattern)
+  - Per-series loop (lines 274-368): multi-series invocation pattern
+    correctness; first-series interpretation_dict capture for multi-
+    series cases (lines 294-323)
+  - Result formatting + significance disclosure (lines 372-422):
+    significance_level threshold logic + decision flag construction
+    + critical_values_ordered representation + interpretation block
+    construction + method field disclosure (backend selected at
+    runtime) + audit_fields significance disclosure
+- **Triple-role helper-export — `_run_pp_single` (lines 172-208;
+  validation scope conditional + cross-references S21 Layer 3 sub-
+  components 3b + 3d):**
+  - 3b helper-export contract correctness: returned dict structure
+    (stat, pvalue, used_lag, critical_values_ordered, method,
+    decision_h0_rejected) consumed by adf_test `_run_triage` per
+    S21 entry Layer 3 sub-component 3b enumeration; contract
+    correctness impacts adf_test joint verdict computation
+  - 3d helper-export tie-breaker contract correctness: SAME returned
+    dict consumed by adf_test `_run_triage` lines 559-565 for
+    CONFLICTING tie-breaker; pp_rej derived from pvalue < significance
+    drives tie-breaker disposition; correctness impacts adf_test
+    ribbon tie-breaker resolution
+  - Helper-export error path correctness: error capture (lines 187-
+    192 + 196-198) propagates to adf_test triage error handling
+  - **Triage-path bandwidth divergence:** `_run_pp_single` invoked
+    by triage with `lags=None` (adf_test line 535) → "auto" →
+    Schwert (2/9) → varies with n; Layer 1 fixture validates pinned
+    LAG=5 only; triage-path operational behavior NOT in audit
+    parameter space at non-fixture n
+
+#### Disclosure pattern (i) — Research note footnote (Tier II.bit-exact-loose + Pattern J B.2 overlay + triple-role)
+
+> This analysis uses TSL technique `pp_test`, cross-package PASS
+> validated against R `urca::ur.pp` (urca 1.3.4) per Phase 3 audit
+> dated 2026-04-29 (test_statistic abs diff 2.09e-06 within Pattern
+> J widening accommodation for internal HAC kernel divergence). TSL
+> output relies on two-layer computation within standalone-technique
+> role (Layer 1 backend-dispatcher selecting statsmodels/arch/manual
+> Phillips-Perron implementation + Layer 2 engine orchestration);
+> Layer 1 arch-path bit-exact-loose validated, statsmodels/manual
+> alternatives + Layer 2 conditional on expert review. Engine module
+> is triple-role: also exposes `_run_pp_single` helper to
+> `adf_test.py` triage at 3b parallel + 3d CONFLICTING tie-breaker.
+> Pre-Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier II.bit-exact-loose + Pattern J B.2 overlay + triple-role)
+
+> Methodology: TSL technique `pp_test` validated per Phase 3
+> reference parity infrastructure under Tier II.bit-exact-loose +
+> Tier V Pattern J B.2 overlay framing with triple-role helper-
+> export disclosure. **Reference:** R `urca::ur.pp` (urca 1.3.4);
+> type="Z-tau"; model="constant". **Verdict:** PASS Pattern J
+> widening at closed_form tolerance; test_statistic abs diff
+> 2.09e-06 (TSL -9.25345071447954 vs reference -9.25345280545195;
+> rel diff 2.26e-07); within ladder accommodating internal HAC
+> kernel weights + residual variance divisor differences at sub-
+> 1e-6 levels per audit Pattern J observation. **Audit date:**
+> 2026-04-29. **Fixture:** seeded single-fixture configuration
+> (stationary AR(1), φ=0.7, σ=1.0, T=500, seed=42, burn-in 100,
+> bandwidth pinned 5, trend="c"); parameter-sensitivity coverage
+> NOT established at this validation tier; Q3b extension pending.
+> Reference selection + tolerance specification AI-assisted with
+> user ratification. **Two-layer + Pattern J B.2 overlay framing
+> scope:** parity validation covers Layer 1 arch-path
+> (`arch.unitroot.PhillipsPerron`) vs canonical R reference at
+> closed_form ladder; Pattern J B.2 overlay accommodates internal
+> HAC kernel divergence (Bartlett kernel + Schwert auto-bandwidth);
+> Layer 1 statsmodels-path + manual-path alternatives NOT validated;
+> Layer 2 (engine orchestration: 4-option regression allowlist
+> gating per CAI Phase 2 Session 17 fix + NaN handling via
+> `_prepare_series` + per-series loop + backend-dispatcher method
+> recording + significance disclosure + interpretation) NOT parity-
+> validated and engine-specific. **Triple-role engine module:**
+> `engine/techniques/pp_test.py` plays THREE operational roles per
+> module docstring lines 9-15: (a) standalone-technique role for
+> direct ribbon invocation (two-layer framing applies); (b) 3b
+> parallel-test helper-export role via `_run_pp_single` (lines 172-
+> 208) called by `adf_test.py`'s `_run_triage` line 535 as Layer 3
+> sub-component 3b "parallel KPSS + PP test invocation" per S21
+> adf_test entry codification; (c) 3d CONFLICTING tie-breaker role
+> via SAME `_run_pp_single` consumed by `adf_test.py` `_run_triage`
+> lines 559-565 for tie-breaker resolution when joint ADF + KPSS
+> verdict is CONFLICTING. pp_test correctness propagates to THREE
+> publication contexts (standalone + adf_test ribbon parallel verdict
+> + adf_test ribbon tie-breaker resolution). Pre-Path α expert
+> review status; expert review pending [target date].
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier II.bit-exact-loose + Pattern J B.2 overlay + triple-role + audit citation)
+
+> `pp_test` validation: TSL Tier II.bit-exact-loose with Tier V
+> Pattern J B.2 overlay (internal-default divergence accommodation)
+> under triple-role helper-export framing. **Reference:** R
+> `urca::ur.pp` (urca 1.3.4); type="Z-tau"; model="constant".
+> **Audit:** `tools/reference_parity/reports/p3_pp_audit.md` dated
+> 2026-04-29. **Verdict:** PASS Pattern J widening at closed_form
+> tolerance; test_statistic abs diff 2.09e-06 / rel diff 2.26e-07.
+> Pattern J B.2 overlay per scope_reframing §2 line 176-177
+> (internal-default divergence; p3_egarch is existing exemplar; p3_pp
+> NOT in original §2 enumeration — added per S23 α disposition under
+> §2 line 236-237 overlay permission). **Fixture:** stationary AR(1),
+> φ=0.7, σ=1.0, T=500, seed=42, burn-in 100, bandwidth pinned 5,
+> trend="c"; single-seeded fixture; parameter-sensitivity coverage
+> NOT established at this validation tier; Q3b extension scope.
+> **Two-layer-framing risk attribution:** Layer 1 arch-path
+> (arch.PhillipsPerron) bit-exact-loose validated within Pattern J
+> widening; attribution from pp_test output for parameter
+> configurations matching fixture-similar conditions conditional on
+> (a) Layer 1 backend-dispatcher selecting arch path (statsmodels-
+> path + manual-path NOT validated); (b) Layer 2 engine orchestration
+> correctness (4-option regression allowlist + NaN handling + per-
+> series loop + backend-dispatcher method recording + significance
+> disclosure + interpretation; validation scope per
+> `engine/techniques/pp_test.py` lines 211-434 + 45-67 + 253-264 +
+> 274-368 + 372-422). **Triple-role retraction surface compounding
+> (THREE publication contexts):** pp_test engine module plays
+> standalone-technique role AND 3b parallel-test helper-export role
+> AND 3d CONFLICTING tie-breaker role per module docstring lines
+> 9-15 verbatim; `_run_pp_single` (lines 172-208) consumed by
+> `adf_test.py` `_run_triage` at line 535 (3b) AND lines 559-565
+> (3d); pp_test errors propagate to standalone publication output
+> + adf_test ribbon joint verdict publication output + adf_test
+> ribbon tie-breaker resolution. **Triage-path bandwidth divergence
+> from Layer 1 fixture:** triage invokes `_run_pp_single` with
+> `lags=None` → "auto" → Schwert (2/9) → varies with n; Layer 1
+> fixture validates pinned LAG=5 only; triage-path operational
+> behavior NOT in audit parameter space at non-fixture n. Pre-Path
+> α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier II.bit-exact-loose + Pattern J B.2 overlay + triple-role)
+
+> `pp_test` cross-package PASS validated against R `urca::ur.pp`
+> within Pattern J widening (Layer 1 arch-path; bit-exact-loose
+> at 2e-6 abs); Layer 1 statsmodels/manual alternatives + Layer 2
+> engine orchestration pending expert review. Triple-role engine
+> module: also exposes `_run_pp_single` helper to `adf_test.py`
+> triage at 3b parallel + 3d tie-breaker. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (R urca::ur.pp 1.3.4;
+  type="Z-tau"; model="constant") per audit Reference field
+  (verbatim). Audit date (2026-04-29) per audit Date field (verbatim).
+  Verdict + Pattern (PASS Pattern J widening) per audit Verdict line
+  (verbatim). Tolerance class (closed_form) per audit Tolerance class
+  line (verbatim). Numeric metric (abs diff 2.09e-06; rel diff
+  2.26e-07; TSL -9.25345071447954 vs Reference -9.25345280545195) per
+  audit Result table (verbatim). Fixture (AR(1) φ=0.7 σ=1.0 T=500
+  seed=42 burn-in 100 bandwidth=5 trend="c") per audit Fixture +
+  Diagnostics sections (verbatim). Pattern J B.2 overlay
+  characterization per scope_reframing §2 line 176-177 (internal-
+  default divergence; p3_egarch exemplar) + §2 line 236-237 (Tier V
+  overlay permission); p3_pp NOT in original §2 Tier II.bit-exact OR
+  Tier V enumeration — added per S23 α disposition under post-S6
+  inference grounded at audit Pattern J observation explicit
+  (verbatim audit lines 36-43). Two-layer + triple-role +
+  backend-dispatcher + Layer 1 engine-extends-beyond-harness framing
+  per S23 STOP 2 Step 0 empirical investigation (verbatim re-Reads
+  of p3_pp_audit.md + p3_pp.py harness + 435 LOC pp_test.py engine +
+  adf_test.py `_run_triage` lines 506-565) + S14b two-layer-amendment
+  + S14c upstream + S15/S17/S18 downstream + S21 parallel-tests +
+  S22 dual-role topology precedent + α tier + αa-conditional A10
+  disposition. Layer 2 (lines 211-434 + 45-67 + 253-264 + 274-368 +
+  372-422) sub-components empirically grounded per Step 0 (d)
+  verbatim line ranges. Triple-role engine module characterization
+  per module docstring lines 9-15 verbatim. Helper-export consumption
+  by adf_test.py `_run_triage` at 3b (line 535) + 3d (lines 559-565)
+  per S21 adf_test entry Layer 3 sub-components 3b + 3d codification
+  (cross-reference). Catalog mapping (1:1) verified per audit Wrapper
+  field sole engine module reference. **A9 Class B revised default
+  discipline operating observation:** S23 Step 0 STOP 2 working-
+  hypothesis-anchors empirically CONFIRMED on triple-role + backend-
+  dispatcher (NOT diverging); tier disposition non-obvious per CHAT
+  RATIFICATION #2 pre-ratification-declined → Step 0 surfaces α/β/γ
+  tier disposition options → Chat ratifies α. Class B counter post-
+  S23 n=4 ACTIVE unchanged; no instance increment because no
+  complexity-assumption failure manifested at S23 trigger or entry
+  text. **Pattern maturation observation: A9 Class B revised default
+  discipline successfully shifts operation from reactive-catch
+  (S15+S17+S21+S22 precedent: complexity-assumption failures
+  manifested at trigger drafting, caught at Step 0 empirical re-Read,
+  re-disposition cycle absorbed via Option II Stage 3-4) to
+  proactive-prevention (S23 first-instance: tier disposition pre-
+  ratification-declined at trigger drafting under CHAT RATIFICATION
+  #2; α/β/γ options surfaced at Step 0 per design; no manifest
+  failure to catch).** Discipline maturation forward-instrumentation
+  candidate for §19.4 absorption #3 codification refinement
+  (institutional discipline observation; NOT a Class B sub-pattern
+  subdivision per Previous Chat 1.3 walkback collapsing B.i/B.ii to
+  single Class B with bidirectional manifestation). **A9 Class A
+  6th-instance candidate caught at S23-pre Step 0 (b):** Doc 2
+  handoff script (Previous Chat authored) asserted 'Tier expected
+  II.bit-exact per scope_reframing §2 line 130 (p3_pp explicitly
+  listed)' without empirical re-Read; empirical scope_reframing §2
+  line 127-131 Tier II.bit-exact 12-wrapper enumeration shows p3_pp
+  NOT in list — schema-misattribution failure mode analogous to
+  Sub-pattern 4 (S18 tier-enumeration omission Instance #5). Class A
+  counter post-S23 candidate n=6 pending §19.4 absorption #3
+  codification (deferred per CHAT RATIFICATION standard pattern).
+  **Sub-pattern variant distinctive: catch at S23-pre Step 0 (b)
+  empirical re-Read per A6 BLOCKING + A9 Class A mitigation
+  discipline operating proactively; failure pattern did NOT manifest
+  in S23 trigger or entry text.** Absorption #3 codification
+  distinguishes (i) Class A instances where failure manifested in
+  committed entry text and amended at next sub-session (S11 + S12 +
+  S16-absorption + S18 precedent: reactive-catch operation) vs (ii)
+  Class A candidate where failure caught at Step 0 pre-trigger
+  empirical re-Read (S23 first-instance: proactive-prevention
+  operation). Sub-pattern variant codification candidate for
+  absorption #3 — pairs with A9 Class B revised default maturation
+  observation above; both reflect discipline maturation from
+  reactive-catch to proactive-prevention operation as institutional
+  discipline observation. **Engine-extends-beyond-harness pattern
+  THIRD observation per §4.7 forward instrumentation — codification
+  refinement triad EMPIRICALLY COMPLETE at n=3 per A3 second-
+  observation tightening precedent threshold satisfied:** Layer 3
+  (S21) + Layer 2 (S22) + Layer 1 backend-dispatcher (S23);
+  Workstream B §4.7 amendment cycle candidate B per S23 commit
+  banking. Verify-state-at-first-consumption sub-discipline 17th
+  instance application (forward-at-authoring + Step 0 confirmation
+  of triple-role + backend-dispatcher working hypothesis under §4.6
+  Option II workflow Stage 3 mature operation; matures from S22 13th-
+  instance Class B different-topology-than-expected falsification
+  with confirmation-rather-than-falsification observation now codified
+  as standard operation under revised default). **Q-A bullet density
+  acknowledgment:** Q-A density at S23 elevated per first-instance
+  novelty enumeration sub-section pattern + triple-role + Pattern J
+  overlay + backend-dispatcher + Layer 1 engine-extends-beyond-
+  harness + bandwidth divergence content compounding. Workstream B
+  amendment cycle codification candidate for Q-A density convention
+  if pattern recurs at S24+ Q1 entries (candidate C per S23 commit
+  message banking).
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at ninth-technique selection (user ratified
+  pp_test under Tier 2 case-against framing per S22-close proposal
+  as "Block 12 Stationarity Tests completion second catalog block
+  fully Q1-amended; sequential disposition per (c) γ continuation"
+  + S23-pre meta ratification (α) Mark 3 unprompted case-against
+  discipline operative; case-against weighted but not invalidating
+  per efficient ratification disposition). Pro-forma elements present
+  per Mark 3 efficient-ratification pattern (operating-context
+  preservation per Workstream B §5.3) **per Workstream B §1.4 Q-B
+  operational pattern codification at S20**. **Q-B pattern persists
+  at n=10 across S12 + S13 + S14b + S14c + S15 + S17 + S18 + S21 +
+  S22 + S23; well past n=4 codification candidate threshold; §1.4
+  codified observation refinement at empirical pattern accumulation**
+  (n=7 at §1.4 S20 codification → n=8 at S21 → n=9 at S22 → n=10 at
+  S23 reinforcement; Workstream B amendment cycle candidate A per
+  S23 commit banking). Not pro-forma across all upstream decisions
+  for this technique (Tier disposition required substantive STOP 2
+  cycle + α/β/γ disposition options ratification + (α) Tier II.bit-
+  exact-loose + Tier V Pattern J B.2 overlay first-instance precedent
+  ratified + αa-conditional A10 Sub-class 2a taxonomy refinement
+  modification + NEW Findings (i) + (ii) inclusion ratifications +
+  asymmetric disclosure probing question disposition + dedicated
+  novelty enumeration sub-section 6-sub-section framing ratified;
+  substantive Chat engagement at structural-decision points
+  empirically observed).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Yes for **Layer 1 arch-path (arch.PhillipsPerron math layer)** per
+  PASS Pattern J widening verdict at closed_form tolerance
+  (test_statistic abs diff 2.09e-06; closed-form Newey-West correction
+  to Dickey-Fuller t-statistic) against canonical R `urca::ur.pp`
+  reference; reproducibility + cross-package agreement institutional-
+  grade evidence within Pattern J widening accommodation.
+  **Conditional for Layer 1 backend-dispatcher alternatives** —
+  statsmodels.phillips_perron path + `_manual_pp` fallback require
+  expert review of: equivalence to arch-path at base config OR cross-
+  package agreement at non-arch-installed environments. **Conditional
+  for Layer 2 (engine pp_test orchestration)** — requires expert
+  review of engine implementation OR engine-output cross-check
+  against harness arch.PhillipsPerron at base pinned config for
+  variant correctness review (4-option regression allowlist
+  appropriateness + NaN handling via `_prepare_series` correctness +
+  per-series loop pattern + backend-dispatcher method disclosure +
+  significance disclosure construction + interpretation block
+  construction). **Conditional for Triple-role helper-export** —
+  requires expert review of: `_run_pp_single` returned-dict contract
+  correctness (consumed by adf_test._run_triage at 3b parallel
+  invocation AND 3d CONFLICTING tie-breaker); error path correctness
+  (consumed by adf_test triage error handling); critical_values_ordered
+  ordering correctness; decision_h0_rejected logic appropriateness
+  for both 3b parallel-test verdict computation AND 3d tie-breaker
+  resolution; triage-path bandwidth divergence (lags=None → auto →
+  Schwert (2/9)) operational appropriateness at non-fixture n.
+  **Critical Q-C framing per triple-role context:** published-research
+  user invoking `pp_test` directly receives standalone single-test
+  output (two-layer framing applies); published-research user
+  invoking `adf_test` from ribbon receives joint verdict that
+  CONSUMES pp_test._run_pp_single output at BOTH 3b parallel verdict
+  AND 3d CONFLICTING tie-breaker resolution; defensibility to all
+  three audiences (published audience + Morgan Stanley compliance +
+  Path α expert reviewer) UNDER Layer 1 backend-dispatcher + Layer 2
+  + Triple-role helper-export expert review acknowledgment. Defensible
+  to all three audiences with disclosure language as drafted: published
+  audience (two-layer + triple-role + Pattern J overlay framing
+  transparent with backend-dispatcher caveat + helper-export caveat
+  + triage-path bandwidth caveat); Morgan Stanley compliance review
+  (precise audit citation + tier taxonomy + Layer 1 / Layer 2 /
+  Triple-role scope delineation + Pattern J B.2 overlay justification
+  + triple-role retraction surface compounding disclosure); external
+  expert reviewer at Path α close (verbatim audit numerics + honest
+  disclosure of Pattern J widening + backend-dispatcher alternatives
+  + Layer 2 orchestration + triple-role helper-export contract scope
+  + triage-path bandwidth divergence; Q3b extension pending).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  Medium-HIGH compounding ACROSS THREE PUBLICATION CONTEXTS. pp_test
+  is canonical stationarity testing methodology (companion to ADF
+  + KPSS for joint stationarity inference; serial-correlation-
+  robust Z(τ) statistic via Newey-West correction; widely used in
+  joint stationarity inference per published research + risk model
+  documentation). **Layer-specific + triple-role retraction surface
+  (per S23 two-layer + triple-role + Pattern J overlay framing):**
+  - Layer 1 arch-path (arch.PhillipsPerron math layer within Pattern
+    J widening): LOW; PASS verdict against canonical R urca::ur.pp
+    at closed_form tolerance; Pattern J B.2 internal-default
+    divergence (HAC kernel + variance divisor) accommodated; expert
+    review surfacing upstream error would affect pp_test specifically
+    (NO multi-map propagation risk; 1:1 catalog↔wrapper).
+  - Layer 1 backend-dispatcher alternatives (statsmodels-path +
+    `_manual_pp` path): MEDIUM; alternative implementations NOT
+    audit-validated; runtime backend selection drives published
+    output; expert review surfacing material divergence in
+    statsmodels-path OR `_manual_pp` from arch-path baseline would
+    invalidate pp_test output specifically when alternative path
+    selected at runtime.
+  - Layer 2 (engine pp_test orchestration: 4-option regression
+    allowlist + NaN handling + per-series loop + backend-dispatcher
+    method recording + significance disclosure + interpretation):
+    MEDIUM analogous to S14b/S15/S21/S22 Layer 2 (engine
+    implementation equivalence) + PP-specific 4-option regression
+    allowlist scope (broader than kpss_test 2-option) + interpretation
+    block construction + significance disclosure formula.
+  - **Triple-role helper-export (`_run_pp_single` at 3b + 3d):
+    MEDIUM-HIGH-CRITICAL COMPOUNDING ACROSS THREE PUBLICATION
+    CONTEXTS** — pp_test correctness affects (i) standalone publication
+    output (the typical pp_test ribbon invocation use case); (ii)
+    adf_test ribbon joint verdict publication output via 3b parallel-
+    test invocation (the S21 adf_test ribbon-default publication
+    context per `_is_triage_mode` dispatch; KPSS shares this
+    compounding via S22 dual-role); (iii) adf_test ribbon tie-
+    breaker resolution via 3d CONFLICTING disposition (the S21 Layer
+    3 sub-component 3d operational distinctive; UNIQUE to pp_test
+    among triage members — KPSS does NOT participate in 3d tie-
+    breaker). Expert review surfacing material errors in
+    `_run_pp_single` contract (returned-dict structure; error path;
+    critical_values_ordered ordering; decision_h0_rejected logic)
+    would invalidate BOTH the standalone "stationarity testing via
+    PP" claim AND the adf_test "joint ADF + KPSS + PP verdict" claim
+    AND the adf_test "CONFLICTING tie-breaker resolution" claim
+    (Layer 3 sub-component 3d "PP tie-breaker for CONFLICTING
+    verdicts" consumes this helper UNIQUELY). **Topologically
+    distinct from S14b/S15/S17/S18 Layer 2 MEDIUM downstream
+    framings, S14c Layer 2b MEDIUM-HIGH upstream framing, S21 Layer
+    3 MEDIUM-HIGH-CRITICAL parallel-tests framings, AND S22 Layer
+    2 + Dual-role MEDIUM-HIGH compounding framing:** S23 Triple-
+    role propagates pp_test errors INTO adf_test ribbon publication
+    context at TWO distinct operational coupling points (3b
+    parallel + 3d tie-breaker); operationally distinct risk surface
+    from single-coupling-point upstream/downstream/parallel-tests/
+    dual-role patterns. **Critical triple-role publication-context
+    elevation:** adf_test ribbon-default publication output IS the
+    joint verdict per `_is_triage_mode` dispatch (per S21 Layer 3
+    framing); pp_test errors via `_run_pp_single` propagate into
+    that publication output via 3b AND 3d operational coupling
+    points; expert review surfacing pp_test errors specifically also
+    invalidates adf_test ribbon publication output at both coupling
+    points, not just standalone pp_test output.
+  - **Triage-path bandwidth divergence retraction surface:** triage
+    invokes `_run_pp_single` with `lags=None` → "auto" → Schwert
+    (2/9) → varies with n; Layer 1 fixture validates pinned LAG=5
+    only; triage-path operational behavior NOT in audit parameter
+    space at non-fixture n; expert review surfacing bandwidth-
+    selection material divergence would invalidate triage-path
+    pp_test output at non-fixture n while leaving standalone
+    pinned-LAG operations intact (asymmetric retraction surface).
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; ninth technique to enter status per S23
+ratification; **THIRD Block 12 Stationarity Tests entry — Block 12
+FULLY Q1-AMENDED** (second catalog block to complete after Block 1
+Causality at S18; per-block continuation pattern from first-entry
+through completion at three-entry block instantiated; Block 1
+milestone forward instrumentation note at §19.4 lines 1086-1107
+refinement candidate for absorption #3 to characterize per-block
+continuation pattern at n=2 catalog block observations); **FIRST
+Tier II.bit-exact-loose + Tier V Pattern J B.2 overlay entry**
+(precedent for future Pattern J-affected wrappers entering §2.5;
+sub-class formalization forward instrumentation if S24+ surfaces
+second Pattern J overlay entry per A3 second-observation tightening
+precedent); **FIRST triple-role helper-export entry** (operationally
+distinct from S22 kpss_test dual-role; 3b parallel + 3d CONFLICTING
+tie-breaker compounding across THREE publication contexts);
+**FIRST dedicated novelty enumeration sub-section** (3a-3f six-
+sub-section framing; codification candidate for Workstream B §3
+addendum or §5.4 if S24+ Q1 entries replicate pattern per A3
+second-observation tightening precedent). **S23 two-layer +
+triple-role + backend-dispatcher + Pattern J overlay framing:
+Layer 1 arch-path (arch.PhillipsPerron vs R urca::ur.pp) bit-
+exact-loose PASS within Pattern J widening; Layer 1 statsmodels-
+path + manual-path alternatives NOT audit-validated, runtime
+backend selection drives published output; Layer 2 (engine pp_test
+orchestration) plausibly equivalent at base pinned config but
+variants engine-specific; Triple-role helper-export
+(`_run_pp_single` consumed by adf_test `_run_triage` at 3b + 3d)
+NOT parity-validated, engine-specific operational coupling driving
+compounded retraction surface across THREE publication contexts;
+triage-path bandwidth divergence from Layer 1 fixture asymmetric
+disclosure requires expert review.** **A9 Class B counter post-S23:
+n=4 ACTIVE** (unchanged; working hypothesis anchors empirically
+CONFIRMED at Step 0 per A9 Class B revised default discipline
+operating correctly; pattern matures from falsification-cycle to
+confirmation-cycle observation now codified as standard operation;
+**§19.4 absorption #3 deferred candidates:** (1) A9 Class B n=4
+codification reinforcement with single-pattern refinement per
+Previous Chat 1.3 walkback (B.i/B.ii collapse to bidirectional
+manifestation; NOT sub-pattern subdivision); (2) A9 Class B revised
+default discipline maturation observation (reactive-catch →
+proactive-prevention; institutional discipline forward
+instrumentation); (3) A10 Sub-class 2a taxonomy disposition (αa)
+keeps-2a-as-general-two-layer vs (αb) splits-2a-vs-2a-triple-role;
+n=2 empirical baseline (S22 kpss + S23 pp); (4) A10 Sub-class 2d
+codification (S21 three-layer-parallel-tests first-instance); (5)
+A9 Class A 5th sub-pattern accumulation (S18 tier-enumeration
+omission) + A9 Class A 6th-instance candidate (S23-pre Doc 2 tier-
+enumeration omission proactive-catch variant; reactive-vs-proactive
+sub-pattern variant codification); (6) Path A canonical lock 7th
+instance + elevation-candidate-absorption sub-mechanism 6th baseline
+observation; (7) Block 1 Causality milestone refinement + Block 12
+Stationarity Tests Q1 completion milestone (per-block continuation
+pattern characterization at n=2 catalog block observations); (8)
+Pattern J overlay first-instance forward-instrumentation thread
+(sub-class formalization candidate if S24+ surfaces second Pattern J
+overlay entry); (9) Retroactive S22 kpss_test Q-A disclosure
+amendment candidate (triage-path bandwidth divergence symmetric to
+S23 NEW Finding 2; CHAT RATIFICATION #4 independent sequential
+disposition deferred resolution under absorption #3 full structure
+visibility). **Workstream B amendment cycle separate-lane candidates**
+(NOT §19.4 absorption #3 scope): (A) §1.4 Q-B operational pattern
+n=7 → n=10 codification update; (B) §4.7 codification refinement
+triad EMPIRICALLY COMPLETE at n=3 per A3 second-observation
+tightening precedent threshold satisfied (Layer 1 backend-dispatcher
+S23 + Layer 2 S22 + Layer 3 S21); (C) novelty enumeration sub-
+section pattern codification at Workstream B §3 addendum or §5.4
+if S24+ Q1 entries replicate pattern; (D) β grant scope-tightening
+evaluation per Previous Chat 1.7 honest mark). **A9 Class A counter
+post-S23: n=5 ACTIVE + candidate n=6 pending absorption #3
+codification** (S23-pre Doc 2 handoff script tier-enumeration
+omission caught at S23-pre Step 0 (b) per A6 BLOCKING + A9 Class A
+mitigation discipline; Sub-pattern variant catch at Step 0 pre-
+trigger empirical re-Read; absorption #3 codifies reactive-vs-
+proactive sub-pattern variant). **Block 12 Stationarity Tests Q1
+work program COMPLETION milestone (second catalog block fully Q1-
+amended after Block 1 Causality at S18):** S21 adf_test + S22
+kpss_test + S23 pp_test = 3-entry Block 12 cumulative ~1300 net
+LOC across all entries; per-block continuation pattern from first-
+entry through completion at three-entry block instantiated;
+forward instrumentation for absorption #3 refinement of §19.4
+lines 1086-1107 Block 1 milestone characterizing per-block
+continuation pattern at n=2 catalog block observations.
+
+## §3 Unvalidated catalog techniques (66 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -3176,13 +4020,13 @@ descriptions, summaries).
 ### State Space / Filtering (4 unvalidated; kalman_filter + kalman_smoother validated separately)
 `local_level`, `local_linear_trend`, `particle_filter`, `structural_ts`
 
-### Stationarity / Tests (1 unvalidated; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22)
-`pp_test`
+### Stationarity / Tests (0 unvalidated; Block 12 FULLY Q1-AMENDED — second catalog block to complete per Q1 work program scope after Block 1 Causality at S18; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22; pp_test moved to §2.5 per Phase 7+ S23)
+(all 3 techniques moved to §2.5)
 
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 67 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test moved to §2.5; **Block 1 Causality FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; Block 12 Stationarity Tests Q1 work in progress with 2 entries per S21+S22; pp_test sole remaining Block 12 unvalidated**).
+**Total: 66 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests BOTH FULLY Q1-AMENDED — first and second catalog blocks to complete per Q1 work program scope; per-block continuation pattern instantiated at n=2 catalog block observations per S23 Block 12 completion**).
 
 ## §4 How to use this document
 
@@ -3225,7 +4069,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (67 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22 amendments):**
+**Tier 3 — UNVALIDATED (66 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
