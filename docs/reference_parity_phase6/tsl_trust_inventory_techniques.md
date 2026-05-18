@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 16 catalog techniques with Phase 7+ Q1 trust documentation
+- 17 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34 amendments)
-- 59 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37 amendments)
+- 58 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -8644,7 +8644,953 @@ only at S34 close per CONSTRAINT 1 NOT IN SCOPE; expiration
 semantics: absorption #5 candidate inventory accumulates through
 S34 close pending Chat disposition at S35 trigger).
 
-## §3 Unvalidated catalog techniques (59 entries; ID-only enumeration)
+### periodogram_spectral_density (Phase 7+ S37; SEVENTEENTH §2.5 entry; FIRST Frequency Domain / Signal block entry — FIFTH catalog block transition opens per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28 + Block 3 Decomposition at S34; FIRST Tier III Pattern A.1 same-library sub-class §2.5 entry; FIRST NEW Sub-class 2i candidate first-instance baseline per A3 first-instance precedent (n=1 baseline, NOT codification); §1.9 Filename divergence sub-pattern variant FIRST cross-block extension observation per Code S37 Step 0 surface; SINGLE-LAYER framing per S37 STOP 2 empirical investigation + α disposition under Tier III Pattern A.1 same-library self-test verdict; analogous to S31 classical_decompose Block 3 first-entry precedent at different Tier characterization scope; multi-anchor empirical correction at trigger working hypothesis per A9 Class A 18th-instance candidate banking at S37 commit message body forward state per Code Step 0 PROACTIVE-PREVENTION variant catch)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+III Pattern A.1 same-library sub-class** per S37 (α) Chat
+disposition. **Tier III Pattern A.1 characterization directly
+grounded** at `scope_reframing_s6_banking.md` lines 151-152 verbatim
+("**Tier III — Phase 3 same-library self-parity validated (Pattern
+A.1).** **18 wrappers** per P-3 v1.2.0 §1 (locked at scale)") +
+audit `p3_periodogram_audit.md` line 5 verbatim ("**Verdict:** PASS
+(Pattern A same-library bit-exact)") + audit line 17 verbatim ("Same-
+library self-test: TSL and reference both invoke `scipy.signal.periodogram`
+with identical arguments"); p3_periodogram explicitly within Tier
+III 18-wrapper Pattern A.1 enumeration locked at scale. **NOT Tier
+II.bit-exact** per trigger working hypothesis (Tier II.bit-exact
+scope per scope_reframing §2 line 130 12-wrapper enumeration is
+cross-package bit-exact; p3_periodogram is same-library self-test,
+not cross-package). Trigger working hypothesis Tier II.bit-exact
+SUPERSEDED at S37 Step 0 empirical Tier III ratification per Chat
+S37 STOP 2 Divergence 2 disposition. STOP 2 BLOCKING discharged on
+Tier anchor per Divergence 2 RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER + §4.7.A
+PRESENT variant 1 Harness-imports-library-directly mechanism per
+CHAT RATIFICATION Divergence/Confirmed 4 CONFIRMED at Step 0; NEW
+Sub-class 2i candidate first-instance baseline observation per
+(αa-S37) ratification):** periodogram_spectral_density is 1:1
+catalog↔wrapper mapping per `p3_periodogram_audit.md` audit Wrapper
+field (`engine/techniques/periodogram_spectral_density.py` sole
+engine module).
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S34
+n=8 PRESENT + n=1 REMEDIATED OBSERVATION per S37 banking per S30
+(G.1) generalized definitional scope codification + S36 §4.7.A
+REMEDIATED 5th variant status dimension extension orthogonal to
+mechanism variant dimension — §4.7.A pattern count tightening
+forward observation; banking only, NOT §4.7.A taxonomy modification
+at S37; NOT A9 Class A counter increment per S30 (G.1) codification
+distinction):**
+`tools/reference_parity/harness/checks/p3_periodogram.py` line 69
+imports `scipy.signal.periodogram` directly (`from scipy.signal
+import periodogram as sp_periodogram`) and invokes the library
+function at lines 71-74 with `fs=1.0, window="hann",
+detrend="linear", scaling="density"` arguments — harness does NOT
+invoke `periodogram_spectral_density.py::run()` engine entry point.
+`engine/techniques/periodogram_spectral_density.py` line 13 imports
+the SAME `scipy.signal.periodogram` primitive (`from scipy.signal
+import periodogram as sp_periodogram, get_window`) and invokes it
+at lines 82-88 within engine `run()` orchestration with preset-
+dispatched arguments (Balanced preset: `window='hann',
+detrend='linear', scaling='density'`). Harness + engine use SAME
+underlying library primitive (scipy.signal.periodogram); harness
+BYPASSES engine `run()` wrapper. §4.7.A variant 1 "Harness-imports-
+library-directly" manifestation per S30 (G.1) generalized
+definitional scope. **§4.7.A status PRESENT per S36 §4.7.A status
+dimension codification (NOT REMEDIATED)** — harness invokes scipy
+primitive directly; engine wraps + invokes same primitive within
+orchestration; code-path divergence active at runtime per HEAD
+verification. **Harness comment grounding (line 65-68 verbatim):**
+"Bypass wrapper output rounding by invoking scipy directly with the
+same arguments TSL's wrapper uses (Balanced preset: window='hann',
+detrend='linear', scaling='density')" — bypass is INTENTIONAL audit
+design choice for parameter resolution validation via same-library
+self-test. Post-S37 §4.7.A observations = n=8 PRESENT across §2.5
+entries (S14a granger + S18 gcc_phat + S26 denton_chowlin + S27
+loess + S31 classical_decompose + S32 mstl_decompose + S33
+stl_decompose + S37 periodogram_spectral_density) + n=1 REMEDIATED
+(S34 x13_seasonal_adjust per Phase 4 Session 2 2026-05-01 P4-2
+pathway (c) closure); **§4.7.A pattern count tightening forward
+observation at absorption #6 per A3 precedent** (NOT A9 Class A
+counter increment per S30 (G.1) generalized definitional scope
+codification — §4.7.A pattern observations track mechanism variant
++ status dimension accumulation distinct from A9 Class A empirical-
+state-assumption failure mode tracking).
+
+**A10 Sub-class disposition: NEW Sub-class 2i candidate first-
+instance baseline observation per (αa-S37) Chat ratification (A3
+first-instance precedent n=1 baseline; NOT codification):** S37
+periodogram_spectral_density surfaces NEW Sub-class 2i candidate at
+first-instance baseline observation per A3 precedent. Sub-class 2i
+definitional scope working hypothesis: **"Pattern A.1 same-library
+self-test bit-exact + §4.7.A PRESENT reimplementation-of-dispatch
+variant"** — Layer 1 scipy.signal.periodogram primitive invoked by
+both harness + engine (same-library self-test verifies parameter
+resolution round-trips scipy primitive without wrapper-introduced
+bugs per audit lines 16-22 verbatim) + Layer 2 engine orchestration
+adds preset config dispatch + NaN handling + dominant frequency
+identification + spectrum scaling additional computation NOT
+exercised by audit. Audit byte-identical agreement (freqs 0.0 abs/
+rel diff + psd 0.0 abs/rel diff per audit lines 11-14 verbatim)
+guaranteed by construction (both arms invoke same scipy primitive
+with identical args); audit verifies wrapper preprocessing +
+parameter resolution NOT cross-package math validation. Distinct
+from codified Sub-class 2a (αa) "general two-layer class" semantic
+(Tier II.bit-exact + cross-package framing; S22 + S23 + S28 + S31
+codified) + NEW Sub-class candidates 2f + 2g + 2h at Block 3 (Tier
+VI LAYERED algorithmic-non-uniqueness + Tier VI SINGLE-LAYER
+deterministic-implementation-difference + Tier VII SKIP-graceful +
+§4.7.A REMEDIATED + same-binary parity conditional) — Sub-class 2i
+NEW at Tier III Pattern A.1 same-library self-test + §4.7.A PRESENT
+reimplementation-of-dispatch combined scope. **n=1 baseline
+observation status per A3 first-instance precedent** (Previous Chat
+1.2 operational pattern: first-instance n=1 = baseline observation
+only; codification deferred to absorption #6+ second-observation
+tightening if recurs at S38+ Frequency Domain / Signal block entry
+OR future Q1 entry within Tier III Pattern A.1 18-wrapper enumeration
+scope). Variant tagging mechanism NOT applied at n=1 first-instance
+per A3 precedent; Sub-class 2i definitional scope working hypothesis
+only.
+
+**Code Tier 2 case-against options surfaced at S37 STOP 2 per Mark
+3 unprompted-discipline (rejected per Chat ratification at S37
+STOP 2):**
+- **(α-i) Sub-class 2a (αa) reimplementation variant extension at
+  Tier III scope:** Sub-class 2a (αa) Tier II.bit-exact two-layer
+  cross-package definitional scope distinct from Tier III Pattern
+  A.1 same-library self-test definitional scope; extension at Tier
+  III scope would conflate codification-stable Sub-class 2a (αa)
+  semantic; rejected per A6 BLOCKING empirical content preservation
+- **(α-ii) Sub-class 2c (αa) three-layer-downstream variant at
+  periodogram two-layer structure:** Sub-class 2c (αa) three-layer-
+  downstream definitional scope distinct from S37 two-layer engine
+  + scipy primitive structure; periodogram engine orchestration
+  scope at preset dispatch + NaN handling + dominant frequency
+  identification does NOT reach three-layer-downstream complexity;
+  rejected per A6 BLOCKING empirical content preservation
+
+**Frequency Domain / Signal block first entry — FIFTH catalog block
+transition opens per Q1 work program scope (per-block continuation
+pattern n=5 catalog block observation candidate at Frequency Domain
+/ Signal block completion):** S37 periodogram_spectral_density opens
+the fifth catalog block transition after Block 1 Causality (6
+entries S12-S18) + Block 12 Stationarity Tests (3 entries S21-S23)
++ Block 8 Missing Data (3 entries S26-S28) + Block 3 Decomposition
+(4 entries S31-S34). **Empirical correction at S37 Step 0 per Code
+Divergence 1 ratification:** trigger working hypothesis "Block 5
+Univariate Spectral (3 unvalidated)" empirically corrected to
+"Frequency Domain / Signal (7 unvalidated)" per §3 enumeration
+empirical re-Read at HEAD 2f517fc lines 8682-8683 verbatim. 7
+unvalidated entries: emd_hht + fft_spectrum + lomb_scargle +
+periodogram_spectral_density + ssa + wavelet_coherence_phase_lag +
+wavelet_transform. Forward instrumentation: Frequency Domain /
+Signal block completion arc projected at S37 + S38 + S39 + S40 +
+S41 + S42 + S43 (7 entries total; per Code Step 0 forward look —
+banking only per S37 STOP 2 Divergence 3 ratification; NOT codified
+at S37; Block ordering working hypothesis re-disposition deferred
+to S37 commit message body forward state + S38 trigger drafting at
+S37 close report forward state). Per-block continuation pattern at
+n=5 catalog block observations (Block 1 + Block 12 + Block 8 +
+Block 3 + Frequency Domain / Signal [in-progress at S37 = 1 of 7])
+codification refinement candidate at absorption #6+ per §19.4 §4
+note 6 refinement n=4 → n=5 per S35-absorption #5 codification.
+
+#### §1.5 Novelty enumeration sub-section (S37 application — third post-S23 first-instance codification application per S30 codification; ≥5 observations threshold satisfied at n=6)
+
+S37 surfaces 6 NEW observations across compound first-instance
+disclosures + Frequency Domain / Signal block first-entry framing +
+multi-anchor empirical correction, satisfying ≥5 observations
+threshold per S23 first-instance codification at S30 §1.5
+codification scope. n=3 post-codification observations across S23
++ S34 + S37; A3 third-observation tightening reinforcement per
+§1.5 sustained-observation operational status note per S36 §1.5
+refinement (n=2 baseline UPGRADE to n=3 third-observation
+reinforcement at S37 per S37 application).
+
+**Novelty 1 — Tier III Pattern A.1 same-library sub-class FIRST §2.5
+entry under Q1 work program:** S37 periodogram_spectral_density is
+FIRST Q1 §2.5 entry within Tier III Pattern A.1 18-wrapper
+enumeration scope; prior Tier III observations were §2 inventory
+entries (not Q1 work program §2.5 entries). Tier III Pattern A.1
+characterization grounded at scope_reframing §2 lines 151-152
+verbatim 18-wrapper locked-at-scale enumeration.
+
+**Novelty 2 — NEW Sub-class 2i candidate first-instance baseline
+observation per (αa-S37) Chat ratification:** FIRST observed Sub-
+class 2i candidate per A3 first-instance precedent (n=1 baseline;
+NOT codification). Definitional scope working hypothesis: "Pattern
+A.1 same-library self-test bit-exact + §4.7.A PRESENT
+reimplementation-of-dispatch variant". Distinct from codified Sub-
+class 2a (αa) Tier II.bit-exact + NEW Sub-class candidates 2f + 2g
++ 2h at Block 3 (Tier VI + Tier VII scope) per Tier III Pattern
+A.1 + §4.7.A PRESENT combined scope.
+
+**Novelty 3 — Frequency Domain / Signal block FIRST §2.5 entry —
+FIFTH catalog block transition opens:** Frequency Domain / Signal
+block first entry framing analogous to S31 classical_decompose
+Block 3 first-entry precedent at different Tier characterization
+scope (Tier III Pattern A.1 vs S31 Tier II.bit-exact); FIFTH
+catalog block transition opens per Q1 work program scope after
+Block 1 + Block 12 + Block 8 + Block 3.
+
+**Novelty 4 — §1.9 Filename divergence sub-pattern variant FIRST
+cross-block extension observation per Code S37 Step 0 surface:**
+audit `p3_periodogram_audit.md` + harness `p3_periodogram.py` omit
+`_spectral_density` suffix from catalog-id; engine filename
+`periodogram_spectral_density.py` preserves catalog-id. §1.9
+codified definitional scope at S36 ("Block 3 Decomposition wrapper
+filename omits catalog-id suffix from catalog-id-to-wrapper-
+filename mapping") EXTENDS to Frequency Domain / Signal block at
+S37 first-instance cross-block observation; n=4 observations across
+Blocks (Block 3 mstl + stl + x13 + Frequency Domain / Signal
+periodogram). A3 first-instance precedent at cross-block scope;
+codification refinement candidate at absorption #6+ for §1.9
+definitional scope generalization beyond Block-3-specific.
+
+**Novelty 5 — A9 Class A 18th-instance candidate banking at S37
+trigger drafting (multi-anchor schema-misattribution; Sub-pattern
+4 variant; Code→Chat PROACTIVE-PREVENTION variant per §4.5 (ii)
+Trigger-execution Step 0 verification timing point):** Code S37
+Step 0 caught multi-anchor schema-misattribution at Chat trigger
+drafting time — Tier characterization working hypothesis (#3 Tier
+II.bit-exact) + Block enumeration anchor (#2 + #11 "Univariate
+Spectral 3 unvalidated") + Block ordering working hypothesis (#7
+periodogram → welch_psd → multitaper_psd) all empirically divergent
+at HEAD 2f517fc §3 catalog re-Read + scope_reframing §2 Tier
+enumerations + audit empirical verdict. Pre-trigger empirical re-
+Read absent at S37 trigger drafting time. A3 first-instance
+precedent n=1 baseline; codification deferred to absorption #6+
+second-observation tightening if recurs.
+
+**Novelty 6 — Multi-anchor empirical correction at trigger working
+hypothesis at single Step 0 catch:** Tier characterization (Tier
+II.bit-exact → Tier III Pattern A.1) + Block enumeration
+("Univariate Spectral 3 unvalidated" → "Frequency Domain / Signal
+7 unvalidated") + Block ordering (welch_psd + multitaper_psd
+fabricated NOT in §3 catalog → 7-entry working hypothesis re-
+disposition deferred to S38+) simultaneously empirically corrected
+at S37 Step 0. Distinct from prior single-anchor working hypothesis
+corrections at S23-pre + S26-pre + S27 + S28 + S30 + S32 + S34
+PROACTIVE-PREVENTION variants per §4.5 (i) + (ii) + (vi) timing
+points; multi-anchor empirical correction is structurally
+distinctive at S37.
+
+**Reference:** `scipy.signal.periodogram` (scipy 1.17.1; same-
+library self-test — both harness + engine invoke same scipy
+primitive with identical arguments per audit lines 16-22 verbatim)
+**Verdict:** **PASS Pattern A same-library bit-exact at byte-
+identical agreement** per audit line 5 verbatim
+**Audit:** `tools/reference_parity/reports/p3_periodogram_audit.md`
+**Audit date:** 2026-04-29
+**freqs abs diff:** 0.0 (byte-identical; audit line 13 verbatim)
+**psd abs diff:** 0.0 (byte-identical; audit line 14 verbatim)
+**Tolerance class:** closed_form
+**Fixture:** 3-tone sinusoid (f=0.05, 0.13, 0.25) + N(0, 0.04)
+noise, T=512, seed=42; Balanced preset config (window='hann',
+detrend='linear', scaling='density'); 257 frequency bins (Nyquist
++ DC; T=512 / 2 + 1) per audit lines 26-33 verbatim
+
+**Source files (SINGLE-LAYER + §4.7.A PRESENT variant 1 per S37 α
+framing; empirical filenames per Divergence 5 §1.9 cross-block
+extension ratification):**
+`tools/reference_parity/harness/checks/p3_periodogram.py` lines
+63-78 (harness TSL arm imports `scipy.signal.periodogram` at line
+69 + invokes at lines 71-74 with `fs=1.0, window="hann",
+detrend="linear", scaling="density"`; extracts freqs + psd arrays
+at lines 76-77; harness does NOT invoke
+`periodogram_spectral_density.py::run()` engine entry point;
+§4.7.A variant 1 "Harness-imports-library-directly" mechanism
+manifestation per S30 (G.1) generalized definitional scope)
++ `tools/reference_parity/harness/checks/p3_periodogram.py` lines
+80-92 (harness reference arm imports SAME `scipy.signal.periodogram`
+at line 81 + invokes with identical arguments at lines 84-87; same-
+library self-test structure — both run_tsl + run_reference invoke
+scipy primitive with identical args per audit lines 16-22 verbatim;
+byte-identical agreement guaranteed by construction; audit verifies
+wrapper preprocessing + parameter resolution NOT cross-package math
+validation)
++ `tools/reference_parity/harness/checks/p3_periodogram.py` lines
+65-68 verbatim (audit design rationale: "Bypass wrapper output
+rounding by invoking scipy directly with the same arguments TSL's
+wrapper uses (Balanced preset: window='hann', detrend='linear',
+scaling='density')")
++ `tools/reference_parity/harness/checks/p3_periodogram.py` lines
+24-36 (`_generate_periodogram_dgp`: 3-tone sinusoidal signal +
+noise at T=512 + seed=42; own DGP generator)
++ `engine/techniques/periodogram_spectral_density.py` lines 1-10
+(module docstring: "Periodogram spectral density estimation for
+Time Series Lab. Computes the periodogram (raw spectral density
+estimate) of a time series using scipy.signal.periodogram.
+Optionally applies windowing and identifies dominant frequencies /
+periodicities.")
++ `engine/techniques/periodogram_spectral_density.py` line 13
+(Layer 1 math import: `from scipy.signal import periodogram as
+sp_periodogram, get_window` — SAME library primitive as harness
+imports at line 69 of p3_periodogram.py)
++ `engine/techniques/periodogram_spectral_density.py` lines 22-26
+(`_PRESET_CONFIG`: preset dispatch Fast `{n_top_freqs: 5, detrend:
+"constant", window: "boxcar"}` / Balanced `{n_top_freqs: 10,
+detrend: "linear", window: "hann"}` / Thorough `{n_top_freqs: 20,
+detrend: "linear", window: "hann"}`)
++ `engine/techniques/periodogram_spectral_density.py` lines 29-100+
+(Layer 2 engine orchestration: `run(ctx, progress_callback)` main
+entry; standalone-technique-only invocation; preset config dispatch
++ NaN handling at lines 53-58 + n ≥ 16 threshold check at lines 60-65
++ parameter resolution at lines 67-72 + dual scipy primitive
+invocations at lines 82-97 (density + spectrum scaling) +
+dominant frequency identification at lines 99+ per progress
+callback notice)
++ `engine/techniques/periodogram_spectral_density.py` lines 82-88
+(Layer 1 math invocation density scaling: `freqs, psd =
+sp_periodogram(clean, fs=fs, window=window, detrend=detrend_val,
+scaling="density")` — SAME library primitive as harness invokes at
+lines 71-74 of p3_periodogram.py at audit-pinned Balanced preset
+args)
++ `engine/techniques/periodogram_spectral_density.py` lines 91-97
+(Layer 1 math invocation spectrum scaling: `_, psd_spectrum =
+sp_periodogram(clean, fs=fs, window=window, detrend=detrend_val,
+scaling="spectrum")` — engine additional invocation for total power
+computation; NOT exercised by audit which validates density scaling
+only)
++ `tools/reference_parity/reports/p3_periodogram_audit.md`
+
+**Validation claim scope (TIER III PATTERN A.1 SAME-LIBRARY SUB-
+CLASS + §4.7.A PRESENT VARIANT 1 HARNESS-IMPORTS-LIBRARY-DIRECTLY +
+NEW Sub-class 2i candidate first-instance baseline observation per
+S37 (α) + (αa-S37) ratifications):** TSL periodogram_spectral_density
+output relies on two layered computations within standalone-
+technique role (Layer 1 scipy.signal.periodogram FFT-based
+classical periodogram primitive + Layer 2 engine orchestration).
+p3_periodogram audit validates Layer 1 scipy primitive parameter
+resolution via same-library self-test (both arms invoke
+scipy.signal.periodogram with identical arguments per audit lines
+16-22 verbatim); byte-identical agreement (freqs 0.0 abs/rel diff +
+psd 0.0 abs/rel diff per audit lines 11-14 verbatim) guaranteed
+by construction. **Audit DOES NOT validate cross-package parity
+verdict** (no R reference; same-library self-test scope); validation
+scope = wrapper preprocessing + parameter resolution round-trips
+scipy primitive without wrapper-introduced bugs per audit lines
+16-22 verbatim. NOT engine standalone orchestration correctness,
+NOT NaN handling correctness, NOT preset config dispatch
+correctness, NOT dominant frequency identification correctness,
+NOT spectrum scaling additional computation correctness, NOT cross-
+package math validation (scipy primitive is reference; no R
+package cross-validation).
+
+- **Layer 1 scipy.signal.periodogram primitive (Tier III Pattern
+  A.1 same-library self-test bit-exact; validated wrapper
+  preprocessing + parameter resolution at audit pinned config):**
+  PASS Pattern A same-library bit-exact verdict per audit line 5
+  verbatim; byte-identical agreement (freqs 0.0 abs/rel diff + psd
+  0.0 abs/rel diff per audit lines 11-14 verbatim). **Tier III
+  Pattern A.1 characterization directly grounded** at scope_reframing
+  §2 lines 151-152 verbatim 18-wrapper locked-at-scale enumeration.
+  Validation scope: SAME underlying scipy primitive as engine
+  module invokes at lines 82-88; same-library self-test verifies
+  wrapper preprocessing + parameter resolution round-trips scipy
+  primitive without wrapper-introduced bugs at Balanced preset
+  config (window='hann', detrend='linear', scaling='density').
+  **Pattern A.1 same-library self-test caveat:** byte-identical
+  agreement guaranteed by construction (both arms invoke same
+  primitive with identical args); audit DOES NOT validate cross-
+  package parity (no R reference) NOR validate scipy primitive
+  math correctness against any external implementation.
+  **§4.7.A PRESENT variant 1 reimplementation-of-dispatch caveat:**
+  engine module `run()` is DIFFERENT code path from harness
+  library-primitive direct invocation; engine adds Layer 2
+  orchestration (NaN handling + preset config dispatch + dominant
+  frequency identification + spectrum scaling additional
+  invocation) NOT exercised by audit. Engine dual scipy invocations
+  (density + spectrum scaling at lines 82-88 + lines 91-97) vs
+  audit single scipy invocation (density scaling only); spectrum
+  scaling invocation NOT audit-validated.
+- **Layer 2 engine orchestration (validation scope conditional;
+  NOT exercised at audit single-invocation pinned config):**
+  - NaN handling (lines 53-58): `clean = values[~np.isnan(values)]`
+    + n_dropped warning; NOT audit-validated
+  - n ≥ 16 threshold check (lines 60-65): error response if n < 16;
+    NOT audit-validated
+  - Preset config dispatch (lines 22-26 `_PRESET_CONFIG` + lines
+    67-72 invocation): Fast `boxcar + constant` / Balanced `hann +
+    linear` / Thorough `hann + linear`; audit pins Balanced preset;
+    Fast + Thorough engine production behaviors NOT exercised by
+    audit
+  - Detrend parameter handling (lines 75-78): False / "False" /
+    "false" string normalization; NOT audit-validated
+  - Dual scipy primitive invocations (lines 82-88 density + lines
+    91-97 spectrum scaling): engine computes density + spectrum
+    scaling for total power; audit validates density scaling only
+  - Dominant frequency identification (lines 99+ per progress
+    callback): n_top_freqs extraction; NOT audit-validated
+  - Result formatting + plain English summary + interpretation +
+    audit_fields construction
+
+#### Disclosure pattern (i) — Research note footnote (Tier III Pattern A.1 same-library sub-class + NEW Sub-class 2i candidate first-instance baseline)
+
+> This analysis uses TSL technique `periodogram_spectral_density`,
+> same-library bit-exact parity validated against direct
+> `scipy.signal.periodogram` invocation per Phase 3 audit dated
+> 2026-04-29 (verdict PASS Pattern A same-library bit-exact; freqs
+> 0.0 abs/rel diff + psd 0.0 abs/rel diff). **Tier III Pattern A.1
+> same-library sub-class characterization** per S37 (α) disposition
+> per scope_reframing §2 lines 151-152 verbatim 18-wrapper locked-
+> at-scale enumeration. Audit validates wrapper preprocessing +
+> parameter resolution round-trips scipy primitive at Balanced
+> preset config (window='hann', detrend='linear',
+> scaling='density'); same-library self-test scope — NO cross-
+> package parity verdict (no R reference). Engine adds Layer 2
+> orchestration (NaN handling + preset config dispatch + dominant
+> frequency identification + spectrum scaling additional
+> invocation); NOT audit-validated. Pre-Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier III Pattern A.1 + §4.7.A PRESENT variant 1 + same-library self-test caveat)
+
+> Methodology: TSL technique `periodogram_spectral_density` validated
+> per Phase 3 reference parity infrastructure under Tier III Pattern
+> A.1 same-library sub-class framing per S37 codification.
+> **Reference:** `scipy.signal.periodogram` (scipy 1.17.1) — same-
+> library self-test (both harness + engine invoke same scipy
+> primitive with identical arguments per audit lines 16-22 verbatim).
+> **Verdict:** PASS Pattern A same-library bit-exact at byte-
+> identical agreement; freqs 0.0 abs/rel diff + psd 0.0 abs/rel
+> diff. **Audit date:** 2026-04-29. **Fixture:** 3-tone sinusoid
+> (f=0.05, 0.13, 0.25) + N(0, 0.04) noise, T=512, seed=42; Balanced
+> preset config pinned (window='hann', detrend='linear',
+> scaling='density'); 257 frequency bins (Nyquist + DC). **Tier III
+> Pattern A.1 same-library sub-class characterization** per
+> scope_reframing §2 lines 151-152 verbatim 18-wrapper locked-at-
+> scale enumeration. **Same-library self-test caveat:** byte-
+> identical agreement guaranteed by construction (both arms invoke
+> same scipy primitive with identical args); audit DOES NOT
+> validate cross-package parity (no R reference; no external math
+> validation against alternative implementation) — audit scope is
+> wrapper preprocessing + parameter resolution validation only.
+> **§4.7.A PRESENT variant 1 reimplementation-of-dispatch caveat:**
+> harness imports + invokes `scipy.signal.periodogram` directly
+> (does NOT invoke engine `run()` entry point); engine module
+> invokes SAME scipy primitive within `run()` orchestration; same-
+> library bit-exact transfers to engine Layer 1 math invocation per
+> identical primitive alignment; engine Layer 2 orchestration (NaN
+> handling + preset config dispatch + dominant frequency
+> identification + spectrum scaling additional invocation) NOT
+> exercised by audit. Reference selection + tolerance specification
+> AI-assisted with user ratification per Phase 7+ work program;
+> pre-Path α expert review status; expert review pending end-of-
+> Phase-7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier III Pattern A.1 + §4.7.A PRESENT variant 1 + NEW Sub-class 2i candidate first-instance baseline + same-library self-test scope-bounded validation)
+
+> `periodogram_spectral_density` validation: TSL Tier III Pattern
+> A.1 same-library sub-class framing per S37 (α) codification + NEW
+> Sub-class 2i candidate first-instance baseline observation per
+> (αa-S37) ratification + §4.7.A PRESENT variant 1 Harness-imports-
+> library-directly mechanism. **Reference:** `scipy.signal.periodogram`
+> (scipy 1.17.1). **Audit:** `tools/reference_parity/reports/p3_periodogram_audit.md`
+> dated 2026-04-29. **Verdict:** PASS Pattern A same-library bit-
+> exact (freqs 0.0 + psd 0.0 abs/rel diff; byte-identical agreement
+> guaranteed by same-library self-test construction). **Fixture:**
+> 3-tone sinusoid DGP n=512 seed=42 + Balanced preset config pinned;
+> single-seeded fixture; parameter-sensitivity coverage NOT
+> established; Q3b extension scope. **NEW Sub-class 2i candidate
+> first-instance baseline observation** per S37 (αa-S37) ratification
+> (definitional scope working hypothesis: "Pattern A.1 same-library
+> self-test bit-exact + §4.7.A PRESENT reimplementation-of-dispatch
+> variant"; A3 first-instance precedent n=1 baseline; NOT
+> codification; codification deferred to absorption #6+ second-
+> observation tightening if recurs; distinct from S31-S34 Block 3
+> Sub-class 2a (αa) + 2f + 2g + 2h variants per Tier characterization
+> scope distinction). **Risk attribution:** **(a) Layer 1 scipy
+> primitive (Tier III Pattern A.1 same-library self-test bit-exact;
+> validated wrapper preprocessing + parameter resolution):** PASS
+> at byte-identical agreement; SAME scipy primitive as engine
+> module invokes at lines 82-88; same-library self-test transfers
+> to engine Layer 1 math invocation; audit DOES NOT validate cross-
+> package parity (no R reference) NOR validate scipy primitive
+> math correctness against external implementation.
+> **(b) §4.7.A PRESENT variant 1 reimplementation-of-dispatch
+> caveat:** harness invokes scipy primitive directly (bypassing
+> engine `run()`); engine wraps + invokes same primitive within
+> orchestration; code-path divergence active at runtime per HEAD
+> verification (NOT REMEDIATED per S36 §4.7.A status dimension
+> codification). **(c) Layer 2 engine orchestration (NOT audit-
+> validated):** NaN handling (lines 53-58) + n ≥ 16 threshold check
+> (lines 60-65) + preset config dispatch (lines 22-26 + 67-72) +
+> detrend parameter handling (lines 75-78) + dual scipy primitive
+> invocations (lines 82-88 density + lines 91-97 spectrum scaling;
+> engine extra spectrum scaling NOT audit-validated) + dominant
+> frequency identification (lines 99+); validation scope per
+> `engine/techniques/periodogram_spectral_density.py` lines 29-100+.
+> **(d) Same-library self-test validation scope-bounded retraction
+> surface:** practitioners invoking `periodogram_spectral_density`
+> from ribbon receive scipy primitive output via engine `run()`
+> orchestration; audit validates wrapper preprocessing + parameter
+> resolution round-trips scipy primitive without wrapper-introduced
+> bugs ONLY; cross-package parity NOT audit-established; engine
+> spectrum scaling + dominant frequency identification NOT audit-
+> validated; expert review of engine implementation + Layer 1 scipy
+> primitive cross-validation against alternative implementation
+> (e.g., R `stats::spec.pgram` cross-package validation) candidate
+> at Q3b extension scope. Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier III Pattern A.1 + §4.7.A PRESENT variant 1 + same-library self-test caveat)
+
+> `periodogram_spectral_density` Tier III Pattern A.1 same-library
+> sub-class per S37 codification + NEW Sub-class 2i candidate first-
+> instance baseline + §4.7.A PRESENT variant 1 Harness-imports-
+> library-directly mechanism; same-library bit-exact vs direct
+> `scipy.signal.periodogram` invocation (byte-identical agreement
+> by construction). Same-library self-test caveat operative: audit
+> validates wrapper preprocessing + parameter resolution; NO cross-
+> package parity (no R reference); NO scipy primitive math
+> validation against external implementation. Engine Layer 2
+> orchestration (NaN handling + preset config dispatch + dominant
+> frequency identification + spectrum scaling additional invocation)
+> NOT audit-validated. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31-S34 + S36 LOC overshoot scope
+expansion refinement — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (`scipy.signal.periodogram`
+  scipy 1.17.1) per `p3_periodogram_audit.md` line 4 verbatim
+  ("**Reference:** `scipy.signal.periodogram` (scipy 1.17.1)").
+  Verdict (PASS Pattern A same-library bit-exact) per
+  `p3_periodogram_audit.md` line 5 verbatim ("**Verdict:** **PASS**
+  (Pattern A same-library bit-exact)"). Byte-identical agreement
+  metrics per `p3_periodogram_audit.md` lines 11-14 verbatim (freqs
+  0.0 abs/rel diff + psd 0.0 abs/rel diff). Audit date (2026-04-29)
+  per `p3_periodogram_audit.md` line 7 verbatim. Fixture (3-tone
+  sinusoid f=0.05/0.13/0.25 + N(0, 0.04) noise + T=512 + seed=42
+  + Balanced preset config pinned + 257 frequency bins) per
+  `p3_periodogram_audit.md` lines 26-33 verbatim Fixture + Diagnostics
+  sections + harness `p3_periodogram.py` lines 24-36 verbatim
+  `_generate_periodogram_dgp`. Tier III Pattern A.1 same-library
+  sub-class characterization directly grounded at
+  `scope_reframing_s6_banking.md` lines 151-152 verbatim ("Tier III
+  — Phase 3 same-library self-parity validated (Pattern A.1). 18
+  wrappers per P-3 v1.2.0 §1 (locked at scale)"); p3_periodogram
+  explicitly within Tier III 18-wrapper enumeration. Same-library
+  self-test structure per audit lines 16-22 verbatim ("byte-
+  identical agreement. Same-library self-test: TSL and reference
+  both invoke `scipy.signal.periodogram` with identical arguments...
+  The audit verifies wrapper preprocessing + parameter resolution
+  round-trips the scipy primitive without wrapper-introduced bugs").
+  §4.7.A PRESENT variant 1 manifestation per harness line 69 +
+  engine line 13 verbatim — both import SAME scipy primitive
+  `scipy.signal.periodogram`; harness lines 71-74 + engine lines
+  82-88 verbatim — both invoke SAME scipy primitive but harness
+  bypasses engine `run()` orchestration; harness comment lines
+  65-68 verbatim ("Bypass wrapper output rounding by invoking
+  scipy directly with the same arguments TSL's wrapper uses").
+  Layer 1 / Layer 2 framework operative per S26 STOP 1.5 second
+  close ratification carried forward + S31-S34 reinforcement.
+  Catalog mapping (1:1) verified per audit Wrapper field. **§4.7.A
+  pattern OBSERVED at S37 as variant 1 PRESENT status** (post-S37
+  §4.7.A observations = n=8 PRESENT across §2.5 entries S14a + S18
+  + S26 + S27 + S31 + S32 + S33 + S37 + n=1 REMEDIATED S34;
+  **§4.7.A pattern count tightening per S30 (G.1) generalized
+  definitional scope codification + S36 §4.7.A status dimension
+  extension** — NOT A9 Class A counter increment; NOT §4.7.A
+  taxonomy modification at S37; forward observation banking only
+  per ITEM 16 forward instrumentation banking discipline). **NEW
+  Sub-class 2i candidate first-instance baseline observation per
+  (αa-S37) ratification** (A3 first-instance precedent n=1 baseline;
+  NOT codification; codification deferred to absorption #6+ second-
+  observation tightening if recurs at S38+ Frequency Domain / Signal
+  block entry OR future Q1 entry within Tier III Pattern A.1 18-
+  wrapper enumeration scope; definitional scope working hypothesis
+  "Pattern A.1 same-library self-test bit-exact + §4.7.A PRESENT
+  reimplementation-of-dispatch variant"). **§1.9 Filename divergence
+  sub-pattern variant FIRST cross-block extension observation per
+  Divergence 5 ratification** (empirical filenames `p3_periodogram_audit.md`
+  + `p3_periodogram.py` + `periodogram_spectral_density.py`;
+  trigger shorthand `p3_periodogram_spectral_density_*` reference
+  informational only; §1.9 codified Block-3-specific scope at S36
+  EXTENDS to Frequency Domain / Signal block at S37 first-instance
+  cross-block observation; n=4 observations across Blocks Block 3
+  mstl + stl + x13 + Frequency Domain / Signal periodogram; A3
+  first-instance precedent at cross-block scope; codification
+  refinement candidate at absorption #6+ for §1.9 definitional
+  scope generalization beyond Block-3-specific). **§2.5 Tier
+  primary+overlay convention NOT APPLICABLE at S37** (Tier III
+  Pattern A.1 single-tier framing; S35-absorption #5 + S32 third-
+  observation tightening reinforcement at n=3 post-codification
+  observations S23 + S28 + S32 preserved unchanged at S37). **§1.5
+  novelty enumeration sub-section APPLIED at S37** per ≥5
+  observations threshold satisfied at n=6 enumerated novelties
+  (Novelty 1-6); third post-S23 application of §1.5 novelty
+  enumeration sub-section pattern per S30 codification + S36 §1.5
+  refinement sustained-observation operational status note; n=3
+  post-codification observations across S23 + S34 + S37; A3 third-
+  observation tightening reinforcement. **A9 Class A counter post-
+  S37: n=14 ACTIVE codified at §19.4 unchanged** (n=15 + n=16
+  codified at §1.7 (c) Workstream B empirical-efficacy grounding
+  scope per S36; n=17 + n=18 candidates banked at commit message
+  body forward state per absorption #6+ codification deferral; A9
+  Class A counter at §19.4 advance deferred to absorption #6+ per
+  multi-candidate accumulation). **A9 Class B counter post-S37:
+  n=4 ACTIVE unchanged (no new Class B catch); sustained-observation
+  count under Class B revised default discipline n=11 (S22 + S23 +
+  S25 + S26 + S27 + S28 + S31 + S32 + S33 + S34 + S37 = n=11 Q1
+  entries only counting basis per Chat preference codified at S31)**.
+  **Maturation observation FOURTEENTH SUSTAINED OBSERVATION REACHED
+  at S37 (S23 + S25 + S26 + S27 + S28 + S29 + S30 + S31 + S32 +
+  S33 + S34 + S35 + S36 + S37 = n=14 cross-session trajectory)** +
+  EIGHT-timing-point empirical surface preserved per S35-absorption
+  #5 codification (no new timing point variant at S37; proactive-
+  prevention operation SUSTAINED across established timing points
+  (i)-(viii)); §4.5 codification operational at n=7 post-codification
+  sustained observations per S37 cross-session trajectory
+  reinforcement. Verify-state-at-first-consumption sub-discipline
+  28th instance application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at seventeenth-technique selection per Mark
+  3 efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20 + S25 + S26 +
+  S27 + S28 + S31 + S32 + S33 + S34 reinforcement. **Q-B pattern
+  persists at n=18 across S12 + S13 + S14b + S14c + S15 + S17 +
+  S18 + S21 + S22 + S23 + S26 + S27 + S28 + S31 + S32 + S33 + S34
+  + S37; §1.4 codified observation refinement at empirical pattern
+  accumulation** (n=7 at §1.4 S20 codification → n=17 at S34
+  reinforcement → n=18 at S37 reinforcement; Workstream B amendment
+  cycle candidate A continues at next cycle). Substantive Chat
+  engagement at structural-decision points empirically observed
+  (Step 0 STOP 2 multi-anchor Divergence 1+2+3+5 ratifications +
+  Tier III Pattern A.1 (α) ratification + Sub-class 2i (αa-S37)
+  NEW candidate first-instance baseline + Code (α-i) + (α-ii)
+  Tier 2 case-against rejection + §1.9 cross-block extension first-
+  instance baseline observation banking + A9 Class A 18th-instance
+  candidate banking + Block ordering working hypothesis re-
+  disposition deferred to S38+).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Conditional Yes for **Layer 1 scipy.signal.periodogram primitive
+  (Tier III Pattern A.1 same-library self-test bit-exact)** per
+  PASS verdict at byte-identical agreement. Defensibility to all
+  three audiences (published audience + Morgan Stanley compliance
+  + Path α expert reviewer) UNDER Tier III Pattern A.1 same-library
+  sub-class + §4.7.A PRESENT variant 1 reimplementation-of-dispatch
+  + same-library self-test scope-bounded validation + cross-package
+  parity NOT audit-established disclosure acknowledgment.
+  **Conditional for Layer 2 engine orchestration** — NaN handling
+  + preset config dispatch + dominant frequency identification +
+  spectrum scaling additional invocation; requires expert review of
+  engine implementation OR engine-output cross-check at base pinned
+  config. **Critical Q-C framing per same-library self-test caveat:**
+  byte-identical agreement is GUARANTEED BY CONSTRUCTION (both
+  arms invoke same scipy primitive with identical args); audit
+  scope is wrapper preprocessing + parameter resolution validation
+  ONLY — NOT scipy primitive math correctness validation against
+  external implementation; defensibility conditional on disclosure
+  of same-library self-test scope vs cross-package parity scope
+  distinction (audit established the former NOT the latter).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  LOW-MEDIUM per Tier III Pattern A.1 same-library sub-class
+  characterization scope bound + §4.7.A PRESENT variant 1
+  disclosure + same-library self-test scope-bounded validation
+  caveat. periodogram_spectral_density is canonical Schuster 1898
+  classical periodogram methodology + scipy.signal.periodogram
+  implementation (widely-used FFT-based spectral density estimator).
+  **Layer-specific + Tier III Pattern A.1 + NEW Sub-class 2i
+  candidate + §4.7.A PRESENT variant 1 retraction surface (per S37
+  (α) + (αa-S37) ratifications):**
+  - Layer 1 scipy.signal.periodogram primitive (Tier III Pattern
+    A.1 same-library self-test bit-exact): LOW; same-library bit-
+    exact guaranteed by construction; expert review surfacing scipy
+    primitive math correctness issue (e.g., scipy implementation
+    bug at edge case) would affect periodogram_spectral_density +
+    other scipy.signal.periodogram-dependent techniques (NOT 1:1
+    catalog↔wrapper isolation; cross-technique propagation risk at
+    scipy primitive scope).
+  - **Layer 2 engine orchestration: LOW-MEDIUM** — NaN handling +
+    preset config dispatch + dominant frequency identification +
+    spectrum scaling additional invocation NOT audit-validated;
+    expert review of engine implementation conditional on Layer 2
+    correctness; orchestration operations operationally
+    straightforward (mask + dict dispatch + sort/argsort +
+    additional scipy invocation); retraction surface LOW-MEDIUM
+    reflects orchestration scope; spectrum scaling additional
+    invocation NOT audit-validated separately.
+  - **Same-library self-test scope-bounded validation retraction
+    surface: MEDIUM** — audit validates wrapper preprocessing +
+    parameter resolution at Balanced preset config pinned; NO
+    cross-package parity validation (no R reference); NO scipy
+    primitive math validation against external implementation;
+    expert review surfacing cross-package divergence (e.g., R
+    `stats::spec.pgram` produces different output at identical
+    args) would prompt Q3b extension scope cross-package validation;
+    Q3b extension scope candidate per Path α expert review.
+  - **§4.7.A PRESENT variant 1 retraction surface: LOW** — harness
+    + engine use SAME scipy primitive; reimplementation scope
+    limited to dispatch-path (re-import + re-invoke vs engine
+    `run()` orchestration); same-library bit-exact transfers to
+    engine Layer 1 math invocation cleanly per identical primitive
+    alignment; reimplementation-of-dispatch variant 1 structurally
+    weaker §4.7.A manifestation than mechanism variants 3 + 4
+    (reimplementation-of-math + use-case-divergence).
+  - **NEW Sub-class 2i candidate first-instance baseline retraction
+    surface: LOW** — A3 first-instance precedent n=1 baseline
+    observation; codification deferred to absorption #6+ second-
+    observation tightening if recurs; sub-class definitional scope
+    working hypothesis "Pattern A.1 same-library self-test bit-
+    exact + §4.7.A PRESENT reimplementation-of-dispatch variant"
+    preserves combined novelty distinction at first-instance
+    observation without codification commitment.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; seventeenth technique to enter status
+per S37 ratification; **FIRST Frequency Domain / Signal block entry
+— FIFTH catalog block transition opens** per Q1 work program scope
+after Block 1 Causality at S18 + Block 12 Stationarity Tests at
+S23 + Block 8 Missing Data at S28 + Block 3 Decomposition at S34
+(per Divergence 1 §3 enumeration empirical correction at S37 Step
+0; trigger working hypothesis "Block 5 Univariate Spectral 3
+unvalidated" SUPERSEDED by empirical "Frequency Domain / Signal 7
+unvalidated"); **FIRST Tier III Pattern A.1 same-library sub-class
+§2.5 entry under Q1 work program** per S37 (α) Tier disposition
+ratification + Divergence 2 empirical Tier III correction at S37
+Step 0 (trigger working hypothesis Tier II.bit-exact SUPERSEDED
+by empirical Tier III Pattern A.1 per scope_reframing §2 lines
+151-152 verbatim 18-wrapper locked-at-scale enumeration);
+**FIRST NEW Sub-class 2i candidate first-instance baseline
+observation** per (αa-S37) ratification (definitional scope
+working hypothesis "Pattern A.1 same-library self-test bit-exact +
+§4.7.A PRESENT reimplementation-of-dispatch variant"; A3 first-
+instance precedent n=1 baseline; NOT codification; codification
+deferred to absorption #6+ second-observation tightening if recurs;
+Code (α-i) Sub-class 2a (αa) extension + (α-ii) Sub-class 2c (αa)
+three-layer-downstream Tier 2 case-against options surfaced at
+S37 STOP 2 + rejected per empirical definitional scope distinction);
+**FIRST §1.9 Filename divergence sub-pattern variant cross-block
+extension observation** per Divergence 5 ratification (n=4
+observations across Blocks Block 3 mstl + stl + x13 + Frequency
+Domain / Signal periodogram; §1.9 codified Block-3-specific scope
+at S36 EXTENDS to Frequency Domain / Signal block at S37; A3
+first-instance precedent at cross-block scope; codification
+refinement candidate at absorption #6+ for §1.9 definitional scope
+generalization beyond Block-3-specific; expiration semantics: §1.9
+cross-block extension observation banks at S37 close pending S38+
+second-instance cross-block observation OR absorption #6+
+codification refinement); **SINGLE-LAYER framing per S37 STOP 2
+empirical investigation + α disposition** (Tier III Pattern A.1
+same-library self-test single-tier framing; §2.5 Tier primary+
+overlay convention NOT APPLICABLE at S37 per S35-absorption #5 +
+S32 third-observation tightening reinforcement at n=3 post-
+codification observations preserved unchanged at S37); **§4.7.A
+PRESENT variant 1 Harness-imports-library-directly mechanism
+manifestation at n=8 PRESENT + n=1 REMEDIATED post-S37 observations
+across §2.5 entries** (S14a granger + S18 gcc_phat + S26
+denton_chowlin + S27 loess + S31 classical_decompose + S32
+mstl_decompose + S33 stl_decompose + S37 periodogram_spectral_density
+PRESENT + S34 x13_seasonal_adjust REMEDIATED; **§4.7.A pattern
+count tightening per S30 (G.1) generalized definitional scope
+codification + S36 §4.7.A status dimension extension** — NOT A9
+Class A counter increment; forward observation banking only;
+NOT §4.7.A taxonomy modification at S37);
+**A9 CLASS A 18TH-INSTANCE CANDIDATE BANKING at S37 commit message
+body forward state per S37 STOP 2 ratification (multi-anchor
+schema-misattribution at trigger drafting; Sub-pattern 4 variant;
+Code→Chat PROACTIVE-PREVENTION variant per §4.5 (ii) Trigger-
+execution Step 0 verification timing point):** Code S37 Step 0
+caught Chat trigger working hypothesis anchors #2 + #3 + #7 + #11
+empirically divergent at HEAD 2f517fc §3 catalog re-Read +
+scope_reframing §2 Tier enumerations + audit empirical verdict;
+pre-trigger empirical re-Read absent at S37 trigger drafting time.
+Structurally distinct from prior A9 Class A failure mode candidates
+banked at S35-S36 (n=14 + n=15 + n=16 content-completeness
+verification gap codified at §1.7 (c); n=17 STOP-1.5-revision-
+scope-misattribution banked at S36; n=18 NEW multi-anchor schema-
+misattribution at S37). A3 first-instance precedent n=1 baseline;
+codification deferred to absorption #6+ second-observation
+tightening if recurs at S38+ trigger drafting. **Block ordering
+working hypothesis re-disposition deferred to S37 commit message
+body forward state per Divergence 3 ratification + S38 trigger
+drafting at S37 close report forward state** (trigger working
+hypothesis periodogram → welch_psd → multitaper_psd fabricated
+without §3 empirical re-Read; welch_psd + multitaper_psd NOT in
+§3 catalog enumeration; preliminary re-disposition working
+hypothesis Block-internal complexity ordering at Frequency Domain
+/ Signal block: periodogram → fft_spectrum → lomb_scargle → ssa
+→ wavelet_transform → wavelet_coherence_phase_lag → emd_hht
+across 7-entry arc; testing across S37 + S38 + S39 + S40 + S41 +
+S42 + S43 per Block ordering working hypothesis); **CONTINUATION
+of S30 + S36 Workstream B codifications at S37:** §1.6 Q-A density
+convention operative continuation (verbatim citation density at
+Q-A field; n=7 post-codification applications at S31 + S32 + S33 +
+S34 + S35 + S36 + S37 with §1.6 LOC overshoot scope expansion at
+S36 refinement operative — n=7 total + n=6 sub-pattern scope
+disambiguation) + §5.5 forward-instrumentation hygiene at status
+line operative continuation (expiration semantics on each
+predictive claim; n=7 post-codification applications at S31 + S32
++ S33 + S34 + S35 + S36 + S37) + §1.5 novelty enumeration sub-
+section APPLIED at S37 (≥5 observations threshold satisfied; third
+post-S23 application; n=3 post-codification observations across
+S23 + S34 + S37; A3 third-observation tightening reinforcement
+per §1.5 sustained-observation operational status note S36
+refinement) + §1.7 refined Mod 3 cadence operative (first Q1 entry
+post-S36 §1.7 codification; refined Mod 3 chunked-surface content-
+completeness specification operational at S37 STOP 1 chunked-
+surface protocol) + §1.8 reroll_on_caveat=False discipline NOT
+APPLICABLE at S37 (Tier III Pattern A.1 PASS verdict; §1.8
+applicability scope Tier VI CAVEAT primary; verified at Step 0
+Tier characterization disposition) + §1.9 Filename divergence sub-
+pattern variant FIRST cross-block extension observation banking
+at S37 (first-instance baseline observation cross-block scope) +
+§4.7.A REMEDIATED status dimension NOT applicable at S37 (PRESENT
+status; status dimension PRESENT/REMEDIATED orthogonal to mechanism
+variant 1; verified at Step 0 §4.7.A pattern manifestation
+disposition); §2.5 Tier primary+overlay convention NOT APPLICABLE
+at S37 (Tier III Pattern A.1 single-tier framing per S35-absorption
+#5 + S32 third-observation tightening reinforcement preserved); §4.7
+in-place codification operative reference at §4.7.A PRESENT variant
+1 manifestation + §4.7.A status dimension extension cross-reference.
+**A10 Sub-class disposition (αa-S37) NEW Sub-class 2i candidate
+first-instance baseline observation with definitional scope
+working hypothesis** per Chat ratification (A3 first-instance
+precedent n=1 baseline; NOT codification; codification deferred to
+absorption #6+ second-observation tightening if recurs at S38+
+Frequency Domain / Signal block entry OR future Q1 entry within
+Tier III Pattern A.1 18-wrapper enumeration scope; definitional
+scope working hypothesis "Pattern A.1 same-library self-test bit-
+exact + §4.7.A PRESENT reimplementation-of-dispatch variant";
+expiration semantics: Sub-class 2i candidate observation banks at
+S37 close pending second-observation tightening at respective sub-
+session OR absorption #6+ codification refinement disposition).
+**A9 Class B counter post-S37: n=4 ACTIVE (unchanged at S37; no
+new Class B catch); sustained-observation count under Class B
+revised default discipline n=11 (S22 + S23 + S25 + S26 + S27 +
+S28 + S31 + S32 + S33 + S34 + S37 = n=11 Q1 entries only counting
+basis per Chat preference codified at S31)** (framing class working
+hypothesis CONFIRMED at Step 0 per A9 Class B revised default
+discipline; expiration semantics: sustained-observation counter
+continues incrementing at each subsequent Q1 entry per A9 Class B
+revised default operating proactively, codification-stable status
+preserved at n=4 ACTIVE counter; n=4 increments only on NEW Class
+B catch).
+**A9 Class A counter post-S37: n=14 ACTIVE codified at §19.4
+unchanged + candidates n=15 + n=16 codified at §1.7 (c) Workstream
+B empirical-efficacy grounding scope per S36 + candidates n=17
+(S36 STOP-1.5-revision-scope-misattribution) + n=18 (S37 multi-
+anchor schema-misattribution at trigger drafting) banked at S37
+commit message body forward state pending absorption #6+
+codification** (expiration semantics: A9 Class A candidate
+inventory accumulates until absorption #6 codification refinement
+disposition adopts/declines each candidate; multi-pattern variant
+codification refinement candidate at n=4+ banked candidates for
+absorption #6 adoption per A3 second-observation tightening
+precedent).
+**§4.7.A pattern n=8 PRESENT + n=1 REMEDIATED observation count
+post-S37 per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A status dimension extension:** S14a + S18 + S26 + S27
++ S31 + S32 + S33 + S37 PRESENT + S34 REMEDIATED = n=9 total
+observations across mechanism variants + status dimension;
+**§4.7.A pattern count tightening + status dimension tightening
+forward observation at absorption #6 per A3 precedent** (distinct
+tracking surface from A9 Class A counter per S30 (G.1) + S36
+codifications; §4.7.A pattern observations track mechanism variant
++ status dimension accumulation; A9 Class A counter tracks
+empirical-state-assumption failure mode).
+**A9 Class A + Class B discipline maturation FOURTEENTH SUSTAINED
+OBSERVATION REACHED at S37 (S23 + S25 + S26 + S27 + S28 + S29 +
+S30 + S31 + S32 + S33 + S34 + S35 + S36 + S37 = n=14 cross-
+session trajectory)** per A3 second-observation tightening precedent
+threshold satisfied + EIGHT-timing-point empirical surface
+preserved per S35-absorption #5 codification (no new timing point
+variant at S37; proactive-prevention operation SUSTAINED across
+established timing points (i)-(viii)); promoted to §4.5 NEW sub-
+section at S29-absorption #4 + EXTENDED at S35-absorption #5 to
+eleven-sustained-observation cross-session trajectory + EIGHT-
+timing-point operational surface (NEW (vii) + NEW (viii)) per CHAT
+RATIFICATIONS carried forward; **§4.5 codification operational at
+n=7 post-codification sustained observations per S37 cross-session
+trajectory** (S30 + S31 + S32 + S33 + S34 + S35 + S36 + S37 post-
+codification trajectory) per CHAT RATIFICATION #13 reinforcement
+(codification-stable status preserved at sustained post-codification
+operation).
+**Frequency Domain / Signal block first-entry status framing**
+(analogous to S31 classical_decompose Block 3 first-entry precedent
+at different Tier characterization scope per Tier III Pattern A.1
+vs S31 Tier II.bit-exact; per-block continuation pattern n=5
+catalog block observation candidate at Frequency Domain / Signal
+block completion per ITEM 11 forward instrumentation banking;
+expiration semantics: per-block continuation pattern n=5
+codification refinement at absorption #6+ refinement disposition
+pending Frequency Domain / Signal block completion arc close);
+**Frequency Domain / Signal forward completion arc S37 + S38 +
+S39 + S40 + S41 + S42 + S43 projected per 7-entry §3 enumeration
+empirical re-Read at S37 Step 0** (banking only per ITEM 11
+forward instrumentation banking; NOT codified at S37; expiration
+semantics: Block ordering working hypothesis re-disposition deferred
+to S37 commit message body forward state per Divergence 3
+ratification + S38 trigger drafting at S37 close report forward
+state; each subsequent Frequency Domain / Signal block entry
+trigger drafting per A9 Class B revised default discipline
+operating proactively at respective sub-session); **heterogeneous-
+vs-homogeneous Tier-surface variant observation forward
+instrumentation banking** (Frequency Domain / Signal block first-
+entry Tier III Pattern A.1; Block Tier-surface composition
+empirical surface unknown at S37 — subsequent entries S38-S43 may
+surface heterogeneous Tier mix OR homogeneous Tier III Pattern A.1
+per §19.4 §4 note 6 refinement at S35-absorption #5 cross-reference;
+codification refinement at Block completion).
+**NEW Sub-class candidate 2j+ projection (subsequent Frequency
+Domain / Signal block entries at S38+) NOT codified at S37** per
+A3 first-instance precedent (codification deferred to absorption
+#6+ second-observation tightening if recurs; expiration semantics:
+NEW Sub-class candidate trajectory observation banks at S37 close
+pending respective sub-session first-instance baseline observation).
+**§1.9 cross-block extension first-instance baseline observation
+banking at S37** (Frequency Domain / Signal block first wrapper
+filename empirical observation per Code S37 Step 0 surface;
+periodogram audit + harness omit `_spectral_density` suffix from
+catalog-id; §1.9 codified Block-3-specific scope at S36 EXTENDS
+to cross-block scope at S37 per A3 first-instance precedent; n=4
+observations across Blocks; codification refinement candidate at
+absorption #6+ for §1.9 definitional scope generalization beyond
+Block-3-specific; expiration semantics: cross-block extension
+observation banks at S37 close pending S38+ Frequency Domain /
+Signal block entry second-instance cross-block observation OR
+absorption #6+ codification refinement).
+**A9 Class A 18th-instance candidate banking at S37 commit
+message body forward state per S37 STOP 2 Code Step 0 catch (multi-
+anchor schema-misattribution at trigger drafting; Sub-pattern 4
+variant; Code→Chat PROACTIVE-PREVENTION variant per §4.5 (ii)
+Trigger-execution Step 0 verification timing point):** Chat
+trigger working hypothesis anchors #2 + #3 + #7 + #11 simultaneously
+empirically divergent at S37 Step 0 (Tier characterization Tier
+II.bit-exact → Tier III Pattern A.1; Block enumeration "Univariate
+Spectral 3 unvalidated" → "Frequency Domain / Signal 7
+unvalidated"; Block ordering periodogram → welch_psd → multitaper_psd
+fabricated working hypothesis SUPERSEDED by 7-entry arc re-
+disposition); n=18 NEW sub-pattern variant distinct from prior
+A9 Class A failure mode candidates n=14-17; A3 first-instance
+precedent n=1 baseline; codification deferred to absorption #6+
+second-observation tightening if multi-anchor schema-misattribution
+recurs at S38+ trigger drafting; banking forward state at S37
+commit message body per CONSTRAINT 1 NOT IN SCOPE §19.4 baseline
+edits preservation. **Block ordering working hypothesis re-
+disposition forward state at S37 commit message body per
+Divergence 3 ratification:** Block-internal complexity ordering
+working hypothesis at Frequency Domain / Signal block analogous
+to S31 Block 3 ordering working hypothesis precedent — preliminary
+ordering periodogram → fft_spectrum → lomb_scargle → ssa →
+wavelet_transform → wavelet_coherence_phase_lag → emd_hht across
+7-entry arc; Block ordering working hypothesis testing across S37
++ S38 + S39 + S40 + S41 + S42 + S43 = potential 7-entry Block-
+ordering observation tightening per A3 precedent if empirically
+confirmed across arc; cross-reference to §19.4 §4 note 13 first-
+instance baseline observation at Block 3 100% confirmed precedent
+per S31-S34 ordering empirical validation; second Block-ordering
+working hypothesis empirical observation at Frequency Domain /
+Signal block close = n=2 Block-ordering observation tightening
+per A3 precedent if empirically confirmed.
+
+## §3 Unvalidated catalog techniques (58 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -8679,8 +9625,8 @@ descriptions, summaries).
 ### Forecasting (Classical) (8 unvalidated)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
 
-### Frequency Domain / Signal (7 unvalidated)
-`emd_hht`, `fft_spectrum`, `lomb_scargle`, `periodogram_spectral_density`, `ssa`, `wavelet_coherence_phase_lag`, `wavelet_transform`
+### Frequency Domain / Signal (6 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; Block Q1-amendment in-progress at 1 of 7 entries Q1-amended)
+`emd_hht`, `fft_spectrum`, `lomb_scargle`, `ssa`, `wavelet_coherence_phase_lag`, `wavelet_transform`
 
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
@@ -8703,7 +9649,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 59 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification candidate at §19.4 §4 forward instrumentation note 6 refinement at absorption #5 refinement disposition; Block 3 Decomposition completion arc S31 + S32 + S33 + S34 COMPLETED at S34 close per Code S31 + S32 + S33 + S34 Step 0 forward look (Block 3 ordering working hypothesis classical → mstl → stl → x13 EMPIRICALLY CONFIRMED at 100% completion); Block heterogeneous-Tier-surface variant observation completion at S34 (Block 3 mixed Tier surface Tier II.bit-exact at S31 + Tier VI LAYERED at S32 + Tier VI SINGLE-LAYER at S33 + Tier VII SKIP-graceful via post-S6 inference at S34); Block 3 sub-class taxonomy growth observation completion (Sub-class 2f + 2g + 2h candidates at n=1 first-instance baselines across S32 + S33 + S34); filename divergence sub-pattern variant n=3 third-observation reinforcement at S34 (S32 mstl + S33 stl + S34 x13 all omit catalog-id suffix); codification candidates at absorption #5 refinement disposition pending post-Block-3-close absorption opportunity**).
+**Total: 58 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 1 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry per S37 §3 enumeration empirical correction at Step 0 (trigger working hypothesis "Block 5 Univariate Spectral 3 unvalidated" SUPERSEDED by empirical "Frequency Domain / Signal 7 unvalidated" per Divergence 1 ratification); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 projected per 7-entry §3 enumeration banking only per forward instrumentation banking discipline; Block ordering working hypothesis re-disposition deferred to S38 trigger drafting at S37 close report forward state per Divergence 3 ratification; A9 Class A 18th-instance candidate banking at S37 commit message body forward state per multi-anchor schema-misattribution Code S37 Step 0 catch**).
 
 ## §4 How to use this document
 
@@ -8746,7 +9692,7 @@ reference parity; NO parameter posterior parity validated**.
 **Requires expert review for any published use** regardless of
 TSL internal invariants holding.
 
-**Tier 3 — UNVALIDATED (59 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34 amendments):**
+**Tier 3 — UNVALIDATED (58 catalog techniques; §3 enumeration; post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37 amendments):**
 
 Available via `TSL_RUN_THR` but **no reference-parity validation
 evidence**. Two paths to publishable confidence:
