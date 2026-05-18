@@ -626,7 +626,7 @@ authoring + Chat ratification triggers (in conversation;
 STOP 1 mandatory triggered + STOP 1.5 revision verification
 cycle triggered + ratifications applied).
 
-### A9 — Chat-trigger empirical-state-assumption failure mode (n=10 Class A + n=4 Class B; two sub-classes; post-S29-absorption #4 extension with discipline maturation observation promoted to §4.5 NEW sub-section per Chat ITEM 7 AFFIRMED commitment)
+### A9 — Chat-trigger empirical-state-assumption failure mode (n=14 Class A + n=4 Class B; two sub-classes; post-S35-absorption #5 extension with Class A counter advance n=10 → n=14 + Sub-pattern 4 maturation n=5 → n=9 + NEW Sub-pattern variant "Sustained Chat→Code direction at Sub-pattern 4" codification per Chat Decision 2 (α); discipline maturation observation promoted to §4.5 NEW sub-section at S29-absorption #4 per Chat ITEM 7 AFFIRMED commitment + EXTENDED to eleven-sustained-observation cross-session trajectory at S35-absorption #5)
 
 **Surfacing:** Phase 7+ S16-absorption first codification per Class A
 n=3 codification candidate threshold reached (per S11 §4 forward
@@ -650,7 +650,7 @@ about file/conversation/codebase reality WITHOUT empirical re-Read at
 trigger-drafting time. Two operationally distinct sub-classes
 observed:
 
-**Sub-class Class A — Baseline-state assertion failure (n=6 ACTIVE; codification status upgraded n=5 → n=6 at S24-absorption per S23-pre Step 0 6th-instance candidate caught at empirical re-Read; reactive-vs-proactive sub-pattern variant codified at S24-absorption):**
+**Sub-class Class A — Baseline-state assertion failure (n=14 ACTIVE; codification status upgraded n=10 → n=14 at S35-absorption #5 per Chat Decision 2 (α) 4-candidate codification: n=11 S29 STOP 1.5 + n=12 S30 Step 0 + n=13 S30 STOP 1.5 + n=14 S31 STOP 1 = sustained Chat→Code direction sub-pattern variant; reactive-vs-proactive sub-pattern variant codified at S24-absorption + NEW Sub-pattern variant "Sustained Chat→Code direction at Sub-pattern 4" codified at S35-absorption #5):**
 Chat trigger asserts baseline-state schema or content without re-Read
 of authoritative source artifact at trigger-drafting time.
 
@@ -666,6 +666,10 @@ of authoritative source artifact at trigger-drafting time.
 | 8 | S26-pre numerical-claim-baseline | Chat propagated "67 catalog scope per A2 codification" framing inverting A2 actual codification direction | A2 codifies 67 STALE CLAUDE.md memory vs 84 EMPIRICAL canonical catalog | Code S26-pre pre-trigger numerical-claim-baseline verification per A6 BLOCKING (NEW timing point variant (iv) per §4.5 taxonomy codification) |
 | 9 | S27 trigger drafting | Chat labeled loess_interpolation "second harness-reimplements-engine-math observation" | Empirical structure is "harness-validates-different-use-case-of-same-library-function"; same library function (statsmodels.lowess), different use cases (harness: smoothing self-parity; engine: interpolation of missing values) | Code S27 Step 0 (d) engine module full re-Read trigger-working-hypothesis-labeling-verification (timing point variant (vi) per §4.5 taxonomy codification) |
 | 10 | S28 trigger drafting | Chat anchored Sub-class 2a (αa) variant tagging second-observation at S22 + S28 = n=2 baseline tightening | Empirical structure three-variant baseline S22 dual-role + S23 triple-role + S28 standalone-only = n=3 codification-stable per A3 precedent | Code S28 Step 0 (e) engine module full re-Read trigger-working-hypothesis-labeling-verification (timing point variant (vi) per §4.5 taxonomy codification) |
+| 11 | S29 STOP 1.5 close (NEW at S35-absorption #5 codification per Chat Decision 2 (α)) | Code STOP 1.5 prior response re-surfaced original STOP 1 draft text without applying Revision 1 to Edit 3.2 | Revision 1 was newly surfaced in that turn and required application before re-surface; Code re-surfaced un-revised draft | Chat S29 STOP 1.5 close application-verification catch **CHAT→CODE DIRECTION VARIANT** — STOP-1.5-close-application-verification timing point variant (vii) per §4.5 taxonomy codification at S35-absorption #5 |
+| 12 | S30 Step 0 (NEW at S35-absorption #5 codification per Chat Decision 2 (α)) | Chat trigger CHAT RATIFICATION #4 placed (E) at NEW §6 + (H) at §2.6 without empirical re-Read of Workstream B current structure | §6 occupied as Banking footer (not available for (E) placement); §2.5 gap with no reserved meaning (not pre-cleared for (H) placement) | Code S30 Step 0 empirical Workstream B current structure Read **CHAT→CODE DIRECTION VARIANT** — trigger structure placement schema-misattribution; Code surfaced (α) §5.5 for (E) [recommended] + (α) §2.5 for (H) [recommended]; Chat ratified Code recommendations |
+| 13 | S30 STOP 1.5 close (NEW at S35-absorption #5 codification per Chat Decision 2 (α)) | Code STOP 1.5 response Edit 3 (H) §2.5 forward instrumentation contained speculative Tier combination examples ("Tier III + Pattern A overlay; Tier IV + Pattern J B.2 overlay") beyond empirical baseline | Speculation removal directed per A6 BLOCKING; Chat surfaced verbatim replacement directive | Chat S30 STOP 1.5 close speculation surfacing catch **CHAT→CODE DIRECTION VARIANT** — Code Edit 3 (H) §2.5 forward instrumentation speculation extending beyond empirical baseline content; STOP-1.5-close-application-verification timing point variant (vii) per §4.5 taxonomy codification |
+| 14 | S31 STOP 1 close (NEW at S35-absorption #5 codification per Chat Decision 2 (α)) | Code Step 1 STOP 1 response surfaced integrations checklist + file LOC delta + edit count metadata but did NOT include verbatim entry text body for STOP 1 verbatim-fidelity verification | STOP 1 mandate per CONSTRAINT 5 requires entry text surface for Chat verbatim-fidelity verification before commit application; Code metadata-only surface insufficient | Chat S31 STOP 1 close content-completeness verification catch **CHAT→CODE DIRECTION VARIANT** — STOP-1-close-content-completeness verification; precipitated Mod 3 operational discipline codification at S31 STOP 1 continuation; **NEW timing point variant (viii) STOP-1-close-content-completeness verification per §4.5 taxonomy codification at S35-absorption #5 per Revision 4 ratification** (distinct from (vii) STOP-1.5-close-application-verification; n=2 observations Instance #14 S31 STOP 1 close + n=15 candidate S35 STOP 1 close recurrence; A3 second-observation tightening precedent threshold satisfied at n=2 for (viii) codification) |
 
 **Recursive S11 → S16-absorption recurrence:** Instance #4 = same A5
 schema misattribution as instance #2 despite S11 correction in
@@ -683,37 +687,117 @@ reactive-vs-proactive sub-pattern variant codification):**
 | 1 — Artifact-body assertion | 1 | #1 (S10 attempt 1) |
 | 2 — Schema-misattribution recurrence | 2 | #2 (S11 pre-STOP-1) + #4 (S16-absorption Step 0) — identical A5 misattribution; conversation-context correction at S11 insufficient to prevent S16-absorption recurrence; demonstrates artifact-level codification (A9 itself) is structural mitigation |
 | 3 — Entry-presupposition | 1 | #3 (S12 Step 0 granger_causality entry assumption) |
-| 4 — Schema-misattribution (tier-enumeration omission + variant tagging scope + numerical-claim-baseline misattribution sub-pattern variants codified at S29-absorption #4) | 5 | #5 (S18 Step 0 Tier IV omission — REACTIVE-CATCH variant) + #6 (S23-pre Doc 2 handoff script p3_pp Tier II.bit-exact assertion — PROACTIVE-PREVENTION variant; ALSO codified as Instance #7 of A9 Class A counter per S29-absorption #4) + #8 (S26-pre catalog-count-baseline misattribution PROACTIVE-PREVENTION variant) + #9 (S27 reimplementation-vs-use-case-divergence PROACTIVE-PREVENTION variant) + #10 (S28 Sub-class 2a variant tagging scope-misattribution PROACTIVE-PREVENTION variant) — sub-pattern 4 maturation across n=1 reactive variant (S18) + n=4 proactive variants (S23-pre + S26-pre + S27 + S28) = n=5 codified post-S29-absorption #4; reactive-vs-proactive sub-pattern variant codified at S24-absorption operational across n=5 instances |
+| 4 — Schema-misattribution (tier-enumeration omission + variant tagging scope + numerical-claim-baseline misattribution + STOP-cycle-close-application-verification + trigger structure placement sub-pattern variants codified at S35-absorption #5; UPDATED at S35-absorption #5 from n=5 codified post-S29-absorption #4 to n=9 codified post-S35-absorption #5 per 4-candidate codification + NEW Sub-pattern variant "Sustained Chat→Code direction" codification) | 9 | #5 (S18 Step 0 Tier IV omission — REACTIVE-CATCH variant) + #6 (S23-pre Doc 2 handoff script p3_pp Tier II.bit-exact assertion — PROACTIVE-PREVENTION variant; ALSO codified as Instance #7 of A9 Class A counter per S29-absorption #4) + #8 (S26-pre catalog-count-baseline misattribution PROACTIVE-PREVENTION variant) + #9 (S27 reimplementation-vs-use-case-divergence PROACTIVE-PREVENTION variant) + #10 (S28 Sub-class 2a variant tagging scope-misattribution PROACTIVE-PREVENTION variant) + **#11 (S29 STOP 1.5 close application-verification — CHAT→CODE DIRECTION VARIANT; STOP-1.5-close-application-verification timing point variant (vii) per §4.5)** + **#12 (S30 Step 0 trigger structure placement schema-misattribution — CHAT→CODE DIRECTION VARIANT)** + **#13 (S30 STOP 1.5 close Code Edit 3 (H) speculation surfacing — CHAT→CODE DIRECTION VARIANT)** + **#14 (S31 STOP 1 close content-completeness verification — CHAT→CODE DIRECTION VARIANT; precipitated Mod 3 operational discipline codification)** — sub-pattern 4 maturation across n=1 reactive variant (S18) + n=8 proactive variants (S23-pre + S26-pre + S27 + S28 + S29 + S30-Step-0 + S30-STOP-1.5 + S31) = n=9 codified post-S35-absorption #5; reactive-vs-proactive sub-pattern variant codified at S24-absorption operational across n=9 instances; NEW Sub-pattern variant "Sustained Chat→Code direction" codified at S35-absorption #5 operational across n=4 consecutive instances #11-14 |
 
-Sub-pattern observation (updated at S24-absorption): Class A operates
-at multiple content layers (artifact-body / schema-content / entry-
-existence / tier-taxonomy). Sub-pattern n-counts (1+2+1+2 = 6 total)
-inform forward observation calibration; sub-pattern 2 (schema-
-misattribution recurrence) demonstrates conversation-context
-corrections insufficient at sub-pattern level; codification at A9
-with sub-pattern granularity strengthens artifact-level mitigation.
+Sub-pattern observation (updated at S35-absorption #5 per Revision 3
+ratification): Class A operates at multiple content layers (artifact-
+body / schema-content / entry-existence / tier-taxonomy). **Sub-
+pattern n-counts (1+2+1+9 = 13 total post-S35-absorption #5; Sub-
+pattern 4 maturation n=2 → n=5 → n=9 across S24-absorption + S29-
+absorption #4 + S35-absorption #5 codification cycles)** inform
+forward observation calibration; sub-pattern 2 (schema-misattribution
+recurrence) demonstrates conversation-context corrections insufficient
+at sub-pattern level; codification at A9 with sub-pattern granularity
+strengthens artifact-level mitigation; Sub-pattern 4 dominant
+maturation reflects extended Q1 work program S23-S34 sustained
+operation across 11-sub-session trajectory.
 
 **Reactive-vs-proactive sub-pattern variant (NEW at S24-absorption per
-S23-pre 6th-instance candidate observation):** Sub-pattern 4
-(tier-enumeration omission) splits into two operational variants
-distinguishing where failure pattern is caught:
+S23-pre 6th-instance candidate observation; OPERATIONAL across n=9
+instances post-S35-absorption #5):** Sub-pattern 4 (tier-enumeration
+omission + variant tagging scope + numerical-claim-baseline
+misattribution + STOP-cycle-close-application-verification + trigger
+structure placement schema-misattribution sub-pattern variants)
+splits into two operational variants distinguishing where failure
+pattern is caught:
 - **Reactive-catch variant (Instance #5 S18 + Instances #1-4 standard
   precedent):** failure pattern manifests in committed Chat trigger
   OR drafted entry text; caught at Code Step 0 empirical re-Read per
   CONSTRAINT 4 A6 BLOCKING; re-disposition cycle absorbed via Option
   II workflow Stage 3-4 per Workstream B §4.6 codification
-- **Proactive-prevention variant (Instance #6 S23-pre first
-  observation):** failure pattern caught at pre-trigger empirical
-  re-Read at S23-pre Step 0 (b); failure pattern did NOT manifest in
-  any committed text (trigger drafted under Step 0 verification
-  expectation; failure caught before propagation to trigger or entry)
+- **Proactive-prevention variant (Instances #6-#14; n=8 observations
+  post-S35-absorption #5 per Chat Decision 2 (α) 4-candidate
+  codification):** failure pattern caught at pre-trigger empirical
+  re-Read (Instances #6 S23-pre + #8 S26-pre) OR Step 0 trigger-
+  execution verification (Instances #9 S27 + #10 S28 + #12 S30) OR
+  STOP-cycle-close-application-verification (Instances #11 S29 STOP
+  1.5 + #13 S30 STOP 1.5 + #14 S31 STOP 1); failure pattern did NOT
+  manifest in any committed text (trigger drafted under Step 0
+  verification expectation; failure caught before propagation to
+  trigger or entry OR caught at STOP-cycle revision-before-commit
+  surface)
 
-Both variants share Sub-pattern 4 tier-enumeration-omission schema
+Both variants share Sub-pattern 4 schema-misattribution schema
 class; mitigation pathway differs only in catch timing. Cross-
-reference: §4 forward instrumentation note 7 "Discipline maturation
-observation — reactive-catch → proactive-prevention" codifies
-broader pattern across A9 Class A + Class B both shifting in same
-direction.
+reference: §4.5 sub-section "Discipline maturation observation —
+reactive-catch → proactive-prevention" codifies broader pattern
+across A9 Class A + Class B both shifting in same direction (PROMOTED
+from §4 forward instrumentation note 7 at S29-absorption #4; EXTENDED
+to eleven-sustained-observation cross-session trajectory at S35-
+absorption #5).
+
+**NEW Sub-pattern variant "Sustained Chat→Code direction at Sub-
+pattern 4" (NEW at S35-absorption #5 per Chat Decision 2 (α);
+empirically grounded at n=4 consecutive Chat→Code direction
+instances #11-14):** Sub-pattern 4 schema-misattribution variant
+distinguishing CATCH DIRECTION (Code→Chat baseline catches +
+Chat→Code STOP-cycle-close catches) per Code↔Chat actor-pair
+bilateral discipline operation:
+- **Code→Chat baseline catches variant (Instances #6 S23-pre + #8
+  S26-pre + #9 S27 + #10 S28 = n=4 observations; pre-S29
+  trajectory):** Code Step 0 empirical re-Read catches Chat trigger
+  baseline-state schema assertions before commit propagation
+- **Chat→Code STOP-cycle-close catches variant (NEW at S35-
+  absorption #5; Instances #11 S29 STOP 1.5 + #12 S30 Step 0 + #13
+  S30 STOP 1.5 + #14 S31 STOP 1 = n=4 consecutive observations
+  post-S29 trajectory):** Chat surfaces application-verification
+  catch at Code STOP-cycle response surface (re-surfacing
+  unmodified prior draft OR omitting material content body OR
+  speculation extension beyond empirical baseline OR trigger
+  structure placement schema-misattribution); A3 second-observation
+  tightening precedent threshold satisfied at n=4 consecutive
+  observations sufficient for absorption #5 codification per Chat
+  Decision 2 (α) verbatim ratification
+
+**Sub-pattern variant operational implication:** sustained Chat→Code
+direction at n=4 consecutive instances reinforces bilateral cross-
+actor discipline observation per §4.5 sub-section; mitigation
+operates at BOTH Code-side empirical-re-Read discipline AND Chat-
+side STOP-cycle-close application-verification discipline; codified
+at S35-absorption #5 as NEW Sub-pattern variant beyond reactive-vs-
+proactive sub-pattern variant codified at S24-absorption.
+
+**Post-Mod-3 sustained 0-catch operation observation (S32+S33+S34
+n=3 consecutive 0-issue STOP 1 reviews):** Mod 3 cadence
+operationally reduces Chat→Code STOP-cycle-close catch frequency at
+sustained post-codification cycles; demonstrates Mod 3 design
+intent operational empirically; codification candidate at S36
+Workstream B Mod 3 codification cross-reference per §4 forward
+instrumentation note 15 (NEW at S35-absorption #5).
+
+**A9 Class A n=15 candidate banking at S35-absorption #5
+codification surface (NEW at S35-absorption #5 per Revision 5
+ratification):** S35 STOP 1 close STOP-1-close-content-completeness
+verification recurrence under Mod 3 cadence (Chat→Code direction)
+— Code's Step 1 close response surfaced edits-applied metadata +
+chunk navigation line ranges but did NOT include verbatim
+codification text body for chunks 1/4 + 2/4 + 3/4 + 4/4. STOP 1
+mandate per CONSTRAINT 5 requires verbatim text body for Chat
+verbatim-fidelity verification. n=15 candidate banked for absorption
+#6+ second-observation tightening if recurs OR S36 Workstream B
+Mod 3 codification refinement scope. **Meta-substantive observation:**
+codified pattern operationally active during its own codification
+at S35-absorption #5 (sustained Chat→Code direction at Sub-pattern
+4 sub-pattern variant gained n=5 reinforcement at codification
+surface itself; NEW timing point variant (viii) STOP-1-close-
+content-completeness verification gained n=2 observations at
+codification surface itself per S31 + S35 STOP 1 close instances).
+Mod 3 cadence operationally reduces STOP 1 review density
+(S32+S33+S34 n=3 consecutive 0-issue observations) but does NOT
+eliminate STOP-1-close-content-completeness verification gap;
+codification candidate at S36 Workstream B Mod 3 codification
+refinement for chunked-surface content-completeness verification
+discipline.
 
 **Sub-class Class B — Empirical-complexity assumption failure (n=4 ACTIVE; codification status upgraded n=1 → n=2 at S19-absorption → n=4 at S24-absorption per S21+S22 STOP 2 instances 3+4; single-pattern bidirectional manifestation codified at S24-absorption per Previous Chat 1.3 walkback):**
 Chat trigger asserts file content complexity/structural pattern
@@ -781,26 +865,52 @@ pre-STOP-1 catches.
   codification (text preserved per R3 maintenance protocol audit
   trail; status field updated)
 
-**Forward instrumentation (updated at S24-absorption):** Class A
-pattern reinforced at n=6 with sub-pattern taxonomy (4 sub-patterns
-+ reactive-vs-proactive sub-pattern variant codified at S24-
-absorption per S23-pre 6th-instance candidate proactive-prevention
-operation; codification refinement at next absorption if sub-pattern
-n-counts shift materially OR reactive-vs-proactive variant pattern
-shifts). Class B pattern codified at n=4 ACTIVE with single-pattern
+**Forward instrumentation (updated at S35-absorption #5):** Class A
+pattern reinforced at n=14 ACTIVE with sub-pattern taxonomy (4
+sub-patterns + reactive-vs-proactive sub-pattern variant codified at
+S24-absorption operational across n=9 instances + NEW Sub-pattern
+variant "Sustained Chat→Code direction at Sub-pattern 4" codified at
+S35-absorption #5 operational across n=4 consecutive instances #11-14;
+codification refinement at next absorption if sub-pattern n-counts
+shift materially OR new sub-pattern variants surface). Class B
+pattern codified at n=4 ACTIVE unchanged with single-pattern
 bidirectional manifestation (simpler-than-expected + different-
 topology-than-expected; mitigation identical); revised default
-assumption empirically operative + reinforced at n=4. **Discipline
-maturation observation PROMOTED FROM §4 forward instrumentation note
-7 TO §4.5 NEW sub-section codification at S29-absorption #4 per
-Chat ITEM 7 AFFIRMED commitment** (reactive-catch → proactive-
-prevention; institutional discipline observation spanning A9 Class
-A + Class B both shifting in same direction; five-sustained-
-observation cross-session trajectory S23+S25+S26+S27+S28 + six-
-timing-point operational surface + bilateral cross-actor extension
-at n=2 empirical baseline; promotion candidate codification-COMPLETE
-post-S29-absorption #4 per A3 design-class precedent threshold
-satisfied at n=3+ codification-stable observations).
+assumption empirically operative + reinforced at n=4; sustained-
+observation count under Class B revised default discipline n=10
+(S22+S23+S25+S26+S27+S28+S31+S32+S33+S34 Q1-entries-only counting
+basis per Chat preference codified at S31). **Discipline maturation
+observation PROMOTED FROM §4 forward instrumentation note 7 TO §4.5
+NEW sub-section codification at S29-absorption #4 per Chat ITEM 7
+AFFIRMED commitment + EXTENDED at S35-absorption #5 to eleven-
+sustained-observation cross-session trajectory + seven-timing-point
+operational surface (NEW (vii) STOP-1.5-close-application-
+verification) + bilateral cross-actor extension at n=9 total +
+sustained Chat→Code direction sub-pattern variant codification**
+(reactive-catch → proactive-prevention; institutional discipline
+observation spanning A9 Class A + Class B both shifting in same
+direction; eleven-sustained-observation cross-session trajectory
+S23+S25+S26+S27+S28+S29+S30+S31+S32+S33+S34 + **eight-timing-point
+operational surface (i)-(viii) per Revision 4 codification at S35-
+absorption #5** + bilateral cross-actor extension at **n=11 total
+per §4.5 maturation observation extension scope (n=3 Code→Chat +
+n=8 Chat→Code) per Revision 1 ratification** + **A9 Sub-pattern 4
+sub-pattern variant scope bilateral cross-actor at n=8 total (n=4
+Code→Chat Instances #6+#8+#9+#10 + n=4 Chat→Code Instances #11+#12+
+#13+#14) per Revision 1+2 scope disambiguation** + sustained
+Chat→Code direction sub-pattern variant operational across n=4
+consecutive instances + §4.5 codification operational at n=5 post-
+codification sustained observations; promotion candidate
+codification-COMPLETE post-S29-absorption #4 + post-codification
+operational at n=5 sustained observations per A3 design-class
+precedent threshold satisfied per S35-absorption #5 extension
+reinforcement). **Scope disambiguation per Revision 1 ratification:**
+§4.5 maturation observation extension scope is broader sustained-
+observation trajectory across S23-S34 (includes Code→Chat catches
+at Sub-pattern 4 instances #6+#8-10 + Chat→Code catches at Sub-
+patterns 2+3+4 across earlier sub-patterns); A9 Sub-pattern 4 sub-
+pattern variant scope is narrower codification-event scope (Sub-
+pattern 4 Instances #6-#14 only; n=8 bilateral cross-actor count).
 
 ### A10 — Q1 trust documentation remediation sub-session class baselines (n=12 observations across multiple sub-classes + topology differentiation + tier-variant; Sub-class 2a (αa) variant tagging UPGRADED to codification-stable at n=3 + Sub-class 2c resolved at n=2 ACTIVE + 2c-IV variant at n=1 ACTIVE + Sub-class 2e NEW codification at n=2 generalized baseline; post-S29-absorption #4 extension)
 
@@ -1336,26 +1446,74 @@ amendment commits + 1 absorption commit (S24-absorption).
   1's 1 amendment commit indicating mature trigger drafting + Step
   0 discipline by S21+).
 
-**Forward instrumentation (REFINED at S29-absorption #4 per Block 8
-completion at S28; per-block continuation pattern at n=3 catalog
+**Forward instrumentation (REFINED at S35-absorption #5 per Block 3
+completion at S34; per-block continuation pattern at n=4 catalog
 block observations satisfies A3 second-observation tightening
-precedent threshold):** Block 1 Causality (6 entries / ~1837 LOC /
-S12-S18 / 1 amendment + 1 absorption) + Block 12 Stationarity Tests
-(3 entries / ~1737 LOC / S21-S23 / 0 amendments + 1 absorption) +
-Block 8 Missing Data (3 entries / ~1551 LOC / S26-S28 / 0 amendments
-+ 0 absorptions pre-S29; S29-absorption #4 = post-Block-8 closure)
-= ~5125 LOC across 12 §2.5 entries / 12 sub-sessions across 3
-fully Q1-amended catalog blocks. Per-block continuation pattern
-characterization at n=3 catalog block observations: blocks complete
-in 3-6 entries; LOC range ~1551-1837 per block; amendment +
-absorption frequency varies (Block 1 highest at 1+1; Block 12 + 8
-each at 0 amendments; Block 8 zero pre-absorption per S29 in-flight);
-per-block completion arc S<N> → S<N+2 to S<N+5> typical (Block 1:
-S12 → S18 = 7 sub-sessions including S14b amend + S16-absorb;
-Block 12: S21 → S23 = 3 sub-sessions; Block 8: S26 → S28 = 3
-sub-sessions). Forward instrumentation: per-block continuation
-pattern characterization tightens at n=4 catalog block observation
-(S31+ next block transition).
+precedent threshold + NEW characterization "Block heterogeneous-
+Tier-surface variant" sub-pattern codification at n=2 observations
+per Chat Decision 3 (α)):** Block 1 Causality (6 entries / ~1837
+LOC / S12-S18 / 1 amendment + 1 absorption / homogeneous Tier
+II.bit-exact-throughout) + Block 12 Stationarity Tests (3 entries /
+~1737 LOC / S21-S23 / 0 amendments + 1 absorption / homogeneous
+Tier II.bit-exact-throughout) + Block 8 Missing Data (3 entries /
+~1551 LOC / S26-S28 / 0 amendments + 0 absorptions pre-S29; S29-
+absorption #4 = post-Block-8 closure / heterogeneous Tier II.bit-
+exact + Tier III + Tier II.mle-band) + **Block 3 Decomposition (4
+entries / ~3119 LOC actual per S31 622 + S32 677 + S33 843 + S34
+977 / S31-S34 / 0 amendments + 0 absorptions pre-S35; S35-absorption
+#5 = post-Block-3 closure / heterogeneous Tier II.bit-exact + Tier
+VI LAYERED + Tier VI SINGLE-LAYER + Tier VII SKIP-graceful)** =
+~8244 LOC across 16 §2.5 entries / 16 sub-sessions across 4 fully
+Q1-amended catalog blocks. Per-block continuation pattern
+characterization at n=4 catalog block observations: blocks complete
+in 3-6 entries; **LOC range expands ~1551-3119 per block** (Block 3
+~3119 LOC largest to-date reflecting Block 3 entry-size growth +
+Block 3 4-entry vs prior 3-entry blocks); amendment + absorption
+frequency varies (Block 1 highest at 1+1; Block 12 + Block 8 + Block
+3 each at 0 amendments; Block 8 + Block 3 pre-absorption per S29 +
+S35 respectively); per-block completion arc S<N> → S<N+2 to S<N+5>
+typical (Block 1: S12 → S18 = 7 sub-sessions including S14b amend +
+S16-absorb; Block 12: S21 → S23 = 3 sub-sessions; Block 8: S26 →
+S28 = 3 sub-sessions; Block 3: S31 → S34 = 4 sub-sessions).
+
+**NEW characterization "Block heterogeneous-Tier-surface variant"
+sub-pattern codification at n=2 observations per Chat Decision 3
+(α) at S35-absorption #5:** Block 8 + Block 3 both surface
+heterogeneous Tier surfaces (multiple distinct Tier characterizations
+within single Block) distinct from Block 1 + Block 12 homogeneous
+Tier II.bit-exact-throughout. **Empirical evidence:**
+- **Block 8 heterogeneous (3 entries S26+S27+S28):** Tier II.bit-
+  exact (denton_chowlin Layer 1H harness reimplementation) + Tier
+  III (loess_interpolation Pattern A.1 same-library sub-class) +
+  Tier II.mle-band (kalman_imputation Pattern A overlay) = 3
+  distinct Tier characterizations
+- **Block 3 heterogeneous (4 entries S31+S32+S33+S34):** Tier
+  II.bit-exact (classical_decompose clean Pattern A bit-exact) +
+  Tier VI LAYERED (mstl_decompose CAVEAT primary + Pattern A
+  structural-identity overlay) + Tier VI SINGLE-LAYER (stl_decompose
+  CAVEAT deterministic implementation-difference) + Tier VII SKIP-
+  graceful via post-S6 inference (x13_seasonal_adjust binary-
+  unavailable) = 4 distinct Tier characterizations
+- **Block 1 homogeneous (6 entries S12-S18):** Tier II.bit-exact-
+  throughout (granger + cross_correlation + prewhitened_ccf +
+  rolling_ccf + dtw + gcc_phat all Tier II.bit-exact variants OR
+  Tier IV self-parity)
+- **Block 12 homogeneous (3 entries S21-S23):** Tier II.bit-exact-
+  throughout (adf + kpss + pp all Tier II.bit-exact variants;
+  pp_test adds Tier V Pattern J overlay)
+
+A3 second-observation tightening precedent threshold satisfied at
+n=2 observations (Block 8 + Block 3) for sub-pattern variant
+codification per Chat Decision 3 (α); forward instrumentation:
+third heterogeneous-Tier-surface Block observation at S37+ FIFTH
+catalog block transition tightens pattern per A3 precedent (n=3
+codification-stable threshold).
+
+Forward instrumentation: per-block continuation pattern
+characterization tightens at n=5 catalog block observation (S37+
+FIFTH catalog block transition); heterogeneous-vs-homogeneous Tier-
+surface sub-pattern codification refinement at next Block close
+based on empirical Tier surface composition observation.
 
 **Forward instrumentation note — Discipline maturation observation:
 reactive-catch → proactive-prevention [SUPERSEDED BY §4.5 NEW
@@ -1560,40 +1718,265 @@ within-block STOP cycle count pattern at Block 1 (S12-S18) +
 Block 12 (S21-S23) retrospective comparison would tighten pattern
 characterization at absorption #5+ per A3 precedent.
 
-## §4.5 Discipline maturation observation (reactive-catch → proactive-prevention) [NEW at S29-absorption #4 codification; promoted from §4 forward instrumentation note 7 per Chat ITEM 7 AFFIRMED commitment + five-sustained-observation + six-timing-point empirical surface + bilateral cross-actor extension empirical baseline]
+**Forward instrumentation note 13 — Block ordering working
+hypothesis empirical confirmation (NEW at S35-absorption #5 per
+Block 3 ordering working hypothesis 100% empirical confirmation;
+A3 first-instance precedent n=1 baseline):** Block 3 ordering
+working hypothesis (classical → mstl → stl → x13) banked at S31
+Step 0 forward look per Code S31 STOP 2 surface; empirical
+confirmation across S31 + S32 + S33 + S34 sub-session ordering =
+100% confirmed at Block 3 close. **First-instance n=1 baseline
+observation per A3 first-instance precedent (NOT codification-
+stable):** Block-ordering working hypothesis empirical confirmation
+sub-pattern operational at single Block observation; codification
+deferred to absorption #6+ second-observation tightening if recurs
+at next catalog block completion arc per A3 precedent. Forward
+instrumentation: second Block-ordering working hypothesis empirical
+confirmation at next catalog block close (S37+ FIFTH catalog block
+transition) tightens pattern per A3 precedent (n=2 codification-
+stable threshold satisfied); codification placement candidates at
+absorption #6+ §4 forward instrumentation note refinement OR
+Workstream B amendment cycle disposition.
+
+**Forward instrumentation note 14 — LOC overshoot pattern n=6
+catalog observation across Q1 entries (NEW at S35-absorption #5
+per S27 + S28 + S31 + S32 + S33 + S34 empirical observations):**
+LOC overshoot pattern observed across n=6 Q1 entries reflecting
+multi-disclosure-class entries with NEW Sub-class candidates +
+first-instance discipline disclosures + §1.5 novelty enumeration
+sub-section applications + Block milestone framings. **Empirical
+LOC overshoot observations:**
+- S27 loess_interpolation: 513 net LOC vs ~330 projection = +183
+  LOC overshoot (+55% over projection); driven by Tier III FIRST
+  §2.5 precedent + §4.7.A use-case-divergence variant
+- S28 kalman_imputation: 536 net LOC vs ~440 projection = +96 LOC
+  overshoot (+22% over projection); driven by Tier II.mle-band +
+  Pattern A overlay FIRST primary+overlay precedent
+- S31 classical_decompose: 622 net LOC above ~400-450 projection
+  (+38% over projection); driven by Sub-class 2a (αa) reimplementation
+  variant extension + endpoint-extrapolation caveat first-instance
+  + §4.7.A reimplementation-of-dispatch variant manifestation
+- S32 mstl_decompose: 677 net LOC above ~400-500 projection (+50%
+  over projection); driven by FIRST POST-S30-CODIFICATION application
+  of §2.5 Tier primary+overlay convention + NEW Sub-class 2f
+  candidate first-instance baseline + algorithmic-non-uniqueness
+  caveat
+- S33 stl_decompose: 843 net LOC above ~400-600 projection (+68%
+  over projection); driven by NEW Sub-class 2g candidate first-
+  instance baseline + reroll_on_caveat=False discipline disclosure
+  first-instance + filename divergence sub-pattern variant n=2
+  baseline + deterministic-implementation-difference caveat
+- S34 x13_seasonal_adjust: 977 net LOC above ~600-900 projection
+  (+8-63% over projection); driven by Tier VII SKIP-graceful via
+  post-S6 inference + audit "Tier C" reference hybrid + §4.7.A
+  REMEDIATED 5th variant first-instance baseline + Pattern A.1
+  CONDITIONAL framing potential + NEW Sub-class 2h candidate first-
+  instance baseline + §1.5 novelty enumeration sub-section APPLIED
+  + Block 3 FULLY Q1-AMENDED milestone framing
+
+**Codification candidate at S36 Workstream B amendment cycle**
+(structurally belongs at Workstream B §1.6 Q-A density convention
+scope expansion; NOT codified at §19.4 per CHAT RATIFICATION #2 +
+CONSTRAINT 1 NOT IN SCOPE at S35-absorption #5; deferred to S36
+separate sub-session); forward observation banking only at this
+absorption. Pattern characterization: LOC overshoot at multi-
+disclosure-class entries with NEW Sub-class candidates + first-
+instance discipline disclosures + §1.5 novelty enumeration sub-
+section applications + Block milestone framings is sustained
+observation candidate for Q-A density convention scope expansion
+codification at S36+.
+
+**Forward instrumentation note 15 — STOP 1 review density observation
+n=6 catalog observation across Q1 entries (NEW at S35-absorption #5
+per S26 + S30 + S31 5-issue vs S32 + S33 + S34 0-issue post-Mod 3
+sustained reduction pattern):** STOP 1 review density observation
+across n=6 Q1 entries demonstrates Mod 3 cadence operationally
+reduces STOP 1 review density at sustained post-codification cycles.
+**Empirical STOP 1 review density observations:**
+- **Pre-Mod-3 / At-Mod-3-codification / Post-Mod-3-retrofit n=3
+  observations (5-issue density):** S26 denton_chowlin 5-issue STOP
+  1 review (pre-Mod-3) + S30 Workstream B amendment cycle 5-issue
+  STOP 1 review (at-Mod-3-codification per Mod 3 codified at S31
+  STOP 1 continuation retrofit) + S31 classical_decompose 5-issue
+  STOP 1 review (Mod 3 codified at S31 STOP 1 continuation retrofit;
+  precipitated Mod 3 operational discipline codification + STOP-1-
+  close-content-completeness verification catch n=14 Class A
+  candidate)
+- **Post-Mod-3 standard-application n=3 observations (0-issue
+  density):** S32 mstl_decompose 0-issue STOP 1 review (Mod 3
+  cadence first standard-application) + S33 stl_decompose 0-issue
+  STOP 1 review (Mod 3 cadence second standard-application) + S34
+  x13_seasonal_adjust 0-issue STOP 1 review (Mod 3 cadence third
+  standard-application)
+
+**Pattern characterization:** Mod 3 cadence (STOP turn responses
+surface text body only; apparatus self-codifications consolidated
+to commit message body) operationally reduces STOP 1 review density
+from 5-issue (pre-Mod-3) to 0-issue (post-Mod-3 standard-
+application) at n=3 sustained consecutive observations. Mod 3
+design intent operationally validated. **Codification candidate at
+S36 Workstream B Mod 3 codification cross-reference** (structurally
+belongs at Workstream B Mod 3 operational discipline codification;
+NOT codified at §19.4 per CHAT RATIFICATION #2 + CONSTRAINT 1 NOT
+IN SCOPE at S35-absorption #5; deferred to S36 separate sub-session);
+forward observation banking only at this absorption. Cross-reference:
+§4.5 sub-section "Post-Mod-3 sustained 0-catch operation observation"
+(S32+S33+S34 n=3 consecutive 0-issue STOP 1 reviews) reinforces
+Mod 3 cadence operational reduction in Chat→Code STOP-cycle-close
+catch frequency.
+
+**Forward instrumentation note 16 — Sub-class taxonomy growth
+observation Block-level (NEW at S35-absorption #5 per Block 3
+Sub-class candidates 2f + 2g + 2h all at n=1 first-instance
+baselines):** Block 3 Decomposition produced THREE NEW Sub-class
+candidates all at n=1 first-instance baselines across S32 + S33 +
+S34 sub-sessions; Block-level sub-class taxonomy growth pattern
+observation candidate at absorption #6+ second-observation
+tightening. **Empirical Sub-class taxonomy growth observations
+across Block 3:**
+- **Sub-class 2f candidate (S32 mstl_decompose first-instance
+  baseline):** "layered iterative-loess primary CAVEAT + closed-
+  form structural-identity overlay" definitional scope working
+  hypothesis; algorithmic-non-uniqueness rationale; LAYERED framing;
+  A3 first-instance precedent n=1 baseline; NOT codification
+- **Sub-class 2g candidate (S33 stl_decompose first-instance
+  baseline):** "deterministic-implementation-difference iterative-
+  loess CAVEAT" definitional scope working hypothesis; per-index
+  divergence reproducible across seeds (NOT Monte Carlo noise);
+  SINGLE-LAYER framing; A3 first-instance precedent n=1 baseline;
+  NOT codification
+- **Sub-class 2h candidate (S34 x13_seasonal_adjust first-instance
+  baseline REFINED definitional scope):** "SKIP-graceful + §4.7.A
+  REMEDIATED + same-binary parity conditional potential" combined
+  novelty (revised from CHAT RATIFICATION #6 working hypothesis per
+  ITEM 3 empirical refinement); Tier VII SKIP-graceful via post-S6
+  inference + Tier C audit reference hybrid; A3 first-instance
+  precedent n=1 baseline; NOT codification
+
+**Block-level pattern observation:** SINGLE catalog block (Block 3
+Decomposition) produces n=3 NEW Sub-class candidates at first-
+instance baselines across n=4 entries (75% of entries produce NEW
+Sub-class candidate). Pattern characterization: heterogeneous-Tier-
+surface Blocks (per §4 note 6 refinement at S35-absorption #5) may
+correlate with elevated Sub-class taxonomy growth rate vs
+homogeneous-Tier-surface Blocks (Block 1 + Block 12 produced n=1
+each Sub-class baselines despite 6 + 3 entries respectively).
+Forward observation banking for absorption #6+ second-observation
+tightening if recurs at future catalog block (next heterogeneous-
+Tier-surface Block at S37+ FIFTH catalog block transition would
+provide n=2 Block-level Sub-class taxonomy growth observation per
+A3 precedent); codification deferred to absorption #6+.
+
+**Forward instrumentation note 17 — Mod 3 chunked-surface content-
+completeness verification empirical pattern observation (NEW at
+S35-absorption #5 per apparatus operational review pause Chat
+ratified sub-disposition #3):** n=3 observations of content-
+completeness verification gap at chunked-surface STOP cycle
+responses under Mod 3 cadence operative:
+- **n=14 S31 STOP 1 close** (precipitated Mod 3 codification at S31
+  STOP 1 continuation): Code Step 1 response surfaced integrations
+  checklist + file LOC delta + edit count metadata but did NOT
+  include verbatim entry text body for STOP 1 verbatim-fidelity
+  verification
+- **n=15 S35 STOP 1 close** (4 sub-sessions post-Mod-3 codification;
+  chunked-surface STOP 1 metadata + navigation surface without
+  verbatim text body): Code Step 1 close response surfaced edits-
+  applied metadata + chunk navigation line ranges (chunks 1/4 +
+  2/4 + 3/4 + 4/4) without verbatim codification text body
+- **n=16 S35 STOP 1.5 close** (subsequent STOP 1.5 re-surface
+  metadata + header-line surface without verbatim revised text
+  body): Code STOP 1.5 response surfaced revision-application
+  metadata + revised chunk 1/4 header line only without verbatim
+  revised chunk 1/4 body
+
+**Pattern characterization:** Mod 3 codification at S31 STOP 1
+continuation under-specified for chunked-surface protocol content-
+completeness verification requirement. Mod 3's "(1) drafted/revised
+text body verbatim chunked if needed" specification did not
+explicitly distinguish verbatim text body (the actual content being
+verified) from metadata describing that content was applied to the
+file. Refinement at S36 Workstream B amendment cycle Mod 3
+codification refinement scope per Chat ratified sub-disposition
+#5; **in-flight Mod 3 specification refinement applied at S35
+continuation per explicit verbal directive per Chat ratified sub-
+disposition #4** (verbatim text body of chunked content + one-line
+chunk navigation + one-line disposition request at chunk M/M close;
+NO edit-application metadata + NO file state confirmation + NO
+chunk-by-chunk navigation tables + NO header-line-only surface +
+NO per-revision enumeration).
+
+**A9 Class A counter n=15 + n=16 candidate banking forward state
+per Chat ratified sub-disposition #6** (codification deferred to
+absorption #6+ second-observation tightening OR S36 Workstream B
+Mod 3 codification refinement scope). **NEW timing point variant
+(viii) STOP-1-close-content-completeness verification codification
+at §4.5 extension chunk 4/4 at n=2 baseline (S31 STOP 1 + S35
+STOP 1 = n=2 observations) per A3 second-observation tightening
+precedent per Chat ratified sub-disposition #7**; S35 STOP 1.5
+banks at S35 commit message body forward state for absorption #6+
+extension reinforcement.
+
+**Sustained content-completeness verification gap recurrence within
+Mod 3 cadence demonstrates Mod 3 specification scope refinement
+required at S36 Workstream B amendment cycle Mod 3 codification
+refinement separate-lane disposition.** Forward observation banking:
+n=4+ recurrence at S36+ Q1 entries would warrant immediate Workstream
+B Mod 3 codification refinement at next Workstream B amendment cycle
+sub-session; n=3 consecutive at S35 within single sub-session
+(S31 + S35 STOP 1 + S35 STOP 1.5) reinforces refinement urgency.
+
+## §4.5 Discipline maturation observation (reactive-catch → proactive-prevention) [NEW at S29-absorption #4 codification; promoted from §4 forward instrumentation note 7 per Chat ITEM 7 AFFIRMED commitment + EXTENDED at S35-absorption #5 to eleven-sustained-observation cross-session trajectory + EIGHT-timing-point empirical surface (NEW (vii) STOP-1.5-close-application-verification + NEW (viii) STOP-1-close-content-completeness verification per Revision 4 ratification) + bilateral cross-actor extension at n=11 total (n=3 Code→Chat + n=8 Chat→Code) per Revision 1 ratification + sustained Chat→Code direction sub-pattern variant cross-reference to A9 amendment Sub-pattern 4 codification + n=15 candidate banking forward instrumentation note per Revision 5 ratification]
 
 **Definitional scope (load-bearing institutional discipline
 observation):** A9 Class A + Class B mitigation discipline operates
 in two phases of operational maturity across Phase 7+ Q1 work
-program sub-sessions S11-S28:
+program sub-sessions S11-S34:
 
 - **Reactive-catch phase (S11-S22 precedent; n=9 instances total
   across Class A + Class B):** failure pattern manifests in committed
   Chat trigger OR drafted entry text; caught at Code Step 0 empirical
   re-Read per CONSTRAINT 4 A6 BLOCKING; re-disposition cycle absorbed
   via Option II workflow Stage 3-4
-- **Proactive-prevention phase (S23 first-instance + S25/S26/S27/S28
-  sustained; n=4 candidate observations + sustained operation):**
-  failure pattern caught at PRE-trigger empirical re-Read OR trigger-
+- **Proactive-prevention phase (S23 first-instance + S25-S34
+  sustained; n=11 cross-session trajectory observations; codification-
+  stable + post-codification operational at n=5 sustained observations
+  S30+S31+S32+S33+S34 per S35-absorption #5 extension):** failure
+  pattern caught at PRE-trigger empirical re-Read OR trigger-
   execution Step 0 verification OR STOP-cycle revision-trigger
   completeness verification OR numerical-claim-baseline pre-trigger
   verification OR framework-consistency-at-STOP-1.5-close verification
   OR trigger-working-hypothesis-labeling-verification at Step 0
-  engine module full re-Read; failure pattern does NOT manifest in
-  committed text (caught before propagation)
+  engine module full re-Read OR STOP-1.5-close-application-verification
+  (NEW timing point variant (vii) codified at S35-absorption #5 per
+  S29 STOP 1.5 close + S30 STOP 1.5 close consecutive Chat→Code
+  catches; n=2 observations satisfies A3 second-observation tightening
+  precedent threshold) OR **STOP-1-close-content-completeness
+  verification (NEW timing point variant (viii) codified at S35-
+  absorption #5 per Revision 4 ratification; S31 STOP 1 close + S35
+  STOP 1 close consecutive Chat→Code catches; n=2 observations
+  satisfies A3 second-observation tightening precedent threshold)**;
+  failure pattern does NOT manifest in committed text (caught before
+  propagation)
 
 **Pattern direction (institutional discipline observation):** Both
 Class A + Class B shift in SAME direction (reactive-catch →
-proactive-prevention) across S23-S28 first-five-instance maturation
-observation trajectory. NOT a sub-pattern subdivision; institutional
-discipline observation spanning entire A9 codification + supporting
-amendments (A6 verify-state-at-narration BLOCKING + Workstream B
-§4.6 Option II workflow + Workstream B §4.7 Forward Q1 Step 0
-discipline operating together).
+proactive-prevention) across S23-S34 eleven-sustained-observation
+maturation observation trajectory. NOT a sub-pattern subdivision;
+institutional discipline observation spanning entire A9 codification
++ supporting amendments (A6 verify-state-at-narration BLOCKING +
+Workstream B §4.6 Option II workflow + Workstream B §4.7 Forward Q1
+Step 0 discipline operating together). **§4.5 codification
+operational at n=5 post-codification sustained observations
+(S30+S31+S32+S33+S34)** per S35-absorption #5 extension reinforcement
+— codification-stable status preserved at sustained post-codification
+operation per A3 design-class precedent threshold satisfied at n=5+
+post-codification observations.
 
-**Empirical observation history (five-sustained-observation cross-
+**Empirical observation history (eleven-sustained-observation cross-
 session trajectory; codification-stable per A3 second-observation
-tightening precedent threshold satisfied at n=3+ observations):**
+tightening precedent threshold satisfied at n=3+ observations +
+post-codification operational at n=5 observations per S35-absorption
+#5 extension):**
 
 | # | Sub-session | Maturation observation surface | Outcome |
 |---|---|---|---|
@@ -1602,9 +1985,21 @@ tightening precedent threshold satisfied at n=3+ observations):**
 | 3 | S26 third codification-stable observation | Pre-ratification-declined disposition (kpss/loess/kalman first-technique selection deferred to Step 0); Step 0 surfaces options + Chat ratifies; three-timing-point empirical surface | Reached A3 codification-stable threshold at n=3 |
 | 4 | S27 fourth sustained observation | Pre-ratification-declined at first-technique selection (Block 8 second entry); Step 0 (d) engine module full re-Read catches schema-misattribution; sixth proactive-prevention timing point variant observation | Sustained at n=4; promotion candidate robustness reinforced |
 | 5 | S28 fifth sustained observation | Pre-ratification-declined at framing class working hypothesis (Sub-class 2a variant tagging); Step 0 (e) engine module full re-Read catches scope-misattribution; six-timing-point empirical surface preserved | Sustained at n=5; six-timing-point empirical surface preserved; promotion-ready for absorption #4 codification |
+| 6 | S29-absorption #4 codification event | §4.5 NEW sub-section codification operational event per Chat ITEM 7 AFFIRMED commitment; promoted from §4 forward instrumentation note 7; six-timing-point taxonomy codified; bilateral cross-actor extension at n=5 baseline; (vii) STOP-1.5-close-application-verification timing point variant FIRST-INSTANCE candidate at S29 STOP 1.5 close catch (Chat→Code direction; A9 Class A n=11 candidate banked) | §4.5 codification-COMPLETE at absorption #4; sustained observation #6 in cross-session trajectory; (vii) timing point variant deferred to absorption #5 per A3 first-instance precedent |
+| 7 | S30 Workstream B amendment cycle codification event | Workstream B 5-candidate disposition (C + E + F + G + H); §1.5 novelty enumeration sub-section + §1.6 Q-A density convention + §2.5 Tier primary+overlay convention + §4.7 (G.1) generalized definitional scope + §5.5 forward-instrumentation hygiene codifications; Chat→Code direction catches at S30 Step 0 (n=12 candidate; trigger structure placement schema-misattribution) + S30 STOP 1.5 (n=13 candidate; Code Edit 3 (H) speculation surfacing) — both proactive-prevention operation at codification-event sub-session | §4.5 codification operational at n=1 post-codification sustained observation; A9 Class A n=12 + n=13 candidates banked at absorption #5 |
+| 8 | S31 first post-codification Q1 entry sustained observation | classical_decompose §2.5 entry; Block 3 Decomposition first-entry; Mod 3 codified at S31 STOP 1 continuation retrofit; STOP-1-close-content-completeness verification catch (Chat→Code direction at S31 STOP 1 close; A9 Class A n=14 candidate banked) | §4.5 codification operational at n=2 post-codification sustained observation; Mod 3 cadence first-instance codification |
+| 9 | S32 second post-codification Q1 entry sustained observation | mstl_decompose §2.5 entry; Block 3 Decomposition second-entry; Mod 3 cadence first standard-application; FIRST POST-S30-CODIFICATION application of §2.5 Tier primary+overlay convention; NEW Sub-class 2f candidate first-instance baseline; 0 substantive STOP 1.5 issues | §4.5 codification operational at n=3 post-codification sustained observation; Mod 3 cadence sustained reduction operational |
+| 10 | S33 third post-codification Q1 entry sustained observation | stl_decompose §2.5 entry; Block 3 Decomposition third-entry; Mod 3 cadence second standard-application; NEW Sub-class 2g candidate first-instance baseline; reroll_on_caveat=False discipline disclosure first-instance; filename divergence sub-pattern variant n=2 baseline; 0 substantive STOP 1.5 issues | §4.5 codification operational at n=4 post-codification sustained observation; Mod 3 cadence sustained reduction reinforced |
+| 11 | S34 fourth post-codification Q1 entry sustained observation | x13_seasonal_adjust §2.5 entry; Block 3 Decomposition fourth-AND-FINAL entry; BLOCK 3 FULLY Q1-AMENDED milestone; Tier VII SKIP-graceful via post-S6 inference + audit "Tier C" reference hybrid; §4.7.A REMEDIATED 5th variant first-instance; NEW Sub-class 2h candidate first-instance; §1.5 novelty enumeration sub-section APPLIED at S34; Mod 3 cadence third standard-application; 0 substantive STOP 1.5 issues | §4.5 codification operational at n=5 post-codification sustained observation per S35-absorption #5 extension; Mod 3 cadence sustained reduction operational at n=3 consecutive 0-issue STOP 1 reviews |
 
-**Six-timing-point operational surface taxonomy (codified at S29-
-absorption #4):**
+**Eight-timing-point operational surface taxonomy (six-timing-point
+codified at S29-absorption #4; EXTENDED at S35-absorption #5 with
+NEW (vii) STOP-1.5-close-application-verification per S29 STOP 1.5
+close + S30 STOP 1.5 close consecutive Chat→Code catches + NEW
+(viii) STOP-1-close-content-completeness verification per S31 STOP
+1 close + S35 STOP 1 close consecutive Chat→Code catches per
+Revision 4 ratification; both satisfying A3 second-observation
+tightening precedent threshold at n=2 observations each):**
 
 - **(i) Pre-trigger session re-entry empirical re-Read** (S23-pre +
   S26-pre): Code re-reads load-bearing state at session re-entry
@@ -1634,80 +2029,240 @@ absorption #4):**
   misattribution (S27: reimplementation-vs-use-case-divergence; S28:
   Sub-class 2a variant tagging scope-misattribution); failure
   pattern caught before manifest commit propagation
+- **(vii) STOP-1.5-close-application-verification** (NEW at S35-
+  absorption #5; S29 STOP 1.5 close + S30 STOP 1.5 close consecutive
+  Chat→Code direction catches): Chat surfaces application-verification
+  catch at STOP-1.5-close when Code's prior response surface re-
+  surfaces unmodified prior draft without applying ratified revisions
+  (S29) OR contains speculative content extending beyond empirical
+  baseline (S30); A9 Class A n=11 + n=13 candidate observations
+  correspond; codified at S35-absorption #5 per A3 second-observation
+  tightening precedent threshold satisfied at n=2 STOP-1.5-close-
+  application-verification observations
+- **(viii) STOP-1-close-content-completeness verification** (NEW at
+  S35-absorption #5 per Revision 4 ratification; S31 STOP 1 close +
+  S35 STOP 1 close consecutive Chat→Code direction catches): Chat
+  surfaces content-completeness verification catch at STOP-1-close
+  when Code's prior response surface omits material content body
+  (verbatim entry text body OR verbatim codification text body)
+  required for STOP 1 verbatim-fidelity verification per CONSTRAINT
+  5 mandate; A9 Class A n=14 + n=15 candidate observations
+  correspond (n=15 candidate banked at S35-absorption #5 codification
+  surface per Revision 5 ratification); codified at S35-absorption
+  #5 per A3 second-observation tightening precedent threshold
+  satisfied at n=2 STOP-1-close-content-completeness verification
+  observations; cross-reference to A9 Sub-pattern 4 NEW Sub-pattern
+  variant "Sustained Chat→Code direction" codification at this
+  absorption
 
-**Bilateral cross-actor extension (codified at S29-absorption #4
-per n=5 empirical observations S26+S27+S28 codification):**
+**Bilateral cross-actor extension (codified at S29-absorption #4 per
+n=5 empirical observations + EXTENDED at S35-absorption #5 to n=11
+total substantive-catch observations per Revision 1 + Revision 6
+ratifications across §4.5 Current-Chat-trajectory sustained-
+observation scope S23-S34 + post-Mod-3 sustained 0-catch operation
+observation preserved separately at "Post-Mod-3 sustained 0-catch
+operation observation" paragraph in A9 amendment chunk 1/4 + §4
+forward instrumentation note 15 chunk 3/4):**
 
 Discipline operates in BOTH directions across Code↔Chat actor pair:
 
-- **Code → Chat catches (n=3 observations):** S26-pre catalog-count-
-  baseline misattribution + S27 reimplementation-vs-use-case-
-  divergence schema-misattribution + S28 Sub-class 2a variant
-  tagging scope-misattribution
-- **Chat → Code catches (n=2 observations):** S26 STOP 1.5 Item 2
-  Layer 1H/1E mislabeling (Chat surfaced Code's mislabeling at STOP
-  1.5 review) + S26 STOP 1.5 close framework consistency (Code
-  surfaced framework asymmetry; Chat ratified extending Layer 1H/1E
-  framework to Chow-Lin)
+- **Code → Chat catches (n=3 observations at §4.5 Current-Chat-
+  trajectory scope; unchanged at S35-absorption #5):** S26-pre
+  catalog-count-baseline misattribution + S27 reimplementation-vs-
+  use-case-divergence schema-misattribution + S28 Sub-class 2a
+  variant tagging scope-misattribution
+- **Chat → Code catches (n=8 substantive-catch observations;
+  EXTENDED at S35-absorption #5 from n=2 to n=8 per Revision 1 +
+  Revision 6 ratifications; substantive-catch-only scope per
+  Revision 6 — S33 + S34 0-issue STOP 1 ratifications are
+  operational successes documented separately at "Post-Mod-3
+  sustained 0-catch operation observation"):** S26 STOP 1.5 Item 2
+  Layer 1H/1E mislabeling (Chat surfaced Code's mislabeling at
+  STOP 1.5 review) + S26 STOP 1.5 close framework consistency
+  (Code surfaced framework asymmetry; Chat ratified extending
+  Layer 1H/1E framework to Chow-Lin) + **S29 STOP 1.5 close
+  application-verification catch (Chat caught Code STOP 1.5 prior
+  response re-surfacing original STOP 1 draft text without applying
+  Revision 1; A9 Class A n=11 codified at S35-absorption #5; (vii)
+  STOP-1.5-close-application-verification timing point)** + **S30
+  Step 0 trigger structure placement schema-misattribution catch
+  (Chat trigger CHAT RATIFICATION #4 placed (E) at §6 + (H) at
+  §2.6 without empirical re-Read of Workstream B current structure;
+  A9 Class A n=12 codified at S35-absorption #5)** + **S30 STOP 1.5
+  close Code Edit 3 (H) speculation surfacing catch (Chat caught
+  Code STOP 1.5 response Edit 3 (H) §2.5 forward instrumentation
+  containing speculative Tier combination examples beyond empirical
+  baseline; A9 Class A n=13 codified at S35-absorption #5; (vii)
+  STOP-1.5-close-application-verification timing point)** + **S31
+  STOP 1 close STOP-1-close-content-completeness verification catch
+  (Chat caught Code Step 1 response surfacing integrations
+  checklist + file LOC delta + edit count metadata but NOT verbatim
+  entry text body; A9 Class A n=14 codified at S35-absorption #5;
+  (viii) STOP-1-close-content-completeness verification timing
+  point)** + **S35 STOP 1 close content-completeness verification
+  catch (Chat caught Code Step 1 close response surfacing edits-
+  applied metadata + chunk navigation line ranges without verbatim
+  codification text body for chunks 1/4 + 2/4 + 3/4 + 4/4; A9
+  Class A n=15 candidate banked at S35-absorption #5 codification
+  surface per Revision 5 ratification; (viii) STOP-1-close-content-
+  completeness verification timing point; meta-substantive
+  recurrence at codification surface itself)** + **S35 STOP 1.5
+  close content-completeness verification recurrence catch (Chat
+  caught Code STOP 1.5 response surfacing edits-applied metadata +
+  revised chunk 1/4 header line only without verbatim revised
+  chunk 1/4 body; A9 Class A n=16 candidate banked at S35-
+  absorption #5 codification surface per Revision 5 + sub-
+  disposition #6 ratifications; (viii) STOP-1-close-content-
+  completeness verification timing point; second meta-substantive
+  recurrence at codification surface itself precipitating apparatus
+  operational review pause + in-flight Mod 3 chunked-surface
+  content-completeness specification refinement per Chat ratified
+  sub-disposition #4)**
+
+**Scope disambiguation per Revision 1 + Revision 6 ratifications
+(NEW at S35-absorption #5):** §4.5 maturation observation extension
+scope vs A9 Sub-pattern 4 sub-pattern variant scope operate at
+distinct empirical bases per Current-Chat-vs-historical-counter
+scope difference:
+- **§4.5 Current-Chat-trajectory sustained-observation scope:** n=11
+  total bilateral cross-actor substantive-catch observations across
+  S23-S34 trajectory (n=3 Code→Chat + n=8 Chat→Code per Revision 6
+  substantive-catch-only scope correction); excludes Previous Chat
+  authored instances (S23-pre Doc 2 handoff script) per §4.5
+  Current-Chat-trajectory scope definition; excludes 0-issue STOP
+  ratification observation surfaces (S33 + S34 operational successes
+  documented separately at "Post-Mod-3 sustained 0-catch operation
+  observation" paragraph) per Revision 6 substantive-catch-only
+  scope correction
+- **A9 Sub-pattern 4 sub-pattern variant scope:** n=8 total
+  bilateral cross-actor observations within Sub-pattern 4 Instances
+  #6-#14 (n=4 Code→Chat Instances #6+#8+#9+#10 INCLUDING S23-pre
+  Previous Chat authored instance per A9 Class A counter historical
+  inclusivity + n=4 Chat→Code Instances #11+#12+#13+#14); narrower
+  codification-event scope counting substantive catches only;
+  Code→Chat n=4 at A9 scope vs Code→Chat n=3 at §4.5 scope reflects
+  S23-pre Previous-Chat-vs-Current-Chat-trajectory empirical
+  distinction (A9 Class A counter includes historical instances
+  across Previous + Current Chat trajectories; §4.5 Current-Chat-
+  trajectory scope excludes Previous Chat authored instances)
+- **Forward instrumentation:** Code→Chat n=3 vs n=4 scope divergence
+  is operational artifact of §4.5 (Current-Chat-trajectory
+  institutional discipline observation tracking) vs A9 (historical
+  Class A counter inclusive scope) separation; both scopes
+  empirically grounded per respective definitions; scope
+  disambiguation surface preserves both counts per A6 BLOCKING
+  empirical content preservation; n=15 + n=16 candidate banking at
+  §4.5 scope reflects "codified pattern operationally active during
+  its own codification at S35-absorption #5" meta-substantive
+  observation per Revision 5 + sub-disposition #6 ratifications
 
 **Operational implication:** discipline maturation is NOT one-
 directional (Code catches Chat OR vice versa); both actors operate
 under verify-state-at-narration BLOCKING + verify-state-at-first-
 consumption sub-discipline; cross-actor catches strengthen
-institutional discipline operation.
+institutional discipline operation. **Post-S30 sustained Chat→Code
+direction at n=4 consecutive catches (S29+S30+S30+S31) reinforces
+sub-pattern variant per A3 second-observation tightening precedent
+threshold satisfied at n=2+ consecutive catches; codified at A9
+Sub-pattern 4 NEW Sub-pattern variant "Sustained Chat→Code
+direction" at S35-absorption #5 per Chat Decision 2 (α).**
+**Post-Mod-3 sustained 0-catch operation at S32+S33+S34** (n=3
+consecutive 0-issue STOP 1 reviews per S32+S33+S34 close ratifications)
+demonstrates Mod 3 cadence operationally reduces STOP-cycle-close
+Chat→Code catch frequency; codification candidate at S36 Workstream
+B Mod 3 codification cross-reference per §4 forward instrumentation
+note 15.
 
 **Relationship to A9 Class A + Class B counters (cross-reference
-for inheritor clarity):**
+for inheritor clarity; UPDATED at S35-absorption #5):**
 
 - **A9 Class A counter** = instances of Chat trigger schema-
-  misattribution at baseline-state assertion; n=10 ACTIVE post-S29-
-  absorption #4 (per A9 amendment scope at S29-absorption #4);
-  proactive-prevention variant codified at sub-pattern 4 reactive-
-  vs-proactive split (S29-absorption #4 codification)
+  misattribution at baseline-state assertion; **n=14 ACTIVE post-
+  S35-absorption #5** (advance from n=10 ACTIVE post-S29-absorption
+  #4 via 4-candidate codification at S35-absorption #5 per Chat
+  Decision 2 (α): n=11 S29 STOP 1.5 + n=12 S30 Step 0 + n=13 S30
+  STOP 1.5 + n=14 S31 STOP 1 — all Chat→Code direction Sustained
+  sub-pattern variant); proactive-prevention variant codified at
+  sub-pattern 4 reactive-vs-proactive split (S29-absorption #4
+  codification) + NEW sub-pattern variant "Sustained Chat→Code
+  direction" codified at S35-absorption #5; Sub-pattern 4 maturation
+  advances n=5 → n=9 codified instances at S35-absorption #5
 - **A9 Class B counter** = instances of Chat trigger empirical-
   complexity assumption failure (simpler-than-expected OR different-
-  topology-than-expected manifestations); n=4 ACTIVE unchanged post-
-  S29-absorption #4 (S15+S17+S21+S22 historical instances); proactive-
-  prevention operation NOT yet generating Class B instance candidates
-  at S23-S28 sustained pattern (sustained operation = NO Class B
-  manifestation = no instance increment)
+  topology-than-expected manifestations); **n=4 ACTIVE unchanged
+  post-S35-absorption #5** (S15+S17+S21+S22 historical instances;
+  no new Class B catch S23-S34); proactive-prevention operation
+  sustained at NO Class B manifestation across S23-S34 trajectory
+  (sustained operation = NO Class B manifestation = no instance
+  increment); sustained-observation count under Class B revised
+  default discipline n=10 (S22+S23+S25+S26+S27+S28+S31+S32+S33+S34
+  Q1-entries-only counting basis per Chat preference codified at
+  S31)
 - **§4.5 (this sub-section)** = institutional discipline operation
   observation SPANNING Class A + Class B both shifting reactive→
   proactive direction; promotion candidate from §4 forward
   instrumentation note 7 (S24-absorption codification) to §4.5
   sub-section (S29-absorption #4 codification) per Chat ITEM 7
   AFFIRMED commitment at S27 STOP 2 (maturation observation WILL
-  codify at absorption #4)
+  codify at absorption #4) + EXTENDED at S35-absorption #5 to
+  eleven-sustained-observation cross-session trajectory + post-
+  codification operational at n=5 sustained observations
 
-**Forward instrumentation (updated at S29-absorption #4):**
+**Forward instrumentation (updated at S35-absorption #5):**
 
-- Sustained proactive-prevention operation past n=5 observations at
-  S29 surface evaluation; promotion to §4.5 sub-section codification
-  SATISFIES Chat ITEM 7 AFFIRMED commitment at S27 STOP 2
-- Continued S30+ proactive-prevention operation reinforces §4.5
-  codification at n=6+ observations per A3 design-class precedent;
-  codification refinement at n=10+ observations potentially triggers
-  promotion to A11 NEW amendment per A3 cross-class generalization
-  criterion (n=3+ observations of distinct cross-class pattern)
-- Regression to reactive-catch operation at S30+ would surface §4.5
+- Sustained proactive-prevention operation past n=11 cross-session
+  trajectory observations at S35 surface evaluation; §4.5
+  codification operational at n=5 post-codification sustained
+  observations (S30+S31+S32+S33+S34) per S35-absorption #5
+  extension reinforcement; codification-stable status preserved
+- Continued S35+ proactive-prevention operation reinforces §4.5
+  codification at n=12+ observations per A3 design-class precedent;
+  codification refinement at n=15+ observations OR Sub-pattern
+  variant recurrence potentially triggers promotion to A11 NEW
+  amendment per A3 cross-class generalization criterion (n=3+
+  observations of distinct cross-class pattern; sustained Chat→Code
+  direction sub-pattern variant codified at S35-absorption #5 may
+  be A11 candidate at next absorption if recurs at S36+ sustained
+  pattern)
+- Regression to reactive-catch operation at S35+ would surface §4.5
   refinement candidate (sub-pattern variant codification OR
   regression analysis); empirical observation continues per
   maturation observation tracking discipline
-- Six-timing-point taxonomy extension at S30+ if NEW timing point
-  variants surface; current taxonomy (i)-(vi) codification-stable
-  at S29-absorption #4; A9 Class A 11th-instance candidate banked
-  at S29-absorption #4 trigger close (vii) STOP-1.5-close-application-
-  verification proactive-prevention timing point variant deferred
-  codification at absorption #5 per A3 precedent (n=1 first-instance
-  at S29; codification at n=2 second-observation tightening if
-  recurs at S30+)
+- **Eight-timing-point taxonomy at S35-absorption #5 codification-
+  stable per Revision 4 ratification (NEW (vii) STOP-1.5-close-
+  application-verification + NEW (viii) STOP-1-close-content-
+  completeness verification; both at n=2 observations satisfying A3
+  second-observation tightening precedent threshold);** extension
+  at S35+ if NEW timing point variants surface; current taxonomy
+  (i)-(viii) codification-stable; **A9 Class A n=15 candidate
+  banked at S35-absorption #5 codification surface per Revision 5
+  ratification** (S35 STOP 1 close STOP-1-close-content-completeness
+  verification recurrence under Mod 3 cadence; Chat→Code direction
+  sustained sub-pattern variant gained n=5 reinforcement at
+  codification surface itself; (viii) timing point variant gained
+  n=2 observations at codification surface itself per S31 + S35
+  STOP 1 close instances); A9 Class A n=16+ candidate banking if
+  NEW STOP-cycle catch surfaces at S36+ (sustained Chat→Code
+  direction sub-pattern variant continuation observation candidate)
+- Mod 3 cadence sustained reduction in Chat→Code STOP-cycle catches
+  at S32+S33+S34 = n=3 consecutive 0-issue STOP 1 reviews;
+  codification candidate at S36 Workstream B Mod 3 codification
+  cross-reference per §4 forward instrumentation note 15 + Mod 3
+  codification refinement for chunked-surface content-completeness
+  verification discipline per Revision 5 ratification n=15 candidate
+  banking observation
 
 **Cross-reference:** §4 forward instrumentation note 7 [SUPERSEDED
 BY §4.5 AT S29-ABSORPTION #4; TEXT PRESERVED PER R3 AUDIT TRAIL];
 A9 Class A + Class B amendments (A9 codification scope; §4.5
-institutional discipline observation scope distinct); §4 forward
-instrumentation note 10 (bilateral cross-actor) cross-references
-§4.5 bilateral cross-actor extension.
+institutional discipline observation scope distinct; A9 Sub-pattern
+4 NEW Sub-pattern variant "Sustained Chat→Code direction" codified
+at S35-absorption #5 cross-references this §4.5 extension); §4
+forward instrumentation note 10 (bilateral cross-actor) cross-
+references §4.5 bilateral cross-actor extension n=9 update; §4
+forward instrumentation note 15 (STOP 1 review density observation
+n=6 catalog; NEW at S35-absorption #5) cross-references Mod 3
+cadence sustained reduction.
 
 ## §5 Cross-references
 
