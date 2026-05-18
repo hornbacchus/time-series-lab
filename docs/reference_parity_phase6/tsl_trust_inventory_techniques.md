@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 18 catalog techniques with Phase 7+ Q1 trust documentation
+- 19 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38 amendments)
-- 57 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39 amendments)
+- 56 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -10876,7 +10876,1486 @@ hypothesis empirical observation at Frequency Domain / Signal
 block close = n=2 Block-ordering observation tightening per A3
 precedent if empirically confirmed).
 
-## §3 Unvalidated catalog techniques (57 entries; ID-only enumeration)
+### lomb_scargle (Phase 7+ S39; NINETEENTH §2.5 entry; THIRD Frequency Domain / Signal block entry — FIFTH catalog block transition advances 2→3 of 7 entries Q1-amended per Q1 work program scope; FIRST Tier V (Pattern J B.3 alignment-via-metric resolution + cross-package framing) §2.5 entry within Frequency Domain / Signal block AND FIRST Tier V PRIMARY tier characterization Q1 §2.5 entry overall (S23 pp_test was Tier II.bit-exact-loose + Tier V Pattern J B.2 overlay framing; S39 lomb_scargle is FIRST Tier V single-tier primary characterization); NEW Sub-class 2k candidate first-instance baseline observation per A3 first-instance precedent + (αc) forward-instrumentation-note treatment (Tier V Pattern J B.3 alignment-via-metric resolution + cross-package framing scope; NOT codification); HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED AT S39 (n=3 distinct Tiers within Frequency Domain / Signal block at Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39; codification refinement candidate at absorption #6+ for Block heterogeneous-Tier-surface variant sub-pattern); ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED AT S39 (n=2 sustained efficacy observations S38 + S39 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement empirically grounded); Sub-class taxonomy growth Block-level observation at Frequency Domain / Signal block (2i at S37 + 2j candidate at S38 forward-instrumentation-note + 2k candidate at S39 forward-instrumentation-note = n=3 NEW Sub-class candidates first-instance baseline observations within Block 5 sub-session arc); §1.9 Filename divergence sub-pattern variant THIRD-OBSERVATION cross-block extension NOT MANIFESTED — lomb_scargle filenames PRESERVE catalog-id at all three layers per Code S39 Step 0 empirical re-Read; A3 cross-block tightening DEFERRED continues from S38 NOT MANIFESTED outcome; Pattern F structural invariants SECOND-OBSERVATION NOT MANIFESTED (Lomb-Scargle has no roundtrip / Parseval analog at structural identity invariant scope); §1.8 reroll_on_caveat=False discipline NOT APPLICABLE (PASS verdict; §1.8 applicability scope Tier VI CAVEAT primary); A9 Class A 20th-instance candidate banking at S39 commit message body forward state (NEW sub-pattern variant — Code-side prior-turn-ratification-acknowledgment gap; A3 first-instance precedent n=1 baseline; codification deferred to absorption #6+); SINGLE-LAYER + §4.7.A PRESENT variant 1 Harness-imports-library-directly mechanism manifestation per S39 STOP 2 empirical investigation + α + (αa) dispositions under Tier V Pattern J B.3 + cross-package framing; analogous to S33 stl_decompose Block 3 third-entry precedent at distinct Tier characterization scope per Tier V Pattern J B.3 vs S33 Tier VI SINGLE-LAYER deterministic-implementation-difference Sub-class 2g scope)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+V (Pattern J B.3 alignment-via-metric resolution + cross-package
+framing) sub-class** per S39 (α-i) Chat disposition. **Tier V
+characterization directly grounded** at `scope_reframing_s6_banking.md`
+§2 lines 170-181 verbatim ("Tier V — Phase 3 PASS with documented
+divergence (Pattern D / Pattern J caveat; non-blocking)" +
+"scipy/astropy normalization convention for `p3_lomb_scargle` (S11
+/ Batch 7; Pattern J B.3 alignment-via-metric resolution). Verdict
+PASS at primary-tier; secondary-tier or per-metric documented
+divergence non-blocking") — p3_lomb_scargle EXPLICITLY enumerated
+within Tier V Pattern J B.3 alignment-via-metric resolution scope.
+p3_lomb_scargle EXPLICITLY NOT IN Tier II.bit-exact 12-wrapper
+enumeration at scope_reframing §2 lines 121-131 verbatim (Tier
+II.bit-exact enumeration: `p3_adf, p3_ccf, p3_classical_decompose,
+p3_denton_chowlin, p3_dtw, p3_fft_spectrum, p3_granger, p3_kpss,
+p3_pca, p3_robust_estimators, p3_var, p3_vecm` — does NOT include
+p3_lomb_scargle). + audit `p3_lomb_scargle_audit.md` line 5
+verbatim ("**Verdict:** **PASS** (Pattern J — alignment via metric
+selection)") + audit line 13 verbatim peak_freq 0.12992 TSL vs
+0.12992 reference = 0.0 abs diff PASS exact at primary metric
+(byte-identical peak-frequency LOCATION) + audit lines 17-20
+verbatim peak_power TSL 0.9382 (scipy) vs 0.9386 (astropy) Pattern
+J B.3 normalization-convention divergence ~4e-4 (report-only
+diagnostic) + audit lines 22-35 verbatim Pattern J rationale
+("scipy `normalize=True`: returns power in [0, 1] range using
+Lomb 1976 / Scargle 1982 inverse-variance scaling. astropy
+`normalization='standard'`: Townsend 2010 generalized LS with
+mean-subtraction. Absolute power values differ expectedly (~4e-4
+here). Peak frequency LOCATION is normalization-invariant — both
+implementations identify the same dominant frequency bin against
+the same frequency grid. Comparison aligned by metric selection
+(peak frequency, not absolute power)") + harness
+`p3_lomb_scargle.py` lines 1-21 verbatim ("Pattern J classic:
+scipy and astropy use DIFFERENT normalization conventions...
+align: pin both to the SAME mathematical normalization by
+computing astropy with `normalization='standard'` and
+`fit_mean=False`, then cross-comparing the power-at-known-
+frequency result. Compare the peak-frequency location, not the
+absolute power value"). **NOT Tier II.bit-exact (Pattern A.2
+cross-package) pure** — peak_power divergence (~4e-4 abs diff)
+violates bit-exact criterion at diagnostic metric scope; primary
+metric peak_freq IS bit-exact (0.0 abs diff) but cross-package
+pure bit-exact criterion requires bit-exact across all primary
+metrics; scope_reframing §2 line 121-131 explicit Tier II.bit-
+exact enumeration does NOT include p3_lomb_scargle. **NOT Tier
+III Pattern A.1 same-library** — scipy.signal.lombscargle vs
+astropy.timeseries.LombScargle are distinct packages, NOT same-
+library self-test. **NOT Tier IV self-parity** — astropy is
+external library reference, not internal harness reimplementation.
+**NOT Tier VI CAVEAT** — audit verdict is PASS (Pattern J
+alignment), NOT CAVEAT. **ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-
+APPLICATION** operative at S39 Step 0 — Tier anchor DEFERRED to
+Code Step 0 empirical verification per Chat S39 trigger drafting
+all-anchor-deferral discipline second-application per institutional
+learning sustainment from S37 multi-anchor schema-misattribution
+catch n=18 + S38 first-application empirical efficacy validation;
+Tier V Pattern J B.3 empirically confirmed at Step 0 with 0 multi-
+anchor divergences (sustained from S38 n=2 sustained efficacy at
+n=2 observations). STOP 2 BLOCKING discharged on Tier anchor per
+Chat S39 STOP 2 (α-i) RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER +
+§4.7.A PRESENT variant 1 Harness-imports-library-directly mechanism
+per CHAT RATIFICATION at Step 0 STOP 2; NEW Sub-class 2k candidate
+first-instance baseline observation per A3 first-instance precedent
++ (αc) forward-instrumentation-note treatment per S39 (αa)
+ratification (analogous to S37 Sub-class 2i candidate + S38
+Pattern F NEW framing element first-instance baseline observation
+precedents at A3 first-instance precedent + (αc) treatment)):**
+lomb_scargle is 1:1 catalog↔wrapper mapping per
+`p3_lomb_scargle_audit.md` audit Wrapper field
+(`engine/techniques/lomb_scargle.py` sole engine module).
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S39
+n=10 PRESENT + n=1 REMEDIATED = n=11 total OBSERVATIONS per S39
+banking per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A REMEDIATED 5th variant status dimension extension
+orthogonal to mechanism variant dimension — §4.7.A pattern count
+tightening forward observation; banking only, NOT §4.7.A taxonomy
+modification at S39; NOT A9 Class A counter increment per S30
+(G.1) codification distinction):**
+`tools/reference_parity/harness/checks/p3_lomb_scargle.py` line 86
+imports `scipy.signal.lombscargle` directly (`from scipy.signal
+import lombscargle`) and invokes the library function at line 98
+(`power = lombscargle(t, y_demean, omegas, normalize=True)`) with
+demean'd y at line 89 (`y_demean = y - np.mean(y)`) + linear
+frequency grid at lines 92-97 — harness does NOT invoke
+`lomb_scargle.py::run()` engine entry point.
+`engine/techniques/lomb_scargle.py` line 13 imports the SAME
+`scipy.signal.lombscargle` primitive (`from scipy.signal import
+lombscargle`) and invokes it at line 134 (`power = lombscargle(t,
+y_demean, angular_freqs, normalize=True)`) within engine `run()`
+orchestration with preset-dispatched arguments (Balanced preset:
+oversampling=5 + n_top_freqs=10 + false_alarm_method='baluev').
+Harness TSL arm + engine use SAME underlying library primitive
+(scipy.signal.lombscargle, normalize=True); harness BYPASSES
+engine `run()` wrapper. §4.7.A variant 1 "Harness-imports-library-
+directly" manifestation per S30 (G.1) generalized definitional
+scope. **§4.7.A status PRESENT per S36 §4.7.A status dimension
+codification (NOT REMEDIATED)** — harness invokes scipy primitive
+directly; engine wraps + invokes same primitive within
+orchestration; code-path divergence active at runtime per HEAD
+verification. **Cross-package framing distinction from S38
+fft_spectrum (Tier II.bit-exact Pattern A.2):** S38 reference arm
+invoked `numpy.fft.fft` cross-package vs harness TSL arm scipy.fft
+(both wrap pocketfft per shared backbone yielding machine-
+precision bit-exact agreement); S39 reference arm invokes
+`astropy.timeseries.LombScargle` at harness line 109 — DIFFERENT
+package (astropy.timeseries) from harness TSL arm scipy.signal +
+engine scipy.signal. Cross-package character: scipy and astropy
+implement DIFFERENT normalization conventions (scipy `normalize=
+True` Lomb 1976/Scargle 1982 inverse-variance scaling vs astropy
+`normalization='standard'` Townsend 2010 generalized LS with
+mean-subtraction) producing peak_power divergence ~4e-4 expected;
+peak_freq LOCATION is normalization-invariant per metric-selection
+alignment — comparison aligned by metric selection (peak frequency,
+NOT absolute power); Pattern J B.3 alignment-via-metric resolution
+per scope_reframing §2 line 178-179 verbatim explicit Pattern J
+B.3 enumeration. Post-S39 §4.7.A observations = n=10 PRESENT
+across §2.5 entries (S14a granger + S18 gcc_phat + S26
+denton_chowlin + S27 loess + S31 classical_decompose + S32
+mstl_decompose + S33 stl_decompose + S37 periodogram_spectral_density
++ S38 fft_spectrum + S39 lomb_scargle) + n=1 REMEDIATED (S34
+x13_seasonal_adjust per Phase 4 Session 2 2026-05-01 P4-2 pathway
+(c) closure) = n=11 total observations across mechanism variants
++ status dimension; **§4.7.A pattern count tightening forward
+observation at absorption #6 per A3 precedent** (NOT A9 Class A
+counter increment per S30 (G.1) generalized definitional scope
+codification — §4.7.A pattern observations track mechanism variant
++ status dimension accumulation distinct from A9 Class A empirical-
+state-assumption failure mode tracking).
+
+**A10 Sub-class disposition: NEW Sub-class 2k candidate first-
+instance baseline observation per A3 first-instance precedent +
+(αc) forward-instrumentation-note treatment per (αa) Chat
+ratification (n=1 baseline; NOT codification of Sub-class 2k):**
+S39 lomb_scargle surfaces NEW Sub-class 2k candidate at first-
+instance baseline observation per A3 precedent. Sub-class 2k
+definitional scope working hypothesis: **"Tier V Pattern J B.3
+alignment-via-metric resolution + cross-package framing"** —
+Layer 1 cross-package primitive divergence (scipy.signal.lombscargle
+normalize=True scaling vs astropy.timeseries.LombScargle
+normalization='standard' scaling) at diagnostic metric (peak_power
+~4e-4 abs diff expected per normalization convention difference) +
+Layer 1 cross-package primitive ALIGNMENT at primary metric
+(peak_freq normalization-invariant LOCATION; 0.0 abs diff byte-
+identical) via metric-selection alignment + Layer 2 engine
+orchestration adds NaN handling + time parsing + frequency grid
+setup + FAP computation (Baluev or bootstrap) + top peaks
+identification + period interpretation additional computation NOT
+exercised by audit. Audit primary-metric bit-exact agreement
+guaranteed at metric-selection alignment scope (peak_freq is
+normalization-invariant); audit DOES validate cross-package parity
+at metric-selection-aligned primary metric scope (peak_freq
+LOCATION); audit verifies wrapper preprocessing + parameter
+resolution + cross-package primitive agreement at metric-selection-
+aligned primary metric NOT cross-implementation normalization
+agreement (which is expected to differ per Pattern J B.3 framing).
+Distinct from codified Sub-class 2a (αa) "general two-layer class"
+semantic (Tier II.bit-exact + cross-package + two-layer; S22 + S23
++ S28 + S31 + S38 codified) per Tier V Pattern J B.3 scope vs
+Tier II.bit-exact codified scope distinction. Distinct from NEW
+Sub-class 2i candidate at S37 (Tier III Pattern A.1 same-library
+self-test bit-exact + §4.7.A PRESENT reimplementation-of-dispatch
+variant scope) per cross-package vs same-library scope distinction.
+Distinct from Pattern F NEW framing element forward instrumentation
+note candidate at S38 (FFT-family structural invariants scope) per
+Pattern J B.3 cross-package normalization-convention divergence
+scope distinction. **n=1 baseline observation status per A3 first-
+instance precedent** (Previous Chat 1.2 operational pattern:
+first-instance n=1 = baseline observation only; codification
+deferred to absorption #6+ second-observation tightening if recurs
+at S39+ Q1 entry within Tier V Pattern J alignment-via-metric
+resolution scope OR future Tier V Pattern J B.3 entry within
+broader Tier V Pattern J enumeration). Variant tagging mechanism
+NOT applied at n=1 first-instance per A3 precedent; Sub-class 2k
+definitional scope working hypothesis only.
+
+**Pattern F structural invariants SECOND-OBSERVATION NOT MANIFESTED
+at S39 per Code S39 Step 0 empirical re-Read:** harness
+`p3_lomb_scargle.py` does NOT compute structural identity invariants
+(no roundtrip equivalent for Lomb-Scargle; no Parseval analog at
+Lomb-Scargle scope). Pattern F NEW framing element observation
+remains at S38 first-instance baseline (n=1 per A3 first-instance
+precedent). A3 second-observation tightening precedent at Pattern
+F scope DEFERRED pending future FFT-family wrapper (none remain
+in §3 catalog per S37 + S38 Step 0 empirical re-Reads) OR Kalman /
+state-space wrapper second-observation. NEW Sub-class 2j
+codification (Pattern F structural invariants scope) preserved at
+deferred status per (αc) forward-instrumentation-note treatment
+from S38.
+
+**§1.9 Filename divergence sub-pattern variant THIRD-OBSERVATION
+cross-block extension NOT MANIFESTED per Code S39 Step 0 empirical
+re-Read:** audit `p3_lomb_scargle_audit.md` + harness
+`p3_lomb_scargle.py` + engine `lomb_scargle.py` ALL preserve
+catalog-id `lomb_scargle` at all three layers; NO suffix omission
+NOR catalog-id divergence. §1.9 codified Block-3-specific scope at
+S36 EXTENDS to Frequency Domain / Signal block at S37 first-
+instance cross-block observation (periodogram audit + harness omit
+`_spectral_density` suffix from catalog-id `periodogram_spectral_density`);
+S38 SECOND-OBSERVATION cross-block extension NOT MANIFESTED;
+S39 THIRD-OBSERVATION cross-block extension NOT MANIFESTED — n=4
+total observations preserved at S37 first-instance baseline (Block
+3 mstl + stl + x13 + Frequency Domain / Signal periodogram); A3
+cross-block tightening DEFERRED continues from S38 NOT MANIFESTED
+outcome pending future entry §1.9 manifestation. Forward
+instrumentation: §1.9 second cross-block observation banking at
+S39 close pending S40+ entry filename empirical verification.
+
+**§1.8 reroll_on_caveat=False discipline NOT APPLICABLE at S39:**
+audit verdict is PASS (Pattern J alignment) per `p3_lomb_scargle_audit.md`
+line 5 verbatim, NOT CAVEAT. §1.8 applicability scope per S32-S33
+codified definitional scope is Tier VI CAVEAT primary; S39 Tier V
+Pattern J B.3 PASS primary scope distinct from §1.8 applicability
+scope. §1.8 NOT APPLICABLE banking continuation at S39 per Step 0
++ STOP 2 verification.
+
+**Code Tier 2 case-against options surfaced at S39 STOP 2 per
+Mark 3 unprompted-discipline (rejected per Chat ratification at
+S39 STOP 2):**
+- **(α-i alternative) Tier II.bit-exact (Pattern A.2 cross-package)
+  pure ALTERNATIVE:** REJECTED. peak_power divergence ~4e-4 abs
+  diff violates bit-exact criterion at diagnostic metric scope;
+  scope_reframing §2 line 121-131 Tier II.bit-exact 12-wrapper
+  enumeration explicitly does NOT include p3_lomb_scargle; rejected
+  per A6 BLOCKING empirical content preservation.
+- **(α-ii) Tier II.bit-exact + Tier V Pattern J overlay framing
+  (analogous to S23 pp_test Tier II.bit-exact-loose + Tier V
+  Pattern J B.2 overlay precedent):** PARTIALLY VIABLE alternative;
+  REJECTED per Code (α-i) recommendation + Chat ratification
+  preference at scope_reframing §2 line 178-179 explicit Tier V
+  enumeration anchor (single-tier Tier V framing preserves codified
+  Tier V Pattern J caveat scope per scope_reframing §2 lines 170-
+  181; overlay framing reserves to S23-style scope where primary
+  metric exhibits bit-exact-loose tolerance vs S39 primary metric
+  exhibits bit-exact EXACT (0.0 abs diff) at metric-selection
+  alignment).
+- **(α-iii) Tier III Pattern A.1 same-library ALTERNATIVE:**
+  REJECTED. scipy.signal.lombscargle vs astropy.timeseries.LombScargle
+  are distinct packages despite shared mathematical formulation
+  scope (Lomb-Scargle periodogram); package-boundary criterion
+  governs A.1 vs A.2 vs Tier V disambiguation per S30 Pattern A
+  taxonomy lock; rejected per A6 BLOCKING empirical content
+  preservation.
+- **(α-iv) Tier IV self-parity ALTERNATIVE:** REJECTED. astropy
+  is external library reference, not internal harness
+  reimplementation; rejected per A6 BLOCKING empirical content
+  preservation.
+- **(α-v) Tier VI CAVEAT ALTERNATIVE:** REJECTED. Audit verdict
+  is PASS (Pattern J alignment), NOT CAVEAT; §1.8 reroll_on_caveat
+  applicability scope NOT APPLICABLE at S39; rejected per A6
+  BLOCKING empirical content preservation.
+- **(αb) Sub-class 2a (αa) extension at Tier V scope:** REJECTED.
+  Sub-class 2a (αa) codified at Tier II.bit-exact + cross-package
+  + two-layer scope per S22 codification at S30 §1.5 codification
+  application precedent + n=5 post-codification observations (S22
+  + S23 + S28 + S31 + S38); Tier V definitional scope distinct
+  from codified Sub-class 2a (αa) scope; extension at Tier V
+  scope would conflate codification-stable Sub-class 2a (αa)
+  semantic; rejected per A6 BLOCKING empirical content preservation.
+- **(αc-only) Forward-instrumentation-note treatment ONLY (no NEW
+  Sub-class 2k candidate framing):** REJECTED per Code (αa)
+  recommendation + Chat ratification preference at NEW Sub-class
+  2k candidate framing preservation (analogous to S37 Sub-class
+  2i candidate + S38 Pattern F NEW framing element first-instance
+  baseline precedent; preserves Sub-class taxonomy structure for
+  future second-observation tightening at Tier V Pattern J B.3
+  scope).
+
+**Frequency Domain / Signal block THIRD entry — FIFTH catalog
+block transition advances 2→3 of 7 entries Q1-amended per Q1 work
+program scope (per-block continuation pattern n=5 catalog block
+observation candidate at Frequency Domain / Signal block completion
+pending arc close):** S39 lomb_scargle advances the fifth catalog
+block transition from 2 of 7 (S37 periodogram_spectral_density
+first-entry baseline + S38 fft_spectrum second-entry continuation)
+to 3 of 7 (S39 lomb_scargle third-entry continuation). **Block
+ordering position verification at S39 Step 0:** lomb_scargle at
+second-position alphabetically within §3 remaining 5 unvalidated
+entries `emd_hht, lomb_scargle, ssa, wavelet_coherence_phase_lag,
+wavelet_transform` (post-S37 + post-S38 §3 enumeration; lomb_scargle
+at THIRD-position in 7-entry Block ordering working hypothesis arc
+counting validated S37 + S38 + S39); Block ordering working
+hypothesis ratified per §3 empirical re-Read at HEAD 57bd08d line
+10915 verbatim. **Empirical §3 enumeration confirmation at S39
+Step 0 mid-session re-Read per CONSTRAINT 4 A6 BLOCKING verify-
+state-at-narration discipline + S38 A9 Class A 19th-instance
+candidate banking institutional learning sustainment:** §3
+Frequency Domain / Signal block remaining 5 unvalidated entries
+empirically = emd_hht + lomb_scargle + ssa +
+wavelet_coherence_phase_lag + wavelet_transform (consistent with
+S38 Step 0 Outcome (a) ratification minus lomb_scargle validated
+at S39 close). Forward instrumentation: Frequency Domain / Signal
+block completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 (7
+entries total) advances at S39; per-block continuation pattern at
+n=5 catalog block observations (Block 1 + Block 12 + Block 8 +
+Block 3 + Frequency Domain / Signal [in-progress at S39 = 3 of 7])
+codification refinement candidate at absorption #6+ per §19.4 §4
+note 6 refinement n=4 → n=5 per S35-absorption #5 codification.
+**Heterogeneous Tier-surface variant observation A3 SECOND-
+OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED AT S39:** n=3
+distinct Tier characterizations across n=3 entries within
+Frequency Domain / Signal block (Tier III Pattern A.1 at S37 +
+Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at
+S39); A3 second-observation tightening precedent threshold
+satisfied at n=3 distinct Tier observations within single Block
+arc; codification refinement candidate at absorption #6+ for
+Block heterogeneous-Tier-surface variant sub-pattern definitional
+scope generalization per §19.4 §4 note 6 refinement at S35-
+absorption #5 codification (Block Tier-surface composition
+empirically HETEROGENEOUS at sustained n=3 distinct Tiers per
+A3 precedent threshold satisfied; codification refinement
+substantively grounded at S39 close pending absorption #6+ chat
+adoption).
+
+#### §1.5 Novelty enumeration sub-section (S39 application — fifth post-S23 first-instance codification application per S30 codification; ≥5 observations threshold satisfied at n=6)
+
+S39 surfaces 6 NEW observations across compound first-instance
+disclosures + Frequency Domain / Signal block third-entry framing
++ multi-observation A3 second-observation tightening precedent
+threshold satisfactions + Sub-class taxonomy growth Block-level
+observation, satisfying ≥5 observations threshold per S23 first-
+instance codification at S30 §1.5 codification scope. n=5 post-
+codification observations across S23 + S34 + S37 + S38 + S39; A3
+fifth-observation tightening reinforcement per §1.5 sustained-
+observation operational status note per S36 §1.5 refinement
+(n=4 fourth-observation reinforcement at S38 UPGRADE to n=5 fifth-
+observation reinforcement at S39 per S39 application).
+
+**Novelty 1 — Tier V (Pattern J B.3 alignment-via-metric resolution
++ cross-package framing) FIRST PRIMARY tier characterization Q1
+§2.5 entry overall + FIRST §2.5 entry within Frequency Domain /
+Signal block:** S39 lomb_scargle is FIRST Q1 §2.5 entry within
+Tier V PRIMARY tier characterization scope (S23 pp_test was Tier
+II.bit-exact-loose primary + Tier V Pattern J B.2 OVERLAY at
+diagnostic-metric scope; S39 lomb_scargle is Tier V single-tier
+PRIMARY characterization per scope_reframing §2 line 178-179
+verbatim explicit Tier V Pattern J B.3 alignment-via-metric
+resolution enumeration). Tier V (Pattern J B.3 alignment-via-
+metric resolution + cross-package framing) characterization
+grounded at scope_reframing §2 lines 170-181 verbatim Tier V
+enumeration scope explicitly including p3_lomb_scargle.
+
+**Novelty 2 — NEW Sub-class 2k candidate first-instance baseline
+observation per A3 first-instance precedent + (αc) forward-
+instrumentation-note treatment per Chat ratification:** FIRST
+observed Sub-class 2k candidate per A3 first-instance precedent
+(n=1 baseline; NOT codification of Sub-class 2k). Definitional
+scope working hypothesis: "Tier V Pattern J B.3 alignment-via-
+metric resolution + cross-package framing scope" — Layer 1 cross-
+package primitive divergence at diagnostic metric (peak_power
+~4e-4 abs diff per normalization convention difference) + Layer
+1 cross-package primitive ALIGNMENT at primary metric (peak_freq
+normalization-invariant LOCATION; 0.0 abs diff byte-identical) via
+metric-selection alignment. Distinct from codified Sub-class 2a-
+2h Tier II.bit-exact + cross-package + two-layer scope (S22 + S23
++ S28 + S31 + S38) per Tier V scope distinction. Distinct from
+NEW Sub-class 2i candidate at S37 (Tier III Pattern A.1 same-
+library self-test bit-exact + §4.7.A PRESENT reimplementation-of-
+dispatch variant scope) per cross-package vs same-library scope
+distinction. Distinct from NEW Sub-class 2j candidate at S38
+(Pattern F structural invariants + Tier II.bit-exact + §4.7.A
+combined scope) per Pattern J B.3 cross-package normalization-
+convention divergence scope distinction.
+
+**Novelty 3 — HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3
+SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED AT
+S39:** n=3 distinct Tier characterizations across n=3 entries
+within Frequency Domain / Signal block (Tier III Pattern A.1 at
+S37 + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3
+at S39); A3 second-observation tightening precedent threshold
+satisfied at n=3 distinct Tier observations within single Block
+arc per Block heterogeneous-Tier-surface variant sub-pattern
+empirical accumulation. Codification refinement candidate at
+absorption #6+ for Block heterogeneous-Tier-surface variant sub-
+pattern definitional scope generalization per §19.4 §4 note 6
+refinement at S35-absorption #5 codification + n=4 catalog block
+homogeneous-Tier-surface observations (Block 1 Tier II.bit-exact
++ Block 12 Tier II.bit-exact + Block 8 Tier II.bit-exact + Block
+3 Tier II.bit-exact + Tier VI heterogeneous; Block 5 HETEROGENEOUS
+NEW pattern at sustained n=3 distinct Tiers per A3 precedent
+threshold).
+
+**Novelty 4 — ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-APPLICATION
+EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD SATISFIED AT S39:** Chat S39 trigger drafting applied
+all-anchor-deferral discipline (Tier + Sub-class + §4.7.A + Block
+ordering anchors DEFERRED to Code Step 0 empirical verification)
+per institutional learning sustainment from S37 multi-anchor
+schema-misattribution catch n=18 + S38 first-application empirical
+efficacy validation (0 multi-anchor divergences at S38 Step 0 vs
+S37 4 simultaneous divergences). Empirical efficacy validated at
+S39 Step 0: 0 multi-anchor schema-misattribution divergences
+SUSTAINED at second-application (n=2 sustained efficacy observations
+S38 + S39 0-divergence per A3 second-observation tightening
+precedent threshold satisfaction). Codification candidate at §1.7+
+Workstream B §1.4 operational scope at absorption #6+ refinement
+empirically grounded at A3 precedent threshold satisfaction;
+apparatus operational discipline refinement at trigger drafting
+cadence empirically grounded for codification refinement adoption.
+
+**Novelty 5 — Sub-class taxonomy growth Block-level observation
+at Frequency Domain / Signal block:** Sub-class 2i candidate
+first-instance baseline at S37 (Tier III Pattern A.1 same-library
+self-test bit-exact + §4.7.A PRESENT reimplementation-of-dispatch
+variant) + Sub-class 2j candidate first-instance baseline at S38
+(Pattern F structural invariants + Tier II.bit-exact + §4.7.A
+combined scope) + Sub-class 2k candidate first-instance baseline
+at S39 (Tier V Pattern J B.3 alignment-via-metric resolution +
+cross-package framing) = n=3 NEW Sub-class candidates first-
+instance baseline observations within Block 5 sub-session arc;
+Block-level Sub-class taxonomy growth rate observation per §19.4
+§4 note 16 forward instrumentation candidate at absorption #6+
+codification refinement (n=3 NEW Sub-class candidates across 3
+sub-sessions in Block 5 vs Block 3 produced 2f + 2g + 2h NEW
+Sub-class candidates across 4 sub-sessions S31-S34; Block-level
+Sub-class taxonomy growth rate sustained at n=3 NEW Sub-classes /
+Block per per-block continuation pattern observation).
+
+**Novelty 6 — A9 Class A 20th-instance candidate banking (NEW
+sub-pattern variant distinct from prior A9 Class A failure modes
+n=14-19): Code-side prior-turn-ratification-acknowledgment gap:**
+Code S39 Step 0 STOP 2 surface re-presentation at S39 Step 0
+turn 2 with identical content to S39 Step 0 turn 1; Chat had
+already provided STOP 2 ratifications across all anchors A-J at
+S39 Step 0 turn 1 response per Chat S39 trigger drafting + STOP 2
+disposition surface (alternative interpretation: transmission-side
+artifact rather than apparatus failure mode). NEW sub-pattern
+variant structurally distinct from prior A9 Class A failure mode
+candidates: n=14-16 content-completeness verification gap codified
+at §1.7 (c) per S36 + n=17 STOP-1.5-revision-scope-misattribution
+banked at S36 + n=18 multi-anchor schema-misattribution at trigger
+drafting at S37 (Chat→Code direction PROACTIVE-PREVENTION variant)
++ n=19 Code-side §3 enumeration drift from prior Step 0 empirical
+re-Read baseline at S38 STOP 2 surface + **n=20 NEW Code-side
+prior-turn-ratification-acknowledgment gap at S39 Step 0 turn 2
+STOP 2 surface re-presentation (structurally distinct direction
+from prior n=14-19 sub-pattern variants per Code-side prior-turn
+acknowledgment scope vs prior content-completeness / multi-anchor
+/ enumeration-drift scopes)**. A3 first-instance precedent n=1
+baseline; codification deferred to absorption #6+ second-
+observation tightening if recurs at S39+ STOP cycle response.
+
+**Reference:** `astropy.timeseries.LombScargle` (astropy 7.2.0;
+cross-package Pattern J B.3 alignment-via-metric resolution —
+harness TSL arm invokes `scipy.signal.lombscargle(t, y_demean,
+omegas, normalize=True)` at line 98 + harness reference arm
+invokes `astropy.timeseries.LombScargle(t, y, normalization=
+"standard", fit_mean=True, center_data=True).power(freqs)` at
+lines 119-121; scipy `normalize=True` Lomb 1976/Scargle 1982
+inverse-variance scaling vs astropy `normalization='standard'`
+Townsend 2010 generalized LS with mean-subtraction per audit
+lines 26-29 verbatim + harness lines 9-14 verbatim;
+normalization convention difference produces peak_power divergence
+~4e-4 expected; peak_freq LOCATION is normalization-invariant per
+metric-selection alignment)
+**Verdict:** **PASS Pattern J — alignment via metric selection**
+per audit line 5 verbatim
+**Audit:** `tools/reference_parity/reports/p3_lomb_scargle_audit.md`
+**Audit date:** 2026-04-29
+**peak_freq abs diff (primary metric; normalization-invariant):**
+0.0 (byte-identical peak-frequency LOCATION; audit line 13
+verbatim peak_freq 0.12992 TSL vs 0.12992 reference)
+**peak_power TSL (scipy normalize=True):** 0.9382 (audit line 19
+verbatim)
+**peak_power reference (astropy normalization='standard'):** 0.9386
+(audit line 19 verbatim)
+**peak_power abs diff (diagnostic metric; report-only per
+normalization convention divergence; ~4e-4 expected):** ~0.0004
+(audit line 31 verbatim "Absolute power values differ expectedly
+(~4e-4 here)")
+**Tolerance class:** closed_form (per harness line 62 verbatim)
+**Fixture:** irregularly-sampled sinusoid (true_freq=0.13,
+amplitude=1.0, σ=0.2, ~30% missingness via random subsampling),
+T=200 originally + kept ~140 samples + seed=42 per audit lines
+39-42 verbatim + harness lines 36-52 verbatim `_generate_lomb_dgp`;
+both arms use SAME frequency grid (freq_min=1/T + freq_max=0.5 +
+n_freqs=5*N) for direct comparison per audit lines 46-47 verbatim;
+demean'd y at TSL arm prior to scipy.signal.lombscargle invocation.
+
+**Source files (SINGLE-LAYER + §4.7.A PRESENT variant 1 per S39 α
+framing; empirical filenames preserve catalog-id at all three
+layers per §1.9 THIRD-OBSERVATION NOT MANIFESTED at S39
+verification):**
+`tools/reference_parity/harness/checks/p3_lomb_scargle.py` lines
+84-106 (harness TSL arm imports `scipy.signal.lombscargle` at line
+86 + demean'd y at line 89 + frequency grid at lines 92-97 +
+invokes scipy.signal.lombscargle at line 98 with `normalize=True`
++ extracts peak_idx + peak_freq + peak_power at lines 99-101;
+harness does NOT invoke `lomb_scargle.py::run()` engine entry
+point; §4.7.A variant 1 "Harness-imports-library-directly"
+mechanism manifestation per S30 (G.1) generalized definitional
+scope)
++ `tools/reference_parity/harness/checks/p3_lomb_scargle.py` lines
+108-130 (harness reference arm imports `astropy.timeseries.LombScargle`
+at line 109 + invokes at lines 119-121 with `normalization=
+"standard", fit_mean=True, center_data=True` + extracts peak_idx
++ peak_freq + peak_power at lines 122-124; cross-package Pattern
+J B.3 alignment-via-metric resolution structure — TSL arm scipy
+vs reference arm astropy; primary metric peak_freq normalization-
+invariant (0.0 abs diff byte-identical at metric-selection
+alignment scope); diagnostic metric peak_power normalization-
+convention divergence ~4e-4 (report-only); audit verifies wrapper
+preprocessing + parameter resolution + cross-package primitive
+agreement at metric-selection-aligned primary metric)
++ `tools/reference_parity/harness/checks/p3_lomb_scargle.py` lines
+1-21 verbatim (audit design rationale: "Pattern J classic: scipy
+and astropy use DIFFERENT normalization conventions: scipy
+`lombscargle(..., normalize=True)`: returns power in the [0, 1]
+range, using the original Lomb 1976 / Scargle 1982 formula divided
+by an inverse variance factor. astropy `LombScargle(...,
+normalization='standard')`: the canonical Townsend 2010
+generalized LS with mean-subtraction (default fit_mean=True). To
+align: pin both to the SAME mathematical normalization by
+computing astropy with `normalization='standard'` and
+`fit_mean=False`, then cross-comparing the power-at-known-
+frequency result. Compare the peak-frequency location, not the
+absolute power value")
++ `tools/reference_parity/harness/checks/p3_lomb_scargle.py` lines
+62-73 (harness verdict_class_rationale: "Lomb-Scargle is closed-
+form least-squares fit of sinusoids at trial frequencies. scipy.
+signal.lombscargle and astropy.timeseries.LombScargle both
+implement the standard formulation. Pattern J: normalization
+conventions differ — scipy returns [0,1]-normalized power; astropy
+supports several conventions. Comparison aligned by peak-frequency
+location (which is normalization-invariant) rather than absolute
+power values")
++ `tools/reference_parity/harness/checks/p3_lomb_scargle.py` lines
+132-173 (compare method: primary peak_freq metric via
+_compare_scalar + diagnostic peak_power as report-only "PASS"
+status with note "scipy normalize=True vs astropy
+normalization='standard' use different conventions; absolute
+power values differ expectedly. Peak frequency is the parity
+metric (normalization-invariant)")
++ `tools/reference_parity/harness/checks/p3_lomb_scargle.py` lines
+36-52 (`_generate_lomb_dgp`: irregularly-sampled sinusoid
+true_freq=0.13 + amplitude=1.0 + σ=0.2 + missing_frac=0.3 at
+T=200 + seed=42; own DGP generator dropping random subset to make
+scipy.signal.lombscargle the right tool)
++ `engine/techniques/lomb_scargle.py` lines 1-10 (module docstring:
+"Lomb-Scargle periodogram for irregularly sampled time series, for
+Time Series Lab. The Lomb-Scargle periodogram extends classical
+spectral analysis to unevenly spaced data. It fits sinusoids at
+each trial frequency and reports the normalized power, making it
+ideal for detecting periodic signals in data with gaps or
+irregular sampling. Uses scipy.signal.lombscargle for the core
+computation")
++ `engine/techniques/lomb_scargle.py` line 13 (Layer 1 math
+import: `from scipy.signal import lombscargle` — SAME library
+primitive as harness TSL arm imports at line 86 of p3_lomb_scargle.py)
++ `engine/techniques/lomb_scargle.py` lines 23-27 (`_PRESET_CONFIG`:
+preset dispatch Fast `{oversampling: 2, n_top_freqs: 5,
+false_alarm_method: "baluev"}` / Balanced `{oversampling: 5,
+n_top_freqs: 10, false_alarm_method: "baluev"}` / Thorough
+`{oversampling: 10, n_top_freqs: 20, false_alarm_method:
+"bootstrap"}`)
++ `engine/techniques/lomb_scargle.py` lines 30-345 (Layer 2 engine
+orchestration: `run(ctx, progress_callback)` main entry; standalone-
+technique-only invocation; time column parsing at lines 56-68
+(`_parse_times` helper at lines 348-377 with ISO date fallback)
++ NaN handling at lines 70-77 + n ≥ 10 threshold check at lines
+79-85 + irregular spacing detection at lines 87-94 + preset config
+dispatch + frequency grid setup at lines 101-126 + scipy.signal.lombscargle
+invocation at line 134 + ordinary frequencies conversion at lines
+137-138 + top peaks identification at lines 140-143 + FAP
+computation Baluev approximation at lines 145-161 OR bootstrap FAP
+at lines 163-175 (n_boot=1000 at Thorough preset) + top
+frequencies + FAP thresholds + summary statistics + plain English
++ audit_fields construction at lines 177-332)
++ `engine/techniques/lomb_scargle.py` line 134 (Layer 1 math
+invocation: `power = lombscargle(t, y_demean, angular_freqs,
+normalize=True)` — SAME library primitive as harness TSL arm
+invokes at line 98 of p3_lomb_scargle.py at demean'd y +
+angular_freqs scope; engine adds preset config dispatch + FAP
+computation (Baluev or bootstrap) + top peaks identification +
+period interpretation NOT exercised by audit which validates
+metric-selection-aligned primary metric peak_freq only)
++ `tools/reference_parity/reports/p3_lomb_scargle_audit.md`
+
+**Validation claim scope (TIER V (PATTERN J B.3 ALIGNMENT-VIA-
+METRIC RESOLUTION + CROSS-PACKAGE FRAMING) SUB-CLASS + §4.7.A
+PRESENT VARIANT 1 HARNESS-IMPORTS-LIBRARY-DIRECTLY + NEW Sub-class
+2k candidate first-instance baseline observation per A3 first-
+instance precedent + (αc) forward-instrumentation-note treatment
+per S39 (α-i) + (α) + (αa) ratifications):** TSL lomb_scargle
+output relies on two layered computations within standalone-
+technique role (Layer 1 scipy.signal.lombscargle Lomb-Scargle
+periodogram primitive + Layer 2 engine orchestration).
+p3_lomb_scargle audit validates Layer 1 scipy.signal.lombscargle
+primitive + cross-package agreement with astropy.timeseries.LombScargle
+via Pattern J B.3 alignment-via-metric resolution (harness TSL arm
+invokes scipy.signal.lombscargle + harness reference arm invokes
+astropy.timeseries.LombScargle on irregularly-sampled sinusoid);
+metric-selection-aligned primary metric agreement (peak_freq 0.0
+abs diff per audit line 13 verbatim byte-identical at peak-
+frequency LOCATION) + Pattern J B.3 normalization-convention
+divergence at diagnostic metric (peak_power ~4e-4 abs diff
+expected per audit lines 17-31 verbatim scipy normalize=True
+vs astropy normalization='standard' Townsend 2010 generalized LS
+convention difference). **Audit DOES validate cross-package parity
+verdict at metric-selection-aligned primary metric scope**
+(astropy reference; cross-package Pattern J B.3 alignment-via-
+metric resolution scope); validation scope = wrapper preprocessing
++ parameter resolution + cross-package primitive agreement at
+metric-selection-aligned primary metric (peak_freq). NOT engine
+standalone orchestration correctness, NOT time column parsing
+correctness (`_parse_times` helper at engine lines 348-377), NOT
+irregular spacing detection correctness, NOT preset config
+dispatch correctness, NOT FAP computation correctness (Baluev or
+bootstrap), NOT top peaks identification correctness, NOT period
+interpretation correctness, NOT diagnostic peak_power normalization
+agreement (which is EXPECTED to differ per Pattern J B.3 framing).
+
+- **Layer 1 scipy.signal.lombscargle / astropy.timeseries.LombScargle
+  primitive (Tier V Pattern J B.3 alignment-via-metric resolution
+  + cross-package self-test bit-exact at primary metric peak_freq;
+  validated wrapper preprocessing + parameter resolution + cross-
+  package primitive agreement at metric-selection-aligned primary
+  metric audit pinned config):** PASS Pattern J — alignment via
+  metric selection verdict per audit line 5 verbatim; primary
+  metric peak_freq byte-identical agreement (0.0 abs diff per
+  audit line 13 verbatim) + diagnostic metric peak_power
+  normalization-convention divergence ~4e-4 expected (report-only
+  per audit lines 17-31 verbatim). **Tier V Pattern J B.3
+  characterization directly grounded** at scope_reframing §2
+  lines 170-181 verbatim Tier V enumeration explicitly including
+  p3_lomb_scargle. Validation scope: SAME mathematical Lomb-
+  Scargle periodogram formulation via scipy.signal.lombscargle
+  (engine + harness TSL arm at normalize=True scaling) and
+  astropy.timeseries.LombScargle (harness reference arm at
+  normalization='standard' Townsend 2010 generalized LS scaling);
+  cross-package Pattern J B.3 alignment-via-metric resolution
+  verifies wrapper preprocessing + parameter resolution + cross-
+  package primitive agreement at metric-selection-aligned primary
+  metric peak_freq (normalization-invariant LOCATION). **Pattern
+  J B.3 alignment-via-metric resolution caveat:** primary metric
+  bit-exact agreement established at metric-selection alignment
+  scope (peak_freq normalization-invariant); audit DOES validate
+  cross-package parity at metric-selection-aligned primary metric
+  scope BUT does NOT validate cross-implementation normalization
+  agreement (which is EXPECTED to differ per scipy normalize=True
+  vs astropy normalization='standard' convention difference per
+  audit lines 22-35 verbatim Pattern J rationale); cross-package
+  agreement at metric-selection-aligned primary metric scope
+  distinct from cross-implementation normalization agreement
+  validation. **§4.7.A PRESENT variant 1 reimplementation-of-
+  dispatch caveat:** engine module `run()` is DIFFERENT code path
+  from harness library-primitive direct invocation; engine adds
+  Layer 2 orchestration (time column parsing + NaN handling +
+  irregular spacing detection + preset config dispatch + FAP
+  computation Baluev or bootstrap + top peaks identification +
+  period interpretation) NOT exercised by audit. Engine angular
+  frequencies setup at lines 117-126 (oversampling + omega_min +
+  omega_max calculation) vs harness TSL arm linear ordinary
+  frequencies setup at lines 92-97 (freq_min + freq_max + n_freqs
+  + omegas = 2*pi*freqs); audit pins SAME frequency grid across
+  arms per audit lines 46-47 verbatim ("Both arms use SAME
+  frequency grid").
+- **Layer 2 engine orchestration (validation scope conditional;
+  NOT exercised at audit metric-selection-aligned primary metric
+  pinned config):**
+  - Time column parsing (`_parse_times` lines 348-377): direct
+    float + ISO date fallback; NOT audit-validated
+  - NaN handling (lines 70-77): `~np.isnan(values) & ~np.isnan(
+    t_numeric)` mask + n_dropped warning; NOT audit-validated
+  - n ≥ 10 threshold check (lines 79-85): error response if n < 10;
+    NOT audit-validated
+  - Irregular spacing detection (lines 87-94): CV = `np.std(dt) /
+    np.mean(dt)` threshold + warning at CV < 0.01; NOT audit-
+    validated
+  - Preset config dispatch (lines 23-27 `_PRESET_CONFIG` + line 96
+    `cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])`):
+    Fast `{oversampling: 2, n_top_freqs: 5, baluev}` / Balanced
+    `{oversampling: 5, n_top_freqs: 10, baluev}` / Thorough
+    `{oversampling: 10, n_top_freqs: 20, bootstrap}`; audit pins
+    custom frequency grid (5*N oversampling matching Balanced);
+    Fast + Thorough engine production behaviors NOT exercised by
+    audit
+  - Angular frequencies setup (lines 117-126): omega_min = 2*pi/
+    T_span (default) or user min_freq + omega_max = pi*n/T_span
+    (default) or user max_freq + n_freqs = oversampling*n + linear
+    spacing; NOT audit-validated at engine-default config (audit
+    pins ordinary frequencies + harness linear spacing)
+  - scipy.signal.lombscargle invocation (line 134): SAME primitive
+    + arguments as harness TSL arm (normalize=True + demean'd y +
+    angular_freqs); audit Layer 1 transfer applies
+  - FAP computation Baluev approximation (lines 145-161):
+    FAP(z) ~ 1 - (1 - exp(-z))^M inversion with M_eff = n_freqs
+    conservative estimate; closed-form approximation; NOT audit-
+    validated
+  - FAP computation bootstrap (lines 163-175): n_boot=1000 random
+    permutations + max power percentile estimation at Thorough
+    preset only; NOT audit-validated
+  - Top peaks identification (lines 142-143): `np.argsort(power)
+    [::-1][:n_top]`; NOT audit-validated
+  - Period interpretation (lines 137-138): `ordinary_freqs =
+    angular_freqs / (2 * np.pi)` + `periods = 1.0 / ordinary_freqs`;
+    NOT audit-validated
+  - Result formatting + plain English summary + interpretation +
+    audit_fields construction
+
+#### Disclosure pattern (i) — Research note footnote (Tier V Pattern J B.3 alignment-via-metric resolution + NEW Sub-class 2k candidate first-instance baseline + cross-package framing)
+
+> This analysis uses TSL technique `lomb_scargle`, cross-package
+> Pattern J B.3 alignment-via-metric resolution parity validated
+> against `astropy.timeseries.LombScargle` reference per Phase 3
+> audit dated 2026-04-29 (verdict PASS Pattern J — alignment via
+> metric selection; primary metric peak_freq 0.0 abs diff byte-
+> identical at peak-frequency LOCATION; diagnostic metric
+> peak_power ~4e-4 abs diff expected per normalization convention
+> difference). **Tier V (Pattern J B.3 alignment-via-metric
+> resolution + cross-package framing) sub-class characterization**
+> per S39 (α-i) disposition per scope_reframing §2 lines 170-181
+> verbatim Tier V enumeration explicitly including p3_lomb_scargle.
+> Audit validates wrapper preprocessing + parameter resolution +
+> cross-package primitive agreement at metric-selection-aligned
+> primary metric peak_freq (normalization-invariant LOCATION);
+> Pattern J B.3 alignment-via-metric resolution scope. Pattern J
+> normalization convention difference (scipy `normalize=True` Lomb
+> 1976/Scargle 1982 vs astropy `normalization='standard'` Townsend
+> 2010 generalized LS) produces peak_power divergence ~4e-4 EXPECTED;
+> comparison aligned by metric selection (peak frequency, NOT
+> absolute power). Engine adds Layer 2 orchestration (time column
+> parsing + NaN handling + irregular spacing detection + preset
+> config dispatch + FAP computation Baluev or bootstrap + top
+> peaks identification + period interpretation); NOT audit-
+> validated. Pre-Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier V Pattern J B.3 + §4.7.A PRESENT variant 1 + alignment-via-metric resolution caveat)
+
+> Methodology: TSL technique `lomb_scargle` validated per Phase 3
+> reference parity infrastructure under Tier V (Pattern J B.3
+> alignment-via-metric resolution + cross-package framing) sub-
+> class framing per S39 codification. **Reference:**
+> `astropy.timeseries.LombScargle` (astropy 7.2.0) — cross-package
+> Pattern J B.3 alignment-via-metric resolution (harness TSL arm
+> invokes `scipy.signal.lombscargle(t, y_demean, omegas,
+> normalize=True)` + harness reference arm invokes
+> `astropy.timeseries.LombScargle(t, y, normalization="standard",
+> fit_mean=True, center_data=True).power(freqs)` on irregularly-
+> sampled sinusoid; both arms use SAME frequency grid for direct
+> comparison per audit lines 46-47 verbatim). **Verdict:** PASS
+> Pattern J — alignment via metric selection; primary metric
+> peak_freq 0.0 abs diff byte-identical at peak-frequency LOCATION;
+> diagnostic metric peak_power ~4e-4 abs diff expected per
+> normalization convention difference. **Audit date:** 2026-04-29.
+> **Fixture:** irregularly-sampled sinusoid (true_freq=0.13,
+> amplitude=1.0, σ=0.2, ~30% missingness via random subsampling),
+> T=200 originally + kept ~140 samples + seed=42; demean'd y at
+> TSL arm prior to scipy.signal.lombscargle invocation. **Tier V
+> Pattern J B.3 characterization** per scope_reframing §2 lines
+> 170-181 verbatim Tier V enumeration explicitly including
+> p3_lomb_scargle. **Pattern J B.3 alignment-via-metric resolution
+> caveat:** primary metric bit-exact agreement established at
+> metric-selection alignment scope (peak_freq normalization-
+> invariant LOCATION); audit validates cross-package parity at
+> metric-selection-aligned primary metric scope BUT does NOT
+> validate cross-implementation normalization agreement (which is
+> EXPECTED to differ per scipy normalize=True vs astropy
+> normalization='standard' convention difference); peak_power
+> diagnostic metric divergence ~4e-4 is EXPECTED methodology
+> divergence per Pattern J B.3 framing (non-blocking; report-only).
+> **§4.7.A PRESENT variant 1 reimplementation-of-dispatch caveat:**
+> harness TSL arm imports + invokes `scipy.signal.lombscargle`
+> directly (does NOT invoke engine `run()` entry point); engine
+> module invokes SAME scipy primitive within `run()` orchestration;
+> primary metric peak_freq agreement transfers to engine Layer 1
+> math invocation per identical primitive alignment; engine Layer
+> 2 orchestration (time column parsing + NaN handling + irregular
+> spacing detection + preset config dispatch + FAP computation
+> Baluev or bootstrap + top peaks identification + period
+> interpretation) NOT exercised by audit. **NEW Sub-class 2k
+> candidate first-instance baseline observation** per A3 precedent
+> (n=1 baseline; NOT codification of NEW Sub-class 2k; forward
+> instrumentation note candidate). Reference selection + tolerance
+> specification + Pattern J B.3 alignment-via-metric resolution
+> framing AI-assisted with user ratification per Phase 7+ work
+> program; pre-Path α expert review status; expert review pending
+> end-of-Phase-7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier V Pattern J B.3 + §4.7.A PRESENT variant 1 + NEW Sub-class 2k candidate first-instance baseline + alignment-via-metric resolution scope-bounded validation)
+
+> `lomb_scargle` validation: TSL Tier V (Pattern J B.3 alignment-
+> via-metric resolution + cross-package framing) sub-class framing
+> per S39 (α-i) codification + NEW Sub-class 2k candidate first-
+> instance baseline observation per (αa) ratification + §4.7.A
+> PRESENT variant 1 Harness-imports-library-directly mechanism.
+> **Reference:** `astropy.timeseries.LombScargle` (astropy 7.2.0).
+> **Audit:** `tools/reference_parity/reports/p3_lomb_scargle_audit.md`
+> dated 2026-04-29. **Verdict:** PASS Pattern J — alignment via
+> metric selection (primary metric peak_freq 0.0 abs diff byte-
+> identical at peak-frequency LOCATION; diagnostic metric peak_power
+> ~4e-4 abs diff EXPECTED per scipy normalize=True vs astropy
+> normalization='standard' Townsend 2010 generalized LS convention
+> difference). **Fixture:** irregularly-sampled sinusoid DGP T=200
+> originally + ~140 samples kept + seed=42 + true_freq=0.13 +
+> ~30% missingness via random subsampling; single-seeded fixture;
+> parameter-sensitivity coverage NOT established; Q3b extension
+> scope. **NEW Sub-class 2k candidate first-instance baseline
+> observation** per S39 (αa) ratification (definitional scope
+> working hypothesis: "Tier V Pattern J B.3 alignment-via-metric
+> resolution + cross-package framing scope"; A3 first-instance
+> precedent n=1 baseline; NOT codification; codification deferred
+> to absorption #6+ second-observation tightening if recurs;
+> distinct from S37 Sub-class 2i candidate Tier III Pattern A.1
+> + §4.7.A PRESENT scope + S38 Sub-class 2j candidate Pattern F
+> structural invariants + Tier II.bit-exact scope per Tier V
+> Pattern J B.3 scope distinction). **Risk attribution:**
+> **(a) Layer 1 scipy.signal.lombscargle / astropy.timeseries.LombScargle
+> primitive (Tier V Pattern J B.3 alignment-via-metric resolution
+> + cross-package self-test bit-exact at primary metric peak_freq;
+> validated wrapper preprocessing + parameter resolution + cross-
+> package primitive agreement at metric-selection-aligned primary
+> metric):** PASS at metric-selection-aligned primary metric byte-
+> identical agreement; SAME scipy.signal.lombscargle primitive as
+> engine module invokes at line 134; primary metric agreement
+> transfers to engine Layer 1 math invocation; audit DOES validate
+> cross-package parity at metric-selection-aligned primary metric
+> scope BUT does NOT validate cross-implementation normalization
+> agreement (which is EXPECTED to differ per Pattern J B.3 framing
+> normalization convention difference). **(b) §4.7.A PRESENT
+> variant 1 reimplementation-of-dispatch caveat:** harness TSL
+> arm invokes scipy.signal.lombscargle primitive directly
+> (bypassing engine `run()`); engine wraps + invokes same primitive
+> within orchestration; code-path divergence active at runtime per
+> HEAD verification (NOT REMEDIATED per S36 §4.7.A status
+> dimension codification). **(c) Layer 2 engine orchestration
+> (NOT audit-validated):** time column parsing (`_parse_times`
+> lines 348-377 with ISO date fallback) + NaN handling (lines 70-
+> 77) + n ≥ 10 threshold check (lines 79-85) + irregular spacing
+> detection (lines 87-94 CV threshold) + preset config dispatch
+> (lines 23-27 `_PRESET_CONFIG` + line 96 invocation) + angular
+> frequencies setup (lines 117-126) + scipy.signal.lombscargle
+> invocation (line 134) + FAP computation Baluev approximation
+> (lines 145-161) OR bootstrap (lines 163-175 at Thorough preset
+> with n_boot=1000) + top peaks identification (lines 142-143) +
+> period interpretation (lines 137-138); validation scope per
+> `engine/techniques/lomb_scargle.py` lines 30-345. **(d) Pattern
+> J B.3 alignment-via-metric resolution validation scope-bounded
+> retraction surface:** practitioners invoking `lomb_scargle` from
+> ribbon receive scipy.signal.lombscargle primitive output via
+> engine `run()` orchestration; audit validates wrapper
+> preprocessing + parameter resolution + cross-package primitive
+> agreement at metric-selection-aligned primary metric peak_freq
+> ONLY; engine FAP computation + top peaks identification + period
+> interpretation + plain English summary NOT audit-validated;
+> diagnostic metric peak_power normalization-convention divergence
+> ~4e-4 is EXPECTED per Pattern J B.3 framing; expert review of
+> engine implementation + Layer 1 cross-implementation normalization
+> validation against alternative implementation (e.g., R `lomb` /
+> `Rwave::lscv`) candidate at Q3b extension scope. Pre-Path α
+> expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier V Pattern J B.3 + §4.7.A PRESENT variant 1 + NEW Sub-class 2k candidate first-instance baseline + alignment-via-metric resolution caveat)
+
+> `lomb_scargle` Tier V (Pattern J B.3 alignment-via-metric
+> resolution + cross-package framing) sub-class per S39
+> codification + NEW Sub-class 2k candidate first-instance baseline
+> + §4.7.A PRESENT variant 1 Harness-imports-library-directly
+> mechanism; cross-package Pattern J B.3 alignment-via-metric
+> resolution vs direct `astropy.timeseries.LombScargle` invocation
+> (scipy normalize=True Lomb 1976/Scargle 1982 vs astropy
+> normalization='standard' Townsend 2010 generalized LS). Primary
+> metric peak_freq byte-identical at peak-frequency LOCATION (0.0
+> abs diff; normalization-invariant); diagnostic metric peak_power
+> ~4e-4 abs diff EXPECTED per normalization convention difference.
+> Pattern J B.3 alignment-via-metric resolution caveat operative:
+> audit validates wrapper preprocessing + parameter resolution +
+> cross-package primitive agreement at metric-selection-aligned
+> primary metric peak_freq; NO cross-implementation normalization
+> agreement validation (EXPECTED divergence per Pattern J B.3
+> framing). Engine Layer 2 orchestration (time column parsing +
+> NaN handling + irregular spacing detection + preset config
+> dispatch + FAP computation + top peaks identification + period
+> interpretation) NOT audit-validated. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31-S38 + S36 LOC overshoot scope
+expansion refinement — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (`astropy.timeseries.LombScargle`
+  astropy 7.2.0) per `p3_lomb_scargle_audit.md` line 4 verbatim
+  ("**Reference:** `astropy.timeseries.LombScargle` (astropy
+  7.2.0)"). Verdict (PASS Pattern J — alignment via metric
+  selection) per `p3_lomb_scargle_audit.md` line 5 verbatim
+  ("**Verdict:** **PASS** (Pattern J — alignment via metric
+  selection)"). Primary metric peak_freq byte-identical agreement
+  per `p3_lomb_scargle_audit.md` line 13 verbatim (peak_freq
+  0.12992 TSL vs 0.12992 reference = 0.0 abs diff PASS exact at
+  peak-frequency LOCATION). Diagnostic metric peak_power
+  normalization-convention divergence per `p3_lomb_scargle_audit.md`
+  lines 17-20 verbatim (peak_power TSL 0.9382 scipy vs 0.9386
+  astropy) + line 31 verbatim ("Absolute power values differ
+  expectedly (~4e-4 here)"). Pattern J B.3 alignment-via-metric
+  resolution rationale per `p3_lomb_scargle_audit.md` lines 22-35
+  verbatim ("scipy `normalize=True`: returns power in [0, 1]
+  range using Lomb 1976 / Scargle 1982 inverse-variance scaling.
+  astropy `normalization='standard'`: Townsend 2010 generalized
+  LS with mean-subtraction. Absolute power values differ
+  expectedly (~4e-4 here). Peak frequency LOCATION is normalization-
+  invariant — both implementations identify the same dominant
+  frequency bin against the same frequency grid. Comparison
+  aligned by metric selection (peak frequency, not absolute
+  power)"). Audit date (2026-04-29) per `p3_lomb_scargle_audit.md`
+  line 7 verbatim. Fixture (irregularly-sampled sinusoid
+  true_freq=0.13 + amplitude=1.0 + σ=0.2 + ~30% missingness +
+  T=200 + kept ~140 samples + seed=42) per `p3_lomb_scargle_audit.md`
+  lines 39-42 verbatim Fixture + Diagnostics sections + harness
+  `p3_lomb_scargle.py` lines 36-52 verbatim `_generate_lomb_dgp`.
+  Tier V (Pattern J B.3 alignment-via-metric resolution + cross-
+  package framing) sub-class characterization directly grounded
+  at `scope_reframing_s6_banking.md` §2 lines 170-181 verbatim
+  ("Tier V — Phase 3 PASS with documented divergence (Pattern D /
+  Pattern J caveat; non-blocking)... scipy/astropy normalization
+  convention for `p3_lomb_scargle` (S11 / Batch 7; Pattern J B.3
+  alignment-via-metric resolution). Verdict PASS at primary-tier;
+  secondary-tier or per-metric documented divergence non-blocking")
+  — p3_lomb_scargle explicitly within Tier V Pattern J B.3
+  enumeration; p3_lomb_scargle EXPLICITLY NOT in Tier II.bit-
+  exact 12-wrapper enumeration at scope_reframing §2 lines 121-
+  131 verbatim. §4.7.A PRESENT variant 1 manifestation per
+  harness line 86 + engine line 13 verbatim — both import SAME
+  scipy.signal.lombscargle primitive; harness line 98 + engine
+  line 134 verbatim — both invoke SAME scipy.signal.lombscargle
+  primitive but harness TSL arm bypasses engine `run()`
+  orchestration; harness reference arm at lines 119-121 invokes
+  astropy.timeseries.LombScargle directly (cross-package). Layer
+  1 / Layer 2 framework operative per S26 STOP 1.5 second close
+  ratification carried forward + S31-S38 reinforcement. Catalog
+  mapping (1:1) verified per audit Wrapper field. **§4.7.A
+  pattern OBSERVED at S39 as variant 1 PRESENT status** (post-S39
+  §4.7.A observations = n=10 PRESENT across §2.5 entries S14a +
+  S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 + S39 + n=1
+  REMEDIATED S34 = n=11 total observations; **§4.7.A pattern
+  count tightening per S30 (G.1) generalized definitional scope
+  codification + S36 §4.7.A status dimension extension** — NOT
+  A9 Class A counter increment; NOT §4.7.A taxonomy modification
+  at S39; forward observation banking only per ITEM 16 forward
+  instrumentation banking discipline). **NEW Sub-class 2k
+  candidate first-instance baseline observation per (αa)
+  ratification** (A3 first-instance precedent n=1 baseline; NOT
+  codification; codification deferred to absorption #6+ second-
+  observation tightening if recurs at S40+ Frequency Domain /
+  Signal block entry OR future Q1 entry within Tier V Pattern J
+  alignment-via-metric resolution scope; definitional scope
+  working hypothesis "Tier V Pattern J B.3 alignment-via-metric
+  resolution + cross-package framing scope"). **§1.9 Filename
+  divergence sub-pattern variant THIRD-OBSERVATION cross-block
+  extension NOT MANIFESTED per Code S39 Step 0 empirical re-Read**
+  (lomb_scargle filenames PRESERVE catalog-id at all three layers;
+  §1.9 cross-block sub-pattern not reinforced at S39; n=4 total
+  observations preserved at S37 first-instance baseline; A3
+  cross-block tightening DEFERRED continues from S38 NOT
+  MANIFESTED outcome). **Pattern F structural invariants SECOND-
+  OBSERVATION NOT MANIFESTED per Code S39 Step 0 empirical re-
+  Read** (Lomb-Scargle has no roundtrip / Parseval analog at
+  structural identity invariant scope; Pattern F NEW framing
+  element observation remains at S38 first-instance baseline;
+  Sub-class 2j codification deferred). **§1.8 reroll_on_caveat=
+  False discipline NOT APPLICABLE at S39** (audit verdict PASS
+  Pattern J alignment NOT CAVEAT; §1.8 applicability scope Tier
+  VI CAVEAT primary). **§2.5 Tier primary+overlay convention
+  NOT APPLICABLE at S39** (Tier V Pattern J B.3 single-tier
+  framing per Code (α-i) + Chat ratification preference; (α-ii)
+  Tier II.bit-exact + Tier V Pattern J overlay alternative
+  rejected per scope_reframing §2 line 178-179 explicit Tier V
+  enumeration anchor). **§1.5 novelty enumeration sub-section
+  APPLIED at S39** per ≥5 observations threshold satisfied at
+  n=6 enumerated novelties (Novelty 1-6); fifth post-S23
+  application of §1.5 novelty enumeration sub-section pattern
+  per S30 codification + S36 §1.5 refinement sustained-
+  observation operational status note; n=5 post-codification
+  observations across S23 + S34 + S37 + S38 + S39; A3 fifth-
+  observation tightening reinforcement. **HETEROGENEOUS TIER-
+  SURFACE VARIANT OBSERVATION A3 SECOND-OBSERVATION TIGHTENING
+  PRECEDENT THRESHOLD SATISFIED AT S39** per n=3 distinct Tier
+  characterizations across n=3 entries within Frequency Domain /
+  Signal block; codification refinement candidate at absorption
+  #6+. **ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-APPLICATION
+  EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+  THRESHOLD SATISFIED AT S39** per Chat S39 trigger drafting
+  all-anchor-deferral discipline second-application; 0 multi-
+  anchor schema-misattribution divergences at S39 Step 0
+  SUSTAINED at n=2 sustained efficacy observations (S38 + S39);
+  codification candidate at §1.7+ Workstream B §1.4 operational
+  scope at absorption #6+ refinement empirically grounded.
+  **A9 Class A counter post-S39: n=14 ACTIVE codified at §19.4
+  unchanged** (n=15 + n=16 codified at §1.7 (c) Workstream B
+  empirical-efficacy grounding scope per S36; n=17 + n=18
+  candidates banked at S37 commit message body forward state +
+  n=19 candidate banked at S38 commit message body forward state
+  + n=20 NEW candidate banked at S39 commit message body forward
+  state per Code-side prior-turn-ratification-acknowledgment
+  gap sub-pattern variant NEW failure mode distinct from prior
+  A9 Class A failure modes n=14-19 per A3 first-instance
+  precedent absorption #6+ codification deferral; A9 Class A
+  counter at §19.4 advance deferred to absorption #6+ per multi-
+  candidate accumulation). **A9 Class B counter post-S39: n=4
+  ACTIVE unchanged (no new Class B catch); sustained-observation
+  count under Class B revised default discipline n=13 (S22 +
+  S23 + S25 + S26 + S27 + S28 + S31 + S32 + S33 + S34 + S37 +
+  S38 + S39 = n=13 Q1 entries only counting basis per Chat
+  preference codified at S31)**. **Maturation observation
+  SIXTEENTH SUSTAINED OBSERVATION REACHED at S39 (S23 + S25 +
+  S26 + S27 + S28 + S29 + S30 + S31 + S32 + S33 + S34 + S35 +
+  S36 + S37 + S38 + S39 = n=16 cross-session trajectory)** +
+  EIGHT-timing-point empirical surface preserved per S35-
+  absorption #5 codification (no new timing point variant at
+  S39; proactive-prevention operation SUSTAINED across
+  established timing points (i)-(viii)); §4.5 codification
+  operational at n=9 post-codification sustained observations
+  per S39 cross-session trajectory reinforcement. Verify-state-
+  at-first-consumption sub-discipline 30th instance application.
+  **Sub-class taxonomy growth Block-level observation at
+  Frequency Domain / Signal block:** 2i (S37) + 2j candidate
+  forward-instrumentation-note (S38) + 2k (S39) = n=3 NEW Sub-
+  class candidates first-instance baseline observations within
+  Block 5 sub-session arc; Block-level Sub-class taxonomy growth
+  rate observation per §19.4 §4 note 16 forward instrumentation
+  candidate at absorption #6+ codification refinement.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at nineteenth-technique selection per
+  Mark 3 efficient-ratification + (α) unprompted case-against
+  discipline operative per Workstream B §1.4 codification + S20
+  + S25 + S26 + S27 + S28 + S31 + S32 + S33 + S34 + S37 + S38
+  reinforcement. **Q-B pattern persists at n=20 across S12 +
+  S13 + S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 + S26 +
+  S27 + S28 + S31 + S32 + S33 + S34 + S37 + S38 + S39; §1.4
+  codified observation refinement at empirical pattern
+  accumulation** (n=7 at §1.4 S20 codification → n=19 at S38
+  reinforcement → n=20 at S39 reinforcement; Workstream B
+  amendment cycle candidate A continues at next cycle).
+  Substantive Chat engagement at structural-decision points
+  empirically observed (Step 0 STOP 2 anchor ratifications A-J
+  under all-anchor-deferral discipline second-application +
+  Tier V (Pattern J B.3 alignment-via-metric resolution + cross-
+  package framing) (α-i) ratification + NEW Sub-class 2k
+  candidate first-instance baseline (αa) ratification + Code
+  (α-i alternative) + (α-ii) Tier II.bit-exact + Tier V overlay
+  + (α-iii) + (α-iv) + (α-v) + (αb) + (αc-only) Tier 2 case-
+  against rejection + §1.9 cross-block extension THIRD-
+  OBSERVATION NOT MANIFESTED banking + Pattern F SECOND-
+  OBSERVATION NOT MANIFESTED banking + §1.8 NOT APPLICABLE
+  banking + HETEROGENEOUS TIER-SURFACE VARIANT A3 SECOND-
+  OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFACTION
+  banking + ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-APPLICATION
+  EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+  THRESHOLD SATISFACTION banking + A9 Class A 20th-instance
+  candidate banking + Sub-class taxonomy growth Block-level
+  observation banking + Block ordering working hypothesis
+  third-position verification).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Conditional Yes for **Layer 1 scipy.signal.lombscargle /
+  astropy.timeseries.LombScargle primitive (Tier V Pattern J B.3
+  alignment-via-metric resolution + cross-package self-test bit-
+  exact at primary metric peak_freq)** per PASS Pattern J
+  alignment verdict at metric-selection-aligned primary metric
+  byte-identical agreement. Defensibility to all three audiences
+  (published audience + Morgan Stanley compliance + Path α
+  expert reviewer) UNDER Tier V (Pattern J B.3 alignment-via-
+  metric resolution + cross-package framing) sub-class + §4.7.A
+  PRESENT variant 1 reimplementation-of-dispatch + Pattern J B.3
+  alignment-via-metric resolution scope-bounded validation +
+  cross-implementation normalization agreement NOT audit-
+  established (EXPECTED divergence per Pattern J B.3 framing)
+  disclosure acknowledgment.
+  **Conditional for Layer 2 engine orchestration** — time column
+  parsing + NaN handling + irregular spacing detection + preset
+  config dispatch + FAP computation Baluev or bootstrap + top
+  peaks identification + period interpretation; requires expert
+  review of engine implementation OR engine-output cross-check
+  at base pinned config. **Critical Q-C framing per Pattern J B.3
+  alignment-via-metric resolution caveat:** primary metric peak_freq
+  agreement is established at METRIC-SELECTION-ALIGNED scope
+  (normalization-invariant LOCATION); audit scope is metric-
+  selection-aligned primary metric cross-package primitive
+  agreement validation NOT cross-implementation normalization
+  agreement validation (which is EXPECTED to differ per scipy
+  vs astropy normalization convention difference); defensibility
+  conditional on disclosure of Pattern J B.3 alignment-via-metric
+  resolution scope vs cross-implementation normalization
+  agreement scope distinction (audit established the former NOT
+  the latter; diagnostic peak_power ~4e-4 divergence is EXPECTED
+  per Pattern J B.3 framing).
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  LOW-MEDIUM per Tier V (Pattern J B.3 alignment-via-metric
+  resolution + cross-package framing) sub-class characterization
+  scope bound + §4.7.A PRESENT variant 1 disclosure + Pattern J
+  B.3 alignment-via-metric resolution scope-bounded validation
+  caveat. lomb_scargle is canonical Lomb 1976/Scargle 1982 Lomb-
+  Scargle periodogram methodology + scipy.signal.lombscargle
+  implementation (widely-used irregular-sampling spectral
+  analysis primitive). **Layer-specific + Tier V Pattern J B.3
+  + NEW Sub-class 2k candidate + §4.7.A PRESENT variant 1
+  retraction surface (per S39 (α-i) + (αa) ratifications):**
+  - Layer 1 scipy.signal.lombscargle / astropy.timeseries.LombScargle
+    primitive (Tier V Pattern J B.3 alignment-via-metric
+    resolution + cross-package self-test bit-exact at primary
+    metric peak_freq): LOW; metric-selection-aligned primary
+    metric agreement established at peak-frequency LOCATION
+    (normalization-invariant); expert review surfacing scipy.
+    signal.lombscargle primitive math correctness issue OR
+    astropy.timeseries.LombScargle math correctness issue would
+    affect lomb_scargle + other scipy/astropy Lomb-Scargle-
+    dependent techniques (NOT 1:1 catalog↔wrapper isolation;
+    cross-technique propagation risk at primitive scope).
+  - **Layer 2 engine orchestration: LOW-MEDIUM** — time column
+    parsing (`_parse_times` ISO date fallback) + NaN handling +
+    irregular spacing detection (CV threshold) + preset config
+    dispatch (Fast/Balanced/Thorough oversampling + FAP method)
+    + FAP computation Baluev approximation OR bootstrap (n_boot=
+    1000 at Thorough) + top peaks identification + period
+    interpretation NOT audit-validated; expert review of engine
+    implementation conditional on Layer 2 correctness;
+    orchestration operations operationally moderate (date
+    parsing + CV computation + closed-form FAP approximation OR
+    bootstrap permutation + sort/argsort + period inversion);
+    retraction surface LOW-MEDIUM reflects orchestration scope;
+    bootstrap FAP at Thorough preset NOT audit-validated
+    separately (n_boot=1000 random permutation seeding).
+  - **Pattern J B.3 alignment-via-metric resolution scope-bounded
+    validation retraction surface: MEDIUM** — audit validates
+    wrapper preprocessing + parameter resolution + cross-package
+    primitive agreement at metric-selection-aligned primary
+    metric peak_freq; NO cross-implementation normalization
+    agreement validation (EXPECTED divergence per Pattern J B.3
+    framing); NO secondary-metric peak_power cross-implementation
+    validation; NO additional-implementation cross-validation
+    (no R `lomb` cross-validation; no R `Rwave::lscv` cross-
+    validation); expert review surfacing cross-implementation
+    divergence at secondary-metric scope (e.g., R `lomb`
+    produces different peak_power at identical args) would
+    prompt Q3b extension scope cross-implementation validation
+    at secondary-metric scope; Q3b extension scope candidate per
+    Path α expert review.
+  - **§4.7.A PRESENT variant 1 retraction surface: LOW** —
+    harness TSL arm + engine use SAME scipy.signal.lombscargle
+    primitive at normalize=True scaling; reimplementation scope
+    limited to dispatch-path (re-import + re-invoke vs engine
+    `run()` orchestration); metric-selection-aligned primary
+    metric agreement transfers to engine Layer 1 math invocation
+    cleanly per identical primitive alignment; reimplementation-
+    of-dispatch variant 1 structurally weaker §4.7.A
+    manifestation than mechanism variants 3 + 4 (reimplementation-
+    of-math + use-case-divergence).
+  - **NEW Sub-class 2k candidate first-instance baseline
+    retraction surface: LOW** — A3 first-instance precedent n=1
+    baseline observation; codification of NEW Sub-class 2k at
+    Tier V Pattern J B.3 alignment-via-metric resolution + cross-
+    package framing scope deferred to absorption #6+ second-
+    observation tightening if recurs; sub-class definitional
+    scope working hypothesis "Tier V Pattern J B.3 alignment-via-
+    metric resolution + cross-package framing scope" preserves
+    combined novelty distinction at first-instance observation
+    without codification commitment.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; nineteenth technique to enter status
+per S39 ratification; **THIRD Frequency Domain / Signal block
+entry — FIFTH catalog block transition advances 2→3 of 7 entries
+Q1-amended** per Q1 work program scope after Block 1 Causality at
+S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data
+at S28 + Block 3 Decomposition at S34 + Frequency Domain / Signal
+block first + second entries at S37 + S38 (Block ordering position
+lomb_scargle at THIRD-position 7-entry Block ordering working
+hypothesis arc counting validated S37 + S38 + S39 per HEAD
+57bd08d line 10915 verbatim §3 empirical re-Read; second-position
+alphabetically within remaining-5-unvalidated §3 enumeration);
+**FIRST Tier V (Pattern J B.3 alignment-via-metric resolution +
+cross-package framing) PRIMARY tier characterization Q1 §2.5 entry
+overall + FIRST §2.5 entry within Frequency Domain / Signal block**
+per S39 (α-i) Tier disposition ratification (S23 pp_test was Tier
+II.bit-exact-loose primary + Tier V Pattern J B.2 OVERLAY at
+diagnostic-metric scope; S39 lomb_scargle is Tier V single-tier
+PRIMARY characterization per scope_reframing §2 line 178-179
+verbatim explicit Tier V Pattern J B.3 alignment-via-metric
+resolution enumeration); **NEW Sub-class 2k candidate first-
+instance baseline observation per A3 first-instance precedent +
+(αc) forward-instrumentation-note treatment** per (αa) Chat
+ratification (definitional scope working hypothesis "Tier V Pattern
+J B.3 alignment-via-metric resolution + cross-package framing
+scope"; A3 first-instance precedent n=1 baseline; NOT codification
+of NEW Sub-class 2k; codification deferred to absorption #6+
+second-observation tightening if recurs); **HETEROGENEOUS TIER-
+SURFACE VARIANT OBSERVATION A3 SECOND-OBSERVATION TIGHTENING
+PRECEDENT THRESHOLD SATISFIED AT S39** (n=3 distinct Tier
+characterizations within Frequency Domain / Signal block at Tier
+III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38 +
+Tier V Pattern J B.3 at S39; codification refinement candidate at
+absorption #6+ for Block heterogeneous-Tier-surface variant sub-
+pattern definitional scope generalization per §19.4 §4 note 6
+refinement at S35-absorption #5 codification);
+**ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-APPLICATION EMPIRICAL
+EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD
+SATISFIED AT S39** per Chat S39 trigger drafting all-anchor-
+deferral discipline second-application per institutional learning
+sustainment from S37 multi-anchor schema-misattribution catch n=18
++ S38 first-application empirical efficacy validation; 0 multi-
+anchor schema-misattribution divergences at S39 Step 0 SUSTAINED
+at n=2 sustained efficacy observations (S38 + S39 0-divergence);
+codification candidate at §1.7+ Workstream B §1.4 operational
+scope at absorption #6+ refinement empirically grounded;
+**§1.9 Filename divergence sub-pattern variant THIRD-OBSERVATION
+cross-block extension NOT MANIFESTED per Code S39 Step 0 empirical
+re-Read** (lomb_scargle filenames PRESERVE catalog-id at all three
+layers `p3_lomb_scargle_audit.md` + `p3_lomb_scargle.py` +
+`lomb_scargle.py`; n=4 total observations preserved at S37 first-
+instance baseline; §1.9 cross-block sub-pattern not reinforced at
+S38 OR S39; A3 cross-block tightening DEFERRED continues pending
+future Frequency Domain / Signal entry §1.9 manifestation;
+expiration semantics: §1.9 second cross-block observation banks
+at S39 close pending S40+ entry filename empirical verification);
+**Pattern F structural invariants SECOND-OBSERVATION NOT
+MANIFESTED at S39** (Lomb-Scargle has no roundtrip / Parseval
+analog at structural identity invariant scope; Pattern F NEW
+framing element observation remains at S38 first-instance baseline;
+NEW Sub-class 2j codification deferred); **§1.8 reroll_on_caveat=
+False discipline NOT APPLICABLE at S39** (audit verdict PASS
+Pattern J alignment NOT CAVEAT; §1.8 applicability scope Tier VI
+CAVEAT primary); **SINGLE-LAYER framing per S39 STOP 2 empirical
+investigation + α disposition** (Tier V Pattern J B.3 alignment-
+via-metric resolution + cross-package single-tier framing; §2.5
+Tier primary+overlay convention NOT APPLICABLE at S39 per Code
+(α-i) + Chat ratification preference at scope_reframing §2 line
+178-179 explicit Tier V enumeration anchor); **§4.7.A PRESENT
+variant 1 Harness-imports-library-directly mechanism manifestation
+at n=10 PRESENT + n=1 REMEDIATED = n=11 total post-S39 observations
+across §2.5 entries** (S14a granger + S18 gcc_phat + S26
+denton_chowlin + S27 loess + S31 classical_decompose + S32
+mstl_decompose + S33 stl_decompose + S37 periodogram_spectral_density
++ S38 fft_spectrum + S39 lomb_scargle PRESENT + S34 x13_seasonal_adjust
+REMEDIATED; **§4.7.A pattern count tightening per S30 (G.1)
+generalized definitional scope codification + S36 §4.7.A status
+dimension extension** — NOT A9 Class A counter increment; forward
+observation banking only; NOT §4.7.A taxonomy modification at
+S39);
+**SUB-CLASS TAXONOMY GROWTH BLOCK-LEVEL OBSERVATION AT FREQUENCY
+DOMAIN / SIGNAL BLOCK forward instrumentation banking:** Sub-class
+2i candidate first-instance baseline at S37 + Sub-class 2j
+candidate forward-instrumentation-note at S38 + Sub-class 2k
+candidate first-instance baseline at S39 = n=3 NEW Sub-class
+candidates first-instance baseline observations within Block 5
+sub-session arc; Block-level Sub-class taxonomy growth rate
+observation candidate at absorption #6+ codification refinement
+per §19.4 §4 note 16 forward instrumentation banking; Block 3
+produced 2f + 2g + 2h NEW Sub-class candidates across 4 sub-
+sessions S31-S34; Block-level Sub-class taxonomy growth rate
+sustained at n=3 NEW Sub-classes / Block per per-block continuation
+pattern observation potential codification refinement at absorption
+#6+.
+**A9 CLASS A 20TH-INSTANCE CANDIDATE BANKING at S39 commit message
+body forward state per S39 STOP 2 turn 2 re-surface (NEW sub-
+pattern variant; Code-side prior-turn-ratification-acknowledgment
+gap; alternative interpretation: transmission-side artifact rather
+than apparatus failure mode; structurally distinct direction from
+prior n=14-19 sub-pattern variants per Code-side prior-turn
+acknowledgment scope vs prior content-completeness / multi-anchor
+/ enumeration-drift scopes):** Code S39 Step 0 STOP 2 surface re-
+presentation at S39 Step 0 turn 2 with identical content to S39
+Step 0 turn 1; Chat had already provided STOP 2 ratifications
+across all anchors A-J at S39 Step 0 turn 1 response. n=20 NEW
+sub-pattern variant distinct from prior A9 Class A failure mode
+candidates n=14-19 per structural-direction distinction; A3 first-
+instance precedent n=1 baseline; codification deferred to
+absorption #6+ second-observation tightening if recurs at S40+
+STOP cycle response; banking forward state at S39 commit message
+body per CONSTRAINT 1 NOT IN SCOPE §19.4 baseline edits
+preservation. **Block ordering working hypothesis third-position
+verification at S39 per Code Step 0 empirical re-Read:**
+lomb_scargle at second-position alphabetically within §3 remaining-
+5 unvalidated entries verified; lomb_scargle at THIRD-position in
+7-entry Block ordering working hypothesis arc counting validated
+S37 + S38 + S39 per preliminary working hypothesis from S37 close
+commit message body forward state confirmed at S39 empirical
+verification; Block ordering working hypothesis testing through
+S40+ Block-internal complexity ordering verification across 7-
+entry arc S37 + S38 + S39 + S40 + S41 + S42 + S43 (n=3 Block-
+ordering observation tightening per A3 precedent at Frequency
+Domain / Signal block close if empirically confirmed; cross-
+reference to §19.4 §4 note 13 first-instance baseline observation
+at Block 3 100% confirmed precedent per S31-S34 ordering empirical
+validation); **CONTINUATION of S30 + S36 Workstream B codifications
+at S39:** §1.6 Q-A density convention operative continuation
+(verbatim citation density at Q-A field; n=9 post-codification
+applications at S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38 +
+S39 with §1.6 LOC overshoot scope expansion at S36 refinement
+operative — n=9 total + n=8 sub-pattern scope disambiguation) +
+§5.5 forward-instrumentation hygiene at status line operative
+continuation (expiration semantics on each predictive claim; n=9
+post-codification applications at S31 + S32 + S33 + S34 + S35 +
+S36 + S37 + S38 + S39) + §1.5 novelty enumeration sub-section
+APPLIED at S39 (≥5 observations threshold satisfied at n=6
+novelties; fifth post-S23 application; n=5 post-codification
+observations across S23 + S34 + S37 + S38 + S39; A3 fifth-
+observation tightening reinforcement per §1.5 sustained-observation
+operational status note S36 refinement) + §1.7 refined Mod 3
+cadence operative (third Q1 entry post-S36 §1.7 codification;
+refined Mod 3 chunked-surface content-completeness specification
+operational at S39 STOP 1 chunked-surface protocol) + §1.8
+reroll_on_caveat=False discipline NOT APPLICABLE at S39 (PASS
+verdict Pattern J alignment; §1.8 applicability scope Tier VI
+CAVEAT primary; verified at Step 0 Tier characterization
+disposition) + §1.9 Filename divergence sub-pattern variant
+THIRD-OBSERVATION cross-block extension NOT MANIFESTED at S39
+(first-instance baseline observation cross-block scope preserved
+at S37; S38 + S39 NOT MANIFESTED outcomes continue) + §4.7.A
+REMEDIATED status dimension NOT applicable at S39 (PRESENT
+status; status dimension PRESENT/REMEDIATED orthogonal to
+mechanism variant 1; verified at Step 0 §4.7.A pattern
+manifestation disposition); §2.5 Tier primary+overlay convention
+NOT APPLICABLE at S39 (Tier V Pattern J B.3 single-tier framing
+per S35-absorption #5 + S32 third-observation tightening
+reinforcement preserved); §4.7 in-place codification operative
+reference at §4.7.A PRESENT variant 1 manifestation + §4.7.A
+status dimension extension cross-reference. **A10 Sub-class
+disposition (αa) NEW Sub-class 2k candidate first-instance
+baseline observation + (αc) forward-instrumentation-note
+treatment per Chat ratification** (definitional scope working
+hypothesis "Tier V Pattern J B.3 alignment-via-metric resolution
++ cross-package framing scope"; A3 first-instance precedent n=1
+baseline; NOT codification of NEW Sub-class 2k; codification
+deferred to absorption #6+ second-observation tightening if
+recurs at S40+ Frequency Domain / Signal block entry OR future
+Q1 entry within Tier V Pattern J alignment-via-metric resolution
+scope; expiration semantics: NEW Sub-class 2k candidate
+observation banks at S39 close pending second-observation
+tightening at respective sub-session OR absorption #6+
+codification refinement disposition).
+**A9 Class B counter post-S39: n=4 ACTIVE (unchanged at S39; no
+new Class B catch); sustained-observation count under Class B
+revised default discipline n=13 (S22 + S23 + S25 + S26 + S27 +
+S28 + S31 + S32 + S33 + S34 + S37 + S38 + S39 = n=13 Q1 entries
+only counting basis per Chat preference codified at S31)**
+(framing class working hypothesis CONFIRMED at Step 0 per A9
+Class B revised default discipline; expiration semantics:
+sustained-observation counter continues incrementing at each
+subsequent Q1 entry per A9 Class B revised default operating
+proactively, codification-stable status preserved at n=4 ACTIVE
+counter; n=4 increments only on NEW Class B catch).
+**A9 Class A counter post-S39: n=14 ACTIVE codified at §19.4
+unchanged + candidates n=15 + n=16 codified at §1.7 (c)
+Workstream B empirical-efficacy grounding scope per S36 +
+candidates n=17 (S36 STOP-1.5-revision-scope-misattribution) +
+n=18 (S37 multi-anchor schema-misattribution at trigger drafting)
++ n=19 (S38 Code-side §3 enumeration drift) + n=20 (S39 Code-side
+prior-turn-ratification-acknowledgment gap) banked at S39 commit
+message body forward state pending absorption #6+ codification**
+(expiration semantics: A9 Class A candidate inventory accumulates
+until absorption #6 codification refinement disposition adopts/
+declines each candidate; multi-pattern variant codification
+refinement candidate at n=6+ banked candidates for absorption #6
+adoption per A3 second-observation tightening precedent).
+**§4.7.A pattern n=10 PRESENT + n=1 REMEDIATED = n=11 total
+observation count post-S39 per S30 (G.1) generalized definitional
+scope codification + S36 §4.7.A status dimension extension:**
+S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 + S39
+PRESENT + S34 REMEDIATED = n=11 total observations across
+mechanism variants + status dimension; **§4.7.A pattern count
+tightening + status dimension tightening forward observation at
+absorption #6 per A3 precedent** (distinct tracking surface from
+A9 Class A counter per S30 (G.1) + S36 codifications; §4.7.A
+pattern observations track mechanism variant + status dimension
+accumulation; A9 Class A counter tracks empirical-state-
+assumption failure mode).
+**A9 Class A + Class B discipline maturation SIXTEENTH SUSTAINED
+OBSERVATION REACHED at S39 (S23 + S25 + S26 + S27 + S28 + S29 +
+S30 + S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38 + S39 = n=16
+cross-session trajectory)** per A3 second-observation tightening
+precedent threshold satisfied + EIGHT-timing-point empirical
+surface preserved per S35-absorption #5 codification (no new
+timing point variant at S39; proactive-prevention operation
+SUSTAINED across established timing points (i)-(viii)); promoted
+to §4.5 NEW sub-section at S29-absorption #4 + EXTENDED at S35-
+absorption #5 to eleven-sustained-observation cross-session
+trajectory + EIGHT-timing-point operational surface (NEW (vii) +
+NEW (viii)) per CHAT RATIFICATIONS carried forward; **§4.5
+codification operational at n=9 post-codification sustained
+observations per S39 cross-session trajectory** (S30 + S31 + S32
++ S33 + S34 + S35 + S36 + S37 + S38 + S39 post-codification
+trajectory) per CHAT RATIFICATION #13 reinforcement (codification-
+stable status preserved at sustained post-codification operation).
+**Frequency Domain / Signal block third-entry status framing**
+(analogous to S33 stl_decompose Block 3 third-entry precedent at
+distinct Tier characterization scope per Tier V Pattern J B.3
+alignment-via-metric resolution vs S33 Tier VI SINGLE-LAYER
+deterministic-implementation-difference Sub-class 2g scope; per-
+block continuation pattern n=5 catalog block observation
+candidate at Frequency Domain / Signal block completion per ITEM
+11 forward instrumentation banking; expiration semantics: per-
+block continuation pattern n=5 codification refinement at
+absorption #6+ refinement disposition pending Frequency Domain /
+Signal block completion arc close);
+**Frequency Domain / Signal forward completion arc S37 + S38 +
+S39 + S40 + S41 + S42 + S43 advances at S39 per 7-entry §3
+enumeration empirical re-Read at S39 Step 0 mid-session** (banking
+continuation per ITEM 11 forward instrumentation banking; NOT
+codified at S39; expiration semantics: Block ordering working
+hypothesis testing through S40+ to Block 5 close per A3 precedent
+if empirically sustained heterogeneous Tier-surface across 7-
+entry arc per A3 second-observation tightening precedent threshold
+SATISFIED at S39; each subsequent Frequency Domain / Signal block
+entry trigger drafting per A9 Class B revised default discipline
+operating proactively at respective sub-session); **HETEROGENEOUS
+TIER-SURFACE VARIANT OBSERVATION A3 SECOND-OBSERVATION TIGHTENING
+PRECEDENT THRESHOLD SATISFIED AT S39 forward instrumentation
+banking** (Block Tier-surface composition empirically HETEROGENEOUS
+at sustained n=3 distinct Tiers per A3 precedent threshold
+satisfied: Tier III Pattern A.1 at S37 + Tier II.bit-exact
+Pattern A.2 at S38 + Tier V Pattern J B.3 at S39; codification
+refinement candidate at absorption #6+ for Block heterogeneous-
+Tier-surface variant sub-pattern definitional scope generalization
+per §19.4 §4 note 6 refinement at S35-absorption #5 codification).
+**NEW Sub-class candidate 2l+ projection (subsequent Frequency
+Domain / Signal block entries at S40+) NOT codified at S39** per
+A3 first-instance precedent (codification deferred to absorption
+#6+ second-observation tightening if recurs; expiration semantics:
+NEW Sub-class candidate trajectory observation banks at S39 close
+pending respective sub-session first-instance baseline observation).
+**§1.9 cross-block extension THIRD-OBSERVATION NOT MANIFESTED at
+S39** (lomb_scargle filenames PRESERVE catalog-id at all three
+layers per Code S39 Step 0 empirical re-Read; §1.9 cross-block
+sub-pattern not reinforced at S39; n=4 total observations
+preserved at S37 first-instance baseline; A3 cross-block
+tightening DEFERRED continues pending future Frequency Domain /
+Signal entry §1.9 manifestation OR future cross-block §1.9
+manifestation; expiration semantics: §1.9 second cross-block
+observation banks at S39 close pending S40+ entry filename
+empirical verification).
+**Pattern F structural invariants SECOND-OBSERVATION NOT
+MANIFESTED at S39** (Lomb-Scargle has no roundtrip / Parseval
+analog at structural identity invariant scope; Pattern F NEW
+framing element observation remains at S38 first-instance baseline
+n=1 per A3 first-instance precedent; A3 second-observation
+tightening precedent at Pattern F scope DEFERRED pending future
+FFT-family OR Kalman / state-space wrapper second-observation;
+NEW Sub-class 2j codification deferred; expiration semantics:
+Pattern F observation banks at S39 close pending second-observation
+tightening at respective sub-session OR absorption #6+
+codification refinement disposition).
+**A9 Class A 20th-instance candidate banking at S39 commit
+message body forward state per S39 STOP 2 turn 2 re-surface
+(NEW sub-pattern variant; Code-side prior-turn-ratification-
+acknowledgment gap; alternative interpretation: transmission-
+side artifact; structurally distinct direction from prior n=14-19
+sub-pattern variants):** Code S39 Step 0 STOP 2 surface re-
+presentation at S39 Step 0 turn 2 with identical content to S39
+Step 0 turn 1; Chat had already provided STOP 2 ratifications
+across all anchors A-J at S39 Step 0 turn 1 response; n=20 NEW
+sub-pattern variant distinct from prior A9 Class A failure mode
+candidates n=14-19 per structural-direction distinction (Code-
+side prior-turn acknowledgment scope vs prior content-completeness
+/ multi-anchor / enumeration-drift scopes); A3 first-instance
+precedent n=1 baseline; codification deferred to absorption #6+
+second-observation tightening if recurs at S40+ STOP cycle
+response. **Block ordering working hypothesis testing through
+S40+ per S39 Step 0 third-position verification:** lomb_scargle
+at THIRD-position in 7-entry Block ordering working hypothesis
+arc counting validated S37 + S38 + S39 per preliminary working
+hypothesis from S37 close commit message body forward state
+confirmed at S39 empirical verification; Block ordering working
+hypothesis testing through S40+ Block-internal complexity ordering
+verification across 7-entry arc S37 + S38 + S39 + S40 + S41 +
+S42 + S43 (n=3 Block-ordering observation tightening per A3
+precedent at Frequency Domain / Signal block close if empirically
+confirmed; cross-reference to §19.4 §4 note 13 first-instance
+baseline observation at Block 3 100% confirmed precedent per S31-
+S34 ordering empirical validation; third Block-ordering working
+hypothesis empirical observation at Frequency Domain / Signal
+block close = n=3 Block-ordering observation tightening per A3
+precedent if empirically confirmed).
+
+## §3 Unvalidated catalog techniques (56 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -10911,8 +12390,8 @@ descriptions, summaries).
 ### Forecasting (Classical) (8 unvalidated)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
 
-### Frequency Domain / Signal (5 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; Block Q1-amendment in-progress at 2 of 7 entries Q1-amended)
-`emd_hht`, `lomb_scargle`, `ssa`, `wavelet_coherence_phase_lag`, `wavelet_transform`
+### Frequency Domain / Signal (4 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; lomb_scargle moved to §2.5 per Phase 7+ S39 — THIRD Frequency Domain / Signal block entry; heterogeneous Tier-surface variant observation A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at S39 with n=3 distinct Tiers Tier III Pattern A.1 + Tier II.bit-exact Pattern A.2 + Tier V Pattern J B.3; Block Q1-amendment in-progress at 3 of 7 entries Q1-amended)
+`emd_hht`, `ssa`, `wavelet_coherence_phase_lag`, `wavelet_transform`
 
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
@@ -10935,7 +12414,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 57 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 2 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry; heterogeneous Tier-surface variant observation FIRST-INSTANCE empirical confirmation at Frequency Domain / Signal block (Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S38 per 7-entry §3 enumeration empirical re-Read at S38 Step 0 mid-session; Block ordering working hypothesis second-position verification at S38 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE FIRST APPLICATION empirically validated at S38 Step 0 (0 multi-anchor schema-misattribution divergences vs S37 4 simultaneous divergences); A9 Class A 19th-instance candidate banking at S38 commit message body forward state per Code Step 0 §3 enumeration drift sub-pattern variant NEW failure mode distinct from prior A9 Class A failure modes n=14-18**).
+**Total: 56 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 3 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry; HETEROGENEOUS Tier-surface variant observation A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at S39 with n=3 distinct Tiers (Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S39 per 7-entry §3 enumeration empirical re-Read at S39 Step 0 mid-session; Block ordering working hypothesis third-position verification at S39 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at S39 (n=2 sustained efficacy observations S38 + S39 0-divergence); Sub-class taxonomy growth Block-level observation at Frequency Domain / Signal block (2i at S37 + 2j candidate at S38 forward-instrumentation-note + 2k at S39 = n=3 NEW Sub-class candidates first-instance baseline observations within Block 5 sub-session arc); A9 Class A 20th-instance candidate banking at S39 commit message body forward state per Code-side prior-turn-ratification-acknowledgment gap sub-pattern variant NEW failure mode distinct from prior A9 Class A failure modes n=14-19**).
 
 ## §4 How to use this document
 
