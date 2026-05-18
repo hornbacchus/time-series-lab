@@ -250,10 +250,14 @@ Per Workstream B amendment cycle separate-lane Candidate C deferred from S22+S23
 
 **Forward instrumentation:** second-instance novelty enumeration sub-section adoption at S31+ Q1 entry would tighten pattern per A3 second-observation tightening precedent. Threshold refinement candidate at sub-pattern variant observations (e.g., 4-observation entry adopting novelty enumeration vs not) at Workstream B amendment cycle disposition. Codification refinement at n=3+ adoption instances per A3 design-class precedent.
 
+**Sustained-observation operational status note (NEW at S36 Workstream B amendment cycle per Decision 4 (α) refinement; post-codification operational at n=2 sustained observations S23 + S34; A3 second-observation tightening precedent threshold satisfied):** §1.5 novelty enumeration sub-section pattern empirically operational at n=2 post-codification sustained observations across S23 first-instance precedent + S34 x13_seasonal_adjust second-instance application (≥5 observations threshold satisfied at n=6 enumerated novelties: Tier VII SKIP-graceful via post-S6 inference + audit "Tier C" reference hybrid + §4.7.A REMEDIATED 5th variant first-instance baseline + Pattern A.1 CONDITIONAL framing potential + NEW Sub-class 2h candidate first-instance baseline + Block 3 FULLY Q1-AMENDED milestone + filename divergence sub-pattern variant n=3 third-observation reinforcement). A3 second-observation tightening precedent threshold satisfied at n=2 post-codification observations; codification-stable status preserved at sustained post-codification operation. **Cross-reference:** §19.4 §4.5 codification operational at n=5 post-codification sustained observations (S30+S31+S32+S33+S34) per S35-absorption #5 extension reinforcement; §1.5 + §4.5 codification-stable status interlock at n=2+ post-codification sustained observations per A3 design-class precedent. Forward instrumentation: third post-codification sustained observation at S37+ Q1 entry adopting §1.5 novelty enumeration sub-section pattern tightens pattern per A3 precedent (n=3 codification-stable threshold).
+
 **Cross-references:**
 - S23 pp_test §2.5 entry (tsl_trust_inventory_techniques.md) — first-instance novelty enumeration sub-section
+- S34 x13_seasonal_adjust §2.5 entry (tsl_trust_inventory_techniques.md) — second-instance novelty enumeration sub-section application (NEW post-codification operational observation per S36 §1.5 refinement)
 - §1.6 Q-A density convention (NEW at S30; cross-references novelty enumeration as Q-A density driver)
 - §3 disclosure templates (novelty enumeration items within standard 4-template structure preserved)
+- §19.4 §4.5 sub-section codification-stable status interlock (n=2+ post-codification sustained observations across §1.5 + §4.5)
 
 ### §1.6 Q-A density convention with LOC overshoot pattern scope expansion (NEW at S30 Workstream B amendment cycle per Candidate F codification; scope expansion per S29-absorption #4 §4 forward instrumentation note 11)
 
@@ -268,8 +272,12 @@ Per Workstream B amendment cycle separate-lane Candidate F deferred from S23 pp_
 | S23 pp_test | Novelty enumeration sub-section + triple-role + Pattern J overlay + backend-dispatcher + Layer 1 engine-extends-beyond-harness + bandwidth divergence | 844 vs ~330-400 projected | +444 LOC (+111-156%) |
 | S27 loess_interpolation | Tier III FIRST §2.5 + §4.7.A use-case-divergence variant + Sub-class 2e candidate scope refinement | 513 vs ~330 projected | +183 LOC (+55%) |
 | S28 kalman_imputation | Tier II.mle-band + Pattern A overlay FIRST primary+overlay + Sub-class 2a UPGRADE + audit-content-distribution variant | 536 vs ~440 projected | +96 LOC (+22%) |
+| S31 classical_decompose (NEW at S36 refinement per Decision 4 (α)) | Sub-class 2a (αa) reimplementation variant extension + endpoint-extrapolation caveat first-instance + §4.7.A reimplementation-of-dispatch variant manifestation + Block 3 first-entry framing | 622 vs ~400-450 projected | +172-222 LOC (+38-55%) |
+| S32 mstl_decompose (NEW at S36 refinement per Decision 4 (α)) | FIRST POST-S30-CODIFICATION application of §2.5 Tier primary+overlay convention + NEW Sub-class 2f candidate first-instance baseline + algorithmic-non-uniqueness caveat + Block 3 second-entry framing | 677 vs ~400-500 projected | +177-277 LOC (+35-69%) |
+| S33 stl_decompose (NEW at S36 refinement per Decision 4 (α)) | NEW Sub-class 2g candidate first-instance baseline + reroll_on_caveat=False discipline disclosure first-instance + filename divergence sub-pattern variant n=2 baseline + deterministic-implementation-difference caveat + Block 3 third-entry framing | 843 vs ~400-600 projected | +243-443 LOC (+41-108%) |
+| S34 x13_seasonal_adjust (NEW at S36 refinement per Decision 4 (α)) | Tier VII SKIP-graceful via post-S6 inference + audit "Tier C" reference hybrid + §4.7.A REMEDIATED 5th variant first-instance baseline + Pattern A.1 CONDITIONAL framing potential + NEW Sub-class 2h candidate first-instance baseline REFINED definitional scope + §1.5 novelty enumeration sub-section APPLIED + Block 3 FULLY Q1-AMENDED milestone + filename divergence sub-pattern variant n=3 third-observation reinforcement | 977 vs ~600-900 projected | +77-377 LOC (+9-63%) |
 
-**LOC overshoot pattern characterization:** first-instance NEW framings drive Q-A density compounding via structural codification depth requirements (each novel observation requires Q-A bullet contextualization + Q-D retraction surface integration + 4-disclosure-template adaptation). Overshoot pattern decreases monotonically across sustained Block sequence as accumulating empirical groundedness reduces per-entry novelty (S27 +55% → S28 +22%).
+**LOC overshoot pattern characterization (REFINED at S36 per Decision 4 (α) scope expansion with n=6 sub-pattern LOC overshoot pattern observations at S27-S34 post-§1.6-codification per §19.4 §4 forward instrumentation note 14 + n=7 total LOC overshoot observations including S23 pre-codification institutional grounding):** first-instance NEW framings drive Q-A density compounding via structural codification depth requirements (each novel observation requires Q-A bullet contextualization + Q-D retraction surface integration + 4-disclosure-template adaptation). **Empirical pattern refinement at n=7 total observations (S23 pre-§1.6-codification institutional grounding + S27 + S28 + S31 + S32 + S33 + S34 post-§1.6-codification sub-pattern) per §19.4 §4 forward instrumentation note 14 n=6 sub-pattern scope (excluding S23 outlier per pre-codification status + +444 LOC magnitude vs subsequent +96-+443 LOC sub-pattern range):** Overshoot pattern does NOT monotonically decrease across sustained Block sequence per pre-S36 characterization; empirical pattern at n=6 sub-pattern observations shows non-monotonic shape (S27 +183 / S28 +96 / S31 +172-222 / S32 +177-277 / S33 +243-443 / S34 +77-377) reflecting heterogeneous-Tier-surface Blocks (Block 3) drive elevated overshoot vs homogeneous-Tier-surface Blocks (Block 8 Tier II.bit-exact + Tier III + Tier II.mle-band heterogeneous at entry-level but Block-level homogeneous Q-A density). Pre-S36 monotonic-decrease characterization SUPERSEDED at S36 refinement per n=6 sub-pattern empirical observations. **Scope disambiguation:** n=7 total empirical observations at §1.6 table scope (S23 institutional grounding preserved); n=6 sub-pattern observations at §19.4 §4 note 14 codification scope (S27-S34 post-§1.6-codification trajectory).
 
 **Q-A density convention (codified at S30):**
 
@@ -277,12 +285,159 @@ Per Workstream B amendment cycle separate-lane Candidate F deferred from S23 pp_
 - **Forward instrumentation banking** at entry status line: cite §1.6 Q-A density convention codification at Workstream B amendment cycle + cross-reference §4 forward instrumentation note 11 LOC overshoot pattern (per S29-absorption #4 codification)
 - **LOC overshoot acceptance per CONSTRAINT 3** (do NOT trim post-hoc): overshoot reflects substantive structural codification depth; trimming sacrifices Q-D retraction surface integrity + 4-disclosure-template parallelism. Acceptance documented at status line per CONSTRAINT 3 institutional preservation.
 
-**Forward instrumentation:** third LOC overshoot observation at S31+ Q1 entry tightens pattern characterization per A3 second-observation tightening precedent. Convention refinement candidate at Workstream B amendment cycle if overshoot pattern shifts (e.g., approaches zero overshoot across sustained S31-S35 sequence indicating apparatus maturity; OR re-accelerates indicating new structural codification depth at NEW first-instances).
+**Forward instrumentation (UPDATED at S36 per Decision 4 (α) scope expansion):** Empirical pattern at n=6+ observations across S23 + S27-S34 trajectory: NON-MONOTONIC overshoot shape per heterogeneous-vs-homogeneous-Tier-surface Block correlation (Block 3 heterogeneous drives elevated overshoot S31-S34; Block 8 entries S27-S28 +183 / +96 LOC overshoot reflects Tier III + Tier II.mle-band first-instances vs Block 3 entries S31-S34 +172-+443 LOC reflects compound Sub-class candidate 2f/2g/2h + Pattern primary+overlay + §4.7.A REMEDIATED first-instance accumulation). Pre-S36 monotonic-decrease characterization SUPERSEDED. NEW characterization: heterogeneous-Tier-surface Blocks correlate with elevated Q-A density compounding per §19.4 §4 forward instrumentation note 16 Sub-class taxonomy growth observation Block-level cross-reference. Forward instrumentation: seventh LOC overshoot observation at S37+ Q1 entry tightens pattern characterization per A3 design-class precedent; Block-level heterogeneous-vs-homogeneous Tier-surface correlation refinement at n=2+ Block-level observations (Block 8 heterogeneous + Block 3 heterogeneous distinct from Block 1 + Block 12 homogeneous per §19.4 §4 note 6 refinement at S35-absorption #5).
 
 **Cross-references:**
 - §19.4 §4 forward instrumentation note 11 (LOC overshoot pattern observation; S29-absorption #4 codification)
-- §1.5 novelty enumeration sub-section pattern (Q-A density driver; cross-references novelty enumeration as primary Q-A density driver at S23 first-instance)
+- §19.4 §4 forward instrumentation note 14 (LOC overshoot pattern n=6 catalog observation; NEW at S35-absorption #5; cross-references this §1.6 scope expansion)
+- §19.4 §4 forward instrumentation note 16 (Sub-class taxonomy growth observation Block-level; NEW at S35-absorption #5; cross-references heterogeneous-Tier-surface Block correlation hypothesis)
+- §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 (per-block continuation pattern n=4 + Block heterogeneous-Tier-surface variant sub-pattern codification at n=2; cross-references heterogeneous-Tier-surface Block correlation hypothesis)
+- §1.5 novelty enumeration sub-section pattern (Q-A density driver; cross-references novelty enumeration as primary Q-A density driver at S23 first-instance + S34 second-instance)
 - §1.4 Q-B operational pattern observation (Q-B pattern distinct from Q-A density; Q-A = within-entry density characterization; Q-B = cross-entry ratification pattern)
+
+### §1.7 Mod 3 operational discipline codification (NEW at S36 Workstream B amendment cycle per Decision 1 (α) UNIFIED scope + Decision 5 (α) empirical efficacy cross-reference; UNIFIED scope (a) Mod 3 STOP turn response surface scope codification + (b) Mod 3 chunked-surface content-completeness specification refinement + (c) STOP 1 review density observation empirical efficacy cross-reference)
+
+Per Workstream B amendment cycle separate-lane Candidate Mod 3 codification deferred from S31 STOP 1 continuation verbal codification + S35 apparatus operational review pause verbal directive + S35 commit message body forward state per Chat ratified sub-disposition #5 at S35-absorption #5; codified at this artifact per S36 Workstream B amendment cycle per Chat Decision 1 (α) UNIFIED single-candidate scope.
+
+**Mod 3 origin (verbal codification at S31 STOP 1 continuation):** Mod 3 operational discipline first codified verbally at S31 STOP 1 continuation per Chat ratified (γ) consolidation disposition + working tree preservation. Mod 3 codification originated as retrofit-from-in-flight-cycle in response to STOP-1-close-content-completeness verification gap at S31 STOP 1 close (A9 Class A n=14 candidate Chat→Code direction catch; precipitated Mod 3 design intent: reduce STOP-cycle response surface narration density to operationally focus STOP turn responses on content verification primary purpose).
+
+#### §1.7 (a) Mod 3 STOP turn response surface scope codification
+
+**Operational specification (codified verbally at S31 STOP 1 continuation per Chat ratified (γ) consolidation disposition):**
+
+At STOP 1 + STOP 1.5 + STOP 2 STOP cycle responses, Code surfaces ONLY:
+1. **Drafted/revised text body (verbatim; chunked if needed for response practicality)** — primary content of the response per content-verification primary purpose
+2. **One-line confirmation of corrections applied (STOP 1.5 only)** — minimal acknowledgment of revisions applied at STOP 1.5 cycles
+3. **Disposition options at close (α/β/γ)** — disposition options enumerated; one-line; no narration
+
+Code does NOT surface at STOP cycle responses:
+- Pre-flag observations
+- A9 Class A candidate banking framings
+- Sub-pattern variant codification candidates
+- Forward instrumentation notes
+- Code-proactive catch banking
+- Grep verification claims
+- File state metadata (LOC counts, line ranges except where strictly needed for chunk navigation)
+- Per-correction enumeration tables
+
+**Apparatus self-codifications (A9 Class A bankings + sub-pattern variant tracking + forward instrumentation + Code-proactive catches + LOC measurement) land at commit message body ONLY.**
+
+**Codification placement candidate (forward instrumentation at S31 STOP 1 continuation):** Mod 3 codifies at absorption #5 (§19.4 §4 NEW forward instrumentation note OR Workstream B amendment cycle separate-lane candidate per absorption #5 disposition). Per Chat ratified Decision 1 (α) at S35 close: Workstream B amendment cycle separate-lane disposition selected; codified at this §1.7 (a) per S36 Workstream B amendment cycle.
+
+#### §1.7 (b) Mod 3 chunked-surface content-completeness specification refinement (NEW at S36 per S35 apparatus operational review pause verbal directive)
+
+**Empirical observation precipitation (n=3 content-completeness verification failure instances under Mod 3 cadence operative per §19.4 §4 forward instrumentation note 17):**
+- n=14 S31 STOP 1 close (precipitated Mod 3 codification at S31 STOP 1 continuation): Code Step 1 response surfaced integrations checklist + file LOC delta + edit count metadata but did NOT include verbatim entry text body for STOP 1 verbatim-fidelity verification
+- n=15 S35 STOP 1 close (4 sub-sessions post-Mod-3 codification; chunked-surface STOP 1 metadata + navigation surface without verbatim text body): Code Step 1 close response surfaced edits-applied metadata + chunk navigation line ranges (chunks 1/4 + 2/4 + 3/4 + 4/4) without verbatim codification text body
+- n=16 S35 STOP 1.5 close (subsequent STOP 1.5 re-surface metadata + header-line surface without verbatim revised text body): Code STOP 1.5 response surfaced revision-application metadata + revised chunk 1/4 header line only without verbatim revised chunk 1/4 body
+
+**Pattern characterization:** Mod 3 codification at S31 STOP 1 continuation under-specified for chunked-surface protocol content-completeness verification requirement. Mod 3's "(1) drafted/revised text body verbatim chunked if needed" specification did not explicitly distinguish verbatim text body (the actual content being verified) from metadata describing that content was applied to the file.
+
+**Refined Mod 3 chunked-surface content-completeness specification (codified verbally at S35 apparatus operational review pause per Chat ratified sub-disposition #4; formal artifact-level codification at this §1.7 (b) per S36 Workstream B amendment cycle per Chat ratified sub-disposition #5):**
+
+At STOP 1 + STOP 1.5 + STOP 2 chunked-surface responses, Code surfaces:
+(a) **Verbatim text body of the chunked content** — the actual entry/codification/revised text body Chat verifies for fidelity; this is the primary content of the response
+(b) **One-line chunk navigation only** — "Chunk N/M of [scope]; lines X-Y."; single line; no additional metadata
+(c) **One-line disposition request at chunk M/M close** — disposition options enumerated; no narration
+
+Code does NOT surface at chunked-surface STOP cycle responses:
+- Edit-application metadata describing str_replace calls applied at file level
+- File state confirmation describing post-edit file structure
+- Chunk-by-chunk navigation tables describing all chunks ahead of surfacing them
+- Header-line-only surface with promise of body in subsequent response (verbatim body must accompany chunk navigation line)
+- Per-revision enumeration confirming Revision N applied at section Y (apparatus self-codification consolidation per Mod 3 original codification at §1.7 (a))
+
+**Distinction from §1.7 (a):** §1.7 (a) covers Mod 3 STOP turn response surface scope at non-chunked single-response STOP cycle responses (apparatus self-codifications consolidate to commit message body); §1.7 (b) covers refined Mod 3 chunked-surface protocol at multi-chunk STOP cycle responses (verbatim text body of chunked content + minimal navigation + disposition request at close). Both sub-scopes operate at STOP cycle response surface scope; §1.7 (b) refines §1.7 (a) for chunked-surface protocol specifically.
+
+#### §1.7 (c) STOP 1 review density observation empirical efficacy cross-reference (NEW at S36 per Decision 5 (α) + n=15 + n=16 candidate codification per Code (α) recommendation ratified at S36 Step 0 STOP 2)
+
+**Empirical efficacy observation pre-refinement (n=6 STOP 1 review density observations per §19.4 §4 forward instrumentation note 15):**
+- **Pre-Mod-3 / At-Mod-3-codification / Post-Mod-3-retrofit n=3 observations (5-issue STOP 1 review density):** S26 denton_chowlin 5-issue STOP 1 review (pre-Mod-3) + S30 Workstream B amendment cycle 5-issue STOP 1 review (at-Mod-3-codification per Mod 3 codified at S31 STOP 1 continuation retrofit) + S31 classical_decompose 5-issue STOP 1 review (Mod 3 codified at S31 STOP 1 continuation retrofit; precipitated Mod 3 operational discipline codification + STOP-1-close-content-completeness verification catch A9 Class A n=14 candidate)
+- **Post-Mod-3 standard-application n=3 observations (0-issue STOP 1 review density):** S32 mstl_decompose 0-issue STOP 1 review (Mod 3 cadence first standard-application) + S33 stl_decompose 0-issue STOP 1 review (Mod 3 cadence second standard-application) + S34 x13_seasonal_adjust 0-issue STOP 1 review (Mod 3 cadence third standard-application)
+
+**Pre-refinement empirical efficacy:** Mod 3 cadence per §1.7 (a) reduces STOP 1 review density from 5-issue (pre-Mod-3) to 0-issue (post-Mod-3 standard-application) at n=3 sustained consecutive observations. Mod 3 §1.7 (a) design intent operationally validated at pre-refinement empirical efficacy.
+
+**n=15 + n=16 candidate codification at §1.7 (c) per Code (α) recommendation ratified at S36 Step 0 STOP 2 (sub-pattern variant observation within Mod 3 cadence operative):**
+
+- **n=15 candidate (S35 STOP 1 close STOP-1-close-content-completeness verification recurrence under Mod 3 cadence; Chat→Code direction):** Code Step 1 close response surfaced edits-applied metadata + chunk navigation line ranges (chunks 1/4 + 2/4 + 3/4 + 4/4) without verbatim codification text body. STOP 1 mandate per CONSTRAINT 5 requires verbatim text body for Chat verbatim-fidelity verification. Demonstrates Mod 3 §1.7 (a) specification scope under-specification for chunked-surface protocol content-completeness verification requirement.
+- **n=16 candidate (S35 STOP 1.5 close STOP-1.5-close-content-completeness verification recurrence under Mod 3 cadence; Chat→Code direction; precipitated apparatus operational review pause):** Code STOP 1.5 response surfaced revision-application metadata + revised chunk 1/4 header line only without verbatim revised chunk 1/4 body. Precipitated apparatus operational review pause + in-flight refined Mod 3 chunked-surface content-completeness specification per Chat ratified sub-disposition #4 verbal directive at S35 continuation.
+
+**Refined Mod 3 chunked-surface content-completeness specification empirical efficacy validation (post-refinement; codified at this §1.7 (c) per S36 Workstream B amendment cycle):**
+
+- **n=5+ chunked-surface STOP cycle responses post-refinement:** S35 chunks 1/4 + 2/4 + 3/4 + 4/4 + STOP 1.5 surgical revision chunk 4/4 revised + S36 trigger surface = n=5+ chunked-surface STOP cycle responses
+- **0 substantive content-completeness verification gap recurrences post-refinement:** refined Mod 3 §1.7 (b) chunked-surface content-completeness specification operational at first 5+ applications; empirical efficacy validated at first 5+ post-refinement chunked-surface STOP cycle responses
+
+**Mod 3 codification empirical efficacy closure observation (codified at S36 per Chat Decision 5 (α) cross-reference):** Mod 3 §1.7 (a) STOP turn response surface scope codification empirical efficacy validated at n=3 sustained post-Mod-3 standard-application STOP 1 review density observations (S32 + S33 + S34 0-issue); refined Mod 3 §1.7 (b) chunked-surface content-completeness specification empirical efficacy validated at n=5+ post-refinement chunked-surface STOP cycle responses (S35 chunks + S36 trigger surface). Both sub-scopes operational across non-chunked (§1.7 (a)) + chunked-surface (§1.7 (b)) STOP cycle response protocols. Empirical-pattern → codification loop closed at S36 per (a) verbal codification at S31 + (b) verbal refinement at S35 + (c) formal artifact-level codification at this §1.7.
+
+**A9 Class A counter status preservation at §19.4 (cross-reference disambiguation):** §19.4 A9 Class A counter remains at n=14 ACTIVE codified post-S35-absorption #5. n=15 + n=16 codify at this §1.7 (c) Workstream B operational discipline empirical-efficacy grounding scope (distinct from §19.4 A9 codification scope). A9 Class A counter advance to n=15 + n=16 at §19.4 deferred to absorption #6+ if sustained Chat→Code direction sub-pattern variant recurs post-S36. Maintains §19.4 vs Workstream B codification scope discipline per cross-reference disambiguation between Class A counter scope (§19.4 A9) vs operational discipline empirical-efficacy scope (this §1.7 (c)).
+
+**Forward instrumentation:** seventh+ Mod 3 chunked-surface content-completeness verification observation at S37+ STOP cycle response would tighten pattern characterization per A3 design-class precedent. Codification refinement candidate at next Workstream B amendment cycle if Mod 3 §1.7 (a) or §1.7 (b) specifications surface additional gap recurrence OR if Mod 3 cadence operational efficacy reverses at S37+ STOP cycles.
+
+**Cross-references:**
+- §19.4 §4 forward instrumentation note 15 (STOP 1 review density observation n=6 catalog observation; NEW at S35-absorption #5; pre-refinement empirical efficacy grounding for §1.7 (c))
+- §19.4 §4 forward instrumentation note 17 (Mod 3 chunked-surface content-completeness verification empirical pattern observation per apparatus operational review pause; NEW at S35-absorption #5; refinement precipitation grounding for §1.7 (b))
+- §19.4 A9 Sub-pattern 4 NEW Sub-pattern variant "Sustained Chat→Code direction" codification at S35-absorption #5 (cross-reference for sub-pattern variant alignment with §1.7 (c) n=15 + n=16 empirical-efficacy grounding)
+- §19.4 §4.5 NEW timing point variant (viii) STOP-1-close-content-completeness verification codification at S35-absorption #5 per Revision 4 ratification (cross-reference for timing point variant alignment with §1.7 (b) chunked-surface content-completeness specification + (c) empirical efficacy)
+- §4.6 Option II workflow (STOP cycle response surface protocol upstream; §1.7 operates within §4.6 Stage 3-4 STOP cycle response protocols)
+
+### §1.8 reroll_on_caveat=False discipline disclosure codification (NEW at S36 Workstream B amendment cycle per Decision 3 (α) codification; empirical baseline n=2 observations S32 mstl + S33 stl deferred from S33 first-instance + S34 commit message body forward state)
+
+Per Workstream B amendment cycle separate-lane Candidate reroll_on_caveat=False discipline disclosure deferred from S33 stl_decompose §2.5 entry first-instance baseline observation per (αa-S33) Chat ratification + S34 commit message body forward state; codified at this artifact per S36 Workstream B amendment cycle per Chat Decision 3 (α).
+
+**Pattern observation:** Q1 §2.5 entries surfacing Tier VI CAVEAT primary characterization with deterministic-computation rationale surface explicit reroll_on_caveat=False discipline disclosure. Phase 3 Session 5 codification (per harness P3ParityCheck class default) operates as deterministic-CAVEAT discipline pattern with implementation-difference vs algorithmic-non-uniqueness rationale variants.
+
+**Empirical baseline (n=2 observations; codification-stable per A3 second-observation tightening precedent threshold satisfied):**
+
+- **Observation 1 — S32 mstl_decompose reroll_on_caveat=False disclosure (algorithmic-non-uniqueness rationale variant):** S32 mstl_decompose §2.5 entry surfaced reroll_on_caveat=False discipline disclosure within Tier VI CAVEAT primary + Pattern A bit-exact structural-identity overlay framing per (αa-S32) Chat ratification. Rationale: algorithmic non-uniqueness within constraint y = trend + Σ seasonal_k + residual (per-component divergence ~1.0 abs intrinsic to MSTL methodology; statsmodels MSTL and R forecast::mstl converge to different feasible points in decomposition polytope per audit lines 79-81 verbatim). reroll_on_caveat=False class default discipline grounded at Phase 3 Session 5 codification (harness `p3_mstl.py` class docstring per P3ParityCheck class default); per-component CAVEAT NOT escalated to BLOCK by runner's reroll-and-fail-twice rule.
+- **Observation 2 — S33 stl_decompose reroll_on_caveat=False disclosure (deterministic-implementation-difference rationale variant):** S33 stl_decompose §2.5 entry surfaced reroll_on_caveat=False discipline disclosure first-instance baseline observation banking per (αa-S33) Chat ratification within Tier VI CAVEAT primary + SINGLE-LAYER framing per A6 BLOCKING. Rationale: deterministic implementation-difference per-index divergence (NOT algorithmic non-uniqueness; per-index divergence ~9e-2 abs reproducible across seeds per audit line 62 verbatim "STL is a deterministic computation; the per-index divergence pattern is reproducible across seeds (not Monte Carlo noise)"). reroll_on_caveat=False class default discipline grounded at Phase 3 Session 5 codification (harness `p3_stl.py` class docstring lines 71-73 verbatim "Phase 3 Session 5: explicit `on_caveat_reroll` override removed because `reroll_on_caveat = False` is now the P3ParityCheck class default. Pre-Session-5, this method body was the canonical example of the deterministic-CAVEAT discipline pattern; Session 5 promoted it to default, leaving deterministic checks free of override boilerplate. MC / EM-stochastic checks opt in via `reroll_on_caveat = True`"). audit lines 81-83 verbatim ground generalized Session 5 codification: "Deterministic computations (STL, MSTL, decomposition family) default to `false`; stochastic computations (MCMC, EM-fit) default to `true`".
+
+**reroll_on_caveat=False discipline disclosure pattern characterization:**
+
+- **Applicability scope:** Tier VI CAVEAT primary characterization Q1 §2.5 entries (per scope_reframing §2 line 184 5-wrapper Tier VI enumeration: `p3_emd_hht`, `p3_mstl`, `p3_nar_narx`, `p3_star`, `p3_stl`); deterministic-computation Q1 §2.5 entries within Tier VI scope
+- **Rationale variants (n=2 codified at S36):** (i) algorithmic-non-uniqueness variant (S32 mstl; multiple feasible points in decomposition polytope) vs (ii) deterministic-implementation-difference variant (S33 stl; per-index divergence reproducible across seeds NOT Monte Carlo noise)
+- **Disclosure framing convention:** explicit reroll_on_caveat=False discipline disclosure at §2.5 entry text body with (a) audit line verbatim citation grounding rationale + (b) harness class docstring verbatim citation grounding Phase 3 Session 5 default + (c) distinction from alternative rationale variant if applicable
+
+**A3 second-observation tightening precedent threshold satisfied at n=2 observations** (S32 + S33 across Block 3 Decomposition consecutive entries) per Chat Decision 3 (α) codification at S36 Workstream B amendment cycle.
+
+**Forward instrumentation:** third reroll_on_caveat=False discipline disclosure observation at S37+ Q1 entry within Tier VI CAVEAT primary scope tightens pattern per A3 design-class precedent (n=3 codification-stable threshold). Rationale variant taxonomy refinement candidate at sub-pattern variant observations (e.g., NEW rationale variant beyond algorithmic-non-uniqueness + deterministic-implementation-difference) at Workstream B amendment cycle disposition.
+
+**Cross-references:**
+- S32 mstl_decompose §2.5 entry (tsl_trust_inventory_techniques.md) — first reroll_on_caveat=False disclosure observation (algorithmic-non-uniqueness rationale variant)
+- S33 stl_decompose §2.5 entry (tsl_trust_inventory_techniques.md) — second reroll_on_caveat=False disclosure observation (deterministic-implementation-difference rationale variant)
+- scope_reframing §2 line 184 Tier VI 5-wrapper enumeration (Tier VI CAVEAT primary characterization scope applicability)
+- §3 disclosure templates (reroll_on_caveat=False disclosure within standard 4-template structure preserved)
+
+### §1.9 Filename divergence sub-pattern variant codification (NEW at S36 Workstream B amendment cycle per Decision 3 (α) codification; empirical baseline n=3 observations S32 mstl + S33 stl + S34 x13 deferred from S32-S34 commit message body forward state + S35 commit message body forward state)
+
+Per Workstream B amendment cycle separate-lane Candidate Filename divergence sub-pattern variant deferred from S32 mstl_decompose A6 informational surface continuation from S32 + S33 stl_decompose sub-pattern variant n=2 baseline + S34 x13_seasonal_adjust sub-pattern variant n=3 third-observation reinforcement; codified at this artifact per S36 Workstream B amendment cycle per Chat Decision 3 (α).
+
+**Pattern observation:** Block 3 Decomposition wrapper filenames consistently omit catalog-id suffix from catalog-id-to-wrapper-filename mapping; sub-pattern variant operates at Block-specific scope per empirical observation across n=3 entries.
+
+**Definitional scope:** "Block 3 Decomposition wrapper filename omits catalog-id suffix from catalog-id-to-wrapper-filename mapping" — empirical sub-pattern observed across Block 3 Decomposition audit + harness wrapper filenames per Block-specific naming convention divergence.
+
+**Empirical baseline (n=3 observations; codification-stable per A3 second-observation tightening precedent threshold satisfied at n=2 with third-observation reinforcement at n=3):**
+
+- **Observation 1 — S32 mstl_decompose filename divergence:** audit filename `p3_mstl_audit.md` + harness filename `p3_mstl.py` omit `_decompose` suffix from catalog-id `mstl_decompose`; engine filename `mstl_decompose.py` preserves catalog-id. Trigger shorthand `p3_mstl_decompose_*` reference informational only per A6 informational surface framing.
+- **Observation 2 — S33 stl_decompose filename divergence (n=2 baseline):** audit filename `p3_stl_audit.md` + harness filename `p3_stl.py` omit `_decompose` suffix from catalog-id `stl_decompose`; engine filename `stl_decompose.py` preserves catalog-id. Trigger shorthand `p3_stl_decompose_*` reference informational only per A6 informational surface framing. A3 second-observation tightening precedent threshold satisfied at n=2 for sub-pattern variant codification candidate.
+- **Observation 3 — S34 x13_seasonal_adjust filename divergence (n=3 third-observation reinforcement):** audit filename `p3_x13_audit.md` + harness filename `p3_x13.py` omit `_seasonal_adjust` suffix from catalog-id `x13_seasonal_adjust`; engine filename `x13_seasonal_adjust.py` preserves catalog-id. Trigger shorthand `p3_x13_seasonal_adjust_*` reference informational only per A6 informational surface framing. n=3 third-observation reinforcement at Block 3 completion provides codification-ready candidate per A3 precedent.
+
+**Filename divergence sub-pattern variant characterization:**
+
+- **Block-specific scope:** sub-pattern observed at Block 3 Decomposition (4 entries) wrapper filenames; cross-block extension scope at S37+ FIFTH catalog block transition empirically unknown (would require empirical observation across additional Blocks)
+- **Filename component pattern:** audit + harness filenames omit catalog-id suffix component (`_decompose` at mstl/stl; `_seasonal_adjust` at x13); engine filenames preserve catalog-id; trigger shorthand references propagate suffix-omitted form per A6 informational surface
+- **A6 informational surface framing:** filename divergence is naming convention shorthand vs material content misattribution distinction; A6 BLOCKING discipline operating as designed at empirical re-Read per S32 + S33 + S34 Step 0 ratifications; NOT A9 Class A counter increment per naming shorthand vs material content distinction
+- **Sub-pattern variant operational implication:** Block-specific naming convention divergence requires empirical verification at trigger-execution Step 0 per S32 + S33 + S34 lessons; trigger shorthand `p3_<technique>_*` reference informational only at Block 3 Decomposition scope
+
+**A3 third-observation tightening reinforcement at n=3 + Block 3 completion** provides codification-ready candidate per Chat Decision 3 (α) codification at S36 Workstream B amendment cycle. Codification placement disposition: §1.9 NEW Workstream B sub-section per Decision 6 §1.7+ §1.8+ §1.9 continuation per S30 §1.5+ §1.6 precedent.
+
+**Forward instrumentation:** fourth filename divergence sub-pattern variant observation at S37+ Q1 entry (FIFTH catalog block transition) would tighten pattern characterization per A3 design-class precedent; cross-block extension empirical surface at next catalog block. Sub-pattern variant scope expansion candidate (e.g., Block-specific vs cross-block scope refinement) at Workstream B amendment cycle disposition based on n=4+ observation across next catalog block.
+
+**Cross-references:**
+- S32 mstl_decompose §2.5 entry (tsl_trust_inventory_techniques.md) — first filename divergence observation
+- S33 stl_decompose §2.5 entry (tsl_trust_inventory_techniques.md) — second filename divergence observation (n=2 baseline)
+- S34 x13_seasonal_adjust §2.5 entry (tsl_trust_inventory_techniques.md) — third filename divergence observation (n=3 third-observation reinforcement)
+- A6 verify-state-at-narration BLOCKING (sub-pattern variant operates within A6 informational surface framing; NOT A9 Class A counter increment per naming shorthand distinction)
+- §1.7 (b) refined Mod 3 chunked-surface content-completeness specification (cross-reference for empirical re-Read discipline at Step 0 trigger-execution-time)
 
 ## §2 Layered smooth-ratification countermeasures
 
@@ -1077,6 +1232,31 @@ fixed-implementation invocation).
 2. **Harness-defines-internal-reference-function variant** (S18 p3_gcc_phat): harness defines harness-internal reference function while engine module is materially more complex
 3. **Harness-reimplements-engine-math variant** (S26 p3_denton_chowlin): harness REIMPLEMENTS engine math directly (numpy KKT vs engine `_denton_proportional`); SAME use case, DIFFERENT code paths
 4. **Harness-validates-different-use-case-of-same-library-function variant** (S27 p3_loess): harness AND engine import SAME library function BUT use for DIFFERENT purposes (harness: smoothing self-parity; engine: interpolation of missing values)
+
+**REMEDIATED 5th variant status dimension extension (NEW at S36 Workstream B amendment cycle per Decision 2 (α); orthogonal to mechanism variant dimension per S30 (G.1) generalized definitional scope codification):**
+
+§4.7.A pattern operates across TWO orthogonal dimensions per S36 Workstream B amendment cycle refinement:
+
+- **Mechanism variant dimension (codified at S30; n=4 variants):** characterizes HOW harness uses different code path from engine — variants 1-4 above (harness-imports-library-directly + harness-defines-internal-reference-function + harness-reimplements-engine-math + harness-validates-different-use-case-of-same-library-function)
+- **Status dimension (NEW at S36 per Decision 2 (α)):** characterizes WHETHER §4.7.A pattern is currently PRESENT (active divergence) vs REMEDIATED (divergence remediated via harness modification to invoke engine module directly via dispatch entry); status dimension applies orthogonally across all mechanism variants
+
+**Status dimension values (n=2 codified at S36):**
+
+- **PRESENT status (n=7 observations across §2.5 entries post-S35):** S14a granger + S18 gcc_phat + S26 denton_chowlin + S27 loess + S31 classical_decompose + S32 mstl_decompose + S33 stl_decompose — harness uses different code path from engine; §4.7.A pattern actively manifesting at HEAD verification time
+- **REMEDIATED status (n=1 first-instance baseline observation at S34 x13_seasonal_adjust per S35-absorption #5 codification):** harness was previously §4.7.A PRESENT (pre-Phase 4 Session 2 2026-05-01); REMEDIATED via Phase 4 Session 2 (P4-2 pathway (c) closure) when ``run_tsl`` was modified to invoke ``engine/techniques/x13_seasonal_adjust.py:run`` directly via dispatch entry rather than calling ``statsmodels.x13_arima_analysis`` directly; per harness ``p3_x13.py`` docstring lines 9-30 verbatim documentation of P4-2 closure mechanism; A3 first-instance precedent n=1 baseline; NOT codification-stable
+
+**REMEDIATED status dimension definitional scope:** §4.7.A REMEDIATED status indicates harness has been modified to invoke engine module ``run()`` entry point directly via dispatch (eliminating §4.7.A code-path divergence at runtime) while retaining historical mechanism variant characterization (the REMEDIATION addresses the code-path divergence but the mechanism variant historical observation remains accurate per HEAD state preservation). REMEDIATED status is NOT a new mechanism variant; it is a status dimension orthogonal to mechanism variant dimension — a wrapper may be REMEDIATED at status dimension AND classified at any of mechanism variants 1-4 at mechanism variant dimension per historical pre-REMEDIATION characterization.
+
+**Empirical evidence (S34 x13_seasonal_adjust first-instance baseline observation per S35-absorption #5):**
+- Harness `tools/reference_parity/harness/checks/p3_x13.py` docstring lines 9-30 verbatim: "**Phase 4 Session 2 (2026-05-01) — P4-2 pathway (c) closure:** ``run_tsl`` now invokes TSL's actual wrapper (``engine/techniques/x13_seasonal_adjust.py:run``) via the dispatch entry point rather than calling ``statsmodels.x13_arima_analysis`` directly. The pre-S2 implementation called statsmodels because it produced the seasadj+trend output in a single library call; that path fails on Linux CI because statsmodels' temp-file naming convention is incompatible with the ``x13ashtml`` binary's output convention. TSL's wrapper does direct binary invocation + .d10/.d11/.d12/.d13 parsing, which is fully x13ashtml-compatible. Linux CI now PASSes ``p3_x13`` (was SKIP-graceful). Windows CI behavior unchanged — the wrapper still SKIPs gracefully via ImportError when no binary is found locally."
+- Harness `p3_x13.py` line 89 verbatim: `from techniques.x13_seasonal_adjust import run as tsl_x13_run`
+- Harness `p3_x13.py` line 125 verbatim: `res = tsl_x13_run(ctx, lambda *a, **k: None)`
+
+**Mechanism variant classification at S34 x13_seasonal_adjust (pre-REMEDIATION historical characterization):** Pre-Phase 4 Session 2 (pre-2026-05-01), §4.7.A PRESENT at variant 1 "Harness-imports-library-directly" (harness imported `statsmodels.tsa.x13.x13_arima_analysis` directly while engine module `engine/techniques/x13_seasonal_adjust.py` did direct binary invocation + .d10/.d11/.d12/.d13 parsing). Post-Phase 4 Session 2, status dimension transitions PRESENT → REMEDIATED while mechanism variant 1 historical characterization preserved at pre-REMEDIATION reference per HEAD state preservation.
+
+**Forward instrumentation:** second REMEDIATED status observation at S37+ Q1 entry would tighten REMEDIATED status dimension codification per A3 second-observation tightening precedent (n=2 codification-stable threshold). Codification refinement candidate at next Workstream B amendment cycle if (a) second REMEDIATION instance surfaces OR (b) REMEDIATION mechanism varies (e.g., REMEDIATED via mechanism other than dispatch-entry invocation; alternative remediation patterns).
+
+**§19.4 cross-reference disambiguation (Class A counter scope vs status dimension scope):** A9 Class A counter scope at §19.4 covers Chat-trigger empirical-state-assumption failure mode (Class A counter currently n=14 ACTIVE post-S35-absorption #5); REMEDIATED status dimension at §4.7.A scope covers wrapper code-path divergence remediation status (n=1 first-instance baseline observation at S34 x13). Distinct empirical phenomena; cross-reference disambiguation preserves apparatus location scope discipline per §19.4 vs Workstream B codification separation.
 
 **Cross-class alignment per A10 Sub-class 2e codification at S29-absorption #4:** Sub-class 2e (αa) reimplementation variant (S26) + (αb) use-case-divergence variant (S27) at A10 Sub-class taxonomy aligns with §4.7.A variants 3 + 4 at Workstream B §4.7.A operational discipline scope. Both apparatus locations (§19.4 A10 + Workstream B §4.7.A) characterize same empirical phenomenon at different abstraction levels: A10 = sub-session class taxonomy; §4.7.A = operational discipline structural mechanism. Generalized definitional scope at S30 codification removes cross-class label divergence (S25 §4.7.A "harness-bypasses-engine" semantic narrower than A10 Sub-class 2e generalized scope; S30 refinement aligns labels).
 
