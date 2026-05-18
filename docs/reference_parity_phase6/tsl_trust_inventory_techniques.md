@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 17 catalog techniques with Phase 7+ Q1 trust documentation
+- 18 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37 amendments)
-- 58 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38 amendments)
+- 57 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -9590,7 +9590,1293 @@ working hypothesis empirical observation at Frequency Domain /
 Signal block close = n=2 Block-ordering observation tightening
 per A3 precedent if empirically confirmed.
 
-## §3 Unvalidated catalog techniques (58 entries; ID-only enumeration)
+### fft_spectrum (Phase 7+ S38; EIGHTEENTH §2.5 entry; SECOND Frequency Domain / Signal block entry — FIFTH catalog block transition advances 1→2 of 7 entries Q1-amended per Q1 work program scope; FIRST Tier II.bit-exact (Pattern A.2 cross-package) §2.5 entry within Frequency Domain / Signal block; Sub-class 2a (αa) anchor + Pattern F structural invariants forward instrumentation note FIRST-INSTANCE baseline observation per A3 first-instance precedent (n=1 baseline, NOT codification of Sub-class 2j); §1.9 Filename divergence sub-pattern variant SECOND-OBSERVATION cross-block extension NOT MANIFESTED — fft_spectrum filenames PRESERVE catalog-id at all three layers per Code S38 Step 0 empirical re-Read; A3 cross-block tightening DEFERRED pending future Frequency Domain / Signal entry §1.9 manifestation; ALL-ANCHOR-DEFERRAL DISCIPLINE FIRST APPLICATION empirically validated at S38 Step 0 (0 multi-anchor schema-misattribution divergences vs S37 4 simultaneous divergences); A9 Class A 19th-instance candidate banking at S38 commit message body forward state per Code Step 0 §3 enumeration drift sub-pattern variant NEW failure mode distinct from prior A9 Class A failure modes n=14-18; SINGLE-LAYER + §4.7.A PRESENT variant 1 Harness-imports-library-directly mechanism manifestation per S38 STOP 2 empirical investigation + α + (αc) dispositions under Tier II.bit-exact + cross-package framing; analogous to S32 mstl_decompose Block 3 second-entry precedent at different Tier characterization scope per Tier II.bit-exact Pattern A.2 cross-package vs S32 Tier VI LAYERED algorithmic-non-uniqueness sub-class 2f scope)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.2 cross-package) sub-class** per S38 (α)
+Chat disposition. **Tier II.bit-exact characterization directly
+grounded** at `scope_reframing_s6_banking.md` §2 line 130 verbatim
+("p3_fft_spectrum, p3_granger, p3_kpss, p3_pca") — p3_fft_spectrum
+EXPLICITLY within Tier II.bit-exact 12-wrapper enumeration scope +
+audit `p3_fft_spectrum_audit.md` line 5 verbatim ("**Verdict:**
+**PASS** (Pattern A bit-exact, machine precision)") + audit lines
+24-28 verbatim ("scipy.fft and numpy.fft both wrap pocketfft (since
+numpy 1.17) with different wrapper code paths but identical
+computational core") + harness `p3_fft_spectrum.py` lines 3-9
+verbatim ("Cross-package check: scipy.fft and numpy.fft have
+independent codebases (scipy uses pocketfft; numpy uses pocketfft
+as well since 1.17 but with different wrapper code paths). Both
+should produce bit-exact identical output for real-valued input;
+Pattern A target."). **NOT Tier III Pattern A.1** per S37 same-
+library framing — fft_spectrum is cross-package (scipy.fft vs
+numpy.fft) NOT same-library self-test; despite shared pocketfft
+backbone, package-boundary criterion governs A.1 vs A.2
+disambiguation per S30 Pattern A taxonomy lock. **NOT Tier
+II.mle-band** — fft is closed-form deterministic computation, not
+MLE-fit numerical iteration. **NOT Tier IV** self-parity — reference
+is external numpy package, not internal harness reimplementation.
+**ALL-ANCHOR-DEFERRAL DISCIPLINE FIRST APPLICATION** operative at
+S38 Step 0 — Tier anchor DEFERRED to Code Step 0 empirical
+verification per Chat S38 trigger drafting all-anchor-deferral
+discipline first application per institutional learning from S37
+multi-anchor schema-misattribution catch n=18; Tier II.bit-exact
+empirically confirmed at Step 0 with 0 multi-anchor divergences
+(vs S37 4 simultaneous divergences). STOP 2 BLOCKING discharged on
+Tier anchor per Chat S38 STOP 2 (α) RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER + §4.7.A
+PRESENT variant 1 Harness-imports-library-directly mechanism per
+CHAT RATIFICATION at Step 0 STOP 2; Sub-class 2a (αa) anchor
+post-codification n=5 observation per S38 (αc) ratification + Pattern
+F NEW framing element FIRST-INSTANCE baseline observation per A3
+first-instance precedent (n=1 baseline; NOT codification of Sub-
+class 2j)):** fft_spectrum is 1:1 catalog↔wrapper mapping per
+`p3_fft_spectrum_audit.md` audit Wrapper field
+(`engine/techniques/fft_spectrum.py` sole engine module).
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S38
+n=9 PRESENT + n=1 REMEDIATED = n=10 total OBSERVATIONS per S38
+banking per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A REMEDIATED 5th variant status dimension extension
+orthogonal to mechanism variant dimension — §4.7.A pattern count
+tightening forward observation; banking only, NOT §4.7.A taxonomy
+modification at S38; NOT A9 Class A counter increment per S30
+(G.1) codification distinction):**
+`tools/reference_parity/harness/checks/p3_fft_spectrum.py` line 69
+imports `scipy.fft.fft` + `scipy.fft.ifft` directly (`from
+scipy.fft import fft as scipy_fft, ifft as scipy_ifft`) and invokes
+the library function at line 73 (`Y = scipy_fft(signal)`) with
+mean-detrended signal at line 72 (`signal = y - np.mean(y)`) —
+harness does NOT invoke `fft_spectrum.py::run()` engine entry
+point. `engine/techniques/fft_spectrum.py` line 10 imports the
+SAME `scipy.fft` primitives (`from scipy.fft import fft, fftfreq`)
+and invokes them at line 147 (`yf = fft(windowed)`) within engine
+`run()` orchestration with preset-dispatched arguments (Balanced
+default: detrend='mean', window='none'). Harness TSL arm + engine
+use SAME underlying library primitive (scipy.fft.fft); harness
+BYPASSES engine `run()` wrapper. §4.7.A variant 1 "Harness-imports-
+library-directly" manifestation per S30 (G.1) generalized
+definitional scope. **§4.7.A status PRESENT per S36 §4.7.A status
+dimension codification (NOT REMEDIATED)** — harness invokes scipy
+primitive directly; engine wraps + invokes same primitive within
+orchestration; code-path divergence active at runtime per HEAD
+verification. **Cross-package framing distinction from S37
+periodogram_spectral_density:** S37 reference arm invoked SAME
+scipy.signal.periodogram primitive as harness TSL arm + engine
+(same-library self-test); S38 reference arm invokes
+`np.fft.fft(signal)` at harness line 92 — DIFFERENT package
+(numpy.fft) from harness TSL arm + engine scipy.fft import.
+Cross-package character: scipy.fft and numpy.fft both wrap
+pocketfft (since numpy 1.17) with different wrapper code paths
+but identical computational core (audit lines 24-28 verbatim);
+yields machine-precision agreement (fft_real 2.84e-14 abs /
+fft_imag 1.55e-14 abs / fft_abs 2.84e-14 abs per audit lines
+13-15 verbatim) but NOT same-library self-test (distinct package
+boundaries, distinct import surfaces). Post-S38 §4.7.A observations
+= n=9 PRESENT across §2.5 entries (S14a granger + S18 gcc_phat +
+S26 denton_chowlin + S27 loess + S31 classical_decompose + S32
+mstl_decompose + S33 stl_decompose + S37 periodogram_spectral_density
++ S38 fft_spectrum) + n=1 REMEDIATED (S34 x13_seasonal_adjust per
+Phase 4 Session 2 2026-05-01 P4-2 pathway (c) closure) = n=10
+total observations across mechanism variants + status dimension;
+**§4.7.A pattern count tightening forward observation at absorption
+#6 per A3 precedent** (NOT A9 Class A counter increment per S30
+(G.1) generalized definitional scope codification — §4.7.A pattern
+observations track mechanism variant + status dimension
+accumulation distinct from A9 Class A empirical-state-assumption
+failure mode tracking).
+
+**A10 Sub-class disposition: Sub-class 2a (αa) anchor per (αc)
+Chat ratification + Pattern F NEW framing element forward
+instrumentation note FIRST-INSTANCE baseline observation per A3
+first-instance precedent (n=1 baseline; NOT codification of Sub-
+class 2j candidate):** S38 fft_spectrum anchors at Sub-class 2a
+(αa) general two-layer reimplementation at Tier II.bit-exact
+cross-package scope per (αc) ratification. **Sub-class 2a (αa)
+post-codification observation count: n=5 post-codification
+observations (S22 kpss + S23 pp + S28 kalman_imputation + S31
+classical_decompose + S38 fft_spectrum; S37 periodogram_spectral_density
+NEW Sub-class 2i candidate at distinct definitional scope NOT
+incremented at Sub-class 2a (αa) counter).** Cross-package
+two-layer structure: Layer 1 scipy.fft.fft / numpy.fft.fft FFT
+primitive invoked by harness TSL arm scipy + harness reference
+arm numpy + engine scipy (cross-package self-test verifies
+identical computational core agreement per pocketfft shared
+backbone) + Layer 2 engine orchestration adds detrend allowlist
++ window allowlist + window function application + one-sided
+spectrum + normalization + min_period filtering + peak detection
++ period interpretation additional computation NOT exercised by
+audit. Audit machine-precision agreement (fft_real 2.84e-14 abs /
+fft_imag 1.55e-14 abs / fft_abs 2.84e-14 abs per audit lines
+13-15 verbatim) guaranteed at pocketfft-shared-backbone scope;
+audit verifies wrapper preprocessing + parameter resolution +
+cross-package primitive agreement at mean-detrended raw FFT output
+NOT engine standalone orchestration correctness, NOT detrend +
+window allowlist correctness, NOT one-sided spectrum normalization
+correctness, NOT peak detection correctness, NOT period
+interpretation correctness. Distinct from codified Sub-class 2a
+(αa) prior application scopes (S22 + S23 + S28 + S31) at engine
+Layer 2 orchestration specifics; SHARED Tier II.bit-exact + cross-
+package + two-layer structure preserves Sub-class 2a (αa)
+definitional scope.
+
+**Pattern F structural invariants NEW framing element FIRST-
+INSTANCE baseline observation per A3 first-instance precedent
+(n=1 baseline; NOT codification of Sub-class 2j; forward
+instrumentation note candidate per (αc) ratification):** S38
+fft_spectrum surfaces FIRST appearance in S12-S38 audit cycle of
+**structural invariant** computation as adjunct to numerical
+parity check. Harness `p3_fft_spectrum.py` lines 74-79 + 100-135
+implement two structural invariants computed in-line within
+`run_tsl` + `compare`: **(F.1) fft_roundtrip invariant:**
+`ifft(fft(x)) ≈ x` to machine precision; harness lines 75-76
+compute `roundtrip = scipy_ifft(Y)` + `roundtrip_max_abs =
+float(np.max(np.abs(roundtrip.real - signal)))`; audit reports
+PASS at 6.66e-16 max_abs_diff per audit line 21 verbatim;
+verifies structural identity invariant independent of cross-
+package agreement. **(F.2) fft_energy_conservation invariant
+(Parseval's theorem):** `sum(|x|²) = sum(|X|²)/N` to bit-exact;
+harness lines 77-79 compute `energy_time = float(np.sum(signal ** 2))`
++ `energy_freq = float(np.sum(np.abs(Y) ** 2) / len(signal))`;
+audit reports PASS at 0.0 exact per audit line 22 verbatim;
+verifies energy conservation invariant. **Pattern F framing
+significance:** Prior Sub-classes 2a-2i validate numerical
+agreement between TSL-arm and reference-arm; Pattern F validates
+**mathematical-identity preservation** independently of cross-
+implementation agreement. **A3 first-instance precedent n=1
+baseline observation status** (Previous Chat 1.2 operational
+pattern: first-instance n=1 = baseline observation only;
+codification of NEW Sub-class 2j candidate at Pattern F structural
+invariants + Tier II.bit-exact + §4.7.A combined scope DEFERRED to
+absorption #6+ second-observation tightening if recurs at S39+
+FFT-family wrapper (NOT in §3 catalog per S37 Step 0 empirical re-
+Read; potential Kalman / state-space wrapper second-observation
+candidates within future Q1 entries; Pattern F invariants pertain
+to wrappers with mathematical identity / conservation law
+applicable structure). Forward instrumentation banking observation
+at S38 commit message body forward state per (αc) ratification;
+Pattern F observation expiration semantics: forward instrumentation
+note banks at S38 close pending second-observation tightening at
+respective sub-session OR absorption #6+ codification refinement
+disposition.
+
+**§1.9 Filename divergence sub-pattern variant SECOND-OBSERVATION
+cross-block extension NOT MANIFESTED per Code S38 Step 0 empirical
+re-Read:** audit `p3_fft_spectrum_audit.md` + harness
+`p3_fft_spectrum.py` + engine `fft_spectrum.py` ALL preserve
+catalog-id `fft_spectrum` at all three layers; NO suffix omission
+NOR catalog-id divergence. §1.9 codified Block-3-specific scope at
+S36 EXTENDS to Frequency Domain / Signal block at S37 first-
+instance cross-block observation (periodogram audit + harness omit
+`_spectral_density` suffix from catalog-id `periodogram_spectral_density`);
+S38 SECOND-OBSERVATION cross-block extension NOT MANIFESTED — n=4
+total observations preserved at S37 first-instance baseline (Block
+3 mstl + stl + x13 + Frequency Domain / Signal periodogram); A3
+cross-block tightening DEFERRED pending future Frequency Domain /
+Signal entry §1.9 manifestation OR future cross-block §1.9
+manifestation. Forward instrumentation: §1.9 second cross-block
+observation banking at S38 close pending S39+ Frequency Domain /
+Signal block entry OR future Q1 entry filename empirical
+verification.
+
+**Code Tier 2 case-against options surfaced at S38 STOP 2 per Mark
+3 unprompted-discipline (rejected per Chat ratification at S38
+STOP 2):**
+- **(α-i) Tier III Pattern A.1 same-library self-test
+  ALTERNATIVE:** REJECTED. scipy.fft and numpy.fft are distinct
+  packages despite shared pocketfft backbone; package-boundary
+  criterion governs A.1 vs A.2 disambiguation per S30 Pattern A
+  taxonomy lock. scope_reframing §2 line 130 explicit enumeration
+  of p3_fft_spectrum within Tier II.bit-exact 12-wrapper
+  enumeration scope provides empirical grounding; rejected per A6
+  BLOCKING empirical content preservation.
+- **(α-ii) Tier II.mle-band ALTERNATIVE:** REJECTED. fft is
+  closed-form deterministic computation, not MLE-fit numerical
+  iteration; harness verdict_class = "closed_form" per line 53
+  verbatim; rejected per A6 BLOCKING empirical content preservation.
+- **(α-iii) Tier IV self-parity ALTERNATIVE:** REJECTED. Reference
+  is external numpy.fft package, not internal harness
+  reimplementation; rejected per A6 BLOCKING empirical content
+  preservation.
+- **(αa) NEW Sub-class 2j codification at Pattern F structural
+  invariants + Tier II.bit-exact + §4.7.A combined scope:**
+  REJECTED at S38. Single-instance Sub-class codification violates
+  A3 second-observation tightening discipline; Sub-class 2j
+  premature at n=1 first-instance baseline; deferred to absorption
+  #6+ second-observation tightening if Pattern F invariants
+  manifest at future FFT-family OR Kalman / state-space wrappers;
+  rejected per A3 first-instance precedent + (αc) ratification
+  forward-instrumentation-note treatment.
+
+**Frequency Domain / Signal block SECOND entry — FIFTH catalog
+block transition advances 1→2 of 7 entries Q1-amended per Q1 work
+program scope (per-block continuation pattern n=5 catalog block
+observation candidate at Frequency Domain / Signal block completion
+pending arc close):** S38 fft_spectrum advances the fifth catalog
+block transition from 1 of 7 (S37 periodogram_spectral_density
+first-entry baseline) to 2 of 7 (S38 fft_spectrum second-entry
+continuation). **Block ordering position verification at S38 Step
+0:** fft_spectrum at second-position alphabetically within §3
+empirical enumeration `emd_hht, fft_spectrum, lomb_scargle, ssa,
+wavelet_coherence_phase_lag, wavelet_transform` (post-S37
+periodogram_spectral_density validated); Block ordering working
+hypothesis ratified per §3 empirical re-Read at HEAD 3112ca9 line
+9629 verbatim. **Empirical §3 enumeration confirmation at S38 Step
+0 mid-session re-Read per CONSTRAINT 4 A6 BLOCKING verify-state-at-
+narration discipline:** §3 Frequency Domain / Signal block
+remaining 6 unvalidated entries empirically = emd_hht + fft_spectrum
++ lomb_scargle + ssa + wavelet_coherence_phase_lag + wavelet_transform
+(consistent with S37 Step 0 Divergence 3 ratification minus
+periodogram_spectral_density validated; welch_psd + multitaper_psd
+NOT in §3 catalog enumeration). Forward instrumentation: Frequency
+Domain / Signal block completion arc S37 + S38 + S39 + S40 + S41
++ S42 + S43 (7 entries total) advances at S38; per-block
+continuation pattern at n=5 catalog block observations (Block 1 +
+Block 12 + Block 8 + Block 3 + Frequency Domain / Signal [in-
+progress at S38 = 2 of 7]) codification refinement candidate at
+absorption #6+ per §19.4 §4 note 6 refinement n=4 → n=5 per S35-
+absorption #5 codification.
+
+#### §1.5 Novelty enumeration sub-section (S38 application — fourth post-S23 first-instance codification application per S30 codification; ≥5 observations threshold satisfied at n=6)
+
+S38 surfaces 6 NEW observations across compound first-instance
+disclosures + Frequency Domain / Signal block second-entry framing
++ all-anchor-deferral discipline first application empirical
+efficacy + A9 Class A 19th-instance candidate banking, satisfying
+≥5 observations threshold per S23 first-instance codification at
+S30 §1.5 codification scope. n=4 post-codification observations
+across S23 + S34 + S37 + S38; A3 fourth-observation tightening
+reinforcement per §1.5 sustained-observation operational status
+note per S36 §1.5 refinement (n=3 third-observation reinforcement
+at S37 UPGRADE to n=4 fourth-observation reinforcement at S38 per
+S38 application).
+
+**Novelty 1 — Tier II.bit-exact (Pattern A.2 cross-package) FIRST
+§2.5 entry within Frequency Domain / Signal block:** S38
+fft_spectrum is FIRST Q1 §2.5 entry within Frequency Domain /
+Signal block at Tier II.bit-exact + Pattern A.2 cross-package
+characterization scope (S37 periodogram_spectral_density was FIRST
+Tier III Pattern A.1 entry at distinct Tier characterization
+scope). Tier II.bit-exact Pattern A.2 characterization grounded at
+scope_reframing §2 line 130 verbatim 12-wrapper enumeration scope.
+**Heterogeneous Tier-surface variant observation FIRST-INSTANCE
+empirical confirmation at Frequency Domain / Signal block** per
+§19.4 §4 note 6 refinement at S35-absorption #5 forward
+instrumentation: Block Tier-surface composition empirically
+HETEROGENEOUS (Tier III Pattern A.1 at S37 + Tier II.bit-exact
+Pattern A.2 at S38); heterogeneous-vs-homogeneous Tier-surface
+forward instrumentation banking n=2 entries observed; codification
+refinement at Block completion arc S43 close per A3 precedent if
+empirically sustained heterogeneous Tier-surface across 7-entry arc.
+
+**Novelty 2 — Pattern F structural invariants NEW framing element
+FIRST-INSTANCE baseline observation per A3 first-instance precedent
++ (αc) forward-instrumentation-note treatment:** FIRST observed
+Pattern F structural invariants computation as adjunct to numerical
+parity check per A3 first-instance precedent (n=1 baseline; NOT
+codification of NEW Sub-class 2j candidate). Definitional scope
+working hypothesis: "FFT-family (and potentially future state-
+space / Kalman) wrappers compute structural identity invariants
+(roundtrip, conservation laws) as adjunct PASS/FAIL tests within
+the parity harness". Distinct from codified Sub-class 2a-2i
+numerical-agreement validation scopes per orthogonal structural-
+identity-preservation framing dimension. Forward instrumentation
+note candidate per (αc) ratification; codification of NEW Sub-
+class 2j deferred to absorption #6+ second-observation tightening.
+
+**Novelty 3 — ALL-ANCHOR-DEFERRAL DISCIPLINE FIRST APPLICATION
+empirical efficacy validation at S38 Step 0:** Chat S38 trigger
+drafting applied all-anchor-deferral discipline (Tier + Sub-class
++ §4.7.A + Block ordering anchors DEFERRED to Code Step 0
+empirical verification) per institutional learning from S37 multi-
+anchor schema-misattribution catch n=18. Empirical efficacy
+validated at S38 Step 0: 0 multi-anchor schema-misattribution
+divergences (vs S37 4 simultaneous divergences); apparatus
+operational discipline refinement at trigger drafting cadence
+empirically validates at n=1 first-instance baseline observation.
+A3 first-instance precedent n=1 baseline; codification refinement
+of all-anchor-deferral discipline at §1.7+ Workstream B §1.4
+operational scope deferred to absorption #6+ second-observation
+tightening at S39+ trigger drafting if all-anchor-deferral
+sustained efficacy.
+
+**Novelty 4 — §1.9 Filename divergence sub-pattern variant SECOND-
+OBSERVATION cross-block extension NOT MANIFESTED per Code S38 Step
+0:** fft_spectrum filenames PRESERVE catalog-id at all three layers
+(audit `p3_fft_spectrum_audit.md` + harness `p3_fft_spectrum.py`
++ engine `fft_spectrum.py`); §1.9 cross-block sub-pattern not
+reinforced at S38. n=4 total observations preserved at S37 first-
+instance baseline (Block 3 mstl + stl + x13 + Frequency Domain /
+Signal periodogram); A3 cross-block tightening DEFERRED pending
+future Frequency Domain / Signal entry §1.9 manifestation. Forward
+instrumentation: §1.9 second cross-block observation banking at
+S38 close pending S39+ entry filename empirical verification.
+
+**Novelty 5 — A9 Class A 19TH-INSTANCE candidate banking (NEW sub-
+pattern variant distinct from prior A9 Class A failure modes n=14-
+18): Code-side §3 enumeration drift from prior Step 0 empirical
+re-Read baseline:** Code S38 Step 0 STOP 2 surface initially
+included §3 enumeration assumption "fft_spectrum, welch_psd,
+multitaper_psd, lomb_scargle, wavelet, [sixth entry TBD]" —
+internal-state drift from S37 Step 0 empirically-corrected baseline
+of `emd_hht + fft_spectrum + lomb_scargle + ssa +
+wavelet_coherence_phase_lag + wavelet_transform`. NEW sub-pattern
+variant structurally distinct from prior A9 Class A failure mode
+candidates: n=14-16 content-completeness verification gap codified
+at §1.7 (c) per S36 + n=17 STOP-1.5-revision-scope-misattribution
+banked at S36 + n=18 multi-anchor schema-misattribution at trigger
+drafting at S37 (Chat→Code direction PROACTIVE-PREVENTION variant)
++ **n=19 NEW Code-side §3 enumeration drift from prior Step 0
+empirical re-Read baseline at S38 STOP 2 surface (structurally
+Code-side internal-state-vs-empirical-state drift; distinct
+direction from n=18 Chat-side trigger-drafting schema-
+misattribution).** Chat S38 STOP 2 ratification directed Code Step
+0 §3 catalog re-Read at HEAD 3112ca9 mid-session per CONSTRAINT 4
+A6 BLOCKING verify-state-at-narration discipline; empirical re-
+Read confirmed outcome (a) — `emd_hht + fft_spectrum +
+lomb_scargle + ssa + wavelet_coherence_phase_lag + wavelet_transform`
+per HEAD 3112ca9 line 9629 verbatim. A3 first-instance precedent
+n=1 baseline; codification deferred to absorption #6+ second-
+observation tightening if recurs at S39+ Step 0 surface.
+
+**Novelty 6 — Frequency Domain / Signal block SECOND-ENTRY framing
+under Block ordering empirical observation second testing:** S38
+fft_spectrum advances Block ordering working hypothesis testing
+through second-position empirical confirmation; analogous to S32
+mstl_decompose Block 3 second-entry precedent at different Tier
+characterization scope (Tier II.bit-exact Pattern A.2 cross-package
+vs S32 Tier VI LAYERED algorithmic-non-uniqueness sub-class 2f).
+Block ordering empirical observation second testing at S38
+advances Block ordering working hypothesis testing through S39+ to
+Block 5 close (n=2 Block-ordering observation tightening per A3
+precedent at Frequency Domain / Signal block close if empirically
+confirmed across 7-entry arc; cross-reference to §19.4 §4 note 13
+first-instance baseline observation at Block 3 100% confirmed
+precedent per S31-S34 ordering empirical validation).
+
+**Reference:** `numpy.fft.fft` (numpy 2.4.4; cross-package Pattern
+A.2 — harness TSL arm invokes `scipy.fft.fft` at line 73 + harness
+reference arm invokes `numpy.fft.fft` at line 92; scipy.fft and
+numpy.fft both wrap pocketfft (since numpy 1.17) with different
+wrapper code paths but identical computational core per audit
+lines 24-28 verbatim)
+**Verdict:** **PASS Pattern A bit-exact at machine precision** per
+audit line 5 verbatim
+**Audit:** `tools/reference_parity/reports/p3_fft_spectrum_audit.md`
+**Audit date:** 2026-04-29
+**fft_real max abs diff:** 2.84e-14 (per audit line 13 verbatim)
+**fft_imag max abs diff:** 1.55e-14 (per audit line 14 verbatim)
+**fft_abs max abs diff:** 2.84e-14 (per audit line 15 verbatim)
+**Pattern F fft_roundtrip residual:** 6.66e-16 PASS (per audit
+line 21 verbatim)
+**Pattern F fft_energy_conservation residual:** 0.0 exact PASS
+(Parseval's theorem; per audit line 22 verbatim)
+**Tolerance class:** closed_form (per harness line 53 verbatim)
+**Fixture:** 3-tone sinusoid (f=0.05, 0.13, 0.25 + amps 1.0, 0.5,
+0.3) + N(0, 0.04) noise, T=512, seed=42; mean-detrend applied
+matching TSL default `detrend='mean'` per audit line 37 verbatim
++ harness lines 71-72 verbatim ("# Mean-detrend (matches TSL
+default detrend='mean')"); raw FFT output before any one-sided /
+normalization processing.
+
+**Source files (SINGLE-LAYER + §4.7.A PRESENT variant 1 per S38 α
+framing; empirical filenames preserve catalog-id at all three
+layers per §1.9 NOT MANIFESTED at S38 verification):**
+`tools/reference_parity/harness/checks/p3_fft_spectrum.py` lines
+67-87 (harness TSL arm imports `scipy.fft.fft` + `scipy.fft.ifft`
+at line 69 + mean-detrends signal at line 72 + invokes scipy.fft.fft
+at line 73 + computes Pattern F invariants at lines 74-79;
+harness does NOT invoke `fft_spectrum.py::run()` engine entry
+point; §4.7.A variant 1 "Harness-imports-library-directly"
+mechanism manifestation per S30 (G.1) generalized definitional
+scope)
++ `tools/reference_parity/harness/checks/p3_fft_spectrum.py` lines
+89-98 (harness reference arm imports `numpy.fft.fft` implicitly
+via `np.fft.fft` invocation at line 92 + mean-detrends signal at
+line 91 + invokes numpy.fft.fft at line 92; cross-package self-
+test structure — TSL arm scipy.fft vs reference arm numpy.fft;
+machine-precision agreement (fft_real 2.84e-14 abs / fft_imag
+1.55e-14 abs / fft_abs 2.84e-14 abs) guaranteed at pocketfft-
+shared-backbone scope; audit verifies wrapper preprocessing +
+parameter resolution + cross-package primitive agreement)
++ `tools/reference_parity/harness/checks/p3_fft_spectrum.py` lines
+3-9 verbatim (audit design rationale: "Cross-package check:
+scipy.fft and numpy.fft have independent codebases (scipy uses
+pocketfft; numpy uses pocketfft as well since 1.17 but with
+different wrapper code paths). Both should produce bit-exact
+identical output for real-valued input; Pattern A target.")
++ `tools/reference_parity/harness/checks/p3_fft_spectrum.py` lines
+54-60 (harness verdict_class_rationale: "FFT is closed-form
+linear-algebra: a deterministic function of the input signal.
+scipy.fft and numpy.fft both wrap pocketfft (since numpy 1.17);
+given identical real-valued input, output is bit-identical.
+Pattern A bit-exact target.")
++ `tools/reference_parity/harness/checks/p3_fft_spectrum.py` lines
+74-79 (Pattern F structural invariants computed in-line: fft_roundtrip
++ fft_energy_conservation Parseval; first appearance of structural
+invariant adjunct computation in S12-S38 audit cycle per S38
+forward instrumentation note baseline observation)
++ `tools/reference_parity/harness/checks/p3_fft_spectrum.py` lines
+30-43 (`_generate_fft_dgp`: 3-tone sinusoidal signal + noise at
+T=512 + seed=42; own DGP generator with multi-tone amplitudes
+1.0/0.5/0.3 at frequencies 0.05/0.13/0.25 + sigma=0.2)
++ `engine/techniques/fft_spectrum.py` lines 1-7 (module docstring:
+"FFT Spectral Analysis for Time Series Lab. Computes the Fast
+Fourier Transform of a time series to identify dominant
+periodicities/frequencies. Returns the power spectrum (periodogram),
+dominant frequencies, and their corresponding periods.")
++ `engine/techniques/fft_spectrum.py` line 10 (Layer 1 math
+import: `from scipy.fft import fft, fftfreq` — SAME library
+primitive as harness TSL arm imports at line 69 of p3_fft_spectrum.py)
++ `engine/techniques/fft_spectrum.py` lines 20-40 (`_prepare_series`
+helper: edge NaN strip + interior NaN linear interpolation; NOT
+exercised by audit)
++ `engine/techniques/fft_spectrum.py` lines 43-146 (Layer 2 engine
+orchestration: `run(ctx, progress_callback)` main entry; standalone-
+technique-only invocation; NaN preprocessing at lines 66-69 + n ≥
+8 threshold check at lines 71-76 + detrend parameter handling +
+allowlist at lines 78-97 + window parameter handling + allowlist
+at lines 98-114 + detrend application at lines 120-128 + window
+function application at lines 130-142 + scipy.fft.fft invocation
+at line 147 + scipy.fft.fftfreq invocation at line 148 + one-sided
+spectrum + normalization at lines 150-153 + min_period filtering
+at lines 156-161 + peak detection at lines 175-186 + period
+interpretation at lines 255-258 via `_interpret_period` helper)
++ `engine/techniques/fft_spectrum.py` line 147 (Layer 1 math
+invocation: `yf = fft(windowed)` — SAME library primitive as
+harness TSL arm invokes at line 73 of p3_fft_spectrum.py at
+mean-detrended signal scope; engine adds windowing transformation
+at line 142 NOT exercised by audit which validates raw FFT output
+at mean-detrend only)
++ `engine/techniques/fft_spectrum.py` lines 79-97 (CAI Phase 2
+Session 13 fix F-FD-FFT-DETREND: explicit allowlist `_DETREND_OPTS
+= ("mean", "linear", "none")`; pre-fix silently treated invalid
+detrend strings as "none"; NOT audit-validated; engine production
+behavior beyond audit scope)
++ `engine/techniques/fft_spectrum.py` lines 99-114 (CAI Phase 2
+Session 13 fix F-FD-FFT-WINDOW: explicit allowlist `_WINDOW_OPTS
+= ("none", "hann", "hamming", "blackman", "bartlett")`; pre-fix
+silently treated invalid window strings as no-window default;
+NOT audit-validated; engine production behavior beyond audit scope)
++ `tools/reference_parity/reports/p3_fft_spectrum_audit.md`
+
+**Validation claim scope (TIER II.BIT-EXACT (PATTERN A.2 CROSS-
+PACKAGE) SUB-CLASS + §4.7.A PRESENT VARIANT 1 HARNESS-IMPORTS-
+LIBRARY-DIRECTLY + Sub-class 2a (αa) anchor post-codification n=5
+observation + Pattern F structural invariants forward
+instrumentation note FIRST-INSTANCE baseline observation per S38
+(α) + (αc) ratifications):** TSL fft_spectrum output relies on two
+layered computations within standalone-technique role (Layer 1
+scipy.fft.fft FFT primitive + Layer 2 engine orchestration).
+p3_fft_spectrum audit validates Layer 1 scipy.fft.fft primitive +
+cross-package agreement with numpy.fft.fft via cross-package
+self-test (harness TSL arm invokes scipy.fft.fft + harness
+reference arm invokes numpy.fft.fft on mean-detrended signal);
+machine-precision agreement (fft_real 2.84e-14 abs / fft_imag
+1.55e-14 abs / fft_abs 2.84e-14 abs per audit lines 13-15
+verbatim) at pocketfft-shared-backbone scope; Pattern F structural
+invariants (fft_roundtrip PASS at 6.66e-16 + fft_energy_conservation
+PASS at 0.0 exact per audit lines 21-22 verbatim) verify
+mathematical-identity preservation independent of cross-
+implementation agreement. **Audit DOES validate cross-package
+parity verdict** (numpy.fft reference; cross-package self-test
+scope under Pattern A.2 framing); validation scope = wrapper
+preprocessing + parameter resolution + cross-package primitive
+agreement at mean-detrended raw FFT output. NOT engine standalone
+orchestration correctness, NOT detrend + window allowlist
+correctness (CAI Phase 2 Session 13 fixes engine-side beyond
+audit scope), NOT window function application correctness, NOT
+one-sided spectrum normalization correctness, NOT min_period
+filtering correctness, NOT peak detection correctness, NOT period
+interpretation correctness (_interpret_period helper at engine
+lines 342-374), NOT spectrum scaling additional computation, NOT
+audit_fields construction correctness.
+
+- **Layer 1 scipy.fft.fft / numpy.fft.fft primitive (Tier II.bit-
+  exact Pattern A.2 cross-package self-test bit-exact at machine
+  precision; validated wrapper preprocessing + parameter
+  resolution + cross-package primitive agreement at audit pinned
+  config):** PASS Pattern A bit-exact verdict per audit line 5
+  verbatim; machine-precision agreement (fft_real 2.84e-14 abs /
+  fft_imag 1.55e-14 abs / fft_abs 2.84e-14 abs per audit lines
+  13-15 verbatim). **Tier II.bit-exact Pattern A.2 characterization
+  directly grounded** at scope_reframing §2 line 130 verbatim 12-
+  wrapper enumeration scope explicitly including p3_fft_spectrum.
+  Validation scope: SAME underlying pocketfft backbone primitive
+  via scipy.fft (engine + harness TSL arm) and numpy.fft (harness
+  reference arm); cross-package self-test verifies wrapper
+  preprocessing + parameter resolution + cross-package primitive
+  agreement at mean-detrended raw FFT output. **Pattern A.2
+  cross-package self-test caveat:** machine-precision agreement
+  established at pocketfft-shared-backbone scope; audit DOES
+  validate cross-package parity (numpy.fft reference) BUT does
+  NOT validate pocketfft primitive math correctness against
+  external implementation (e.g., R `stats::fft`); cross-package
+  agreement at shared backbone scope distinct from cross-
+  implementation math validation. **§4.7.A PRESENT variant 1
+  reimplementation-of-dispatch caveat:** engine module `run()` is
+  DIFFERENT code path from harness library-primitive direct
+  invocation; engine adds Layer 2 orchestration (NaN handling +
+  detrend allowlist + window allowlist + window function
+  application + one-sided spectrum + normalization + min_period
+  filtering + peak detection + period interpretation) NOT
+  exercised by audit. Engine windowing transformation at line 142
+  (`windowed = signal * window`) precedes scipy.fft invocation at
+  line 147; audit exercises raw FFT at mean-detrend only (no
+  windowing).
+- **Pattern F structural invariants (validated structural identity
+  preservation at machine precision; orthogonal to cross-package
+  numerical agreement):**
+  - **(F.1) fft_roundtrip:** PASS at 6.66e-16 max_abs_diff per
+    audit line 21 verbatim; harness lines 75-76 compute
+    `roundtrip = scipy_ifft(Y)` + `roundtrip_max_abs =
+    float(np.max(np.abs(roundtrip.real - signal)))`; verifies
+    `ifft(fft(x)) ≈ x` identity at machine precision; structural
+    integrity preserved.
+  - **(F.2) fft_energy_conservation (Parseval's theorem):** PASS
+    at 0.0 exact per audit line 22 verbatim; harness lines 77-79
+    compute `energy_time = float(np.sum(signal ** 2))` +
+    `energy_freq = float(np.sum(np.abs(Y) ** 2) / len(signal))`;
+    verifies `sum(|x|²) = sum(|X|²)/N` Parseval identity at bit-
+    exact agreement; energy conservation preserved.
+  - **Pattern F NEW framing element FIRST-INSTANCE baseline
+    observation per A3 first-instance precedent + (αc) forward-
+    instrumentation-note treatment:** distinct from prior Sub-
+    classes 2a-2i numerical-agreement validation framings per
+    orthogonal structural-identity-preservation dimension; NEW
+    Sub-class 2j codification DEFERRED to absorption #6+ second-
+    observation tightening if recurs.
+- **Layer 2 engine orchestration (validation scope conditional;
+  NOT exercised at audit raw-FFT-at-mean-detrend pinned config):**
+  - NaN handling via `_prepare_series` (lines 20-40): edge NaN
+    strip + interior NaN linear interpolation; NOT audit-validated
+  - n ≥ 8 threshold check (lines 71-76): error response if n < 8;
+    NOT audit-validated
+  - Detrend parameter handling + allowlist (lines 78-97 CAI Phase
+    2 Session 13 fix F-FD-FFT-DETREND): `_DETREND_OPTS = ("mean",
+    "linear", "none")`; pre-fix silently treated invalid detrend
+    strings as "none"; NOT audit-validated; audit pins mean-
+    detrend matching TSL default
+  - Window parameter handling + allowlist (lines 98-114 CAI Phase
+    2 Session 13 fix F-FD-FFT-WINDOW): `_WINDOW_OPTS = ("none",
+    "hann", "hamming", "blackman", "bartlett")`; pre-fix silently
+    treated invalid window strings as no-window default; NOT
+    audit-validated; audit pins no windowing
+  - Window function application (lines 130-142): np.hanning /
+    np.hamming / np.blackman / np.bartlett / np.ones dispatch;
+    NOT audit-validated
+  - One-sided spectrum + normalization (lines 150-153): positive
+    frequencies filter + `amplitudes = np.abs(yf[pos_mask]) * 2.0
+    / n` normalization + `power = amplitudes ** 2`; NOT audit-
+    validated
+  - Min_period filtering (lines 156-161): `max_freq = 1.0 /
+    min_period if min_period > 0 else np.inf`; NOT audit-validated
+  - Peak detection (`_find_peaks` lines 333-339): simple local
+    maxima detection; NOT audit-validated
+  - Period interpretation (`_interpret_period` lines 342-374):
+    domain-specific period-to-cycle mapping; NOT audit-validated
+  - Result formatting + plain English summary + interpretation +
+    audit_fields construction
+
+#### Disclosure pattern (i) — Research note footnote (Tier II.bit-exact Pattern A.2 cross-package sub-class + Sub-class 2a (αa) anchor post-codification n=5 + Pattern F structural invariants forward instrumentation note baseline)
+
+> This analysis uses TSL technique `fft_spectrum`, cross-package
+> bit-exact parity validated at machine precision against
+> `numpy.fft.fft` reference per Phase 3 audit dated 2026-04-29
+> (verdict PASS Pattern A bit-exact, machine precision; fft_real
+> 2.84e-14 abs / fft_imag 1.55e-14 abs / fft_abs 2.84e-14 abs).
+> **Tier II.bit-exact (Pattern A.2 cross-package) sub-class
+> characterization** per S38 (α) disposition per scope_reframing
+> §2 line 130 verbatim 12-wrapper enumeration scope. Audit
+> validates wrapper preprocessing + parameter resolution + cross-
+> package primitive agreement (scipy.fft vs numpy.fft both wrap
+> pocketfft) at mean-detrended raw FFT output; cross-package self-
+> test scope. **Pattern F structural invariants** (fft_roundtrip
+> 6.66e-16 + fft_energy_conservation 0.0 exact Parseval) verify
+> mathematical-identity preservation independent of cross-package
+> agreement; FIRST appearance of structural invariant adjunct
+> computation in S12-S38 audit cycle. Engine adds Layer 2
+> orchestration (NaN handling + detrend + window allowlists +
+> window function application + one-sided spectrum + normalization
+> + peak detection + period interpretation); NOT audit-validated.
+> Pre-Path α expert review status.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier II.bit-exact Pattern A.2 + §4.7.A PRESENT variant 1 + cross-package self-test caveat + Pattern F structural invariants)
+
+> Methodology: TSL technique `fft_spectrum` validated per Phase 3
+> reference parity infrastructure under Tier II.bit-exact (Pattern
+> A.2 cross-package) sub-class framing per S38 codification.
+> **Reference:** `numpy.fft.fft` (numpy 2.4.4) — cross-package
+> self-test (harness TSL arm invokes `scipy.fft.fft` + harness
+> reference arm invokes `numpy.fft.fft` on mean-detrended signal;
+> scipy.fft and numpy.fft both wrap pocketfft since numpy 1.17
+> with different wrapper code paths but identical computational
+> core per audit lines 24-28 verbatim). **Verdict:** PASS Pattern
+> A bit-exact at machine precision; fft_real 2.84e-14 abs / fft_imag
+> 1.55e-14 abs / fft_abs 2.84e-14 abs. **Pattern F structural
+> invariants:** fft_roundtrip PASS at 6.66e-16 max_abs_diff
+> (ifft(fft(x)) ≈ x identity verified) + fft_energy_conservation
+> PASS at 0.0 exact (Parseval's theorem `sum(|x|²) = sum(|X|²)/N`
+> verified at bit-exact agreement). **Audit date:** 2026-04-29.
+> **Fixture:** 3-tone sinusoid (f=0.05, 0.13, 0.25 + amps 1.0, 0.5,
+> 0.3) + N(0, 0.04) noise, T=512, seed=42; mean-detrend applied
+> matching TSL default `detrend='mean'`; raw FFT output before any
+> one-sided / normalization processing. **Tier II.bit-exact
+> (Pattern A.2 cross-package) sub-class characterization** per
+> scope_reframing §2 line 130 verbatim 12-wrapper enumeration
+> scope explicitly including p3_fft_spectrum. **Cross-package
+> self-test caveat:** machine-precision agreement established at
+> pocketfft-shared-backbone scope; audit validates cross-package
+> parity (numpy.fft reference) BUT does NOT validate pocketfft
+> primitive math correctness against external implementation (e.g.,
+> R `stats::fft`); cross-package agreement at shared backbone
+> scope distinct from cross-implementation math validation.
+> **§4.7.A PRESENT variant 1 reimplementation-of-dispatch caveat:**
+> harness TSL arm imports + invokes `scipy.fft.fft` directly (does
+> NOT invoke engine `run()` entry point); engine module invokes
+> SAME scipy.fft primitive within `run()` orchestration; cross-
+> package bit-exact transfers to engine Layer 1 math invocation
+> per identical primitive alignment; engine Layer 2 orchestration
+> (NaN handling + detrend + window allowlists + window function
+> application + one-sided spectrum + normalization + min_period
+> filtering + peak detection + period interpretation) NOT
+> exercised by audit. **Pattern F structural invariants NEW
+> framing element first-instance baseline observation** per A3
+> precedent (n=1 baseline; NOT codification of NEW Sub-class 2j;
+> forward instrumentation note candidate). Reference selection +
+> tolerance specification AI-assisted with user ratification per
+> Phase 7+ work program; pre-Path α expert review status; expert
+> review pending end-of-Phase-7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier II.bit-exact Pattern A.2 + §4.7.A PRESENT variant 1 + Sub-class 2a (αa) anchor + Pattern F structural invariants + cross-package self-test scope-bounded validation)
+
+> `fft_spectrum` validation: TSL Tier II.bit-exact (Pattern A.2
+> cross-package) sub-class framing per S38 (α) codification + Sub-
+> class 2a (αa) anchor post-codification n=5 observation per (αc)
+> ratification + Pattern F structural invariants NEW framing
+> element first-instance baseline observation per A3 first-instance
+> precedent + §4.7.A PRESENT variant 1 Harness-imports-library-
+> directly mechanism. **Reference:** `numpy.fft.fft` (numpy 2.4.4).
+> **Audit:** `tools/reference_parity/reports/p3_fft_spectrum_audit.md`
+> dated 2026-04-29. **Verdict:** PASS Pattern A bit-exact at
+> machine precision (fft_real 2.84e-14 + fft_imag 1.55e-14 +
+> fft_abs 2.84e-14 abs diff; cross-package agreement at pocketfft-
+> shared-backbone scope). **Pattern F structural invariants:**
+> fft_roundtrip PASS at 6.66e-16 (ifft(fft(x)) ≈ x identity) +
+> fft_energy_conservation PASS at 0.0 exact (Parseval). **Fixture:**
+> 3-tone sinusoid DGP n=512 seed=42 + mean-detrend pinned matching
+> TSL default; single-seeded fixture; parameter-sensitivity
+> coverage NOT established; Q3b extension scope. **Sub-class 2a
+> (αa) anchor post-codification n=5 observation** per S38 (αc)
+> ratification (Sub-class 2a (αa) Tier II.bit-exact + cross-
+> package + two-layer codified scope; S22 + S23 + S28 + S31 + S38
+> post-codification cumulative observation count). **Pattern F NEW
+> framing element first-instance baseline observation** per A3
+> precedent (definitional scope working hypothesis: "FFT-family
+> and potentially future state-space / Kalman wrappers compute
+> structural identity invariants (roundtrip, conservation laws) as
+> adjunct PASS/FAIL tests within the parity harness"; A3 first-
+> instance precedent n=1 baseline; NOT codification of NEW Sub-
+> class 2j; codification deferred to absorption #6+ second-
+> observation tightening). **Risk attribution:** **(a) Layer 1
+> scipy.fft.fft / numpy.fft.fft primitive (Tier II.bit-exact
+> Pattern A.2 cross-package self-test bit-exact at machine
+> precision; validated wrapper preprocessing + parameter
+> resolution + cross-package primitive agreement):** PASS at
+> machine-precision agreement; SAME scipy.fft primitive as engine
+> module invokes at line 147; cross-package self-test transfers to
+> engine Layer 1 math invocation; audit DOES validate cross-package
+> parity (numpy.fft reference) BUT does NOT validate pocketfft
+> primitive math correctness against external implementation.
+> **(b) Pattern F structural invariants (validated structural
+> identity preservation at machine precision; orthogonal to cross-
+> package numerical agreement):** fft_roundtrip + fft_energy_conservation
+> verify mathematical identity preservation; structural integrity
+> confirmed at machine precision. **(c) §4.7.A PRESENT variant 1
+> reimplementation-of-dispatch caveat:** harness TSL arm invokes
+> scipy.fft primitive directly (bypassing engine `run()`); engine
+> wraps + invokes same primitive within orchestration; code-path
+> divergence active at runtime per HEAD verification (NOT REMEDIATED
+> per S36 §4.7.A status dimension codification). **(d) Layer 2
+> engine orchestration (NOT audit-validated):** NaN handling
+> (lines 20-40 _prepare_series) + n ≥ 8 threshold check (lines
+> 71-76) + detrend parameter handling + allowlist (lines 78-97 CAI
+> Phase 2 Session 13 fix F-FD-FFT-DETREND) + window parameter
+> handling + allowlist (lines 98-114 CAI Phase 2 Session 13 fix
+> F-FD-FFT-WINDOW) + window function application (lines 130-142)
+> + one-sided spectrum + normalization (lines 150-153) + min_period
+> filtering (lines 156-161) + peak detection (lines 175-186 +
+> _find_peaks lines 333-339) + period interpretation (lines 255-
+> 258 + _interpret_period lines 342-374); validation scope per
+> `engine/techniques/fft_spectrum.py` lines 43-316. **(e) Cross-
+> package self-test validation scope-bounded retraction surface:**
+> practitioners invoking `fft_spectrum` from ribbon receive scipy
+> primitive output via engine `run()` orchestration; audit
+> validates wrapper preprocessing + parameter resolution + cross-
+> package primitive agreement at mean-detrended raw FFT output
+> ONLY; engine windowing + one-sided spectrum normalization + peak
+> detection + period interpretation NOT audit-validated; expert
+> review of engine implementation + Layer 1 pocketfft primitive
+> cross-validation against alternative implementation (e.g., R
+> `stats::fft` cross-implementation validation) candidate at Q3b
+> extension scope. Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier II.bit-exact Pattern A.2 + §4.7.A PRESENT variant 1 + Sub-class 2a (αa) anchor + Pattern F + cross-package self-test caveat)
+
+> `fft_spectrum` Tier II.bit-exact (Pattern A.2 cross-package)
+> sub-class per S38 codification + Sub-class 2a (αa) anchor post-
+> codification n=5 observation + Pattern F structural invariants
+> first-instance baseline + §4.7.A PRESENT variant 1 Harness-
+> imports-library-directly mechanism; cross-package bit-exact at
+> machine precision vs direct `numpy.fft.fft` invocation (scipy.fft
+> and numpy.fft both wrap pocketfft since numpy 1.17). Pattern F
+> structural invariants (fft_roundtrip 6.66e-16 + fft_energy_conservation
+> 0.0 exact Parseval) verify mathematical identity preservation.
+> Cross-package self-test caveat operative: audit validates wrapper
+> preprocessing + parameter resolution + cross-package primitive
+> agreement at shared pocketfft backbone scope; NO cross-
+> implementation math validation against external implementation
+> (e.g., R `stats::fft`). Engine Layer 2 orchestration (NaN
+> handling + detrend + window allowlists + window function
+> application + one-sided spectrum + normalization + peak detection
+> + period interpretation) NOT audit-validated. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31-S37 + S36 LOC overshoot scope
+expansion refinement — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (`numpy.fft.fft` numpy 2.4.4)
+  per `p3_fft_spectrum_audit.md` line 4 verbatim ("**Reference:**
+  `numpy.fft.fft` (numpy 2.4.4)"). Verdict (PASS Pattern A bit-
+  exact at machine precision) per `p3_fft_spectrum_audit.md` line
+  5 verbatim ("**Verdict:** **PASS** (Pattern A bit-exact,
+  machine precision)"). Machine-precision agreement metrics per
+  `p3_fft_spectrum_audit.md` lines 13-15 verbatim (fft_real
+  2.84e-14 / fft_imag 1.55e-14 / fft_abs 2.84e-14 abs diff).
+  Pattern F invariants per `p3_fft_spectrum_audit.md` lines 21-22
+  verbatim (fft_roundtrip 6.66e-16 + fft_energy_conservation 0.0
+  exact Parseval). Audit date (2026-04-29) per
+  `p3_fft_spectrum_audit.md` line 7 verbatim. Fixture (3-tone
+  sinusoid f=0.05/0.13/0.25 + amps 1.0/0.5/0.3 + N(0, 0.04) noise
+  + T=512 + seed=42 + mean-detrend) per `p3_fft_spectrum_audit.md`
+  lines 32-37 verbatim Fixture + Diagnostics sections + harness
+  `p3_fft_spectrum.py` lines 30-43 verbatim `_generate_fft_dgp`.
+  Tier II.bit-exact (Pattern A.2 cross-package) sub-class
+  characterization directly grounded at `scope_reframing_s6_banking.md`
+  §2 line 130 verbatim ("p3_fft_spectrum, p3_granger, p3_kpss,
+  p3_pca") — p3_fft_spectrum explicitly within Tier II.bit-exact
+  12-wrapper enumeration. Cross-package self-test structure per
+  audit lines 24-28 verbatim ("scipy.fft and numpy.fft both wrap
+  pocketfft (since numpy 1.17) with different wrapper code paths
+  but identical computational core. Pattern F invariants verify
+  Parseval theorem and inverse-roundtrip identity at machine
+  precision") + harness lines 3-9 verbatim ("Cross-package check:
+  scipy.fft and numpy.fft have independent codebases (scipy uses
+  pocketfft; numpy uses pocketfft as well since 1.17 but with
+  different wrapper code paths). Both should produce bit-exact
+  identical output for real-valued input; Pattern A target").
+  §4.7.A PRESENT variant 1 manifestation per harness line 69 +
+  engine line 10 verbatim — both import SAME scipy.fft primitive;
+  harness line 73 + engine line 147 verbatim — both invoke SAME
+  scipy.fft.fft primitive but harness TSL arm bypasses engine
+  `run()` orchestration; harness reference arm at line 92 invokes
+  numpy.fft.fft directly (cross-package). Layer 1 / Layer 2
+  framework operative per S26 STOP 1.5 second close ratification
+  carried forward + S31-S37 reinforcement. Catalog mapping (1:1)
+  verified per audit Wrapper field. **§4.7.A pattern OBSERVED at
+  S38 as variant 1 PRESENT status** (post-S38 §4.7.A observations
+  = n=9 PRESENT across §2.5 entries S14a + S18 + S26 + S27 + S31
+  + S32 + S33 + S37 + S38 + n=1 REMEDIATED S34 = n=10 total
+  observations; **§4.7.A pattern count tightening per S30 (G.1)
+  generalized definitional scope codification + S36 §4.7.A status
+  dimension extension** — NOT A9 Class A counter increment; NOT
+  §4.7.A taxonomy modification at S38; forward observation banking
+  only per ITEM 16 forward instrumentation banking discipline).
+  **Sub-class 2a (αa) anchor post-codification n=5 observation per
+  (αc) ratification** (S22 + S23 + S28 + S31 + S38 post-codification
+  cumulative observation count; codification-stable status
+  preserved at n=5 sustained post-codification operation per A3
+  precedent). **Pattern F structural invariants NEW framing element
+  FIRST-INSTANCE baseline observation per A3 first-instance
+  precedent + (αc) forward-instrumentation-note treatment** (A3
+  first-instance precedent n=1 baseline; NOT codification of NEW
+  Sub-class 2j; codification deferred to absorption #6+ second-
+  observation tightening if recurs at S39+ FFT-family OR Kalman /
+  state-space wrappers; definitional scope working hypothesis
+  "FFT-family and potentially future state-space / Kalman wrappers
+  compute structural identity invariants (roundtrip, conservation
+  laws) as adjunct PASS/FAIL tests within the parity harness").
+  **§1.9 Filename divergence sub-pattern variant SECOND-OBSERVATION
+  cross-block extension NOT MANIFESTED per Code S38 Step 0
+  empirical re-Read** (fft_spectrum filenames PRESERVE catalog-id
+  at all three layers; §1.9 cross-block sub-pattern not reinforced
+  at S38; n=4 total observations preserved at S37 first-instance
+  baseline; A3 cross-block tightening DEFERRED pending future
+  Frequency Domain / Signal entry §1.9 manifestation). **§2.5 Tier
+  primary+overlay convention NOT APPLICABLE at S38** (Tier II.bit-
+  exact Pattern A.2 single-tier framing; S35-absorption #5 + S32
+  third-observation tightening reinforcement at n=3 post-
+  codification observations preserved unchanged at S38). **§1.5
+  novelty enumeration sub-section APPLIED at S38** per ≥5
+  observations threshold satisfied at n=6 enumerated novelties
+  (Novelty 1-6); fourth post-S23 application of §1.5 novelty
+  enumeration sub-section pattern per S30 codification + S36 §1.5
+  refinement sustained-observation operational status note; n=4
+  post-codification observations across S23 + S34 + S37 + S38;
+  A3 fourth-observation tightening reinforcement. **ALL-ANCHOR-
+  DEFERRAL DISCIPLINE FIRST APPLICATION empirical efficacy
+  validation at S38 Step 0** per Chat S38 trigger drafting all-
+  anchor-deferral discipline first application per institutional
+  learning from S37 multi-anchor schema-misattribution catch n=18;
+  0 multi-anchor schema-misattribution divergences at S38 Step 0
+  (vs S37 4 simultaneous divergences); A3 first-instance precedent
+  n=1 baseline; codification refinement of all-anchor-deferral
+  discipline at §1.7+ Workstream B §1.4 operational scope deferred
+  to absorption #6+ second-observation tightening at S39+ trigger
+  drafting if all-anchor-deferral sustained efficacy. **A9 Class A
+  counter post-S38: n=14 ACTIVE codified at §19.4 unchanged**
+  (n=15 + n=16 codified at §1.7 (c) Workstream B empirical-
+  efficacy grounding scope per S36; n=17 + n=18 candidates banked
+  at S37 commit message body forward state + n=19 NEW candidate
+  banked at S38 commit message body forward state per Code Step 0
+  §3 enumeration drift sub-pattern variant NEW failure mode
+  distinct from prior A9 Class A failure modes n=14-18 per A3
+  first-instance precedent absorption #6+ codification deferral;
+  A9 Class A counter at §19.4 advance deferred to absorption #6+
+  per multi-candidate accumulation). **A9 Class B counter post-
+  S38: n=4 ACTIVE unchanged (no new Class B catch); sustained-
+  observation count under Class B revised default discipline n=12
+  (S22 + S23 + S25 + S26 + S27 + S28 + S31 + S32 + S33 + S34 +
+  S37 + S38 = n=12 Q1 entries only counting basis per Chat
+  preference codified at S31)**. **Maturation observation FIFTEENTH
+  SUSTAINED OBSERVATION REACHED at S38 (S23 + S25 + S26 + S27 +
+  S28 + S29 + S30 + S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38
+  = n=15 cross-session trajectory)** + EIGHT-timing-point empirical
+  surface preserved per S35-absorption #5 codification (no new
+  timing point variant at S38; proactive-prevention operation
+  SUSTAINED across established timing points (i)-(viii)); §4.5
+  codification operational at n=8 post-codification sustained
+  observations per S38 cross-session trajectory reinforcement.
+  Verify-state-at-first-consumption sub-discipline 29th instance
+  application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at eighteenth-technique selection per Mark
+  3 efficient-ratification + (α) unprompted case-against discipline
+  operative per Workstream B §1.4 codification + S20 + S25 + S26
+  + S27 + S28 + S31 + S32 + S33 + S34 + S37 reinforcement. **Q-B
+  pattern persists at n=19 across S12 + S13 + S14b + S14c + S15 +
+  S17 + S18 + S21 + S22 + S23 + S26 + S27 + S28 + S31 + S32 + S33
+  + S34 + S37 + S38; §1.4 codified observation refinement at
+  empirical pattern accumulation** (n=7 at §1.4 S20 codification →
+  n=18 at S37 reinforcement → n=19 at S38 reinforcement; Workstream
+  B amendment cycle candidate A continues at next cycle).
+  Substantive Chat engagement at structural-decision points
+  empirically observed (Step 0 STOP 2 anchor ratifications under
+  all-anchor-deferral discipline first application + Tier II.bit-
+  exact (Pattern A.2 cross-package) (α) ratification + Sub-class
+  2a (αa) anchor + Pattern F forward instrumentation note (αc)
+  ratification + Code (α-i) Tier III + (α-ii) Tier II.mle-band +
+  (α-iii) Tier IV + (αa) Sub-class 2j codification Tier 2 case-
+  against rejection + §1.9 cross-block extension NOT MANIFESTED
+  banking + A9 Class A 19th-instance candidate banking + Block
+  ordering working hypothesis second-position verification +
+  ALL-ANCHOR-DEFERRAL DISCIPLINE FIRST APPLICATION empirical
+  efficacy ratification).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  Conditional Yes for **Layer 1 scipy.fft.fft / numpy.fft.fft
+  primitive (Tier II.bit-exact Pattern A.2 cross-package self-test
+  bit-exact at machine precision)** per PASS verdict at machine-
+  precision agreement + Pattern F structural invariants validation.
+  Defensibility to all three audiences (published audience + Morgan
+  Stanley compliance + Path α expert reviewer) UNDER Tier II.bit-
+  exact (Pattern A.2 cross-package) sub-class + §4.7.A PRESENT
+  variant 1 reimplementation-of-dispatch + cross-package self-test
+  scope-bounded validation + cross-implementation math validation
+  NOT audit-established disclosure acknowledgment.
+  **Conditional for Layer 2 engine orchestration** — NaN handling
+  + detrend + window allowlists + window function application +
+  one-sided spectrum + normalization + min_period filtering + peak
+  detection + period interpretation; requires expert review of
+  engine implementation OR engine-output cross-check at base
+  pinned config. **Critical Q-C framing per cross-package self-
+  test caveat:** machine-precision agreement is established at
+  POCKETFFT-SHARED-BACKBONE scope (scipy.fft + numpy.fft both wrap
+  pocketfft since numpy 1.17); audit scope is cross-package
+  primitive agreement at shared backbone validation NOT pocketfft
+  primitive math correctness validation against external
+  implementation; defensibility conditional on disclosure of
+  cross-package self-test scope vs cross-implementation math
+  validation scope distinction (audit established the former NOT
+  the latter). **Pattern F structural invariants** establish
+  mathematical-identity preservation at machine precision
+  independently of cross-package agreement; orthogonal validation
+  dimension complementary to cross-package primitive agreement.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  LOW-MEDIUM per Tier II.bit-exact (Pattern A.2 cross-package)
+  sub-class characterization scope bound + §4.7.A PRESENT variant
+  1 disclosure + cross-package self-test scope-bounded validation
+  caveat + Pattern F structural invariants validation. fft_spectrum
+  is canonical Cooley-Tukey 1965 FFT algorithm + pocketfft
+  implementation (widely-used FFT primitive via scipy.fft +
+  numpy.fft package wrappers). **Layer-specific + Tier II.bit-
+  exact + Pattern A.2 + Sub-class 2a (αa) anchor + Pattern F +
+  §4.7.A PRESENT variant 1 retraction surface (per S38 (α) + (αc)
+  ratifications):**
+  - Layer 1 scipy.fft.fft / numpy.fft.fft primitive (Tier II.bit-
+    exact Pattern A.2 cross-package self-test bit-exact at machine
+    precision): LOW; cross-package bit-exact established at
+    pocketfft-shared-backbone scope; expert review surfacing
+    pocketfft primitive math correctness issue (e.g., pocketfft
+    implementation bug at edge case) would affect fft_spectrum +
+    ALL scipy.fft / numpy.fft-dependent techniques (NOT 1:1
+    catalog↔wrapper isolation; cross-technique propagation risk
+    at pocketfft primitive scope).
+  - Pattern F structural invariants (validated structural identity
+    preservation at machine precision): LOW; mathematical identity
+    invariants (Parseval + roundtrip) verified at machine
+    precision; structural integrity guarantee independent of
+    cross-package agreement; expert review surfacing structural
+    identity violation would invalidate FFT primitive itself
+    (extremely low probability given Cooley-Tukey + pocketfft
+    maturity).
+  - **Layer 2 engine orchestration: LOW-MEDIUM** — NaN handling +
+    detrend + window allowlists + window function application +
+    one-sided spectrum + normalization + min_period filtering +
+    peak detection + period interpretation NOT audit-validated;
+    expert review of engine implementation conditional on Layer 2
+    correctness; orchestration operations operationally
+    straightforward (mask + dict dispatch + numpy primitive
+    invocations + sort/argsort + simple peak detection);
+    retraction surface LOW-MEDIUM reflects orchestration scope;
+    CAI Phase 2 Session 13 fixes F-FD-FFT-DETREND + F-FD-FFT-
+    WINDOW (engine lines 79-114) addressed prior silent-fall-
+    through bugs but NOT audit-validated separately.
+  - **Cross-package self-test scope-bounded validation retraction
+    surface: MEDIUM** — audit validates wrapper preprocessing +
+    parameter resolution + cross-package primitive agreement at
+    mean-detrended raw FFT output; NO cross-implementation math
+    validation (no R `stats::fft` cross-validation; no MATLAB
+    `fft` cross-validation); expert review surfacing cross-
+    implementation divergence (e.g., R `stats::fft` produces
+    different output at identical args due to library
+    implementation difference) would prompt Q3b extension scope
+    cross-implementation validation; Q3b extension scope candidate
+    per Path α expert review.
+  - **§4.7.A PRESENT variant 1 retraction surface: LOW** — harness
+    TSL arm + engine use SAME scipy.fft primitive; reimplementation
+    scope limited to dispatch-path (re-import + re-invoke vs
+    engine `run()` orchestration); cross-package bit-exact transfers
+    to engine Layer 1 math invocation cleanly per identical
+    primitive alignment; reimplementation-of-dispatch variant 1
+    structurally weaker §4.7.A manifestation than mechanism
+    variants 3 + 4 (reimplementation-of-math + use-case-divergence).
+  - **Sub-class 2a (αa) anchor post-codification n=5 observation
+    retraction surface: LOW** — codification-stable Sub-class 2a
+    (αa) Tier II.bit-exact + cross-package + two-layer scope per
+    S22 codification at S30 §1.5 codification application
+    precedent; n=5 post-codification observation count consistent
+    with codified definitional scope.
+  - **Pattern F structural invariants forward instrumentation note
+    first-instance baseline retraction surface: LOW** — A3 first-
+    instance precedent n=1 baseline observation; codification of
+    NEW Sub-class 2j candidate at Pattern F + Tier II.bit-exact +
+    §4.7.A combined scope deferred to absorption #6+ second-
+    observation tightening if recurs; forward instrumentation
+    note treatment preserves first-instance observation without
+    codification commitment.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; eighteenth technique to enter status
+per S38 ratification; **SECOND Frequency Domain / Signal block
+entry — FIFTH catalog block transition advances 1→2 of 7 entries
+Q1-amended** per Q1 work program scope after Block 1 Causality at
+S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at
+S28 + Block 3 Decomposition at S34 + Frequency Domain / Signal
+block first-entry at S37 (Block ordering position fft_spectrum at
+second-position alphabetically within §3 empirical enumeration
+`emd_hht, fft_spectrum, lomb_scargle, ssa, wavelet_coherence_phase_lag,
+wavelet_transform` per HEAD 3112ca9 line 9629 verbatim re-Read);
+**FIRST Tier II.bit-exact (Pattern A.2 cross-package) §2.5 entry
+within Frequency Domain / Signal block** per S38 (α) Tier
+disposition ratification (heterogeneous Tier-surface variant
+observation FIRST-INSTANCE empirical confirmation at Frequency
+Domain / Signal block — Tier III Pattern A.1 at S37 + Tier II.bit-
+exact Pattern A.2 at S38; codification refinement at Block
+completion arc S43 close per A3 precedent if empirically sustained
+heterogeneous Tier-surface across 7-entry arc); **Sub-class 2a
+(αa) anchor post-codification n=5 observation per S38 (αc)
+ratification** (S22 + S23 + S28 + S31 + S38 post-codification
+cumulative observation count; codification-stable status preserved
+at n=5 sustained post-codification operation per A3 precedent);
+**Pattern F structural invariants NEW framing element FIRST-
+INSTANCE baseline observation per A3 first-instance precedent +
+(αc) forward-instrumentation-note treatment** (definitional scope
+working hypothesis "FFT-family and potentially future state-space
+/ Kalman wrappers compute structural identity invariants
+(roundtrip, conservation laws) as adjunct PASS/FAIL tests within
+the parity harness"; A3 first-instance precedent n=1 baseline;
+NOT codification of NEW Sub-class 2j; codification deferred to
+absorption #6+ second-observation tightening if recurs; Code (αa)
+Sub-class 2j codification Tier 2 case-against rejected per A3
+first-instance precedent + (αc) forward-instrumentation-note
+treatment); **§1.9 Filename divergence sub-pattern variant SECOND-
+OBSERVATION cross-block extension NOT MANIFESTED per Code S38
+Step 0 empirical re-Read** (fft_spectrum filenames PRESERVE
+catalog-id at all three layers `p3_fft_spectrum_audit.md` +
+`p3_fft_spectrum.py` + `fft_spectrum.py`; n=4 total observations
+preserved at S37 first-instance baseline; §1.9 cross-block sub-
+pattern not reinforced at S38; A3 cross-block tightening DEFERRED
+pending future Frequency Domain / Signal entry §1.9 manifestation;
+expiration semantics: §1.9 second cross-block observation banks
+at S38 close pending S39+ entry filename empirical verification);
+**SINGLE-LAYER framing per S38 STOP 2 empirical investigation + α
+disposition** (Tier II.bit-exact Pattern A.2 cross-package single-
+tier framing; §2.5 Tier primary+overlay convention NOT APPLICABLE
+at S38 per S35-absorption #5 + S32 third-observation tightening
+reinforcement at n=3 post-codification observations preserved
+unchanged at S38); **§4.7.A PRESENT variant 1 Harness-imports-
+library-directly mechanism manifestation at n=9 PRESENT + n=1
+REMEDIATED = n=10 total post-S38 observations across §2.5 entries**
+(S14a granger + S18 gcc_phat + S26 denton_chowlin + S27 loess +
+S31 classical_decompose + S32 mstl_decompose + S33 stl_decompose
++ S37 periodogram_spectral_density + S38 fft_spectrum PRESENT +
+S34 x13_seasonal_adjust REMEDIATED; **§4.7.A pattern count
+tightening per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A status dimension extension** — NOT A9 Class A counter
+increment; forward observation banking only; NOT §4.7.A taxonomy
+modification at S38);
+**ALL-ANCHOR-DEFERRAL DISCIPLINE FIRST APPLICATION empirical
+efficacy validation at S38 Step 0 per Chat S38 trigger drafting
+all-anchor-deferral discipline first application per institutional
+learning from S37 multi-anchor schema-misattribution catch n=18:**
+Chat S38 trigger drafting applied all-anchor-deferral discipline
+(Tier + Sub-class + §4.7.A + Block ordering anchors DEFERRED to
+Code Step 0 empirical verification); empirical efficacy validated
+at S38 Step 0: 0 multi-anchor schema-misattribution divergences
+(vs S37 4 simultaneous divergences); apparatus operational
+discipline refinement at trigger drafting cadence empirically
+validates at n=1 first-instance baseline observation. A3 first-
+instance precedent n=1 baseline; codification refinement of all-
+anchor-deferral discipline at §1.7+ Workstream B §1.4 operational
+scope deferred to absorption #6+ second-observation tightening at
+S39+ trigger drafting if all-anchor-deferral sustained efficacy.
+**A9 CLASS A 19TH-INSTANCE CANDIDATE BANKING at S38 commit message
+body forward state per Code Step 0 §3 enumeration drift sub-
+pattern variant NEW failure mode distinct from prior A9 Class A
+failure modes n=14-18 (structurally Code-side internal-state-vs-
+empirical-state drift; distinct direction from n=18 Chat-side
+trigger-drafting schema-misattribution):** Code S38 Step 0 STOP 2
+surface initially included §3 enumeration assumption "fft_spectrum,
+welch_psd, multitaper_psd, lomb_scargle, wavelet, [sixth entry
+TBD]" — internal-state drift from S37 Step 0 empirically-corrected
+baseline of `emd_hht + fft_spectrum + lomb_scargle + ssa +
+wavelet_coherence_phase_lag + wavelet_transform`. Chat S38 STOP 2
+ratification directed Code Step 0 §3 catalog re-Read at HEAD
+3112ca9 mid-session per CONSTRAINT 4 A6 BLOCKING verify-state-at-
+narration discipline; empirical re-Read confirmed outcome (a) per
+HEAD 3112ca9 line 9629 verbatim. NEW sub-pattern variant
+structurally distinct from prior A9 Class A failure mode candidates
+n=14-16 content-completeness verification gap codified at §1.7 (c)
+per S36 + n=17 STOP-1.5-revision-scope-misattribution banked at
+S36 + n=18 multi-anchor schema-misattribution at trigger drafting
+at S37 (Chat→Code direction PROACTIVE-PREVENTION variant) + n=19
+NEW Code-side §3 enumeration drift from prior Step 0 empirical
+re-Read baseline at S38 STOP 2 surface (structurally Code-side
+internal-state-vs-empirical-state drift; distinct direction from
+n=18 Chat-side trigger-drafting schema-misattribution). A3 first-
+instance precedent n=1 baseline; codification deferred to
+absorption #6+ second-observation tightening if recurs at S39+
+Step 0 surface. **Block ordering working hypothesis second-position
+verification at S38 per Code Step 0 empirical re-Read:** fft_spectrum
+at second-position alphabetically within §3 empirical enumeration
+verified; Block ordering working hypothesis testing through S39+
+Block-internal complexity ordering verification across 7-entry arc
+S37 + S38 + S39 + S40 + S41 + S42 + S43 (n=2 Block-ordering
+observation tightening per A3 precedent at Frequency Domain /
+Signal block close if empirically confirmed; cross-reference to
+§19.4 §4 note 13 first-instance baseline observation at Block 3
+100% confirmed precedent per S31-S34 ordering empirical
+validation); **CONTINUATION of S30 + S36 Workstream B codifications
+at S38:** §1.6 Q-A density convention operative continuation
+(verbatim citation density at Q-A field; n=8 post-codification
+applications at S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38
+with §1.6 LOC overshoot scope expansion at S36 refinement
+operative — n=8 total + n=7 sub-pattern scope disambiguation) +
+§5.5 forward-instrumentation hygiene at status line operative
+continuation (expiration semantics on each predictive claim; n=8
+post-codification applications at S31 + S32 + S33 + S34 + S35 +
+S36 + S37 + S38) + §1.5 novelty enumeration sub-section APPLIED
+at S38 (≥5 observations threshold satisfied at n=6 novelties;
+fourth post-S23 application; n=4 post-codification observations
+across S23 + S34 + S37 + S38; A3 fourth-observation tightening
+reinforcement per §1.5 sustained-observation operational status
+note S36 refinement) + §1.7 refined Mod 3 cadence operative
+(second Q1 entry post-S36 §1.7 codification; refined Mod 3
+chunked-surface content-completeness specification operational at
+S38 STOP 1 chunked-surface protocol) + §1.8 reroll_on_caveat=False
+discipline NOT APPLICABLE at S38 (Tier II.bit-exact Pattern A.2
+PASS verdict; §1.8 applicability scope Tier VI CAVEAT primary;
+verified at Step 0 Tier characterization disposition) + §1.9
+Filename divergence sub-pattern variant SECOND-OBSERVATION cross-
+block extension NOT MANIFESTED at S38 (first-instance baseline
+observation cross-block scope preserved at S37) + §4.7.A REMEDIATED
+status dimension NOT applicable at S38 (PRESENT status; status
+dimension PRESENT/REMEDIATED orthogonal to mechanism variant 1;
+verified at Step 0 §4.7.A pattern manifestation disposition); §2.5
+Tier primary+overlay convention NOT APPLICABLE at S38 (Tier
+II.bit-exact Pattern A.2 single-tier framing per S35-absorption
+#5 + S32 third-observation tightening reinforcement preserved);
+§4.7 in-place codification operative reference at §4.7.A PRESENT
+variant 1 manifestation + §4.7.A status dimension extension cross-
+reference. **A10 Sub-class disposition (αc) Sub-class 2a (αa)
+anchor post-codification n=5 observation + Pattern F structural
+invariants forward instrumentation note FIRST-INSTANCE baseline
+observation per Chat ratification** (Sub-class 2a (αa) anchor at
+S22 + S23 + S28 + S31 + S38 = n=5 post-codification observations;
+codification-stable status preserved per A3 precedent; Pattern F
+NEW framing element first-instance baseline observation per A3
+first-instance precedent n=1 baseline; NOT codification of NEW
+Sub-class 2j; codification deferred to absorption #6+ second-
+observation tightening if recurs at S39+ FFT-family OR Kalman /
+state-space wrappers; expiration semantics: Pattern F observation
+banks at S38 close pending second-observation tightening at
+respective sub-session OR absorption #6+ codification refinement
+disposition).
+**A9 Class B counter post-S38: n=4 ACTIVE (unchanged at S38; no
+new Class B catch); sustained-observation count under Class B
+revised default discipline n=12 (S22 + S23 + S25 + S26 + S27 +
+S28 + S31 + S32 + S33 + S34 + S37 + S38 = n=12 Q1 entries only
+counting basis per Chat preference codified at S31)** (framing
+class working hypothesis CONFIRMED at Step 0 per A9 Class B
+revised default discipline; expiration semantics: sustained-
+observation counter continues incrementing at each subsequent Q1
+entry per A9 Class B revised default operating proactively,
+codification-stable status preserved at n=4 ACTIVE counter; n=4
+increments only on NEW Class B catch).
+**A9 Class A counter post-S38: n=14 ACTIVE codified at §19.4
+unchanged + candidates n=15 + n=16 codified at §1.7 (c) Workstream
+B empirical-efficacy grounding scope per S36 + candidates n=17
+(S36 STOP-1.5-revision-scope-misattribution) + n=18 (S37 multi-
+anchor schema-misattribution at trigger drafting) + n=19 (S38
+Code-side §3 enumeration drift) banked at S38 commit message
+body forward state pending absorption #6+ codification** (expiration
+semantics: A9 Class A candidate inventory accumulates until
+absorption #6 codification refinement disposition adopts/declines
+each candidate; multi-pattern variant codification refinement
+candidate at n=5+ banked candidates for absorption #6 adoption
+per A3 second-observation tightening precedent).
+**§4.7.A pattern n=9 PRESENT + n=1 REMEDIATED = n=10 total
+observation count post-S38 per S30 (G.1) generalized definitional
+scope codification + S36 §4.7.A status dimension extension:**
+S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 PRESENT +
+S34 REMEDIATED = n=10 total observations across mechanism variants
++ status dimension; **§4.7.A pattern count tightening + status
+dimension tightening forward observation at absorption #6 per A3
+precedent** (distinct tracking surface from A9 Class A counter
+per S30 (G.1) + S36 codifications; §4.7.A pattern observations
+track mechanism variant + status dimension accumulation; A9 Class
+A counter tracks empirical-state-assumption failure mode).
+**A9 Class A + Class B discipline maturation FIFTEENTH SUSTAINED
+OBSERVATION REACHED at S38 (S23 + S25 + S26 + S27 + S28 + S29 +
+S30 + S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38 = n=15 cross-
+session trajectory)** per A3 second-observation tightening precedent
+threshold satisfied + EIGHT-timing-point empirical surface
+preserved per S35-absorption #5 codification (no new timing point
+variant at S38; proactive-prevention operation SUSTAINED across
+established timing points (i)-(viii)); promoted to §4.5 NEW sub-
+section at S29-absorption #4 + EXTENDED at S35-absorption #5 to
+eleven-sustained-observation cross-session trajectory + EIGHT-
+timing-point operational surface (NEW (vii) + NEW (viii)) per CHAT
+RATIFICATIONS carried forward; **§4.5 codification operational at
+n=8 post-codification sustained observations per S38 cross-session
+trajectory** (S30 + S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38
+post-codification trajectory) per CHAT RATIFICATION #13
+reinforcement (codification-stable status preserved at sustained
+post-codification operation).
+**Frequency Domain / Signal block second-entry status framing**
+(analogous to S32 mstl_decompose Block 3 second-entry precedent
+at different Tier characterization scope per Tier II.bit-exact
+Pattern A.2 vs S32 Tier VI LAYERED algorithmic-non-uniqueness sub-
+class 2f; per-block continuation pattern n=5 catalog block
+observation candidate at Frequency Domain / Signal block completion
+per ITEM 11 forward instrumentation banking; expiration semantics:
+per-block continuation pattern n=5 codification refinement at
+absorption #6+ refinement disposition pending Frequency Domain /
+Signal block completion arc close);
+**Frequency Domain / Signal forward completion arc S37 + S38 + S39
++ S40 + S41 + S42 + S43 advances at S38 per 7-entry §3 enumeration
+empirical re-Read at S38 Step 0 mid-session** (banking continuation
+per ITEM 11 forward instrumentation banking; NOT codified at S38;
+expiration semantics: Block ordering working hypothesis testing
+through S39+ to Block 5 close per A3 precedent if empirically
+sustained heterogeneous Tier-surface across 7-entry arc; each
+subsequent Frequency Domain / Signal block entry trigger drafting
+per A9 Class B revised default discipline operating proactively at
+respective sub-session); **heterogeneous Tier-surface variant
+observation FIRST-INSTANCE empirical confirmation at Frequency
+Domain / Signal block forward instrumentation banking** (Block
+Tier-surface composition empirically HETEROGENEOUS at n=2 entries:
+Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38;
+codification refinement at Block completion arc S43 close per A3
+precedent if empirically sustained heterogeneous Tier-surface
+across 7-entry arc).
+**NEW Sub-class candidate 2j+ projection (Pattern F structural
+invariants codification candidate at subsequent FFT-family OR
+Kalman / state-space wrapper second-observation) NOT codified at
+S38** per A3 first-instance precedent (codification deferred to
+absorption #6+ second-observation tightening if recurs; expiration
+semantics: NEW Sub-class 2j candidate trajectory observation
+banks at S38 close pending respective sub-session second-instance
+baseline observation).
+**§1.9 cross-block extension SECOND-OBSERVATION NOT MANIFESTED at
+S38** (fft_spectrum filenames PRESERVE catalog-id at all three
+layers per Code S38 Step 0 empirical re-Read; §1.9 cross-block
+sub-pattern not reinforced at S38; n=4 total observations preserved
+at S37 first-instance baseline; A3 cross-block tightening DEFERRED
+pending future Frequency Domain / Signal entry §1.9 manifestation
+OR future cross-block §1.9 manifestation; expiration semantics:
+§1.9 second cross-block observation banks at S38 close pending
+S39+ entry filename empirical verification).
+**A9 Class A 19th-instance candidate banking at S38 commit message
+body forward state per S38 STOP 2 Code Step 0 §3 enumeration drift
+catch (NEW sub-pattern variant; Code-side internal-state-vs-
+empirical-state drift; distinct direction from Chat-side trigger-
+drafting schema-misattribution at S37 n=18):** Code S38 Step 0
+STOP 2 surface initially included §3 enumeration assumption
+"fft_spectrum, welch_psd, multitaper_psd, lomb_scargle, wavelet,
+[sixth entry TBD]" — internal-state drift from S37 Step 0
+empirically-corrected baseline; Chat S38 STOP 2 ratification
+directed mid-session §3 catalog re-Read per CONSTRAINT 4 A6
+BLOCKING verify-state-at-narration discipline; empirical re-Read
+confirmed outcome (a) at HEAD 3112ca9 line 9629 verbatim. n=19
+NEW sub-pattern variant distinct from prior A9 Class A failure
+mode candidates n=14-18 per structural-direction distinction
+(Code-side internal-state drift vs Chat-side trigger-drafting
+schema-misattribution); A3 first-instance precedent n=1 baseline;
+codification deferred to absorption #6+ second-observation
+tightening if recurs at S39+ Step 0 surface; banking forward state
+at S38 commit message body per CONSTRAINT 1 NOT IN SCOPE §19.4
+baseline edits preservation. **Block ordering working hypothesis
+testing through S39+ per S38 Step 0 second-position verification:**
+fft_spectrum at second-position alphabetically within §3 empirical
+enumeration verified; Block ordering working hypothesis testing
+through S39+ Block-internal complexity ordering verification
+across 7-entry arc S37 + S38 + S39 + S40 + S41 + S42 + S43 (n=2
+Block-ordering observation tightening per A3 precedent at
+Frequency Domain / Signal block close if empirically confirmed;
+cross-reference to §19.4 §4 note 13 first-instance baseline
+observation at Block 3 100% confirmed precedent per S31-S34
+ordering empirical validation; second Block-ordering working
+hypothesis empirical observation at Frequency Domain / Signal
+block close = n=2 Block-ordering observation tightening per A3
+precedent if empirically confirmed).
+
+## §3 Unvalidated catalog techniques (57 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -9625,8 +10911,8 @@ descriptions, summaries).
 ### Forecasting (Classical) (8 unvalidated)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
 
-### Frequency Domain / Signal (6 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; Block Q1-amendment in-progress at 1 of 7 entries Q1-amended)
-`emd_hht`, `fft_spectrum`, `lomb_scargle`, `ssa`, `wavelet_coherence_phase_lag`, `wavelet_transform`
+### Frequency Domain / Signal (5 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; Block Q1-amendment in-progress at 2 of 7 entries Q1-amended)
+`emd_hht`, `lomb_scargle`, `ssa`, `wavelet_coherence_phase_lag`, `wavelet_transform`
 
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
@@ -9649,7 +10935,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 58 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 1 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry per S37 §3 enumeration empirical correction at Step 0 (trigger working hypothesis "Block 5 Univariate Spectral 3 unvalidated" SUPERSEDED by empirical "Frequency Domain / Signal 7 unvalidated" per Divergence 1 ratification); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 projected per 7-entry §3 enumeration banking only per forward instrumentation banking discipline; Block ordering working hypothesis re-disposition deferred to S38 trigger drafting at S37 close report forward state per Divergence 3 ratification; A9 Class A 18th-instance candidate banking at S37 commit message body forward state per multi-anchor schema-misattribution Code S37 Step 0 catch**).
+**Total: 57 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 2 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry; heterogeneous Tier-surface variant observation FIRST-INSTANCE empirical confirmation at Frequency Domain / Signal block (Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S38 per 7-entry §3 enumeration empirical re-Read at S38 Step 0 mid-session; Block ordering working hypothesis second-position verification at S38 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE FIRST APPLICATION empirically validated at S38 Step 0 (0 multi-anchor schema-misattribution divergences vs S37 4 simultaneous divergences); A9 Class A 19th-instance candidate banking at S38 commit message body forward state per Code Step 0 §3 enumeration drift sub-pattern variant NEW failure mode distinct from prior A9 Class A failure modes n=14-18**).
 
 ## §4 How to use this document
 
