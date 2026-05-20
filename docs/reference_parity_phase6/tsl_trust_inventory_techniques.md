@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 19 catalog techniques with Phase 7+ Q1 trust documentation
+- 20 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39 amendments)
-- 56 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40 amendments)
+- 55 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -12355,7 +12355,1621 @@ hypothesis empirical observation at Frequency Domain / Signal
 block close = n=3 Block-ordering observation tightening per A3
 precedent if empirically confirmed).
 
-## §3 Unvalidated catalog techniques (56 entries; ID-only enumeration)
+### ssa (Phase 7+ S40; TWENTIETH §2.5 entry; FOURTH Frequency Domain / Signal block entry — FIFTH catalog block transition advances 3→4 of 7 entries Q1-amended per Q1 work program scope; FIRST Tier IV (Pattern A.3 self-parity / paper-formula validated) PRIMARY tier characterization Q1 §2.5 entry overall (S18 gcc_phat was Tier IV Pattern A.3 self-parity FIRST Q1 §2.5 entry at THREE-LAYER DOWNSTREAM-TOPOLOGY framing per Block 1 Causality completion; S40 ssa is FIRST Tier IV PRIMARY characterization at SINGLE-LAYER + degenerate-dual-arm-self-parity framing within Frequency Domain / Signal block at distinct structural scope); §4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant — FIRST-INSTANCE baseline observation at §2.5 entry codification scope per Code S40 Step 0 empirical surface (prior S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 + S39 PRESENT observations all variant 1 Harness-imports-library-directly; S40 ssa is FIRST EXPLICIT variant 3 PRESENT observation at §2.5 entry codification scope); NEW Sub-class 2l candidate first-instance baseline observation per A3 first-instance precedent + (αc) forward-instrumentation-note treatment (Tier IV Pattern A.3 self-parity / paper-formula + §4.7.A PRESENT variant 3 harness-reimplements-engine-math + degenerate-dual-arm-self-parity sub-variant + single-layer scope; NOT codification of Sub-class 2l); §1.9 Filename divergence sub-pattern variant SECOND-INSTANCE cross-block extension MANIFESTED at suffix-ADDITION direction per Code S40 Step 0 empirical re-Read (engine `ssa_model.py` ADDS `_model` suffix to catalog-id `ssa`; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope at n=2 cross-block observations; direction-distinct sub-variants S37 suffix-OMISSION + S40 suffix-ADDITION; codification refinement candidate at absorption #6+ for §1.9 definitional scope generalization direction-symmetric expansion); HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 THIRD-OBSERVATION TIGHTENING SUSTAINED AT S40 (n=4 distinct Tiers within Frequency Domain / Signal block at Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40; codification refinement candidate at absorption #6+ empirically REINFORCED); ALL-ANCHOR-DEFERRAL DISCIPLINE THIRD-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD REINFORCED AT S40 (n=3 sustained efficacy observations S38 + S39 + S40 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement empirically ROBUSTLY grounded); Sub-class taxonomy growth Block-level observation A3 FOURTH-OBSERVATION TIGHTENING REINFORCED at S40 (2i at S37 + 2j candidate at S38 + 2k at S39 + 2l at S40 = n=4 NEW Sub-class candidates first-instance baseline observations within Block 5 sub-session arc; codification refinement candidate at §19.4 §4 note 16 empirically REINFORCED); Pattern F structural invariants SECOND-OBSERVATION NOT MANIFESTED (SSA harness does NOT compute structural identity invariants; Pattern F NEW framing element observation remains at S38 first-instance baseline); §1.8 reroll_on_caveat=False discipline NOT APPLICABLE (PASS verdict Pattern A bit-exact NOT CAVEAT); CRITICAL CAVEAT — audit validates `_ssa_reference` SELF-CONSISTENCY ONLY (TSL arm == reference arm identical `_ssa_reference` invocation with identical arguments; 0.0 abs diff GUARANTEED BY CONSTRUCTION); engine `ssa_model.py::run()` math + Layer 2 orchestration (NaN handling + preset config dispatch + window length parameter resolution + trajectory matrix construction + numpy.linalg.svd + eigentriple grouping + diagonal averaging) NEVER exercised by audit — distinct validation claim scope from S37-S39 entries; SINGLE-LAYER + §4.7.A PRESENT variant 3 degenerate-dual-arm-self-parity framing per S40 STOP 2 empirical investigation + α + (αa) dispositions under Tier IV Pattern A.3 + paper-formula framing)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+IV (Pattern A.3 self-parity / paper-formula validated) sub-class**
+per S40 (α) Chat disposition. **Tier IV characterization directly
+grounded** at `scope_reframing_s6_banking.md` §2 lines 159-168
+verbatim ("Tier IV — Phase 3 self-parity / paper-formula validated
+(Pattern A.3). ~10 wrappers per P-3 v1.2.0 §1 estimate. TSL output
+validated against from-scratch reimplementation of paper-defined
+recursion. Pattern K → Pattern A path... 5 wrappers — `p3_bocpd`,
+`p3_cusum_page_hinkley`, `p3_stl_esd` (S10 / Batch 6) +
+`p3_wavelet_coherence`, `p3_ssa` (S11 / Batch 7)") — p3_ssa
+EXPLICITLY enumerated within Tier IV Pattern A.3 self-parity /
+paper-formula 5-wrapper enumeration at S11 / Batch 7. p3_ssa
+EXPLICITLY NOT IN Tier II.bit-exact 12-wrapper enumeration at
+scope_reframing §2 lines 121-131 verbatim NOR Tier III Pattern
+A.1 18-wrapper enumeration at scope_reframing §2 lines 151-152
+verbatim NOR Tier V Pattern J enumeration at scope_reframing §2
+lines 170-181 verbatim NOR Tier VI CAVEAT enumeration at
+scope_reframing §2 lines 183-184 verbatim (`p3_emd_hht`,
+`p3_mstl`, `p3_nar_narx`, `p3_star`, `p3_stl`). + audit
+`p3_ssa_audit.md` line 6 verbatim ("**Verdict:** **PASS** (Pattern
+A bit-exact)") + audit lines 12-17 verbatim all 4 metrics 0.0 abs
+diff / 0.0 rel diff (singular_values + eigenvalues + U_first_col +
+Vt_first_row PASS exact) + audit lines 19-27 verbatim methodology
+rationale ("byte-identical agreement on singular values,
+eigenvalues (singular values squared), and the first left/right
+singular vectors after sign canonicalization. SSA is closed-form:
+build Hankel trajectory matrix from the time series, apply SVD,
+group eigentriples, diagonal-average back to the time series.
+Both arms call `numpy.linalg.svd` on identical Hankel matrix;
+output is unique up to singular-vector sign, which the
+`_sign_canonicalize` step removes") + harness `p3_ssa.py` lines
+1-17 verbatim audit design rationale ("Compares TSL
+`engine/techniques/ssa_model.py` (numpy SVD on Hankel trajectory
+matrix) against a from-scratch reference implementing the
+canonical Broomhead-King 1986 / Golyandina-Zhigljavsky 2013 SSA
+algorithm. Both use numpy.linalg.svd internally; Pattern A bit-
+exact target on eigenvalues, modulo the sign-canonicalization
+that `ssa_model.py:flip_sign_svd` applies"). **NOT Tier II.bit-
+exact (Pattern A.2 cross-package)** — reference is from-scratch
+harness reimplementation, not external package; scope_reframing
+§2 line 121-131 enumeration does NOT include p3_ssa. **NOT Tier
+III Pattern A.1 same-library** — reference is from-scratch
+reimplementation, not direct library invocation of TSL's same
+library; scope_reframing §2 line 151-152 enumeration does NOT
+include p3_ssa. **NOT Tier V Pattern J** — audit verdict PASS
+Pattern A bit-exact at 0.0 abs diff; no Pattern J normalization-
+convention divergence; scope_reframing §2 line 170-181 enumeration
+does NOT include p3_ssa. **NOT Tier VI CAVEAT** — audit verdict
+PASS, NOT CAVEAT; scope_reframing §2 line 183-184 enumeration
+does NOT include p3_ssa. **NOT Tier VII** — audit infrastructure
+exists and PASS verdict; not SKIP-graceful. **ALL-ANCHOR-DEFERRAL
+DISCIPLINE THIRD-APPLICATION** operative at S40 Step 0 — Tier
+anchor DEFERRED to Code Step 0 empirical verification per Chat
+S40 trigger drafting all-anchor-deferral discipline third-
+application per institutional learning sustainment from S37
+multi-anchor schema-misattribution catch n=18 + S38 first-
+application empirical efficacy validation + S39 second-application
+empirical efficacy validation (A3 second-observation tightening
+precedent threshold SATISFIED at S39); Tier IV Pattern A.3
+empirically confirmed at Step 0 with 0 multi-anchor divergences
+(SUSTAINED at n=3 sustained efficacy observations S38 + S39 + S40
+0-divergence; A3 precedent threshold REINFORCED). STOP 2 BLOCKING
+discharged on Tier anchor per Chat S40 STOP 2 (α) RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER +
+§4.7.A PRESENT variant 3 Harness-reimplements-engine-math
+mechanism at DEGENERATE DUAL-ARM SELF-PARITY sub-variant per CHAT
+RATIFICATION at Step 0 STOP 2; NEW Sub-class 2l candidate first-
+instance baseline observation per A3 first-instance precedent +
+(αc) forward-instrumentation-note treatment per S40 (αa)+(αc)
+ratification (analogous to S37 Sub-class 2i candidate + S38
+Pattern F NEW framing element + S39 Sub-class 2k candidate first-
+instance baseline observation precedents at A3 first-instance
+precedent + (αc) treatment)):** ssa is 1:1 catalog↔wrapper mapping
+per `p3_ssa_audit.md` audit Wrapper field
+(`engine/techniques/ssa_model.py` sole engine module) BUT engine
+filename diverges from catalog-id per §1.9 SECOND-INSTANCE cross-
+block extension MANIFESTED at suffix-ADDITION direction — engine
+`ssa_model.py` ADDS `_model` suffix to catalog-id `ssa` per
+registry.py lines 143-145 verbatim (`"ssa_model":
+"techniques.ssa_model"` + `"ssa": "techniques.ssa_model"` +
+`"singular_spectrum_analysis": "techniques.ssa_model"` — three
+aliases all map to engine `techniques.ssa_model`).
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S40
+n=11 PRESENT + n=1 REMEDIATED = n=12 total OBSERVATIONS per S40
+banking per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A REMEDIATED 5th variant status dimension extension
+orthogonal to mechanism variant dimension; §4.7.A variant 3
+FIRST-INSTANCE baseline observation at §2.5 entry codification
+scope per S40 banking — prior S37-S39 PRESENT all variant 1
+Harness-imports-library-directly; S40 ssa is FIRST EXPLICIT variant
+3 PRESENT observation at §2.5 entry codification scope):**
+`tools/reference_parity/harness/checks/p3_ssa.py` lines 44-72
+defines `_ssa_reference(y, *, L, n_components)` from-scratch
+reimplementation function — Golyandina-Zhigljavsky 2013 SSA paper
+formula reimplementation (trajectory matrix construction at lines
+51-54 + `numpy.linalg.svd` invocation at line 56 + n_components
+truncation at lines 57-59 + sign canonicalization at lines 61-65
+via max-abs-positive convention + eigenvalues = sigma² at line 66
++ return dict at lines 67-72). Harness `run_tsl` (lines 102-114)
+invokes `_ssa_reference(y, L=L, n_components=self.N_COMPONENTS)`
+at **line 108** directly with comment at lines 105-107 verbatim
+("**Bypass TSL wrapper rounding: invoke the same SSA math directly.
+Match Balanced preset L=N//2, n_components=10**"); harness TSL-arm
+does NOT invoke engine `ssa_model.py::run()` entry point. Harness
+`run_reference` (lines 116-126) **invokes the SAME `_ssa_reference(y,
+L=L, n_components=self.N_COMPONENTS)` at line 119** — IDENTICAL
+function call to run_tsl with identical arguments. **Critical
+empirical observation: BOTH arms invoke SAME `_ssa_reference`
+function — DEGENERATE SELF-PARITY at dual-arm scope.** Engine
+`ssa_model.py::run()` is NEVER invoked by audit. The audit verdict
+"PASS Pattern A bit-exact" at 0.0 abs diff across all metrics is
+**GUARANTEED BY CONSTRUCTION** (TSL arm == reference arm exactly
+per identical `_ssa_reference` invocation with identical arguments).
+§4.7.A variant 3 "Harness-reimplements-engine-math" manifestation
+per S30 (G.1) generalized definitional scope. **§4.7.A status
+PRESENT per S36 §4.7.A status dimension codification (NOT
+REMEDIATED)** — harness defines from-scratch reimplementation +
+invokes it from both arms; engine `ssa_model.py::run()` math
+never validated; code-path divergence active at runtime per HEAD
+verification. **Cross-package framing distinction from S37-S39 §4.7.A
+variant 1:** S37-S39 reference arms invoke library primitive
+directly (S37 same-library scipy.signal.periodogram self-test; S38
+cross-package scipy.fft vs numpy.fft both wrap pocketfft shared
+backbone; S39 cross-package scipy.signal.lombscargle vs
+astropy.timeseries.LombScargle distinct normalization conventions);
+audit DOES validate library primitive at metric scope at S37-S39
+(S37 same-library bit-exact; S38 cross-package bit-exact at
+pocketfft-shared-backbone; S39 metric-selection-aligned bit-exact
+at peak_freq). At S40 ssa: harness defines from-scratch
+`_ssa_reference` (not library primitive direct invocation); BOTH
+arms invoke SAME `_ssa_reference` reimplementation; audit validates
+`_ssa_reference` self-consistency ONLY (degenerate; 0.0 abs diff
+guaranteed by identical invocation). Engine `ssa_model.py::run()`
+math NEVER validated by audit. Post-S40 §4.7.A observations =
+n=11 PRESENT across §2.5 entries (S14a granger + S18 gcc_phat +
+S26 denton_chowlin + S27 loess + S31 classical_decompose + S32
+mstl_decompose + S33 stl_decompose + S37 periodogram_spectral_density
++ S38 fft_spectrum + S39 lomb_scargle + S40 ssa) + n=1 REMEDIATED
+(S34 x13_seasonal_adjust per Phase 4 Session 2 2026-05-01 P4-2
+pathway (c) closure) = n=12 total observations across mechanism
+variants + status dimension; **§4.7.A pattern count tightening
+forward observation at absorption #6 per A3 precedent + §4.7.A
+variant 3 FIRST-INSTANCE baseline observation at §2.5 entry
+codification scope forward instrumentation banking** (NOT A9
+Class A counter increment per S30 (G.1) generalized definitional
+scope codification — §4.7.A pattern observations track mechanism
+variant + status dimension accumulation distinct from A9 Class A
+empirical-state-assumption failure mode tracking; §4.7.A variant
+3 first-instance baseline at S40 enables future second-observation
+tightening at variant 3 scope for codification refinement
+candidate at absorption #6+ §4.7.A taxonomy mechanism variant
+dimension scope expansion).
+
+**A10 Sub-class disposition: NEW Sub-class 2l candidate first-
+instance baseline observation per A3 first-instance precedent +
+(αc) forward-instrumentation-note treatment per (αa)+(αc) Chat
+ratification (n=1 baseline; NOT codification of Sub-class 2l):**
+S40 ssa surfaces NEW Sub-class 2l candidate at first-instance
+baseline observation per A3 precedent. Sub-class 2l definitional
+scope working hypothesis: **"Tier IV Pattern A.3 self-parity /
+paper-formula validated + §4.7.A PRESENT variant 3 harness-
+reimplements-engine-math + degenerate-dual-arm-self-parity sub-
+variant + single-layer scope"** — Layer 1 `_ssa_reference` from-
+scratch reimplementation of Golyandina-Zhigljavsky 2013 SSA paper
+formula invoked at BOTH TSL-arm + reference-arm (degenerate self-
+parity; 0.0 abs diff guaranteed by construction at identical
+function invocation with identical arguments) + Layer 2 engine
+`ssa_model.py::run()` orchestration (NaN handling + preset config
+dispatch + window length parameter resolution + trajectory matrix
+construction + numpy.linalg.svd + eigentriple grouping + diagonal
+averaging) NEVER exercised by audit. Audit validates
+`_ssa_reference` self-consistency ONLY at degenerate dual-arm
+self-parity scope (audit verdict "PASS Pattern A bit-exact" at
+0.0 abs diff GUARANTEED BY CONSTRUCTION — TSL arm == reference
+arm identical `_ssa_reference` invocation); audit DOES NOT
+validate `_ssa_reference` correctness vs Golyandina-Zhigljavsky
+2013 paper formula (no independent reference) NOR validate engine
+`ssa_model.py::run()` math correctness (engine never invoked).
+Distinct from codified Sub-class 2a (αa) "general two-layer class"
+semantic (Tier II.bit-exact + cross-package + two-layer; S22 +
+S23 + S28 + S31 + S38 codified) per Tier IV vs Tier II.bit-exact
+scope distinction. Distinct from NEW Sub-class 2i candidate at
+S37 (Tier III Pattern A.1 same-library self-test bit-exact +
+§4.7.A PRESENT variant 1 reimplementation-of-dispatch scope) per
+self-parity vs same-library scope distinction + variant 3 vs
+variant 1 scope distinction. Distinct from Pattern F NEW framing
+element forward instrumentation note candidate at S38 (FFT-family
+structural invariants scope) per Tier IV self-parity vs Tier
+II.bit-exact cross-package scope distinction. Distinct from NEW
+Sub-class 2k candidate at S39 (Tier V Pattern J B.3 alignment-
+via-metric resolution + cross-package framing scope) per Tier IV
+self-parity vs Tier V Pattern J scope distinction + variant 3 vs
+variant 1 scope distinction. Distinct from S18 gcc_phat Tier IV
+Pattern A.3 self-parity FIRST Q1 §2.5 entry — S18 was THREE-LAYER
+DOWNSTREAM-TOPOLOGY framing per Block 1 Causality completion
+(memory) at three-layer structural scope; S40 ssa is SINGLE-LAYER
++ DEGENERATE-DUAL-ARM-SELF-PARITY framing within Frequency Domain
+/ Signal block at distinct structural scope. **n=1 baseline
+observation status per A3 first-instance precedent** (Previous
+Chat 1.2 operational pattern: first-instance n=1 = baseline
+observation only; codification deferred to absorption #6+ second-
+observation tightening if recurs at S41+ Q1 entry within Tier IV
+Pattern A.3 self-parity + §4.7.A variant 3 combined scope OR
+future Tier IV Pattern A.3 entry within Tier IV ~10-wrapper
+enumeration scope). Variant tagging mechanism NOT applied at n=1
+first-instance per A3 precedent; Sub-class 2l definitional scope
+working hypothesis only.
+
+**Pattern F structural invariants SECOND-OBSERVATION NOT
+MANIFESTED at S40 per Code S40 Step 0 empirical re-Read:** harness
+`p3_ssa.py` does NOT compute structural identity invariants (no
+roundtrip identity test; no Parseval analog; no conservation law
+adjunct at SVD/eigentriple scope; sign-canonicalization step at
+lines 61-65 is normalization not structural invariant
+validation). Pattern F NEW framing element observation remains
+at S38 first-instance baseline (n=1 per A3 first-instance
+precedent). A3 second-observation tightening precedent at Pattern
+F scope DEFERRED pending future FFT-family wrapper (none remain
+in §3 catalog per S37 + S38 + S39 Step 0 empirical re-Reads) OR
+Kalman / state-space wrapper second-observation. NEW Sub-class 2j
+codification (Pattern F structural invariants scope) preserved at
+deferred status per (αc) forward-instrumentation-note treatment
+from S38.
+
+**§1.9 Filename divergence sub-pattern variant SECOND-INSTANCE
+cross-block extension MANIFESTED at suffix-ADDITION direction per
+Code S40 Step 0 empirical re-Read:** engine module
+`engine/techniques/ssa_model.py` ADDS `_model` suffix to catalog-
+id `ssa`; audit `p3_ssa_audit.md` + harness `p3_ssa.py` preserve
+catalog-id `ssa` at audit + harness layers. Registry.py lines
+143-145 verbatim three aliases (`"ssa_model"` + `"ssa"` +
+`"singular_spectrum_analysis"`) all map to `techniques.ssa_model`
+engine module — engine filename `ssa_model.py` is canonical;
+catalog-id `ssa` per §3 enumeration aliases to engine module via
+registry. §1.9 codified Block-3-specific scope at S36 EXTENDS to
+Frequency Domain / Signal block at S37 first-instance cross-block
+observation (periodogram audit + harness omit `_spectral_density`
+suffix from catalog-id `periodogram_spectral_density` — suffix-
+OMISSION direction); S38 + S39 SECOND + THIRD-OBSERVATION cross-
+block extension NOT MANIFESTED at fft_spectrum + lomb_scargle;
+**S40 SECOND-INSTANCE cross-block extension MANIFESTED at suffix-
+ADDITION direction** — engine adds suffix vs audit + harness
+preserve catalog-id. **Direction-distinct sub-variant observation:**
+S37 first-instance at suffix-OMISSION direction + S40 second-
+instance at suffix-ADDITION direction — n=2 distinct §1.9 cross-
+block sub-variants observed. **A3 SECOND-OBSERVATION TIGHTENING
+PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope** at n=2
+cross-block observations (S37 + S40); cumulative §1.9 observations
+across Blocks = n=5 (Block 3 mstl + stl + x13 intra-block S32-S34
++ Frequency Domain / Signal periodogram cross-block S37 + ssa
+cross-block S40). Codification refinement candidate at absorption
+#6+ for §1.9 definitional scope generalization (direction-symmetric
+expansion: filename-divergence-between-layers covers both suffix-
+omission + suffix-addition directions; cross-block scope vs Block-
+3-specific scope from S36 codification baseline). Forward
+instrumentation: §1.9 third cross-block observation banking at
+S40 close pending S41+ entry filename empirical verification.
+
+**§1.8 reroll_on_caveat=False discipline NOT APPLICABLE at S40:**
+audit verdict is PASS (Pattern A bit-exact) per `p3_ssa_audit.md`
+line 6 verbatim, NOT CAVEAT. §1.8 applicability scope per S32-S33
+codified definitional scope is Tier VI CAVEAT primary; S40 Tier
+IV Pattern A.3 PASS primary scope distinct from §1.8 applicability
+scope. §1.8 NOT APPLICABLE banking continuation at S40 per Step 0
++ STOP 2 verification.
+
+**Code Tier 2 case-against options surfaced at S40 STOP 2 per
+Mark 3 unprompted-discipline (rejected per Chat ratification at
+S40 STOP 2):**
+- **(α-i alternative) Tier II.bit-exact (Pattern A.2 cross-package)
+  ALTERNATIVE:** REJECTED. Reference is from-scratch harness
+  reimplementation `_ssa_reference`, not external package;
+  scope_reframing §2 line 121-131 Tier II.bit-exact 12-wrapper
+  enumeration explicitly does NOT include p3_ssa; rejected per
+  A6 BLOCKING empirical content preservation.
+- **(α-ii) Tier III Pattern A.1 same-library ALTERNATIVE:**
+  REJECTED. Reference is from-scratch reimplementation, not
+  direct library invocation of TSL's same library;
+  scope_reframing §2 line 151-152 Tier III 18-wrapper Pattern
+  A.1 enumeration explicitly does NOT include p3_ssa; rejected
+  per A6 BLOCKING empirical content preservation.
+- **(α-iii) Tier V Pattern J ALTERNATIVE:** REJECTED. Audit
+  verdict PASS Pattern A bit-exact at 0.0 abs diff across all
+  metrics; no Pattern J normalization-convention divergence at
+  diagnostic-metric scope; scope_reframing §2 line 170-181 Tier
+  V enumeration does NOT include p3_ssa; rejected per A6
+  BLOCKING empirical content preservation.
+- **(α-iv) Tier VI CAVEAT ALTERNATIVE:** REJECTED. Audit
+  verdict is PASS (Pattern A bit-exact), NOT CAVEAT; §1.8
+  reroll_on_caveat applicability scope NOT APPLICABLE at S40;
+  scope_reframing §2 line 183-184 Tier VI 5-wrapper enumeration
+  does NOT include p3_ssa; rejected per A6 BLOCKING empirical
+  content preservation.
+- **(α-v) Tier VII SKIP-graceful ALTERNATIVE:** REJECTED. Audit
+  infrastructure exists at `p3_ssa.py` + `p3_ssa_audit.md` and
+  PASS verdict produced; NOT SKIP-graceful; rejected per A6
+  BLOCKING empirical content preservation.
+- **(αb) Sub-class 2a (αa) extension at Tier IV scope:**
+  REJECTED. Sub-class 2a (αa) codified at Tier II.bit-exact +
+  cross-package + two-layer scope per S22 codification at S30
+  §1.5 codification application precedent + n=5 post-codification
+  observations (S22 + S23 + S28 + S31 + S38); Tier IV self-parity
+  definitional scope distinct from codified Sub-class 2a (αa)
+  scope; extension at Tier IV scope would conflate codification-
+  stable Sub-class 2a (αa) semantic; rejected per A6 BLOCKING
+  empirical content preservation.
+- **(αc-only) Forward-instrumentation-note treatment ONLY (no
+  NEW Sub-class 2l candidate framing):** REJECTED per Code (αa)+
+  (αc) recommendation + Chat ratification preference at NEW Sub-
+  class 2l candidate framing preservation (analogous to S37 Sub-
+  class 2i candidate + S38 Pattern F NEW framing element + S39
+  Sub-class 2k candidate first-instance baseline precedent;
+  preserves Sub-class taxonomy structure for future second-
+  observation tightening at Tier IV Pattern A.3 self-parity +
+  §4.7.A variant 3 + degenerate-dual-arm-self-parity scope).
+- **§4.7.A variant 2 (Harness-defines-internal-reference-
+  function) ALTERNATIVE:** PARTIALLY VIABLE alternative —
+  `_ssa_reference` IS internal harness function. But the
+  function REIMPLEMENTS engine MATH (Golyandina-Zhigljavsky 2013
+  paper formula); variant 3 (reimplements-engine-math) is more
+  specific characterization than variant 2 (defines-internal-
+  reference-function) per S30 codification specificity ordering;
+  rejected per Code recommendation + Chat ratification preference
+  at variant 3 specificity scope.
+
+**Frequency Domain / Signal block FOURTH entry — FIFTH catalog
+block transition advances 3→4 of 7 entries Q1-amended per Q1 work
+program scope (per-block continuation pattern n=5 catalog block
+observation candidate at Frequency Domain / Signal block completion
+pending arc close):** S40 ssa advances the fifth catalog block
+transition from 3 of 7 (S37 periodogram_spectral_density first-
+entry + S38 fft_spectrum second-entry + S39 lomb_scargle third-
+entry) to 4 of 7 (S40 ssa fourth-entry continuation). **Block
+ordering position verification at S40 Step 0:** ssa at second-
+position alphabetically within §3 remaining 4 unvalidated entries
+`emd_hht, ssa, wavelet_coherence_phase_lag, wavelet_transform`
+(post-S37 + post-S38 + post-S39 §3 enumeration; ssa at FOURTH-
+position in 7-entry Block ordering working hypothesis arc counting
+validated S37 + S38 + S39 + S40); Block ordering working hypothesis
+ratified per §3 empirical re-Read at HEAD 3afe6c7 line 12394
+verbatim. **Empirical §3 enumeration confirmation at S40 Step 0
+mid-session re-Read per CONSTRAINT 4 A6 BLOCKING verify-state-at-
+narration discipline + S38 + S39 A9 Class A 19th + 20th-instance
+candidate banking institutional learning sustainment:** §3
+Frequency Domain / Signal block remaining 4 unvalidated entries
+empirically = emd_hht + ssa + wavelet_coherence_phase_lag +
+wavelet_transform (consistent with S39 Step 0 ratification minus
+ssa validated at S40 close). Forward instrumentation: Frequency
+Domain / Signal block completion arc S37 + S38 + S39 + S40 + S41
++ S42 + S43 (7 entries total) advances at S40; per-block
+continuation pattern at n=5 catalog block observations (Block 1 +
+Block 12 + Block 8 + Block 3 + Frequency Domain / Signal [in-
+progress at S40 = 4 of 7]) codification refinement candidate at
+absorption #6+ per §19.4 §4 note 6 refinement n=4 → n=5 per S35-
+absorption #5 codification.
+**Heterogeneous Tier-surface variant observation A3 THIRD-
+OBSERVATION TIGHTENING SUSTAINED AT S40:** n=4 distinct Tier
+characterizations across n=4 entries within Frequency Domain /
+Signal block (Tier III Pattern A.1 at S37 + Tier II.bit-exact
+Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV
+Pattern A.3 at S40); A3 third-observation tightening sustained at
+n=4 distinct Tier observations within single Block arc per Block
+heterogeneous-Tier-surface variant sub-pattern empirical
+accumulation EMPIRICALLY REINFORCED at fourth-sub-session
+heterogeneous-Tier observation. Codification refinement candidate
+at absorption #6+ for Block heterogeneous-Tier-surface variant
+sub-pattern definitional scope generalization per §19.4 §4 note
+6 refinement at S35-absorption #5 codification EMPIRICALLY
+REINFORCED (Block Tier-surface composition empirically
+HETEROGENEOUS at sustained n=4 distinct Tiers per A3 precedent
+threshold REINFORCED; codification refinement substantively
+ROBUSTLY grounded at S40 close pending absorption #6+ chat
+adoption).
+
+#### §1.5 Novelty enumeration sub-section (S40 application — sixth post-S23 first-instance codification application per S30 codification; ≥5 observations threshold satisfied at n=7)
+
+S40 surfaces 7 NEW observations across compound first-instance
+disclosures + Frequency Domain / Signal block fourth-entry framing
++ multi-observation A3 second-observation tightening precedent
+threshold satisfactions + Sub-class taxonomy growth Block-level
+observation + degenerate dual-arm self-parity validation claim
+scope distinction, satisfying ≥5 observations threshold per S23
+first-instance codification at S30 §1.5 codification scope. n=6
+post-codification observations across S23 + S34 + S37 + S38 + S39
++ S40; A3 sixth-observation tightening reinforcement per §1.5
+sustained-observation operational status note per S36 §1.5
+refinement (n=5 fifth-observation reinforcement at S39 UPGRADE to
+n=6 sixth-observation reinforcement at S40 per S40 application).
+
+**Novelty 1 — Tier IV (Pattern A.3 self-parity / paper-formula
+validated) FIRST PRIMARY tier characterization Q1 §2.5 entry
+overall + FIRST §2.5 entry within Frequency Domain / Signal block
+at Tier IV scope:** S40 ssa is FIRST Q1 §2.5 entry within Tier IV
+PRIMARY tier characterization scope at Frequency Domain / Signal
+block first-instance (S18 gcc_phat was FIRST Tier IV Q1 §2.5
+entry overall at THREE-LAYER DOWNSTREAM-TOPOLOGY framing within
+Block 1 Causality completion scope; S40 ssa is FIRST Tier IV
+PRIMARY characterization within Frequency Domain / Signal block
+at SINGLE-LAYER + degenerate-dual-arm-self-parity framing per
+distinct structural scope). Tier IV (Pattern A.3 self-parity /
+paper-formula validated) characterization grounded at
+scope_reframing §2 lines 159-168 verbatim Tier IV 5-wrapper
+enumeration scope explicitly including p3_ssa (Pattern K → Pattern
+A path per phase3_cross_batch_findings.md S10 cross-batch finding;
+S11 / Batch 7 enumeration).
+
+**Novelty 2 — §4.7.A PRESENT variant 3 (Harness-reimplements-
+engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant FIRST-
+INSTANCE baseline observation at §2.5 entry codification scope:**
+S40 ssa is FIRST EXPLICIT §4.7.A variant 3 PRESENT observation
+at §2.5 entry codification scope (prior S37-S39 PRESENT all variant
+1 Harness-imports-library-directly; S14a + S18 + S26 + S27 + S31
++ S32 + S33 + S37 + S38 + S39 + S40 PRESENT across §2.5 entries
++ S34 REMEDIATED = n=12 total post-S40 observations across
+mechanism variants + status dimension; variant 3 first-instance
+baseline at §2.5 entry codification scope forward instrumentation
+banking). DEGENERATE DUAL-ARM SELF-PARITY sub-variant first-
+instance baseline observation at §4.7.A taxonomy + harness
+mechanism dimension; codification refinement candidate at
+absorption #6+ for §4.7.A taxonomy mechanism variant dimension
+scope expansion (degenerate-dual-arm-self-parity sub-variant
+within variant 3 scope).
+
+**Novelty 3 — NEW Sub-class 2l candidate first-instance baseline
+observation per A3 first-instance precedent + (αc) forward-
+instrumentation-note treatment per (αa)+(αc) Chat ratification:**
+FIRST observed Sub-class 2l candidate per A3 first-instance
+precedent (n=1 baseline; NOT codification of Sub-class 2l).
+Definitional scope working hypothesis: "Tier IV Pattern A.3 self-
+parity / paper-formula validated + §4.7.A PRESENT variant 3
+harness-reimplements-engine-math + degenerate-dual-arm-self-
+parity sub-variant + single-layer scope". Distinct from codified
+Sub-class 2a-2k Tier II.bit-exact + cross-package + two-layer
+scope (S22 + S23 + S28 + S31 + S38 codified) + NEW Sub-class 2i
++ 2j + 2k candidates (S37 + S38 + S39 first-instance baseline
+observations within Block 5 sub-session arc) per Tier IV self-
+parity vs other Tier scope distinction + variant 3 vs variant 1
+scope distinction. Distinct from S18 gcc_phat Tier IV THREE-LAYER
+DOWNSTREAM-TOPOLOGY framing per Block 1 Causality completion vs
+S40 SINGLE-LAYER + DEGENERATE-DUAL-ARM-SELF-PARITY framing.
+
+**Novelty 4 — §1.9 Filename divergence sub-pattern variant
+SECOND-INSTANCE cross-block extension MANIFESTED at suffix-
+ADDITION direction per Code S40 Step 0 empirical re-Read; A3
+SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at
+§1.9 cross-block scope:** engine `ssa_model.py` ADDS `_model`
+suffix to catalog-id `ssa` per registry.py lines 143-145 verbatim
++ S37 periodogram_spectral_density first-instance cross-block
+manifestation at suffix-OMISSION direction (audit + harness omit
+`_spectral_density` suffix); S40 ssa second-instance cross-block
+manifestation at suffix-ADDITION direction. n=2 cross-block
+observations (S37 + S40); n=2 distinct sub-variants (suffix-
+omission + suffix-addition). A3 second-observation tightening
+precedent threshold SATISFIED at §1.9 cross-block scope at n=2
+cross-block observations; codification refinement candidate at
+absorption #6+ for §1.9 definitional scope generalization
+(direction-symmetric expansion: filename-divergence-between-
+layers covers both omission + addition directions; cross-block
+scope vs Block-3-specific scope from S36 codification baseline).
+
+**Novelty 5 — Degenerate dual-arm self-parity validation claim
+scope distinction FIRST observation at Q1 §2.5 entry codification
+scope:** harness `_ssa_reference` (lines 44-72) is from-scratch
+reimplementation of Golyandina-Zhigljavsky 2013 SSA paper formula;
+BOTH harness run_tsl (line 108) AND run_reference (line 119)
+invoke IDENTICAL `_ssa_reference(y, L=L, n_components=self.N_COMPONENTS)`
+function call with identical arguments. **Audit verdict "PASS
+Pattern A bit-exact" at 0.0 abs diff across all metrics is
+GUARANTEED BY CONSTRUCTION** (TSL arm == reference arm exactly).
+Engine `ssa_model.py::run()` math + Layer 2 orchestration NEVER
+exercised by audit. **Distinct validation claim scope from S37-
+S39 entries:** S37-S39 audit DOES validate library primitive at
+metric scope (S37 same-library bit-exact; S38 cross-package bit-
+exact at pocketfft-shared-backbone; S39 metric-selection-aligned
+bit-exact at peak_freq). At S40 ssa: audit validates
+`_ssa_reference` self-consistency ONLY at degenerate dual-arm
+scope; audit DOES NOT validate `_ssa_reference` correctness vs
+Golyandina-Zhigljavsky 2013 paper formula (no independent
+reference) NOR validate engine `ssa_model.py::run()` math
+correctness (engine never invoked). FIRST observation of
+degenerate dual-arm self-parity validation claim scope distinction
+at Q1 §2.5 entry codification scope; institutionally substantive
+empirical content distinction at validation claim scope dimension.
+
+**Novelty 6 — HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3
+THIRD-OBSERVATION TIGHTENING SUSTAINED AT S40:** n=4 distinct
+Tier characterizations across n=4 entries within Frequency Domain
+/ Signal block (Tier III Pattern A.1 at S37 + Tier II.bit-exact
+Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV
+Pattern A.3 at S40); A3 third-observation tightening sustained at
+n=4 distinct Tier observations within single Block arc per Block
+heterogeneous-Tier-surface variant sub-pattern empirical
+accumulation EMPIRICALLY REINFORCED. Codification refinement
+candidate at absorption #6+ for Block heterogeneous-Tier-surface
+variant sub-pattern definitional scope generalization per §19.4
+§4 note 6 refinement at S35-absorption #5 codification EMPIRICALLY
+ROBUSTLY GROUNDED.
+
+**Novelty 7 — ALL-ANCHOR-DEFERRAL DISCIPLINE THIRD-APPLICATION
+EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD REINFORCED AT S40 + Sub-class taxonomy growth Block-
+level observation A3 FOURTH-OBSERVATION TIGHTENING REINFORCED at
+S40 (compound multi-threshold A3 precedent satisfaction confluence
+continuation):** Chat S40 trigger drafting applied all-anchor-
+deferral discipline (Tier + Sub-class + §4.7.A + Block ordering
+anchors DEFERRED to Code Step 0 empirical verification) per
+institutional learning sustainment from S37 multi-anchor schema-
+misattribution catch n=18 + S38 first-application + S39 second-
+application empirical efficacy validations (A3 second-observation
+tightening precedent threshold SATISFIED at S39 close). Empirical
+efficacy validated at S40 Step 0: 0 multi-anchor schema-
+misattribution divergences SUSTAINED at third-application (n=3
+sustained efficacy observations S38 + S39 + S40 0-divergence per
+A3 second-observation tightening precedent threshold REINFORCEMENT).
+Codification candidate at §1.7+ Workstream B §1.4 operational
+scope at absorption #6+ refinement empirically ROBUSTLY grounded
+at A3 precedent threshold REINFORCEMENT. + Sub-class taxonomy
+growth Block-level observation: 2i (S37) + 2j candidate (S38) +
+2k (S39) + 2l (S40) = n=4 NEW Sub-class candidates first-instance
+baseline observations within Block 5 sub-session arc; A3 FOURTH-
+OBSERVATION TIGHTENING REINFORCED at sustained Sub-class taxonomy
+growth Block-level observation; codification refinement candidate
+at §19.4 §4 note 16 EMPIRICALLY ROBUSTLY GROUNDED.
+
+**Reference:** from-scratch numpy SVD reference inline in
+`harness/checks/p3_ssa.py` (numpy 2.4.4; Pattern A.3 self-parity
+/ paper-formula validated per Golyandina-Zhigljavsky 2013 SSA
+paper formula reimplementation — harness `_ssa_reference` lines
+44-72 reimplements canonical Broomhead-King 1986 / Golyandina-
+Zhigljavsky 2013 SSA algorithm; harness `run_tsl` line 108 +
+harness `run_reference` line 119 BOTH invoke IDENTICAL
+`_ssa_reference(y, L=L, n_components=self.N_COMPONENTS)` with
+identical arguments; DEGENERATE DUAL-ARM SELF-PARITY at audit
+scope — 0.0 abs diff GUARANTEED BY CONSTRUCTION; engine
+`ssa_model.py::run()` NEVER invoked by audit)
+**Verdict:** **PASS Pattern A bit-exact** per audit line 6
+verbatim
+**Audit:** `tools/reference_parity/reports/p3_ssa_audit.md`
+**Audit date:** 2026-04-29
+**singular_values abs diff:** 0.0 (byte-identical; audit line 14
+verbatim)
+**eigenvalues abs diff:** 0.0 (byte-identical; audit line 15
+verbatim)
+**U_first_col abs diff:** 0.0 (byte-identical after sign
+canonicalization; audit line 16 verbatim)
+**Vt_first_row abs diff:** 0.0 (byte-identical after sign
+canonicalization; audit line 17 verbatim)
+**Tolerance class:** closed_form (per harness line 82 verbatim)
+**Fixture:** trend (0.02·t) + 12-period sinusoid + N(0, 0.09)
+noise, T=200, seed=42; window length L = N // 2 = 100;
+n_components = 10 per audit lines 31-34 verbatim + harness lines
+32-41 verbatim `_generate_ssa_dgp`; sign convention sklearn
+`svd_flip` style (max-absolute-entry of U positive, Vt sign-locked
+to U) per audit lines 39-40 verbatim.
+
+**Source files (SINGLE-LAYER + §4.7.A PRESENT variant 3 at
+DEGENERATE DUAL-ARM SELF-PARITY sub-variant per S40 α framing;
+empirical filenames at §1.9 SECOND-INSTANCE cross-block extension
+MANIFESTED at suffix-ADDITION direction per S40 verification —
+engine `ssa_model.py` ADDS `_model` suffix to catalog-id `ssa`;
+audit + harness preserve catalog-id):**
+`tools/reference_parity/harness/checks/p3_ssa.py` lines 44-72
+(harness `_ssa_reference(y, *, L, n_components)` from-scratch
+reimplementation of Golyandina-Zhigljavsky 2013 SSA paper formula:
+trajectory matrix construction at lines 51-54 + `numpy.linalg.svd`
+invocation at line 56 + n_components truncation at lines 57-59 +
+sign canonicalization at lines 61-65 via max-abs-positive
+convention + eigenvalues = sigma² at line 66 + return dict at
+lines 67-72; §4.7.A variant 3 "Harness-reimplements-engine-math"
+mechanism manifestation per S30 (G.1) generalized definitional
+scope)
++ `tools/reference_parity/harness/checks/p3_ssa.py` lines 102-114
+(harness TSL arm invokes `_ssa_reference(y, L=L, n_components=
+self.N_COMPONENTS)` at line 108 directly with comment at lines
+105-107 verbatim "Bypass TSL wrapper rounding: invoke the same
+SSA math directly. Match Balanced preset L=N//2, n_components=10";
+extracts singular_values + eigenvalues + U_first_col + Vt_first_row
+at lines 110-113; harness does NOT invoke `ssa_model.py::run()`
+engine entry point; §4.7.A variant 3 manifestation)
++ `tools/reference_parity/harness/checks/p3_ssa.py` lines 116-126
+(harness reference arm **invokes SAME `_ssa_reference(y, L=L,
+n_components=self.N_COMPONENTS)` at line 119** — IDENTICAL function
+call to run_tsl with identical arguments; DEGENERATE DUAL-ARM
+SELF-PARITY sub-variant at audit scope; extracts singular_values
++ eigenvalues + U_first_col + Vt_first_row at lines 121-124;
+0.0 abs diff GUARANTEED BY CONSTRUCTION per identical function
+invocation)
++ `tools/reference_parity/harness/checks/p3_ssa.py` lines 1-17
+verbatim (audit design rationale: "Compares TSL `engine/techniques/
+ssa_model.py` (numpy SVD on Hankel trajectory matrix) against a
+from-scratch reference implementing the canonical Broomhead-King
+1986 / Golyandina-Zhigljavsky 2013 SSA algorithm. Both use
+numpy.linalg.svd internally; Pattern A bit-exact target on
+eigenvalues, modulo the sign-canonicalization that `ssa_model.py:
+flip_sign_svd` applies. **Why self-parity vs `pyts.decomposition`:**
+pyts has a SingularSpectrumAnalysis estimator but its sklearn-
+style API expects (n_samples, n_features) input shape and applies
+SSA per-row, not per-time-series. Translating to a 1-D series
+parity test is awkward; the from-scratch reference follows
+Golyandina-Zhigljavsky 2013 directly")
++ `tools/reference_parity/harness/checks/p3_ssa.py` lines 82-91
+(harness verdict_class_rationale: "SSA is closed-form: build
+Hankel trajectory matrix, apply SVD, group eigentriples, diagonal-
+average back to time series. TSL and reference both call
+numpy.linalg.svd on identical Hankel matrix; eigenvalues are
+unique and singular vectors are unique up to sign. After sign-
+canonicalization, machine-precision parity expected")
++ `tools/reference_parity/harness/checks/p3_ssa.py` lines 128-156
+(compare method: 4 primary metrics via _compare_vector — singular_values
++ eigenvalues + U_first_col + Vt_first_row; outcome PASS at all
+0.0 abs diff per identical `_ssa_reference` invocation)
++ `tools/reference_parity/harness/checks/p3_ssa.py` lines 32-41
+(`_generate_ssa_dgp`: trend + sinusoidal + noise at T=200 +
+seed=42; own DGP generator producing trend (0.02·t) + 12-period
+sinusoid + N(0, 0.09) noise)
++ `engine/techniques/ssa_model.py` lines 1-13 (module docstring:
+"Singular Spectrum Analysis (SSA) for Time Series Lab. SSA
+decomposes a time series into trend, oscillatory, and noise
+components by embedding it into a trajectory matrix and applying
+SVD. The resulting eigentriples can be grouped to reconstruct
+interpretable components. Algorithm: 1. Embed the series into a
+Hankel (trajectory) matrix of dimension L x K. 2. SVD of the
+trajectory matrix. 3. Group eigentriples into meaningful
+components. 4. Reconstruct component time series via diagonal
+averaging")
++ `engine/techniques/ssa_model.py` line 15 (numpy import:
+`import numpy as np` — Layer 1 math primitive via
+`numpy.linalg.svd` at engine line 100+; engine math NEVER invoked
+by audit per §4.7.A variant 3 + DEGENERATE DUAL-ARM SELF-PARITY
+sub-variant)
++ `engine/techniques/ssa_model.py` lines 25-29 (`_PRESET_CONFIG`:
+preset dispatch Fast `{auto_group: True, n_components_report: 10}`
+/ Balanced `{auto_group: True, n_components_report: 20}` /
+Thorough `{auto_group: True, n_components_report: 40}`)
++ `engine/techniques/ssa_model.py` lines 32-404 (Layer 2 engine
+orchestration: `run(ctx, progress_callback)` main entry; standalone-
+technique-only invocation; NaN handling with linear interpolation
+at lines 52-69 + n ≥ 20 threshold check at lines 71-77 + preset
+config dispatch at lines 79-98 + window length parameter resolution
+(default N//4 Fast / N//2 Balanced + Thorough) at lines 82-89 +
+n_components parameter resolution at lines 93-98 + trajectory
+matrix construction + numpy.linalg.svd invocation + eigentriple
+grouping (auto_group or manual_groups) + diagonal averaging
+reconstruction + component analysis + summary tables + plain
+English + audit_fields construction; **engine `run()` NEVER
+invoked by audit per §4.7.A variant 3 DEGENERATE DUAL-ARM SELF-
+PARITY sub-variant**)
++ `engine/techniques/registry.py` lines 143-145 verbatim
+("ssa_model": "techniques.ssa_model" + "ssa": "techniques.ssa_model"
++ "singular_spectrum_analysis": "techniques.ssa_model" — three
+aliases mapping to engine `techniques.ssa_model`; catalog-id
+`ssa` per §3 enumeration aliases to engine module via registry;
+§1.9 SECOND-INSTANCE cross-block extension MANIFESTED at suffix-
+ADDITION direction)
++ `tools/reference_parity/reports/p3_ssa_audit.md`
+
+**Validation claim scope (TIER IV (PATTERN A.3 SELF-PARITY /
+PAPER-FORMULA VALIDATED) SUB-CLASS + §4.7.A PRESENT VARIANT 3
+HARNESS-REIMPLEMENTS-ENGINE-MATH AT DEGENERATE DUAL-ARM SELF-
+PARITY SUB-VARIANT + NEW Sub-class 2l candidate first-instance
+baseline observation per A3 first-instance precedent + (αc)
+forward-instrumentation-note treatment per S40 (α) + (αa)+(αc)
+ratifications) — CRITICAL CAVEAT operative:** TSL ssa output
+relies on Layer 1 numpy.linalg.svd primitive + Layer 2 engine
+`ssa_model.py::run()` orchestration. **Audit validates
+`_ssa_reference` self-consistency ONLY at degenerate dual-arm
+self-parity scope** — harness `_ssa_reference` (lines 44-72)
+from-scratch reimplementation of Golyandina-Zhigljavsky 2013 SSA
+paper formula is invoked at BOTH TSL-arm (line 108) AND reference-
+arm (line 119) with IDENTICAL arguments; audit verdict "PASS
+Pattern A bit-exact" at 0.0 abs diff across all 4 metrics
+(singular_values + eigenvalues + U_first_col + Vt_first_row) is
+**GUARANTEED BY CONSTRUCTION** per identical function invocation.
+**Audit DOES NOT validate**:
+- `_ssa_reference` correctness vs Golyandina-Zhigljavsky 2013
+  paper formula (no independent reference at degenerate dual-arm
+  scope — both arms use SAME reimplementation)
+- engine `ssa_model.py::run()` math correctness (engine NEVER
+  invoked by audit)
+- engine Layer 2 orchestration (NaN handling + preset config
+  dispatch + window length parameter resolution + trajectory
+  matrix construction + numpy.linalg.svd + eigentriple grouping +
+  diagonal averaging) — NEVER exercised by audit
+- cross-implementation parity (no R `Rssa` cross-validation; no
+  pyts `SingularSpectrumAnalysis` cross-validation per audit lines
+  42-49 verbatim pyts API incompatibility rationale)
+
+- **Layer 1 `_ssa_reference` from-scratch reimplementation (Tier
+  IV Pattern A.3 self-parity / paper-formula validated at
+  DEGENERATE DUAL-ARM SELF-PARITY scope):** PASS Pattern A bit-
+  exact verdict per audit line 6 verbatim; 0.0 abs diff across
+  all 4 metrics per audit lines 12-17 verbatim. **Tier IV Pattern
+  A.3 characterization directly grounded** at scope_reframing §2
+  lines 159-168 verbatim Tier IV 5-wrapper enumeration explicitly
+  including p3_ssa. Validation scope: `_ssa_reference` self-
+  consistency at degenerate dual-arm self-parity scope (TSL arm
+  == reference arm identical invocation; 0.0 abs diff guaranteed
+  by construction). **Pattern A.3 self-parity / paper-formula
+  caveat:** byte-identical agreement established at degenerate
+  dual-arm self-parity scope (TSL arm == reference arm exactly);
+  audit DOES NOT validate `_ssa_reference` correctness vs
+  Golyandina-Zhigljavsky 2013 paper formula (no independent
+  reference); cross-package or cross-implementation validation
+  NOT audit-established. **§4.7.A PRESENT variant 3 harness-
+  reimplements-engine-math + degenerate-dual-arm-self-parity
+  caveat:** engine `ssa_model.py::run()` is COMPLETELY DIFFERENT
+  code path from harness `_ssa_reference` reimplementation;
+  engine adds Layer 2 orchestration (NaN handling + preset config
+  dispatch + window length parameter resolution + trajectory
+  matrix construction + numpy.linalg.svd + eigentriple grouping +
+  diagonal averaging) NEVER exercised by audit. **DEGENERATE
+  DUAL-ARM SELF-PARITY sub-variant distinction from S37-S39 §4.7.A
+  variant 1:** S37-S39 audit DOES validate library primitive at
+  metric scope (S37 same-library bit-exact; S38 cross-package
+  bit-exact at pocketfft-shared-backbone; S39 metric-selection-
+  aligned bit-exact at peak_freq). At S40 ssa: audit validates
+  `_ssa_reference` self-consistency ONLY at degenerate dual-arm
+  scope; engine math NEVER validated.
+- **Layer 2 engine `ssa_model.py::run()` orchestration (validation
+  scope NOT EXERCISED; engine NEVER invoked by audit):**
+  - NaN handling with linear interpolation (lines 52-69):
+    `~np.isnan(values)` mask + `np.interp(nans, valid, values
+    [valid])` interior interpolation + n_dropped warning + n ≥
+    10 valid check; NOT audit-validated
+  - n ≥ 20 threshold check (lines 71-77): error response if n <
+    20; NOT audit-validated
+  - Preset config dispatch (lines 25-29 `_PRESET_CONFIG` + line
+    79 `cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG
+    ["Balanced"])`): Fast `{auto_group: True, n_components_report:
+    10}` / Balanced `{auto_group: True, n_components_report: 20}`
+    / Thorough `{auto_group: True, n_components_report: 40}`;
+    audit pins custom Balanced-like preset (L=N//2, n_components=
+    10); Fast + Thorough engine production behaviors NOT exercised
+    by audit
+  - Window length parameter resolution (lines 82-89): user
+    window_length OR default `max(10, n // 4)` Fast OR `max(10,
+    n // 2)` Balanced/Thorough + capped at `min(L, n // 2)`; NOT
+    audit-validated at engine-default config (audit pins L=N//2=
+    100 matching Balanced preset)
+  - n_components parameter resolution (lines 93-98): user
+    n_components OR default `min(max_report, L, K)`; NOT audit-
+    validated at engine-default config (audit pins n_components=
+    10 matching N_COMPONENTS class constant)
+  - Trajectory matrix construction (lines 100+): Hankel embedding
+    L × K dimension; NOT audit-validated at engine scope (audit
+    pins identical construction in `_ssa_reference`)
+  - numpy.linalg.svd invocation (engine math): SAME primitive as
+    harness `_ssa_reference` invokes at line 56; audit Layer 1
+    transfer DOES NOT apply at engine scope per §4.7.A variant 3
+    degenerate-dual-arm-self-parity (engine never invoked)
+  - Eigentriple grouping (auto_group or manual_groups): grouping
+    algorithm NOT audit-validated
+  - Diagonal averaging reconstruction: time-series reconstruction
+    NOT audit-validated
+  - Component analysis + summary tables + plain English +
+    audit_fields construction: presentation layer NOT audit-
+    validated
+
+#### Disclosure pattern (i) — Research note footnote (Tier IV Pattern A.3 self-parity / paper-formula validated + NEW Sub-class 2l candidate first-instance baseline + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant + CRITICAL CAVEAT)
+
+> This analysis uses TSL technique `ssa`, **self-parity validated**
+> against from-scratch reimplementation of Golyandina-Zhigljavsky
+> 2013 SSA paper formula per Phase 3 audit dated 2026-04-29
+> (verdict PASS Pattern A bit-exact; 0.0 abs diff across singular
+> values + eigenvalues + first left/right singular vectors after
+> sign canonicalization). **Tier IV (Pattern A.3 self-parity /
+> paper-formula validated) sub-class characterization** per S40
+> (α) disposition per scope_reframing §2 lines 159-168 verbatim
+> Tier IV 5-wrapper enumeration explicitly including p3_ssa.
+> **CRITICAL CAVEAT — degenerate dual-arm self-parity:** harness
+> `_ssa_reference` from-scratch reimplementation is invoked at
+> BOTH TSL-arm AND reference-arm with identical arguments; audit
+> verdict PASS at 0.0 abs diff is GUARANTEED BY CONSTRUCTION;
+> engine `ssa_model.py::run()` math is NEVER invoked by audit;
+> engine Layer 2 orchestration (NaN handling + preset config
+> dispatch + window length parameter resolution + trajectory
+> matrix construction + numpy.linalg.svd + eigentriple grouping
+> + diagonal averaging) NEVER exercised by audit. Audit validates
+> `_ssa_reference` self-consistency ONLY; cross-implementation
+> parity (R `Rssa` / pyts `SingularSpectrumAnalysis`) NOT audit-
+> established. Engine math correctness vs paper formula NOT audit-
+> validated. Pre-Path α expert review status; expert review of
+> engine implementation + cross-implementation validation
+> candidate at Q3b extension scope.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier IV Pattern A.3 + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant + critical caveat at validation claim scope)
+
+> Methodology: TSL technique `ssa` validated per Phase 3 reference
+> parity infrastructure under Tier IV (Pattern A.3 self-parity /
+> paper-formula validated) sub-class framing per S40 codification.
+> **Reference:** from-scratch numpy SVD reference inline in
+> `harness/checks/p3_ssa.py` (numpy 2.4.4) reimplementing
+> canonical Broomhead-King 1986 / Golyandina-Zhigljavsky 2013 SSA
+> algorithm (harness `_ssa_reference` lines 44-72: trajectory
+> matrix construction + `numpy.linalg.svd` invocation + n_components
+> truncation + sign canonicalization via max-abs-positive
+> convention + eigenvalues = sigma²). **Verdict:** PASS Pattern A
+> bit-exact; 0.0 abs diff across singular_values + eigenvalues +
+> U_first_col + Vt_first_row after sign canonicalization. **Audit
+> date:** 2026-04-29. **Fixture:** trend (0.02·t) + 12-period
+> sinusoid + N(0, 0.09) noise, T=200, seed=42; window length L =
+> N // 2 = 100; n_components = 10. **Tier IV Pattern A.3
+> characterization** per scope_reframing §2 lines 159-168 verbatim
+> Tier IV 5-wrapper enumeration explicitly including p3_ssa.
+> **CRITICAL CAVEAT — DEGENERATE DUAL-ARM SELF-PARITY at validation
+> claim scope:** harness `_ssa_reference` from-scratch reimplementation
+> is invoked at BOTH TSL-arm (`run_tsl` line 108) AND reference-arm
+> (`run_reference` line 119) with IDENTICAL `_ssa_reference(y,
+> L=L, n_components=self.N_COMPONENTS)` function call + identical
+> arguments. Audit verdict "PASS Pattern A bit-exact" at 0.0 abs
+> diff is GUARANTEED BY CONSTRUCTION per identical function
+> invocation (TSL arm == reference arm exactly). Audit validates
+> `_ssa_reference` self-consistency ONLY at degenerate dual-arm
+> scope; audit DOES NOT validate `_ssa_reference` correctness vs
+> Golyandina-Zhigljavsky 2013 paper formula (no independent
+> reference) NOR engine `ssa_model.py::run()` math correctness
+> (engine NEVER invoked by audit). **§4.7.A PRESENT variant 3
+> Harness-reimplements-engine-math at degenerate-dual-arm-self-
+> parity sub-variant:** harness defines `_ssa_reference` from-
+> scratch reimplementation + invokes it from both arms; engine
+> `ssa_model.py::run()` math is COMPLETELY DIFFERENT code path
+> NEVER exercised by audit; engine Layer 2 orchestration (NaN
+> handling + preset config dispatch + window length parameter
+> resolution + trajectory matrix construction + numpy.linalg.svd
+> + eigentriple grouping + diagonal averaging) NEVER audit-
+> validated. **NEW Sub-class 2l candidate first-instance baseline
+> observation** per A3 precedent (n=1 baseline; NOT codification
+> of NEW Sub-class 2l; forward instrumentation note candidate).
+> Reference selection + tolerance specification + Pattern A.3
+> self-parity framing + §4.7.A variant 3 degenerate-dual-arm-
+> self-parity sub-variant AI-assisted with user ratification per
+> Phase 7+ work program; pre-Path α expert review status; expert
+> review pending end-of-Phase-7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier IV Pattern A.3 + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant + NEW Sub-class 2l candidate first-instance baseline + CRITICAL CAVEAT at validation claim scope)
+
+> `ssa` validation: TSL Tier IV (Pattern A.3 self-parity / paper-
+> formula validated) sub-class framing per S40 (α) codification
+> + NEW Sub-class 2l candidate first-instance baseline observation
+> per (αa)+(αc) ratification + §4.7.A PRESENT variant 3 Harness-
+> reimplements-engine-math at DEGENERATE DUAL-ARM SELF-PARITY
+> sub-variant. **Reference:** from-scratch numpy SVD reference
+> inline in `harness/checks/p3_ssa.py` (numpy 2.4.4) reimplementing
+> Golyandina-Zhigljavsky 2013 SSA paper formula. **Audit:**
+> `tools/reference_parity/reports/p3_ssa_audit.md` dated 2026-04-29.
+> **Verdict:** PASS Pattern A bit-exact (singular_values 0.0 +
+> eigenvalues 0.0 + U_first_col 0.0 + Vt_first_row 0.0 abs diff
+> after sign canonicalization). **Fixture:** trend + 12-period
+> sinusoid + N(0, 0.09) noise DGP T=200 seed=42 + L=100 +
+> n_components=10; single-seeded fixture; parameter-sensitivity
+> coverage NOT established; Q3b extension scope. **NEW Sub-class
+> 2l candidate first-instance baseline observation** per S40
+> (αa)+(αc) ratification (definitional scope working hypothesis:
+> "Tier IV Pattern A.3 self-parity / paper-formula + §4.7.A
+> PRESENT variant 3 harness-reimplements-engine-math + degenerate-
+> dual-arm-self-parity sub-variant + single-layer scope"; A3
+> first-instance precedent n=1 baseline; NOT codification;
+> codification deferred to absorption #6+ second-observation
+> tightening if recurs; distinct from S37 Sub-class 2i candidate
+> Tier III Pattern A.1 + §4.7.A variant 1 scope + S38 Sub-class
+> 2j candidate Pattern F structural invariants + Tier II.bit-
+> exact scope + S39 Sub-class 2k candidate Tier V Pattern J B.3
+> + cross-package scope per Tier IV self-parity + variant 3
+> scope distinction; distinct from S18 gcc_phat Tier IV THREE-
+> LAYER DOWNSTREAM-TOPOLOGY framing per SINGLE-LAYER + DEGENERATE-
+> DUAL-ARM-SELF-PARITY scope distinction). **CRITICAL CAVEAT at
+> validation claim scope — DEGENERATE DUAL-ARM SELF-PARITY:**
+> harness `_ssa_reference` is invoked at BOTH TSL-arm AND
+> reference-arm with identical arguments; audit verdict PASS at
+> 0.0 abs diff GUARANTEED BY CONSTRUCTION; engine `ssa_model.py:
+> :run()` math NEVER validated by audit. **Risk attribution:**
+> **(a) Layer 1 `_ssa_reference` from-scratch reimplementation
+> (Tier IV Pattern A.3 self-parity / paper-formula validated at
+> DEGENERATE DUAL-ARM SELF-PARITY scope):** PASS at 0.0 abs diff
+> per identical function invocation (TSL arm == reference arm
+> exactly); audit validates `_ssa_reference` self-consistency
+> ONLY; audit DOES NOT validate `_ssa_reference` correctness vs
+> Golyandina-Zhigljavsky 2013 paper formula (no independent
+> reference at degenerate dual-arm scope) NOR cross-implementation
+> parity (R `Rssa` / pyts `SingularSpectrumAnalysis` per audit
+> lines 42-49 verbatim pyts API incompatibility rationale).
+> **(b) §4.7.A PRESENT variant 3 Harness-reimplements-engine-math
+> at degenerate-dual-arm-self-parity sub-variant caveat:** harness
+> defines `_ssa_reference` from-scratch reimplementation + invokes
+> it from both arms; engine `ssa_model.py::run()` is COMPLETELY
+> DIFFERENT code path NEVER exercised by audit; code-path
+> divergence between audit + engine production active at runtime
+> per HEAD verification (NOT REMEDIATED per S36 §4.7.A status
+> dimension codification). **(c) Layer 2 engine
+> `ssa_model.py::run()` orchestration (NEVER audit-validated):**
+> NaN handling with linear interpolation (lines 52-69) + n ≥ 20
+> threshold check (lines 71-77) + preset config dispatch (lines
+> 25-29 `_PRESET_CONFIG` + line 79 invocation) + window length
+> parameter resolution (lines 82-89) + n_components parameter
+> resolution (lines 93-98) + trajectory matrix construction +
+> `numpy.linalg.svd` invocation (engine math) + eigentriple
+> grouping (auto_group or manual_groups) + diagonal averaging
+> reconstruction + component analysis + summary tables + plain
+> English + audit_fields construction; validation scope per
+> `engine/techniques/ssa_model.py` lines 32-404 (404 LOC engine
+> module NEVER invoked by audit). **(d) Pattern A.3 self-parity /
+> paper-formula + degenerate-dual-arm-self-parity validation
+> scope-bounded retraction surface — MEDIUM-HIGH:** practitioners
+> invoking `ssa` from ribbon receive engine `ssa_model.py::run()`
+> output via Layer 2 orchestration; audit validates `_ssa_reference`
+> self-consistency ONLY (degenerate dual-arm) — engine math NEVER
+> validated; cross-implementation parity NOT established; expert
+> review of engine implementation + Layer 1 cross-implementation
+> validation against alternative implementation (R `Rssa` /
+> pyts `SingularSpectrumAnalysis` API-translation harness OR
+> independent Golyandina-Zhigljavsky 2013 paper formula reimplementation
+> distinct from harness `_ssa_reference`) candidate at Q3b
+> extension scope. **MEDIUM-HIGH retraction surface vs S37 LOW-
+> MEDIUM / S38 LOW / S39 LOW-MEDIUM** per degenerate dual-arm
+> self-parity + engine Layer 2 orchestration NEVER audit-validated
+> combined scope. Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier IV Pattern A.3 + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant + NEW Sub-class 2l candidate first-instance baseline + critical caveat)
+
+> `ssa` Tier IV (Pattern A.3 self-parity / paper-formula validated)
+> sub-class per S40 codification + NEW Sub-class 2l candidate
+> first-instance baseline + §4.7.A PRESENT variant 3 Harness-
+> reimplements-engine-math at DEGENERATE DUAL-ARM SELF-PARITY
+> sub-variant; from-scratch numpy SVD reference reimplementing
+> Golyandina-Zhigljavsky 2013 SSA paper formula. PASS Pattern A
+> bit-exact at 0.0 abs diff across all metrics after sign
+> canonicalization. **CRITICAL CAVEAT — degenerate dual-arm self-
+> parity:** harness `_ssa_reference` invoked at BOTH TSL-arm AND
+> reference-arm with identical arguments; 0.0 abs diff GUARANTEED
+> BY CONSTRUCTION; engine `ssa_model.py::run()` math NEVER
+> validated by audit; engine Layer 2 orchestration (NaN handling
+> + preset config dispatch + window length + n_components +
+> trajectory matrix + numpy.linalg.svd + eigentriple grouping +
+> diagonal averaging) NEVER exercised by audit. Cross-implementation
+> parity (R `Rssa` / pyts) NOT audit-established. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31-S39 + S36 LOC overshoot scope
+expansion refinement — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (from-scratch numpy SVD
+  reference inline in `harness/checks/p3_ssa.py` numpy 2.4.4)
+  per `p3_ssa_audit.md` lines 4-5 verbatim ("**Reference:** from-
+  scratch numpy SVD reference inline in `harness/checks/p3_ssa.py`
+  (numpy 2.4.4)"). Verdict (PASS Pattern A bit-exact) per
+  `p3_ssa_audit.md` line 6 verbatim ("**Verdict:** **PASS**
+  (Pattern A bit-exact)"). Metric 0.0 abs diff across all 4
+  components per `p3_ssa_audit.md` lines 12-17 verbatim
+  (singular_values + eigenvalues + U_first_col + Vt_first_row).
+  Audit methodology rationale per `p3_ssa_audit.md` lines 19-27
+  verbatim ("byte-identical agreement on singular values,
+  eigenvalues (singular values squared), and the first left/right
+  singular vectors after sign canonicalization. SSA is closed-
+  form: build Hankel trajectory matrix from the time series,
+  apply SVD, group eigentriples, diagonal-average back to the
+  time series. Both arms call `numpy.linalg.svd` on identical
+  Hankel matrix; output is unique up to singular-vector sign,
+  which the `_sign_canonicalize` step removes"). Audit date
+  (2026-04-29) per `p3_ssa_audit.md` line 8 verbatim. Fixture
+  (trend (0.02·t) + 12-period sinusoid + N(0, 0.09) noise + T=200
+  + seed=42 + L=100 + n_components=10) per `p3_ssa_audit.md`
+  lines 30-34 verbatim Fixture section + harness `p3_ssa.py` lines
+  32-41 verbatim `_generate_ssa_dgp`. Tier IV (Pattern A.3 self-
+  parity / paper-formula validated) sub-class characterization
+  directly grounded at `scope_reframing_s6_banking.md` §2 lines
+  159-168 verbatim ("Tier IV — Phase 3 self-parity / paper-
+  formula validated (Pattern A.3). ~10 wrappers per P-3 v1.2.0
+  §1 estimate. TSL output validated against from-scratch
+  reimplementation of paper-defined recursion. Pattern K → Pattern
+  A path... 5 wrappers — `p3_bocpd`, `p3_cusum_page_hinkley`,
+  `p3_stl_esd` (S10 / Batch 6) + `p3_wavelet_coherence`, `p3_ssa`
+  (S11 / Batch 7)") — p3_ssa explicitly within Tier IV Pattern
+  A.3 self-parity / paper-formula 5-wrapper enumeration. **§4.7.A
+  PRESENT variant 3 at DEGENERATE DUAL-ARM SELF-PARITY sub-variant
+  manifestation** per harness `_ssa_reference` lines 44-72 verbatim
+  (from-scratch Golyandina-Zhigljavsky 2013 SSA paper formula
+  reimplementation) + harness `run_tsl` line 108 verbatim
+  (`out = _ssa_reference(y, L=L, n_components=self.N_COMPONENTS)`)
+  + harness `run_reference` line 119 verbatim
+  (`out = _ssa_reference(y, L=L, n_components=self.N_COMPONENTS)`
+  — IDENTICAL function call to run_tsl); engine
+  `ssa_model.py::run()` NEVER invoked by audit. **§1.9 SECOND-
+  INSTANCE cross-block extension MANIFESTED at suffix-ADDITION
+  direction** per `engine/techniques/registry.py` lines 143-145
+  verbatim three aliases (`"ssa_model"`, `"ssa"`,
+  `"singular_spectrum_analysis"`) all map to engine module
+  `techniques.ssa_model`. Layer 1 / Layer 2 framework operative
+  per S26 STOP 1.5 second close ratification carried forward +
+  S31-S39 reinforcement. Catalog mapping (1:1) verified per audit
+  Wrapper field. **§4.7.A pattern OBSERVED at S40 as variant 3
+  PRESENT status FIRST-INSTANCE baseline at §2.5 entry codification
+  scope** (post-S40 §4.7.A observations = n=11 PRESENT across §2.5
+  entries S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 +
+  S39 + S40 + n=1 REMEDIATED S34 = n=12 total observations;
+  **§4.7.A variant 3 first-instance baseline observation at §2.5
+  entry codification scope** per S40 banking — prior S37-S39
+  PRESENT all variant 1; **§4.7.A pattern count tightening +
+  variant 3 first-instance baseline forward observation at
+  absorption #6** per A3 precedent — NOT A9 Class A counter
+  increment; NOT §4.7.A taxonomy modification at S40; forward
+  observation banking only per ITEM 16 forward instrumentation
+  banking discipline). **NEW Sub-class 2l candidate first-instance
+  baseline observation per (αa)+(αc) ratification** (A3 first-
+  instance precedent n=1 baseline; NOT codification; codification
+  deferred to absorption #6+ second-observation tightening if
+  recurs at S41+ Q1 entry within Tier IV Pattern A.3 self-parity
+  + §4.7.A variant 3 combined scope OR future Tier IV Pattern A.3
+  entry; definitional scope working hypothesis "Tier IV Pattern
+  A.3 self-parity / paper-formula + §4.7.A PRESENT variant 3
+  harness-reimplements-engine-math + degenerate-dual-arm-self-
+  parity sub-variant + single-layer scope"). **§1.9 Filename
+  divergence sub-pattern variant SECOND-INSTANCE cross-block
+  extension MANIFESTED at suffix-ADDITION direction per Code S40
+  Step 0 empirical re-Read** (engine `ssa_model.py` adds `_model`
+  suffix to catalog-id `ssa`; n=2 cross-block observations across
+  S37 + S40; direction-distinct sub-variants suffix-omission
+  S37 + suffix-addition S40; A3 second-observation tightening
+  precedent threshold SATISFIED at §1.9 cross-block scope at n=2
+  observations; codification refinement candidate at absorption
+  #6+ for direction-symmetric expansion). **Pattern F structural
+  invariants SECOND-OBSERVATION NOT MANIFESTED per Code S40 Step
+  0 empirical re-Read** (SSA has no roundtrip / Parseval analog at
+  structural identity invariant scope; Pattern F NEW framing
+  element observation remains at S38 first-instance baseline;
+  Sub-class 2j codification deferred). **§1.8 reroll_on_caveat=
+  False discipline NOT APPLICABLE at S40** (audit verdict PASS
+  Pattern A bit-exact NOT CAVEAT; §1.8 applicability scope Tier
+  VI CAVEAT primary). **§2.5 Tier primary+overlay convention NOT
+  APPLICABLE at S40** (Tier IV Pattern A.3 single-tier framing
+  per Code (α) + Chat ratification preference). **§1.5 novelty
+  enumeration sub-section APPLIED at S40** per ≥5 observations
+  threshold satisfied at n=7 enumerated novelties (Novelty 1-7);
+  sixth post-S23 application of §1.5 novelty enumeration sub-
+  section pattern per S30 codification + S36 §1.5 refinement
+  sustained-observation operational status note; n=6 post-
+  codification observations across S23 + S34 + S37 + S38 + S39 +
+  S40; A3 sixth-observation tightening reinforcement. **HETEROGENEOUS
+  TIER-SURFACE VARIANT OBSERVATION A3 THIRD-OBSERVATION TIGHTENING
+  SUSTAINED AT S40** per n=4 distinct Tier characterizations
+  across n=4 entries within Frequency Domain / Signal block;
+  codification refinement candidate at absorption #6+ empirically
+  REINFORCED. **ALL-ANCHOR-DEFERRAL DISCIPLINE THIRD-APPLICATION
+  EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+  THRESHOLD REINFORCED AT S40** per Chat S40 trigger drafting
+  all-anchor-deferral discipline third-application; 0 multi-
+  anchor schema-misattribution divergences at S40 Step 0
+  SUSTAINED at n=3 sustained efficacy observations (S38 + S39 +
+  S40); codification candidate at §1.7+ Workstream B §1.4
+  operational scope at absorption #6+ refinement empirically
+  ROBUSTLY grounded. **Sub-class taxonomy growth Block-level
+  observation A3 FOURTH-OBSERVATION TIGHTENING REINFORCED AT S40**
+  (2i + 2j candidate + 2k + 2l = n=4 NEW Sub-class candidates
+  first-instance baseline observations within Block 5 sub-session
+  arc). **Degenerate dual-arm self-parity validation claim scope
+  distinction FIRST observation at Q1 §2.5 entry codification
+  scope** per S40 (validation claim scope distinction from S37-
+  S39 entries at audit-validates-library-primitive scope vs S40
+  audit-validates-`_ssa_reference`-self-consistency-only scope;
+  engine `ssa_model.py::run()` math NEVER validated). **A9 Class
+  A counter post-S40: n=14 ACTIVE codified at §19.4 unchanged**
+  (n=15 + n=16 codified at §1.7 (c) Workstream B empirical-
+  efficacy grounding scope per S36; n=17 + n=18 + n=19 + n=20
+  candidates banked at S36 + S37 + S38 + S39 commit message body
+  forward state pending absorption #6+ codification; A9 Class A
+  counter at §19.4 advance deferred to absorption #6+ per multi-
+  candidate accumulation). **A9 Class B counter post-S40: n=4
+  ACTIVE unchanged (no new Class B catch); sustained-observation
+  count under Class B revised default discipline n=14 (S22 + S23
+  + S25 + S26 + S27 + S28 + S31 + S32 + S33 + S34 + S37 + S38 +
+  S39 + S40 = n=14 Q1 entries only counting basis per Chat
+  preference codified at S31)**. **Maturation observation
+  SEVENTEENTH SUSTAINED OBSERVATION REACHED at S40 (S23 + S25 +
+  S26 + S27 + S28 + S29 + S30 + S31 + S32 + S33 + S34 + S35 +
+  S36 + S37 + S38 + S39 + S40 = n=17 cross-session trajectory)**
+  + EIGHT-timing-point empirical surface preserved per S35-
+  absorption #5 codification (no new timing point variant at S40;
+  proactive-prevention operation SUSTAINED across established
+  timing points (i)-(viii)); §4.5 codification operational at
+  n=10 post-codification sustained observations per S40 cross-
+  session trajectory reinforcement. Verify-state-at-first-
+  consumption sub-discipline 31st instance application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at twentieth-technique selection per Mark
+  3 efficient-ratification + (α) unprompted case-against
+  discipline operative per Workstream B §1.4 codification + S20
+  + S25 + S26 + S27 + S28 + S31 + S32 + S33 + S34 + S37 + S38 +
+  S39 reinforcement. **Q-B pattern persists at n=21 across S12
+  + S13 + S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 + S26
+  + S27 + S28 + S31 + S32 + S33 + S34 + S37 + S38 + S39 + S40;
+  §1.4 codified observation refinement at empirical pattern
+  accumulation** (n=7 at §1.4 S20 codification → n=20 at S39
+  reinforcement → n=21 at S40 reinforcement; Workstream B
+  amendment cycle candidate A continues at next cycle).
+  Substantive Chat engagement at structural-decision points
+  empirically observed (Step 0 STOP 2 anchor ratifications A-J
+  + CRITICAL CAVEAT under all-anchor-deferral discipline third-
+  application + Tier IV (Pattern A.3 self-parity / paper-formula
+  validated) (α) ratification + NEW Sub-class 2l candidate
+  first-instance baseline (αa)+(αc) ratification + Code (α-i
+  alternative) + (α-ii) + (α-iii) + (α-iv) + (α-v) + (αb) + (αc-
+  only) + §4.7.A variant 2 alternative Tier 2 case-against
+  rejection + §1.9 cross-block extension SECOND-INSTANCE MANIFESTED
+  at suffix-ADDITION direction banking + Pattern F SECOND-
+  OBSERVATION NOT MANIFESTED banking + §1.8 NOT APPLICABLE banking
+  + HETEROGENEOUS TIER-SURFACE VARIANT A3 THIRD-OBSERVATION
+  TIGHTENING SUSTAINED banking + ALL-ANCHOR-DEFERRAL DISCIPLINE
+  THIRD-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION
+  TIGHTENING PRECEDENT THRESHOLD REINFORCED banking + Sub-class
+  taxonomy growth Block-level observation A3 FOURTH-OBSERVATION
+  TIGHTENING REINFORCED banking + Degenerate dual-arm self-parity
+  validation claim scope distinction FIRST observation banking +
+  Block ordering working hypothesis fourth-position verification).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  **Conditional Yes with HEIGHTENED DISCLOSURE REQUIREMENT for
+  Layer 1 `_ssa_reference` from-scratch reimplementation (Tier IV
+  Pattern A.3 self-parity / paper-formula validated at DEGENERATE
+  DUAL-ARM SELF-PARITY scope)** per PASS Pattern A bit-exact
+  verdict at 0.0 abs diff GUARANTEED BY CONSTRUCTION. Defensibility
+  to all three audiences (published audience + Morgan Stanley
+  compliance + Path α expert reviewer) UNDER Tier IV (Pattern A.3
+  self-parity / paper-formula validated) sub-class + §4.7.A
+  PRESENT variant 3 Harness-reimplements-engine-math at degenerate-
+  dual-arm-self-parity sub-variant + Pattern A.3 self-parity /
+  paper-formula scope-bounded validation + cross-implementation
+  parity NOT audit-established + engine math NEVER validated by
+  audit + HEIGHTENED DISCLOSURE REQUIREMENT at degenerate dual-arm
+  self-parity caveat.
+  **NOT conditional for Layer 2 engine `ssa_model.py::run()`
+  orchestration — explicit caveat required:** engine math (NaN
+  handling + preset config dispatch + window length parameter
+  resolution + n_components parameter resolution + trajectory
+  matrix construction + numpy.linalg.svd + eigentriple grouping +
+  diagonal averaging) NEVER exercised by audit; requires expert
+  review of engine implementation OR engine-output cross-check
+  against alternative implementation (R `Rssa` / pyts API-
+  translation harness) at base pinned config. **Critical Q-C
+  framing per DEGENERATE DUAL-ARM SELF-PARITY caveat:** 0.0 abs
+  diff IS established at degenerate dual-arm scope (TSL arm ==
+  reference arm identical `_ssa_reference` invocation); audit
+  scope is `_ssa_reference` self-consistency validation ONLY —
+  audit DOES NOT validate `_ssa_reference` correctness vs
+  Golyandina-Zhigljavsky 2013 paper formula NOR engine math
+  correctness NOR cross-implementation parity; defensibility
+  conditional on disclosure of degenerate dual-arm self-parity
+  scope distinction (audit established `_ssa_reference` self-
+  consistency NOT engine validation NOT cross-implementation
+  parity; engine math + Layer 2 orchestration NEVER audit-
+  validated). **HIGHER retraction surface than S37-S39 entries**
+  per degenerate dual-arm self-parity validation claim scope
+  distinction; institutionally substantive heightened disclosure
+  requirement at all four disclosure templates.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  **MEDIUM-HIGH per Tier IV (Pattern A.3 self-parity / paper-
+  formula validated) sub-class characterization scope bound +
+  §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-
+  variant disclosure + Pattern A.3 self-parity / paper-formula
+  scope-bounded validation caveat + engine `ssa_model.py::run()`
+  math NEVER validated by audit caveat** — DISTINCT FROM S37
+  LOW-MEDIUM / S38 LOW / S39 LOW-MEDIUM per degenerate dual-arm
+  self-parity + engine math NEVER validated combined scope. ssa
+  is canonical Broomhead-King 1986 / Golyandina-Zhigljavsky 2013
+  SSA methodology + numpy.linalg.svd implementation (widely-used
+  spectral decomposition primitive). **Layer-specific + Tier IV
+  Pattern A.3 + NEW Sub-class 2l candidate + §4.7.A PRESENT
+  variant 3 degenerate-dual-arm-self-parity sub-variant retraction
+  surface (per S40 (α) + (αa)+(αc) ratifications):**
+  - Layer 1 `_ssa_reference` from-scratch reimplementation (Tier
+    IV Pattern A.3 self-parity / paper-formula at degenerate-
+    dual-arm-self-parity scope): LOW-MEDIUM — degenerate self-
+    parity at byte-identical agreement guaranteed by construction;
+    `_ssa_reference` correctness vs Golyandina-Zhigljavsky 2013
+    paper formula NOT audit-validated (no independent reference);
+    expert review surfacing `_ssa_reference` math correctness
+    issue would affect ssa + other Tier IV Pattern A.3 wrappers
+    (NOT 1:1 catalog↔wrapper isolation; cross-technique propagation
+    risk at paper-formula reimplementation scope).
+  - **Layer 2 engine `ssa_model.py::run()` orchestration: HIGH
+    (NEVER audit-validated)** — NaN handling with linear
+    interpolation + preset config dispatch (Fast/Balanced/Thorough
+    n_components_report 10/20/40) + window length parameter
+    resolution (engine defaults distinct from audit pinned L=N//2)
+    + n_components parameter resolution (engine defaults distinct
+    from audit pinned n_components=10) + trajectory matrix
+    construction + `numpy.linalg.svd` invocation (engine math —
+    DIFFERENT code path from harness `_ssa_reference`) +
+    eigentriple grouping (auto_group or manual_groups) + diagonal
+    averaging reconstruction + component analysis + summary tables
+    + plain English + audit_fields construction — NEVER audit-
+    validated; expert review of engine implementation REQUIRED at
+    code-level inspection; orchestration scope substantial (404
+    LOC engine module); retraction surface HIGH reflects engine
+    math + Layer 2 orchestration entirely outside audit scope.
+  - **Pattern A.3 self-parity / paper-formula + degenerate-dual-
+    arm-self-parity scope-bounded validation retraction surface:
+    HIGH** — audit validates `_ssa_reference` self-consistency
+    ONLY at degenerate dual-arm self-parity scope; NO cross-
+    implementation parity validation (no R `Rssa` cross-validation;
+    no pyts `SingularSpectrumAnalysis` API-translation cross-
+    validation per audit lines 42-49 verbatim pyts API
+    incompatibility rationale); NO independent paper formula
+    cross-validation; expert review surfacing cross-implementation
+    divergence (e.g., R `Rssa` produces different singular values
+    OR eigentriple grouping at identical args) OR `_ssa_reference`
+    paper formula reimplementation correctness issue (vs
+    Golyandina-Zhigljavsky 2013 canonical formula) would prompt
+    Q3b extension scope cross-implementation OR independent
+    reference validation; Q3b extension scope candidate per Path
+    α expert review; HIGH retraction surface reflects validation
+    scope NARROWER than S37-S39 audit-validates-library-primitive
+    scope.
+  - **§4.7.A PRESENT variant 3 degenerate-dual-arm-self-parity
+    retraction surface: HIGH** — harness defines `_ssa_reference`
+    from-scratch reimplementation; engine `ssa_model.py::run()`
+    is COMPLETELY DIFFERENT code path NEVER exercised by audit;
+    reimplementation-of-engine-math at degenerate-dual-arm-self-
+    parity sub-variant is the MOST DEGENERATE §4.7.A variant
+    observed in §2.5 entry codification scope; mechanism variant 3
+    structurally STRONGER §4.7.A manifestation than mechanism
+    variants 1 + 2 + 4 (dispatch-only + internal-reference-function
+    + use-case-divergence); HIGH retraction surface reflects
+    structural strength of §4.7.A variant 3 at degenerate-dual-
+    arm-self-parity sub-variant.
+  - **NEW Sub-class 2l candidate first-instance baseline retraction
+    surface: LOW** — A3 first-instance precedent n=1 baseline
+    observation; codification of NEW Sub-class 2l at Tier IV
+    Pattern A.3 self-parity + §4.7.A variant 3 + degenerate-dual-
+    arm-self-parity combined scope deferred to absorption #6+
+    second-observation tightening if recurs; sub-class definitional
+    scope working hypothesis preserves combined novelty distinction
+    at first-instance observation without codification commitment.
+  - **§1.9 SECOND-INSTANCE cross-block extension MANIFESTED at
+    suffix-ADDITION direction retraction surface: LOW** — A3
+    second-observation tightening precedent threshold SATISFIED
+    at §1.9 cross-block scope at n=2 cross-block observations
+    (S37 + S40); direction-distinct sub-variants (suffix-omission
+    + suffix-addition) preserved at codification refinement
+    candidate at absorption #6+ for direction-symmetric expansion;
+    forward instrumentation note treatment preserves observation
+    without codification commitment.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; twentieth technique to enter status
+per S40 ratification; **FOURTH Frequency Domain / Signal block
+entry — FIFTH catalog block transition advances 3→4 of 7 entries
+Q1-amended** per Q1 work program scope after Block 1 Causality at
+S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data
+at S28 + Block 3 Decomposition at S34 + Frequency Domain / Signal
+block first + second + third entries at S37 + S38 + S39 (Block
+ordering position ssa at FOURTH-position 7-entry Block ordering
+working hypothesis arc counting validated S37 + S38 + S39 + S40
+per HEAD 3afe6c7 line 12394 verbatim §3 empirical re-Read; second-
+position alphabetically within remaining-4-unvalidated §3
+enumeration); **FIRST Tier IV (Pattern A.3 self-parity / paper-
+formula validated) PRIMARY tier characterization Q1 §2.5 entry
+overall + FIRST §2.5 entry within Frequency Domain / Signal block
+at Tier IV scope** per S40 (α) Tier disposition ratification (S18
+gcc_phat was FIRST Tier IV Q1 §2.5 entry overall at THREE-LAYER
+DOWNSTREAM-TOPOLOGY framing per Block 1 Causality completion; S40
+ssa is FIRST Tier IV PRIMARY characterization at SINGLE-LAYER +
+degenerate-dual-arm-self-parity framing within Frequency Domain
+/ Signal block at distinct structural scope); **§4.7.A PRESENT
+variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-
+ARM SELF-PARITY sub-variant FIRST-INSTANCE baseline observation
+at §2.5 entry codification scope** per S40 (α) Chat ratification
+(prior S37-S39 PRESENT all variant 1 Harness-imports-library-
+directly; S40 ssa is FIRST EXPLICIT variant 3 PRESENT observation
+at §2.5 entry codification scope; post-S40 §4.7.A observations
+n=11 PRESENT + n=1 REMEDIATED = n=12 total observations); **NEW
+Sub-class 2l candidate first-instance baseline observation per
+A3 first-instance precedent + (αc) forward-instrumentation-note
+treatment** per (αa)+(αc) Chat ratification (definitional scope
+working hypothesis "Tier IV Pattern A.3 self-parity / paper-
+formula + §4.7.A PRESENT variant 3 harness-reimplements-engine-
+math + degenerate-dual-arm-self-parity sub-variant + single-layer
+scope"; A3 first-instance precedent n=1 baseline; NOT codification
+of NEW Sub-class 2l; codification deferred to absorption #6+
+second-observation tightening if recurs); **§1.9 Filename
+divergence sub-pattern variant SECOND-INSTANCE cross-block
+extension MANIFESTED at suffix-ADDITION direction per Code S40
+Step 0 empirical re-Read** (engine `ssa_model.py` ADDS `_model`
+suffix to catalog-id `ssa`; n=2 cross-block observations across
+S37 + S40 at direction-distinct sub-variants suffix-OMISSION +
+suffix-ADDITION; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD SATISFIED at §1.9 cross-block scope; codification
+refinement candidate at absorption #6+ for direction-symmetric
+expansion; expiration semantics: §1.9 third cross-block observation
+banks at S40 close pending S41+ entry filename empirical
+verification); **HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION
+A3 THIRD-OBSERVATION TIGHTENING SUSTAINED AT S40** (n=4 distinct
+Tier characterizations within Frequency Domain / Signal block at
+Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at
+S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40;
+codification refinement candidate at absorption #6+ for Block
+heterogeneous-Tier-surface variant sub-pattern definitional scope
+generalization per §19.4 §4 note 6 refinement at S35-absorption
+#5 codification EMPIRICALLY REINFORCED); **ALL-ANCHOR-DEFERRAL
+DISCIPLINE THIRD-APPLICATION EMPIRICAL EFFICACY A3 SECOND-
+OBSERVATION TIGHTENING PRECEDENT THRESHOLD REINFORCED AT S40**
+per Chat S40 trigger drafting all-anchor-deferral discipline
+third-application per institutional learning sustainment from
+S37 multi-anchor schema-misattribution catch n=18 + S38 first-
+application + S39 second-application empirical efficacy validations
+(A3 second-observation tightening precedent threshold SATISFIED
+at S39); 0 multi-anchor schema-misattribution divergences at S40
+Step 0 SUSTAINED at n=3 sustained efficacy observations (S38 +
+S39 + S40 0-divergence); codification candidate at §1.7+
+Workstream B §1.4 operational scope at absorption #6+ refinement
+empirically ROBUSTLY grounded at A3 precedent threshold
+REINFORCEMENT; **Sub-class taxonomy growth Block-level observation
+A3 FOURTH-OBSERVATION TIGHTENING REINFORCED at S40** (2i at S37
++ 2j candidate at S38 + 2k at S39 + 2l at S40 = n=4 NEW Sub-class
+candidates first-instance baseline observations within Block 5
+sub-session arc; Block-level Sub-class taxonomy growth rate
+observation candidate at §19.4 §4 note 16 EMPIRICALLY REINFORCED);
+**Pattern F structural invariants SECOND-OBSERVATION NOT
+MANIFESTED at S40** (SSA harness does NOT compute structural
+identity invariants; Pattern F NEW framing element observation
+remains at S38 first-instance baseline; NEW Sub-class 2j
+codification deferred); **§1.8 reroll_on_caveat=False discipline
+NOT APPLICABLE at S40** (audit verdict PASS Pattern A bit-exact
+NOT CAVEAT; §1.8 applicability scope Tier VI CAVEAT primary);
+**SINGLE-LAYER framing per S40 STOP 2 empirical investigation +
+α disposition** (Tier IV Pattern A.3 self-parity / paper-formula
++ §4.7.A variant 3 degenerate-dual-arm-self-parity single-layer
+framing; §2.5 Tier primary+overlay convention NOT APPLICABLE at
+S40); **CRITICAL CAVEAT — audit validates `_ssa_reference` SELF-
+CONSISTENCY ONLY at degenerate dual-arm self-parity scope** —
+harness `_ssa_reference` (lines 44-72) from-scratch reimplementation
+of Golyandina-Zhigljavsky 2013 SSA paper formula invoked at BOTH
+TSL-arm (line 108) AND reference-arm (line 119) with IDENTICAL
+arguments; audit verdict "PASS Pattern A bit-exact" at 0.0 abs
+diff GUARANTEED BY CONSTRUCTION per identical function invocation;
+engine `ssa_model.py::run()` math + Layer 2 orchestration (NaN
+handling + preset config dispatch + window length parameter
+resolution + trajectory matrix construction + numpy.linalg.svd +
+eigentriple grouping + diagonal averaging) NEVER exercised by
+audit; distinct validation claim scope from S37-S39 audit-
+validates-library-primitive scope per FIRST observation of
+degenerate dual-arm self-parity validation claim scope distinction
+at Q1 §2.5 entry codification scope; institutionally substantive
+empirical content distinction at validation claim scope dimension;
+**Degenerate dual-arm self-parity validation claim scope
+distinction FIRST observation at Q1 §2.5 entry codification scope**
+per S40 banking (validation claim scope distinction surfaced
+explicitly at all four disclosure templates + Q-A through Q-D
+audit checklist + Status line per CRITICAL CAVEAT ratification);
+**§4.7.A pattern n=11 PRESENT + n=1 REMEDIATED = n=12 total post-
+S40 observations across §2.5 entries** (S14a granger + S18
+gcc_phat + S26 denton_chowlin + S27 loess + S31 classical_decompose
++ S32 mstl_decompose + S33 stl_decompose + S37 periodogram_spectral_density
++ S38 fft_spectrum + S39 lomb_scargle + S40 ssa PRESENT + S34
+x13_seasonal_adjust REMEDIATED; **§4.7.A pattern count tightening
++ variant 3 first-instance baseline observation at §2.5 entry
+codification scope forward observation at absorption #6 per A3
+precedent** — NOT A9 Class A counter increment; forward observation
+banking only; NOT §4.7.A taxonomy modification at S40);
+**SUB-CLASS TAXONOMY GROWTH BLOCK-LEVEL OBSERVATION AT FREQUENCY
+DOMAIN / SIGNAL BLOCK forward instrumentation banking
+EMPIRICALLY REINFORCED:** Sub-class 2i candidate first-instance
+baseline at S37 + Sub-class 2j candidate forward-instrumentation-
+note at S38 + Sub-class 2k candidate first-instance baseline at
+S39 + Sub-class 2l candidate first-instance baseline at S40 = n=4
+NEW Sub-class candidates first-instance baseline observations
+within Block 5 sub-session arc; Block-level Sub-class taxonomy
+growth rate observation candidate at absorption #6+ codification
+refinement per §19.4 §4 note 16 forward instrumentation banking
+EMPIRICALLY REINFORCED at fourth-observation tightening per A3
+precedent; Block 3 produced 2f + 2g + 2h NEW Sub-class candidates
+across 4 sub-sessions S31-S34; Block 5 produces n=4 NEW Sub-class
+candidates across 4 sub-sessions S37-S40; Block-level Sub-class
+taxonomy growth rate sustained at n=4 NEW Sub-classes / Block per
+per-block continuation pattern observation EMPIRICALLY REINFORCED
+at fourth-observation tightening.
+**A9 CLASS A COUNTER POST-S40 STATUS PRESERVATION at S40 commit
+message body forward state per S40 Step 0 sustained institutional
+learning operationalization (no new Class A catch at S40 Step 0;
+prior-turn-ratification-acknowledgment discipline operational at
+S40 — Code surfaced STOP 2 once at Step 0 close; awaited Chat
+ratification response; proceeded to Step 1 entry drafting upon
+receipt of Chat STOP 2 disposition response without re-surfacing
+Step 0 STOP 2 surface per S39 n=20 candidate banking institutional
+learning sustainment):** n=14 ACTIVE codified at §19.4 unchanged
++ n=15 + n=16 codified at §1.7 (c) per S36 + n=17 + n=18 + n=19
++ n=20 candidates banked at S36 + S37 + S38 + S39 commit message
+body forward state pending absorption #6+ codification; A9 Class
+A counter at §19.4 advance deferred to absorption #6+ per multi-
+candidate accumulation. **Block ordering working hypothesis fourth-
+position verification at S40 per Code Step 0 empirical re-Read:**
+ssa at second-position alphabetically within §3 remaining-4
+unvalidated entries verified; ssa at FOURTH-position in 7-entry
+Block ordering working hypothesis arc counting validated S37 +
+S38 + S39 + S40 per preliminary working hypothesis from S37 close
+commit message body forward state confirmed at S40 empirical
+verification; Block ordering working hypothesis testing through
+S41+ Block-internal complexity ordering verification across 7-
+entry arc S37 + S38 + S39 + S40 + S41 + S42 + S43 (n=3 Block-
+ordering observation tightening per A3 precedent SUSTAINED at S40;
+cross-reference to §19.4 §4 note 13 first-instance baseline
+observation at Block 3 100% confirmed precedent per S31-S34
+ordering empirical validation); **CONTINUATION of S30 + S36
+Workstream B codifications at S40:** §1.6 Q-A density convention
+operative continuation (verbatim citation density at Q-A field;
+n=10 post-codification applications at S31 + S32 + S33 + S34 +
+S35 + S36 + S37 + S38 + S39 + S40 with §1.6 LOC overshoot scope
+expansion at S36 refinement operative — n=10 total + n=9 sub-
+pattern scope disambiguation) + §5.5 forward-instrumentation
+hygiene at status line operative continuation (expiration
+semantics on each predictive claim; n=10 post-codification
+applications at S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38 +
+S39 + S40) + §1.5 novelty enumeration sub-section APPLIED at S40
+(≥5 observations threshold satisfied at n=7 novelties; sixth
+post-S23 application; n=6 post-codification observations across
+S23 + S34 + S37 + S38 + S39 + S40; A3 sixth-observation tightening
+reinforcement per §1.5 sustained-observation operational status
+note S36 refinement) + §1.7 refined Mod 3 cadence operative
+(fourth Q1 entry post-S36 §1.7 codification; refined Mod 3
+chunked-surface content-completeness specification operational
+at S40 STOP 1 chunked-surface protocol) + §1.8 reroll_on_caveat=
+False discipline NOT APPLICABLE at S40 (PASS verdict Pattern A
+bit-exact; §1.8 applicability scope Tier VI CAVEAT primary;
+verified at Step 0 Tier characterization disposition) + §1.9
+Filename divergence sub-pattern variant SECOND-INSTANCE cross-
+block extension MANIFESTED at suffix-ADDITION direction at S40
+(A3 second-observation tightening precedent threshold SATISFIED
+at §1.9 cross-block scope at n=2 cross-block observations) +
+§4.7.A REMEDIATED status dimension NOT applicable at S40 (PRESENT
+status; status dimension PRESENT/REMEDIATED orthogonal to
+mechanism variant 3); §2.5 Tier primary+overlay convention NOT
+APPLICABLE at S40 (Tier IV Pattern A.3 single-tier framing per
+S35-absorption #5 + S32 third-observation tightening reinforcement
+preserved); §4.7 in-place codification operative reference at
+§4.7.A PRESENT variant 3 first-instance baseline observation at
+§2.5 entry codification scope + §4.7.A status dimension extension
+cross-reference. **A10 Sub-class disposition (αa)+(αc) NEW Sub-
+class 2l candidate first-instance baseline observation + (αc)
+forward-instrumentation-note treatment per Chat ratification**
+(definitional scope working hypothesis "Tier IV Pattern A.3 self-
+parity / paper-formula + §4.7.A PRESENT variant 3 harness-
+reimplements-engine-math + degenerate-dual-arm-self-parity sub-
+variant + single-layer scope"; A3 first-instance precedent n=1
+baseline; NOT codification of NEW Sub-class 2l; codification
+deferred to absorption #6+ second-observation tightening if
+recurs at S41+ Frequency Domain / Signal block entry OR future
+Q1 entry within Tier IV Pattern A.3 self-parity + §4.7.A variant
+3 combined scope; expiration semantics: NEW Sub-class 2l
+candidate observation banks at S40 close pending second-observation
+tightening at respective sub-session OR absorption #6+
+codification refinement disposition).
+**A9 Class B counter post-S40: n=4 ACTIVE (unchanged at S40; no
+new Class B catch); sustained-observation count under Class B
+revised default discipline n=14 (S22 + S23 + S25 + S26 + S27 +
+S28 + S31 + S32 + S33 + S34 + S37 + S38 + S39 + S40 = n=14 Q1
+entries only counting basis per Chat preference codified at S31)**
+(framing class working hypothesis CONFIRMED at Step 0 per A9
+Class B revised default discipline; expiration semantics:
+sustained-observation counter continues incrementing at each
+subsequent Q1 entry per A9 Class B revised default operating
+proactively, codification-stable status preserved at n=4 ACTIVE
+counter; n=4 increments only on NEW Class B catch).
+**A9 Class A counter post-S40: n=14 ACTIVE codified at §19.4
+unchanged + candidates n=15 + n=16 codified at §1.7 (c)
+Workstream B empirical-efficacy grounding scope per S36 +
+candidates n=17 (S36 STOP-1.5-revision-scope-misattribution) +
+n=18 (S37 multi-anchor schema-misattribution at trigger drafting)
++ n=19 (S38 Code-side §3 enumeration drift) + n=20 (S39 Code-
+side prior-turn-ratification-acknowledgment gap) banked at S36-
+S39 commit message body forward state + S40 SUSTAINED no new
+Class A catch per S40 Step 0 prior-turn-ratification-acknowledgment
+discipline operationalization institutional learning sustainment**
+(expiration semantics: A9 Class A candidate inventory accumulates
+until absorption #6 codification refinement disposition adopts/
+declines each candidate; multi-pattern variant codification
+refinement candidate at n=6+ banked candidates for absorption #6
+adoption per A3 second-observation tightening precedent).
+**§4.7.A pattern n=11 PRESENT + n=1 REMEDIATED = n=12 total
+observation count post-S40 per S30 (G.1) generalized definitional
+scope codification + S36 §4.7.A status dimension extension + S40
+§4.7.A variant 3 first-instance baseline observation at §2.5
+entry codification scope:** S14a + S18 + S26 + S27 + S31 + S32 +
+S33 + S37 + S38 + S39 + S40 PRESENT + S34 REMEDIATED = n=12
+total observations across mechanism variants + status dimension;
+**§4.7.A pattern count tightening + status dimension tightening
++ variant 3 first-instance baseline observation forward observation
+at absorption #6 per A3 precedent** (distinct tracking surface
+from A9 Class A counter per S30 (G.1) + S36 codifications;
+§4.7.A pattern observations track mechanism variant + status
+dimension accumulation; A9 Class A counter tracks empirical-
+state-assumption failure mode; §4.7.A variant 3 first-instance
+baseline at S40 enables future second-observation tightening at
+variant 3 scope for codification refinement candidate at absorption
+#6+ §4.7.A taxonomy mechanism variant dimension scope expansion).
+**A9 Class A + Class B discipline maturation SEVENTEENTH SUSTAINED
+OBSERVATION REACHED at S40 (S23 + S25 + S26 + S27 + S28 + S29 +
+S30 + S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38 + S39 + S40
+= n=17 cross-session trajectory)** per A3 second-observation
+tightening precedent threshold satisfied + EIGHT-timing-point
+empirical surface preserved per S35-absorption #5 codification
+(no new timing point variant at S40; proactive-prevention
+operation SUSTAINED across established timing points (i)-(viii));
+promoted to §4.5 NEW sub-section at S29-absorption #4 + EXTENDED
+at S35-absorption #5 to eleven-sustained-observation cross-session
+trajectory + EIGHT-timing-point operational surface (NEW (vii) +
+NEW (viii)) per CHAT RATIFICATIONS carried forward; **§4.5
+codification operational at n=10 post-codification sustained
+observations per S40 cross-session trajectory** (S30 + S31 + S32
++ S33 + S34 + S35 + S36 + S37 + S38 + S39 + S40 post-codification
+trajectory) per CHAT RATIFICATION #13 reinforcement (codification-
+stable status preserved at sustained post-codification operation).
+**Frequency Domain / Signal block fourth-entry status framing**
+(analogous to S34 x13_seasonal_adjust Block 3 fourth-entry FINAL-
+entry precedent at Tier VII + §4.7.A REMEDIATED first-observation
+scope per Block 3 Decomposition completion; S40 ssa is Block 5
+fourth-entry NOT FINAL-entry per Block 5 7-entry arc continuation
+at distinct Tier characterization scope Tier IV Pattern A.3 self-
+parity / paper-formula + §4.7.A variant 3 degenerate-dual-arm-
+self-parity sub-variant; per-block continuation pattern n=5
+catalog block observation candidate at Frequency Domain / Signal
+block completion per ITEM 11 forward instrumentation banking;
+expiration semantics: per-block continuation pattern n=5
+codification refinement at absorption #6+ refinement disposition
+pending Frequency Domain / Signal block completion arc close);
+**Frequency Domain / Signal forward completion arc S37 + S38 +
+S39 + S40 + S41 + S42 + S43 advances at S40 per 7-entry §3
+enumeration empirical re-Read at S40 Step 0 mid-session** (banking
+continuation per ITEM 11 forward instrumentation banking; NOT
+codified at S40; expiration semantics: Block ordering working
+hypothesis testing through S41+ to Block 5 close per A3 precedent
++ HETEROGENEOUS TIER-SURFACE A3 THIRD-OBSERVATION TIGHTENING
+SUSTAINED at S40 sustained heterogeneous Tier-surface across 7-
+entry arc; each subsequent Frequency Domain / Signal block entry
+trigger drafting per A9 Class B revised default discipline
+operating proactively at respective sub-session); **HETEROGENEOUS
+TIER-SURFACE VARIANT OBSERVATION A3 THIRD-OBSERVATION TIGHTENING
+SUSTAINED AT S40 forward instrumentation banking EMPIRICALLY
+REINFORCED** (Block Tier-surface composition empirically
+HETEROGENEOUS at sustained n=4 distinct Tiers per A3 precedent
+threshold REINFORCED: Tier III Pattern A.1 at S37 + Tier II.bit-
+exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier
+IV Pattern A.3 at S40; codification refinement candidate at
+absorption #6+ for Block heterogeneous-Tier-surface variant
+sub-pattern definitional scope generalization per §19.4 §4 note
+6 refinement at S35-absorption #5 codification EMPIRICALLY
+ROBUSTLY GROUNDED).
+**NEW Sub-class candidate 2m+ projection (subsequent Frequency
+Domain / Signal block entries at S41+) NOT codified at S40** per
+A3 first-instance precedent (codification deferred to absorption
+#6+ second-observation tightening if recurs; expiration semantics:
+NEW Sub-class candidate trajectory observation banks at S40 close
+pending respective sub-session first-instance baseline observation).
+**§1.9 cross-block extension SECOND-INSTANCE MANIFESTED at suffix-
+ADDITION direction at S40** (engine `ssa_model.py` ADDS `_model`
+suffix to catalog-id `ssa` per registry.py lines 143-145 verbatim
+three aliases mapping to `techniques.ssa_model`; n=2 cross-block
+observations across S37 + S40 at direction-distinct sub-variants
+suffix-OMISSION + suffix-ADDITION; A3 SECOND-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block
+scope; codification refinement candidate at absorption #6+ for
+direction-symmetric expansion: filename-divergence-between-layers
+covers both omission + addition directions; cross-block scope vs
+Block-3-specific scope from S36 codification baseline; expiration
+semantics: §1.9 third cross-block observation banks at S40 close
+pending S41+ entry filename empirical verification).
+**Pattern F structural invariants SECOND-OBSERVATION NOT
+MANIFESTED at S40** (SSA harness `p3_ssa.py` does NOT compute
+structural identity invariants — no roundtrip identity test; no
+Parseval analog; no conservation law adjunct at SVD/eigentriple
+scope; Pattern F NEW framing element observation remains at S38
+first-instance baseline n=1 per A3 first-instance precedent; A3
+second-observation tightening precedent at Pattern F scope
+DEFERRED pending future FFT-family OR Kalman / state-space
+wrapper second-observation; NEW Sub-class 2j codification
+deferred; expiration semantics: Pattern F observation banks at
+S40 close pending second-observation tightening at respective
+sub-session OR absorption #6+ codification refinement disposition).
+**Degenerate dual-arm self-parity validation claim scope
+distinction FIRST observation at Q1 §2.5 entry codification scope
+at S40 forward instrumentation banking** (validation claim scope
+distinction surfaced explicitly at all four disclosure templates
++ Q-A through Q-D audit checklist + Status line per CRITICAL
+CAVEAT ratification; harness `_ssa_reference` invoked at BOTH
+TSL-arm + reference-arm with identical arguments — 0.0 abs diff
+GUARANTEED BY CONSTRUCTION; engine `ssa_model.py::run()` math
+NEVER validated by audit; engine Layer 2 orchestration NEVER
+exercised; distinct validation claim scope from S37-S39 audit-
+validates-library-primitive scope; institutionally substantive
+empirical content distinction at validation claim scope dimension;
+codification refinement candidate at absorption #6+ for validation
+claim scope dimension taxonomy expansion).
+**Block ordering working hypothesis testing through S41+ per S40
+Step 0 fourth-position verification:** ssa at FOURTH-position in
+7-entry Block ordering working hypothesis arc counting validated
+S37 + S38 + S39 + S40 per preliminary working hypothesis from
+S37 close commit message body forward state confirmed at S40
+empirical verification; Block ordering working hypothesis testing
+through S41+ Block-internal complexity ordering verification
+across 7-entry arc S37 + S38 + S39 + S40 + S41 + S42 + S43 (n=3
+Block-ordering observation tightening per A3 precedent SUSTAINED
+at S40; cross-reference to §19.4 §4 note 13 first-instance
+baseline observation at Block 3 100% confirmed precedent per
+S31-S34 ordering empirical validation; fourth Block-ordering
+working hypothesis empirical observation at Frequency Domain /
+Signal block close = n=4 Block-ordering observation tightening
+per A3 precedent if empirically confirmed across remaining S41-
+S43 arc).
+
+## §3 Unvalidated catalog techniques (55 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -12390,8 +14004,8 @@ descriptions, summaries).
 ### Forecasting (Classical) (8 unvalidated)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
 
-### Frequency Domain / Signal (4 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; lomb_scargle moved to §2.5 per Phase 7+ S39 — THIRD Frequency Domain / Signal block entry; heterogeneous Tier-surface variant observation A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at S39 with n=3 distinct Tiers Tier III Pattern A.1 + Tier II.bit-exact Pattern A.2 + Tier V Pattern J B.3; Block Q1-amendment in-progress at 3 of 7 entries Q1-amended)
-`emd_hht`, `ssa`, `wavelet_coherence_phase_lag`, `wavelet_transform`
+### Frequency Domain / Signal (3 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; lomb_scargle moved to §2.5 per Phase 7+ S39 — THIRD Frequency Domain / Signal block entry; ssa moved to §2.5 per Phase 7+ S40 — FOURTH Frequency Domain / Signal block entry; heterogeneous Tier-surface variant observation A3 THIRD-OBSERVATION TIGHTENING SUSTAINED at S40 with n=4 distinct Tiers (Tier III Pattern A.1 + Tier II.bit-exact Pattern A.2 + Tier V Pattern J B.3 + Tier IV Pattern A.3); Block Q1-amendment in-progress at 4 of 7 entries Q1-amended)
+`emd_hht`, `wavelet_coherence_phase_lag`, `wavelet_transform`
 
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
@@ -12414,7 +14028,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 56 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 3 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry; HETEROGENEOUS Tier-surface variant observation A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at S39 with n=3 distinct Tiers (Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S39 per 7-entry §3 enumeration empirical re-Read at S39 Step 0 mid-session; Block ordering working hypothesis third-position verification at S39 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE SECOND-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at S39 (n=2 sustained efficacy observations S38 + S39 0-divergence); Sub-class taxonomy growth Block-level observation at Frequency Domain / Signal block (2i at S37 + 2j candidate at S38 forward-instrumentation-note + 2k at S39 = n=3 NEW Sub-class candidates first-instance baseline observations within Block 5 sub-session arc); A9 Class A 20th-instance candidate banking at S39 commit message body forward state per Code-side prior-turn-ratification-acknowledgment gap sub-pattern variant NEW failure mode distinct from prior A9 Class A failure modes n=14-19**).
+**Total: 55 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 4 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry; HETEROGENEOUS Tier-surface variant observation A3 THIRD-OBSERVATION TIGHTENING SUSTAINED at S40 with n=4 distinct Tiers (Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S40 per 7-entry §3 enumeration empirical re-Read at S40 Step 0 mid-session; Block ordering working hypothesis fourth-position verification at S40 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE THIRD-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD REINFORCED at S40 (n=3 sustained efficacy observations S38 + S39 + S40 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement empirically ROBUSTLY grounded); Sub-class taxonomy growth Block-level observation at Frequency Domain / Signal block (2i at S37 + 2j candidate at S38 forward-instrumentation-note + 2k at S39 + 2l at S40 = n=4 NEW Sub-class candidates first-instance baseline observations within Block 5 sub-session arc; A3 FOURTH-OBSERVATION TIGHTENING REINFORCED); §1.9 SECOND-INSTANCE cross-block extension MANIFESTED at suffix-ADDITION direction at S40 (A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope at n=2 cross-block observations S37 suffix-omission + S40 suffix-addition); §4.7.A variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant FIRST-INSTANCE baseline observation at §2.5 entry codification scope at S40 (prior S37-S39 PRESENT all variant 1); DEGENERATE DUAL-ARM SELF-PARITY validation claim scope distinction FIRST observation at Q1 §2.5 entry codification scope at S40 (audit validates _ssa_reference self-consistency ONLY; engine ssa_model.py::run() math NEVER validated by audit); A9 Class A counter post-S40 status preserved n=14 ACTIVE + n=15-n=20 candidates banked at S35-S39 + S40 SUSTAINED no new Class A catch per S40 Step 0 prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment**).
 
 ## §4 How to use this document
 
