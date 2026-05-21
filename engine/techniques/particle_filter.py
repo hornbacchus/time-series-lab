@@ -155,12 +155,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
             # Propagate (state transition)
             particles = state_transition(particles, t, sigma_state)
 
-            # Update weights if observation is available
+            # Update weights if observation is available.
+            # Sequential Importance Sampling (SIS): weights_t =
+            # weights_{t-1} * p(y_t | x_t) / normalizer. Prior fix
+            # at S52 engine-fix session replaced a REPLACE-update
+            # (weights = w / w_sum) with the SIS MULTIPLY-update;
+            # the prior REPLACE was masked under always-resample
+            # (uniform weights after resample) but produced
+            # persistent bias under adaptive ESS<0.5*N resampling.
             if not nan_mask[t]:
                 log_w = obs_likelihood(values[t], particles, sigma_obs)
+                log_w_combined = np.log(weights + 1e-300) + log_w
                 # Numerical stability
-                max_log_w = np.max(log_w)
-                w = np.exp(log_w - max_log_w)
+                max_log_w = np.max(log_w_combined)
+                w = np.exp(log_w_combined - max_log_w)
                 w_sum = np.sum(w)
 
                 if w_sum > 0:
