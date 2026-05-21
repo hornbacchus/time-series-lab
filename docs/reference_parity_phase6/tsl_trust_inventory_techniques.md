@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 21 catalog techniques with Phase 7+ Q1 trust documentation
+- 22 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41 amendments)
-- 54 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42 amendments)
+- 53 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -15705,7 +15705,1997 @@ ALIGNMENT candidate scope). Banking observation NOT warranting
 additional STOP 1.5 cycle per Q-D authoritative framing convention
 operational + empirical content correct at Q-D MEDIUM-HIGH scope.
 
-## §3 Unvalidated catalog techniques (54 entries; ID-only enumeration)
+### wavelet_coherence_phase_lag (Phase 7+ S42; TWENTY-SECOND §2.5 entry; SIXTH Frequency Domain / Signal block entry — FIFTH catalog block transition advances 5→6 of 7 entries Q1-amended per Q1 work program scope; SECOND Tier IV (Pattern A.3 self-parity / paper-formula validated) PRIMARY tier characterization Q1 §2.5 entry overall after S40 ssa first-instance baseline (S18 gcc_phat was FIRST Tier IV Q1 §2.5 entry overall at THREE-LAYER DOWNSTREAM-TOPOLOGY framing per Block 1 Causality completion; S40 ssa was FIRST Tier IV PRIMARY characterization at SINGLE-LAYER + degenerate-dual-arm-self-parity framing within Frequency Domain / Signal block; S42 wavelet_coherence_phase_lag is SECOND Tier IV PRIMARY characterization at SINGLE-LAYER + degenerate-dual-arm-self-parity framing within Frequency Domain / Signal block — A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at Tier IV PRIMARY tier characterization scope at Q1 §2.5 entry codification per S40 + S42 paired observations); §4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE per Code S42 Step 0 empirical surface (S40 ssa first-instance baseline at §2.5 entry codification scope + S42 wavelet_coherence_phase_lag SECOND-INSTANCE = A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §4.7.A variant 3 degenerate dual-arm self-parity sub-variant scope; codification refinement candidate at absorption #6+ for §4.7.A variant 3 sub-variant codification scope adoption EMPIRICALLY ROBUSTLY GROUNDED); Sub-class 2l SECOND-INSTANCE per S40 + S42 paired observations (S40 ssa first-instance baseline + S42 wavelet_coherence_phase_lag SECOND-INSTANCE = A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at Sub-class 2l scope at n=2 observations; codification refinement candidate at absorption #6+ for Sub-class 2l codification scope adoption EMPIRICALLY ROBUSTLY GROUNDED); §1.9 Filename divergence sub-pattern variant THIRD-OBSERVATION TIGHTENING MANIFESTED at SUFFIX-OMISSION direction (same-direction-as-S37) per Code S42 Step 0 empirical re-Read (audit `p3_wavelet_coherence_audit.md` + harness `p3_wavelet_coherence.py` + engine `wavelet_coherence.py` ALL SUFFIX-OMISSION-CONSISTENT vs canonical catalog technique_id `wavelet_coherence_phase_lag`; S37 periodogram_classical suffix-OMISSION first-instance + S40 ssa suffix-ADDITION distinct-direction + S42 wavelet_coherence_phase_lag suffix-OMISSION SAME-direction-as-S37 = n=3 cross-block observations across distinct Blocks; A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope at n=3 cross-block observations + direction sub-variant analysis n=2 suffix-omission + n=1 suffix-addition; codification refinement candidate at absorption #6+ for §1.9 definitional scope generalization with direction-symmetric expansion + cross-block scope generalization EMPIRICALLY ROBUSTLY REINFORCED); HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 THIRD-OBSERVATION TIGHTENING SUSTAINED AT S42 (n=4 distinct Tiers preserved within Frequency Domain / Signal block at Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT; S42 Tier IV REPEATS S40 — no advance to n=5 distinct Tiers; codification refinement candidate at absorption #6+ for Block heterogeneous-Tier-surface variant sub-pattern empirically REINFORCED at sustained n=4 distinct Tiers across 6 sub-sessions S37-S42); ALL-ANCHOR-DEFERRAL DISCIPLINE FIFTH-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED AT S42 (n=5 sustained efficacy observations S38 + S39 + S40 + S41 + S42 0-divergence; STRONGEST empirical grounding among absorption #6 candidates at S42 close); Multi-precedent confluence at SAME audit + SAME entry codification scope THIRD-INSTANCE per S38 + S41 + S42 sequential observations (FIVE A3 precedent threshold satisfactions/reinforcements at S42 scope: Tier IV Pattern A.3 SECOND-OBSERVATION TIGHTENING + §4.7.A variant 3 degenerate dual-arm self-parity SECOND-OBSERVATION TIGHTENING + Sub-class 2l SECOND-OBSERVATION TIGHTENING + §1.9 Filename divergence cross-block extension THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline FIFTH-APPLICATION A3 further reinforcement at n=5 sustained efficacy observations; A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=3 distinct observations; codification refinement candidate at absorption #6+ for multi-precedent confluence sub-pattern definitional scope at §2.5 entry codification scope EMPIRICALLY ROBUSTLY REINFORCED); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE NOT MANIFESTED at S42 (engine `wavelet_coherence.py` default `_PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])` Balanced preset n_scales=64 + smoothing_width=5 MATCHES audit pinned config n_scales=64 + smoothing_width=5; preserves S41 wavelet_transform FIRST observation at ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE scope as SINGLE-INSTANCE — A3 first-instance precedent preserved at S42); Pattern F structural invariants THIRD-OBSERVATION NOT MANIFESTED at S42 (wavelet coherence harness `p3_wavelet_coherence.py` compare() lines 165-190 primary metrics ONLY `mean_coherence` + `mean_phase`; no structural identity invariants computation; preserves S41 second-observation tightening status at n=2 Pattern F observations S38 + S41 + FFT-family → wavelet-family empirical generalization scope; Pattern F third-observation tightening DEFERRED pending future entry); CRITICAL CAVEAT — audit validates `_wavelet_coherence_reference` SELF-CONSISTENCY ONLY (TSL arm == reference arm identical `_wavelet_coherence_reference` invocation with identical arguments n_scales=64 + smoothing_width=5; 0.0 abs diff GUARANTEED BY CONSTRUCTION); engine `wavelet_coherence.py::run()` math + Layer 2 orchestration (NaN handling + preset config dispatch + min_scale + max_scale + smoothing_width parameter resolution + CWT invocation + cross-wavelet spectrum + time-domain + scale-domain smoothing + coherence/phase computation + circular mean of phase + lead-lag direction inference + summary tables) NEVER exercised by audit — distinct validation claim scope from S37-S39 + S41 entries; SINGLE-LAYER + §4.7.A PRESENT variant 3 degenerate-dual-arm-self-parity framing per S42 STOP 2 empirical investigation + Chat ratification under Tier IV Pattern A.3 + paper-formula framing SECOND-INSTANCE)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+IV (Pattern A.3 self-parity / paper-formula validated) sub-class**
+per S42 (A) Chat STOP 2 disposition. **Tier IV characterization
+directly grounded** at `scope_reframing_s6_banking.md` §2 lines
+159-168 verbatim ("Tier IV — Phase 3 self-parity / paper-formula
+validated (Pattern A.3). ~10 wrappers per P-3 v1.2.0 §1 estimate.
+TSL output validated against from-scratch reimplementation of
+paper-defined recursion. Pattern K → Pattern A path... 5 wrappers
+— `p3_bocpd`, `p3_cusum_page_hinkley`, `p3_stl_esd` (S10 / Batch
+6) + `p3_wavelet_coherence`, `p3_ssa` (S11 / Batch 7)") —
+p3_wavelet_coherence EXPLICITLY enumerated within Tier IV Pattern
+A.3 self-parity / paper-formula 5-wrapper enumeration at S11 /
+Batch 7. p3_wavelet_coherence EXPLICITLY NOT IN Tier II.bit-exact
+12-wrapper enumeration at scope_reframing §2 lines 121-131
+verbatim NOR Tier III Pattern A.1 18-wrapper enumeration at
+scope_reframing §2 lines 151-152 verbatim NOR Tier V Pattern J
+enumeration at scope_reframing §2 lines 170-181 verbatim NOR Tier
+VI CAVEAT enumeration at scope_reframing §2 lines 183-184 verbatim
+(`p3_emd_hht`, `p3_mstl`, `p3_nar_narx`, `p3_star`, `p3_stl`). +
+audit `p3_wavelet_coherence_audit.md` line 6 verbatim ("**Verdict:**
+**PASS** (Pattern A self-parity bit-exact)") + audit lines 14-15
+verbatim all 2 metrics 0.0 abs diff / 0.0 rel diff (mean_coherence
++ mean_phase PASS exact) + audit lines 17-23 verbatim methodology
+rationale ("byte-identical agreement on scale-averaged coherence
+and phase. Both arms invoke `pywt.cwt` with identical Morlet
+wavelet ('morl'), identical `scipy.ndimage.uniform_filter1d`
+smoothing kernel (width=5), and identical scale grid (n_scales=64,
+log-spaced over [2, N/4])") + audit lines 38-49 verbatim Pattern
+K → Pattern A path methodology rationale ("Original Pattern K
+candidate: R `biwavelet` package implements a different coherence
+estimator (Liu-Liang-Weisberg 2007 with Monte Carlo significance)
+— not directly comparable. The custom phase-lag estimator (scale-
+averaged circular mean of phase angle) has no canonical reference
+at all. Resolution: self-parity reference inline in
+`harness/checks/p3_wavelet_coherence.py` (~50 LOC) mirrors TSL's
+CWT-based coherence + smoothing formula verbatim. Catches wrapper-
+level regressions in CWT invocation, smoothing application, or
+coherence-formula arithmetic") + harness `p3_wavelet_coherence.py`
+lines 1-17 verbatim audit design rationale ("Compares TSL
+`engine/techniques/wavelet_coherence.py` (custom CWT-based
+coherence with smoothing) against a from-scratch reference that
+mirrors TSL's coherence formula verbatim. Pattern A self-parity
+— the canonical R `biwavelet` package implements a different
+coherence estimator (Liu-Liang-Weisberg 2007 with Monte Carlo
+significance) and is not directly comparable; self-parity catches
+wrapper-level regressions in the CWT call, smoothing, or
+coherence-formula application. **Tier B sub-component:** the
+custom phase-lag estimator (scale-averaged circular mean of
+phase) is part of the self-parity reference; no separate canonical
+reference exists"). **NOT Tier II.bit-exact (Pattern A.2 cross-
+package)** — reference is from-scratch harness reimplementation,
+not external package; scope_reframing §2 line 121-131 enumeration
+does NOT include p3_wavelet_coherence. **NOT Tier III Pattern
+A.1 same-library** — reference is from-scratch reimplementation,
+not direct library invocation of TSL's same library;
+scope_reframing §2 line 151-152 enumeration does NOT include
+p3_wavelet_coherence. **NOT Tier V Pattern J** — audit verdict
+PASS Pattern A self-parity bit-exact at 0.0 abs diff; no Pattern
+J normalization-convention divergence; scope_reframing §2 line
+170-181 enumeration does NOT include p3_wavelet_coherence. **NOT
+Tier VI CAVEAT** — audit verdict PASS, NOT CAVEAT; scope_reframing
+§2 line 183-184 enumeration does NOT include p3_wavelet_coherence.
+**NOT Tier VII** — audit infrastructure exists and PASS verdict
+produced; not SKIP-graceful. **ALL-ANCHOR-DEFERRAL DISCIPLINE
+FIFTH-APPLICATION** operative at S42 Step 0 — Tier anchor DEFERRED
+to Code Step 0 empirical verification per Chat S42 trigger
+drafting all-anchor-deferral discipline fifth-application per
+institutional learning sustainment from S37 multi-anchor schema-
+misattribution catch n=18 + S38 first-application + S39 second-
+application + S40 third-application + S41 fourth-application
+empirical efficacy validations (A3 second-observation tightening
+precedent threshold SATISFIED at S39 + REINFORCED at S40 + S41 +
+FURTHER REINFORCED at S42); Tier IV Pattern A.3 empirically
+confirmed at Step 0 with 0 multi-anchor divergences (SUSTAINED at
+n=5 sustained efficacy observations S38 + S39 + S40 + S41 + S42
+0-divergence; A3 precedent threshold FURTHER REINFORCED at
+STRONGEST empirical grounding among absorption #6 candidates).
+STOP 2 BLOCKING discharged on Tier anchor per Chat S42 STOP 2 (A)
+RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER +
+§4.7.A PRESENT variant 3 Harness-reimplements-engine-math
+mechanism at DEGENERATE DUAL-ARM SELF-PARITY sub-variant per CHAT
+RATIFICATION at Step 0 STOP 2; Sub-class 2l SECOND-INSTANCE per
+A3 second-observation tightening precedent threshold SATISFIED
+per S40 + S42 paired observations + (C) ratification (analogous
+to S37 Sub-class 2i candidate FIRST-INSTANCE + S41 Sub-class 2i
+SECOND-OBSERVATION TIGHTENING precedent at Tier III Pattern A.1 +
+§4.7.A variant 1 scope; S40 Sub-class 2l FIRST-INSTANCE baseline
++ S42 Sub-class 2l SECOND-OBSERVATION TIGHTENING at Tier IV
+Pattern A.3 + §4.7.A variant 3 scope)):** wavelet_coherence_phase_lag
+is 1:1 catalog↔wrapper mapping per `p3_wavelet_coherence_audit.md`
+audit Wrapper field (`engine/techniques/wavelet_coherence.py`
+sole engine module) BUT engine filename diverges from catalog-id
+per §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension
+MANIFESTED at SUFFIX-OMISSION direction — engine
+`wavelet_coherence.py` + audit `p3_wavelet_coherence_audit.md` +
+harness `p3_wavelet_coherence.py` ALL OMIT `_phase_lag` suffix
+from canonical catalog technique_id `wavelet_coherence_phase_lag`.
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S42
+n=12 PRESENT + n=1 REMEDIATED = n=13 total OBSERVATIONS per S42
+banking per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A REMEDIATED 5th variant status dimension extension
+orthogonal to mechanism variant dimension; §4.7.A variant 3
+SECOND-INSTANCE TIGHTENING at §2.5 entry codification scope per
+S42 banking — S40 ssa FIRST-INSTANCE baseline + S42 wavelet_coherence_phase_lag
+SECOND-INSTANCE; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD SATISFIED at §4.7.A variant 3 degenerate dual-arm self-
+parity sub-variant scope at n=2 observations):**
+`tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 46-103 defines `_wavelet_coherence_reference(x, y, *,
+n_scales, min_scale, max_scale, smoothing_width, wavelet)` from-
+scratch reimplementation function — custom CWT-based coherence +
+smoothing + phase-lag formula reimplementation (CWT invocation at
+lines 65-66 via `pywt.cwt(x_std, scales, wavelet)` +
+`pywt.cwt(y_std, scales, wavelet)` + cross-wavelet spectrum at
+line 67 `Wxy = Wx * np.conj(Wy)` + time-direction smoothing at
+lines 69-73 `smooth_time` via `scipy.ndimage.uniform_filter1d` +
+scale-direction smoothing at lines 75-79 `smooth_scale` via
+`uniform_filter1d` with `max(w // 2, 1)` size + smoothed cross-
+spectrum + auto-spectra at lines 81-89 + coherence formula at
+line 92 `np.clip(np.abs(S_xy) ** 2 / denom, 0, 1)` + phase angle
+at line 93 + scale-averaged coherence + circular mean of phase at
+lines 94-98 + return dict at lines 99-103). Harness `run_tsl`
+(lines 137-150) invokes `_wavelet_coherence_reference(x, y,
+n_scales=64, smoothing_width=5)` at **line 144-146** directly
+with comment at lines 141-143 verbatim ("**Bypass TSL wrapper
+output rounding; invoke the same math directly. Use Balanced
+preset config: n_scales=64, smoothing_width=5**"); harness TSL-
+arm does NOT invoke engine `wavelet_coherence.py::run()` entry
+point. Harness `run_reference` (lines 152-163) **invokes the SAME
+`_wavelet_coherence_reference(x, y, n_scales=64, smoothing_width=
+5)` at lines 156-158** — IDENTICAL function call to run_tsl with
+identical arguments. **Critical empirical observation: BOTH arms
+invoke SAME `_wavelet_coherence_reference` function — DEGENERATE
+SELF-PARITY at dual-arm scope SECOND-INSTANCE.** Engine
+`wavelet_coherence.py::run()` is NEVER invoked by audit. The
+audit verdict "PASS Pattern A self-parity bit-exact" at 0.0 abs
+diff across both metrics is **GUARANTEED BY CONSTRUCTION** (TSL
+arm == reference arm exactly per identical
+`_wavelet_coherence_reference` invocation with identical
+arguments). §4.7.A variant 3 "Harness-reimplements-engine-math"
+manifestation per S30 (G.1) generalized definitional scope. **§4.7.A
+status PRESENT per S36 §4.7.A status dimension codification (NOT
+REMEDIATED)** — harness defines from-scratch reimplementation +
+invokes it from both arms; engine `wavelet_coherence.py::run()`
+math never validated; code-path divergence active at runtime per
+HEAD verification. **Cross-package framing distinction from S37-
+S39 + S41 §4.7.A variant 1 + parallel to S40 §4.7.A variant 3:**
+S37-S39 + S41 reference arms invoke library primitive directly
+(S37 same-library scipy.signal.periodogram self-test; S38 cross-
+package scipy.fft vs numpy.fft both wrap pocketfft shared backbone;
+S39 cross-package scipy.signal.lombscargle vs astropy.timeseries.LombScargle
+distinct normalization conventions; S41 same-library pywt.wavedec
+self-test); audit DOES validate library primitive at metric scope
+at S37-S39 + S41 (S37 + S41 same-library bit-exact; S38 cross-
+package bit-exact at pocketfft-shared-backbone; S39 metric-
+selection-aligned bit-exact at peak_freq). At S40 + S42 Tier IV
+Pattern A.3 + §4.7.A variant 3: harness defines from-scratch
+reimplementation (`_ssa_reference` at S40; `_wavelet_coherence_reference`
+at S42; NOT library primitive direct invocation); BOTH arms invoke
+SAME reimplementation; audit validates reimplementation self-
+consistency ONLY (degenerate; 0.0 abs diff guaranteed by identical
+invocation). Engine `ssa_model.py::run()` math + engine
+`wavelet_coherence.py::run()` math NEVER validated by audit. Post-
+S42 §4.7.A observations = n=12 PRESENT across §2.5 entries (S14a
+granger + S18 gcc_phat + S26 denton_chowlin + S27 loess + S31
+classical_decompose + S32 mstl_decompose + S33 stl_decompose +
+S37 periodogram_spectral_density + S38 fft_spectrum + S39
+lomb_scargle + S40 ssa + S41 wavelet_transform + S42
+wavelet_coherence_phase_lag) + n=1 REMEDIATED (S34
+x13_seasonal_adjust per Phase 4 Session 2 2026-05-01 P4-2 pathway
+(c) closure) = n=13 total observations across mechanism variants
++ status dimension; **§4.7.A variant 3 SECOND-INSTANCE TIGHTENING
+at §2.5 entry codification scope per S42 banking** (S40 ssa
+FIRST-INSTANCE baseline + S42 wavelet_coherence_phase_lag SECOND-
+INSTANCE; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD
+SATISFIED at §4.7.A variant 3 degenerate dual-arm self-parity
+sub-variant scope at n=2 observations; codification refinement
+candidate at absorption #6+ for §4.7.A variant 3 sub-variant
+codification scope adoption EMPIRICALLY ROBUSTLY GROUNDED).
+
+**A10 Sub-class disposition: Sub-class 2l SECOND-INSTANCE per A3
+second-observation tightening precedent threshold SATISFIED per
+S40 + S42 paired observations + (B) Chat STOP 2 ratification (A3
+precedent threshold SATISFIED at n=2 observations; codification
+refinement candidate at absorption #6+ for Sub-class 2l codification
+scope adoption EMPIRICALLY ROBUSTLY GROUNDED):** S42
+wavelet_coherence_phase_lag surfaces Sub-class 2l SECOND-INSTANCE
+per A3 precedent. Sub-class 2l definitional scope working
+hypothesis CARRIED FORWARD from S40 first-instance baseline:
+**"Tier IV Pattern A.3 self-parity / paper-formula validated +
+§4.7.A PRESENT variant 3 harness-reimplements-engine-math +
+degenerate-dual-arm-self-parity sub-variant + single-layer scope"**
+— Layer 1 `_wavelet_coherence_reference` from-scratch
+reimplementation of custom CWT-based coherence + smoothing +
+phase-lag formula invoked at BOTH TSL-arm + reference-arm
+(degenerate self-parity; 0.0 abs diff guaranteed by construction
+at identical function invocation with identical arguments) +
+Layer 2 engine `wavelet_coherence.py::run()` orchestration (NaN
+handling via `dropna_aligned` + n < 32 threshold check + preset
+config dispatch + wavelet parameter resolution + n_scales +
+min_scale + max_scale + smoothing_width parameter resolution +
+CWT invocation + cross-wavelet spectrum + smoothing + coherence/
+phase computation + circular mean of phase + lead-lag direction
+inference + best scale identification + summary tables + plain
+English + audit_fields construction) NEVER exercised by audit.
+Audit validates `_wavelet_coherence_reference` self-consistency
+ONLY at degenerate dual-arm self-parity scope (audit verdict
+"PASS Pattern A self-parity bit-exact" at 0.0 abs diff GUARANTEED
+BY CONSTRUCTION — TSL arm == reference arm identical
+`_wavelet_coherence_reference` invocation); audit DOES NOT
+validate `_wavelet_coherence_reference` correctness vs canonical
+wavelet coherence + phase-lag formulas (no independent reference;
+R `biwavelet` Liu-Liang-Weisberg 2007 estimator distinct
+methodology per audit lines 38-44 verbatim) NOR validate engine
+`wavelet_coherence.py::run()` math correctness (engine never
+invoked). Distinct from codified Sub-class 2a (αa) "general two-
+layer class" semantic (Tier II.bit-exact + cross-package + two-
+layer; S22 + S23 + S28 + S31 + S38 codified) per Tier IV vs Tier
+II.bit-exact scope distinction. Distinct from Sub-class 2i (S37
+first-instance + S41 second-observation tightening; Tier III
+Pattern A.1 same-library self-test bit-exact + §4.7.A PRESENT
+variant 1 reimplementation-of-dispatch scope) per Tier IV self-
+parity vs Tier III same-library scope distinction + variant 3 vs
+variant 1 scope distinction. Distinct from Pattern F NEW framing
+element forward instrumentation note candidate Sub-class 2j (S38
+first-instance + S41 second-observation tightening; FFT-family →
+wavelet-family structural invariants scope) per Tier IV self-
+parity vs Tier II.bit-exact + Tier III cross-Tier scope
+distinction. Distinct from Sub-class 2k candidate (S39 first-
+instance; Tier V Pattern J B.3 alignment-via-metric resolution +
+cross-package framing scope) per Tier IV self-parity vs Tier V
+Pattern J scope distinction + variant 3 vs variant 1 scope
+distinction. Distinct from S18 gcc_phat Tier IV Pattern A.3 self-
+parity FIRST Q1 §2.5 entry — S18 was THREE-LAYER DOWNSTREAM-
+TOPOLOGY framing per Block 1 Causality completion (memory) at
+three-layer structural scope; S40 + S42 are SINGLE-LAYER +
+DEGENERATE-DUAL-ARM-SELF-PARITY framing within Frequency Domain
+/ Signal block at distinct structural scope. **A3 SECOND-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED at Sub-class 2l scope at
+n=2 observations** (S40 ssa first-instance baseline + S42
+wavelet_coherence_phase_lag SECOND-INSTANCE); codification
+refinement candidate at absorption #6+ for Sub-class 2l
+codification scope adoption EMPIRICALLY ROBUSTLY GROUNDED.
+Variant tagging mechanism preserved at SECOND-INSTANCE per A3
+precedent; codification disposition deferred to absorption #6+
+Chat ratification.
+
+**Pattern F structural invariants THIRD-OBSERVATION NOT MANIFESTED
+at S42 per Code S42 Step 0 empirical re-Read:** harness
+`p3_wavelet_coherence.py` compare() lines 165-190 primary metrics
+ONLY `mean_coherence` + `mean_phase` via `_compare_vector`; NO
+structural identity invariants computation (no cross-wavelet
+roundtrip identity test; no cross-spectrum Parseval-like energy
+conservation; no conservation law adjunct at CWT/coherence scope).
+Pattern F NEW framing element observation remains at S38 + S41
+n=2 second-observation tightening status (FFT-family → wavelet-
+family empirical generalization scope per S41 second-observation
+tightening). A3 third-observation tightening precedent at Pattern
+F scope DEFERRED pending future wrapper structural-invariants
+manifestation (potential candidates: state-space Kalman recursion
+identity, EVT block-maxima asymptotic invariants, time-series
+decomposition reconstruction identity). NEW Sub-class 2j
+codification (Pattern F structural invariants scope) preserved
+at second-observation tightening status per (αc) forward-
+instrumentation-note treatment from S38 + S41.
+
+**§1.9 Filename divergence sub-pattern variant THIRD-OBSERVATION
+TIGHTENING MANIFESTED at SUFFIX-OMISSION direction per Code S42
+Step 0 empirical re-Read:** audit `p3_wavelet_coherence_audit.md`
++ harness `p3_wavelet_coherence.py` + engine `wavelet_coherence.py`
+ALL OMIT `_phase_lag` suffix from canonical catalog technique_id
+`wavelet_coherence_phase_lag` per §3 enumeration line 15744
+verbatim. §1.9 codified Block-3-specific scope at S36 EXTENDS to
+Frequency Domain / Signal block at S37 first-instance cross-block
+observation (periodogram audit + harness omit `_spectral_density`
+suffix from catalog-id `periodogram_spectral_density` — suffix-
+OMISSION direction); S40 SECOND-INSTANCE cross-block extension
+MANIFESTED at suffix-ADDITION direction (engine `ssa_model.py`
+ADDS `_model` suffix to catalog-id `ssa`); S41 third cross-block
+extension NOT MANIFESTED at wavelet_transform; **S42 THIRD-
+OBSERVATION TIGHTENING cross-block extension MANIFESTED at
+SUFFIX-OMISSION direction** — audit + harness + engine all omit
+suffix vs canonical catalog technique_id. **Direction-distinct
+sub-variant observation:** S37 first-instance at suffix-OMISSION
+direction + S40 second-instance at suffix-ADDITION direction +
+S42 third-instance at suffix-OMISSION direction (SAME-direction-
+as-S37) — n=3 cross-block observations + n=2 distinct §1.9 cross-
+block sub-variants observed (n=2 suffix-omission + n=1 suffix-
+addition). **A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD
+SATISFIED at §1.9 cross-block scope** at n=3 cross-block
+observations (S37 + S40 + S42); cumulative §1.9 observations
+across Blocks = n=6 (Block 3 mstl + stl + x13 intra-block S32-S34
++ Frequency Domain / Signal periodogram cross-block S37 + ssa
+cross-block S40 + wavelet_coherence_phase_lag cross-block S42).
+**Empirical observation at S42 surface — same-direction repeat
+within suffix-OMISSION sub-variant:** S37 + S42 = n=2 suffix-
+omission cross-block observations; direction sub-variant
+empirical accumulation at sustained n=2 same-direction observations
+within direction-distinct sub-variant analysis scope. Codification
+refinement candidate at absorption #6+ for §1.9 definitional
+scope generalization (direction-symmetric expansion: filename-
+divergence-between-layers covers both suffix-omission + suffix-
+addition directions; cross-block scope vs Block-3-specific scope
+from S36 codification baseline; cross-block extension scope at
+n=3 cross-block observations EMPIRICALLY ROBUSTLY REINFORCED).
+Forward instrumentation: §1.9 fourth cross-block observation
+banking at S42 close pending S43+ entry filename empirical
+verification.
+
+**§1.8 reroll_on_caveat=False discipline NOT APPLICABLE at S42:**
+audit verdict is PASS (Pattern A self-parity bit-exact) per
+`p3_wavelet_coherence_audit.md` line 6 verbatim, NOT CAVEAT. §1.8
+applicability scope per S32-S33 codified definitional scope is
+Tier VI CAVEAT primary; S42 Tier IV Pattern A.3 PASS primary
+scope distinct from §1.8 applicability scope. §1.8 NOT APPLICABLE
+banking continuation at S42 per Step 0 + STOP 2 verification.
+
+**ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE NOT
+MANIFESTED at S42 per Code S42 Step 0 empirical re-Read:** engine
+`wavelet_coherence.py` line 90 verbatim (`cfg = _PRESET_CONFIG.get(
+ctx.preset, _PRESET_CONFIG["Balanced"])`) + `_PRESET_CONFIG`
+lines 26-30 verbatim (Fast `{n_scales: 32, smoothing_width: 3}`
+/ Balanced `{n_scales: 64, smoothing_width: 5}` / Thorough
+`{n_scales: 128, smoothing_width: 7}`) — engine DEFAULT preset
+Balanced (when preset not specified or invalid) sets n_scales=64
++ smoothing_width=5. Audit harness `p3_wavelet_coherence.py`
+lines 144-146 + 156-158 invoke `_wavelet_coherence_reference(x,
+y, n_scales=64, smoothing_width=5)` with EXPLICIT n_scales=64 +
+smoothing_width=5 (matching Balanced preset values). **ENGINE-
+DEFAULT-CONFIG = AUDIT-PINNED-CONFIG match at Balanced preset
+(n_scales=64 + smoothing_width=5).** Preserves S41 wavelet_transform
+FIRST observation at ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG
+DIVERGENCE scope as SINGLE-INSTANCE (S41 engine default mode
+"symmetric" diverged from audit pinned mode "periodization"; S42
+no divergence — engine and audit BOTH use Balanced preset
+defaults). A3 first-instance precedent preserved at S42; second-
+observation tightening at ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-
+CONFIG DIVERGENCE scope DEFERRED pending future Q1 §2.5 entry
+where engine default config diverges from audit pinned config.
+
+**Code Tier 2 case-against options surfaced at S42 STOP 2 per
+Mark 3 unprompted-discipline (rejected per Chat ratification at
+S42 STOP 2):**
+- **(α-i alternative) Tier II.bit-exact (Pattern A.2 cross-package)
+  ALTERNATIVE:** REJECTED. Reference is from-scratch harness
+  reimplementation `_wavelet_coherence_reference`, not external
+  package; scope_reframing §2 line 121-131 Tier II.bit-exact 12-
+  wrapper enumeration explicitly does NOT include p3_wavelet_coherence;
+  rejected per A6 BLOCKING empirical content preservation.
+- **(α-ii) Tier III Pattern A.1 same-library ALTERNATIVE:**
+  REJECTED. Reference is from-scratch reimplementation, not
+  direct library invocation of TSL's same library (pywt provides
+  CWT primitive but does NOT provide coherence + phase-lag
+  estimator); scope_reframing §2 line 151-152 Tier III 18-wrapper
+  Pattern A.1 enumeration explicitly does NOT include
+  p3_wavelet_coherence; rejected per A6 BLOCKING empirical content
+  preservation.
+- **(α-iii) Tier V Pattern J ALTERNATIVE:** REJECTED. Audit
+  verdict PASS Pattern A self-parity bit-exact at 0.0 abs diff
+  across both metrics; no Pattern J normalization-convention
+  divergence at diagnostic-metric scope; scope_reframing §2 line
+  170-181 Tier V enumeration does NOT include p3_wavelet_coherence;
+  rejected per A6 BLOCKING empirical content preservation.
+- **(α-iv) Tier VI CAVEAT ALTERNATIVE:** REJECTED. Audit verdict
+  is PASS (Pattern A self-parity bit-exact), NOT CAVEAT; §1.8
+  reroll_on_caveat applicability scope NOT APPLICABLE at S42;
+  scope_reframing §2 line 183-184 Tier VI 5-wrapper enumeration
+  does NOT include p3_wavelet_coherence; rejected per A6 BLOCKING
+  empirical content preservation.
+- **(α-v) Tier VII SKIP-graceful ALTERNATIVE:** REJECTED. Audit
+  infrastructure exists at `p3_wavelet_coherence.py` +
+  `p3_wavelet_coherence_audit.md` and PASS verdict produced; NOT
+  SKIP-graceful; rejected per A6 BLOCKING empirical content
+  preservation.
+- **(αb) NEW Sub-class 2m+ candidate first-instance baseline
+  ALTERNATIVE (treating S42 as distinct from Sub-class 2l):**
+  REJECTED. Empirical structure IDENTICAL to S40 ssa (Tier IV +
+  Pattern A.3 + §4.7.A variant 3 + harness reimplements engine
+  math + run_tsl bypasses engine `run()`); SAME sub-class
+  structure → Sub-class 2l SECOND-INSTANCE per A3 precedent;
+  treating S42 as Sub-class 2m+ would conflate codification-
+  stable Sub-class 2l semantic at SECOND-INSTANCE tightening;
+  rejected per A6 BLOCKING empirical content preservation +
+  Sub-class taxonomy stability discipline.
+- **(αc) §1.9 SAME-DIRECTION repeat (n=2 suffix-omission) ONLY
+  ALTERNATIVE (treating S42 + S37 as direction-internal repeat,
+  not n=3 cross-block observation):** REJECTED. §1.9 cross-block
+  scope counts cross-block extensions regardless of direction
+  sub-variant; S37 + S40 + S42 = n=3 cross-block observations
+  satisfies A3 THIRD-OBSERVATION TIGHTENING precedent threshold
+  at cross-block scope; direction sub-variant analysis (n=2
+  suffix-omission + n=1 suffix-addition) is supplementary
+  characterization within cross-block observation count; rejected
+  per A3 precedent semantics + A6 BLOCKING empirical content
+  preservation.
+- **(αd) Pattern F THIRD-OBSERVATION MANIFESTED at wavelet-
+  coherence cross-spectral scope ALTERNATIVE:** REJECTED. Harness
+  `p3_wavelet_coherence.py` compare() lines 165-190 empirical
+  structure computes ONLY primary metrics `mean_coherence` +
+  `mean_phase` via `_compare_vector`; no structural identity
+  invariants computation surface; rejected per A6 BLOCKING
+  empirical content preservation. Pattern F NOT MANIFESTED at
+  S42; preserves S41 second-observation tightening status at n=2
+  Pattern F observations + FFT-family → wavelet-family empirical
+  generalization scope.
+- **§4.7.A variant 2 (Harness-defines-internal-reference-function)
+  ALTERNATIVE:** PARTIALLY VIABLE alternative —
+  `_wavelet_coherence_reference` IS internal harness function.
+  But the function REIMPLEMENTS engine MATH (custom CWT-based
+  coherence + smoothing + phase-lag formula reimplementation);
+  variant 3 (reimplements-engine-math) is more specific
+  characterization than variant 2 (defines-internal-reference-
+  function) per S30 codification specificity ordering + S40
+  Sub-class 2l first-instance baseline framing precedent; rejected
+  per Code recommendation + Chat ratification preference at
+  variant 3 specificity scope continuation.
+
+**Frequency Domain / Signal block SIXTH entry — FIFTH catalog
+block transition advances 5→6 of 7 entries Q1-amended per Q1 work
+program scope (per-block continuation pattern n=5 catalog block
+observation candidate at Frequency Domain / Signal block completion
+pending S43 close):** S42 wavelet_coherence_phase_lag advances
+the fifth catalog block transition from 5 of 7 (S37
+periodogram_spectral_density first-entry + S38 fft_spectrum
+second-entry + S39 lomb_scargle third-entry + S40 ssa fourth-
+entry + S41 wavelet_transform fifth-entry) to 6 of 7 (S42
+wavelet_coherence_phase_lag sixth-entry continuation). **Block
+ordering position verification at S42 Step 0:**
+wavelet_coherence_phase_lag at second-position alphabetically
+within §3 remaining 2 unvalidated entries `emd_hht,
+wavelet_coherence_phase_lag` (post-S37 + post-S38 + post-S39 +
+post-S40 + post-S41 §3 enumeration; wavelet_coherence_phase_lag
+at SIXTH-position in 7-entry Block ordering working hypothesis
+arc counting validated S37 + S38 + S39 + S40 + S41 + S42); Block
+ordering working hypothesis ratified per §3 empirical re-Read at
+HEAD c62be4b line 15744 verbatim. **Empirical §3 enumeration
+confirmation at S42 Step 0 mid-session re-Read per CONSTRAINT 4
+A6 BLOCKING verify-state-at-narration discipline + S38 + S39 +
+S40 + S41 A9 Class A 19th + 20th-instance candidate banking
+institutional learning sustainment:** §3 Frequency Domain /
+Signal block remaining 2 unvalidated entries empirically =
+emd_hht + wavelet_coherence_phase_lag (consistent with S41 Step
+0 ratification minus wavelet_transform validated at S41 close).
+Forward instrumentation: Frequency Domain / Signal block
+completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances
+at S42; per-block continuation pattern at n=5 catalog block
+observations (Block 1 + Block 12 + Block 8 + Block 3 + Frequency
+Domain / Signal [in-progress at S42 = 6 of 7]) codification
+refinement candidate at absorption #6+ per §19.4 §4 note 6
+refinement n=4 → n=5 per S35-absorption #5 codification — pending
+S43 Block 5 close FULLY Q1-AMENDED milestone.
+**Heterogeneous Tier-surface variant observation A3 THIRD-
+OBSERVATION TIGHTENING SUSTAINED AT S42:** n=4 distinct Tier
+characterizations preserved across n=6 entries within Frequency
+Domain / Signal block (Tier III Pattern A.1 at S37 + S41 REPEAT
++ Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at
+S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT); S42 Tier IV
+REPEATS S40 — no advance to n=5 distinct Tiers; A3 third-
+observation tightening sustained at n=4 distinct Tier observations
+within single Block arc per Block heterogeneous-Tier-surface
+variant sub-pattern empirical accumulation EMPIRICALLY REINFORCED
+at sustained n=4 distinct Tiers across 6 sub-sessions S37-S42.
+Codification refinement candidate at absorption #6+ for Block
+heterogeneous-Tier-surface variant sub-pattern definitional
+scope generalization per §19.4 §4 note 6 refinement at S35-
+absorption #5 codification EMPIRICALLY ROBUSTLY GROUNDED.
+
+#### §1.5 Novelty enumeration sub-section (S42 application — eighth post-S23 first-instance codification application per S30 codification; ≥5 observations threshold satisfied at n=8)
+
+S42 surfaces 8 NEW observations across compound second-instance/
+third-instance tightening disclosures + Frequency Domain / Signal
+block sixth-entry framing + multi-precedent confluence THIRD-
+INSTANCE + A3 precedent threshold satisfactions/reinforcements
+at SAME audit + SAME entry codification scope + all-anchor-
+deferral discipline fifth-application empirical efficacy further
+reinforcement, satisfying ≥5 observations threshold per S23
+first-instance codification at S30 §1.5 codification scope. n=8
+post-codification observations across S23 + S34 + S37 + S38 +
+S39 + S40 + S41 + S42; A3 eighth-observation tightening
+reinforcement per §1.5 sustained-observation operational status
+note per S36 §1.5 refinement (n=7 seventh-observation
+reinforcement at S41 UPGRADE to n=8 eighth-observation
+reinforcement at S42 per S42 application).
+
+**Novelty 1 — Tier IV (Pattern A.3 self-parity / paper-formula
+validated) SECOND PRIMARY tier characterization Q1 §2.5 entry
+overall per A3 second-observation tightening precedent threshold
+SATISFIED at Tier IV PRIMARY tier characterization scope:** S42
+wavelet_coherence_phase_lag is SECOND Q1 §2.5 entry within Tier
+IV PRIMARY tier characterization scope at Frequency Domain /
+Signal block second-instance within Block 5 (S40 ssa was FIRST
+Tier IV PRIMARY characterization within Frequency Domain / Signal
+block at SINGLE-LAYER + degenerate-dual-arm-self-parity framing;
+S42 wavelet_coherence_phase_lag is SECOND Tier IV PRIMARY
+characterization within Frequency Domain / Signal block at
+SINGLE-LAYER + degenerate-dual-arm-self-parity framing). Tier IV
+(Pattern A.3 self-parity / paper-formula validated) characterization
+grounded at scope_reframing §2 lines 159-168 verbatim Tier IV 5-
+wrapper enumeration scope explicitly including p3_wavelet_coherence
+(Pattern K → Pattern A path per phase3_cross_batch_findings.md
+S10 cross-batch finding; S11 / Batch 7 enumeration). A3 SECOND-
+OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at Tier IV
+PRIMARY tier characterization scope per S40 + S42 paired
+observations.
+
+**Novelty 2 — §4.7.A PRESENT variant 3 (Harness-reimplements-
+engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant
+SECOND-INSTANCE TIGHTENING at §2.5 entry codification scope per
+A3 second-observation tightening precedent threshold SATISFIED:**
+S42 wavelet_coherence_phase_lag is SECOND-INSTANCE §4.7.A variant
+3 PRESENT observation at §2.5 entry codification scope (S40 ssa
+first-instance baseline + S42 SECOND-INSTANCE; prior S37-S39 +
+S41 PRESENT all variant 1 Harness-imports-library-directly; S14a
++ S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 + S39 + S40 +
+S41 + S42 PRESENT across §2.5 entries + S34 REMEDIATED = n=13
+total post-S42 observations across mechanism variants + status
+dimension; variant 3 second-instance tightening at §2.5 entry
+codification scope forward instrumentation banking). DEGENERATE
+DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE at §4.7.A
+taxonomy + harness mechanism dimension; codification refinement
+candidate at absorption #6+ for §4.7.A taxonomy mechanism variant
+3 sub-variant codification scope adoption EMPIRICALLY ROBUSTLY
+GROUNDED.
+
+**Novelty 3 — Sub-class 2l SECOND-INSTANCE per A3 second-
+observation tightening precedent threshold SATISFIED at Sub-class
+2l scope at n=2 observations:** SECOND observed Sub-class 2l per
+A3 second-observation tightening precedent (n=2 observations;
+codification refinement candidate at absorption #6+ for Sub-class
+2l codification scope adoption EMPIRICALLY ROBUSTLY GROUNDED).
+Definitional scope working hypothesis CARRIED FORWARD from S40
+first-instance baseline: "Tier IV Pattern A.3 self-parity /
+paper-formula validated + §4.7.A PRESENT variant 3 harness-
+reimplements-engine-math + degenerate-dual-arm-self-parity sub-
+variant + single-layer scope". Distinct from codified Sub-class
+2a-2k Tier II.bit-exact + cross-package + two-layer scope (S22 +
+S23 + S28 + S31 + S38 codified) + Sub-class 2i + 2j + 2k
+candidates (S37 + S38 + S39 first-instance baseline + S37 + S41
++ S38 + S41 second-observation tightening observations within
+Block 5 sub-session arc) per Tier IV self-parity vs other Tier
+scope distinction + variant 3 vs variant 1 scope distinction.
+Distinct from S18 gcc_phat Tier IV THREE-LAYER DOWNSTREAM-
+TOPOLOGY framing per Block 1 Causality completion vs S40 + S42
+SINGLE-LAYER + DEGENERATE-DUAL-ARM-SELF-PARITY framing.
+
+**Novelty 4 — §1.9 Filename divergence sub-pattern variant
+THIRD-OBSERVATION TIGHTENING MANIFESTED at SUFFIX-OMISSION
+direction (same-direction-as-S37) per Code S42 Step 0 empirical
+re-Read; A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD
+SATISFIED at §1.9 cross-block scope at n=3 cross-block
+observations:** audit `p3_wavelet_coherence_audit.md` + harness
+`p3_wavelet_coherence.py` + engine `wavelet_coherence.py` ALL
+OMIT `_phase_lag` suffix from canonical catalog technique_id
+`wavelet_coherence_phase_lag` + S37 periodogram_spectral_density
+first-instance cross-block manifestation at suffix-OMISSION
+direction + S40 ssa second-instance cross-block manifestation at
+suffix-ADDITION direction; S42 third-instance cross-block
+manifestation at suffix-OMISSION direction (SAME-direction-as-
+S37). n=3 cross-block observations (S37 + S40 + S42); n=2 distinct
+sub-variants (n=2 suffix-omission + n=1 suffix-addition). A3
+THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at
+§1.9 cross-block scope at n=3 cross-block observations;
+codification refinement candidate at absorption #6+ for §1.9
+definitional scope generalization (direction-symmetric expansion
++ cross-block scope generalization EMPIRICALLY ROBUSTLY
+REINFORCED at sustained three cross-block observations).
+
+**Novelty 5 — Degenerate dual-arm self-parity validation claim
+scope distinction SECOND observation at Q1 §2.5 entry codification
+scope per A3 second-observation tightening precedent threshold
+SATISFIED:** harness `_wavelet_coherence_reference` (lines 46-
+103) is from-scratch reimplementation of custom CWT-based
+coherence + smoothing + phase-lag formula; BOTH harness run_tsl
+(lines 137-150) AND run_reference (lines 152-163) invoke
+IDENTICAL `_wavelet_coherence_reference(x, y, n_scales=64,
+smoothing_width=5)` function call with identical arguments. **Audit
+verdict "PASS Pattern A self-parity bit-exact" at 0.0 abs diff
+across both metrics is GUARANTEED BY CONSTRUCTION** (TSL arm ==
+reference arm exactly). Engine `wavelet_coherence.py::run()` math
++ Layer 2 orchestration NEVER exercised by audit. **Distinct
+validation claim scope from S37-S39 + S41 entries (audit-validates-
+library-primitive scope) and parallel to S40 entry (audit-
+validates-reimplementation-self-consistency-only scope):** S37-
+S39 + S41 audit DOES validate library primitive at metric scope
+(S37 + S41 same-library bit-exact; S38 cross-package bit-exact
+at pocketfft-shared-backbone; S39 metric-selection-aligned bit-
+exact at peak_freq). At S40 ssa + S42 wavelet_coherence_phase_lag:
+audit validates `_ssa_reference` / `_wavelet_coherence_reference`
+self-consistency ONLY at degenerate dual-arm scope; audit DOES
+NOT validate reimplementation correctness vs canonical paper
+formula NOR validate engine `ssa_model.py::run()` /
+`wavelet_coherence.py::run()` math correctness (engine never
+invoked). SECOND observation of degenerate dual-arm self-parity
+validation claim scope distinction at Q1 §2.5 entry codification
+scope per S40 + S42 paired observations; institutionally
+substantive empirical content distinction at validation claim
+scope dimension TIGHTENED at SECOND-OBSERVATION per A3 precedent.
+
+**Novelty 6 — HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3
+THIRD-OBSERVATION TIGHTENING SUSTAINED AT S42:** n=4 distinct
+Tier characterizations preserved across n=6 entries within
+Frequency Domain / Signal block (Tier III Pattern A.1 at S37 +
+S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V
+Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT);
+S42 Tier IV REPEATS S40 — no advance to n=5 distinct Tiers; A3
+third-observation tightening sustained at n=4 distinct Tier
+observations within single Block arc per Block heterogeneous-
+Tier-surface variant sub-pattern empirical accumulation
+EMPIRICALLY REINFORCED at sustained n=4 distinct Tiers across 6
+sub-sessions S37-S42. Codification refinement candidate at
+absorption #6+ for Block heterogeneous-Tier-surface variant sub-
+pattern definitional scope generalization per §19.4 §4 note 6
+refinement at S35-absorption #5 codification EMPIRICALLY
+ROBUSTLY GROUNDED.
+
+**Novelty 7 — ALL-ANCHOR-DEFERRAL DISCIPLINE FIFTH-APPLICATION
+EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD FURTHER REINFORCED AT S42 (compound A3 precedent
+satisfaction confluence continuation; STRONGEST empirical
+grounding among absorption #6 candidates):** Chat S42 trigger
+drafting applied all-anchor-deferral discipline (Tier + Sub-class
++ §4.7.A + Block ordering position + Pattern F third-observation
+anchors DEFERRED to Code Step 0 empirical verification) per
+institutional learning sustainment from S37 multi-anchor schema-
+misattribution catch n=18 + S38 first-application + S39 second-
+application + S40 third-application + S41 fourth-application
+empirical efficacy validations (A3 second-observation tightening
+precedent threshold SATISFIED at S39 + REINFORCED at S40 + S41).
+Empirical efficacy validated at S42 Step 0: 0 multi-anchor
+schema-misattribution divergences SUSTAINED at fifth-application
+(n=5 sustained efficacy observations S38 + S39 + S40 + S41 + S42
+0-divergence per A3 second-observation tightening precedent
+threshold FURTHER REINFORCEMENT). STRONGEST empirical grounding
+among absorption #6 candidates at S42 close (n=5 sustained
+efficacy observations exceeds all other absorption #6 candidate
+empirical thresholds). Codification candidate at §1.7+ Workstream
+B §1.4 operational scope at absorption #6+ refinement empirically
+ROBUSTLY grounded at A3 precedent threshold FURTHER REINFORCEMENT.
+
+**Novelty 8 — Multi-precedent confluence at SAME audit + SAME
+entry codification scope THIRD-INSTANCE per S38 + S41 + S42
+sequential observations; A3 THIRD-OBSERVATION TIGHTENING
+PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-
+pattern scope:** S42 wavelet_coherence_phase_lag exhibits FIVE
+A3 precedent threshold satisfactions/reinforcements at SAME audit
++ SAME entry codification scope: (1) Tier IV Pattern A.3 SECOND-
+OBSERVATION TIGHTENING; (2) §4.7.A variant 3 degenerate dual-arm
+self-parity SECOND-OBSERVATION TIGHTENING; (3) Sub-class 2l
+SECOND-OBSERVATION TIGHTENING; (4) §1.9 Filename divergence
+cross-block extension THIRD-OBSERVATION TIGHTENING; (5) All-
+anchor-deferral discipline FIFTH-APPLICATION A3 further
+reinforcement at n=5 sustained efficacy observations. S38
+fft_spectrum first-instance multi-precedent confluence baseline
+(Pattern F NEW framing element + Sub-class 2j candidate + Tier
+II.bit-exact second-observation + §4.7.A variant 1 fourth-
+observation + all-anchor-deferral discipline first-application);
+S41 wavelet_transform second-instance multi-precedent confluence
+(Sub-class 2i SECOND-OBSERVATION TIGHTENING + Pattern F SECOND-
+OBSERVATION TIGHTENING + all-anchor-deferral discipline FOURTH-
+APPLICATION + ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG
+DIVERGENCE FIRST observation + Q-C HEIGHTENED DISCLOSURE
+REQUIREMENT SECOND-OBSERVATION TIGHTENING + Q-D MEDIUM-HIGH
+SECOND-OBSERVATION TIGHTENING — SIX A3 precedent threshold
+satisfactions/reinforcements at SAME audit + SAME entry
+codification scope per S41 banking). S42 wavelet_coherence_phase_lag
+THIRD-INSTANCE multi-precedent confluence per FIVE A3 precedent
+threshold satisfactions/reinforcements. A3 THIRD-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent
+confluence sub-pattern scope at SAME audit + SAME entry
+codification surface at n=3 distinct observations (S38 + S41 +
+S42); codification refinement candidate at absorption #6+ for
+multi-precedent confluence sub-pattern definitional scope at
+§2.5 entry codification scope EMPIRICALLY ROBUSTLY REINFORCED at
+three sustained observations.
+
+**Reference:** from-scratch reference mirroring TSL recursion
+verbatim inline in `harness/checks/p3_wavelet_coherence.py`
+(pywt 1.8.0 + scipy 1.17.1; Pattern A.3 self-parity / paper-
+formula validated per custom CWT-based coherence + smoothing +
+phase-lag formula reimplementation — harness
+`_wavelet_coherence_reference` lines 46-103 reimplements custom
+CWT-based coherence + smoothing + phase-lag formula; harness
+`run_tsl` lines 144-146 + harness `run_reference` lines 156-158
+BOTH invoke IDENTICAL `_wavelet_coherence_reference(x, y,
+n_scales=64, smoothing_width=5)` with identical arguments;
+DEGENERATE DUAL-ARM SELF-PARITY at audit scope SECOND-INSTANCE
+— 0.0 abs diff GUARANTEED BY CONSTRUCTION; engine
+`wavelet_coherence.py::run()` NEVER invoked by audit)
+**Verdict:** **PASS Pattern A self-parity bit-exact** per audit
+line 6 verbatim
+**Audit:** `tools/reference_parity/reports/p3_wavelet_coherence_audit.md`
+**Audit date:** 2026-04-29
+**mean_coherence abs diff:** 0.0 (byte-identical; audit line 14
+verbatim)
+**mean_phase abs diff:** 0.0 (byte-identical; audit line 15
+verbatim)
+**Tolerance class:** closed_form (per audit line 7 verbatim)
+**Fixture:** two coherent sinusoids with lead-lag relationship —
+series x(t) = sin(2π t/32) + 0.3·N(0,1); y(t) = x(t) shifted
+forward by 4 samples + 0.3·N(0,1); T=256, seed=42; wavelet 'morl'
+(Morlet); 64 scales log-spaced over [2, N/4]; smoothing width 5
+per audit lines 25-30 verbatim Fixture section + harness lines
+32-43 verbatim `_generate_coherent_pair_dgp`; True period: 32
+samples; True lag: 4 samples (y leads x) per audit lines 34-35
+verbatim Diagnostics section.
+
+**Source files (SINGLE-LAYER + §4.7.A PRESENT variant 3 at
+DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE per
+S42 (A)-(I) framing; empirical filenames at §1.9 THIRD-OBSERVATION
+TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION
+direction per S42 verification — audit + harness + engine ALL
+OMIT `_phase_lag` suffix from canonical catalog technique_id
+`wavelet_coherence_phase_lag`):**
+`tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 46-103 (harness `_wavelet_coherence_reference(x, y, *,
+n_scales, min_scale, max_scale, smoothing_width, wavelet)` from-
+scratch reimplementation of custom CWT-based coherence +
+smoothing + phase-lag formula: CWT invocation at lines 65-66 via
+`pywt.cwt(x_std, scales, wavelet)` + `pywt.cwt(y_std, scales,
+wavelet)` + cross-wavelet spectrum at line 67 `Wxy = Wx *
+np.conj(Wy)` + time-direction smoothing at lines 69-73
+`smooth_time` via `scipy.ndimage.uniform_filter1d` size=width
+axis=1 + scale-direction smoothing at lines 75-79 `smooth_scale`
+via `uniform_filter1d` size=max(w // 2, 1) axis=0 + smoothed
+cross-spectrum + auto-spectra at lines 81-89 + coherence formula
+at line 92 `np.clip(np.abs(S_xy) ** 2 / denom, 0, 1)` + phase
+angle at line 93 + scale-averaged coherence at line 94 + circular
+mean of phase at lines 95-98 `np.angle(np.mean(np.exp(1j *
+phase[s, :])))` + return dict at lines 99-103; §4.7.A variant 3
+"Harness-reimplements-engine-math" mechanism manifestation
+SECOND-INSTANCE per S30 (G.1) generalized definitional scope +
+S40 first-instance baseline + S42 SECOND-INSTANCE TIGHTENING)
++ `tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 137-150 (harness TSL arm invokes
+`_wavelet_coherence_reference(x, y, n_scales=64, smoothing_width=5)`
+at lines 144-146 directly with comment at lines 141-143 verbatim
+"Bypass TSL wrapper output rounding; invoke the same math
+directly. Use Balanced preset config: n_scales=64, smoothing_width=5";
+extracts mean_coherence + mean_phase at lines 147-150; harness
+does NOT invoke `wavelet_coherence.py::run()` engine entry point;
+§4.7.A variant 3 manifestation SECOND-INSTANCE)
++ `tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 152-163 (harness reference arm **invokes SAME
+`_wavelet_coherence_reference(x, y, n_scales=64, smoothing_width=5)`
+at lines 156-158** — IDENTICAL function call to run_tsl with
+identical arguments; DEGENERATE DUAL-ARM SELF-PARITY sub-variant
+at audit scope SECOND-INSTANCE; extracts mean_coherence +
+mean_phase at lines 159-162; 0.0 abs diff GUARANTEED BY
+CONSTRUCTION per identical function invocation)
++ `tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 1-17 verbatim (audit design rationale: "Compares TSL
+`engine/techniques/wavelet_coherence.py` (custom CWT-based
+coherence with smoothing) against a from-scratch reference that
+mirrors TSL's coherence formula verbatim. Pattern A self-parity
+— the canonical R `biwavelet` package implements a different
+coherence estimator (Liu-Liang-Weisberg 2007 with Monte Carlo
+significance) and is not directly comparable; self-parity catches
+wrapper-level regressions in the CWT call, smoothing, or
+coherence-formula application. **Tier B sub-component:** the
+custom phase-lag estimator (scale-averaged circular mean of
+phase) is part of the self-parity reference; no separate canonical
+reference exists")
++ `tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 113-124 (harness verdict_class_rationale: "Wavelet coherence
+is closed-form smoothed cross-spectrum normalized by smoothed
+auto-spectra. TSL and reference both use pywt.cwt with identical
+wavelet ('morl') + identical smoothing kernel; bit-exact parity
+expected. R biwavelet uses Monte Carlo significance + Liu-Liang-
+Weisberg 2007 estimator variant; not directly comparable. Self-
+parity reference catches TSL preprocessing / smoothing-application
+regressions")
++ `tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 165-190 (compare method: 2 primary metrics via
+_compare_vector — mean_coherence + mean_phase; outcome PASS at
+all 0.0 abs diff per identical `_wavelet_coherence_reference`
+invocation; NO structural identity invariants computation — no
+cross-wavelet roundtrip; no cross-spectrum Parseval-like
+conservation; primary metrics-only structure preserves Pattern F
+third-observation NOT MANIFESTED status at S42)
++ `tools/reference_parity/harness/checks/p3_wavelet_coherence.py`
+lines 32-43 (`_generate_coherent_pair_dgp`: two coherent
+sinusoids with lead-lag relationship at T=256 + period=32 + lag=4
++ sigma=0.3 + seed=42; own DGP generator producing series x(t)
+= sin(2π t/32) + 0.3·N(0,1); y(t) = x(t) shifted forward by 4
+samples + 0.3·N(0,1))
++ `engine/techniques/wavelet_coherence.py` lines 1-12 (module
+docstring: "Wavelet coherence and phase-lag analysis between two
+time series for Time Series Lab. Computes the continuous wavelet
+transform (CWT) of two series using PyWavelets, then calculates
+wavelet coherence (analogous to squared correlation in time-
+frequency space) and the phase difference (indicating lead/lag
+at each scale and time). The coherence measures how consistently
+the two series co-move at each frequency (scale) over time, while
+the phase angle reveals which series leads")
++ `engine/techniques/wavelet_coherence.py` line 14 (numpy import:
+`import numpy as np` — Layer 1 math primitive via `pywt.cwt` at
+engine lines 119-120 + `scipy.ndimage.uniform_filter1d` at engine
+lines 139-147; engine math NEVER invoked by audit per §4.7.A
+variant 3 + DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-
+INSTANCE)
++ `engine/techniques/wavelet_coherence.py` lines 26-30
+(`_PRESET_CONFIG`: preset dispatch Fast `{n_scales: 32,
+smoothing_width: 3}` / Balanced `{n_scales: 64, smoothing_width:
+5}` / Thorough `{n_scales: 128, smoothing_width: 7}`)
++ `engine/techniques/wavelet_coherence.py` lines 33-409 (Layer 2
+engine orchestration: `run(ctx, progress_callback)` main entry;
+pairwise-technique invocation (requires 2 series); NaN handling
+via `dropna_aligned(x_vals, y_vals)` at line 77 + n_dropped
+warning at lines 78-80 + n < 32 threshold check at lines 82-88 +
+preset config dispatch at line 90 + wavelet parameter resolution
+default 'morl' at line 92 + n_scales / min_scale / max_scale /
+smoothing_width parameter resolution at lines 93-96 + CWT
+invocation at lines 119-120 with try/except + cross-wavelet
+spectrum at line 134 + time-direction + scale-direction smoothing
+at lines 137-152 + wavelet coherence formula + phase difference
++ scale-averaged statistics + period conversion via Morlet factor
+1.03 + best scale identification + scale coherence table + time-
+varying coherence table + global statistics + plain English +
+audit_fields construction; **engine `run()` NEVER invoked by
+audit per §4.7.A variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-
+variant SECOND-INSTANCE**)
++ `tools/reference_parity/reports/p3_wavelet_coherence_audit.md`
+
+**Validation claim scope (TIER IV (PATTERN A.3 SELF-PARITY /
+PAPER-FORMULA VALIDATED) SUB-CLASS + §4.7.A PRESENT VARIANT 3
+HARNESS-REIMPLEMENTS-ENGINE-MATH AT DEGENERATE DUAL-ARM SELF-
+PARITY SUB-VARIANT SECOND-INSTANCE + Sub-class 2l SECOND-INSTANCE
+per S40 + S42 paired observations + A3 SECOND-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED per S42 (A)+(B)+(C)
+ratifications) — CRITICAL CAVEAT operative:** TSL
+wavelet_coherence_phase_lag output relies on Layer 1
+`pywt.cwt` + `scipy.ndimage.uniform_filter1d` primitives + Layer
+2 engine `wavelet_coherence.py::run()` orchestration. **Audit
+validates `_wavelet_coherence_reference` self-consistency ONLY
+at degenerate dual-arm self-parity scope** — harness
+`_wavelet_coherence_reference` (lines 46-103) from-scratch
+reimplementation of custom CWT-based coherence + smoothing +
+phase-lag formula is invoked at BOTH TSL-arm (lines 144-146) AND
+reference-arm (lines 156-158) with IDENTICAL arguments; audit
+verdict "PASS Pattern A self-parity bit-exact" at 0.0 abs diff
+across both metrics (mean_coherence + mean_phase) is **GUARANTEED
+BY CONSTRUCTION** per identical function invocation. **Audit
+DOES NOT validate**:
+- `_wavelet_coherence_reference` correctness vs canonical wavelet
+  coherence + phase-lag formulas (no independent reference at
+  degenerate dual-arm scope — both arms use SAME reimplementation;
+  R `biwavelet` Liu-Liang-Weisberg 2007 estimator distinct
+  methodology per audit lines 38-44 verbatim)
+- engine `wavelet_coherence.py::run()` math correctness (engine
+  NEVER invoked by audit)
+- engine Layer 2 orchestration (NaN handling via `dropna_aligned`
+  + n < 32 threshold check + preset config dispatch + wavelet
+  parameter resolution + n_scales/min_scale/max_scale/smoothing_width
+  parameter resolution + CWT invocation + cross-wavelet spectrum
+  + time-domain + scale-domain smoothing + coherence/phase
+  computation + circular mean of phase + lead-lag direction
+  inference + best scale identification + summary tables + plain
+  English + audit_fields construction) — NEVER exercised by audit
+- cross-implementation parity (no R `biwavelet` cross-validation
+  per audit lines 38-44 distinct estimator methodology; no
+  alternative wavelet coherence implementation cross-validation)
+
+- **Layer 1 `_wavelet_coherence_reference` from-scratch
+  reimplementation (Tier IV Pattern A.3 self-parity / paper-
+  formula validated at DEGENERATE DUAL-ARM SELF-PARITY scope
+  SECOND-INSTANCE):** PASS Pattern A self-parity bit-exact
+  verdict per audit line 6 verbatim; 0.0 abs diff across both 2
+  metrics per audit lines 14-15 verbatim. **Tier IV Pattern A.3
+  characterization directly grounded** at scope_reframing §2
+  lines 159-168 verbatim Tier IV 5-wrapper enumeration explicitly
+  including p3_wavelet_coherence. Validation scope:
+  `_wavelet_coherence_reference` self-consistency at degenerate
+  dual-arm self-parity scope (TSL arm == reference arm identical
+  invocation; 0.0 abs diff guaranteed by construction). **Pattern
+  A.3 self-parity / paper-formula caveat SECOND-INSTANCE:** byte-
+  identical agreement established at degenerate dual-arm self-
+  parity scope (TSL arm == reference arm exactly); audit DOES
+  NOT validate `_wavelet_coherence_reference` correctness vs
+  canonical wavelet coherence + phase-lag formulas (no independent
+  reference; R `biwavelet` Liu-Liang-Weisberg 2007 estimator
+  distinct methodology); cross-package or cross-implementation
+  validation NOT audit-established. **§4.7.A PRESENT variant 3
+  harness-reimplements-engine-math + degenerate-dual-arm-self-
+  parity caveat SECOND-INSTANCE:** engine
+  `wavelet_coherence.py::run()` is COMPLETELY DIFFERENT code
+  path from harness `_wavelet_coherence_reference` reimplementation;
+  engine adds Layer 2 orchestration (NaN handling via
+  `dropna_aligned` + n < 32 threshold check + preset config
+  dispatch + wavelet parameter resolution + n_scales/min_scale/
+  max_scale/smoothing_width parameter resolution + CWT invocation
+  with try/except + cross-wavelet spectrum + time-direction +
+  scale-direction smoothing + coherence/phase computation +
+  circular mean of phase + lead-lag direction inference + best
+  scale identification + summary tables + plain English +
+  audit_fields construction) NEVER exercised by audit. **DEGENERATE
+  DUAL-ARM SELF-PARITY sub-variant distinction from S37-S39 + S41
+  §4.7.A variant 1 + parallel to S40 §4.7.A variant 3:** S37-S39
+  + S41 audit DOES validate library primitive at metric scope
+  (S37 + S41 same-library bit-exact; S38 cross-package bit-exact
+  at pocketfft-shared-backbone; S39 metric-selection-aligned bit-
+  exact at peak_freq). At S40 + S42 Tier IV Pattern A.3 + §4.7.A
+  variant 3: audit validates reimplementation self-consistency
+  ONLY at degenerate dual-arm scope; engine math NEVER validated.
+- **Layer 2 engine `wavelet_coherence.py::run()` orchestration
+  (validation scope NOT EXERCISED; engine NEVER invoked by
+  audit):**
+  - NaN handling via `dropna_aligned(x_vals, y_vals)` (line 77):
+    aligned pairwise NaN drop + n_dropped warning at lines 78-80;
+    NOT audit-validated
+  - n < 32 threshold check (lines 82-88): error response if n <
+    32; NOT audit-validated
+  - Preset config dispatch (lines 26-30 `_PRESET_CONFIG` + line
+    90 `cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG
+    ["Balanced"])`): Fast `{n_scales: 32, smoothing_width: 3}` /
+    Balanced `{n_scales: 64, smoothing_width: 5}` / Thorough
+    `{n_scales: 128, smoothing_width: 7}`; audit pins Balanced
+    preset (n_scales=64 + smoothing_width=5); Fast + Thorough
+    engine production behaviors NOT exercised by audit. **ENGINE-
+    DEFAULT-CONFIG = AUDIT-PINNED-CONFIG match at Balanced preset
+    — no divergence vs S41 wavelet_transform engine default mode
+    'symmetric' vs audit pinned mode 'periodization' divergence**;
+    preserves S41 FIRST observation at ENGINE-DEFAULT-CONFIG vs
+    AUDIT-PINNED-CONFIG DIVERGENCE scope as SINGLE-INSTANCE.
+  - Wavelet parameter resolution (line 92): user wavelet OR
+    default 'morl' (Morlet); NOT audit-validated at engine-default
+    config (audit pins 'morl' matching engine default)
+  - n_scales parameter resolution (line 93): user n_scales OR
+    preset default; NOT audit-validated at engine-default config
+    (audit pins n_scales=64 matching Balanced preset)
+  - min_scale parameter resolution (line 94): user min_scale OR
+    default 2; NOT audit-validated at engine-default config (audit
+    pins min_scale=2.0 matching engine default)
+  - max_scale parameter resolution (line 95): user max_scale OR
+    default n / 4; NOT audit-validated at engine-default config
+    (audit pins max_scale=n/4 matching engine default)
+  - smoothing_width parameter resolution (line 96): user
+    smoothing_width OR preset default; NOT audit-validated at
+    engine-default config (audit pins smoothing_width=5 matching
+    Balanced preset)
+  - CWT invocation (lines 119-120): SAME primitive `pywt.cwt(x_std,
+    scales, wavelet_name)` + `pywt.cwt(y_std, scales, wavelet_name)`
+    as harness `_wavelet_coherence_reference` invokes at lines 65-
+    66; audit Layer 1 transfer DOES NOT apply at engine scope per
+    §4.7.A variant 3 degenerate-dual-arm-self-parity (engine never
+    invoked)
+  - Cross-wavelet spectrum (line 134): SAME formula `Wx *
+    np.conj(Wy)` as harness reimplementation line 67
+  - Time-direction + scale-direction smoothing (lines 137-152):
+    SAME formula as harness reimplementation lines 69-79; NOT
+    audit-validated at engine scope
+  - Coherence + phase computation: SAME formula
+    `np.clip(np.abs(S_xy) ** 2 / denom, 0, 1)` + `np.angle(S_xy)`
+    as harness reimplementation lines 92-93; NOT audit-validated
+    at engine scope
+  - Circular mean of phase (lines 176-179): SAME formula
+    `np.angle(np.mean(np.exp(1j * phase[s, :])))` as harness
+    reimplementation lines 95-98; NOT audit-validated at engine
+    scope
+  - Lead-lag direction inference + best scale identification +
+    scale coherence table + time-varying coherence table + global
+    statistics + plain English + audit_fields construction:
+    presentation layer NOT audit-validated
+
+#### Disclosure pattern (i) — Research note footnote (Tier IV Pattern A.3 self-parity / paper-formula validated SECOND-INSTANCE + Sub-class 2l SECOND-INSTANCE + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE + CRITICAL CAVEAT)
+
+> This analysis uses TSL technique `wavelet_coherence_phase_lag`,
+> **self-parity validated** against from-scratch reimplementation
+> of custom CWT-based coherence + smoothing + phase-lag formula
+> per Phase 3 audit dated 2026-04-29 (verdict PASS Pattern A
+> self-parity bit-exact; 0.0 abs diff across mean_coherence +
+> mean_phase). **Tier IV (Pattern A.3 self-parity / paper-formula
+> validated) sub-class characterization** per S42 (A) disposition
+> per scope_reframing §2 lines 159-168 verbatim Tier IV 5-wrapper
+> enumeration explicitly including p3_wavelet_coherence. **Sub-
+> class 2l SECOND-INSTANCE characterization** per S42 (B)
+> ratification (A3 second-observation tightening precedent
+> threshold SATISFIED at Sub-class 2l scope per S40 ssa first-
+> instance baseline + S42 wavelet_coherence_phase_lag SECOND-
+> INSTANCE; codification refinement candidate at absorption #6+
+> EMPIRICALLY ROBUSTLY GROUNDED). **CRITICAL CAVEAT — degenerate
+> dual-arm self-parity SECOND-INSTANCE:** harness
+> `_wavelet_coherence_reference` from-scratch reimplementation is
+> invoked at BOTH TSL-arm AND reference-arm with identical
+> arguments; audit verdict PASS at 0.0 abs diff is GUARANTEED BY
+> CONSTRUCTION; engine `wavelet_coherence.py::run()` math is
+> NEVER invoked by audit; engine Layer 2 orchestration (NaN
+> handling + n < 32 threshold check + preset config dispatch +
+> wavelet parameter resolution + n_scales/min_scale/max_scale/
+> smoothing_width parameter resolution + CWT invocation + cross-
+> wavelet spectrum + smoothing + coherence/phase computation +
+> circular mean of phase + lead-lag direction inference + best
+> scale identification) NEVER exercised by audit. Audit validates
+> `_wavelet_coherence_reference` self-consistency ONLY; cross-
+> implementation parity (R `biwavelet` Liu-Liang-Weisberg 2007
+> estimator distinct methodology) NOT audit-established. Engine
+> math correctness vs canonical wavelet coherence + phase-lag
+> formulas NOT audit-validated. Pre-Path α expert review status;
+> expert review of engine implementation + cross-implementation
+> validation candidate at Q3b extension scope.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier IV Pattern A.3 SECOND-INSTANCE + Sub-class 2l SECOND-INSTANCE + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE + critical caveat at validation claim scope)
+
+> Methodology: TSL technique `wavelet_coherence_phase_lag`
+> validated per Phase 3 reference parity infrastructure under
+> Tier IV (Pattern A.3 self-parity / paper-formula validated)
+> sub-class framing per S42 codification + Sub-class 2l SECOND-
+> INSTANCE characterization per S40 + S42 paired observations.
+> **Reference:** from-scratch reference mirroring TSL recursion
+> verbatim inline in `harness/checks/p3_wavelet_coherence.py`
+> (pywt 1.8.0 + scipy 1.17.1) reimplementing custom CWT-based
+> coherence + smoothing + phase-lag formula (harness
+> `_wavelet_coherence_reference` lines 46-103: CWT invocation +
+> cross-wavelet spectrum + time-direction + scale-direction
+> smoothing + coherence formula + phase angle + scale-averaged
+> coherence + circular mean of phase). **Verdict:** PASS Pattern
+> A self-parity bit-exact; 0.0 abs diff across mean_coherence +
+> mean_phase. **Audit date:** 2026-04-29. **Fixture:** two
+> coherent sinusoids with lead-lag relationship — series x(t) =
+> sin(2π t/32) + 0.3·N(0,1); y(t) = x(t) shifted forward by 4
+> samples + 0.3·N(0,1); T=256, seed=42; wavelet 'morl' (Morlet);
+> 64 scales log-spaced over [2, N/4]; smoothing width 5; true
+> period 32 samples; true lag 4 samples (y leads x). **Tier IV
+> Pattern A.3 characterization** per scope_reframing §2 lines
+> 159-168 verbatim Tier IV 5-wrapper enumeration explicitly
+> including p3_wavelet_coherence. **CRITICAL CAVEAT — DEGENERATE
+> DUAL-ARM SELF-PARITY at validation claim scope SECOND-INSTANCE:**
+> harness `_wavelet_coherence_reference` from-scratch
+> reimplementation is invoked at BOTH TSL-arm (`run_tsl` lines
+> 144-146) AND reference-arm (`run_reference` lines 156-158) with
+> IDENTICAL `_wavelet_coherence_reference(x, y, n_scales=64,
+> smoothing_width=5)` function call + identical arguments. Audit
+> verdict "PASS Pattern A self-parity bit-exact" at 0.0 abs diff
+> is GUARANTEED BY CONSTRUCTION per identical function invocation
+> (TSL arm == reference arm exactly). Audit validates
+> `_wavelet_coherence_reference` self-consistency ONLY at
+> degenerate dual-arm scope; audit DOES NOT validate
+> `_wavelet_coherence_reference` correctness vs canonical wavelet
+> coherence + phase-lag formulas (no independent reference; R
+> `biwavelet` Liu-Liang-Weisberg 2007 estimator distinct
+> methodology) NOR engine `wavelet_coherence.py::run()` math
+> correctness (engine NEVER invoked by audit). **§4.7.A PRESENT
+> variant 3 Harness-reimplements-engine-math at degenerate-dual-
+> arm-self-parity sub-variant SECOND-INSTANCE:** harness defines
+> `_wavelet_coherence_reference` from-scratch reimplementation +
+> invokes it from both arms; engine `wavelet_coherence.py::run()`
+> math is COMPLETELY DIFFERENT code path NEVER exercised by
+> audit; engine Layer 2 orchestration (NaN handling +
+> n < 32 threshold check + preset config dispatch + wavelet
+> parameter resolution + n_scales/min_scale/max_scale/smoothing_width
+> parameter resolution + CWT invocation + cross-wavelet spectrum
+> + smoothing + coherence/phase computation + circular mean of
+> phase + lead-lag direction inference + best scale identification)
+> NEVER audit-validated. **Sub-class 2l SECOND-INSTANCE observation**
+> per A3 second-observation tightening precedent threshold
+> SATISFIED at Sub-class 2l scope (codification refinement
+> candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED; A3
+> precedent threshold SATISFIED at n=2 observations S40 + S42).
+> Reference selection + tolerance specification + Pattern A.3
+> self-parity framing + §4.7.A variant 3 degenerate-dual-arm-
+> self-parity sub-variant SECOND-INSTANCE AI-assisted with user
+> ratification per Phase 7+ work program; pre-Path α expert
+> review status; expert review pending end-of-Phase-7+-work-
+> program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier IV Pattern A.3 SECOND-INSTANCE + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE + Sub-class 2l SECOND-INSTANCE + CRITICAL CAVEAT at validation claim scope)
+
+> `wavelet_coherence_phase_lag` validation: TSL Tier IV (Pattern
+> A.3 self-parity / paper-formula validated) sub-class framing
+> per S42 (A) codification + Sub-class 2l SECOND-INSTANCE per
+> S40 + S42 paired observations (B) ratification + §4.7.A
+> PRESENT variant 3 Harness-reimplements-engine-math at
+> DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE.
+> **Reference:** from-scratch reference mirroring TSL recursion
+> verbatim inline in `harness/checks/p3_wavelet_coherence.py`
+> (pywt 1.8.0 + scipy 1.17.1) reimplementing custom CWT-based
+> coherence + smoothing + phase-lag formula. **Audit:**
+> `tools/reference_parity/reports/p3_wavelet_coherence_audit.md`
+> dated 2026-04-29. **Verdict:** PASS Pattern A self-parity bit-
+> exact (mean_coherence 0.0 + mean_phase 0.0 abs diff). **Fixture:**
+> two coherent sinusoids with lead-lag relationship DGP T=256
+> seed=42 + wavelet 'morl' + 64 scales + smoothing width 5; true
+> period 32 samples; true lag 4 samples; single-seeded fixture;
+> parameter-sensitivity coverage NOT established; Q3b extension
+> scope. **Sub-class 2l SECOND-INSTANCE characterization** per
+> S42 (B) ratification (definitional scope working hypothesis
+> CARRIED FORWARD from S40 first-instance baseline: "Tier IV
+> Pattern A.3 self-parity / paper-formula + §4.7.A PRESENT
+> variant 3 harness-reimplements-engine-math + degenerate-dual-
+> arm-self-parity sub-variant + single-layer scope"; A3 second-
+> observation tightening precedent threshold SATISFIED at Sub-
+> class 2l scope at n=2 observations; codification refinement
+> candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED;
+> distinct from S37 + S41 Sub-class 2i candidate Tier III Pattern
+> A.1 + §4.7.A variant 1 scope + S38 + S41 Sub-class 2j candidate
+> Pattern F structural invariants + Tier II.bit-exact + Tier III
+> scope + S39 Sub-class 2k candidate Tier V Pattern J B.3 +
+> cross-package scope per Tier IV self-parity + variant 3 scope
+> distinction; distinct from S18 gcc_phat Tier IV THREE-LAYER
+> DOWNSTREAM-TOPOLOGY framing per SINGLE-LAYER + DEGENERATE-DUAL-
+> ARM-SELF-PARITY scope distinction). **CRITICAL CAVEAT at
+> validation claim scope — DEGENERATE DUAL-ARM SELF-PARITY
+> SECOND-INSTANCE:** harness `_wavelet_coherence_reference` is
+> invoked at BOTH TSL-arm AND reference-arm with identical
+> arguments; audit verdict PASS at 0.0 abs diff GUARANTEED BY
+> CONSTRUCTION; engine `wavelet_coherence.py::run()` math NEVER
+> validated by audit. **Risk attribution:** **(a) Layer 1
+> `_wavelet_coherence_reference` from-scratch reimplementation
+> (Tier IV Pattern A.3 self-parity / paper-formula validated at
+> DEGENERATE DUAL-ARM SELF-PARITY scope SECOND-INSTANCE):** PASS
+> at 0.0 abs diff per identical function invocation (TSL arm ==
+> reference arm exactly); audit validates
+> `_wavelet_coherence_reference` self-consistency ONLY; audit
+> DOES NOT validate `_wavelet_coherence_reference` correctness
+> vs canonical wavelet coherence + phase-lag formulas (no
+> independent reference at degenerate dual-arm scope) NOR cross-
+> implementation parity (R `biwavelet` Liu-Liang-Weisberg 2007
+> estimator distinct methodology per audit lines 38-44 verbatim
+> incompatibility rationale). **(b) §4.7.A PRESENT variant 3
+> Harness-reimplements-engine-math at degenerate-dual-arm-self-
+> parity sub-variant SECOND-INSTANCE caveat:** harness defines
+> `_wavelet_coherence_reference` from-scratch reimplementation +
+> invokes it from both arms; engine `wavelet_coherence.py::run()`
+> is COMPLETELY DIFFERENT code path NEVER exercised by audit;
+> code-path divergence between audit + engine production active
+> at runtime per HEAD verification (NOT REMEDIATED per S36
+> §4.7.A status dimension codification). **(c) Layer 2 engine
+> `wavelet_coherence.py::run()` orchestration (NEVER audit-
+> validated):** NaN handling via `dropna_aligned` (line 77) +
+> n < 32 threshold check (lines 82-88) + preset config dispatch
+> (lines 26-30 `_PRESET_CONFIG` + line 90 invocation) + wavelet
+> parameter resolution (line 92) + n_scales/min_scale/max_scale/
+> smoothing_width parameter resolution (lines 93-96) + CWT
+> invocation with try/except (lines 119-120; engine math) + cross-
+> wavelet spectrum (line 134) + time-direction + scale-direction
+> smoothing (lines 137-152) + coherence/phase computation +
+> circular mean of phase (lines 176-179) + lead-lag direction
+> inference + best scale identification + scale coherence table
+> + time-varying coherence table + global statistics + plain
+> English + audit_fields construction; validation scope per
+> `engine/techniques/wavelet_coherence.py` lines 33-409 (410 LOC
+> engine module NEVER invoked by audit). **(d) Pattern A.3 self-
+> parity / paper-formula + degenerate-dual-arm-self-parity
+> validation scope-bounded retraction surface SECOND-INSTANCE —
+> MEDIUM-HIGH:** practitioners invoking `wavelet_coherence_phase_lag`
+> from ribbon receive engine `wavelet_coherence.py::run()` output
+> via Layer 2 orchestration; audit validates
+> `_wavelet_coherence_reference` self-consistency ONLY (degenerate
+> dual-arm) — engine math NEVER validated; cross-implementation
+> parity NOT established; expert review of engine implementation
+> + Layer 1 cross-implementation validation against alternative
+> implementation (R `biwavelet` Liu-Liang-Weisberg 2007 API-
+> translation harness OR independent custom wavelet coherence +
+> phase-lag formula reimplementation distinct from harness
+> `_wavelet_coherence_reference`) candidate at Q3b extension
+> scope. **MEDIUM-HIGH retraction surface SECOND-INSTANCE per
+> S40 + S42 paired observations** (S40 ssa MEDIUM-HIGH FIRST-
+> INSTANCE baseline + S42 wavelet_coherence_phase_lag MEDIUM-
+> HIGH SECOND-INSTANCE; A3 second-observation tightening
+> precedent threshold SATISFIED at MEDIUM-HIGH retraction surface
+> scope at n=2 observations within Tier IV Pattern A.3 self-
+> parity + §4.7.A variant 3 degenerate-dual-arm-self-parity
+> combined scope). Pre-Path α expert review status.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier IV Pattern A.3 SECOND-INSTANCE + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE + Sub-class 2l SECOND-INSTANCE + critical caveat)
+
+> `wavelet_coherence_phase_lag` Tier IV (Pattern A.3 self-parity
+> / paper-formula validated) sub-class per S42 codification +
+> Sub-class 2l SECOND-INSTANCE per S40 + S42 paired observations
+> + §4.7.A PRESENT variant 3 Harness-reimplements-engine-math at
+> DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE;
+> from-scratch reference mirroring TSL recursion verbatim
+> reimplementing custom CWT-based coherence + smoothing + phase-
+> lag formula. PASS Pattern A self-parity bit-exact at 0.0 abs
+> diff across both metrics. **CRITICAL CAVEAT — degenerate dual-
+> arm self-parity SECOND-INSTANCE:** harness
+> `_wavelet_coherence_reference` invoked at BOTH TSL-arm AND
+> reference-arm with identical arguments; 0.0 abs diff GUARANTEED
+> BY CONSTRUCTION; engine `wavelet_coherence.py::run()` math
+> NEVER validated by audit; engine Layer 2 orchestration (NaN
+> handling + n < 32 threshold check + preset config dispatch +
+> wavelet parameter resolution + n_scales/min_scale/max_scale/
+> smoothing_width + CWT invocation + cross-wavelet spectrum +
+> smoothing + coherence/phase + circular mean of phase + lead-
+> lag inference + best scale) NEVER exercised by audit. Cross-
+> implementation parity (R `biwavelet`) NOT audit-established.
+> Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31-S41 + S36 LOC overshoot scope
+expansion refinement — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (from-scratch reference
+  mirroring TSL recursion verbatim inline in
+  `harness/checks/p3_wavelet_coherence.py` pywt 1.8.0 + scipy
+  1.17.1) per `p3_wavelet_coherence_audit.md` lines 4-5 verbatim
+  ("**Reference:** from-scratch reference mirroring TSL recursion
+  verbatim (pywt 1.8.0 + scipy 1.17.1)"). Verdict (PASS Pattern
+  A self-parity bit-exact) per `p3_wavelet_coherence_audit.md`
+  line 6 verbatim ("**Verdict:** **PASS** (Pattern A self-parity
+  bit-exact)"). Metric 0.0 abs diff across both 2 components per
+  `p3_wavelet_coherence_audit.md` lines 14-15 verbatim
+  (mean_coherence + mean_phase). Audit methodology rationale per
+  `p3_wavelet_coherence_audit.md` lines 17-23 verbatim ("byte-
+  identical agreement on scale-averaged coherence and phase.
+  Both arms invoke `pywt.cwt` with identical Morlet wavelet
+  ('morl'), identical `scipy.ndimage.uniform_filter1d` smoothing
+  kernel (width=5), and identical scale grid (n_scales=64, log-
+  spaced over [2, N/4])"). Audit Pattern K → Pattern A path
+  rationale per `p3_wavelet_coherence_audit.md` lines 38-49
+  verbatim ("Original Pattern K candidate: R `biwavelet` package
+  implements a different coherence estimator (Liu-Liang-Weisberg
+  2007 with Monte Carlo significance) — not directly comparable.
+  The custom phase-lag estimator (scale-averaged circular mean
+  of phase angle) has no canonical reference at all. Resolution:
+  self-parity reference inline in
+  `harness/checks/p3_wavelet_coherence.py` (~50 LOC) mirrors
+  TSL's CWT-based coherence + smoothing formula verbatim. Catches
+  wrapper-level regressions in CWT invocation, smoothing
+  application, or coherence-formula arithmetic"). Audit date
+  (2026-04-29) per `p3_wavelet_coherence_audit.md` line 8
+  verbatim. Fixture (two coherent sinusoids with lead-lag
+  relationship + T=256 + period=32 + lag=4 + sigma=0.3 + seed=42
+  + wavelet 'morl' + 64 scales + smoothing width 5) per
+  `p3_wavelet_coherence_audit.md` lines 25-30 verbatim Fixture
+  section + harness `p3_wavelet_coherence.py` lines 32-43 verbatim
+  `_generate_coherent_pair_dgp`. Tier IV (Pattern A.3 self-parity
+  / paper-formula validated) sub-class characterization directly
+  grounded at `scope_reframing_s6_banking.md` §2 lines 159-168
+  verbatim ("Tier IV — Phase 3 self-parity / paper-formula
+  validated (Pattern A.3). ~10 wrappers per P-3 v1.2.0 §1
+  estimate. TSL output validated against from-scratch
+  reimplementation of paper-defined recursion. Pattern K →
+  Pattern A path... 5 wrappers — `p3_bocpd`, `p3_cusum_page_hinkley`,
+  `p3_stl_esd` (S10 / Batch 6) + `p3_wavelet_coherence`, `p3_ssa`
+  (S11 / Batch 7)") — p3_wavelet_coherence explicitly within
+  Tier IV Pattern A.3 self-parity / paper-formula 5-wrapper
+  enumeration. **§4.7.A PRESENT variant 3 at DEGENERATE DUAL-
+  ARM SELF-PARITY sub-variant SECOND-INSTANCE manifestation**
+  per harness `_wavelet_coherence_reference` lines 46-103 verbatim
+  (from-scratch custom CWT-based coherence + smoothing + phase-
+  lag formula reimplementation) + harness `run_tsl` lines 144-146
+  verbatim (`result = _wavelet_coherence_reference(x, y,
+  n_scales=64, smoothing_width=5)`) + harness `run_reference`
+  lines 156-158 verbatim (`result = _wavelet_coherence_reference(x,
+  y, n_scales=64, smoothing_width=5)` — IDENTICAL function call
+  to run_tsl); engine `wavelet_coherence.py::run()` NEVER invoked
+  by audit. **§1.9 THIRD-OBSERVATION TIGHTENING cross-block
+  extension MANIFESTED at SUFFIX-OMISSION direction** per audit
+  `p3_wavelet_coherence_audit.md` + harness
+  `p3_wavelet_coherence.py` + engine `wavelet_coherence.py` ALL
+  OMIT `_phase_lag` suffix from canonical catalog technique_id
+  `wavelet_coherence_phase_lag` per §3 line 15744 verbatim. Layer
+  1 / Layer 2 framework operative per S26 STOP 1.5 second close
+  ratification carried forward + S31-S41 reinforcement. Catalog
+  mapping (1:1) verified per audit Wrapper field. **§4.7.A
+  pattern OBSERVED at S42 as variant 3 PRESENT status SECOND-
+  INSTANCE TIGHTENING at §2.5 entry codification scope** (post-
+  S42 §4.7.A observations = n=12 PRESENT across §2.5 entries
+  S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 + S39 +
+  S40 + S41 + S42 + n=1 REMEDIATED S34 = n=13 total observations;
+  **§4.7.A variant 3 SECOND-INSTANCE TIGHTENING at §2.5 entry
+  codification scope** per S42 banking — S40 ssa first-instance
+  baseline + S42 wavelet_coherence_phase_lag SECOND-INSTANCE;
+  **§4.7.A pattern count tightening + variant 3 SECOND-INSTANCE
+  tightening forward observation at absorption #6** per A3
+  precedent — NOT A9 Class A counter increment; NOT §4.7.A
+  taxonomy modification at S42; forward observation banking only
+  per ITEM 16 forward instrumentation banking discipline). **Sub-
+  class 2l SECOND-INSTANCE per A3 second-observation tightening
+  precedent threshold SATISFIED per S40 + S42 paired observations**
+  (definitional scope working hypothesis CARRIED FORWARD: "Tier
+  IV Pattern A.3 self-parity / paper-formula + §4.7.A PRESENT
+  variant 3 harness-reimplements-engine-math + degenerate-dual-
+  arm-self-parity sub-variant + single-layer scope"; A3 second-
+  observation tightening precedent threshold SATISFIED at Sub-
+  class 2l scope at n=2 observations; codification refinement
+  candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED).
+  **§1.9 Filename divergence sub-pattern variant THIRD-
+  OBSERVATION TIGHTENING MANIFESTED at SUFFIX-OMISSION direction
+  per Code S42 Step 0 empirical re-Read** (audit + harness +
+  engine ALL OMIT `_phase_lag` suffix; n=3 cross-block
+  observations across S37 + S40 + S42; direction sub-variant
+  analysis n=2 suffix-omission + n=1 suffix-addition; A3 THIRD-
+  OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9
+  cross-block scope at n=3 observations; codification refinement
+  candidate at absorption #6+ for §1.9 definitional scope
+  generalization with direction-symmetric expansion + cross-block
+  scope generalization EMPIRICALLY ROBUSTLY REINFORCED). **Pattern
+  F structural invariants THIRD-OBSERVATION NOT MANIFESTED per
+  Code S42 Step 0 empirical re-Read** (wavelet coherence harness
+  primary metrics-only structure; preserves S41 second-observation
+  tightening status at n=2 Pattern F observations + FFT-family
+  → wavelet-family empirical generalization scope; Sub-class 2j
+  codification deferred). **ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-
+  CONFIG DIVERGENCE NOT MANIFESTED at S42** (engine `_PRESET_CONFIG`
+  Balanced preset n_scales=64 + smoothing_width=5 matches audit
+  pinned config; preserves S41 FIRST observation at ENGINE-
+  DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE scope as
+  SINGLE-INSTANCE). **§1.8 reroll_on_caveat=False discipline NOT
+  APPLICABLE at S42** (audit verdict PASS Pattern A self-parity
+  bit-exact NOT CAVEAT; §1.8 applicability scope Tier VI CAVEAT
+  primary). **§2.5 Tier primary+overlay convention NOT APPLICABLE
+  at S42** (Tier IV Pattern A.3 single-tier framing per Code (A)
+  + Chat ratification preference). **§1.5 novelty enumeration
+  sub-section APPLIED at S42** per ≥5 observations threshold
+  satisfied at n=8 enumerated novelties (Novelty 1-8); eighth
+  post-S23 application of §1.5 novelty enumeration sub-section
+  pattern per S30 codification + S36 §1.5 refinement sustained-
+  observation operational status note; n=8 post-codification
+  observations across S23 + S34 + S37 + S38 + S39 + S40 + S41 +
+  S42; A3 eighth-observation tightening reinforcement.
+  **HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 THIRD-
+  OBSERVATION TIGHTENING SUSTAINED AT S42** per n=4 distinct
+  Tier characterizations preserved across n=6 entries within
+  Frequency Domain / Signal block; codification refinement
+  candidate at absorption #6+ empirically REINFORCED at sustained
+  n=4 distinct Tiers across 6 sub-sessions. **ALL-ANCHOR-DEFERRAL
+  DISCIPLINE FIFTH-APPLICATION EMPIRICAL EFFICACY A3 SECOND-
+  OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED
+  AT S42** per Chat S42 trigger drafting all-anchor-deferral
+  discipline fifth-application; 0 multi-anchor schema-misattribution
+  divergences at S42 Step 0 SUSTAINED at n=5 sustained efficacy
+  observations (S38 + S39 + S40 + S41 + S42); codification
+  candidate at §1.7+ Workstream B §1.4 operational scope at
+  absorption #6+ refinement empirically ROBUSTLY grounded; STRONGEST
+  empirical grounding among absorption #6 candidates. **Multi-
+  precedent confluence at SAME audit + SAME entry codification
+  scope THIRD-INSTANCE per S38 + S41 + S42 sequential
+  observations** (FIVE A3 precedent threshold satisfactions/
+  reinforcements at S42 scope: Tier IV Pattern A.3 SECOND-
+  OBSERVATION + §4.7.A variant 3 SECOND-OBSERVATION + Sub-class
+  2l SECOND-OBSERVATION + §1.9 THIRD-OBSERVATION + all-anchor-
+  deferral discipline FIFTH-APPLICATION A3 further reinforcement;
+  A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED
+  at multi-precedent confluence sub-pattern scope at SAME audit
+  + SAME entry codification surface at n=3 distinct observations;
+  codification refinement candidate at absorption #6+ EMPIRICALLY
+  ROBUSTLY REINFORCED). **Degenerate dual-arm self-parity
+  validation claim scope distinction SECOND observation at Q1
+  §2.5 entry codification scope** per S40 + S42 paired observations
+  (validation claim scope distinction between S37-S39 + S41
+  audit-validates-library-primitive scope vs S40 + S42 audit-
+  validates-reimplementation-self-consistency-only scope; engine
+  math NEVER validated). **A9 Class A counter post-S42: n=14
+  ACTIVE codified at §19.4 unchanged** (n=15 + n=16 codified at
+  §1.7 (c) Workstream B empirical-efficacy grounding scope per
+  S36; n=17 + n=18 + n=19 + n=20 candidates banked at S36 + S37
+  + S38 + S39 commit message body forward state + S40 + S41 + S42
+  SUSTAINED no new Class A catch pending absorption #6+ codification;
+  A9 Class A counter at §19.4 advance deferred to absorption #6+
+  per multi-candidate accumulation). **A9 Class B counter post-
+  S42: n=4 ACTIVE unchanged (no new Class B catch); sustained-
+  observation count under Class B revised default discipline
+  n=16 (S22 + S23 + S25 + S26 + S27 + S28 + S31 + S32 + S33 +
+  S34 + S37 + S38 + S39 + S40 + S41 + S42 = n=16 Q1 entries
+  only counting basis per Chat preference codified at S31)**.
+  **Maturation observation NINETEENTH SUSTAINED OBSERVATION
+  REACHED at S42 (S23 + S25 + S26 + S27 + S28 + S29 + S30 + S31
+  + S32 + S33 + S34 + S35 + S36 + S37 + S38 + S39 + S40 + S41 +
+  S42 = n=19 cross-session trajectory)** + EIGHT-timing-point
+  empirical surface preserved per S35-absorption #5 codification
+  (no new timing point variant at S42; proactive-prevention
+  operation SUSTAINED across established timing points (i)-(viii));
+  §4.5 codification operational at n=12 post-codification
+  sustained observations per S42 cross-session trajectory
+  reinforcement. Verify-state-at-first-consumption sub-discipline
+  34th-35th instance application.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at twenty-second-technique selection per
+  Mark 3 efficient-ratification + (α) unprompted case-against
+  discipline operative per Workstream B §1.4 codification + S20
+  + S25-S41 reinforcement. **Q-B pattern persists at n=23 across
+  S12 + S13 + S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 +
+  S26 + S27 + S28 + S31 + S32 + S33 + S34 + S37 + S38 + S39 +
+  S40 + S41 + S42; §1.4 codified observation refinement at
+  empirical pattern accumulation** (n=7 at §1.4 S20 codification
+  → n=22 at S41 reinforcement → n=23 at S42 reinforcement;
+  Workstream B amendment cycle candidate A continues at next
+  cycle). Substantive Chat engagement at structural-decision
+  points empirically observed (Step 0 STOP 2 anchor ratifications
+  A-I + CRITICAL CAVEAT under all-anchor-deferral discipline
+  fifth-application + Tier IV (Pattern A.3 self-parity / paper-
+  formula validated) (A) ratification + Sub-class 2l SECOND-
+  INSTANCE (B) ratification + §4.7.A PRESENT variant 3 SECOND-
+  INSTANCE (C) ratification + Block ordering position sixth-
+  position (D) ratification + Pattern F third-observation NOT
+  MANIFESTED (E) ratification + §1.9 THIRD-OBSERVATION TIGHTENING
+  MANIFESTED at SUFFIX-OMISSION direction (F) ratification +
+  ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE NOT
+  MANIFESTED (G) ratification + Multi-precedent confluence
+  THIRD-INSTANCE (H) ratification + Code (α-i alternative) +
+  (α-ii) + (α-iii) + (α-iv) + (α-v) + (αb) + (αc) + (αd) +
+  §4.7.A variant 2 alternative Tier 2 case-against rejection +
+  §1.8 NOT APPLICABLE banking + HETEROGENEOUS TIER-SURFACE
+  VARIANT A3 THIRD-OBSERVATION TIGHTENING SUSTAINED banking +
+  ALL-ANCHOR-DEFERRAL DISCIPLINE FIFTH-APPLICATION EMPIRICAL
+  EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD
+  FURTHER REINFORCED banking).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  **Conditional Yes with HEIGHTENED DISCLOSURE REQUIREMENT for
+  Layer 1 `_wavelet_coherence_reference` from-scratch
+  reimplementation (Tier IV Pattern A.3 self-parity / paper-
+  formula validated at DEGENERATE DUAL-ARM SELF-PARITY scope
+  SECOND-INSTANCE)** per PASS Pattern A self-parity bit-exact
+  verdict at 0.0 abs diff GUARANTEED BY CONSTRUCTION.
+  Defensibility to all three audiences (published audience +
+  Morgan Stanley compliance + Path α expert reviewer) UNDER Tier
+  IV (Pattern A.3 self-parity / paper-formula validated) sub-
+  class + §4.7.A PRESENT variant 3 Harness-reimplements-engine-
+  math at degenerate-dual-arm-self-parity sub-variant SECOND-
+  INSTANCE + Pattern A.3 self-parity / paper-formula scope-
+  bounded validation + cross-implementation parity NOT audit-
+  established + engine math NEVER validated by audit + HEIGHTENED
+  DISCLOSURE REQUIREMENT SECOND-OBSERVATION TIGHTENING at
+  degenerate dual-arm self-parity caveat per S40 + S42 paired
+  observations (S40 ssa HEIGHTENED DISCLOSURE REQUIREMENT FIRST-
+  INSTANCE baseline + S42 wavelet_coherence_phase_lag HEIGHTENED
+  DISCLOSURE REQUIREMENT SECOND-OBSERVATION TIGHTENING; A3
+  second-observation tightening precedent threshold SATISFIED
+  at Q-C HEIGHTENED DISCLOSURE REQUIREMENT scope at n=2
+  observations within Tier IV Pattern A.3 self-parity + §4.7.A
+  variant 3 degenerate-dual-arm-self-parity combined scope).
+  **NOT conditional for Layer 2 engine
+  `wavelet_coherence.py::run()` orchestration — explicit caveat
+  required:** engine math (NaN handling via `dropna_aligned` +
+  n < 32 threshold check + preset config dispatch + wavelet
+  parameter resolution + n_scales/min_scale/max_scale/smoothing_width
+  parameter resolution + CWT invocation + cross-wavelet spectrum
+  + smoothing + coherence/phase computation + circular mean of
+  phase + lead-lag direction inference + best scale identification
+  + summary tables + plain English + audit_fields construction)
+  NEVER audit-validated; cross-implementation parity (R `biwavelet`)
+  NOT established; expert review of engine implementation + Layer
+  1 cross-implementation validation against alternative
+  implementation (R `biwavelet` Liu-Liang-Weisberg 2007 API-
+  translation harness) at base pinned config. **Critical Q-C
+  framing per DEGENERATE DUAL-ARM SELF-PARITY caveat SECOND-
+  INSTANCE:** 0.0 abs diff IS established at degenerate dual-arm
+  scope (TSL arm == reference arm identical
+  `_wavelet_coherence_reference` invocation); audit scope is
+  `_wavelet_coherence_reference` self-consistency validation
+  ONLY — audit DOES NOT validate
+  `_wavelet_coherence_reference` correctness vs canonical
+  wavelet coherence + phase-lag formulas NOR engine math
+  correctness NOR cross-implementation parity; defensibility
+  conditional on disclosure of degenerate dual-arm self-parity
+  scope distinction (audit established
+  `_wavelet_coherence_reference` self-consistency NOT engine
+  validation NOT cross-implementation parity; engine math + Layer
+  2 orchestration NEVER audit-validated). **HIGHER retraction
+  surface than S37-S39 + S41 entries SECOND-INSTANCE** per
+  degenerate dual-arm self-parity validation claim scope
+  distinction TIGHTENED at SECOND-OBSERVATION per A3 precedent;
+  institutionally substantive heightened disclosure requirement
+  at all four disclosure templates SECOND-INSTANCE.
+
+- **Q-D (retraction surface if expert review later finds
+  inadequacy):** **MEDIUM-HIGH per Tier IV (Pattern A.3 self-
+  parity / paper-formula validated) sub-class characterization
+  scope bound + §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM
+  SELF-PARITY sub-variant SECOND-INSTANCE disclosure + Pattern
+  A.3 self-parity / paper-formula scope-bounded validation
+  caveat + engine `wavelet_coherence.py::run()` math NEVER
+  validated by audit caveat** — MEDIUM-HIGH retraction surface
+  SECOND-OBSERVATION TIGHTENING per S40 + S42 paired observations
+  (S40 ssa MEDIUM-HIGH FIRST-INSTANCE baseline + S42
+  wavelet_coherence_phase_lag MEDIUM-HIGH SECOND-INSTANCE; A3
+  second-observation tightening precedent threshold SATISFIED at
+  MEDIUM-HIGH retraction surface scope at n=2 observations within
+  Tier IV Pattern A.3 self-parity + §4.7.A variant 3 degenerate-
+  dual-arm-self-parity combined scope). DISTINCT FROM S37 LOW-
+  MEDIUM / S38 LOW / S39 LOW-MEDIUM / S41 LOW-MEDIUM per
+  degenerate dual-arm self-parity + engine math NEVER validated
+  combined scope. wavelet_coherence_phase_lag is custom CWT-based
+  coherence + smoothing + phase-lag methodology + pywt.cwt
+  implementation (widely-used continuous wavelet transform
+  primitive). **Layer-specific + Tier IV Pattern A.3 + Sub-class
+  2l SECOND-INSTANCE + §4.7.A PRESENT variant 3 degenerate-dual-
+  arm-self-parity sub-variant SECOND-INSTANCE retraction surface
+  (per S42 (A)+(B)+(C) ratifications):**
+  - Layer 1 `_wavelet_coherence_reference` from-scratch
+    reimplementation (Tier IV Pattern A.3 self-parity / paper-
+    formula at degenerate-dual-arm-self-parity scope SECOND-
+    INSTANCE): LOW-MEDIUM — degenerate self-parity at byte-
+    identical agreement guaranteed by construction;
+    `_wavelet_coherence_reference` correctness vs canonical
+    wavelet coherence + phase-lag formulas NOT audit-validated
+    (no independent reference; R `biwavelet` Liu-Liang-Weisberg
+    2007 estimator distinct methodology); expert review surfacing
+    `_wavelet_coherence_reference` math correctness issue would
+    affect wavelet_coherence_phase_lag + other Tier IV Pattern
+    A.3 wrappers (NOT 1:1 catalog↔wrapper isolation; cross-
+    technique propagation risk at paper-formula reimplementation
+    scope).
+  - **Layer 2 engine `wavelet_coherence.py::run()` orchestration:
+    HIGH (NEVER audit-validated)** — NaN handling via
+    `dropna_aligned` + n < 32 threshold check + preset config
+    dispatch (Fast/Balanced/Thorough n_scales 32/64/128 +
+    smoothing_width 3/5/7) + wavelet parameter resolution (engine
+    default 'morl' matching audit pinned) + n_scales/min_scale/
+    max_scale/smoothing_width parameter resolution (engine
+    defaults Balanced preset MATCH audit pinned config —
+    ENGINE-DEFAULT-CONFIG = AUDIT-PINNED-CONFIG no divergence
+    vs S41 wavelet_transform divergence) + CWT invocation with
+    try/except (engine math — DIFFERENT code path from harness
+    `_wavelet_coherence_reference`) + cross-wavelet spectrum +
+    time-direction + scale-direction smoothing (engine math —
+    DIFFERENT code path) + coherence/phase computation + circular
+    mean of phase + lead-lag direction inference + best scale
+    identification + scale coherence table + time-varying coherence
+    table + global statistics + plain English + audit_fields
+    construction — NEVER audit-validated; expert review of engine
+    implementation REQUIRED at code-level inspection; orchestration
+    scope substantial (410 LOC engine module); retraction surface
+    HIGH reflects engine math + Layer 2 orchestration entirely
+    outside audit scope.
+  - **Pattern A.3 self-parity / paper-formula + degenerate-dual-
+    arm-self-parity scope-bounded validation retraction surface
+    SECOND-INSTANCE: HIGH** — audit validates
+    `_wavelet_coherence_reference` self-consistency ONLY at
+    degenerate dual-arm self-parity scope; NO cross-implementation
+    parity validation (no R `biwavelet` cross-validation per
+    audit lines 38-44 verbatim Liu-Liang-Weisberg 2007 estimator
+    distinct methodology incompatibility rationale); NO
+    independent paper formula cross-validation; expert review
+    surfacing cross-implementation divergence (e.g., R `biwavelet`
+    produces different coherence OR phase-lag at identical args)
+    OR `_wavelet_coherence_reference` paper formula reimplementation
+    correctness issue (vs canonical wavelet coherence + phase-lag
+    formulas) would prompt Q3b extension scope cross-implementation
+    OR independent reference validation; Q3b extension scope
+    candidate per Path α expert review; HIGH retraction surface
+    SECOND-INSTANCE reflects validation scope NARROWER than S37-
+    S39 + S41 audit-validates-library-primitive scope.
+  - **§4.7.A PRESENT variant 3 degenerate-dual-arm-self-parity
+    retraction surface SECOND-INSTANCE: HIGH** — harness defines
+    `_wavelet_coherence_reference` from-scratch reimplementation;
+    engine `wavelet_coherence.py::run()` is COMPLETELY DIFFERENT
+    code path NEVER exercised by audit; reimplementation-of-
+    engine-math at degenerate-dual-arm-self-parity sub-variant
+    is the MOST DEGENERATE §4.7.A variant observed in §2.5
+    entry codification scope SECOND-INSTANCE; mechanism variant
+    3 structurally STRONGER §4.7.A manifestation than mechanism
+    variants 1 + 2 + 4 (dispatch-only + internal-reference-
+    function + use-case-divergence); HIGH retraction surface
+    SECOND-INSTANCE reflects structural strength of §4.7.A
+    variant 3 at degenerate-dual-arm-self-parity sub-variant
+    TIGHTENED at SECOND-OBSERVATION per A3 precedent.
+  - **Sub-class 2l SECOND-INSTANCE retraction surface: LOW** —
+    A3 second-observation tightening precedent threshold SATISFIED
+    at Sub-class 2l scope at n=2 observations (S40 + S42);
+    codification of Sub-class 2l at Tier IV Pattern A.3 self-
+    parity + §4.7.A variant 3 + degenerate-dual-arm-self-parity
+    combined scope EMPIRICALLY ROBUSTLY GROUNDED for absorption
+    #6+ adoption; sub-class definitional scope working hypothesis
+    CARRIED FORWARD with SECOND-INSTANCE tightening preserves
+    combined novelty distinction at codification refinement
+    candidate scope.
+  - **§1.9 THIRD-OBSERVATION TIGHTENING cross-block extension
+    MANIFESTED at SUFFIX-OMISSION direction (same-direction-as-
+    S37) retraction surface: LOW** — A3 THIRD-OBSERVATION
+    TIGHTENING precedent threshold SATISFIED at §1.9 cross-block
+    scope at n=3 cross-block observations (S37 + S40 + S42);
+    direction-distinct sub-variants (n=2 suffix-omission + n=1
+    suffix-addition) preserved at codification refinement
+    candidate at absorption #6+ for direction-symmetric expansion
+    + cross-block scope generalization EMPIRICALLY ROBUSTLY
+    REINFORCED; forward instrumentation note treatment preserves
+    observation without codification commitment.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; twenty-second technique to enter
+status per S42 ratification; **SIXTH Frequency Domain / Signal
+block entry — FIFTH catalog block transition advances 5→6 of 7
+entries Q1-amended** per Q1 work program scope after Block 1
+Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8
+Missing Data at S28 + Block 3 Decomposition at S34 + Frequency
+Domain / Signal block first + second + third + fourth + fifth
+entries at S37 + S38 + S39 + S40 + S41 (Block ordering position
+wavelet_coherence_phase_lag at SIXTH-position 7-entry Block
+ordering working hypothesis arc counting validated S37 + S38 +
+S39 + S40 + S41 + S42 per HEAD c62be4b line 15744 verbatim §3
+empirical re-Read; second-position alphabetically within remaining-
+2-unvalidated §3 enumeration); **SECOND Tier IV (Pattern A.3
+self-parity / paper-formula validated) PRIMARY tier characterization
+Q1 §2.5 entry overall** per S42 (A) Tier disposition ratification
++ A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED
+at Tier IV PRIMARY tier characterization scope per S40 + S42
+paired observations (S18 gcc_phat was FIRST Tier IV Q1 §2.5
+entry overall at THREE-LAYER DOWNSTREAM-TOPOLOGY framing per
+Block 1 Causality completion; S40 ssa was FIRST Tier IV PRIMARY
+characterization at SINGLE-LAYER + degenerate-dual-arm-self-
+parity framing within Frequency Domain / Signal block; S42
+wavelet_coherence_phase_lag is SECOND Tier IV PRIMARY
+characterization at SINGLE-LAYER + degenerate-dual-arm-self-
+parity framing within Frequency Domain / Signal block); **§4.7.A
+PRESENT variant 3 (Harness-reimplements-engine-math) at
+DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-INSTANCE at
+§2.5 entry codification scope** per S42 (C) Chat ratification
+(S40 ssa FIRST-INSTANCE baseline + S42 SECOND-INSTANCE; A3
+SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at
+§4.7.A variant 3 degenerate dual-arm self-parity sub-variant
+scope; post-S42 §4.7.A observations n=12 PRESENT + n=1 REMEDIATED
+= n=13 total observations); **Sub-class 2l SECOND-INSTANCE per
+A3 second-observation tightening precedent threshold SATISFIED
+per S40 + S42 paired observations** per S42 (B) Chat ratification
+(definitional scope working hypothesis CARRIED FORWARD "Tier IV
+Pattern A.3 self-parity / paper-formula + §4.7.A PRESENT variant
+3 harness-reimplements-engine-math + degenerate-dual-arm-self-
+parity sub-variant + single-layer scope"; A3 second-observation
+tightening precedent threshold SATISFIED at Sub-class 2l scope
+at n=2 observations; codification refinement candidate at
+absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED); **§1.9 Filename
+divergence sub-pattern variant THIRD-OBSERVATION TIGHTENING
+cross-block extension MANIFESTED at SUFFIX-OMISSION direction
+per Code S42 Step 0 empirical re-Read** (audit
+`p3_wavelet_coherence_audit.md` + harness
+`p3_wavelet_coherence.py` + engine `wavelet_coherence.py` ALL
+OMIT `_phase_lag` suffix from canonical catalog technique_id
+`wavelet_coherence_phase_lag`; n=3 cross-block observations
+across S37 + S40 + S42 at direction-distinct sub-variants n=2
+suffix-OMISSION + n=1 suffix-ADDITION; A3 THIRD-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block
+scope at n=3 cross-block observations; codification refinement
+candidate at absorption #6+ for direction-symmetric expansion +
+cross-block scope generalization EMPIRICALLY ROBUSTLY REINFORCED;
+expiration semantics: §1.9 fourth cross-block observation banks
+at S42 close pending S43+ entry filename empirical verification);
+**HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 THIRD-
+OBSERVATION TIGHTENING SUSTAINED AT S42** (n=4 distinct Tier
+characterizations preserved within Frequency Domain / Signal
+block at Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-
+exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier
+IV Pattern A.3 at S40 + S42 REPEAT; S42 Tier IV REPEATS S40 —
+no advance to n=5; codification refinement candidate at
+absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at sustained n=4
+distinct Tiers across 6 sub-sessions S37-S42); **ALL-ANCHOR-
+DEFERRAL DISCIPLINE FIFTH-APPLICATION EMPIRICAL EFFICACY A3
+SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER
+REINFORCED AT S42** per Chat S42 trigger drafting all-anchor-
+deferral discipline fifth-application per institutional learning
+sustainment from S37 multi-anchor schema-misattribution catch
+n=18 + S38 first-application + S39 second-application + S40
+third-application + S41 fourth-application empirical efficacy
+validations (A3 second-observation tightening precedent threshold
+SATISFIED at S39 + REINFORCED at S40 + S41); 0 multi-anchor
+schema-misattribution divergences at S42 Step 0 SUSTAINED at
+n=5 sustained efficacy observations (S38 + S39 + S40 + S41 + S42
+0-divergence); STRONGEST empirical grounding among absorption
+#6 candidates at S42 close (n=5 sustained efficacy observations
+exceeds all other absorption #6 candidate empirical thresholds);
+codification candidate at §1.7+ Workstream B §1.4 operational
+scope at absorption #6+ refinement empirically ROBUSTLY grounded
+at A3 precedent threshold FURTHER REINFORCEMENT; **Multi-precedent
+confluence at SAME audit + SAME entry codification scope THIRD-
+INSTANCE per S38 + S41 + S42 sequential observations** (S38
+fft_spectrum first-instance multi-precedent confluence baseline
++ S41 wavelet_transform second-instance multi-precedent confluence
++ S42 wavelet_coherence_phase_lag THIRD-INSTANCE multi-precedent
+confluence per FIVE A3 precedent threshold satisfactions/
+reinforcements; A3 THIRD-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD SATISFIED at multi-precedent confluence sub-pattern
+scope at SAME audit + SAME entry codification surface at n=3
+distinct observations; codification refinement candidate at
+absorption #6+ EMPIRICALLY ROBUSTLY REINFORCED); **Pattern F
+structural invariants THIRD-OBSERVATION NOT MANIFESTED at S42**
+(wavelet coherence harness compare() primary metrics-only
+structure; preserves S41 second-observation tightening status
+at n=2 Pattern F observations S38 + S41 + FFT-family → wavelet-
+family empirical generalization scope; NEW Sub-class 2j
+codification deferred at second-observation tightening status);
+**ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE NOT
+MANIFESTED at S42** (engine `_PRESET_CONFIG` Balanced preset
+n_scales=64 + smoothing_width=5 matches audit pinned config;
+preserves S41 FIRST observation at ENGINE-DEFAULT-CONFIG vs
+AUDIT-PINNED-CONFIG DIVERGENCE scope as SINGLE-INSTANCE; A3
+first-instance precedent preserved at S42); **§1.8 reroll_on_caveat=
+False discipline NOT APPLICABLE at S42** (audit verdict PASS
+Pattern A self-parity bit-exact NOT CAVEAT; §1.8 applicability
+scope Tier VI CAVEAT primary); **SINGLE-LAYER framing per S42
+STOP 2 empirical investigation + A-I dispositions** (Tier IV
+Pattern A.3 self-parity / paper-formula + §4.7.A variant 3
+degenerate-dual-arm-self-parity single-layer framing; §2.5 Tier
+primary+overlay convention NOT APPLICABLE at S42); **CRITICAL
+CAVEAT — audit validates `_wavelet_coherence_reference` SELF-
+CONSISTENCY ONLY at degenerate dual-arm self-parity scope
+SECOND-INSTANCE** — harness `_wavelet_coherence_reference`
+(lines 46-103) from-scratch reimplementation of custom CWT-based
+coherence + smoothing + phase-lag formula invoked at BOTH TSL-
+arm (lines 144-146) AND reference-arm (lines 156-158) with
+IDENTICAL arguments; audit verdict "PASS Pattern A self-parity
+bit-exact" at 0.0 abs diff GUARANTEED BY CONSTRUCTION per
+identical function invocation; engine
+`wavelet_coherence.py::run()` math + Layer 2 orchestration (NaN
+handling + n < 32 threshold check + preset config dispatch +
+wavelet parameter resolution + n_scales/min_scale/max_scale/
+smoothing_width parameter resolution + CWT invocation + cross-
+wavelet spectrum + smoothing + coherence/phase computation +
+circular mean of phase + lead-lag direction inference + best
+scale identification) NEVER exercised by audit; SECOND
+observation of degenerate dual-arm self-parity validation claim
+scope distinction at Q1 §2.5 entry codification scope per A3
+second-observation tightening precedent threshold SATISFIED at
+n=2 observations (S40 + S42); institutionally substantive
+empirical content distinction at validation claim scope
+dimension TIGHTENED at SECOND-OBSERVATION per A3 precedent;
+**Degenerate dual-arm self-parity validation claim scope
+distinction SECOND observation at Q1 §2.5 entry codification
+scope** per S40 + S42 paired observations (validation claim
+scope distinction TIGHTENED at SECOND-OBSERVATION per A3
+precedent); **§4.7.A pattern n=12 PRESENT + n=1 REMEDIATED =
+n=13 total post-S42 observations across §2.5 entries** (S14a
+granger + S18 gcc_phat + S26 denton_chowlin + S27 loess + S31
+classical_decompose + S32 mstl_decompose + S33 stl_decompose +
+S37 periodogram_spectral_density + S38 fft_spectrum + S39
+lomb_scargle + S40 ssa + S41 wavelet_transform + S42
+wavelet_coherence_phase_lag PRESENT + S34 x13_seasonal_adjust
+REMEDIATED; **§4.7.A pattern count tightening + variant 3
+SECOND-INSTANCE TIGHTENING forward observation at absorption #6
+per A3 precedent** — NOT A9 Class A counter increment; forward
+observation banking only; NOT §4.7.A taxonomy modification at
+S42); **A9 CLASS A COUNTER POST-S42 STATUS PRESERVATION at S42
+commit message body forward state per S42 Step 0 sustained
+institutional learning operationalization (no new Class A catch
+at S42 Step 0; prior-turn-ratification-acknowledgment discipline
+operational at S42 — Code surfaced STOP 2 once at Step 0 close;
+awaited Chat ratification response; proceeded to Step 1 entry
+drafting upon receipt of Chat STOP 2 disposition response without
+re-surfacing Step 0 STOP 2 surface per S39 n=20 candidate banking
+institutional learning sustainment from S40 + S41):** n=14
+ACTIVE codified at §19.4 unchanged + n=15 + n=16 codified at
+§1.7 (c) per S36 + n=17 + n=18 + n=19 + n=20 candidates banked
+at S36 + S37 + S38 + S39 commit message body forward state +
+S40 + S41 + S42 SUSTAINED no new Class A catch pending
+absorption #6+ codification; A9 Class A counter at §19.4
+advance deferred to absorption #6+ per multi-candidate
+accumulation. **Block ordering working hypothesis sixth-position
+verification at S42 per Code Step 0 empirical re-Read:**
+wavelet_coherence_phase_lag at second-position alphabetically
+within §3 remaining-2 unvalidated entries verified;
+wavelet_coherence_phase_lag at SIXTH-position in 7-entry Block
+ordering working hypothesis arc counting validated S37 + S38 +
+S39 + S40 + S41 + S42 per preliminary working hypothesis from
+S37 close commit message body forward state confirmed at S42
+empirical verification; Block ordering working hypothesis testing
+through S43 Block-internal complexity ordering verification
+across 7-entry arc S37 + S38 + S39 + S40 + S41 + S42 + S43 (n=5
+Block-ordering observation tightening per A3 precedent SUSTAINED
+at S42; cross-reference to §19.4 §4 note 13 first-instance
+baseline observation at Block 3 100% confirmed precedent per
+S31-S34 ordering empirical validation); **CONTINUATION of S30
++ S36 Workstream B codifications at S42:** §1.6 Q-A density
+convention operative continuation (verbatim citation density at
+Q-A field; n=12 post-codification applications at S31 + S32 +
+S33 + S34 + S35 + S36 + S37 + S38 + S39 + S40 + S41 + S42 with
+§1.6 LOC overshoot scope expansion at S36 refinement operative
+— n=12 total + n=11 sub-pattern scope disambiguation) + §5.5
+forward-instrumentation hygiene at status line operative
+continuation (expiration semantics on each predictive claim;
+n=12 post-codification applications at S31 + S32 + S33 + S34 +
+S35 + S36 + S37 + S38 + S39 + S40 + S41 + S42) + §1.5 novelty
+enumeration sub-section APPLIED at S42 (≥5 observations threshold
+satisfied at n=8 novelties; eighth post-S23 application; n=8
+post-codification observations across S23 + S34 + S37 + S38 +
+S39 + S40 + S41 + S42; A3 eighth-observation tightening
+reinforcement per §1.5 sustained-observation operational status
+note S36 refinement) + §1.7 refined Mod 3 cadence operative
+(sixth Q1 entry post-S36 §1.7 codification; refined Mod 3
+chunked-surface content-completeness specification operational
+at S42 STOP 1 chunked-surface protocol; Step 2 cross-section
+update narration suppression SECOND-OBSERVATION TIGHTENING per
+S41 EFFICACY VALIDATED FIRST-INSTANCE + S42 sustained successful
+suppression at chunk 1/4 surface candidate at SECOND-OBSERVATION
+TIGHTENING per A3 precedent) + §1.8 reroll_on_caveat=False
+discipline NOT APPLICABLE at S42 (PASS verdict Pattern A self-
+parity bit-exact; §1.8 applicability scope Tier VI CAVEAT
+primary; verified at Step 0 Tier characterization disposition)
++ §1.9 Filename divergence sub-pattern variant THIRD-OBSERVATION
+TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION
+direction at S42 (A3 THIRD-OBSERVATION TIGHTENING precedent
+threshold SATISFIED at §1.9 cross-block scope at n=3 cross-block
+observations) + §4.7.A REMEDIATED status dimension NOT applicable
+at S42 (PRESENT status; status dimension PRESENT/REMEDIATED
+orthogonal to mechanism variant 3); §2.5 Tier primary+overlay
+convention NOT APPLICABLE at S42 (Tier IV Pattern A.3 single-
+tier framing per S35-absorption #5 + S32 third-observation
+tightening reinforcement preserved); §4.7 in-place codification
+operative reference at §4.7.A PRESENT variant 3 SECOND-INSTANCE
+TIGHTENING at §2.5 entry codification scope + §4.7.A status
+dimension extension cross-reference. **A10 Sub-class disposition
+SECOND-INSTANCE per (B) Chat ratification** (definitional scope
+working hypothesis CARRIED FORWARD "Tier IV Pattern A.3 self-
+parity / paper-formula + §4.7.A PRESENT variant 3 harness-
+reimplements-engine-math + degenerate-dual-arm-self-parity sub-
+variant + single-layer scope"; A3 second-observation tightening
+precedent threshold SATISFIED at Sub-class 2l scope at n=2
+observations; codification refinement candidate at absorption
+#6+ EMPIRICALLY ROBUSTLY GROUNDED; expiration semantics:
+Sub-class 2l candidate observation banks at S42 close pending
+absorption #6+ codification refinement disposition adoption).
+**A9 Class B counter post-S42: n=4 ACTIVE (unchanged at S42; no
+new Class B catch); sustained-observation count under Class B
+revised default discipline n=16 (S22 + S23 + S25 + S26 + S27 +
+S28 + S31 + S32 + S33 + S34 + S37 + S38 + S39 + S40 + S41 + S42
+= n=16 Q1 entries only counting basis per Chat preference
+codified at S31)** (framing class working hypothesis CONFIRMED
+at Step 0 per A9 Class B revised default discipline; expiration
+semantics: sustained-observation counter continues incrementing
+at each subsequent Q1 entry per A9 Class B revised default
+operating proactively, codification-stable status preserved at
+n=4 ACTIVE counter; n=4 increments only on NEW Class B catch).
+**A9 Class A counter post-S42: n=14 ACTIVE codified at §19.4
+unchanged + candidates n=15 + n=16 codified at §1.7 (c)
+Workstream B empirical-efficacy grounding scope per S36 +
+candidates n=17 (S36 STOP-1.5-revision-scope-misattribution) +
+n=18 (S37 multi-anchor schema-misattribution at trigger drafting)
++ n=19 (S38 Code-side §3 enumeration drift) + n=20 (S39 Code-
+side prior-turn-ratification-acknowledgment gap) banked at S36-
+S39 commit message body forward state + S40 + S41 + S42
+SUSTAINED no new Class A catch per S42 Step 0 prior-turn-
+ratification-acknowledgment discipline operationalization
+institutional learning sustainment** (expiration semantics: A9
+Class A candidate inventory accumulates until absorption #6
+codification refinement disposition adopts/declines each
+candidate; multi-pattern variant codification refinement candidate
+at n=6+ banked candidates for absorption #6 adoption per A3
+second-observation tightening precedent). **§4.7.A pattern n=12
+PRESENT + n=1 REMEDIATED = n=13 total observation count post-
+S42 per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A status dimension extension + S42 §4.7.A variant 3
+SECOND-INSTANCE TIGHTENING at §2.5 entry codification scope:**
+S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 + S39 + S40
++ S41 + S42 PRESENT + S34 REMEDIATED = n=13 total observations
+across mechanism variants + status dimension; **§4.7.A pattern
+count tightening + status dimension tightening + variant 3
+SECOND-INSTANCE tightening forward observation at absorption #6
+per A3 precedent** (distinct tracking surface from A9 Class A
+counter per S30 (G.1) + S36 codifications; §4.7.A pattern
+observations track mechanism variant + status dimension
+accumulation; A9 Class A counter tracks empirical-state-
+assumption failure mode; §4.7.A variant 3 SECOND-INSTANCE
+tightening at S42 enables codification refinement candidate at
+absorption #6+ §4.7.A taxonomy mechanism variant dimension scope
+expansion EMPIRICALLY ROBUSTLY GROUNDED). **A9 Class A + Class
+B discipline maturation NINETEENTH SUSTAINED OBSERVATION
+REACHED at S42 (S23 + S25 + S26 + S27 + S28 + S29 + S30 + S31
++ S32 + S33 + S34 + S35 + S36 + S37 + S38 + S39 + S40 + S41 +
+S42 = n=19 cross-session trajectory)** per A3 second-observation
+tightening precedent threshold satisfied + EIGHT-timing-point
+empirical surface preserved per S35-absorption #5 codification
+(no new timing point variant at S42; proactive-prevention
+operation SUSTAINED across established timing points (i)-(viii));
+promoted to §4.5 NEW sub-section at S29-absorption #4 + EXTENDED
+at S35-absorption #5 to eleven-sustained-observation cross-
+session trajectory + EIGHT-timing-point operational surface (NEW
+(vii) + NEW (viii)) per CHAT RATIFICATIONS carried forward;
+**§4.5 codification operational at n=12 post-codification
+sustained observations per S42 cross-session trajectory** (S30
++ S31 + S32 + S33 + S34 + S35 + S36 + S37 + S38 + S39 + S40 +
+S41 + S42 post-codification trajectory) per CHAT RATIFICATION
+#13 reinforcement (codification-stable status preserved at
+sustained post-codification operation). **Frequency Domain /
+Signal block sixth-entry status framing** (analogous to S40 ssa
+Block 5 fourth-entry FIRST-INSTANCE precedent at Tier IV Pattern
+A.3 self-parity + §4.7.A variant 3 degenerate-dual-arm-self-
+parity sub-variant scope; S42 wavelet_coherence_phase_lag is
+Block 5 sixth-entry NOT FINAL-entry per Block 5 7-entry arc
+continuation pending S43 close at Tier characterization scope
+TBD per Code Step 0 + Chat STOP 2 ratification at S43; per-block
+continuation pattern n=5 catalog block observation candidate at
+Frequency Domain / Signal block completion per ITEM 11 forward
+instrumentation banking; expiration semantics: per-block
+continuation pattern n=5 codification refinement at absorption
+#6+ refinement disposition pending Frequency Domain / Signal
+block completion arc close at S43); **Frequency Domain / Signal
+forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43
+advances at S42 per 7-entry §3 enumeration empirical re-Read at
+S42 Step 0 mid-session** (banking continuation per ITEM 11
+forward instrumentation banking; NOT codified at S42; expiration
+semantics: Block ordering working hypothesis testing through S43
+to Block 5 close per A3 precedent + HETEROGENEOUS TIER-SURFACE
+A3 THIRD-OBSERVATION TIGHTENING SUSTAINED at S42 sustained
+heterogeneous Tier-surface across 7-entry arc; S43 trigger
+drafting per A9 Class B revised default discipline operating
+proactively at respective sub-session); **HETEROGENEOUS TIER-
+SURFACE VARIANT OBSERVATION A3 THIRD-OBSERVATION TIGHTENING
+SUSTAINED AT S42 forward instrumentation banking EMPIRICALLY
+REINFORCED** (Block Tier-surface composition empirically
+HETEROGENEOUS at sustained n=4 distinct Tiers per A3 precedent
+threshold REINFORCED: Tier III Pattern A.1 at S37 + S41 REPEAT
++ Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3
+at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT; codification
+refinement candidate at absorption #6+ for Block heterogeneous-
+Tier-surface variant sub-pattern definitional scope generalization
+per §19.4 §4 note 6 refinement at S35-absorption #5 codification
+EMPIRICALLY ROBUSTLY GROUNDED).
+**NEW Sub-class candidate 2m+ projection (subsequent Frequency
+Domain / Signal block entry at S43) NOT codified at S42** per
+A3 first-instance precedent (codification deferred to absorption
+#6+ second-observation tightening if recurs; expiration semantics:
+NEW Sub-class candidate trajectory observation banks at S42
+close pending S43 first-instance baseline observation at Block
+5 close FULLY Q1-AMENDED milestone).
+**§1.9 cross-block extension THIRD-OBSERVATION TIGHTENING
+MANIFESTED at SUFFIX-OMISSION direction at S42** (audit
+`p3_wavelet_coherence_audit.md` + harness
+`p3_wavelet_coherence.py` + engine `wavelet_coherence.py` ALL
+OMIT `_phase_lag` suffix from canonical catalog technique_id;
+n=3 cross-block observations across S37 + S40 + S42 at direction-
+distinct sub-variants n=2 suffix-OMISSION + n=1 suffix-ADDITION;
+A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED
+at §1.9 cross-block scope; codification refinement candidate at
+absorption #6+ for direction-symmetric expansion + cross-block
+scope generalization EMPIRICALLY ROBUSTLY REINFORCED;
+expiration semantics: §1.9 fourth cross-block observation banks
+at S42 close pending S43+ entry filename empirical verification).
+**Pattern F structural invariants THIRD-OBSERVATION NOT
+MANIFESTED at S42** (wavelet coherence harness
+`p3_wavelet_coherence.py` compare() lines 165-190 primary metrics-
+only structure — no cross-wavelet roundtrip; no cross-spectrum
+Parseval-like conservation; no structural identity invariants
+computation; Pattern F NEW framing element observation remains
+at S38 + S41 n=2 second-observation tightening status (FFT-
+family → wavelet-family empirical generalization scope); A3
+third-observation tightening precedent at Pattern F scope
+DEFERRED pending future wrapper structural-invariants
+manifestation; NEW Sub-class 2j codification deferred at
+second-observation tightening status per (αc) forward-
+instrumentation-note treatment; expiration semantics: Pattern F
+observation banks at S42 close pending third-observation
+tightening at respective sub-session OR absorption #6+
+codification refinement disposition).
+**ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE NOT
+MANIFESTED at S42** (engine `wavelet_coherence.py` line 90
+`_PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])`
+Balanced preset n_scales=64 + smoothing_width=5 matches audit
+pinned config; preserves S41 FIRST observation at ENGINE-DEFAULT-
+CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE scope as SINGLE-INSTANCE
+— S41 wavelet_transform engine default mode "symmetric" diverged
+from audit pinned mode "periodization"; S42 no divergence —
+engine and audit BOTH use Balanced preset defaults; A3 first-
+instance precedent preserved at S42; second-observation tightening
+at ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE
+scope DEFERRED pending future Q1 §2.5 entry where engine default
+config diverges from audit pinned config; expiration semantics:
+ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE
+observation banks at S42 close as SINGLE-INSTANCE pending
+respective sub-session manifestation).
+**Degenerate dual-arm self-parity validation claim scope
+distinction SECOND observation at Q1 §2.5 entry codification
+scope at S42 forward instrumentation banking** (validation claim
+scope distinction TIGHTENED at SECOND-OBSERVATION per A3
+precedent threshold SATISFIED at n=2 observations S40 + S42;
+harness `_wavelet_coherence_reference` invoked at BOTH TSL-arm
++ reference-arm with identical arguments — 0.0 abs diff
+GUARANTEED BY CONSTRUCTION; engine `wavelet_coherence.py::run()`
+math NEVER validated by audit; engine Layer 2 orchestration
+NEVER exercised by audit; institutionally substantive empirical
+content distinction at validation claim scope dimension
+TIGHTENED at SECOND-OBSERVATION).
+**Multi-precedent confluence at SAME audit + SAME entry
+codification scope THIRD-INSTANCE per S38 + S41 + S42 sequential
+observations** (S38 fft_spectrum first-instance multi-precedent
+confluence baseline + S41 wavelet_transform second-instance
+multi-precedent confluence + S42 wavelet_coherence_phase_lag
+THIRD-INSTANCE multi-precedent confluence per FIVE A3 precedent
+threshold satisfactions/reinforcements at S42 scope: (1) Tier
+IV Pattern A.3 SECOND-OBSERVATION TIGHTENING + (2) §4.7.A
+variant 3 degenerate dual-arm self-parity SECOND-OBSERVATION
+TIGHTENING + (3) Sub-class 2l SECOND-OBSERVATION TIGHTENING +
+(4) §1.9 Filename divergence cross-block extension THIRD-
+OBSERVATION TIGHTENING + (5) All-anchor-deferral discipline
+FIFTH-APPLICATION A3 further reinforcement at n=5 sustained
+efficacy observations; A3 THIRD-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD SATISFIED at multi-precedent confluence sub-pattern
+scope at SAME audit + SAME entry codification surface at n=3
+distinct observations S38 + S41 + S42; codification refinement
+candidate at absorption #6+ for multi-precedent confluence sub-
+pattern definitional scope at §2.5 entry codification scope
+EMPIRICALLY ROBUSTLY REINFORCED at three sustained observations).
+
+## §3 Unvalidated catalog techniques (53 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -15740,8 +17730,8 @@ descriptions, summaries).
 ### Forecasting (Classical) (8 unvalidated)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
 
-### Frequency Domain / Signal (2 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; lomb_scargle moved to §2.5 per Phase 7+ S39 — THIRD Frequency Domain / Signal block entry; ssa moved to §2.5 per Phase 7+ S40 — FOURTH Frequency Domain / Signal block entry; wavelet_transform moved to §2.5 per Phase 7+ S41 — FIFTH Frequency Domain / Signal block entry; heterogeneous Tier-surface variant observation A3 third-observation tightening SUSTAINED at S41 with n=4 distinct Tiers (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40); Block Q1-amendment in-progress at 5 of 7 entries Q1-amended)
-`emd_hht`, `wavelet_coherence_phase_lag`
+### Frequency Domain / Signal (1 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; lomb_scargle moved to §2.5 per Phase 7+ S39 — THIRD Frequency Domain / Signal block entry; ssa moved to §2.5 per Phase 7+ S40 — FOURTH Frequency Domain / Signal block entry; wavelet_transform moved to §2.5 per Phase 7+ S41 — FIFTH Frequency Domain / Signal block entry; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42 — SIXTH Frequency Domain / Signal block entry; heterogeneous Tier-surface variant observation A3 third-observation tightening SUSTAINED at S42 with n=4 distinct Tiers preserved (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT — S42 Tier IV REPEATS S40, no advance to n=5 distinct Tiers); Block Q1-amendment in-progress at 6 of 7 entries Q1-amended)
+`emd_hht`
 
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
@@ -15764,7 +17754,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 54 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 5 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry; HETEROGENEOUS Tier-surface variant observation A3 third-observation tightening SUSTAINED at S41 with n=4 distinct Tiers (S41 Tier III Pattern A.1 REPEATS S37; not advanced to n=5); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S41 per 7-entry §3 enumeration empirical re-Read at S41 Step 0 mid-session; Block ordering working hypothesis fifth-position verification at S41 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE FOURTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S41 (n=4 sustained efficacy observations S38 + S39 + S40 + S41 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement empirically ROBUSTLY REINFORCED — STRONGEST empirical grounding for codification adoption among all absorption #6 candidates at S41 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (S37 + S41 Tier III Pattern A.1 + §4.7.A variant 1 codification adoption candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED); Pattern F structural invariants SECOND-OBSERVATION TIGHTENING at S41 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family empirical generalization Tier-agnostic; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED); §1.9 SECOND-INSTANCE cross-block extension MANIFESTED at suffix-ADDITION direction at S40 (A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope at n=2 cross-block observations S37 suffix-omission + S40 suffix-addition; preserved unchanged at S41); §4.7.A variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant FIRST-INSTANCE baseline observation at §2.5 entry codification scope at S40 (preserved at S41); A9 Class A counter post-S41 status preserved n=14 ACTIVE + n=15-n=20 candidates banked at S35-S39 + S40 + S41 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment from S40; Multi-precedent confluence at S41 INSTITUTIONALLY SUBSTANTIVE (three A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope: Sub-class 2i second-observation tightening + Pattern F second-observation tightening + all-anchor-deferral discipline A3 further reinforcement)**).
+**Total: 53 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 6 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry; HETEROGENEOUS Tier-surface variant observation A3 third-observation tightening SUSTAINED at S42 with n=4 distinct Tiers preserved (S42 Tier IV Pattern A.3 REPEATS S40; not advanced to n=5); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S42 per 7-entry §3 enumeration empirical re-Read at S42 Step 0 mid-session; Block ordering working hypothesis sixth-position verification at S42 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE FIFTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S42 (n=5 sustained efficacy observations S38 + S39 + S40 + S41 + S42 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement empirically ROBUSTLY REINFORCED — STRONGEST empirical grounding for codification adoption among all absorption #6 candidates at S42 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (S37 + S41 Tier III Pattern A.1 + §4.7.A variant 1 codification adoption candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED; preserved unchanged at S42); Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (S40 + S42 Tier IV Pattern A.3 + §4.7.A variant 3 degenerate-dual-arm-self-parity codification adoption candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED); Pattern F structural invariants SECOND-OBSERVATION TIGHTENING at S41 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family empirical generalization Tier-agnostic; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED; preserved unchanged at S42 — Pattern F THIRD-OBSERVATION NOT MANIFESTED at wavelet coherence harness primary metrics-only structure); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 (A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope at n=3 cross-block observations S37 suffix-omission + S40 suffix-addition + S42 suffix-omission; direction sub-variant analysis n=2 suffix-omission + n=1 suffix-addition; codification refinement candidate at absorption #6+ for direction-symmetric expansion + cross-block scope generalization EMPIRICALLY ROBUSTLY REINFORCED); §4.7.A variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-OBSERVATION TIGHTENING at §2.5 entry codification scope at S42 (S40 first-instance baseline + S42 SECOND-INSTANCE; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE preserved at S41 FIRST observation as SINGLE-INSTANCE (S42 NOT MANIFESTED — engine `wavelet_coherence.py` Balanced preset matches audit pinned config); A9 Class A counter post-S42 status preserved n=14 ACTIVE + n=15-n=20 candidates banked at S35-S39 + S40 + S41 + S42 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment from S40 + S41; Multi-precedent confluence at S42 INSTITUTIONALLY SUBSTANTIVE THIRD-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 THIRD-INSTANCE per FIVE A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope: Tier IV Pattern A.3 second-observation tightening + §4.7.A variant 3 degenerate dual-arm self-parity second-observation tightening + Sub-class 2l second-observation tightening + §1.9 cross-block extension third-observation tightening + all-anchor-deferral discipline FIFTH-APPLICATION A3 further reinforcement; A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=3 distinct observations)**).
 
 ## §4 How to use this document
 
