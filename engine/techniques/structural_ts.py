@@ -230,7 +230,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             exog_future = None
 
-        fc_result = fit.get_forecast(steps=horizon, exog=exog_future, alpha=alpha)
+        fc_result = fit.get_forecast(steps=horizon, exog=exog_future)
         fc_mean = fc_result.predicted_mean
         if hasattr(fc_mean, 'values'):
             fc_mean = fc_mean.values

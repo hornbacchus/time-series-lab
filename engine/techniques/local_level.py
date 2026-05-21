@@ -103,7 +103,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Generating forecasts", 65)
 
-        fc_result = fit.get_forecast(steps=horizon, alpha=alpha)
+        fc_result = fit.get_forecast(steps=horizon)
         fc_mean = fc_result.predicted_mean
         if hasattr(fc_mean, 'values'):
             fc_mean = fc_mean.values

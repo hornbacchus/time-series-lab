@@ -173,7 +173,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             exog_future = None
 
-        fc_result = fit.get_forecast(steps=horizon, exog=exog_future, alpha=0.05)
+        fc_result = fit.get_forecast(steps=horizon, exog=exog_future)
         fc = fc_result.predicted_mean.values if hasattr(fc_result.predicted_mean, 'values') else np.asarray(fc_result.predicted_mean)
         ci_df = fc_result.conf_int()
         if hasattr(ci_df, 'values'):

@@ -272,7 +272,7 @@ def _run_manual_arima(ctx, clean, name, horizon, warnings, progress_callback):
     progress_callback("Generating forecasts", 65)
 
     # Forecast
-    forecast_result = fit.get_forecast(steps=horizon, alpha=0.05)
+    forecast_result = fit.get_forecast(steps=horizon)
     fc = np.asarray(forecast_result.predicted_mean)
     conf_int_raw = forecast_result.conf_int()
     # conf_int() returns DataFrame when input has a DatetimeIndex and

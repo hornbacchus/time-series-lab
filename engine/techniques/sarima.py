@@ -174,7 +174,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Generating forecasts", 55)
 
-        forecast_obj = fit.get_forecast(steps=horizon, alpha=0.05)
+        forecast_obj = fit.get_forecast(steps=horizon)
         fc = forecast_obj.predicted_mean.values if hasattr(forecast_obj.predicted_mean, 'values') else np.asarray(forecast_obj.predicted_mean)
         ci_df = forecast_obj.conf_int()
         lower = ci_df.iloc[:, 0].values if hasattr(ci_df, 'iloc') else ci_df[:, 0]

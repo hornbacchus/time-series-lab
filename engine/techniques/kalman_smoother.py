@@ -252,7 +252,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # --- Forecast ---
         progress_callback("Generating forecasts", 80)
         try:
-            fc_result = fit.get_forecast(steps=horizon, alpha=alpha)
+            fc_result = fit.get_forecast(steps=horizon)
             fc_mean = np.asarray(fc_result.predicted_mean, dtype=np.float64)
             ci_df = fc_result.conf_int(alpha=alpha)
             ci = ci_df.values if hasattr(ci_df, "values") else np.asarray(ci_df)
