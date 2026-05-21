@@ -19757,7 +19757,19 @@ S48 originally classified as Tier II.bit-exact inheriting Session 9
 "Pattern A bit-exact regime" vocabulary; corrected at S49 to Tier
 II.mle-band per S6/S9 tier-split refinement (Session 9 language predates
 split; MLE-band convergence precision is not bit-exact at machine
-precision per §122). Verdict class: `mle_fit` (Kalman MLE; closed-form
+precision per §122). **S52 audit-hygiene pass closure note:** S52
+re-checked all 23 pre-S49 validated §2.5 entries (S12-S43) against the
+post-S6/S9 tier-split taxonomy; zero stale-vocabulary inheritances
+detected beyond this S48 instance. Decisive evidence at
+`tsl_trust_inventory_techniques.md` line 4987 — kalman_imputation
+(S28), the closest analog to S48 local_level (same Phase 3 Batch 5
+wrapper, same Session 9 closure "Pattern A regime" vocabulary
+inheritance risk), was correctly classified at Tier II.mle-band primary
+with explicit "NOT bit-exact at machine precision per scope_reframing
+§2 lines 134-137" framing. Session 9 vocabulary-inheritance pattern
+**formally closed at S52** as isolated S48 incident, not systematic;
+S49 inline correction resolved the single instance; no further
+corrections required. Verdict class: `mle_fit` (Kalman MLE; closed-form
 recursions given variances; likelihood-optimum convergence on
 (sigma_eps2, sigma_eta2) at MLE-class precision per Phase 3 Batch 5
 audit class declaration at
