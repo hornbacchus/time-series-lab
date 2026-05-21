@@ -22,11 +22,11 @@ Phase 6+ S9+ infrastructure category).
 - 9 catalog techniques with reference-parity validation
   evidence (§2; full Phase 1 + extractable Phase 2 + explicit
   gap markings)
-- 22 catalog techniques with Phase 7+ Q1 trust documentation
+- 23 catalog techniques with Phase 7+ Q1 trust documentation
   remediation (§2.5; Tier-characterization + disclosure
   templates + validation provenance audit checklist;
-  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42 amendments)
-- 53 catalog techniques without reference-parity validation
+  post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43 amendments)
+- 52 catalog techniques without reference-parity validation
   (§3; ID-only enumeration with explicit status framing)
 
 **Scope this document does NOT cover:**
@@ -17695,7 +17695,2045 @@ candidate at absorption #6+ for multi-precedent confluence sub-
 pattern definitional scope at §2.5 entry codification scope
 EMPIRICALLY ROBUSTLY REINFORCED at three sustained observations).
 
-## §3 Unvalidated catalog techniques (53 entries; ID-only enumeration)
+### emd_hht (Phase 7+ S43; TWENTY-THIRD §2.5 entry; SEVENTH Frequency Domain / Signal block entry — FIFTH catalog block FULLY Q1-AMENDED at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); FIRST Tier VI CAVEAT Q1 §2.5 entry within Frequency Domain / Signal block (S32 mstl_decompose + S33 stl_decompose Tier VI CAVEAT precedent within Block 3 Decomposition; S43 emd_hht is cross-Block Tier VI characterization extension FIRST-INSTANCE baseline observation per A3 first-instance precedent within Frequency Domain / Signal block scope); §4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation per Code S43 Step 0 empirical surface (THIRD §4.7.A variant 3 observation overall at §2.5 entry codification scope after S40 + S42 first + second observations at DEGENERATE DUAL-ARM sub-variant; S43 emd_hht is FIRST NEW NON-DEGENERATE DUAL-ARM sub-variant within §4.7.A variant 3 codified scope at TSL arm ≠ reference arm distinction — TSL arm `_numpy_emd_minimal` inline mirrors engine `_numpy_emd` fallback; reference arm invokes EXTERNAL PyEMD.EMD library distinct implementation; A3 first-instance precedent at §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant scope at S43; codification deferred to absorption #6+ second-observation tightening if recurs); NEW Sub-class 2m candidate first-instance baseline observation per A3 first-instance precedent + (αc) forward-instrumentation-note treatment per (αa)+(αc) Chat ratification (definitional scope working hypothesis: "Tier VI CAVEAT (Pattern J Tier C — different sifting libraries / no canonical reference) + §4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at NON-DEGENERATE DUAL-ARM sub-variant (TSL arm inline reimplementation mirrors engine fallback; reference arm distinct external library) + Pattern F structural invariants computation explicit (reconstruction_identity validation at both arms) + IMF count CAVEAT driver + cumulative energy curve Pearson correlation supplementary metric (Tier C convention) + single-layer scope"); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT lines 5-7 + tolerance class em_stochastic + audit lines 64-67 verbatim §1.8 reroll_on_caveat=False codification reference; cross-Block scope continuation observation per Block 3 S32 + S33 §1.8 applicability precedent); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED at S43 per A3 THIRD-OBSERVATION TIGHTENING precedent threshold SATISFIED at Pattern F scope at n=3 observations across n=3 mathematical families (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family) + cross-Tier (Tier II.bit-exact + Tier III + Tier VI CAVEAT) scope (harness compare() lines 198-210 reconstruction_identity validation at both arms at machine precision 1e-10 threshold; TSL 1.11e-16 + ref 0.0; Pattern F Tier-agnostic empirical generalization observation INSTITUTIONALLY SUBSTANTIVE across THREE distinct mathematical-family + Tier-characterization scopes; NEW Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic); §1.9 Filename divergence sub-pattern variant FOURTH-OBSERVATION NOT MANIFESTED at S43 (audit `p3_emd_hht_audit.md` + harness `p3_emd_hht.py` + engine `emd_hht.py` ALL preserve canonical catalog technique_id `emd_hht` exactly; preserves S42 THIRD-OBSERVATION TIGHTENING status at n=3 cross-block observations + direction sub-variant analysis n=2 suffix-omission + n=1 suffix-addition); HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 per A3 FOURTH-OBSERVATION TIGHTENING precedent threshold SATISFIED at heterogeneous Tier-surface variant sub-pattern scope at n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers; codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY REINFORCED beyond S42 third-observation tightening baseline); ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED AT S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Multi-precedent confluence at SAME audit + SAME entry codification scope FOURTH-INSTANCE per S38 + S41 + S42 + S43 sequential observations (SEVEN A3 precedent threshold satisfactions/reinforcements at S43 scope: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone = SEVEN record-high single-observation count in apparatus history; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation); BLOCK 5 FREQUENCY DOMAIN / SIGNAL FULLY Q1-AMENDED MILESTONE REACHED AT S43 CLOSE = FIFTH catalog block fully Q1-amended (5 of 13 = 38% catalog block-level completion); per-block continuation pattern n=5 catalog block observations REACHED at Block 5 close — codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations (Block 1 + Block 12 + Block 8 + Block 3 + Frequency Domain / Signal); CRITICAL CAVEAT — audit verdict CAVEAT (Pattern J Tier C; ±2 IMF count divergence with 0.99 correlation on energy curve) DETERMINISTIC at `reroll_on_caveat = False` Session 5 lock per audit lines 64-67 verbatim; engine `emd_hht.py:run()` math + Layer 2 orchestration (NaN handling via `_prepare_series` + preset config dispatch + emd package availability check + EMD/EEMD method dispatch + max_imfs + max_sift_iterations + ensemble_size + noise_width parameter resolution + EMD sifting + Hilbert transform + instantaneous frequency + amplitude analysis + summary tables + plain English + audit_fields construction) NEVER exercised by audit — distinct validation claim scope from S37-S39 + S41 audit-validates-library-primitive scope and from S40 + S42 audit-validates-reimplementation-self-consistency-only scope; NEW VALIDATION CLAIM SCOPE CATEGORY at S43 = audit-validates-IMF-count-CAVEAT-with-reconstruction-identity-PASS-and-energy-curve-correlation-PASS-via-different-sifting-libraries (Tier C convention))
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+VI CAVEAT (Pattern J / Tier C — different sifting libraries; ±2
+IMF count divergence with 0.99 correlation on energy curve) sub-
+class** per S43 (A) Chat STOP 2 disposition. **Tier VI
+characterization directly grounded** at `scope_reframing_s6_banking.md`
+§2 lines 183-184 verbatim ("Tier VI — Phase 3 CAVEAT. 5 wrappers
+per P-3 v1.2.0 §1: `p3_emd_hht`, `p3_mstl`, `p3_nar_narx`,
+`p3_star`, `p3_stl`. Matches except in stated regime (boundary,
+near-singular, iterative LOESS divergence, Tier C reference
+convergence failure)") — p3_emd_hht EXPLICITLY enumerated within
+Tier VI 5-wrapper enumeration. + audit `p3_emd_hht_audit.md`
+lines 5-7 verbatim ("**Verdict:** **CAVEAT** (Pattern J / Tier C
+— different sifting libraries; ±2 IMF count divergence with 0.99
+correlation on energy curve)") + audit line 8 verbatim ("**Tolerance
+class:** em_stochastic") + audit lines 17-20 verbatim Primary
+metrics (reconstruction_identity_tsl PASS 1.11e-16 +
+reconstruction_identity_ref PASS 0.0 + n_imfs_match CAVEAT TSL=8
+ref=6 abs_diff=2 + cum_energy_curve_correlation PASS Pearson 0.991)
++ audit lines 22-29 verbatim Outcome ("CAVEAT verdict driven by
+IMF-count divergence. TSL's numpy-fallback sifter (mirrors AOE
+Quinn `emd`-package algorithm) extracts 8 IMFs; PyEMD (Laszuk)
+extracts 6 IMFs on the same signal. Both implementations satisfy
+reconstruction identity at machine precision (sum(IMFs) +
+residual = original signal exactly). The cumulative-energy curve
+agrees at ρ=0.991 — both implementations concentrate energy in
+similar frequency bands despite different IMF granularity") +
+audit lines 47-63 verbatim Pattern J / NO-REFERENCE Tier C
+classification methodology rationale ("Per master plan §5 Tier
+C, EMD/HHT lacks a canonical reference: the AOE Quinn `emd`,
+Laszuk `PyEMD`, MATLAB `emd`, and R `EMD` packages all implement
+Huang 1998 with slightly different envelope-extension heuristics,
+sifting stop criteria, and edge handling. Per-IMF bitwise parity
+is mathematically intractable. Comparison via: 1. Reconstruction
+identity (machine precision on both sides) — verifies neither
+implementation drops energy. 2. IMF count agreement (±1 PASS, ±2
+CAVEAT, ±3+ BLOCK) — verifies sifting stops at compatible
+coarseness. 3. Cumulative-energy-curve Pearson correlation (>=
+0.85 PASS) — verifies energy is distributed across IMFs in
+correlated patterns even when granularity differs") + audit lines
+64-67 verbatim §1.8 reroll_on_caveat=False codification reference
+("CAVEAT verdict is informative-not-bug — documents the known
+methodology divergence. `reroll_on_caveat = False` (default per
+Session 5 lock) means no retry; verdict stays CAVEAT
+deterministically") + harness `p3_emd_hht.py` lines 1-27 verbatim
+audit design rationale ("Compares TSL `engine/techniques/emd_hht.py`
+(uses `emd` package if available, else custom numpy fallback)
+against `PyEMD.EMD` on a synthetic multi-component signal.
+**Pattern J classic:** TSL's `emd` (AOE Quinn) and reference
+`PyEMD.EMD` (Laszuk) are independent implementations of the
+Huang 1998 sifting algorithm. They use different envelope-
+extension heuristics, different convergence criteria, and may
+extract different numbers of IMFs on the same signal. Per-IMF
+bitwise parity is NOT achievable; comparison via structural
+properties: - Reconstruction identity: sum(IMFs) + residual ≈
+original signal (both implementations should reach machine
+precision on this). - IMF count: typically agrees within ±1 on
+smooth signals; reported as diagnostic. - Energy concentration:
+cumulative IMF energy curve shape (Pearson correlation between
+TSL and reference cumulative energy curves; > 0.85 PASS). This
+is a **NO-REFERENCE Tier C** wrapper per master plan §5;
+correlation-based parity per the Tier C convention from
+`p3_nar_narx`"). **NOT Tier II.bit-exact (Pattern A.2 cross-
+package)** — audit verdict CAVEAT not PASS bit-exact;
+scope_reframing §2 line 121-131 Tier II.bit-exact enumeration
+does NOT include p3_emd_hht. **NOT Tier III Pattern A.1 same-
+library** — audit reference is PyEMD external library distinct
+implementation, not TSL's same library; scope_reframing §2 line
+151-152 Tier III enumeration does NOT include p3_emd_hht. **NOT
+Tier IV Pattern A.3 self-parity / paper-formula** — audit
+reference is external PyEMD package (not from-scratch
+reimplementation; not degenerate self-parity); scope_reframing
+§2 line 159-168 Tier IV enumeration does NOT include p3_emd_hht.
+**NOT Tier V Pattern J PASS-with-documented-divergence** — audit
+verdict CAVEAT not PASS; ±2 IMF count divergence drives CAVEAT
+status not Tier V PASS scope; scope_reframing §2 line 170-181
+Tier V enumeration does NOT include p3_emd_hht. **NOT Tier VII
+SKIP** — audit infrastructure exists and CAVEAT verdict produced;
+NOT SKIP-graceful. **ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-
+APPLICATION** operative at S43 Step 0 — Tier anchor DEFERRED to
+Code Step 0 empirical verification per Chat S43 trigger drafting
+all-anchor-deferral discipline sixth-application per institutional
+learning sustainment from S37 multi-anchor schema-misattribution
+catch n=18 + S38 first-application + S39 second-application +
+S40 third-application + S41 fourth-application + S42 fifth-
+application empirical efficacy validations (A3 second-observation
+tightening precedent threshold SATISFIED at S39 + REINFORCED at
+S40 + S41 + S42); Tier VI CAVEAT empirically confirmed at Step 0
+with 0 multi-anchor divergences (SUSTAINED at n=6 sustained
+efficacy observations S38 + S39 + S40 + S41 + S42 + S43
+0-divergence; A3 precedent threshold FURTHER REINFORCED at
+STRONGEST cumulative empirical grounding among absorption #6
+candidates). STOP 2 BLOCKING discharged on Tier anchor per Chat
+S43 STOP 2 (A) RATIFICATION.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER +
+§4.7.A PRESENT variant 3 Harness-reimplements-engine-math
+mechanism at NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE
+baseline observation per CHAT RATIFICATION at Step 0 STOP 2; NEW
+Sub-class 2m candidate first-instance baseline observation per
+A3 first-instance precedent + (αc) forward-instrumentation-note
+treatment per (αa)+(αc) Chat ratification (analogous to S37 Sub-
+class 2i candidate FIRST-INSTANCE + S38 Sub-class 2j candidate
+FIRST-INSTANCE + S39 Sub-class 2k candidate FIRST-INSTANCE + S40
+Sub-class 2l candidate FIRST-INSTANCE precedents at A3 first-
+instance precedent + (αc) treatment; S43 Sub-class 2m candidate
+extends Block 5 NEW Sub-class candidate count to n=5 across Block
+5 sub-session arc S37-S43)):** emd_hht is 1:1 catalog↔wrapper
+mapping per `p3_emd_hht_audit.md` audit Wrapper field
+(`engine/techniques/emd_hht.py` sole engine module). **§1.9
+Filename divergence sub-pattern variant FOURTH-OBSERVATION NOT
+MANIFESTED at S43** — audit `p3_emd_hht_audit.md` + harness
+`p3_emd_hht.py` + engine `emd_hht.py` ALL preserve canonical
+catalog technique_id `emd_hht` exactly (no suffix-omission or
+suffix-addition divergence vs canonical catalog); preserves S42
+THIRD-OBSERVATION TIGHTENING status at n=3 cross-block observations
++ direction sub-variant analysis n=2 suffix-omission + n=1 suffix-
+addition.
+
+**§4.7.A harness-bypasses-engine pattern manifestation (POST-S43
+n=13 PRESENT + n=1 REMEDIATED = n=14 total OBSERVATIONS per S43
+banking per S30 (G.1) generalized definitional scope codification
++ S36 §4.7.A REMEDIATED 5th variant status dimension extension
+orthogonal to mechanism variant dimension; §4.7.A variant 3
+THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope per
+S43 banking — S40 ssa + S42 wavelet_coherence_phase_lag at
+DEGENERATE DUAL-ARM sub-variant + S43 emd_hht at NEW NON-
+DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation
+at §4.7.A variant 3 sub-variant scope taxonomy expansion at A3
+first-instance baseline observation EMPIRICALLY GROUNDED):**
+`tools/reference_parity/harness/checks/p3_emd_hht.py` lines 57-
+109 defines `_numpy_emd_minimal(signal, max_imfs, max_iter)` from-
+scratch reimplementation function — Huang 1998 EMD sifting
+algorithm reimplementation (`_find_extrema` at lines 60-67 + 75-
+84 mirror harness + engine + `_envelope_mean` at lines 69-79 + 87-
+100+ cubic-spline envelope mean computation + `_sift` at lines
+81-95 iterative sifting with stopping criterion `sd < 0.001` at
+line 93 + outer loop at lines 97-108 IMF extraction with residual
+update + return imfs array at line 109; "**Minimal EMD sifter
+mirroring TSL's `_numpy_emd`**" per line 59 docstring; §4.7.A
+variant 3 "Harness-reimplements-engine-math" mechanism
+manifestation per S30 (G.1) generalized definitional scope).
+Harness `run_tsl` (lines 137-161) invokes `_numpy_emd_minimal(y,
+max_imfs=8, max_iter=200)` at **line 143** directly with comment
+at lines 140-142 verbatim ("**Use TSL's `_numpy_emd` directly
+(matches Balanced preset max_imfs=8, max_iter=200). Bypass wrapper
+output rounding**"); harness TSL-arm does NOT invoke engine
+`emd_hht.py::run()` entry point. Harness `run_reference` (lines
+163-191) **invokes EXTERNAL PyEMD.EMD library at lines 164-165 +
+167-168** — IMPORT `from PyEMD import EMD` at line 164 + invoke
+`emd = EMD(MAX_ITERATION=200)` at line 167 + `imfs = emd(y,
+max_imf=8)` at line 168 — DISTINCT IMPLEMENTATION from `_numpy_emd_minimal`
+inline mirror at TSL arm. **Critical empirical observation: TSL
+arm ≠ reference arm — NON-DEGENERATE DUAL-ARM at §4.7.A variant
+3 sub-variant scope FIRST-INSTANCE baseline observation.** Engine
+`emd_hht.py::run()` is NEVER invoked by audit. The audit verdict
+"CAVEAT (Pattern J / Tier C — different sifting libraries; ±2 IMF
+count divergence with 0.99 correlation on energy curve)" at TSL=8
++ ref=6 + abs_diff=2 + reconstruction_identity PASS both arms +
+cum_energy_curve_correlation PASS 0.991 is **AUDIT-VALIDATED
+INFORMATIVE-NOT-BUG** per audit lines 64-65 verbatim — documents
+methodology divergence between AOE Quinn / Laszuk / MATLAB / R
+sifting libraries at structural-properties scope (reconstruction
+identity + IMF count + energy curve correlation). §4.7.A variant
+3 "Harness-reimplements-engine-math" manifestation per S30 (G.1)
+generalized definitional scope. **§4.7.A status PRESENT per S36
+§4.7.A status dimension codification (NOT REMEDIATED)** — harness
+defines from-scratch reimplementation + invokes inline mirror at
+TSL arm; engine `emd_hht.py::run()` math never validated; code-
+path divergence active at runtime per HEAD verification. **NON-
+DEGENERATE DUAL-ARM sub-variant distinction from S40 + S42
+DEGENERATE DUAL-ARM sub-variant:** S40 + S42 audit invokes
+IDENTICAL helper function (`_ssa_reference` at S40; `_wavelet_coherence_reference`
+at S42) at BOTH TSL-arm AND reference-arm with identical arguments
+(0.0 abs diff GUARANTEED BY CONSTRUCTION; both arms = same
+reimplementation). At S43 emd_hht: TSL arm invokes inline
+`_numpy_emd_minimal` mirror at TSL `_numpy_emd` fallback; reference
+arm invokes EXTERNAL PyEMD.EMD library distinct implementation.
+TSL arm ≠ reference arm at S43; ±2 IMF count divergence + 0.99
+correlation observed per distinct implementations. Post-S43
+§4.7.A observations = n=13 PRESENT across §2.5 entries (S14a
+granger + S18 gcc_phat + S26 denton_chowlin + S27 loess + S31
+classical_decompose + S32 mstl_decompose + S33 stl_decompose +
+S37 periodogram_spectral_density + S38 fft_spectrum + S39
+lomb_scargle + S40 ssa + S41 wavelet_transform + S42
+wavelet_coherence_phase_lag + S43 emd_hht) + n=1 REMEDIATED (S34
+x13_seasonal_adjust per Phase 4 Session 2 2026-05-01 P4-2 pathway
+(c) closure) = n=14 total observations across mechanism variants
++ status dimension; **§4.7.A variant 3 THIRD-INSTANCE TIGHTENING
+at §2.5 entry codification scope per S43 banking + NEW NON-
+DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation
+at §4.7.A variant 3 sub-variant scope taxonomy expansion** (S40
++ S42 DEGENERATE DUAL-ARM sub-variant SECOND-OBSERVATION TIGHTENING
+per A3 precedent; S43 NEW NON-DEGENERATE DUAL-ARM sub-variant
+FIRST-INSTANCE baseline; codification refinement candidate at
+absorption #6+ for §4.7.A variant 3 sub-variant taxonomy expansion
+EMPIRICALLY ROBUSTLY GROUNDED).
+
+**A10 Sub-class disposition: NEW Sub-class 2m candidate first-
+instance baseline observation per A3 first-instance precedent +
+(αc) forward-instrumentation-note treatment per (αa)+(αc) Chat
+ratification (n=1 baseline; NOT codification of Sub-class 2m):**
+S43 emd_hht surfaces NEW Sub-class 2m candidate at first-instance
+baseline observation per A3 precedent. Sub-class 2m definitional
+scope working hypothesis: **"Tier VI CAVEAT (Pattern J Tier C —
+different sifting libraries / no canonical reference) + §4.7.A
+PRESENT variant 3 (Harness-reimplements-engine-math) at NON-
+DEGENERATE DUAL-ARM sub-variant (TSL arm inline reimplementation
+mirrors engine fallback; reference arm distinct external library)
++ Pattern F structural invariants computation explicit
+(reconstruction_identity validation at both arms) + IMF count
+CAVEAT driver + cumulative energy curve Pearson correlation
+supplementary metric (Tier C convention) + single-layer scope"**
+— Layer 1 `_numpy_emd_minimal` inline reimplementation of Huang
+1998 EMD sifting algorithm at TSL arm (mirrors engine `_numpy_emd`
+fallback at line 59 comment "**Minimal EMD sifter mirroring TSL's
+`_numpy_emd`**"); Layer 1 EXTERNAL PyEMD.EMD library at reference
+arm (distinct implementation per AOE Quinn vs Laszuk envelope-
+extension heuristics + sifting stop criteria + edge handling); +
+Layer 2 engine `emd_hht.py::run()` orchestration (NaN handling
+via `_prepare_series` at lines 50-70 + preset config dispatch +
+emd package availability check + EMD/EEMD method dispatch +
+max_imfs + max_sift_iterations + ensemble_size + noise_width
+parameter resolution + EMD sifting + Hilbert transform +
+instantaneous frequency + amplitude analysis + summary tables +
+plain English + audit_fields construction) NEVER exercised by
+audit. Audit validates structural-properties scope (reconstruction
+identity + IMF count + energy curve correlation) under Tier C
+convention with CAVEAT verdict deterministic per
+`reroll_on_caveat = False` Session 5 lock; audit DOES NOT
+validate per-IMF bitwise parity (mathematically intractable per
+Huang 1998 implementation variation) NOR engine
+`emd_hht.py::run()` math correctness (engine never invoked) NOR
+cross-implementation parity beyond `PyEMD.EMD` reference (AOE
+Quinn `emd` + MATLAB `emd` + R `EMD` distinct implementations).
+**Distinct from codified Sub-class 2a (αa) "general two-layer
+class" semantic** (Tier II.bit-exact + cross-package + two-layer;
+S22 + S23 + S28 + S31 + S38 codified) per Tier VI CAVEAT vs Tier
+II.bit-exact scope distinction. **Distinct from NEW Sub-class 2i
+candidate at S37 + S41 SECOND-OBSERVATION TIGHTENING** (Tier III
+Pattern A.1 same-library self-test bit-exact + §4.7.A PRESENT
+variant 1 reimplementation-of-dispatch scope) per Tier VI CAVEAT
+vs Tier III same-library scope distinction + variant 3 vs variant
+1 scope distinction. **Distinct from NEW Sub-class 2j candidate
+at S38 + S41 SECOND-OBSERVATION TIGHTENING** (Pattern F structural
+invariants scope at Tier II.bit-exact + Tier III scope) per Tier
+VI CAVEAT vs Tier II.bit-exact + Tier III cross-Tier scope
+distinction (though S43 reinforces Pattern F at THIRD-OBSERVATION
+TIGHTENING at Tier VI CAVEAT scope distinct from Sub-class 2j
+characterization). **Distinct from NEW Sub-class 2k candidate at
+S39** (Tier V Pattern J B.3 alignment-via-metric resolution +
+cross-package framing scope) per Tier VI CAVEAT vs Tier V Pattern
+J B.3 scope distinction + Pattern J B.3 vs Pattern J Tier C sub-
+pattern distinction. **Distinct from NEW Sub-class 2l candidate
+at S40 + S42 SECOND-OBSERVATION TIGHTENING** (Tier IV Pattern A.3
+self-parity / paper-formula + §4.7.A variant 3 DEGENERATE DUAL-
+ARM sub-variant scope) per Tier VI CAVEAT vs Tier IV Pattern A.3
+scope distinction + NON-DEGENERATE vs DEGENERATE dual-arm sub-
+variant distinction. **Distinct from S32 + S33 Block 3 Tier VI
+CAVEAT entries** per Frequency Domain / Signal vs Time-series
+Decomposition block scope distinction + Pattern J Tier C (no
+canonical reference) vs Pattern J B.1 (statsmodels precision
+instability) sub-pattern distinction + (S32 + S33 §4.7.A variant
+1 vs S43 §4.7.A variant 3 NON-DEGENERATE DUAL-ARM mechanism
+variant distinction). **n=1 baseline observation status per A3
+first-instance precedent** (Previous Chat 1.2 operational
+pattern: first-instance n=1 = baseline observation only;
+codification deferred to absorption #6+ second-observation
+tightening if recurs at S44+ Q1 entry within Tier VI CAVEAT
+Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-
+variant combined scope OR future Tier VI Pattern J Tier C entry
+within Tier VI ~5-wrapper enumeration scope). Variant tagging
+mechanism NOT applied at n=1 first-instance per A3 precedent;
+Sub-class 2m definitional scope working hypothesis only.
+
+**Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING
+MANIFESTED at S43 per Code S43 Step 0 empirical re-Read:** harness
+`p3_emd_hht.py` compare() lines 198-210 EXPLICITLY computes
+`reconstruction_identity_tsl` + `reconstruction_identity_ref`
+structural invariants — sum(IMFs) + residual = original signal at
+machine precision 1e-10 threshold; both arms PASS at machine
+precision (TSL 1.11e-16 + ref 0.0). **A3 THIRD-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED at Pattern F scope at
+n=3 observations across n=3 mathematical families:** S38
+fft_spectrum FFT-family + S41 wavelet_transform wavelet-family +
+S43 emd_hht EMD-family — empirical generalization Tier-agnostic
+across THREE distinct mathematical-family + cross-Tier (Tier
+II.bit-exact at S38 + Tier III Pattern A.1 at S41 + Tier VI
+CAVEAT at S43) scope. Pattern F NEW framing element observation
+ADVANCES from S41 second-observation tightening status (n=2 Pattern
+F observations at FFT-family + wavelet-family at S38 + S41) to
+S43 THIRD-OBSERVATION TIGHTENING (n=3 Pattern F observations at
+FFT-family + wavelet-family + EMD-family across Tier II.bit-exact
++ Tier III + Tier VI cross-Tier scope). **Pattern F Tier-agnostic
+empirical generalization observation INSTITUTIONALLY SUBSTANTIVE**
+across THREE distinct mathematical-family + Tier-characterization
+scopes — Pattern F structural identity invariants computation
+emerges as cross-Tier sub-pattern at structurally-decomposable
+spectral analysis primitives (FFT roundtrip + wavelet inverse
+roundtrip + Parseval energy conservation + EMD reconstruction
+identity). NEW Sub-class 2j (Pattern F structural invariants scope)
+codification refinement candidate at absorption #6+ EMPIRICALLY
+ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic
+across mathematical families + Tier characterizations.
+
+**§1.9 Filename divergence sub-pattern variant FOURTH-OBSERVATION
+NOT MANIFESTED at S43 per Code S43 Step 0 empirical re-Read:**
+audit `p3_emd_hht_audit.md` + harness `p3_emd_hht.py` + engine
+`emd_hht.py` ALL preserve canonical catalog technique_id `emd_hht`
+exactly (no suffix-omission or suffix-addition divergence vs
+canonical catalog per §3 line 17734 post-S42 empirical re-Read).
+§1.9 codified Block-3-specific scope at S36 EXTENDS to Frequency
+Domain / Signal block at S37 first-instance cross-block observation
+(suffix-OMISSION direction) + S40 SECOND-INSTANCE cross-block
+extension MANIFESTED at suffix-ADDITION direction + S41 third
+cross-block extension NOT MANIFESTED + S42 THIRD-OBSERVATION
+TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION
+direction; **S43 FOURTH-OBSERVATION cross-block extension NOT
+MANIFESTED at emd_hht** — canonical catalog technique_id preserved
+exactly at all three layers. **Preserves S42 THIRD-OBSERVATION
+TIGHTENING status** at n=3 cross-block observations (S37 + S40 +
+S42) + direction sub-variant analysis (n=2 suffix-omission + n=1
+suffix-addition); no advance to fourth observation at S43. A3
+FOURTH-OBSERVATION TIGHTENING precedent at §1.9 cross-block scope
+DEFERRED pending future Q1 §2.5 entry where filename divergence
+recurs. **Empirical observation at S43 surface — Block 5 closes
+with no further §1.9 cross-block observation advancing the n=3
+THIRD-OBSERVATION TIGHTENING baseline** (Block 5 §1.9 cross-block
+observation count = n=3 at S37 + S40 + S42; S43 emd_hht canonical
+filename preserved).
+
+**§1.8 reroll_on_caveat=False discipline APPLICABLE at S43 —
+FIRST applicability test within Frequency Domain / Signal block
+scope per S37-S42 §1.8 NOT APPLICABLE banking series:** audit
+verdict CAVEAT per `p3_emd_hht_audit.md` lines 5-7 verbatim
+("**Verdict:** **CAVEAT** (Pattern J / Tier C — different sifting
+libraries; ±2 IMF count divergence with 0.99 correlation on energy
+curve)"); tolerance class em_stochastic per line 8 verbatim. §1.8
+applicability scope per S32-S33 codified definitional scope is
+Tier VI CAVEAT primary; S43 Tier VI CAVEAT empirically confirmed
+satisfies §1.8 applicability scope. Audit lines 64-67 verbatim
+§1.8 reroll_on_caveat=False codification reference: "CAVEAT
+verdict is informative-not-bug — documents the known methodology
+divergence. `reroll_on_caveat = False` (default per Session 5
+lock) means no retry; verdict stays CAVEAT deterministically".
+**Cross-Block scope continuation observation:** prior §1.8
+applicability at S32 + S33 within Block 3 Decomposition (Tier VI
+CAVEAT Pattern J B.1 statsmodels precision-instability scope);
+S43 emd_hht = FIRST §1.8 applicability test within Frequency
+Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE
+banking series. **Institutionally substantive cross-Block scope
+continuation observation at refined Mod 3 + §1.8 applicability**:
+S43 advances §1.8 applicability scope sustainment across n=2
+catalog blocks (Block 3 Decomposition at S32 + S33 + Block 5
+Frequency Domain / Signal at S43) at n=3 §1.8 applicability
+observations (S32 + S33 + S43); codification refinement candidate
+at absorption #6+ for §1.8 cross-Block scope continuation
+generalization EMPIRICALLY GROUNDED at A3 second-observation
+tightening precedent threshold SATISFIED at §1.8 cross-Block
+scope per S43 second-cross-Block observation.
+
+**Code Tier 2 case-against options surfaced at S43 STOP 2 per
+Mark 3 unprompted-discipline (rejected per Chat ratification at
+S43 STOP 2):**
+- **(α-i alternative) Tier II.bit-exact (Pattern A.2 cross-package)
+  ALTERNATIVE:** REJECTED. Audit verdict CAVEAT not PASS bit-
+  exact; scope_reframing §2 line 121-131 Tier II.bit-exact 12-
+  wrapper enumeration explicitly does NOT include p3_emd_hht;
+  rejected per A6 BLOCKING empirical content preservation.
+- **(α-ii) Tier III Pattern A.1 same-library ALTERNATIVE:**
+  REJECTED. Audit reference is PyEMD external library distinct
+  implementation (AOE Quinn vs Laszuk envelope-extension
+  heuristics), not TSL's same library; scope_reframing §2 line
+  151-152 Tier III enumeration does NOT include p3_emd_hht;
+  rejected per A6 BLOCKING empirical content preservation.
+- **(α-iii) Tier IV Pattern A.3 self-parity / paper-formula
+  ALTERNATIVE:** REJECTED. Audit reference is external PyEMD
+  package (not from-scratch reimplementation; not degenerate
+  self-parity); harness `_numpy_emd_minimal` mirrors engine but
+  reference arm uses external library — NOT degenerate dual-arm
+  self-parity scope; scope_reframing §2 line 159-168 Tier IV
+  enumeration does NOT include p3_emd_hht; rejected per A6
+  BLOCKING empirical content preservation.
+- **(α-iv) Tier V Pattern J PASS-with-documented-divergence
+  ALTERNATIVE:** REJECTED. Audit verdict CAVEAT not PASS; ±2 IMF
+  count divergence drives CAVEAT status not Tier V PASS scope;
+  scope_reframing §2 line 170-181 Tier V enumeration does NOT
+  include p3_emd_hht; rejected per A6 BLOCKING empirical content
+  preservation.
+- **(α-v) Tier VII SKIP-graceful ALTERNATIVE:** REJECTED. Audit
+  infrastructure exists at `p3_emd_hht.py` + `p3_emd_hht_audit.md`
+  and CAVEAT verdict produced; NOT SKIP-graceful; rejected per
+  A6 BLOCKING empirical content preservation.
+- **(αb-α) Extend codified Sub-class 2g or 2h ALTERNATIVE
+  (treating S43 emd_hht as continuation of S32 + S33 Block 3 Tier
+  VI candidates):** REJECTED per Block scope distinction (Frequency
+  Domain / Signal vs Time-series Decomposition) + Pattern J sub-
+  pattern distinction (Tier C no canonical reference vs B.1
+  statsmodels precision instability) + §4.7.A variant 1 (S32 +
+  S33) vs §4.7.A variant 3 NON-DEGENERATE DUAL-ARM (S43) mechanism
+  variant distinction; rejected per Chat ratification + A6
+  BLOCKING empirical content preservation.
+- **(αb-β) Extend NEW Sub-class 2l (S40 + S42 SECOND-OBSERVATION
+  TIGHTENING) ALTERNATIVE:** REJECTED. Sub-class 2l definitional
+  scope = Tier IV Pattern A.3 + §4.7.A variant 3 DEGENERATE DUAL-
+  ARM sub-variant; S43 Tier VI CAVEAT + §4.7.A variant 3 NON-
+  DEGENERATE DUAL-ARM sub-variant — distinct Tier characterization
+  + distinct dual-arm sub-variant per (B) Chat ratification scope
+  distinction; rejected per A6 BLOCKING empirical content
+  preservation.
+- **(αb-γ) Forward-instrumentation-note treatment ONLY (no NEW
+  Sub-class 2m candidate framing) ALTERNATIVE:** REJECTED per
+  Code (αa)+(αc) recommendation + Chat ratification preference at
+  NEW Sub-class 2m candidate framing preservation (analogous to
+  S37 Sub-class 2i + S38 Sub-class 2j + S39 Sub-class 2k + S40
+  Sub-class 2l candidate first-instance baseline precedents at A3
+  first-instance precedent + (αc) treatment; preserves Sub-class
+  taxonomy structure for future second-observation tightening at
+  Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE
+  DUAL-ARM sub-variant combined scope).
+- **§4.7.A variant 1 (Harness-imports-library-directly)
+  ALTERNATIVE:** PARTIALLY VIABLE alternative — reference arm
+  DOES import PyEMD library directly (`from PyEMD import EMD`).
+  But TSL arm reimplements engine math via inline `_numpy_emd_minimal`
+  (not direct library invocation; mirrors engine fallback); variant
+  3 characterization captures both arms' mechanism asymmetry at
+  NON-DEGENERATE DUAL-ARM sub-variant scope; rejected per Code
+  recommendation + Chat ratification preference at variant 3 NON-
+  DEGENERATE DUAL-ARM sub-variant specificity continuation.
+- **§1.8 NOT APPLICABLE characterization ALTERNATIVE (treating
+  S43 as preserving S37-S42 §1.8 NOT APPLICABLE banking series):**
+  REJECTED. Tier VI CAVEAT empirically confirmed at S43; §1.8
+  applicability scope explicit at Tier VI CAVEAT primary per S32-
+  S33 codified definitional scope; rejected per A6 BLOCKING
+  empirical content preservation.
+- **Pattern F NOT MANIFESTED characterization ALTERNATIVE:**
+  REJECTED. Harness `p3_emd_hht.py` compare() lines 198-210
+  EXPLICITLY computes `reconstruction_identity_tsl` +
+  `reconstruction_identity_ref` structural invariants metrics
+  (both arms PASS at machine precision); structural identity
+  invariant computation surface MANIFESTED at EMD reconstruction
+  scope; rejected per A6 BLOCKING empirical content preservation.
+
+**Frequency Domain / Signal block SEVENTH entry — FIFTH catalog
+block FULLY Q1-AMENDED milestone REACHED AT S43 CLOSE = 5 of 13
+catalog blocks fully Q1-amended (38% catalog block-level
+completion):** S43 emd_hht advances the fifth catalog block
+transition from 6 of 7 (S37 periodogram_spectral_density first-
+entry + S38 fft_spectrum second-entry + S39 lomb_scargle third-
+entry + S40 ssa fourth-entry + S41 wavelet_transform fifth-entry
++ S42 wavelet_coherence_phase_lag sixth-entry) to **7 of 7
+FULLY Q1-AMENDED milestone** (S43 emd_hht seventh-entry final
+Block 5 entry). **Block ordering position verification at S43
+Step 0:** emd_hht at sole-position alphabetically within §3
+remaining 1 unvalidated entry `emd_hht` (post-S37 + post-S38 +
+post-S39 + post-S40 + post-S41 + post-S42 §3 enumeration; emd_hht
+at SEVENTH-position in 7-entry Block ordering working hypothesis
+arc counting validated S37 + S38 + S39 + S40 + S41 + S42 + S43);
+Block ordering working hypothesis ratified per §3 empirical re-
+Read at HEAD cfa0cf9 line 17734 verbatim. **Empirical §3
+enumeration confirmation at S43 Step 0 mid-session re-Read per
+CONSTRAINT 4 A6 BLOCKING verify-state-at-narration discipline +
+S38-S42 A9 Class A 19th + 20th-instance candidate banking
+institutional learning sustainment:** §3 Frequency Domain /
+Signal block remaining 1 unvalidated entry empirically = emd_hht
+(consistent with S42 Step 0 ratification minus wavelet_coherence_phase_lag
+validated at S42 close); S43 emd_hht advancement closes Block 5
+arc at 7 of 7 entries Q1-amended. **Frequency Domain / Signal
+block completion arc COMPLETED at S43 close:** S37 + S38 + S39 +
+S40 + S41 + S42 + S43 (7 entries total per §3 enumeration
+empirical re-Read at S37-S42 Step 0); Block 5 FULLY Q1-AMENDED
+milestone reached. **Block 5 FULLY Q1-AMENDED milestone =
+FIFTH catalog block fully Q1-amended (5 of 13 = 38% catalog
+block-level completion)** (Block 1 Causality + Block 12 Stationarity
+Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5
+Frequency Domain / Signal blocks fully Q1-amended). **Per-block
+continuation pattern n=5 catalog block observations REACHED at
+Block 5 close** per absorption #6+ codification candidate at §19.4
+§4 note 6 refinement n=4 → n=5 per S35-absorption #5 codification
+EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block
+fully Q1-amended observations — milestone observation banking.
+**Heterogeneous Tier-surface variant observation A3 FOURTH-
+OBSERVATION TIGHTENING MANIFESTED AT S43:** n=5 distinct Tier
+characterizations across n=7 entries within Frequency Domain /
+Signal block (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier
+II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 +
+Tier IV Pattern A.3 at S40 + S42 REPEAT + **Tier VI CAVEAT at
+S43 NEW**); S43 Tier VI advances heterogeneous Tier-surface
+variant observation from S42 baseline n=4 distinct Tiers to S43
+n=5 distinct Tiers — A3 FOURTH-OBSERVATION TIGHTENING precedent
+threshold SATISFIED at heterogeneous Tier-surface variant sub-
+pattern scope at n=5 distinct Tiers across 7 sub-sessions S37-
+S43. Codification refinement candidate at absorption #6+ for
+Block heterogeneous-Tier-surface variant sub-pattern definitional
+scope generalization per §19.4 §4 note 6 refinement at S35-
+absorption #5 codification EMPIRICALLY ROBUSTLY REINFORCED beyond
+S42 third-observation tightening baseline at FOURTH-OBSERVATION
+TIGHTENING.
+
+#### §1.5 Novelty enumeration sub-section (S43 application — ninth post-S23 first-instance codification application per S30 codification; ≥5 observations threshold satisfied at n=9)
+
+S43 surfaces 9 NEW observations across compound first-instance
+baseline + second-observation tightening + third-observation
+tightening + fourth-observation tightening disclosures + Frequency
+Domain / Signal block seventh-entry framing + Block 5 FULLY Q1-
+AMENDED milestone substantive + multi-precedent confluence
+FOURTH-INSTANCE at SEVEN A3 precedent threshold satisfactions/
+reinforcements (record-high single-observation count in apparatus
+history) + Sub-class 2m candidate first-instance baseline
+observation + Pattern F structural invariants A3 THIRD-OBSERVATION
+TIGHTENING + Heterogeneous Tier-surface variant A3 FOURTH-
+OBSERVATION TIGHTENING + §1.8 reroll_on_caveat=False discipline
+FIRST applicability test within Frequency Domain / Signal block
+scope + all-anchor-deferral discipline sixth-application empirical
+efficacy further reinforcement, satisfying ≥5 observations
+threshold per S23 first-instance codification at S30 §1.5
+codification scope. n=9 post-codification observations across
+S23 + S34 + S37 + S38 + S39 + S40 + S41 + S42 + S43; A3 ninth-
+observation tightening reinforcement per §1.5 sustained-observation
+operational status note per S36 §1.5 refinement (n=8 eighth-
+observation reinforcement at S42 UPGRADE to n=9 ninth-observation
+reinforcement at S43 per S43 application).
+
+**Novelty 1 — Tier VI CAVEAT (Pattern J / Tier C — different
+sifting libraries) FIRST Tier VI CAVEAT Q1 §2.5 entry within
+Frequency Domain / Signal block per A3 first-instance precedent
+(cross-Block Tier VI characterization extension):** S43 emd_hht
+is FIRST Tier VI CAVEAT Q1 §2.5 entry within Frequency Domain /
+Signal block scope (S32 mstl_decompose + S33 stl_decompose Tier
+VI CAVEAT precedent within Block 3 Decomposition; S43 emd_hht
+extends Tier VI characterization to NEW Block 5 Frequency Domain
+/ Signal block scope). Tier VI CAVEAT (Pattern J / Tier C —
+different sifting libraries; ±2 IMF count divergence with 0.99
+correlation on energy curve) characterization grounded at
+scope_reframing §2 lines 183-184 verbatim Tier VI 5-wrapper
+enumeration scope explicitly including p3_emd_hht. A3 first-
+instance precedent at cross-Block Tier VI characterization
+extension scope at S43 (Tier VI characterization observed n=3
+total across §2.5 entries: S32 + S33 + S43 = n=3 Tier VI Q1 §2.5
+entries; A3 second-observation tightening precedent threshold
+SATISFIED at Tier VI characterization SAME-Block scope at S33;
+S43 = FIRST cross-Block Tier VI characterization extension; A3
+cross-Block first-instance precedent scope).
+
+**Novelty 2 — §4.7.A PRESENT variant 3 (Harness-reimplements-
+engine-math) at NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE
+baseline observation at §2.5 entry codification scope per A3
+first-instance precedent (§4.7.A variant 3 sub-variant taxonomy
+expansion):** S43 emd_hht is THIRD §4.7.A variant 3 observation
+overall (S40 + S42 + S43) at NEW NON-DEGENERATE DUAL-ARM sub-
+variant within §4.7.A variant 3 codified scope. S40 + S42 §4.7.A
+variant 3 observations were both DEGENERATE DUAL-ARM sub-variant
+(TSL arm == reference arm identical helper invocation); S43
+introduces NEW NON-DEGENERATE DUAL-ARM sub-variant (TSL arm
+inline `_numpy_emd_minimal` mirrors engine `_numpy_emd` fallback;
+reference arm invokes EXTERNAL PyEMD.EMD library distinct
+implementation; TSL arm ≠ reference arm). A3 first-instance
+precedent at §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant
+scope at S43; codification refinement candidate at absorption #6+
+for §4.7.A variant 3 sub-variant taxonomy expansion at A3 first-
+instance baseline observation EMPIRICALLY GROUNDED.
+
+**Novelty 3 — NEW Sub-class 2m candidate first-instance baseline
+observation per A3 first-instance precedent + (αc) forward-
+instrumentation-note treatment per (αa)+(αc) Chat ratification:**
+FIRST observed Sub-class 2m candidate per A3 first-instance
+precedent (n=1 baseline; NOT codification of Sub-class 2m).
+Definitional scope working hypothesis: "Tier VI CAVEAT (Pattern J
+Tier C — different sifting libraries / no canonical reference) +
+§4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at
+NON-DEGENERATE DUAL-ARM sub-variant (TSL arm inline reimplementation
+mirrors engine fallback; reference arm distinct external library)
++ Pattern F structural invariants computation explicit
+(reconstruction_identity validation at both arms) + IMF count
+CAVEAT driver + cumulative energy curve Pearson correlation
+supplementary metric (Tier C convention) + single-layer scope".
+Distinct from codified Sub-class 2a-2l Tier II.bit-exact + Tier
+III + Tier V + Tier IV + §4.7.A variant 1 + §4.7.A variant 3
+DEGENERATE DUAL-ARM scope (S22 + S23 + S28 + S31 + S38 codified
+Sub-class 2a-2g + S37 + S38 + S39 + S40 + S42 Sub-class 2i + 2j
++ 2k + 2l first-instance baseline + second-observation tightening
+observations within Block 5 sub-session arc) per Tier VI CAVEAT
++ NON-DEGENERATE DUAL-ARM scope distinction. Distinct from S32 +
+S33 Block 3 Tier VI candidates Sub-class 2g/2h per Frequency
+Domain / Signal vs Time-series Decomposition block scope
+distinction + Pattern J Tier C vs Pattern J B.1 sub-pattern
+distinction + §4.7.A variant 1 vs §4.7.A variant 3 NON-DEGENERATE
+DUAL-ARM mechanism variant distinction. **Block 5 Sub-class
+taxonomy growth Block-level observation completion at S43:** n=5
+NEW Sub-class candidates first-instance baseline observations
+within Block 5 sub-session arc (2i at S37 + 2j candidate at S38
++ 2k at S39 + 2l at S40 + 2m at S43) + Sub-class 2i + 2j
+SECOND-OBSERVATION TIGHTENING at S41 + Sub-class 2l SECOND-
+OBSERVATION TIGHTENING at S42 — Block-level Sub-class taxonomy
+growth rate observation candidate at §19.4 §4 note 16 EMPIRICALLY
+ROBUSTLY REINFORCED at five-NEW-Sub-class-candidate Block-level
+growth pattern.
+
+**Novelty 4 — §1.8 reroll_on_caveat=False discipline APPLICABLE
+at S43 — FIRST applicability test within Frequency Domain /
+Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking
+series:** §1.8 applicability test at FIRST cross-Block scope
+continuation observation per Block 3 S32 + S33 §1.8 applicability
+precedent — n=2 §1.8 cross-Block applicability observations at
+Block 3 + Block 5 = n=3 §1.8 applicability observations across
+S32 + S33 + S43. A3 second-observation tightening precedent
+threshold SATISFIED at §1.8 cross-Block scope continuation at
+n=2 cross-Block observations (Block 3 + Block 5); codification
+refinement candidate at absorption #6+ for §1.8 cross-Block scope
+continuation generalization EMPIRICALLY GROUNDED at FIRST cross-
+Block applicability extension observation. Institutionally
+substantive cross-Block scope continuation observation at refined
+Mod 3 + §1.8 applicability cross-Block scope continuation.
+
+**Novelty 5 — Pattern F structural invariants A3 THIRD-OBSERVATION
+TIGHTENING MANIFESTED AT S43 at n=3 observations across n=3
+mathematical families + cross-Tier scope:** S38 fft_spectrum FFT-
+family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-
+family = n=3 Pattern F observations across n=3 distinct
+mathematical families + cross-Tier (Tier II.bit-exact at S38 +
+Tier III Pattern A.1 at S41 + Tier VI CAVEAT at S43) scope. A3
+THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at
+Pattern F scope at n=3 observations; harness compare() lines 198-
+210 EXPLICITLY computes reconstruction_identity validation at
+both arms at machine precision 1e-10 threshold (TSL 1.11e-16 +
+ref 0.0). Pattern F Tier-agnostic empirical generalization
+observation INSTITUTIONALLY SUBSTANTIVE across THREE distinct
+mathematical-family + Tier-characterization scopes — Pattern F
+structural identity invariants computation emerges as cross-Tier
+sub-pattern at structurally-decomposable spectral analysis
+primitives. NEW Sub-class 2j (Pattern F structural invariants
+scope) codification refinement candidate at absorption #6+
+EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening
+Tier-agnostic across mathematical families + Tier characterizations.
+
+**Novelty 6 — HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3
+FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43:** n=5 distinct
+Tier characterizations across n=7 entries within Frequency Domain
+/ Signal block (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier
+II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 +
+Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43
+NEW); S43 Tier VI advances heterogeneous Tier-surface variant
+observation from S42 baseline n=4 distinct Tiers to S43 n=5
+distinct Tiers. A3 FOURTH-OBSERVATION TIGHTENING precedent threshold
+SATISFIED at heterogeneous Tier-surface variant sub-pattern scope
+at n=5 distinct Tiers across 7 sub-sessions S37-S43.
+Codification refinement candidate at absorption #6+ for Block
+heterogeneous-Tier-surface variant sub-pattern definitional scope
+generalization per §19.4 §4 note 6 refinement at S35-absorption
+#5 codification EMPIRICALLY ROBUSTLY REINFORCED beyond S42 third-
+observation tightening baseline at FOURTH-OBSERVATION TIGHTENING.
+
+**Novelty 7 — Block 5 FULLY Q1-AMENDED milestone REACHED AT S43
+CLOSE = FIFTH catalog block fully Q1-amended (5 of 13 = 38%
+catalog block-level completion):** S43 emd_hht advances Block 5
+Frequency Domain / Signal arc from 6 of 7 to 7 of 7 entries Q1-
+amended = FULLY Q1-AMENDED milestone. **FIFTH catalog block
+FULLY Q1-AMENDED milestone reached at S43 close** (Block 1
+Causality + Block 12 Stationarity Tests + Block 8 Missing Data +
+Block 3 Decomposition + Block 5 Frequency Domain / Signal blocks
+fully Q1-amended). Per-block continuation pattern n=5 catalog
+block observations REACHED at Block 5 close per absorption #6+
+codification candidate at §19.4 §4 note 6 refinement n=4 → n=5
+per S35-absorption #5 codification EMPIRICALLY ROBUSTLY GROUNDED
+at sustained five catalog block fully Q1-amended observations.
+Substantive forward instrumentation scope at S43 close: catalog
+block-level Q1 work program progress at 38% completion;
+absorption #6+ consolidation projection at S44+ with potentially
+THREE-to-FIVE-sub-session consolidation precedent given 40+
+candidate inventory + SEVEN A3 precedent threshold satisfactions
+empirically ROBUSTLY grounded at single S43 observation +
+FOURTH-INSTANCE multi-precedent confluence across S38 + S41 +
+S42 + S43.
+
+**Novelty 8 — ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION
+EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD FURTHER REINFORCED AT S43 (STRONGEST cumulative
+empirical grounding among absorption #6 candidates):** Chat S43
+trigger drafting applied all-anchor-deferral discipline (Tier +
+Sub-class + §4.7.A + §1.8 + Block ordering position + Pattern F
+third-observation + §1.9 fourth-observation anchors DEFERRED to
+Code Step 0 empirical verification) per institutional learning
+sustainment from S37 multi-anchor schema-misattribution catch
+n=18 + S38-S42 first-through-fifth-application empirical efficacy
+validations (A3 second-observation tightening precedent threshold
+SATISFIED at S39 + REINFORCED at S40 + S41 + S42). Empirical
+efficacy validated at S43 Step 0: 0 multi-anchor schema-
+misattribution divergences SUSTAINED at sixth-application (n=6
+sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43
+0-divergence per A3 second-observation tightening precedent
+threshold FURTHER REINFORCEMENT). STRONGEST cumulative empirical
+grounding among absorption #6 candidates at S43 close (n=6
+sustained efficacy observations exceeds all other absorption #6
+candidate empirical thresholds). Codification candidate at §1.7+
+Workstream B §1.4 operational scope at absorption #6+ refinement
+empirically ROBUSTLY grounded at A3 precedent threshold FURTHER
+REINFORCEMENT at n=6 sustained efficacy observations.
+
+**Novelty 9 — Multi-precedent confluence at SAME audit + SAME
+entry codification scope FOURTH-INSTANCE per S38 + S41 + S42 +
+S43 sequential observations + SEVEN A3 precedent threshold
+satisfactions/reinforcements at S43 scope (record-high single-
+observation count in apparatus history):** S43 emd_hht exhibits
+SEVEN A3 precedent threshold satisfactions/reinforcements at SAME
+audit + SAME entry codification scope: (1) Tier VI CAVEAT FIRST
+Q1 §2.5 entry within Frequency Domain / Signal block (cross-Block
+extension); (2) Heterogeneous Tier-surface variant A3 FOURTH-
+OBSERVATION TIGHTENING at n=5 distinct Tiers; (3) Pattern F
+structural invariants A3 THIRD-OBSERVATION TIGHTENING at n=3
+mathematical families; (4) All-anchor-deferral discipline SIXTH-
+APPLICATION A3 further reinforcement at n=6 sustained efficacy
+observations; (5) §1.8 reroll_on_caveat=False discipline FIRST
+applicability test within Frequency Domain / Signal block scope;
+(6) §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-
+INSTANCE baseline observation (sub-variant taxonomy expansion);
+(7) Block 5 FULLY Q1-AMENDED milestone reached = FIFTH catalog
+block fully Q1-amended (per-block continuation pattern n=5
+catalog block observations REACHED). S38 fft_spectrum first-
+instance multi-precedent confluence baseline (5 A3 precedent
+threshold satisfactions); S41 wavelet_transform second-instance
+multi-precedent confluence (6 A3 precedent threshold satisfactions);
+S42 wavelet_coherence_phase_lag third-instance multi-precedent
+confluence (5 A3 precedent threshold satisfactions); S43 emd_hht
+FOURTH-INSTANCE multi-precedent confluence (7 A3 precedent
+threshold satisfactions = record-high single-observation count in
+apparatus history). A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT
+THRESHOLD SATISFIED at multi-precedent confluence sub-pattern
+scope at SAME audit + SAME entry codification surface at n=4
+distinct observations (S38 + S41 + S42 + S43) + sustained ≥5 A3
+threshold satisfactions per observation. Codification refinement
+candidate at absorption #6+ for multi-precedent confluence sub-
+pattern definitional scope at §2.5 entry codification scope
+EMPIRICALLY ROBUSTLY REINFORCED at FOUR sustained observations.
+
+**Reference:** `PyEMD.EMD` (EMD-signal 1.9.0, Laszuk) — EXTERNAL
+PACKAGE reference distinct from TSL inline `_numpy_emd_minimal`
+mirror (Pattern J / Tier C — different sifting libraries; per-
+IMF bitwise parity mathematically intractable per Huang 1998
+implementation variation across AOE Quinn `emd` / Laszuk `PyEMD`
+/ MATLAB `emd` / R `EMD` envelope-extension heuristics + sifting
+stop criteria + edge handling; structural-properties comparison
+via reconstruction identity + IMF count + cumulative-energy-
+curve Pearson correlation per Tier C convention from p3_nar_narx)
+**Verdict:** **CAVEAT** (Pattern J / Tier C — different sifting
+libraries; ±2 IMF count divergence with 0.99 correlation on
+energy curve) per audit lines 5-7 verbatim
+**Audit:** `tools/reference_parity/reports/p3_emd_hht_audit.md`
+**Audit date:** 2026-04-29
+**reconstruction_identity_tsl status:** PASS (max abs residual
+1.11e-16; audit line 17 verbatim)
+**reconstruction_identity_ref status:** PASS (max abs residual
+0.0; audit line 18 verbatim)
+**n_imfs_match status:** **CAVEAT** (TSL=8, ref=6, abs_diff=2;
+audit line 19 verbatim — drives CAVEAT verdict)
+**cum_energy_curve_correlation status:** PASS (Pearson 0.991;
+audit line 20 verbatim)
+**Tolerance class:** em_stochastic (per audit line 8 verbatim)
+**Fixture:** chirp (5→25 Hz over [0,1]) + low-freq sinusoid (1.5
+Hz) + linear trend + N(0, 0.01) noise, T=512, seed=42 per audit
+lines 33-35 verbatim Fixture section; both arms configured with
+max_iter=200, max_imfs=8 per audit line 36 verbatim. TSL n_imfs:
+8 + PyEMD n_imfs: 6 + ρ(cum_energy_curve): 0.991 (well above
+0.85 PASS threshold) + PyEMD version: 1.9.0 + TSL `emd` package:
+NOT INSTALLED (uses `_numpy_emd` fallback) per audit lines 40-45
+verbatim Diagnostics section.
+
+**Source files (SINGLE-LAYER + §4.7.A PRESENT variant 3 at NON-
+DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation
+per S43 (A)-(K) framing; empirical filenames at §1.9 FOURTH-
+OBSERVATION cross-block extension NOT MANIFESTED at S43 per
+verification — audit + harness + engine ALL preserve canonical
+catalog technique_id `emd_hht` exactly):**
+`tools/reference_parity/harness/checks/p3_emd_hht.py` lines 57-
+109 (harness `_numpy_emd_minimal(signal, max_imfs, max_iter)`
+from-scratch reimplementation of Huang 1998 EMD sifting algorithm
+mirroring TSL `_numpy_emd` fallback: `_find_extrema` at lines 60-
+67 local maxima + minima detection + `_envelope_mean` at lines
+69-79 cubic-spline envelope mean computation with endpoint
+extension + `_sift` at lines 81-95 iterative sifting with stopping
+criterion `sd < 0.001` at line 93 + outer loop at lines 97-108
+IMF extraction with residual update + return imfs array at line
+109; "**Minimal EMD sifter mirroring TSL's `_numpy_emd`**" per
+line 59 docstring verbatim; §4.7.A variant 3 "Harness-reimplements-
+engine-math" mechanism manifestation per S30 (G.1) generalized
+definitional scope at NON-DEGENERATE DUAL-ARM sub-variant FIRST-
+INSTANCE baseline observation)
++ `tools/reference_parity/harness/checks/p3_emd_hht.py` lines
+137-161 (harness TSL arm invokes `_numpy_emd_minimal(y, max_imfs=
+8, max_iter=200)` at line 143 directly with comment at lines 140-
+142 verbatim "**Use TSL's `_numpy_emd` directly (matches Balanced
+preset max_imfs=8, max_iter=200). Bypass wrapper output rounding**";
+computes reconstruction at line 147 `reconstruction = imfs.sum(
+axis=0) + residual` + recon_max_abs at line 148 + imf_energies at
+line 150 + cum_energy at lines 151-155; harness does NOT invoke
+`emd_hht.py::run()` engine entry point; §4.7.A variant 3 manifestation
+at NON-DEGENERATE DUAL-ARM sub-variant)
++ `tools/reference_parity/harness/checks/p3_emd_hht.py` lines
+163-191 (harness reference arm **invokes EXTERNAL PyEMD.EMD
+library at lines 164-165 + 167-168** — IMPORT `from PyEMD import
+EMD` at line 164 + invoke `emd = EMD(MAX_ITERATION=200)` at line
+167 + `imfs = emd(y, max_imf=8)` at line 168 — DISTINCT
+IMPLEMENTATION from `_numpy_emd_minimal` inline mirror at TSL
+arm; computes n_imfs + reconstruction + recon_max_abs at lines
+172-176 + imf_energies + cum_energy at lines 177-184; TSL arm ≠
+reference arm at S43 — NON-DEGENERATE DUAL-ARM sub-variant scope)
++ `tools/reference_parity/harness/checks/p3_emd_hht.py` lines 1-
+27 verbatim (audit design rationale: "Compares TSL
+`engine/techniques/emd_hht.py` (uses `emd` package if available,
+else custom numpy fallback) against `PyEMD.EMD` on a synthetic
+multi-component signal. **Pattern J classic:** TSL's `emd` (AOE
+Quinn) and reference `PyEMD.EMD` (Laszuk) are independent
+implementations of the Huang 1998 sifting algorithm. They use
+different envelope-extension heuristics, different convergence
+criteria, and may extract different numbers of IMFs on the same
+signal. Per-IMF bitwise parity is NOT achievable; comparison via
+structural properties: - Reconstruction identity: sum(IMFs) +
+residual ≈ original signal (both implementations should reach
+machine precision on this). - IMF count: typically agrees within
+±1 on smooth signals; reported as diagnostic. - Energy
+concentration: cumulative IMF energy curve shape (Pearson
+correlation between TSL and reference cumulative energy curves;
+> 0.85 PASS). This is a **NO-REFERENCE Tier C** wrapper per
+master plan §5; correlation-based parity per the Tier C
+convention from `p3_nar_narx`")
++ `tools/reference_parity/harness/checks/p3_emd_hht.py` lines
+119-128 (harness verdict_class_rationale: "EMD's sifting is
+iterative with stopping criteria that differ between
+implementations (TSL numpy fallback vs PyEMD). Per-IMF bitwise
+parity not achievable. Comparison via reconstruction identity
+(machine precision) + IMF count agreement + energy-curve
+correlation. Tier C / Pattern K-style correlation-based check")
++ `tools/reference_parity/harness/checks/p3_emd_hht.py` lines
+193-273 (compare method: 4 primary metrics via _compare_scalar
++ _compare_vector — reconstruction_identity_tsl + reconstruction_identity_ref
++ n_imfs_match + cum_energy_curve_correlation; **Pattern F
+structural invariants computation PRESENT** at lines 198-210
+reconstruction_identity validation at both arms at machine
+precision 1e-10 threshold; IMF count agreement at lines 212-219
+±1 PASS / ±2 CAVEAT / ±3+ BLOCK; energy-curve Pearson correlation
+at lines 220-257 ≥0.85 PASS / ≥0.6 CAVEAT / else BLOCK; outcome
+CAVEAT driven by n_imfs_match CAVEAT status per identical_dual_arm
+divergence)
++ `tools/reference_parity/harness/checks/p3_emd_hht.py` lines 42-
+54 (`_generate_emd_dgp`: Multi-component non-stationary signal
+chirp + low-freq sinusoid + linear trend + noise at T=512 +
+seed=42; own DGP generator producing chirp (5→25 Hz over [0,1])
++ slow sinusoid 1.5 Hz + linear trend 0.3·t + N(0, 0.01) noise)
++ `engine/techniques/emd_hht.py` lines 1-8 (module docstring:
+"Empirical Mode Decomposition & Hilbert-Huang Transform for Time
+Series Lab. Decomposes a time series into Intrinsic Mode
+Functions (IMFs) using EMD, then applies the Hilbert transform
+to obtain instantaneous frequency and amplitude. Uses the `emd`
+package when available, falling back to a numpy-based sifting
+implementation")
++ `engine/techniques/emd_hht.py` line 10 (numpy import: `import
+numpy as np` — Layer 1 math primitive via inline EMD sifting
+fallback `_numpy_emd` OR external `emd` package when installed;
+engine math NEVER invoked by audit per §4.7.A variant 3 + NON-
+DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline)
++ `engine/techniques/emd_hht.py` lines 29-47 (`_PRESET_CONFIG`:
+preset dispatch Fast `{max_imfs: 4, max_sift_iterations: 50,
+method: 'emd'}` / Balanced `{max_imfs: 8, max_sift_iterations:
+200, method: 'emd'}` / Thorough `{max_imfs: 12,
+max_sift_iterations: 500, method: 'eemd', ensemble_size: 100,
+noise_width: 0.05}`; engine Balanced preset matches audit pinned
+config max_imfs=8 + max_iter=200; ENGINE-DEFAULT-CONFIG = AUDIT-
+PINNED-CONFIG match at parameter scope; engine default method
+'emd' but TSL `emd` package NOT INSTALLED at audit fixture per
+audit lines 44-45 verbatim → engine uses `_numpy_emd` fallback
+path matching harness `_numpy_emd_minimal` mirror)
++ `engine/techniques/emd_hht.py` lines 50-70 (`_prepare_series`:
+NaN handling — strips edge NaN + interpolates interior NaN +
+n_dropped warning; NOT audit-validated at engine scope)
++ `engine/techniques/emd_hht.py` lines 73-100+ (`_find_extrema`
++ `_envelope_mean` fallback sifting functions; mirror harness
+`_numpy_emd_minimal` inline helper at structurally-equivalent
+scope; engine fallback path NEVER invoked by audit at engine
+entry-point scope per §4.7.A variant 3 NON-DEGENERATE DUAL-ARM
+sub-variant FIRST-INSTANCE baseline)
++ `engine/techniques/emd_hht.py` lines 100+-490 (Layer 2 engine
+orchestration: `run(ctx, progress_callback)` main entry;
+standalone-technique-only invocation; preset config dispatch +
+emd package availability check + EMD/EEMD method dispatch +
+max_imfs + max_sift_iterations + ensemble_size + noise_width
+parameter resolution + EMD sifting (external `emd` package OR
+fallback `_numpy_emd`) + Hilbert transform + instantaneous
+frequency + amplitude analysis + summary tables + plain English
++ audit_fields construction; **engine `run()` NEVER invoked by
+audit per §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant
+FIRST-INSTANCE baseline observation**)
++ `tools/reference_parity/reports/p3_emd_hht_audit.md`
+
+**Validation claim scope (TIER VI CAVEAT (PATTERN J / TIER C —
+DIFFERENT SIFTING LIBRARIES) SUB-CLASS + §4.7.A PRESENT VARIANT
+3 HARNESS-REIMPLEMENTS-ENGINE-MATH AT NON-DEGENERATE DUAL-ARM
+SUB-VARIANT FIRST-INSTANCE BASELINE OBSERVATION + NEW Sub-class
+2m candidate first-instance baseline observation per S40 + S42
+Sub-class 2l SECOND-OBSERVATION TIGHTENING + §1.8 reroll_on_caveat=
+False discipline APPLICABLE FIRST applicability test within
+Frequency Domain / Signal block scope + A3 SECOND-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.8 cross-Block
+scope continuation per S43 (A)+(B)+(C)+(D) ratifications) —
+CRITICAL CAVEAT operative:** TSL emd_hht output relies on Layer
+1 inline `_numpy_emd` fallback path (when external `emd` package
+not installed at engine scope) + Hilbert transform primitive +
+Layer 2 engine `emd_hht.py::run()` orchestration. **Audit
+validates structural-properties scope ONLY at Tier C convention**
+— harness `_numpy_emd_minimal` (lines 57-109) inline mirror of
+TSL `_numpy_emd` fallback is invoked at TSL arm (line 143);
+EXTERNAL PyEMD.EMD library is invoked at reference arm (lines
+164-168); audit verdict "CAVEAT (Pattern J / Tier C — different
+sifting libraries; ±2 IMF count divergence with 0.99 correlation
+on energy curve)" reflects structural-properties divergence
+between AOE Quinn / Laszuk sifting libraries. **Audit DOES validate
+within structural-properties scope:**
+- Reconstruction identity at both arms (TSL 1.11e-16 + ref 0.0
+  PASS at machine precision; Pattern F structural invariant)
+- IMF count agreement (TSL=8, ref=6, abs_diff=2 CAVEAT per ±2
+  CAVEAT threshold)
+- Cumulative-energy-curve Pearson correlation (ρ=0.991 PASS per
+  ≥0.85 threshold)
+
+**Audit DOES NOT validate**:
+- Per-IMF bitwise parity (mathematically intractable per Huang
+  1998 implementation variation across AOE Quinn / Laszuk /
+  MATLAB / R packages; ±2 IMF count divergence empirical at S43
+  fixture)
+- `_numpy_emd_minimal` correctness vs Huang 1998 paper formula
+  (mirror of TSL `_numpy_emd` fallback; no independent canonical
+  reference at degenerate-self-parity scope for TSL inline mirror;
+  reference arm distinct PyEMD implementation provides cross-
+  implementation comparison at structural-properties scope only)
+- engine `emd_hht.py::run()` math correctness (engine NEVER
+  invoked by audit)
+- engine Layer 2 orchestration (NaN handling via `_prepare_series`
+  + preset config dispatch + emd package availability check +
+  EMD/EEMD method dispatch + max_imfs + max_sift_iterations +
+  ensemble_size + noise_width parameter resolution + EMD sifting
+  fallback + Hilbert transform + instantaneous frequency +
+  amplitude analysis + summary tables + plain English +
+  audit_fields construction) — NEVER exercised by audit
+- cross-implementation parity beyond `PyEMD.EMD` reference (AOE
+  Quinn `emd` + MATLAB `emd` + R `EMD` distinct implementations
+  per audit lines 49-53 verbatim; only one cross-implementation
+  comparison established at PyEMD scope)
+
+- **Layer 1 `_numpy_emd_minimal` from-scratch reimplementation
+  (Tier VI CAVEAT Pattern J Tier C — different sifting libraries
+  scope; NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE
+  baseline observation):** TSL arm invokes inline mirror of TSL
+  `_numpy_emd` fallback at line 143; reference arm invokes
+  EXTERNAL PyEMD.EMD library distinct implementation; ±2 IMF
+  count divergence observed (TSL=8, ref=6 — drives CAVEAT
+  verdict). **Tier VI CAVEAT characterization directly grounded**
+  at scope_reframing §2 lines 183-184 verbatim Tier VI 5-wrapper
+  enumeration explicitly including p3_emd_hht. Validation scope:
+  structural-properties (reconstruction identity + IMF count +
+  energy curve correlation) under Tier C convention with CAVEAT
+  verdict deterministic per `reroll_on_caveat = False` Session 5
+  lock. **Pattern J Tier C caveat:** different sifting libraries
+  (AOE Quinn vs Laszuk vs MATLAB vs R) implement Huang 1998 with
+  slightly different envelope-extension heuristics + sifting stop
+  criteria + edge handling; per-IMF bitwise parity mathematically
+  intractable; comparison via structural properties scope.
+  **§4.7.A PRESENT variant 3 harness-reimplements-engine-math +
+  NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline
+  caveat:** harness defines `_numpy_emd_minimal` inline mirror of
+  TSL `_numpy_emd` fallback at TSL arm; reference arm invokes
+  EXTERNAL PyEMD.EMD library distinct implementation; engine
+  `emd_hht.py::run()` is COMPLETELY DIFFERENT code path from
+  harness `_numpy_emd_minimal` reimplementation NEVER exercised
+  by audit. **NON-DEGENERATE DUAL-ARM sub-variant distinction
+  from S40 + S42 §4.7.A variant 3 DEGENERATE DUAL-ARM:** S40
+  ssa + S42 wavelet_coherence_phase_lag harness invokes IDENTICAL
+  helper function at BOTH arms with identical arguments (0.0 abs
+  diff GUARANTEED BY CONSTRUCTION; both arms = same reimplementation).
+  At S43 emd_hht: TSL arm invokes inline `_numpy_emd_minimal`
+  mirror at TSL `_numpy_emd` fallback; reference arm invokes
+  EXTERNAL PyEMD.EMD library distinct implementation. TSL arm ≠
+  reference arm at S43; ±2 IMF count divergence + 0.99 correlation
+  observed per distinct implementations. **§4.7.A variant 3 sub-
+  variant taxonomy expansion** at A3 first-instance baseline
+  observation (DEGENERATE vs NON-DEGENERATE dual-arm sub-variants
+  within variant 3 codified scope).
+- **Layer 2 engine `emd_hht.py::run()` orchestration (validation
+  scope NOT EXERCISED; engine NEVER invoked by audit):**
+  - NaN handling via `_prepare_series` (lines 50-70): edge NaN
+    stripping + interior NaN interpolation + n_dropped warning;
+    NOT audit-validated
+  - Preset config dispatch (lines 29-47 `_PRESET_CONFIG` + engine
+    line invocation): Fast `{max_imfs: 4, iters: 50, method:
+    'emd'}` / Balanced `{max_imfs: 8, iters: 200, method: 'emd'}`
+    / Thorough `{max_imfs: 12, iters: 500, method: 'eemd',
+    ensemble_size: 100, noise_width: 0.05}`; audit pins Balanced
+    preset values (max_imfs=8, max_iter=200); Fast + Thorough
+    engine production behaviors NOT exercised by audit. **ENGINE-
+    DEFAULT-CONFIG = AUDIT-PINNED-CONFIG match at Balanced preset
+    parameter scope** at max_imfs + max_iter; engine default method
+    'emd' but TSL `emd` package NOT INSTALLED at audit fixture
+    per audit lines 44-45 verbatim → engine uses `_numpy_emd`
+    fallback path matching harness `_numpy_emd_minimal` mirror;
+    engine EEMD (Thorough preset method 'eemd' with ensemble_size
+    + noise_width) NOT exercised by audit.
+  - emd package availability check + EMD/EEMD method dispatch:
+    `_has_emd()` at lines 21-26 returns False at audit fixture
+    (TSL `emd` package NOT INSTALLED per audit line 44-45 verbatim);
+    NOT audit-validated at engine entry-point scope
+  - max_imfs + max_sift_iterations + ensemble_size + noise_width
+    parameter resolution: user-overridable per ctx.params; NOT
+    audit-validated at engine-default config (audit pins Balanced
+    preset matching engine default)
+  - EMD sifting (external `emd` package OR fallback `_numpy_emd`):
+    audit uses inline `_numpy_emd_minimal` mirror at TSL arm
+    (NOT engine fallback invocation); engine fallback `_numpy_emd`
+    structurally-equivalent to harness `_numpy_emd_minimal` mirror
+    but distinct invocation path per §4.7.A variant 3 NON-
+    DEGENERATE DUAL-ARM sub-variant; engine fallback NEVER invoked
+    by audit
+  - Hilbert transform + instantaneous frequency + amplitude
+    analysis: presentation-layer downstream of EMD sifting; NEVER
+    invoked by audit
+  - Summary tables + plain English + audit_fields construction:
+    presentation layer NOT audit-validated
+
+#### Disclosure pattern (i) — Research note footnote (Tier VI CAVEAT Pattern J Tier C — different sifting libraries + NEW Sub-class 2m candidate first-instance baseline + §4.7.A PRESENT variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + CRITICAL CAVEAT + §1.8 reroll_on_caveat=False APPLICABLE)
+
+> This analysis uses TSL technique `emd_hht`, **validated with
+> CAVEAT** against `PyEMD.EMD` (EMD-signal 1.9.0, Laszuk) per
+> Phase 3 audit dated 2026-04-29 (verdict CAVEAT Pattern J /
+> Tier C — different sifting libraries; ±2 IMF count divergence
+> [TSL=8, ref=6] with 0.991 Pearson correlation on cumulative
+> energy curve; reconstruction identity PASS at machine precision
+> both arms). **Tier VI CAVEAT (Pattern J / Tier C — different
+> sifting libraries) sub-class characterization** per S43 (A)
+> disposition per scope_reframing §2 lines 183-184 verbatim Tier
+> VI 5-wrapper enumeration explicitly including p3_emd_hht. **NEW
+> Sub-class 2m candidate first-instance baseline observation**
+> per S43 (B) ratification (A3 first-instance precedent n=1
+> baseline; codification deferred to absorption #6+ second-
+> observation tightening if recurs). **§4.7.A PRESENT variant 3
+> NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline
+> observation** per S43 (C) ratification (THIRD §4.7.A variant
+> 3 observation overall after S40 + S42 DEGENERATE DUAL-ARM
+> SECOND-OBSERVATION TIGHTENING; NEW NON-DEGENERATE DUAL-ARM sub-
+> variant FIRST-INSTANCE at TSL arm inline `_numpy_emd_minimal`
+> mirror + reference arm external PyEMD.EMD library distinct
+> implementation; sub-variant taxonomy expansion). **§1.8
+> reroll_on_caveat=False discipline APPLICABLE — FIRST applicability
+> test within Frequency Domain / Signal block scope** per S43 (D)
+> ratification (audit verdict CAVEAT deterministic at
+> `reroll_on_caveat = False` Session 5 lock per audit lines 64-67
+> verbatim; cross-Block scope continuation observation per Block
+> 3 S32 + S33 §1.8 applicability precedent). **CRITICAL CAVEAT —
+> deterministic CAVEAT verdict:** Pattern J / Tier C — different
+> sifting libraries (AOE Quinn vs Laszuk vs MATLAB vs R) implement
+> Huang 1998 with slightly different envelope-extension heuristics
+> + sifting stop criteria + edge handling; per-IMF bitwise parity
+> mathematically intractable; comparison via structural properties
+> (reconstruction identity + IMF count + energy curve correlation);
+> audit verdict CAVEAT stays deterministically per
+> `reroll_on_caveat = False`; engine `emd_hht.py::run()` math
+> NEVER validated by audit; engine Layer 2 orchestration (NaN
+> handling + preset config dispatch + emd package availability +
+> EMD/EEMD method dispatch + parameter resolution + EMD sifting
+> + Hilbert transform + instantaneous frequency + amplitude
+> analysis) NEVER exercised by audit. Cross-implementation parity
+> beyond `PyEMD.EMD` reference (AOE Quinn `emd` + MATLAB `emd` +
+> R `EMD`) NOT audit-established. Pre-Path α expert review status;
+> expert review of engine implementation + cross-implementation
+> validation candidate at Q3b extension scope.
+
+#### Disclosure pattern (ii) — Technical appendix (Tier VI CAVEAT Pattern J Tier C + NEW Sub-class 2m candidate first-instance baseline + §4.7.A PRESENT variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + critical caveat at validation claim scope + §1.8 reroll_on_caveat=False APPLICABLE)
+
+> Methodology: TSL technique `emd_hht` validated per Phase 3
+> reference parity infrastructure under Tier VI CAVEAT (Pattern
+> J / Tier C — different sifting libraries) sub-class framing
+> per S43 codification + NEW Sub-class 2m candidate first-instance
+> baseline observation per (αa)+(αc) ratification + §4.7.A
+> PRESENT variant 3 Harness-reimplements-engine-math at NON-
+> DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline
+> observation. **Reference:** `PyEMD.EMD` (EMD-signal 1.9.0,
+> Laszuk) — external package reference distinct from TSL inline
+> `_numpy_emd_minimal` mirror at TSL arm. **Verdict:** CAVEAT
+> Pattern J / Tier C — different sifting libraries; ±2 IMF count
+> divergence (TSL=8, ref=6) with 0.991 Pearson correlation on
+> cumulative energy curve; reconstruction identity PASS at machine
+> precision both arms (TSL 1.11e-16 + ref 0.0). **Audit date:**
+> 2026-04-29. **Fixture:** chirp (5→25 Hz over [0,1]) + low-freq
+> sinusoid (1.5 Hz) + linear trend + N(0, 0.01) noise, T=512,
+> seed=42; both arms configured with max_iter=200, max_imfs=8.
+> **Tier VI CAVEAT characterization** per scope_reframing §2
+> lines 183-184 verbatim Tier VI 5-wrapper enumeration explicitly
+> including p3_emd_hht. **CRITICAL CAVEAT — Pattern J / Tier C
+> different sifting libraries scope:** TSL's numpy-fallback
+> sifter (mirrors AOE Quinn `emd`-package algorithm) extracts 8
+> IMFs; PyEMD (Laszuk) extracts 6 IMFs on the same signal. Both
+> implementations satisfy reconstruction identity at machine
+> precision (sum(IMFs) + residual = original signal exactly).
+> Cumulative-energy curve agrees at ρ=0.991 — both implementations
+> concentrate energy in similar frequency bands despite different
+> IMF granularity. Per master plan §5 Tier C, EMD/HHT lacks a
+> canonical reference: AOE Quinn `emd`, Laszuk `PyEMD`, MATLAB
+> `emd`, R `EMD` packages all implement Huang 1998 with slightly
+> different envelope-extension heuristics + sifting stop criteria
+> + edge handling. Per-IMF bitwise parity mathematically
+> intractable. **§4.7.A PRESENT variant 3 Harness-reimplements-
+> engine-math at NON-DEGENERATE DUAL-ARM sub-variant FIRST-
+> INSTANCE baseline observation:** harness defines
+> `_numpy_emd_minimal` inline mirror of TSL `_numpy_emd` fallback
+> at TSL arm (line 143); reference arm invokes EXTERNAL PyEMD.EMD
+> library distinct implementation (lines 164-168). TSL arm ≠
+> reference arm at S43 — DISTINCT from S40 + S42 DEGENERATE DUAL-
+> ARM sub-variant (both arms invoked identical helper). Engine
+> `emd_hht.py::run()` is COMPLETELY DIFFERENT code path NEVER
+> exercised by audit; engine Layer 2 orchestration (NaN handling
+> + preset config dispatch + emd package availability check +
+> EMD/EEMD method dispatch + parameter resolution + EMD sifting
+> + Hilbert transform + instantaneous frequency + amplitude
+> analysis) NEVER audit-validated. **§1.8 reroll_on_caveat=False
+> discipline APPLICABLE at S43** — audit verdict CAVEAT deterministic
+> per `reroll_on_caveat = False` Session 5 lock (no retry; verdict
+> stays CAVEAT deterministically); FIRST §1.8 applicability test
+> within Frequency Domain / Signal block scope per S37-S42 §1.8
+> NOT APPLICABLE banking series; cross-Block scope continuation
+> observation per Block 3 S32 + S33 §1.8 applicability precedent.
+> **NEW Sub-class 2m candidate first-instance baseline observation**
+> per A3 first-instance precedent (n=1 baseline; codification
+> deferred to absorption #6+ second-observation tightening if
+> recurs). Reference selection + tolerance specification + Tier
+> VI CAVEAT Pattern J Tier C framing + §4.7.A variant 3 NON-
+> DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline AI-
+> assisted with user ratification per Phase 7+ work program;
+> pre-Path α expert review status; expert review pending end-of-
+> Phase-7+-work-program.
+
+#### Disclosure pattern (iii) — Risk model documentation (Tier VI CAVEAT Pattern J Tier C + §4.7.A PRESENT variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + NEW Sub-class 2m candidate first-instance baseline + CRITICAL CAVEAT at validation claim scope + §1.8 reroll_on_caveat=False APPLICABLE)
+
+> `emd_hht` validation: TSL Tier VI CAVEAT (Pattern J / Tier C —
+> different sifting libraries) sub-class framing per S43 (A)
+> codification + NEW Sub-class 2m candidate first-instance baseline
+> observation per (αa)+(αc) ratification + §4.7.A PRESENT variant
+> 3 Harness-reimplements-engine-math at NON-DEGENERATE DUAL-ARM
+> sub-variant FIRST-INSTANCE baseline observation + §1.8
+> reroll_on_caveat=False discipline APPLICABLE — FIRST applicability
+> test within Frequency Domain / Signal block scope. **Reference:**
+> `PyEMD.EMD` (EMD-signal 1.9.0, Laszuk) — external package
+> distinct implementation from TSL inline `_numpy_emd_minimal`
+> mirror at TSL arm. **Audit:**
+> `tools/reference_parity/reports/p3_emd_hht_audit.md` dated 2026-
+> 04-29. **Verdict:** CAVEAT Pattern J / Tier C — different
+> sifting libraries; ±2 IMF count divergence (TSL=8, ref=6) +
+> 0.991 Pearson correlation on cumulative energy curve;
+> reconstruction identity PASS at machine precision both arms
+> (TSL 1.11e-16 + ref 0.0). **Fixture:** multi-component non-
+> stationary signal (chirp 5→25 Hz + sinusoid 1.5 Hz + linear
+> trend + noise) DGP T=512 seed=42 + max_iter=200 + max_imfs=8;
+> single-seeded fixture; parameter-sensitivity coverage NOT
+> established; Q3b extension scope. **NEW Sub-class 2m candidate
+> first-instance baseline observation** per S43 (B) ratification
+> (definitional scope working hypothesis: "Tier VI CAVEAT (Pattern
+> J Tier C — different sifting libraries / no canonical reference)
+> + §4.7.A PRESENT variant 3 harness-reimplements-engine-math at
+> NON-DEGENERATE DUAL-ARM sub-variant + Pattern F structural
+> invariants computation explicit + IMF count CAVEAT driver +
+> cumulative energy curve Pearson correlation supplementary metric
+> (Tier C convention) + single-layer scope"; A3 first-instance
+> precedent n=1 baseline; NOT codification; codification deferred
+> to absorption #6+ second-observation tightening if recurs;
+> distinct from S37 + S41 Sub-class 2i Tier III + §4.7.A variant
+> 1 + S38 + S41 Sub-class 2j Pattern F structural invariants +
+> Tier II.bit-exact / Tier III + S39 Sub-class 2k Tier V Pattern
+> J B.3 + S40 + S42 Sub-class 2l Tier IV Pattern A.3 + §4.7.A
+> variant 3 DEGENERATE DUAL-ARM per Tier VI CAVEAT + NON-DEGENERATE
+> DUAL-ARM scope distinction). **CRITICAL CAVEAT at validation
+> claim scope — Pattern J / Tier C different sifting libraries:**
+> audit verdict CAVEAT deterministic at `reroll_on_caveat = False`
+> Session 5 lock; engine `emd_hht.py::run()` math NEVER validated;
+> per-IMF bitwise parity mathematically intractable. **Risk
+> attribution:** **(a) Layer 1 `_numpy_emd_minimal` from-scratch
+> reimplementation at TSL arm (Tier VI CAVEAT Pattern J Tier C —
+> different sifting libraries scope; NON-DEGENERATE DUAL-ARM sub-
+> variant FIRST-INSTANCE baseline):** inline mirror of TSL
+> `_numpy_emd` fallback at line 143; reference arm EXTERNAL
+> PyEMD.EMD library distinct implementation at lines 164-168;
+> ±2 IMF count divergence (TSL=8, ref=6) drives CAVEAT verdict;
+> reconstruction identity PASS at machine precision both arms;
+> cumulative-energy curve Pearson correlation PASS 0.991;
+> audit validates structural-properties scope (reconstruction
+> identity + IMF count + energy curve correlation) at Tier C
+> convention; audit DOES NOT validate per-IMF bitwise parity NOR
+> `_numpy_emd_minimal` correctness vs Huang 1998 paper formula
+> (no independent canonical reference at TSL inline mirror scope);
+> cross-implementation parity beyond `PyEMD.EMD` (AOE Quinn /
+> MATLAB / R distinct implementations) NOT audit-established.
+> **(b) §4.7.A PRESENT variant 3 Harness-reimplements-engine-
+> math at NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE
+> baseline caveat:** harness defines `_numpy_emd_minimal` inline
+> mirror at TSL arm + invokes EXTERNAL PyEMD library at reference
+> arm; engine `emd_hht.py::run()` is COMPLETELY DIFFERENT code
+> path NEVER exercised by audit; code-path divergence between
+> audit + engine production active at runtime per HEAD verification
+> (NOT REMEDIATED per S36 §4.7.A status dimension codification).
+> **(c) Layer 2 engine `emd_hht.py::run()` orchestration (NEVER
+> audit-validated):** NaN handling via `_prepare_series` (lines
+> 50-70) + preset config dispatch (lines 29-47 `_PRESET_CONFIG`)
+> + emd package availability check (`_has_emd()` lines 21-26) +
+> EMD/EEMD method dispatch (Thorough preset method 'eemd') +
+> max_imfs + max_sift_iterations + ensemble_size + noise_width
+> parameter resolution + EMD sifting (external `emd` package OR
+> fallback `_numpy_emd`) + Hilbert transform + instantaneous
+> frequency + amplitude analysis + summary tables + plain English
+> + audit_fields construction; validation scope per
+> `engine/techniques/emd_hht.py` lines 100+-490 (490 LOC engine
+> module; engine `run()` NEVER invoked by audit). **(d) Pattern
+> J / Tier C — different sifting libraries scope-bounded
+> validation retraction surface — MEDIUM:** practitioners invoking
+> `emd_hht` from ribbon receive engine `emd_hht.py::run()` output
+> via Layer 2 orchestration; audit validates structural-properties
+> scope (reconstruction identity + IMF count + energy curve
+> correlation) ONLY at Pattern J / Tier C convention; ±2 IMF count
+> divergence is empirically expected per different sifting
+> libraries; reconstruction identity + energy concentration PASS
+> at machine precision + 0.991 correlation provides STRUCTURAL
+> safety bound; cross-implementation parity beyond `PyEMD.EMD`
+> reference NOT established; expert review of engine implementation
+> + Layer 1 cross-implementation validation against alternative
+> implementations (MATLAB `emd` / R `EMD` API-translation harness
+> OR Huang 1998 paper formula independent reimplementation
+> distinct from harness `_numpy_emd_minimal` mirror) candidate
+> at Q3b extension scope. **MEDIUM retraction surface vs S37 LOW-
+> MEDIUM / S38 LOW / S39 LOW-MEDIUM / S40 MEDIUM-HIGH / S41 LOW-
+> MEDIUM / S42 MEDIUM-HIGH** per Pattern J / Tier C — different
+> sifting libraries + structural-properties scope validation
+> (reconstruction identity + IMF count + energy curve correlation
+> at Tier C convention) combined scope. Pre-Path α expert review
+> status. **§1.8 reroll_on_caveat=False discipline operative:**
+> audit verdict CAVEAT stays deterministically per Session 5
+> lock; no retry; institutionally substantive informative-not-
+> bug status per audit lines 64-67 verbatim.
+
+#### Disclosure pattern (iv) — Internal use disclosure (Tier VI CAVEAT Pattern J Tier C + §4.7.A PRESENT variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + NEW Sub-class 2m candidate first-instance baseline + critical caveat + §1.8 reroll_on_caveat=False APPLICABLE)
+
+> `emd_hht` Tier VI CAVEAT (Pattern J / Tier C — different sifting
+> libraries) sub-class per S43 codification + NEW Sub-class 2m
+> candidate first-instance baseline + §4.7.A PRESENT variant 3
+> Harness-reimplements-engine-math at NON-DEGENERATE DUAL-ARM
+> sub-variant FIRST-INSTANCE baseline + §1.8 reroll_on_caveat=False
+> APPLICABLE; PyEMD.EMD (EMD-signal 1.9.0, Laszuk) external
+> package reference distinct from TSL inline `_numpy_emd_minimal`
+> mirror. CAVEAT Pattern J / Tier C — different sifting libraries;
+> ±2 IMF count divergence (TSL=8, ref=6) + 0.991 Pearson
+> correlation on cumulative energy curve; reconstruction identity
+> PASS at machine precision both arms. **CRITICAL CAVEAT —
+> Pattern J / Tier C different sifting libraries:** audit verdict
+> CAVEAT deterministic at `reroll_on_caveat = False` Session 5
+> lock per audit lines 64-67 verbatim; engine `emd_hht.py::run()`
+> math NEVER validated by audit; engine Layer 2 orchestration
+> (NaN handling + preset config dispatch + emd package availability
+> + EMD/EEMD method dispatch + parameter resolution + EMD sifting
+> + Hilbert transform + instantaneous frequency + amplitude
+> analysis) NEVER exercised by audit; per-IMF bitwise parity
+> mathematically intractable. Cross-implementation parity beyond
+> `PyEMD.EMD` (AOE Quinn `emd` + MATLAB `emd` + R `EMD`) NOT
+> audit-established. Pre-Path α.
+
+**Validation provenance audit checklist (Workstream B §1 four-question
+audit; applied per Q1 entry close; per S30 §1.6 Q-A density convention
+operative continuation from S31-S42 + S36 LOC overshoot scope
+expansion refinement — verbatim citation density):**
+
+- **Q-A (extracted/cited evidence vs inferred reasoning):**
+  Extracted/cited evidence. Reference (PyEMD.EMD EMD-signal 1.9.0
+  Laszuk) per `p3_emd_hht_audit.md` line 4 verbatim ("**Reference:**
+  `PyEMD.EMD` (EMD-signal 1.9.0, Laszuk)"). Verdict (CAVEAT Pattern
+  J / Tier C — different sifting libraries; ±2 IMF count divergence
+  with 0.99 correlation on energy curve) per `p3_emd_hht_audit.md`
+  lines 5-7 verbatim ("**Verdict:** **CAVEAT** (Pattern J / Tier
+  C — different sifting libraries; ±2 IMF count divergence with
+  0.99 correlation on energy curve)"). Tolerance class (em_stochastic)
+  per `p3_emd_hht_audit.md` line 8 verbatim. Primary metrics per
+  `p3_emd_hht_audit.md` lines 17-20 verbatim (reconstruction_identity_tsl
+  PASS 1.11e-16 + reconstruction_identity_ref PASS 0.0 + n_imfs_match
+  CAVEAT TSL=8 ref=6 abs_diff=2 + cum_energy_curve_correlation PASS
+  Pearson 0.991). Audit Outcome rationale per `p3_emd_hht_audit.md`
+  lines 22-29 verbatim ("CAVEAT verdict driven by IMF-count
+  divergence. TSL's numpy-fallback sifter (mirrors AOE Quinn `emd`-
+  package algorithm) extracts 8 IMFs; PyEMD (Laszuk) extracts 6
+  IMFs on the same signal. Both implementations satisfy
+  reconstruction identity at machine precision (sum(IMFs) +
+  residual = original signal exactly). The cumulative-energy
+  curve agrees at ρ=0.991 — both implementations concentrate
+  energy in similar frequency bands despite different IMF
+  granularity"). Audit Pattern J / NO-REFERENCE Tier C classification
+  rationale per `p3_emd_hht_audit.md` lines 47-63 verbatim ("Per
+  master plan §5 Tier C, EMD/HHT lacks a canonical reference:
+  the AOE Quinn `emd`, Laszuk `PyEMD`, MATLAB `emd`, and R `EMD`
+  packages all implement Huang 1998 with slightly different
+  envelope-extension heuristics, sifting stop criteria, and edge
+  handling. Per-IMF bitwise parity is mathematically intractable.
+  Comparison via: 1. Reconstruction identity (machine precision
+  on both sides) — verifies neither implementation drops energy.
+  2. IMF count agreement (±1 PASS, ±2 CAVEAT, ±3+ BLOCK) —
+  verifies sifting stops at compatible coarseness. 3. Cumulative-
+  energy-curve Pearson correlation (>= 0.85 PASS) — verifies
+  energy is distributed across IMFs in correlated patterns even
+  when granularity differs"). Audit §1.8 reroll_on_caveat=False
+  codification reference per `p3_emd_hht_audit.md` lines 64-67
+  verbatim ("CAVEAT verdict is informative-not-bug — documents
+  the known methodology divergence. `reroll_on_caveat = False`
+  (default per Session 5 lock) means no retry; verdict stays
+  CAVEAT deterministically"). Audit date (2026-04-29) per
+  `p3_emd_hht_audit.md` line 9 verbatim. Fixture (chirp 5→25 Hz
+  over [0,1] + low-freq sinusoid 1.5 Hz + linear trend + N(0,
+  0.01) noise + T=512 + seed=42 + max_iter=200 + max_imfs=8) per
+  `p3_emd_hht_audit.md` lines 33-36 verbatim Fixture section +
+  harness `p3_emd_hht.py` lines 42-54 verbatim `_generate_emd_dgp`.
+  Diagnostics (TSL n_imfs=8 + PyEMD n_imfs=6 + ρ=0.991 + PyEMD
+  version 1.9.0 + TSL `emd` package NOT INSTALLED uses
+  `_numpy_emd` fallback) per `p3_emd_hht_audit.md` lines 40-45
+  verbatim Diagnostics section. Tier VI CAVEAT sub-class
+  characterization directly grounded at `scope_reframing_s6_banking.md`
+  §2 lines 183-184 verbatim ("Tier VI — Phase 3 CAVEAT. 5 wrappers
+  per P-3 v1.2.0 §1: `p3_emd_hht`, `p3_mstl`, `p3_nar_narx`,
+  `p3_star`, `p3_stl`. Matches except in stated regime (boundary,
+  near-singular, iterative LOESS divergence, Tier C reference
+  convergence failure)") — p3_emd_hht explicitly within Tier VI
+  5-wrapper enumeration. **§4.7.A PRESENT variant 3 at NON-
+  DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline
+  observation manifestation** per harness `_numpy_emd_minimal`
+  lines 57-109 verbatim (from-scratch Huang 1998 EMD sifting
+  algorithm inline reimplementation mirroring TSL `_numpy_emd`
+  fallback) + harness `run_tsl` line 143 verbatim (`imfs =
+  _numpy_emd_minimal(y, max_imfs=8, max_iter=200)`) + harness
+  `run_reference` lines 164-168 verbatim (`from PyEMD import EMD`
+  + `emd = EMD(MAX_ITERATION=200)` + `imfs = emd(y, max_imf=8)`
+  — EXTERNAL PACKAGE distinct implementation from inline mirror);
+  engine `emd_hht.py::run()` NEVER invoked by audit. **§1.9
+  FOURTH-OBSERVATION cross-block extension NOT MANIFESTED at S43**
+  — audit + harness + engine ALL preserve canonical catalog
+  technique_id `emd_hht` exactly per §3 enumeration. Layer 1 /
+  Layer 2 framework operative per S26 STOP 1.5 second close
+  ratification carried forward + S31-S42 reinforcement. Catalog
+  mapping (1:1) verified per audit Wrapper field. **§4.7.A
+  pattern OBSERVED at S43 as variant 3 PRESENT status THIRD-
+  INSTANCE TIGHTENING at §2.5 entry codification scope + NEW NON-
+  DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline
+  observation at §4.7.A variant 3 sub-variant scope taxonomy
+  expansion** (post-S43 §4.7.A observations = n=13 PRESENT across
+  §2.5 entries S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 +
+  S38 + S39 + S40 + S41 + S42 + S43 + n=1 REMEDIATED S34 = n=14
+  total observations; §4.7.A variant 3 THIRD-INSTANCE TIGHTENING
+  per S43 banking — S40 + S42 DEGENERATE DUAL-ARM SECOND-
+  OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-
+  variant FIRST-INSTANCE baseline; §4.7.A pattern count tightening
+  + variant 3 sub-variant taxonomy expansion forward observation
+  at absorption #6 per A3 precedent — NOT A9 Class A counter
+  increment; NOT §4.7.A taxonomy modification at S43; forward
+  observation banking only per ITEM 16 forward instrumentation
+  banking discipline). **NEW Sub-class 2m candidate first-instance
+  baseline observation per (αa)+(αc) ratification** (A3 first-
+  instance precedent n=1 baseline; NOT codification; codification
+  deferred to absorption #6+ second-observation tightening if
+  recurs at S44+ Q1 entry within Tier VI CAVEAT Pattern J Tier C
+  + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant combined
+  scope OR future Tier VI Pattern J Tier C entry within Tier VI
+  ~5-wrapper enumeration scope; definitional scope working
+  hypothesis "Tier VI CAVEAT Pattern J Tier C + §4.7.A PRESENT
+  variant 3 NON-DEGENERATE DUAL-ARM sub-variant + Pattern F
+  structural invariants computation explicit + IMF count CAVEAT
+  driver + cumulative energy curve Pearson correlation supplementary
+  metric Tier C convention + single-layer scope"). **§1.8
+  reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST
+  applicability test within Frequency Domain / Signal block scope
+  per S37-S42 §1.8 NOT APPLICABLE banking series** (audit verdict
+  CAVEAT lines 5-7 + tolerance class em_stochastic + audit lines
+  64-67 verbatim §1.8 reroll_on_caveat=False codification reference;
+  cross-Block scope continuation observation per Block 3 S32 +
+  S33 §1.8 applicability precedent; n=3 §1.8 applicability
+  observations across S32 + S33 + S43 at n=2 catalog blocks Block
+  3 + Block 5; A3 second-observation tightening precedent threshold
+  SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-
+  Block observations). **Pattern F structural invariants A3 THIRD-
+  OBSERVATION TIGHTENING MANIFESTED per Code S43 Step 0 empirical
+  re-Read** (harness compare() lines 198-210 EXPLICITLY computes
+  reconstruction_identity validation at both arms at machine
+  precision 1e-10 threshold; n=3 Pattern F observations across
+  n=3 mathematical families S38 FFT + S41 wavelet + S43 EMD +
+  cross-Tier scope; A3 THIRD-OBSERVATION TIGHTENING precedent
+  threshold SATISFIED; NEW Sub-class 2j codification refinement
+  candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at
+  three-observation tightening Tier-agnostic across mathematical
+  families + Tier characterizations). **HETEROGENEOUS TIER-SURFACE
+  VARIANT OBSERVATION A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED
+  AT S43** per n=5 distinct Tier characterizations across n=7
+  entries within Frequency Domain / Signal block (Tier III + Tier
+  II.bit-exact + Tier V + Tier IV + Tier VI CAVEAT at S43 NEW);
+  codification refinement candidate at absorption #6+ EMPIRICALLY
+  ROBUSTLY REINFORCED beyond S42 third-observation tightening
+  baseline. **§2.5 Tier primary+overlay convention NOT APPLICABLE
+  at S43** (Tier VI CAVEAT single-tier framing per Code (A) +
+  Chat ratification preference). **§1.5 novelty enumeration sub-
+  section APPLIED at S43** per ≥5 observations threshold satisfied
+  at n=9 enumerated novelties (Novelty 1-9); ninth post-S23
+  application of §1.5 novelty enumeration sub-section pattern per
+  S30 codification + S36 §1.5 refinement sustained-observation
+  operational status note; n=9 post-codification observations
+  across S23 + S34 + S37 + S38 + S39 + S40 + S41 + S42 + S43; A3
+  ninth-observation tightening reinforcement. **ALL-ANCHOR-
+  DEFERRAL DISCIPLINE SIXTH-APPLICATION EMPIRICAL EFFICACY A3
+  SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER
+  REINFORCED AT S43** per Chat S43 trigger drafting all-anchor-
+  deferral discipline sixth-application; 0 multi-anchor schema-
+  misattribution divergences at S43 Step 0 SUSTAINED at n=6
+  sustained efficacy observations (S38-S43); codification candidate
+  at §1.7+ Workstream B §1.4 operational scope at absorption #6+
+  refinement empirically ROBUSTLY grounded; STRONGEST cumulative
+  empirical grounding among absorption #6 candidates. **Multi-
+  precedent confluence at SAME audit + SAME entry codification
+  scope FOURTH-INSTANCE per S38 + S41 + S42 + S43 sequential
+  observations** (SEVEN A3 precedent threshold satisfactions/
+  reinforcements at S43 scope = record-high single-observation
+  count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry
+  within Frequency Domain / Signal block + Heterogeneous Tier-
+  surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F
+  structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-
+  anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=
+  False discipline FIRST applicability test within Block 5 +
+  §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-
+  INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3
+  FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at
+  multi-precedent confluence sub-pattern scope at SAME audit +
+  SAME entry codification surface at n=4 distinct observations;
+  codification refinement candidate at absorption #6+ EMPIRICALLY
+  ROBUSTLY REINFORCED at four sustained observations + sustained
+  ≥5 A3 threshold satisfactions per observation). **Block 5 FULLY
+  Q1-AMENDED milestone REACHED at S43 close = FIFTH catalog block
+  fully Q1-amended (5 of 13 = 38% catalog block-level completion);
+  per-block continuation pattern n=5 catalog block observations
+  REACHED** per absorption #6+ codification candidate at §19.4
+  §4 note 6 refinement n=4 → n=5 per S35-absorption #5 codification
+  EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block
+  fully Q1-amended observations (Block 1 + Block 12 + Block 8 +
+  Block 3 + Frequency Domain / Signal). **A9 Class A counter post-
+  S43: n=14 ACTIVE codified at §19.4 unchanged** (n=15 + n=16
+  codified at §1.7 (c) Workstream B empirical-efficacy grounding
+  scope per S36; n=17 + n=18 + n=19 + n=20 candidates banked at
+  S36 + S37 + S38 + S39 commit message body forward state + S40
+  + S41 + S42 + S43 SUSTAINED no new Class A catch pending
+  absorption #6+ codification; A9 Class A counter at §19.4 advance
+  deferred to absorption #6+ per multi-candidate accumulation).
+  **A9 Class B counter post-S43: n=4 ACTIVE unchanged (no new
+  Class B catch); sustained-observation count under Class B
+  revised default discipline n=17 (S22 + S23 + S25-S28 + S31-S34
+  + S37-S43 = n=17 Q1 entries only counting basis per Chat
+  preference codified at S31)**. **Maturation observation
+  TWENTIETH SUSTAINED OBSERVATION REACHED at S43 (S23 + S25 + S26
+  + S27 + S28 + S29 + S30 + S31 + S32 + S33 + S34 + S35 + S36 +
+  S37 + S38 + S39 + S40 + S41 + S42 + S43 = n=20 cross-session
+  trajectory)** + EIGHT-timing-point empirical surface preserved
+  per S35-absorption #5 codification (no new timing point variant
+  at S43; proactive-prevention operation SUSTAINED across
+  established timing points (i)-(viii)); §4.5 codification
+  operational at n=13 post-codification sustained observations
+  per S43 cross-session trajectory reinforcement.
+
+- **Q-B (user genuine contestation vs default ratification):**
+  Default ratification at twenty-third-technique selection per
+  Mark 3 efficient-ratification + (α) unprompted case-against
+  discipline operative per Workstream B §1.4 codification + S20
+  + S25-S42 reinforcement. **Q-B pattern persists at n=24 across
+  S12 + S13 + S14b + S14c + S15 + S17 + S18 + S21 + S22 + S23 +
+  S26 + S27 + S28 + S31 + S32 + S33 + S34 + S37 + S38 + S39 + S40
+  + S41 + S42 + S43; §1.4 codified observation refinement at
+  empirical pattern accumulation** (n=7 at §1.4 S20 codification
+  → n=23 at S42 reinforcement → n=24 at S43 reinforcement;
+  Workstream B amendment cycle candidate A continues at next
+  cycle). Substantive Chat engagement at structural-decision
+  points empirically observed (Step 0 STOP 2 anchor ratifications
+  A-K + CRITICAL CAVEAT under all-anchor-deferral discipline
+  sixth-application + Tier VI CAVEAT (Pattern J / Tier C —
+  different sifting libraries) (A) ratification + NEW Sub-class
+  2m candidate first-instance baseline (B) ratification + §4.7.A
+  PRESENT variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-
+  INSTANCE baseline (C) ratification + §1.8 reroll_on_caveat=False
+  discipline APPLICABLE FIRST applicability test within Block 5
+  (D) ratification + Block ordering position seventh-position (E)
+  ratification + Pattern F structural invariants A3 THIRD-
+  OBSERVATION TIGHTENING MANIFESTED (F) ratification + §1.9
+  FOURTH-OBSERVATION NOT MANIFESTED preserving S42 (G) ratification
+  + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION
+  TIGHTENING (H) ratification + Multi-precedent confluence FOURTH-
+  INSTANCE at SEVEN A3 precedent threshold satisfactions (I)
+  ratification + Block 5 FULLY Q1-AMENDED milestone (J) ratification
+  + ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION (K) ratification
+  + Code (α-i alternative) + (α-ii) + (α-iii) + (α-iv) + (α-v) +
+  (αb-α) + (αb-β) + (αb-γ) + §4.7.A variant 1 alternative + §1.8
+  NOT APPLICABLE alternative + Pattern F NOT MANIFESTED alternative
+  Tier 2 case-against rejection — 11 case-against alternatives
+  rejected at S43 = NEW LARGEST Code Tier 2 case-against alternative
+  count in apparatus history).
+
+- **Q-C (Chat confidence for publication tomorrow with disclosure):**
+  **Conditional Yes with HEIGHTENED DISCLOSURE REQUIREMENT for
+  Tier VI CAVEAT (Pattern J / Tier C — different sifting
+  libraries) characterization** per audit verdict CAVEAT
+  deterministic at `reroll_on_caveat = False` Session 5 lock per
+  audit lines 64-67 verbatim. Defensibility to all three audiences
+  (published audience + Morgan Stanley compliance + Path α expert
+  reviewer) UNDER Tier VI CAVEAT sub-class + §4.7.A PRESENT
+  variant 3 Harness-reimplements-engine-math at NON-DEGENERATE
+  DUAL-ARM sub-variant FIRST-INSTANCE baseline + Pattern J / Tier
+  C — different sifting libraries scope-bounded validation +
+  cross-implementation parity established at PyEMD scope only +
+  engine math NEVER validated by audit + §1.8 reroll_on_caveat=
+  False APPLICABLE FIRST applicability test within Frequency
+  Domain / Signal block scope + HEIGHTENED DISCLOSURE REQUIREMENT
+  at Tier VI CAVEAT informative-not-bug status per audit lines 64-
+  65 verbatim. **Q-C HEIGHTENED DISCLOSURE REQUIREMENT FOURTH-
+  OBSERVATION TIGHTENING potential at n=4 observations** per
+  cumulative Q-C HEIGHTENED DISCLOSURE REQUIREMENT enumeration
+  across S40 + S41 + S42 + S43 (S40 ssa Tier IV Pattern A.3 +
+  §4.7.A variant 3 degenerate dual-arm self-parity FIRST-INSTANCE
+  + S41 wavelet_transform Tier III Pattern A.1 + §4.7.A variant
+  1 + engine-default-config divergence SECOND-OBSERVATION TIGHTENING
+  + S42 wavelet_coherence_phase_lag Tier IV Pattern A.3 + §4.7.A
+  variant 3 degenerate dual-arm self-parity THIRD-OBSERVATION
+  TIGHTENING + S43 emd_hht Tier VI CAVEAT + §4.7.A variant 3 NON-
+  DEGENERATE DUAL-ARM sub-variant + Pattern J Tier C different
+  sifting libraries FOURTH-OBSERVATION TIGHTENING at NEW Tier
+  characterization + sub-variant taxonomy expansion); A3 FOURTH-
+  OBSERVATION TIGHTENING per Q-C HEIGHTENED DISCLOSURE REQUIREMENT
+  scope codification refinement candidate at absorption #6+
+  EMPIRICALLY ROBUSTLY REINFORCED beyond S42 THIRD-OBSERVATION
+  TIGHTENING potential baseline. **NOT conditional for Layer 2
+  engine `emd_hht.py::run()` orchestration — explicit caveat
+  required:** engine math (NaN handling + preset config dispatch
+  + emd package availability check + EMD/EEMD method dispatch +
+  parameter resolution + EMD sifting fallback + Hilbert transform
+  + instantaneous frequency + amplitude analysis + summary tables
+  + plain English + audit_fields construction) NEVER audit-
+  validated; cross-implementation parity beyond `PyEMD.EMD` (AOE
+  Quinn `emd` + MATLAB `emd` + R `EMD`) NOT established; expert
+  review of engine implementation + Layer 1 cross-implementation
+  validation against alternative implementations at base pinned
+  config. **Critical Q-C framing per Pattern J / Tier C — different
+  sifting libraries caveat FIRST observation at Frequency Domain
+  / Signal block scope:** ±2 IMF count divergence empirically
+  expected per different sifting libraries (AOE Quinn vs Laszuk vs
+  MATLAB vs R); reconstruction identity + energy concentration
+  PASS at machine precision + 0.991 correlation provides STRUCTURAL
+  safety bound; audit scope is structural-properties validation
+  ONLY at Tier C convention; defensibility conditional on
+  disclosure of Pattern J / Tier C — different sifting libraries
+  scope distinction (audit established structural-properties NOT
+  per-IMF bitwise parity NOT engine validation NOT cross-
+  implementation parity beyond PyEMD; engine math + Layer 2
+  orchestration NEVER audit-validated). **DISTINCT retraction
+  surface from S37-S42 entries** per Tier VI CAVEAT Pattern J Tier
+  C — different sifting libraries + structural-properties scope
+  validation combined scope; institutionally substantive heightened
+  disclosure requirement at all four disclosure templates at NEW
+  Tier characterization + sub-variant taxonomy expansion combined
+  scope.
+
+- **Q-D (retraction surface if expert review later finds inadequacy):**
+  **MEDIUM per Tier VI CAVEAT (Pattern J / Tier C — different
+  sifting libraries) sub-class characterization scope bound +
+  §4.7.A PRESENT variant 3 NON-DEGENERATE DUAL-ARM sub-variant
+  FIRST-INSTANCE baseline observation disclosure + Pattern J / Tier
+  C — different sifting libraries scope-bounded validation caveat
+  + engine `emd_hht.py::run()` math NEVER validated by audit
+  caveat + §1.8 reroll_on_caveat=False discipline APPLICABLE
+  deterministic CAVEAT verdict caveat** — MEDIUM retraction surface
+  per Pattern J / Tier C — different sifting libraries + structural-
+  properties scope validation (reconstruction identity + IMF count
+  + energy curve correlation at Tier C convention) combined scope.
+  **DISTINCT FROM S37 LOW-MEDIUM / S38 LOW / S39 LOW-MEDIUM / S40
+  MEDIUM-HIGH / S41 LOW-MEDIUM / S42 MEDIUM-HIGH per Tier VI CAVEAT
+  + Pattern J Tier C combined scope:** emd_hht is Huang 1998 EMD
+  + Hilbert transform methodology + PyEMD external library
+  reference (widely-used EMD implementation among AOE Quinn / Laszuk
+  / MATLAB / R packages). **Layer-specific + Tier VI CAVEAT +
+  Sub-class 2m candidate first-instance baseline + §4.7.A PRESENT
+  variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE
+  baseline retraction surface (per S43 (A)+(B)+(C)+(D) ratifications):**
+  - Layer 1 `_numpy_emd_minimal` inline mirror at TSL arm + EXTERNAL
+    PyEMD.EMD library at reference arm (Tier VI CAVEAT Pattern J
+    Tier C — different sifting libraries scope; NON-DEGENERATE
+    DUAL-ARM sub-variant FIRST-INSTANCE baseline): MEDIUM —
+    structural-properties scope validation at Tier C convention
+    (reconstruction identity PASS at machine precision both arms
+    + IMF count CAVEAT at ±2 divergence + cumulative energy curve
+    correlation PASS at 0.991); per-IMF bitwise parity mathematically
+    intractable; expert review surfacing `_numpy_emd_minimal`
+    correctness vs Huang 1998 paper formula OR alternative
+    implementation divergence beyond PyEMD (MATLAB `emd` / R `EMD`)
+    would prompt Q3b extension scope cross-implementation
+    validation.
+  - **Layer 2 engine `emd_hht.py::run()` orchestration: HIGH
+    (NEVER audit-validated)** — NaN handling via `_prepare_series`
+    + preset config dispatch (Fast/Balanced/Thorough max_imfs
+    4/8/12 + max_sift_iterations 50/200/500 + method 'emd'/'emd'/
+    'eemd' + ensemble_size + noise_width) + emd package
+    availability check (`_has_emd()`) + EMD/EEMD method dispatch
+    (Thorough preset 'eemd' Ensemble EMD with noise) + parameter
+    resolution (engine defaults Balanced preset MATCH audit pinned
+    config max_imfs=8 + max_iter=200 — ENGINE-DEFAULT-CONFIG =
+    AUDIT-PINNED-CONFIG match at parameter scope; engine default
+    method 'emd' uses fallback path at audit fixture per TSL `emd`
+    package NOT INSTALLED) + EMD sifting (external `emd` package
+    OR fallback `_numpy_emd`) + Hilbert transform + instantaneous
+    frequency + amplitude analysis + summary tables + plain English
+    + audit_fields construction — NEVER audit-validated; expert
+    review of engine implementation REQUIRED at code-level
+    inspection; orchestration scope substantial (490 LOC engine
+    module); retraction surface HIGH reflects engine math + Layer
+    2 orchestration entirely outside audit scope.
+  - **Pattern J / Tier C — different sifting libraries scope-
+    bounded validation retraction surface: MEDIUM** — audit
+    validates structural-properties scope ONLY at Tier C convention
+    (reconstruction identity + IMF count + energy curve
+    correlation); cross-implementation parity established at
+    PyEMD.EMD scope only (one cross-implementation comparison);
+    NO MATLAB `emd` / R `EMD` cross-validation; ±2 IMF count
+    divergence empirically expected per Pattern J / Tier C
+    methodology; reconstruction identity + 0.991 correlation
+    provides STRUCTURAL safety bound; expert review surfacing
+    structural-properties scope inadequacy (e.g., reconstruction
+    identity fails at edge-case fixture; energy correlation drops
+    below 0.85 threshold; IMF count divergence exceeds ±3
+    threshold) would prompt Q3b extension scope cross-implementation
+    OR fixture-coverage expansion; Q3b extension scope candidate
+    per Path α expert review; MEDIUM retraction surface reflects
+    Pattern J / Tier C deterministic CAVEAT scope.
+  - **§4.7.A PRESENT variant 3 NON-DEGENERATE DUAL-ARM sub-variant
+    FIRST-INSTANCE baseline retraction surface: MEDIUM** — harness
+    defines `_numpy_emd_minimal` inline mirror at TSL arm + invokes
+    EXTERNAL PyEMD library at reference arm; engine
+    `emd_hht.py::run()` is COMPLETELY DIFFERENT code path NEVER
+    exercised by audit; NON-DEGENERATE DUAL-ARM sub-variant is
+    NEW sub-variant within §4.7.A variant 3 codified scope at A3
+    first-instance baseline; sub-variant taxonomy expansion at
+    codification refinement candidate scope; MEDIUM retraction
+    surface reflects structural-properties scope validation +
+    cross-implementation comparison at PyEMD scope + NEW sub-
+    variant taxonomy at first-instance.
+  - **NEW Sub-class 2m candidate first-instance baseline retraction
+    surface: LOW** — A3 first-instance precedent n=1 baseline
+    observation; codification of NEW Sub-class 2m at Tier VI
+    CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE
+    DUAL-ARM sub-variant combined scope deferred to absorption
+    #6+ second-observation tightening if recurs; sub-class
+    definitional scope working hypothesis preserves combined
+    novelty distinction at first-instance observation without
+    codification commitment.
+  - **§1.8 reroll_on_caveat=False discipline APPLICABLE FIRST
+    applicability test within Frequency Domain / Signal block
+    scope retraction surface: LOW** — audit verdict CAVEAT
+    deterministic at Session 5 lock; institutionally substantive
+    informative-not-bug status per audit lines 64-65 verbatim;
+    FIRST cross-Block scope continuation observation at §1.8
+    applicability per Block 3 S32 + S33 + Block 5 S43 = n=2
+    catalog blocks at n=3 §1.8 applicability observations; A3
+    second-observation tightening precedent threshold SATISFIED
+    at §1.8 cross-Block scope continuation scope; codification
+    refinement candidate at absorption #6+ EMPIRICALLY GROUNDED.
+  - **Pattern F structural invariants A3 THIRD-OBSERVATION
+    TIGHTENING MANIFESTED retraction surface: LOW** — A3 third-
+    observation tightening precedent threshold SATISFIED at
+    Pattern F scope at n=3 observations across n=3 mathematical
+    families (FFT + wavelet + EMD) + cross-Tier scope; Pattern F
+    Tier-agnostic empirical generalization observation INSTITUTIONALLY
+    SUBSTANTIVE; codification refinement candidate at absorption
+    #6+ for NEW Sub-class 2j (Pattern F structural invariants
+    scope) EMPIRICALLY ROBUSTLY GROUNDED; forward instrumentation
+    note treatment preserves observation without codification
+    commitment.
+
+**Status:** validated-pre-expert-review per Phase 7+ Q1 trust
+documentation remediation; twenty-third technique to enter status
+per S43 ratification; **SEVENTH Frequency Domain / Signal block
+entry — FIFTH catalog block FULLY Q1-AMENDED milestone REACHED
+AT S43 CLOSE = 5 of 13 catalog blocks fully Q1-amended (38%
+catalog block-level completion)** per Q1 work program scope after
+Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 +
+Block 8 Missing Data at S28 + Block 3 Decomposition at S34 +
+Frequency Domain / Signal block first + second + third + fourth
++ fifth + sixth entries at S37 + S38 + S39 + S40 + S41 + S42
+(Block ordering position emd_hht at SEVENTH-position 7-entry
+Block ordering working hypothesis arc counting validated S37 +
+S38 + S39 + S40 + S41 + S42 + S43 per HEAD cfa0cf9 line 17734
+verbatim §3 empirical re-Read; sole-position alphabetically within
+remaining-1-unvalidated §3 enumeration); **FIRST Tier VI CAVEAT
+(Pattern J / Tier C — different sifting libraries) Q1 §2.5 entry
+within Frequency Domain / Signal block per A3 first-instance
+precedent** per S43 (A) Tier disposition ratification (S32
+mstl_decompose + S33 stl_decompose Tier VI CAVEAT precedent within
+Block 3 Decomposition; S43 emd_hht is cross-Block Tier VI
+characterization extension FIRST-INSTANCE baseline observation
+per A3 first-instance precedent within Frequency Domain / Signal
+block scope); **§4.7.A PRESENT variant 3 (Harness-reimplements-
+engine-math) at NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE
+baseline observation at §2.5 entry codification scope** per S43
+(C) Chat ratification (THIRD §4.7.A variant 3 observation overall
+after S40 + S42 DEGENERATE DUAL-ARM sub-variant SECOND-OBSERVATION
+TIGHTENING; NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE
+at A3 first-instance precedent; sub-variant taxonomy expansion;
+post-S43 §4.7.A observations n=13 PRESENT + n=1 REMEDIATED = n=14
+total observations); **NEW Sub-class 2m candidate first-instance
+baseline observation per A3 first-instance precedent + (αc)
+forward-instrumentation-note treatment** per (αa)+(αc) Chat
+ratification (definitional scope working hypothesis "Tier VI
+CAVEAT (Pattern J Tier C — different sifting libraries / no
+canonical reference) + §4.7.A PRESENT variant 3 harness-
+reimplements-engine-math + NON-DEGENERATE DUAL-ARM sub-variant +
+Pattern F structural invariants computation explicit
+(reconstruction_identity validation at both arms) + IMF count
+CAVEAT driver + cumulative energy curve Pearson correlation
+supplementary metric (Tier C convention) + single-layer scope";
+A3 first-instance precedent n=1 baseline; codification deferred
+to absorption #6+ second-observation tightening if recurs); **§1.8
+reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST
+applicability test within Frequency Domain / Signal block scope
+per S37-S42 §1.8 NOT APPLICABLE banking series** per S43 (D)
+Chat ratification (audit verdict CAVEAT lines 5-7 + tolerance
+class em_stochastic + audit lines 64-67 verbatim §1.8
+reroll_on_caveat=False codification reference; cross-Block scope
+continuation observation per Block 3 S32 + S33 §1.8 applicability
+precedent; n=3 §1.8 applicability observations across S32 + S33
++ S43 at n=2 catalog blocks Block 3 + Block 5; A3 second-
+observation tightening precedent threshold SATISFIED at §1.8
+cross-Block scope continuation at n=2 cross-Block observations);
+**Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING
+MANIFESTED at S43** per (F) Chat ratification (n=3 observations
+across n=3 mathematical families S38 FFT + S41 wavelet + S43
+EMD + cross-Tier Tier II.bit-exact + Tier III + Tier VI CAVEAT
+scope; harness compare() lines 198-210 reconstruction_identity
+validation at both arms at machine precision; A3 THIRD-OBSERVATION
+TIGHTENING precedent threshold SATISFIED at Pattern F scope;
+NEW Sub-class 2j codification refinement candidate at absorption
+#6+ EMPIRICALLY ROBUSTLY GROUNDED); **§1.9 Filename divergence
+sub-pattern variant FOURTH-OBSERVATION NOT MANIFESTED at S43**
+per (G) Chat ratification (audit + harness + engine ALL preserve
+canonical catalog technique_id `emd_hht` exactly; preserves S42
+THIRD-OBSERVATION TIGHTENING status at n=3 cross-block observations
++ direction sub-variant analysis n=2 suffix-omission + n=1 suffix-
+addition; no advance to fourth observation at S43; expiration
+semantics: §1.9 fifth cross-block observation banks at S43 close
+pending S44+ entry filename empirical verification); **HETEROGENEOUS
+TIER-SURFACE VARIANT OBSERVATION A3 FOURTH-OBSERVATION TIGHTENING
+MANIFESTED AT S43** per (H) Chat ratification (n=5 distinct Tier
+characterizations across n=7 entries within Frequency Domain /
+Signal block: Tier III Pattern A.1 at S37 + S41 REPEAT + Tier
+II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 +
+Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43
+NEW = n=5 distinct Tiers; codification refinement candidate at
+absorption #6+ EMPIRICALLY ROBUSTLY REINFORCED beyond S42 third-
+observation tightening baseline); **ALL-ANCHOR-DEFERRAL DISCIPLINE
+SIXTH-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED AT S43** per
+(K) Chat ratification (n=6 sustained efficacy observations S38
++ S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative
+empirical grounding among absorption #6 candidates); **Multi-
+precedent confluence at SAME audit + SAME entry codification
+scope FOURTH-INSTANCE per S38 + S41 + S42 + S43 sequential
+observations** per (I) Chat ratification (SEVEN A3 precedent
+threshold satisfactions/reinforcements at S43 scope = record-
+high single-observation count in apparatus history: Tier VI
+CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block
++ Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION
+TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION
+TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION +
+§1.8 reroll_on_caveat=False discipline FIRST applicability test
+within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-
+variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED
+milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD
+SATISFIED at multi-precedent confluence sub-pattern scope at n=4
+distinct observations + sustained ≥5 A3 threshold satisfactions
+per observation; codification refinement candidate at absorption
+#6+ EMPIRICALLY ROBUSTLY REINFORCED); **BLOCK 5 FREQUENCY DOMAIN
+/ SIGNAL FULLY Q1-AMENDED MILESTONE REACHED AT S43 CLOSE = FIFTH
+catalog block fully Q1-amended (5 of 13 = 38% catalog block-level
+completion); per-block continuation pattern n=5 catalog block
+observations REACHED** per (J) Chat ratification (per absorption
+#6+ codification candidate at §19.4 §4 note 6 refinement n=4 →
+n=5 per S35-absorption #5 codification EMPIRICALLY ROBUSTLY
+GROUNDED at sustained five catalog block fully Q1-amended
+observations); **SINGLE-LAYER framing per S43 STOP 2 empirical
+investigation + A-K dispositions** (Tier VI CAVEAT Pattern J Tier
+C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM single-layer framing;
+§2.5 Tier primary+overlay convention NOT APPLICABLE at S43);
+**CRITICAL CAVEAT — Pattern J / Tier C — different sifting
+libraries scope; deterministic CAVEAT verdict per
+`reroll_on_caveat = False` Session 5 lock** — audit verdict CAVEAT
+deterministic per audit lines 64-65 verbatim ("CAVEAT verdict is
+informative-not-bug — documents the known methodology divergence.
+`reroll_on_caveat = False` (default per Session 5 lock) means no
+retry; verdict stays CAVEAT deterministically"); engine
+`emd_hht.py::run()` math + Layer 2 orchestration (NaN handling +
+preset config dispatch + emd package availability check + EMD/EEMD
+method dispatch + parameter resolution + EMD sifting + Hilbert
+transform + instantaneous frequency + amplitude analysis) NEVER
+exercised by audit; structural-properties scope validation ONLY
+at Tier C convention (reconstruction identity + IMF count + energy
+curve correlation); cross-implementation parity established at
+PyEMD scope only (AOE Quinn / MATLAB / R distinct implementations
+NOT cross-validated); FIRST observation of Tier VI CAVEAT Pattern
+J Tier C — different sifting libraries scope at Frequency Domain
+/ Signal block scope per A3 first-instance precedent; institutionally
+substantive empirical content distinction at NEW Tier characterization
++ sub-variant taxonomy expansion combined scope; **§4.7.A pattern
+n=13 PRESENT + n=1 REMEDIATED = n=14 total post-S43 observations
+across §2.5 entries** (S14a granger + S18 gcc_phat + S26
+denton_chowlin + S27 loess + S31 classical_decompose + S32
+mstl_decompose + S33 stl_decompose + S37 periodogram_spectral_density
++ S38 fft_spectrum + S39 lomb_scargle + S40 ssa + S41
+wavelet_transform + S42 wavelet_coherence_phase_lag + S43 emd_hht
+PRESENT + S34 x13_seasonal_adjust REMEDIATED; **§4.7.A variant 3
+THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope + NEW
+NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline
+observation at §4.7.A variant 3 sub-variant scope taxonomy
+expansion per S43 banking** — forward observation banking only;
+NOT §4.7.A taxonomy modification at S43); **A9 CLASS A COUNTER
+POST-S43 STATUS PRESERVATION at S43 commit message body forward
+state per S43 Step 0 sustained institutional learning
+operationalization (no new Class A catch at S43 Step 0; prior-
+turn-ratification-acknowledgment discipline operational at S43
+— Code surfaced STOP 2 once at Step 0 close; awaited Chat
+ratification response; proceeded to Step 1 entry drafting upon
+receipt of Chat STOP 2 disposition response without re-surfacing
+Step 0 STOP 2 surface per S39 n=20 candidate banking institutional
+learning sustainment from S40 + S41 + S42):** n=14 ACTIVE codified
+at §19.4 unchanged + n=15 + n=16 codified at §1.7 (c) per S36 +
+n=17 + n=18 + n=19 + n=20 candidates banked at S36-S39 commit
+message body forward state + S40 + S41 + S42 + S43 SUSTAINED no
+new Class A catch pending absorption #6+ codification; A9 Class A
+counter at §19.4 advance deferred to absorption #6+ per multi-
+candidate accumulation. **Block ordering working hypothesis
+seventh-position verification at S43 per Code Step 0 empirical
+re-Read:** emd_hht at sole-position alphabetically within §3
+remaining-1 unvalidated entry verified; emd_hht at SEVENTH-position
+in 7-entry Block ordering working hypothesis arc counting
+validated S37 + S38 + S39 + S40 + S41 + S42 + S43 per preliminary
+working hypothesis from S37 close commit message body forward
+state CONFIRMED at S43 empirical verification COMPLETING 7-entry
+Block 5 arc; Block ordering working hypothesis SIXTH-OBSERVATION
+TIGHTENING per A3 precedent at Block 5 close (n=6 sustained
+Block-ordering observations across complete arc); **CONTINUATION
+of S30 + S36 Workstream B codifications at S43:** §1.6 Q-A density
+convention operative continuation (n=13 post-codification
+applications S31-S43) + §5.5 forward-instrumentation hygiene at
+status line operative continuation (n=13 post-codification
+applications) + §1.5 novelty enumeration sub-section APPLIED at
+S43 (≥5 observations threshold satisfied at n=9 novelties; ninth
+post-S23 application; A3 ninth-observation tightening
+reinforcement) + §1.7 refined Mod 3 cadence operative (seventh
+Q1 entry post-S36 §1.7 codification; refined Mod 3 chunked-
+surface content-completeness specification operational at S43
+STOP 1 chunked-surface protocol; Step 2 cross-section update
+narration suppression THIRD-OBSERVATION TIGHTENING candidate per
+S41 EFFICACY VALIDATED FIRST-INSTANCE + S42 SECOND-OBSERVATION
+TIGHTENING SUSTAINED + S43 sustained successful suppression) +
+§1.8 reroll_on_caveat=False discipline APPLICABLE at S43 (FIRST
+applicability test within Frequency Domain / Signal block scope;
+audit verdict CAVEAT lines 5-7 + audit lines 64-67 verbatim
+codification reference; cross-Block scope continuation observation
+per Block 3 S32 + S33 §1.8 applicability precedent) + §1.9
+Filename divergence sub-pattern variant FOURTH-OBSERVATION NOT
+MANIFESTED at S43 (audit + harness + engine ALL preserve canonical
+catalog technique_id `emd_hht` exactly; preserves S42 THIRD-
+OBSERVATION TIGHTENING status) + §4.7.A REMEDIATED status
+dimension NOT applicable at S43 (PRESENT status; status dimension
+PRESENT/REMEDIATED orthogonal to mechanism variant 3); §2.5 Tier
+primary+overlay convention NOT APPLICABLE at S43 (Tier VI CAVEAT
+single-tier framing per S43 (A) ratification); §4.7 in-place
+codification operative reference at §4.7.A PRESENT variant 3
+THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope + NEW
+NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + §4.7.A
+status dimension extension cross-reference. **A10 Sub-class
+disposition NEW Sub-class 2m candidate first-instance baseline
+observation per (αa)+(αc) Chat ratification** (definitional scope
+working hypothesis "Tier VI CAVEAT Pattern J Tier C — different
+sifting libraries + §4.7.A PRESENT variant 3 harness-reimplements-
+engine-math + NON-DEGENERATE DUAL-ARM sub-variant + Pattern F
+structural invariants computation explicit + IMF count CAVEAT
+driver + cumulative energy curve Pearson correlation supplementary
+metric Tier C convention + single-layer scope"; A3 first-instance
+precedent n=1 baseline; NOT codification of NEW Sub-class 2m;
+codification deferred to absorption #6+ second-observation
+tightening if recurs at S44+ Q1 entry within Tier VI CAVEAT
+Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-
+variant combined scope OR future Tier VI Pattern J Tier C entry
+within Tier VI ~5-wrapper enumeration scope; expiration semantics:
+NEW Sub-class 2m candidate observation banks at S43 close pending
+second-observation tightening at respective sub-session OR
+absorption #6+ codification refinement disposition). **A9 Class
+B counter post-S43: n=4 ACTIVE (unchanged at S43; no new Class B
+catch); sustained-observation count under Class B revised default
+discipline n=17 (S22 + S23 + S25 + S26 + S27 + S28 + S31 + S32 +
+S33 + S34 + S37 + S38 + S39 + S40 + S41 + S42 + S43 = n=17 Q1
+entries only counting basis per Chat preference codified at S31)**.
+**A9 Class A counter post-S43: n=14 ACTIVE codified at §19.4
+unchanged + candidates n=15 + n=16 codified at §1.7 (c) Workstream
+B empirical-efficacy grounding scope per S36 + candidates n=17
++ n=18 + n=19 + n=20 banked at S36-S39 commit message body forward
+state + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch
+per S43 Step 0 prior-turn-ratification-acknowledgment discipline
+operationalization institutional learning sustainment**. **§4.7.A
+pattern n=13 PRESENT + n=1 REMEDIATED = n=14 total observation
+count post-S43 per S30 (G.1) generalized definitional scope
+codification + S36 §4.7.A status dimension extension + S43 §4.7.A
+variant 3 THIRD-INSTANCE TIGHTENING + NEW NON-DEGENERATE DUAL-ARM
+sub-variant FIRST-INSTANCE baseline observation at §2.5 entry
+codification scope.** **A9 Class A + Class B discipline maturation
+TWENTIETH SUSTAINED OBSERVATION REACHED at S43 (S23 + S25 + S26
++ S27 + S28 + S29 + S30 + S31 + S32 + S33 + S34 + S35 + S36 +
+S37 + S38 + S39 + S40 + S41 + S42 + S43 = n=20 cross-session
+trajectory)** per A3 second-observation tightening precedent
+threshold satisfied + EIGHT-timing-point empirical surface
+preserved per S35-absorption #5 codification; **§4.5 codification
+operational at n=13 post-codification sustained observations per
+S43 cross-session trajectory** (S30 + S31 + S32 + S33 + S34 + S35
++ S36 + S37 + S38 + S39 + S40 + S41 + S42 + S43 post-codification
+trajectory). **Frequency Domain / Signal block seventh-entry +
+Block 5 FULLY Q1-AMENDED milestone status framing** (analogous
+to S18 gcc_phat_delay Block 1 sixth-entry FINAL-entry precedent
+at Tier IV Pattern A.3 + Block 1 Causality FULLY Q1-AMENDED FIRST
+catalog block milestone per Block 1 close; S23 pp_test Block 12
+third-entry FINAL-entry precedent at Block 12 Stationarity Tests
+FULLY Q1-AMENDED SECOND catalog block; S28 kalman_imputation
+Block 8 third-entry FINAL-entry precedent at Block 8 Missing Data
+FULLY Q1-AMENDED THIRD catalog block; S34 x13_seasonal_adjust
+Block 3 fourth-entry FINAL-entry precedent at Block 3 Decomposition
+FULLY Q1-AMENDED FOURTH catalog block; S43 emd_hht is Block 5
+seventh-entry FINAL-entry per Block 5 7-entry arc completion at
+Tier VI CAVEAT scope = FIFTH catalog block FULLY Q1-AMENDED
+milestone; per-block continuation pattern n=5 catalog block
+observations REACHED at S43 close per absorption #6+ codification
+candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY
+ROBUSTLY GROUNDED). **Frequency Domain / Signal completion arc
+S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close**
+(banking continuation per ITEM 11 forward instrumentation banking;
+Block 5 FULLY Q1-AMENDED milestone REACHED at S43 close); **post-
+S43 Q1 work program substantive forward instrumentation scope:**
+absorption #6+ consolidation projection at S44+ with potentially
+THREE-to-FIVE-sub-session consolidation precedent given 40+
+candidate inventory + SEVEN A3 precedent threshold satisfactions
+empirically ROBUSTLY grounded at single S43 observation + FOURTH-
+INSTANCE multi-precedent confluence across S38 + S41 + S42 + S43;
+substantive forward instrumentation scope at S43 close: catalog
+block-level Q1 work program progress at 38% completion;
+absorption #6 candidate inventory accumulated to 40+ candidates
+across n=11 multi-pattern variant codification scopes (Tier IV
+Pattern A.3 SECOND-OBSERVATION + §4.7.A variant 3 DEGENERATE
+DUAL-ARM SECOND-OBSERVATION + Sub-class 2l SECOND-OBSERVATION +
+§1.9 cross-block extension THIRD-OBSERVATION + Multi-precedent
+confluence sub-pattern THIRD-OBSERVATION upgraded to FOURTH-
+OBSERVATION at S43 + Tier VI CAVEAT cross-Block FIRST-INSTANCE
++ NEW Sub-class 2m FIRST-INSTANCE + NEW §4.7.A variant 3 NON-
+DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE + Pattern F
+structural invariants A3 THIRD-OBSERVATION + Heterogeneous Tier-
+surface variant A3 FOURTH-OBSERVATION + Per-block continuation
+pattern n=5 catalog block observations REACHED + Q-C HEIGHTENED
+DISCLOSURE REQUIREMENT FOURTH-OBSERVATION TIGHTENING potential +
+Q-D MEDIUM-HIGH retraction surface CATEGORY sub-category
+establishment + §1.8 cross-Block scope continuation second-
+observation tightening + Step 2 cross-section update narration
+suppression THIRD-OBSERVATION TIGHTENING).
+**§1.9 cross-block extension FOURTH-OBSERVATION NOT MANIFESTED
+at S43** (audit + harness + engine ALL preserve canonical catalog
+technique_id `emd_hht` exactly; preserves S42 THIRD-OBSERVATION
+TIGHTENING status at n=3 cross-block observations + direction
+sub-variant analysis n=2 suffix-omission + n=1 suffix-addition;
+expiration semantics: §1.9 fifth cross-block observation banks
+at S43 close pending S44+ entry filename empirical verification).
+**Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING
+MANIFESTED at S43** (harness `p3_emd_hht.py` compare() lines 198-
+210 EXPLICITLY computes reconstruction_identity validation at
+both arms at machine precision 1e-10 threshold; n=3 Pattern F
+observations across n=3 mathematical families S38 FFT-family +
+S41 wavelet-family + S43 EMD-family + cross-Tier scope Tier
+II.bit-exact at S38 + Tier III Pattern A.1 at S41 + Tier VI
+CAVEAT at S43; A3 THIRD-OBSERVATION TIGHTENING precedent threshold
+SATISFIED at Pattern F scope; NEW Sub-class 2j codification
+refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY
+GROUNDED at three-observation tightening Tier-agnostic across
+mathematical families + Tier characterizations; expiration
+semantics: Pattern F fourth-observation banks at S43 close pending
+S44+ wrapper structural-invariants manifestation).
+**ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at
+Balanced preset parameter scope** (engine Balanced preset max_imfs=8
++ max_sift_iterations=200 matches audit pinned max_imfs=8 +
+max_iter=200; engine default method 'emd' but TSL `emd` package
+NOT INSTALLED at audit fixture → engine uses `_numpy_emd` fallback
+path matching harness `_numpy_emd_minimal` mirror; preserves S41
+FIRST observation at ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG
+DIVERGENCE scope as SINGLE-INSTANCE; S43 no divergence at parameter
+scope — engine + audit BOTH use Balanced preset max_imfs=8 +
+max_iter=200; A3 first-instance precedent preserved at S43).
+**NEW Pattern J / Tier C — different sifting libraries scope
+FIRST observation at Q1 §2.5 entry codification scope at S43
+forward instrumentation banking** (Pattern J / Tier C distinct
+from Pattern J B.1 statsmodels precision-instability at S32 + S33
++ Pattern J B.2 ARCH/RUGARCH alpha-vs-gamma naming swap at S6 /
+Batch 2 + Pattern J B.3 alignment-via-metric resolution at S39
+lomb_scargle; FIRST Pattern J Tier C — different sifting libraries
+observation at §2.5 entry codification scope; cross-implementation
+parity established at PyEMD scope only at A3 first-instance
+precedent; institutionally substantive empirical content
+distinction at Pattern J sub-pattern scope dimension).
+**Multi-precedent confluence at SAME audit + SAME entry
+codification scope FOURTH-INSTANCE per S38 + S41 + S42 + S43
+sequential observations** (S38 fft_spectrum first-instance multi-
+precedent confluence baseline + S41 wavelet_transform second-
+instance multi-precedent confluence + S42 wavelet_coherence_phase_lag
+THIRD-INSTANCE multi-precedent confluence + S43 emd_hht FOURTH-
+INSTANCE multi-precedent confluence per SEVEN A3 precedent threshold
+satisfactions/reinforcements at S43 scope = record-high single-
+observation count in apparatus history: (1) Tier VI CAVEAT FIRST
+Q1 §2.5 entry within Frequency Domain / Signal block + (2)
+Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING
++ (3) Pattern F structural invariants A3 THIRD-OBSERVATION
+TIGHTENING + (4) All-anchor-deferral discipline SIXTH-APPLICATION
+A3 further reinforcement + (5) §1.8 reroll_on_caveat=False discipline
+FIRST applicability test within Block 5 + (6) §4.7.A variant 3
+NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + (7)
+Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION
+TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent
+confluence sub-pattern scope at SAME audit + SAME entry codification
+surface at n=4 distinct observations S38 + S41 + S42 + S43 +
+sustained ≥5 A3 threshold satisfactions per observation;
+codification refinement candidate at absorption #6+ for multi-
+precedent confluence sub-pattern definitional scope at §2.5
+entry codification scope EMPIRICALLY ROBUSTLY REINFORCED at four
+sustained observations + sustained ≥5 A3 threshold satisfactions
+per observation).
+
+## §3 Unvalidated catalog techniques (52 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -17730,8 +19768,8 @@ descriptions, summaries).
 ### Forecasting (Classical) (8 unvalidated)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
 
-### Frequency Domain / Signal (1 unvalidated; periodogram_spectral_density moved to §2.5 per Phase 7+ S37 — FIRST Frequency Domain / Signal block entry; FIFTH catalog block transition opens; fft_spectrum moved to §2.5 per Phase 7+ S38 — SECOND Frequency Domain / Signal block entry; lomb_scargle moved to §2.5 per Phase 7+ S39 — THIRD Frequency Domain / Signal block entry; ssa moved to §2.5 per Phase 7+ S40 — FOURTH Frequency Domain / Signal block entry; wavelet_transform moved to §2.5 per Phase 7+ S41 — FIFTH Frequency Domain / Signal block entry; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42 — SIXTH Frequency Domain / Signal block entry; heterogeneous Tier-surface variant observation A3 third-observation tightening SUSTAINED at S42 with n=4 distinct Tiers preserved (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT — S42 Tier IV REPEATS S40, no advance to n=5 distinct Tiers); Block Q1-amendment in-progress at 6 of 7 entries Q1-amended)
-`emd_hht`
+### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
+(all 7 techniques moved to §2.5)
 
 ### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
@@ -17754,7 +19792,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 53 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition ALL FOUR FULLY Q1-AMENDED — FIRST FOUR catalog blocks to complete per Q1 work program scope; per-block continuation pattern at n=4 catalog block observations satisfies A3 second-observation tightening precedent threshold; codification at §19.4 §4 forward instrumentation note 6 refinement at S35-absorption #5 + n=5 codification refinement candidate at absorption #6+ post-Frequency-Domain/Signal-block-closure; Frequency Domain / Signal block Q1-amendment IN-PROGRESS at 6 of 7 entries Q1-amended — FIFTH catalog block transition opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry; HETEROGENEOUS Tier-surface variant observation A3 third-observation tightening SUSTAINED at S42 with n=4 distinct Tiers preserved (S42 Tier IV Pattern A.3 REPEATS S40; not advanced to n=5); Block forward completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 advances at S42 per 7-entry §3 enumeration empirical re-Read at S42 Step 0 mid-session; Block ordering working hypothesis sixth-position verification at S42 per Code Step 0 empirical re-Read; ALL-ANCHOR-DEFERRAL DISCIPLINE FIFTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S42 (n=5 sustained efficacy observations S38 + S39 + S40 + S41 + S42 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement empirically ROBUSTLY REINFORCED — STRONGEST empirical grounding for codification adoption among all absorption #6 candidates at S42 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (S37 + S41 Tier III Pattern A.1 + §4.7.A variant 1 codification adoption candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED; preserved unchanged at S42); Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (S40 + S42 Tier IV Pattern A.3 + §4.7.A variant 3 degenerate-dual-arm-self-parity codification adoption candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED); Pattern F structural invariants SECOND-OBSERVATION TIGHTENING at S41 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family empirical generalization Tier-agnostic; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED; preserved unchanged at S42 — Pattern F THIRD-OBSERVATION NOT MANIFESTED at wavelet coherence harness primary metrics-only structure); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 (A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope at n=3 cross-block observations S37 suffix-omission + S40 suffix-addition + S42 suffix-omission; direction sub-variant analysis n=2 suffix-omission + n=1 suffix-addition; codification refinement candidate at absorption #6+ for direction-symmetric expansion + cross-block scope generalization EMPIRICALLY ROBUSTLY REINFORCED); §4.7.A variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant SECOND-OBSERVATION TIGHTENING at §2.5 entry codification scope at S42 (S40 first-instance baseline + S42 SECOND-INSTANCE; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE preserved at S41 FIRST observation as SINGLE-INSTANCE (S42 NOT MANIFESTED — engine `wavelet_coherence.py` Balanced preset matches audit pinned config); A9 Class A counter post-S42 status preserved n=14 ACTIVE + n=15-n=20 candidates banked at S35-S39 + S40 + S41 + S42 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment from S40 + S41; Multi-precedent confluence at S42 INSTITUTIONALLY SUBSTANTIVE THIRD-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 THIRD-INSTANCE per FIVE A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope: Tier IV Pattern A.3 second-observation tightening + §4.7.A variant 3 degenerate dual-arm self-parity second-observation tightening + Sub-class 2l second-observation tightening + §1.9 cross-block extension third-observation tightening + all-anchor-deferral discipline FIFTH-APPLICATION A3 further reinforcement; A3 THIRD-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=3 distinct observations)**).
+**Total: 52 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
 
 ## §4 How to use this document
 
