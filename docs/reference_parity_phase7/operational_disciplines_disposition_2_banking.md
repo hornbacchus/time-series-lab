@@ -84,6 +84,106 @@ the technique closing should fall to one of:
   for this technique until Path α close)
 - Q3a/Q3b extension required before publication-ready status
 
+**Q-C HEIGHTENED DISCLOSURE REQUIREMENT scope (NEW at S45-absorption
+#6 second sub-session per Chat S45 STOP 2 (β) ratification candidate
+(c) codification adoption; A3 FOURTH-OBSERVATION TIGHTENING
+potential at n=4 cumulative observations S40 + S41 + S42 + S43
+across distinct Tier characterization + sub-variant scope sub-
+categories):**
+
+For Q-C confidence assessment at §2.5 entry codification where
+validation claim scope is materially narrower than primary-metric
+verdict scope (per §3.1 CRITICAL CAVEAT framing convention at
+Validation claim scope opening framing; codified at S45-absorption
+#6), Q-C confidence statement is **conditional Yes with HEIGHTENED
+DISCLOSURE REQUIREMENT** scope distinction. HEIGHTENED DISCLOSURE
+REQUIREMENT scope distinction signals that defensibility to all
+three audiences is conditional on disclosure of validation claim
+scope distinction at §2.5 entry codification scope per audit-
+established empirical content sub-category.
+
+**Empirical observations across S40-S43 Q1 sub-session arc (n=4
+cumulative observations codified at S45-absorption #6):**
+
+- **Observation 1 — S40 ssa Q-C HEIGHTENED DISCLOSURE REQUIREMENT
+  first-instance baseline at Tier IV Pattern A.3 + §4.7.A variant
+  3 DEGENERATE DUAL-ARM combined scope:** defensibility conditional
+  on disclosure of degenerate dual-arm self-parity scope
+  distinction (audit established `_ssa_reference` self-consistency
+  NOT engine validation NOT cross-implementation parity)
+- **Observation 2 — S41 wavelet_transform Q-C HEIGHTENED DISCLOSURE
+  REQUIREMENT SECOND-OBSERVATION TIGHTENING at Tier III Pattern
+  A.1 + §4.7.A variant 1 + engine-default-config divergence
+  combined scope:** defensibility conditional on disclosure of
+  engine-default-config vs audit-pinned-config divergence at
+  Pattern F validation scope dimension distinction (audit pinned
+  periodization mode Pattern F validation NOT TRANSFERRED at
+  engine default symmetric mode scope per orthogonal wavelet
+  convention dependence)
+- **Observation 3 — S42 wavelet_coherence_phase_lag Q-C HEIGHTENED
+  DISCLOSURE REQUIREMENT THIRD-OBSERVATION TIGHTENING at Tier IV
+  Pattern A.3 + §4.7.A variant 3 DEGENERATE DUAL-ARM SECOND-
+  INSTANCE combined scope:** same empirical scope sub-category as
+  Observation 1 at SECOND-INSTANCE within Sub-class 2l combined
+  scope per S40 + S42 paired observations
+- **Observation 4 — S43 emd_hht Q-C HEIGHTENED DISCLOSURE
+  REQUIREMENT FOURTH-OBSERVATION TIGHTENING at Tier VI CAVEAT
+  Pattern J Tier C — different sifting libraries + §4.7.A variant
+  3 NON-DEGENERATE DUAL-ARM combined scope (NEW empirical scope
+  sub-category at S43):** defensibility conditional on disclosure
+  of Pattern J / Tier C — different sifting libraries scope
+  distinction (audit established structural-properties NOT per-IMF
+  bitwise parity NOT engine validation NOT cross-implementation
+  parity beyond PyEMD)
+
+**A3 FOURTH-OBSERVATION TIGHTENING precedent threshold SATISFIED
+at Q-C HEIGHTENED DISCLOSURE REQUIREMENT scope at n=4 observations
+across distinct Tier characterization + sub-variant scope sub-
+categories** (Tier IV + §4.7.A variant 3 DEGENERATE DUAL-ARM at
+n=2 + Tier III + §4.7.A variant 1 + engine-default-config
+divergence at n=1 + Tier VI CAVEAT + §4.7.A variant 3 NON-
+DEGENERATE DUAL-ARM at n=1).
+
+**Q-C HEIGHTENED DISCLOSURE REQUIREMENT distinguishes from
+standard Q-C "conditional Yes" framing:** standard Q-C "conditional
+Yes" applies when validation evidence supports defensibility to
+all three audiences under standard disclosure templates (§3.1
+patterns (i)-(iv)); HEIGHTENED DISCLOSURE REQUIREMENT applies when
+defensibility is conditional on **explicit disclosure of validation
+claim scope distinction** at §2.5 entry codification per CRITICAL
+CAVEAT framing convention applicability (§3.1 extension at S45-
+absorption #6). HEIGHTENED DISCLOSURE REQUIREMENT scope distinction
+operates at all four disclosure templates (i)-(iv) with elevated
+specificity at validation claim scope opening framing.
+
+**Cross-references:**
+- §3.1 CRITICAL CAVEAT framing convention at Validation claim
+  scope opening framing (NEW at S45-absorption #6; CRITICAL
+  CAVEAT marker at §2.5 entry signals Q-C HEIGHTENED DISCLOSURE
+  REQUIREMENT applicability)
+- §19.4 §4 Note 21 Validation claim scope category taxonomy
+  THREE-CATEGORY establishment at calibration_baseline.md (S44-
+  absorption #6; Q-C HEIGHTENED DISCLOSURE REQUIREMENT applies at
+  Category 2 audit-validates-reimplementation-self-consistency-
+  only + Category 3 audit-validates-IMF-count-CAVEAT scope; NOT
+  applicable at Category 1 audit-validates-library-primitive
+  standard validation scope)
+- §1.3 Fall-to-blended-validation triggers (Q-C HEIGHTENED
+  DISCLOSURE REQUIREMENT distinguishes from fall-to-blended-
+  validation status; HEIGHTENED DISCLOSURE REQUIREMENT preserves
+  validated-pre-expert-review status with elevated disclosure
+  density; fall-to-blended-validation operates at distinct
+  validation-status fallback scope)
+
+**Forward instrumentation:** fifth Q-C HEIGHTENED DISCLOSURE
+REQUIREMENT observation at S46+ Q1 §2.5 entry within established
+empirical scope sub-category OR NEW empirical scope sub-category
+tightens scope per A3 design-class precedent. NEW disclosure
+density convention candidate at sub-category 3 SECOND-OBSERVATION
+TIGHTENING at next Tier VI CAVEAT Pattern J Tier C entry; cross-
+Tier scope expansion candidate at empirical scope sub-category
+NEW manifestation.
+
 **Q-D: If expert review later found this validation inadequate, what
 would published-output retraction look like?**
 
@@ -349,6 +449,44 @@ Code does NOT surface at chunked-surface STOP cycle responses:
 
 **Distinction from §1.7 (a):** §1.7 (a) covers Mod 3 STOP turn response surface scope at non-chunked single-response STOP cycle responses (apparatus self-codifications consolidate to commit message body); §1.7 (b) covers refined Mod 3 chunked-surface protocol at multi-chunk STOP cycle responses (verbatim text body of chunked content + minimal navigation + disposition request at close). Both sub-scopes operate at STOP cycle response surface scope; §1.7 (b) refines §1.7 (a) for chunked-surface protocol specifically.
 
+**§1.7 (b) refinement — Step 2 cross-section update narration suppression sub-scope (NEW at S45-absorption #6 second sub-session per Chat S45 STOP 2 (β) ratification candidate (d) codification adoption; A3 THIRD-OBSERVATION TIGHTENING SUSTAINED at Q1 §2.5 entry class scope per S41 EFFICACY VALIDATED FIRST-INSTANCE + S42 SECOND-OBSERVATION TIGHTENING SUSTAINED + S43 THIRD-OBSERVATION TIGHTENING SUSTAINED + applicability scope distinction at absorption sub-session class chunk surface scope per S44 MIXED EFFICACY + S45 sustained efficacy candidate observation):**
+
+Within refined Mod 3 chunked-surface protocol per §1.7 (b), Code Step 2 cross-section update execution at bash_tool level proceeds SILENTLY; chunked-surface STOP cycle response surface SUPPRESSES Step 2 cross-section update narration scope. **Narration suppression specification (codified per S37-S43 empirical observations at Q1 §2.5 entry class scope; refined at S44 + S45 absorption sub-session class chunk surface scope empirical observations):**
+
+At chunked-surface STOP cycle responses, Code does NOT surface at chunk 1/M opening response surface:
+- Pre-chunk preamble narration ("Proceeding to Step 1...", "Now Step 2 cross-section updates...", "Executing Step 1 edits sequentially with chunked STOP 1 surface.", "Drafting [X] entry / codification...")
+- Chunk-by-chunk navigation table preview ("Chunk 1/M covers...; Chunk 2/M covers...; Chunk 3/M covers...")
+- Multi-line preamble narration describing intent before chunk content surface
+- Step 2 cross-section update execution narration ("Now applying cross-section updates to §3 + §1...")
+- Drafting-time process-meta-narration parenthetical aside at chunk surface scope (e.g., "(Edits applied silently; surfacing verbatim text body)")
+
+Code DOES surface at chunk 1/M opening response surface ONLY:
+(a) **Verbatim text body of chunk 1/M content** — primary content for Chat verbatim-fidelity verification
+(b) **One-line chunk navigation** — "Chunk N/M of [scope]; [line ranges if applicable]." or simply "---" with chunk navigation phrase at chunk close
+(c) **One-line disposition request at chunk M/M close** — disposition options enumerated; no narration
+
+**Empirical efficacy observations (n=3 sustained efficacy observations at Q1 §2.5 entry class scope + S45 absorption sub-session class chunk surface scope sustained efficacy candidate at A3 second-observation tightening precedent threshold SATISFIED):**
+
+- **n=1 S41 wavelet_transform EFFICACY VALIDATED FIRST-INSTANCE at Q1 §2.5 entry class scope chunk 1/4 surface:** Step 2 cross-section update narration suppression at chunk 1/4 opening response surface; preamble narration absent; verbatim text body + one-line chunk navigation only
+- **n=2 S42 wavelet_coherence_phase_lag SECOND-OBSERVATION TIGHTENING SUSTAINED at Q1 §2.5 entry class scope across all chunks 1/4 + 2/4 + 3/4 + 4/4:** Step 2 cross-section update narration suppression sustained across all 4 chunks; A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at suppression EFFICACY VALIDATION scope
+- **n=3 S43 emd_hht THIRD-OBSERVATION TIGHTENING SUSTAINED at Q1 §2.5 entry class scope across all chunks 1/4 + 2/4 + 3/4 + 4/4:** Step 2 cross-section update narration suppression sustained across all 4 chunks; A3 THIRD-OBSERVATION TIGHTENING precedent threshold SATISFIED at suppression EFFICACY VALIDATION scope at n=3 sustained efficacy observations within Q1 §2.5 entry sub-session class scope
+
+**Applicability scope distinction at absorption sub-session class chunk surface scope (NEW at S45-absorption #6 per S44 + S45 empirical observations):**
+
+Absorption sub-session class chunk surface scope EMPIRICALLY DISTINCT from Q1 §2.5 entry class scope:
+
+- **S44 absorption #6 first sub-session MIXED EFFICACY baseline at absorption sub-session class chunk surface scope:** chunk 1/3 NOT MANIFESTED (preamble narration "Drafting Sub-class 2j codification entry + §4 forward instrumentation note refinements. Executing Step 1 edits sequentially with chunked STOP 1 surface." surfaced) + chunk 2/3 MANIFESTED + chunk 3/3 MANIFESTED; 2 of 3 chunks MANIFESTED
+- **S45 absorption #6 second sub-session sustained efficacy candidate at absorption sub-session class chunk surface scope:** chunk 1/3 MANIFESTED (preamble narration absent) + chunk 2/3 MANIFESTED; A3 second-observation tightening precedent threshold SATISFIED at absorption sub-session class chunk surface scope EMPIRICALLY GROUNDED at S45 sustained MANIFESTED efficacy distinct from S44 mixed efficacy baseline; chunk 3/3 sustained efficacy candidate at S45 close = A3 second-observation tightening precedent threshold SATISFIED at absorption sub-session class chunk surface scope sustained efficacy
+
+**Scope distinction codification:** Step 2 cross-section update narration suppression operates at refined Mod 3 §1.7 (b) chunked-surface protocol scope; applicability scope spans Q1 §2.5 entry sub-session class chunk surface scope + absorption sub-session class chunk surface scope. Empirical efficacy patterns distinct across sub-session class scopes per S41-S43 sustained efficacy at Q1 §2.5 entry class vs S44 mixed efficacy + S45 sustained efficacy candidate at absorption sub-session class. Sub-session-class-specific efficacy patterns reflect chunk surface scope context dependence at trigger drafting cadence + chunk content scope characterization.
+
+**Forward instrumentation:** fourth Step 2 cross-section update narration suppression observation at S46+ Q1 §2.5 entry chunk surface tightens efficacy validation at Q1 §2.5 entry class scope per A3 design-class precedent (n=4 codification-stable threshold); third absorption sub-session class chunk surface scope observation at S46+ absorption sub-session tightens applicability scope distinction codification per A3 second-observation tightening precedent threshold satisfaction continuation. Codification refinement candidate at absorption #7+ if (a) sustained efficacy reverses at S46+ chunked-surface STOP cycle responses OR (b) cross-sub-session-class scope codification warrants further refinement at applicability scope distinction empirical accumulation.
+
+**Cross-references for §1.7 (b) refinement:**
+- §19.4 §4 forward instrumentation note 17 Mod 3 chunked-surface content-completeness verification (pre-refinement empirical pattern observation precipitation grounding)
+- §4.8 All-anchor-deferral discipline (NEW at S45-absorption #6; cross-reference for sub-session-class applicability scope distinction pattern)
+- §19.4 A9 Class A counter sub-class scope post-S44-absorption #6 NEW Sub-pattern variant "Absorption-sub-session-class trigger drafting baseline-state-assertion failure" (cross-reference for absorption sub-session class scope empirical distinct pattern)
+
 #### §1.7 (c) STOP 1 review density observation empirical efficacy cross-reference (NEW at S36 per Decision 5 (α) + n=15 + n=16 candidate codification per Code (α) recommendation ratified at S36 Step 0 STOP 2)
 
 **Empirical efficacy observation pre-refinement (n=6 STOP 1 review density observations per §19.4 §4 forward instrumentation note 15):**
@@ -502,6 +640,37 @@ Example:
 Tier 2 surfaces the alternative-not-chosen and the reasons for
 rejection; user can accept or push back on the rejection rationale.
 
+#### §2.2 Case-against count tightening sub-pattern at Step 0 disposition surface scope (NEW at S45-absorption #6 second sub-session per Chat S45 STOP 2 (β) ratification candidate (e) codification adoption; A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at n=3 observations S39 + S42 + S43 + record-high 11 case-against alternatives at S43 single observation in apparatus history)
+
+Per Workstream B amendment cycle separate-lane Candidate Code Tier 2 case-against count tightening sub-pattern codification per Q1 §2.5 entry sub-session arc S39-S43 empirical observations at Step 0 disposition surface case-against alternative enumeration; codified at this §2.2 extension per S45-absorption #6 second sub-session per Chat ratified S45 STOP 2 (β) candidate (e) priority order codification adoption ratification.
+
+**Sub-pattern observation:** At Code Step 0 STOP 2 disposition surface within Mark 3 efficient-ratification + (α) unprompted case-against discipline operation (per §5.3 Mark 3 codification + §2.2 Tier 2 devil's-advocate baseline), Code surfaces case-against alternatives enumeration at empirical structure surface for Chat ratification per established discipline. **Case-against alternatives count empirically tightening at sustained Q1 §2.5 entry sub-session arc:** sustained ≥5 case-against alternatives per Step 0 disposition surface at sustained observations + record-high 11 case-against alternatives at S43 single observation.
+
+**Empirical observations (n=3 codified at S45-absorption #6; codification-stable per A3 SECOND-OBSERVATION TIGHTENING precedent threshold satisfaction at n=2 observations + record-high S43 third observation):**
+
+- **Observation 1 — S39 lomb_scargle FIRST-INSTANCE baseline at n=7 case-against alternatives:** S39 Step 0 STOP 2 disposition surface enumerated n=7 Code Tier 2 case-against alternatives (Tier II.bit-exact + Tier III + Tier IV + Tier VI + Tier VII + Sub-class 2a variant tagging + §4.7.A variant 1 mechanism alternatives rejected per A6 BLOCKING empirical content preservation). FIRST-INSTANCE baseline at sustained ≥5 case-against alternatives per Step 0 disposition surface scope.
+- **Observation 2 — S42 wavelet_coherence_phase_lag SECOND-INSTANCE at n=9 case-against alternatives:** S42 Step 0 STOP 2 disposition surface enumerated n=9 Code Tier 2 case-against alternatives (Tier II.bit-exact + Tier III + Tier V + Tier VI + Tier VII + Sub-class 2m+ + §1.9 same-direction-repeat + Pattern F NOT MANIFESTED + §4.7.A variant 2 alternatives rejected). SECOND-OBSERVATION TIGHTENING at sustained ≥5 case-against alternatives + +29% case-against alternative count advance vs S39 baseline.
+- **Observation 3 — S43 emd_hht THIRD-OBSERVATION TIGHTENING at n=11 case-against alternatives = RECORD-HIGH single-observation count in apparatus history:** S43 Step 0 STOP 2 disposition surface enumerated n=11 Code Tier 2 case-against alternatives (Tier II.bit-exact + Tier III + Tier IV + Tier V + Tier VII + Sub-class 2g/2h + Sub-class 2l + Sub-class 2m γ + §4.7.A variant 1 + §1.8 NOT APPLICABLE + Pattern F NOT MANIFESTED alternatives rejected). THIRD-OBSERVATION TIGHTENING at sustained ≥5 case-against alternatives + record-high single-observation count advancing S42 baseline by +22%.
+
+**A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at case-against count tightening sub-pattern scope at n=2 observations + record-high third observation reinforcement** (S39 + S42 + S43 = n=3 cumulative observations at sustained ≥5 case-against alternatives per Step 0 disposition surface).
+
+**Sub-pattern characterization:**
+
+- **Case-against alternative count threshold:** sustained ≥5 case-against alternatives per Step 0 disposition surface at Q1 §2.5 entry sub-session scope; below threshold operationally indicates insufficient devil's-advocate surface per §2.2 Tier 2 application standard
+- **Case-against count tightening direction:** S39 n=7 → S42 n=9 → S43 n=11 = sustained tightening trajectory; reflects compound novelty surface accumulation + multi-Tier scope-exclusion enumeration + Sub-class taxonomy variant enumeration across Q1 §2.5 entry sub-session arc maturation
+- **Apparatus operational discipline empirical consequence:** sustained Mark 3 efficient-ratification + (α) unprompted case-against discipline at Step 0 disposition surface scope; Code surfaces empirical structure + alternative-not-chosen enumeration at substantial alternative count per established discipline; Chat ratification operates over enumerated alternatives per §5.3 Mark 3 + §2.2 Tier 2 combined operational scope
+
+**Sub-pattern codification refinement consideration:** S43 record-high 11 case-against alternatives reflects S43 host §2.5 entry compound novelty surface (NEW Tier VI CAVEAT + NEW Sub-class 2m candidate + §4.7.A variant 3 NEW NON-DEGENERATE DUAL-ARM sub-variant + §1.8 APPLICABLE FIRST applicability + Block 5 FULLY Q1-AMENDED milestone substantive scope) driving alternative-not-chosen enumeration density. NOT a generalized n=11 threshold expectation; rather record-high observation at compound novelty surface scope. Forward expectations preserve sustained ≥5 baseline threshold per A3 second-observation tightening; record-high observations reflect host §2.5 entry compound novelty surface variable scope.
+
+**Cross-references:**
+- §5.3 Mark 3 efficient-ratification + (α) unprompted case-against discipline (baseline operational scope for case-against alternative enumeration at Step 0 disposition surface)
+- §19.4 §4 Note 19 Multi-precedent confluence sub-pattern at calibration_baseline.md (S44-absorption #6 codification; record-high 11 case-against alternatives at S43 contributes to SEVEN A3 threshold satisfactions at S43 record-high single-observation count)
+- S39 lomb_scargle §2.5 entry (tsl_trust_inventory_techniques.md) — first-instance baseline at n=7 case-against alternatives
+- S42 wavelet_coherence_phase_lag §2.5 entry (tsl_trust_inventory_techniques.md) — second-observation at n=9 case-against alternatives
+- S43 emd_hht §2.5 entry (tsl_trust_inventory_techniques.md) — third-observation TIGHTENING at n=11 case-against alternatives RECORD-HIGH single-observation count
+
+**Forward instrumentation:** fourth case-against count observation at S46+ Q1 §2.5 entry tightens sub-pattern per A3 design-class precedent (n=4 codification-stable threshold); sustained ≥5 baseline expectation preserved at S46+ entries; record-high observations remain tied to host §2.5 entry compound novelty surface scope.
+
 ### §2.3 Tier 3 — Second-opinion architecture
 
 **Applies to: first-of-class decisions / conflicting-evidence
@@ -635,6 +804,152 @@ attribution).
 **Pattern (iv) — Internal use disclosure.** Disclosure for
 internal-only use cases (internal trading desk reference;
 internal research that does not get published externally).
+
+#### CRITICAL CAVEAT framing convention at Validation claim scope opening framing (NEW at S45-absorption #6 second sub-session per Chat S45 STOP 2 (β) ratification candidate (b) codification adoption; A3 FOURTH-OBSERVATION TIGHTENING precedent threshold SATISFIED at n=4 observations across distinct empirical scope sub-categories S40 + S41 + S42 + S43)
+
+Per Workstream B amendment cycle separate-lane Candidate CRITICAL
+CAVEAT framing convention codification per Q1 §2.5 entry sub-session
+arc S40-S43 empirical observations at distinct empirical scope sub-
+categories; codified at this §3.1 extension per S45-absorption #6
+second sub-session per Chat ratified S45 STOP 2 (β) candidate (b)
+priority order codification adoption ratification.
+
+**Convention scope:** Q1 §2.5 entry Validation claim scope opening
+framing surfaces explicit **CRITICAL CAVEAT** marker at validation
+claim scope distinction empirical sub-category surface where audit-
+established validation scope is materially narrower than primary-
+metric verdict scope OR where audit verdict masks engine-default-
+config divergence at validation scope dimension OR where audit
+validates degenerate dual-arm self-parity scope ONLY (NOT
+independent paper formula correctness NOR engine math correctness
+NOR cross-implementation parity) OR where audit verdict is
+deterministic CAVEAT at Pattern J / Tier C scope.
+
+**Empirical observations (n=4 codified at S45-absorption #6;
+codification-stable per A3 FOURTH-OBSERVATION TIGHTENING precedent
+threshold satisfaction at n=4 observations across distinct
+empirical scope sub-categories):**
+
+- **Observation 1 — S40 ssa CRITICAL CAVEAT framing first-instance
+  baseline at degenerate dual-arm self-parity validation claim
+  scope distinction:** audit validates `_ssa_reference` self-
+  consistency ONLY at degenerate dual-arm self-parity scope (TSL
+  arm == reference arm identical helper invocation; 0.0 abs diff
+  GUARANTEED BY CONSTRUCTION); engine `ssa_model.py::run()` math
+  + Layer 2 orchestration NEVER exercised by audit. CRITICAL
+  CAVEAT framing operative at S40 §2.5 entry Validation claim
+  scope opening framing per (αa)+(αc) Chat ratification.
+- **Observation 2 — S41 wavelet_transform CRITICAL CAVEAT framing
+  second-observation tightening at engine-default-config vs audit-
+  pinned-config divergence at Pattern F validation scope dimension:**
+  engine default mode "symmetric" diverged from audit pinned mode
+  "periodization" at Pattern F structural invariants validation
+  scope dimension; Pattern F energy conservation invariant NOT
+  TRANSFERRED at engine default mode scope per orthogonal wavelet
+  basis convention dependence. CRITICAL CAVEAT framing operative
+  at S41 §2.5 entry Validation claim scope opening framing per
+  S41 STOP 1.5 surgical revision ratification.
+- **Observation 3 — S42 wavelet_coherence_phase_lag CRITICAL CAVEAT
+  framing third-observation tightening at degenerate dual-arm
+  self-parity validation claim scope distinction SECOND-INSTANCE:**
+  audit validates `_wavelet_coherence_reference` self-consistency
+  ONLY at degenerate dual-arm self-parity scope; engine
+  `wavelet_coherence.py::run()` math + Layer 2 orchestration NEVER
+  exercised by audit; SAME empirical scope sub-category as
+  Observation 1 at SECOND-INSTANCE within Sub-class 2l Tier IV
+  Pattern A.3 + §4.7.A variant 3 DEGENERATE DUAL-ARM combined
+  scope. CRITICAL CAVEAT framing operative at S42 §2.5 entry
+  Validation claim scope opening framing per S42 (α)+(αa)+(αc)
+  Chat ratification.
+- **Observation 4 — S43 emd_hht CRITICAL CAVEAT framing fourth-
+  observation tightening at Tier VI CAVEAT Pattern J Tier C —
+  different sifting libraries deterministic CAVEAT validation
+  claim scope distinction (NEW empirical scope sub-category at
+  S43):** audit verdict CAVEAT (Pattern J / Tier C — different
+  sifting libraries; ±2 IMF count divergence with 0.99 correlation
+  on energy curve) DETERMINISTIC at `reroll_on_caveat = False`
+  Session 5 lock per audit lines 64-67 verbatim; per-IMF bitwise
+  parity mathematically intractable per Huang 1998 implementation
+  variation; structural-properties scope validation ONLY at Tier
+  C convention. CRITICAL CAVEAT framing operative at S43 §2.5
+  entry Validation claim scope opening framing per S43 (A)+(D)
+  Chat ratification.
+
+**Empirical scope sub-category taxonomy (n=4 observations across
+n=3 distinct empirical scope sub-categories codified at S45-
+absorption #6):**
+
+- **Sub-category 1 — Degenerate dual-arm self-parity validation
+  claim scope distinction (n=2 observations S40 + S42 within
+  Sub-class 2l Tier IV Pattern A.3 + §4.7.A variant 3 DEGENERATE
+  DUAL-ARM combined scope):** audit-validates-reimplementation-
+  self-consistency-only at TSL arm == reference arm identical
+  helper invocation scope; engine math NEVER validated; cross-
+  implementation parity NOT established
+- **Sub-category 2 — Engine-default-config vs audit-pinned-config
+  divergence at Pattern F validation scope dimension (n=1
+  observation S41 within Sub-class 2i + 2j combined scope at
+  Tier III Pattern A.1 + Pattern F structural invariants
+  validation):** audit pinned config diverges from engine default
+  config at Pattern F validation scope dimension; validation
+  scope NOT TRANSFERRED at engine default scope per convention-
+  specific dependence
+- **Sub-category 3 — Tier VI CAVEAT Pattern J Tier C deterministic
+  CAVEAT validation claim scope distinction (n=1 first-instance
+  baseline observation S43 within Sub-class 2m candidate Tier VI
+  CAVEAT + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM combined
+  scope):** deterministic CAVEAT verdict per `reroll_on_caveat
+  = False` Session 5 lock; structural-properties scope validation
+  ONLY at Tier C convention; per-IMF bitwise parity mathematically
+  intractable
+
+**Codification framing convention application protocol:** at Q1
+§2.5 entry Validation claim scope opening framing, Code surfaces
+**CRITICAL CAVEAT** marker explicit at validation claim scope
+opening when empirical scope sub-category satisfies any of three
+sub-categories codified above. CRITICAL CAVEAT marker functions as
+disclosure-density-signaling convention at §2.5 entry codification
+scope; downstream §2.5 entry text body surfaces validation claim
+scope distinction enumeration at audit DOES validate scope + audit
+DOES NOT validate scope + Layer 2 engine orchestration NEVER
+exercised by audit scope per established disclosure pattern
+conventions across §2.5 entries.
+
+**Cross-references:**
+- S40 ssa §2.5 entry (tsl_trust_inventory_techniques.md) — first
+  CRITICAL CAVEAT framing observation (Sub-category 1 degenerate
+  dual-arm self-parity)
+- S41 wavelet_transform §2.5 entry (tsl_trust_inventory_techniques.md)
+  — second CRITICAL CAVEAT framing observation (Sub-category 2
+  engine-default-config divergence)
+- S42 wavelet_coherence_phase_lag §2.5 entry (tsl_trust_inventory_techniques.md)
+  — third CRITICAL CAVEAT framing observation (Sub-category 1
+  SECOND-INSTANCE)
+- S43 emd_hht §2.5 entry (tsl_trust_inventory_techniques.md) —
+  fourth CRITICAL CAVEAT framing observation (Sub-category 3 NEW
+  first-instance baseline at Tier VI CAVEAT Pattern J Tier C)
+- §19.4 §4 Note 19 Multi-precedent confluence sub-pattern at
+  calibration_baseline.md (S44-absorption #6 codification; CRITICAL
+  CAVEAT framing convention A3 FOURTH-OBSERVATION TIGHTENING is
+  one of SEVEN A3 threshold satisfactions at S43 record-high
+  single-observation count per Note 19)
+- §19.4 §4 Note 20 Q-D retraction surface FOUR-SUB-CATEGORY
+  taxonomy at calibration_baseline.md (S44-absorption #6
+  codification; CRITICAL CAVEAT framing convention applicability
+  scope aligns with Q-D retraction surface sub-categories 3 + 4
+  MEDIUM-HIGH + MEDIUM scopes)
+- §4.8 All-anchor-deferral discipline (NEW at S45-absorption #6;
+  CRITICAL CAVEAT framing convention operates within all-anchor-
+  deferral discipline empirical verification scope at Code Step
+  0 disposition)
+
+**Forward instrumentation:** fifth CRITICAL CAVEAT framing
+observation at S46+ Q1 §2.5 entry within established empirical
+scope sub-category OR NEW empirical scope sub-category tightens
+convention per A3 design-class precedent; sub-category 3
+SECOND-OBSERVATION TIGHTENING candidate at next Tier VI CAVEAT
+Pattern J Tier C entry; cross-Tier scope expansion candidate at
+empirical scope sub-category NEW manifestation at S46+ entries.
 
 ### §3.2 Tier × pattern matrix
 
@@ -1135,7 +1450,21 @@ S20 Workstream B amendment cycle.
    under operational assumption that Code performs Step 0 empirical
    re-Read at trigger-execution time. Chat trigger drafting does NOT
    assume Chat-side baseline-state assertion correctness; relies on
-   Code Step 0 to catch divergence.
+   Code Step 0 to catch divergence. **All-anchor-deferral discipline
+   refinement at Q1 §2.5 entry sub-session class scope (NEW at S45-
+   absorption #6 cross-reference per §4.8 codification):** at Q1 §2.5
+   entry sub-session class scope, Chat trigger drafting formally
+   DEFERS all working hypothesis anchors (Tier + Sub-class + §4.7.A
+   + Block ordering + Pattern F + §1.9 + §1.8 + technique-specific
+   anchors) to Code Step 0 empirical verification rather than pre-
+   anchoring at trigger drafting time; operational scope refinement
+   beyond Stage 1 baseline expectation per S38-S43 n=6 sustained
+   efficacy observations + A3 SECOND-OBSERVATION TIGHTENING
+   PRECEDENT THRESHOLD FURTHER REINFORCED satisfaction. Cross-
+   reference §4.8 for full all-anchor-deferral discipline definitional
+   scope + applicability scope distinction (Q1 §2.5 entry class
+   sustained efficacy vs absorption sub-session class NEW Class A
+   surface pattern recurrence).
 2. **Code Step 0 empirical re-Read at trigger-execution time per
    CONSTRAINT 4 BLOCKING:** Code reads authoritative source artifacts
    at HEAD before any drafting/editing action. Step 0 scope per
@@ -1498,6 +1827,128 @@ applies symmetrically across both §4.7 pattern observation timing
 points; second-observation tightening confirmed at S25 Workstream B
 amendment cycle Step 0 anchors empirically CONFIRMED per CHAT
 RATIFICATION #8 disposition.
+
+### §4.8 All-anchor-deferral discipline (NEW at S45-absorption #6 second sub-session per Chat S45 STOP 2 (β) ratification candidate (a) codification adoption; STRONGEST cumulative empirical grounding at n=6 sustained efficacy observations S38-S43 at Q1 §2.5 entry sub-session class scope; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED satisfaction; absorption sub-session class scope applicability distinction per S44 NEW Class A surface pattern recurrence sub-pattern variant)
+
+Per §19.4 absorption #6 first sub-session §4 forward instrumentation
+notes 18-22 codification at calibration_baseline.md (S44-absorption
+#6); Workstream B amendment cycle separate-lane Candidate ALL-
+ANCHOR-DEFERRAL DISCIPLINE codification per S37-S43 Q1 §2.5 entry
+sub-session arc empirical efficacy sustained at n=6 observations
+S38 + S39 + S40 + S41 + S42 + S43 0-divergence; codified at this
+artifact per S45-absorption #6 second sub-session per Chat
+ratified S45 STOP 2 (β) candidate (a) priority order codification
+adoption ratification.
+
+**Discipline shape (codified at S45-absorption #6):** Chat trigger
+drafting at Q1 §2.5 entry sub-session class scope DEFERS all
+working hypothesis anchors (Tier characterization + Sub-class
+disposition + §4.7.A pattern manifestation + Block ordering
+position + Pattern F third-observation + §1.9 cross-block extension
++ §1.8 applicability + any technique-specific anchor scope) to
+Code Step 0 empirical verification rather than pre-anchoring at
+trigger drafting time. Chat trigger drafting limited to: first-
+technique selection + sub-session class + apparatus operational
+discipline cross-references; ALL technique-specific empirical
+structure anchors surfaced at Code Step 0 empirical re-Read at
+trigger-execution time per CONSTRAINT 4 A6 BLOCKING.
+
+**Empirical grounding (n=6 sustained efficacy observations at Q1
+§2.5 entry sub-session class scope):**
+
+| Sub-session | Application | Multi-anchor schema-misattribution divergences | Cumulative efficacy |
+|---|---|---|---|
+| S38 fft_spectrum | FIRST-APPLICATION baseline | 0 divergences at Code Step 0 | n=1 sustained efficacy |
+| S39 lomb_scargle | SECOND-APPLICATION | 0 divergences at Code Step 0 | n=2 sustained efficacy; A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED |
+| S40 ssa | THIRD-APPLICATION | 0 divergences at Code Step 0 | n=3 sustained efficacy; A3 precedent REINFORCED |
+| S41 wavelet_transform | FOURTH-APPLICATION | 0 divergences at Code Step 0 | n=4 sustained efficacy; A3 precedent FURTHER REINFORCED |
+| S42 wavelet_coherence_phase_lag | FIFTH-APPLICATION | 0 divergences at Code Step 0 | n=5 sustained efficacy; A3 precedent FURTHER REINFORCED |
+| S43 emd_hht | SIXTH-APPLICATION | 0 divergences at Code Step 0 | n=6 sustained efficacy; STRONGEST cumulative empirical grounding among absorption #6 candidates |
+
+**A3 SECOND-OBSERVATION TIGHTENING precedent threshold FURTHER
+REINFORCED satisfaction at n=6 sustained efficacy observations at
+Q1 §2.5 entry sub-session class scope** = STRONGEST cumulative
+empirical grounding among S37-S44 banked codification adoption
+candidates at S44-absorption #6 disposition surface; codified at
+this §4.8 per S45-absorption #6 codification adoption disposition.
+
+**Applicability scope distinction at absorption sub-session class
+scope (NEW at S45-absorption #6 per S44 NEW Class A surface pattern
+recurrence sub-pattern variant codification):**
+
+All-anchor-deferral discipline operational scope DOES NOT
+generalize to absorption sub-session class trigger drafting per
+S44 empirical observation. **Empirical evidence:**
+
+- **Q1 §2.5 entry sub-session class scope:** n=6 sustained efficacy
+  observations S38-S43 at 0-divergence (all-anchor-deferral
+  discipline operates as primary structural mitigation for A9
+  Class A baseline-state assertion failure at Q1 §2.5 entry trigger
+  drafting cadence)
+- **Absorption sub-session class scope:** S44 trigger drafting
+  surfaced n=2 NEW Class A candidates (n=21 + n=22 codified at
+  §19.4 baseline at S44-absorption #6) per S44 NEW Class A surface
+  pattern recurrence — absorption sub-session class trigger
+  drafting does NOT operate under all-anchor-deferral discipline
+  expectation per established empirical precedent at S29 + S35
+  absorption sub-session class scope (absorption sub-sessions
+  discharge banked apparatus self-codifications per established
+  candidates without working hypothesis anchor structure at
+  trigger drafting)
+
+**Scope distinction codification:** all-anchor-deferral discipline
+applies AT Q1 §2.5 entry sub-session class trigger drafting scope
+ONLY; NOT applicable at absorption sub-session class trigger
+drafting scope. Sub-pattern variant codification at S44-absorption
+#6 calibration_baseline.md A9 sub-class entry: "Absorption-sub-
+session-class trigger drafting baseline-state-assertion failure"
+NEW Sub-pattern variant established at distinct scope from Q1
+§2.5 entry class scope sustained 0-divergence pattern.
+
+**Cross-Block sustained-observation trajectory:** Block 5
+Frequency Domain / Signal 7-entry sub-session arc S37-S43 sustains
+all-anchor-deferral discipline across entire Block close arc; per-
+Block continuation pattern observation candidate at absorption #7+
+for cross-Block all-anchor-deferral discipline sustained efficacy
+generalization scope (Block 5 = first Block-arc-complete sustained
+0-divergence observation; future Block-arc-complete sustained 0-
+divergence observations at S46+ Block 6+ block arcs would tighten
+cross-Block scope codification per A3 precedent).
+
+**Cross-references:**
+- §4.6 Option II workflow Stage 1 (Chat trigger drafting under
+  Code Step 0 empirical re-Read expectation; all-anchor-deferral
+  discipline operationalizes Stage 1 expectation at Q1 §2.5 entry
+  sub-session class scope by formal anchor deferral at trigger
+  drafting; cross-reference for operational scope alignment)
+- §4.7 Forward Q1 Step 0 discipline (§4.7.A + §4.7.B pattern
+  observations operate within all-anchor-deferral discipline
+  empirical verification scope at Step 0; all-anchor-deferral
+  discipline DEFERS §4.7.A + §4.7.B pattern manifestation to Code
+  Step 0 verification per all-anchor-deferral application)
+- §19.4 A9 Class A counter sub-class scope at calibration_baseline.md
+  (post-S44-absorption #6 n=22 ACTIVE codified including S44 NEW
+  Sub-pattern variant "Absorption-sub-session-class trigger
+  drafting baseline-state-assertion failure"; cross-reference for
+  absorption sub-session class scope applicability distinction
+  empirical grounding)
+- §19.4 §4 Note 19 Multi-precedent confluence sub-pattern at
+  calibration_baseline.md (S44-absorption #6 NEW codification;
+  all-anchor-deferral discipline A3 SECOND-OBSERVATION TIGHTENING
+  PRECEDENT THRESHOLD FURTHER REINFORCED satisfaction at n=6
+  sustained efficacy observations is one of SEVEN A3 threshold
+  satisfactions at S43 record-high single-observation count per
+  Note 19 codification)
+
+**Forward instrumentation:** seventh+ all-anchor-deferral discipline
+application observation at S46+ Q1 §2.5 entry sub-session would
+further reinforce A3 precedent at sustained-efficacy scope per A3
+design-class precedent. Codification refinement candidate at
+absorption #7+ if (a) sustained-efficacy reverses at S46+
+multi-anchor schema-misattribution divergence recurrence at Q1
+§2.5 entry class scope OR (b) cross-Block scope codification
+warrants amendment-class status at sustained Block-arc-complete
+0-divergence pattern (multiple Block arcs at sustained efficacy).
 
 ## §5 Operating context preservation
 
