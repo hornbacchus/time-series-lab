@@ -650,7 +650,7 @@ about file/conversation/codebase reality WITHOUT empirical re-Read at
 trigger-drafting time. Two operationally distinct sub-classes
 observed:
 
-**Sub-class Class A — Baseline-state assertion failure (n=14 ACTIVE; codification status upgraded n=10 → n=14 at S35-absorption #5 per Chat Decision 2 (α) 4-candidate codification: n=11 S29 STOP 1.5 + n=12 S30 Step 0 + n=13 S30 STOP 1.5 + n=14 S31 STOP 1 = sustained Chat→Code direction sub-pattern variant; reactive-vs-proactive sub-pattern variant codified at S24-absorption + NEW Sub-pattern variant "Sustained Chat→Code direction at Sub-pattern 4" codified at S35-absorption #5):**
+**Sub-class Class A — Baseline-state assertion failure (n=22 ACTIVE; codification status upgraded n=10 → n=14 at S35-absorption #5 per Chat Decision 2 (α) 4-candidate codification + n=14 → n=22 at S44-absorption #6 per Chat S44 STOP 2 (i) ratification 8-candidate codification: n=15 + n=16 (S36 §1.7 (c) Workstream B empirical-efficacy grounding scope codification reference advanced at §19.4 baseline) + n=17 (S36 STOP-1.5-revision-scope-misattribution) + n=18 (S37 multi-anchor schema-misattribution at trigger drafting) + n=19 (S38 Code-side §3 enumeration drift) + n=20 (S39 Code-side prior-turn-ratification-acknowledgment gap) + n=21 (S44 trigger drafting baseline-state-assertion failure §19.4 baseline document attribution scope NEW at S44) + n=22 (S44 trigger drafting baseline-state-assertion failure §4 forward instrumentation notes count scope NEW at S44) = sustained Chat→Code direction sub-pattern variant continuation + NEW Sub-pattern variant "Absorption-sub-session-class trigger drafting baseline-state-assertion failure" codified at S44-absorption #6 per S44 NEW Class A surface pattern recurrence at absorption sub-session trigger drafting scope distinct from Q1 §2.5 entry trigger drafting scope sustained 0-divergence at sixth-application empirical efficacy S38-S43):**
 Chat trigger asserts baseline-state schema or content without re-Read
 of authoritative source artifact at trigger-drafting time.
 
@@ -670,6 +670,14 @@ of authoritative source artifact at trigger-drafting time.
 | 12 | S30 Step 0 (NEW at S35-absorption #5 codification per Chat Decision 2 (α)) | Chat trigger CHAT RATIFICATION #4 placed (E) at NEW §6 + (H) at §2.6 without empirical re-Read of Workstream B current structure | §6 occupied as Banking footer (not available for (E) placement); §2.5 gap with no reserved meaning (not pre-cleared for (H) placement) | Code S30 Step 0 empirical Workstream B current structure Read **CHAT→CODE DIRECTION VARIANT** — trigger structure placement schema-misattribution; Code surfaced (α) §5.5 for (E) [recommended] + (α) §2.5 for (H) [recommended]; Chat ratified Code recommendations |
 | 13 | S30 STOP 1.5 close (NEW at S35-absorption #5 codification per Chat Decision 2 (α)) | Code STOP 1.5 response Edit 3 (H) §2.5 forward instrumentation contained speculative Tier combination examples ("Tier III + Pattern A overlay; Tier IV + Pattern J B.2 overlay") beyond empirical baseline | Speculation removal directed per A6 BLOCKING; Chat surfaced verbatim replacement directive | Chat S30 STOP 1.5 close speculation surfacing catch **CHAT→CODE DIRECTION VARIANT** — Code Edit 3 (H) §2.5 forward instrumentation speculation extending beyond empirical baseline content; STOP-1.5-close-application-verification timing point variant (vii) per §4.5 taxonomy codification |
 | 14 | S31 STOP 1 close (NEW at S35-absorption #5 codification per Chat Decision 2 (α)) | Code Step 1 STOP 1 response surfaced integrations checklist + file LOC delta + edit count metadata but did NOT include verbatim entry text body for STOP 1 verbatim-fidelity verification | STOP 1 mandate per CONSTRAINT 5 requires entry text surface for Chat verbatim-fidelity verification before commit application; Code metadata-only surface insufficient | Chat S31 STOP 1 close content-completeness verification catch **CHAT→CODE DIRECTION VARIANT** — STOP-1-close-content-completeness verification; precipitated Mod 3 operational discipline codification at S31 STOP 1 continuation; **NEW timing point variant (viii) STOP-1-close-content-completeness verification per §4.5 taxonomy codification at S35-absorption #5 per Revision 4 ratification** (distinct from (vii) STOP-1.5-close-application-verification; n=2 observations Instance #14 S31 STOP 1 close + n=15 candidate S35 STOP 1 close recurrence; A3 second-observation tightening precedent threshold satisfied at n=2 for (viii) codification) |
+| 15 | S35 STOP 1 close (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification; codified per S36 §1.7 (c) Workstream B empirical-efficacy grounding scope reference advanced at §19.4 baseline) | Code Step 1 STOP 1 close response surfaced chunked-surface STOP 1 metadata + navigation surface without verbatim text body | STOP 1 mandate verbatim-fidelity verification requirement per Mod 3 (1) drafted text body verbatim specification; Code metadata-only surface insufficient | Chat S35 STOP 1 close content-completeness verification catch **CHAT→CODE DIRECTION VARIANT** — STOP-1-close-content-completeness verification timing point variant (viii) recurrence; banked at S35-absorption #5 commit message body forward state for absorption #6+ codification advance; FORMALLY ADVANCED at §19.4 baseline at S44-absorption #6 per (i) ratification |
+| 16 | S35 STOP 1.5 close (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification; codified per S36 §1.7 (c) Workstream B empirical-efficacy grounding scope reference advanced at §19.4 baseline) | Code STOP 1.5 close response surfaced revision-application metadata + header-line surface without verbatim revised text body | STOP 1.5 mandate verbatim-fidelity verification requirement per Mod 3 specification; Code metadata-only surface insufficient | Chat S35 STOP 1.5 close application-verification catch **CHAT→CODE DIRECTION VARIANT** — STOP-1.5-close-application-verification timing point variant (vii) recurrence; banked at S35-absorption #5 commit message body forward state for absorption #6+ codification advance; FORMALLY ADVANCED at §19.4 baseline at S44-absorption #6 per (i) ratification |
+| 17 | S36 STOP 1.5 (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification; banked at S36 commit message body forward state) | Code STOP-1.5-revision response scope-misattribution: revision-scope misinterpreted at Workstream B amendment cycle scope at S36 | Empirical revision-scope was Mod 3 (b)+(c) specification refinement at operational_disciplines_disposition_2_banking.md scope; Code applied revision at incorrect scope-attribution requiring Chat re-disposition | Chat S36 STOP 1.5 revision-scope-misattribution catch **CHAT→CODE DIRECTION VARIANT** — STOP-1.5-close-revision-scope-attribution verification; banked at S36 commit message body forward state for absorption #6+ codification advance; FORMALLY ADVANCED at §19.4 baseline at S44-absorption #6 per (i) ratification |
+| 18 | S37 trigger drafting (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification; banked at S37 commit message body forward state) | Chat S37 trigger drafting pre-anchored multi-anchor working hypothesis schema (Tier + Sub-class + §4.7.A + Block ordering anchors) at trigger drafting time | Empirical structure surfaced multi-anchor schema-misattribution at S37 Step 0 Code empirical re-Read; trigger anchored Sub-class 2i at Tier IV scope but empirical revealed Tier III Pattern A.1 + §4.7.A variant 1 mechanism scope | Code S37 Step 0 multi-anchor schema-misattribution catch **CHAT→CODE DIRECTION VARIANT** — multi-anchor schema-misattribution at trigger drafting; precipitated ALL-ANCHOR-DEFERRAL DISCIPLINE codification at S38+ trigger drafting cadence; banked at S37 commit message body forward state for absorption #6+ codification advance; FORMALLY ADVANCED at §19.4 baseline at S44-absorption #6 per (i) ratification |
+| 19 | S38 trigger drafting + Code Step 0 (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification; banked at S38 commit message body forward state) | Code Step 0 §3 catalog enumeration drift at S38 Step 0 (b) §3 catalog empirical re-Read | Empirical §3 enumeration accurate at HEAD but Code Step 0 surfaced enumeration drift hypothesis without applying mid-session §3 re-Read discipline | Code S38 Step 0 prior-turn institutional learning catch **CODE→CHAT DIRECTION VARIANT** — Code-side §3 enumeration drift prevention; precipitated mid-session §3 catalog re-Read discipline at S38+ Step 0 cadence; banked at S38 commit message body forward state for absorption #6+ codification advance; FORMALLY ADVANCED at §19.4 baseline at S44-absorption #6 per (i) ratification |
+| 20 | S39 trigger drafting + Code prior-turn (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification; banked at S39 commit message body forward state) | Code prior-turn-ratification-acknowledgment gap at S39 cycle (Code re-surfaced Step 0 STOP 2 disposition at subsequent turn after Chat ratification received) | Empirical workflow expectation per Option II Stage 4: Code proceeds to Step 1 upon receipt of Chat STOP 2 disposition response without re-surfacing Step 0 STOP 2 surface; Code re-surfaced gap requires prior-turn-ratification-acknowledgment discipline operationalization | Chat S39 prior-turn-ratification-acknowledgment gap catch **CHAT→CODE DIRECTION VARIANT** — Code-side prior-turn-ratification-acknowledgment gap prevention; precipitated prior-turn-ratification-acknowledgment discipline operationalization at S40+ Code Step 0 cadence; banked at S39 commit message body forward state for absorption #6+ codification advance; FORMALLY ADVANCED at §19.4 baseline at S44-absorption #6 per (i) ratification |
+| 21 | S44 trigger drafting (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification + (α) ratification corrected document attribution) | Chat S44 trigger drafting asserted §19.4 baseline at `tsl_trust_inventory_techniques.md` document attribution | Empirical at HEAD 50a11e5 verifies §19.4 baseline lives at `docs/reference_parity_phase6/calibration_baseline.md` per Phase 6+ living calibration baseline v1.3 §19.4 instantiation; tsl_trust_inventory_techniques.md has §19.4 elevation candidate 1 + 2 sub-headers only (S8 historical banking footer content; NOT §19.4 baseline authoritative state) | Code S44 Step 0 STOP 2 empirical document attribution catch **CHAT→CODE DIRECTION VARIANT** — absorption-sub-session-class trigger drafting baseline-state-assertion failure NEW Sub-pattern variant at S44; CODIFIED at §19.4 baseline at S44-absorption #6 per (α) ratification + (i) ratification 8-candidate codification |
+| 22 | S44 trigger drafting (NEW at S44-absorption #6 codification per Chat S44 STOP 2 (i) ratification + (β) ratification corrected §4 forward instrumentation notes baseline) | Chat S44 trigger drafting asserted "§4 notes 1-15 + n=16 forward instrumentation candidate from S36 §1.7 (c) Workstream B" | Empirical at HEAD 50a11e5 calibration_baseline.md verifies §4 forward instrumentation notes 1-17 ALREADY CODIFIED at lines 1314+ through 1870+ (Note 16 Sub-class taxonomy growth at line 1828; Note 17 Mod 3 chunked-surface content at line 1870); trigger claim "n=16 forward instrumentation candidate" OUTDATED at S44 trigger drafting | Code S44 Step 0 STOP 2 empirical §4 forward instrumentation notes count catch **CHAT→CODE DIRECTION VARIANT** — absorption-sub-session-class trigger drafting baseline-state-assertion failure NEW Sub-pattern variant at S44 (stale enumeration sub-pattern); CODIFIED at §19.4 baseline at S44-absorption #6 per (β) ratification + (i) ratification 8-candidate codification |
 
 **Recursive S11 → S16-absorption recurrence:** Instance #4 = same A5
 schema misattribution as instance #2 despite S11 correction in
@@ -912,7 +920,7 @@ patterns 2+3+4 across earlier sub-patterns); A9 Sub-pattern 4 sub-
 pattern variant scope is narrower codification-event scope (Sub-
 pattern 4 Instances #6-#14 only; n=8 bilateral cross-actor count).
 
-### A10 — Q1 trust documentation remediation sub-session class baselines (n=12 observations across multiple sub-classes + topology differentiation + tier-variant; Sub-class 2a (αa) variant tagging UPGRADED to codification-stable at n=3 + Sub-class 2c resolved at n=2 ACTIVE + 2c-IV variant at n=1 ACTIVE + Sub-class 2e NEW codification at n=2 generalized baseline; post-S29-absorption #4 extension)
+### A10 — Q1 trust documentation remediation sub-session class baselines (n=23 observations across multiple sub-classes + topology differentiation + tier-variant; Sub-class 2a (αa) variant tagging UPGRADED to codification-stable at n=3 + Sub-class 2c resolved at n=2 ACTIVE + 2c-IV variant at n=1 ACTIVE + Sub-class 2e NEW codification at n=2 generalized baseline + Sub-class 2j NEW codification at n=3 cross-Tier baseline per S44-absorption #6; post-S29-absorption #4 + S35-absorption #5 + S44-absorption #6 extensions; Block 1 + Block 12 + Block 8 + Block 3 + Block 5 FULLY Q1-AMENDED at 5 of 13 catalog blocks fully Q1-amended)
 
 **Surfacing:** Phase 7+ Q1 work program S12 + S13 + S14b + S14c + S15
 trust documentation remediation entries codify ongoing Q1 operational
@@ -1083,6 +1091,64 @@ investigation:
   surface across Sub-class 2a + 2d at adf_test ribbon-default
   publication output (per `_is_triage_mode` dispatch at S21
   codification).
+- **Sub-class 2j — Pattern F structural invariants scope (n=3
+  ACTIVE generalized baseline; NEW codification at S44-absorption
+  #6 per A3 THIRD-OBSERVATION TIGHTENING precedent threshold
+  SATISFIED at n=3 observations across n=3 mathematical families
+  + cross-Tier scope per Chat S44 STOP 2 (a) ratification):**
+  harness `compare()` empirically computes structural identity
+  invariants at machine-precision threshold (1e-10 default) at
+  BOTH arms of audit; Pattern F structural invariants validation
+  operates as cross-Tier sub-pattern at structurally-decomposable
+  spectral analysis primitives. Three empirical observations
+  across three mathematical families + three Tier characterizations:
+  - **(αFFT) FFT-family observation (S38 fft_spectrum first-
+    instance baseline at Tier II.bit-exact Pattern A.2):** harness
+    compare() computes FFT roundtrip identity (forward FFT +
+    inverse FFT residual at machine precision) + Parseval energy
+    conservation (sum-squared time-domain = sum-squared frequency-
+    domain at machine precision); both arms PASS at machine
+    precision threshold.
+  - **(αwavelet) Wavelet-family observation (S41 wavelet_transform
+    second-observation tightening at Tier III Pattern A.1 same-
+    library):** harness compare() computes wavelet inverse
+    roundtrip identity + wavelet energy conservation (orthogonal
+    wavelet basis at periodization mode); both arms PASS at
+    machine precision threshold (3.11e-15 roundtrip; 3.41e-13
+    energy conservation rel ~5e-16).
+  - **(αEMD) EMD-family observation (S43 emd_hht third-observation
+    tightening at Tier VI CAVEAT Pattern J Tier C — different
+    sifting libraries):** harness compare() computes EMD
+    reconstruction identity (sum of IMFs + residual = original
+    signal at machine precision); both arms PASS at machine
+    precision threshold (TSL 1.11e-16 + ref 0.0) DESPITE Tier VI
+    CAVEAT-driver IMF-count divergence at primary-metric scope
+    (Pattern F structural invariants computation operationally
+    distinct from primary-metric verdict scope; structural
+    invariants PASS coexists with primary-metric CAVEAT verdict
+    at SAME audit).
+  **Pattern F Tier-agnostic empirical generalization
+  INSTITUTIONALLY SUBSTANTIVE:** structural identity invariants
+  computation emerges as cross-Tier sub-pattern at structurally-
+  decomposable spectral analysis primitives (FFT + wavelet + EMD
+  = three distinct mathematical decomposition families)
+  regardless of Tier characterization scope (Tier II.bit-exact +
+  Tier III + Tier VI CAVEAT = three distinct Tier characterizations).
+  Empirical baseline LOC contribution per §2.5 entry codification:
+  ~80-150 LOC at Pattern F structural invariants computation
+  surface enumeration. Catalog mapping orthogonal to Pattern F
+  scope (S38 + S41 + S43 all 1:1 catalog↔wrapper but Pattern F
+  scope agnostic to catalog mapping per cross-family decomposition
+  scope distinction). **Forward instrumentation:** fourth Sub-
+  class 2j observation would tighten variant taxonomy per A3
+  precedent at absorption #7+; cross-Tier scope expansion (e.g.,
+  Tier IV Pattern A.3 self-parity OR Tier V Pattern J) candidate
+  at fourth observation; structural identity invariants
+  computation may extend to non-decomposition primitives (e.g.,
+  Kalman recursion identity at state-space scope; EVT block-
+  maxima asymptotic invariants; time-series decomposition
+  reconstruction identity at MSTL/STL scope) at future Q1 entry
+  codification.
 
 **Provisional class threshold proposal (loose; n=1 per sub-class
 data points; tighten with more observations per A3 design-class
@@ -1096,6 +1162,7 @@ precedent):**
 | Sub-class 2c (three-layer-downstream Tier II.bit-exact) | S15 ~358 + S17 ~366 net LOC (n=2 ACTIVE) | 340-380 LOC | ~430 LOC |
 | Sub-class 2c-IV (three-layer-downstream Tier IV variant) | S18 ~438 net LOC | 400-470 LOC | ~500 LOC |
 | Sub-class 2d (three-layer-parallel-tests) | S21 ~451 net LOC | 420-490 LOC | ~550 LOC |
+| Sub-class 2j (Pattern F structural invariants cross-Tier scope; (αFFT) + (αwavelet) + (αEMD) variants codified at S44-absorption #6) | S38 ~1285 + S41 ~1964 + S43 ~2680 net LOC (n=3 ACTIVE; cross-mathematical-family + cross-Tier observation; Pattern F structural invariants LOC contribution ~80-150 LOC per entry; overall entry LOC reflects compound novelty surface at host §2.5 entry codification scope NOT Sub-class 2j scope alone) | Pattern F scope contribution 80-150 LOC + host entry scope-dependent dispersion | N/A (host entry surface threshold inherited from host topology Sub-class) |
 
 **Topology differentiation rationale:** Sub-class 2b vs 2c distinction
 codified per S14c + S15 empirical observation. Both same layer depth
@@ -1125,7 +1192,8 @@ amendment absorb into baseline?"). Cross-reference for inheritor
 clarity; do NOT conflate per S11 + S16-absorption Class A
 misattribution pattern (A9 instances #2 + #4).
 
-**Forward instrumentation (updated at S29-absorption #4):** Sub-
+**Forward instrumentation (updated at S44-absorption #6; prior
+updates at S29-absorption #4 + S35-absorption #5):** Sub-
 class 2a (αa) variant tagging UPGRADED to codification-stable at
 n=3 per A3 second-observation tightening precedent threshold
 satisfied (S22 dual-role + S23 triple-role + S28 standalone-only).
@@ -1139,18 +1207,82 @@ codification at n=2 generalized baseline (S26 reimplementation (αa)
 different-code-path-from-engine" definitional scope) per S29-
 absorption #4 codification.** **Sub-class 2d three-layer-parallel-
 tests S21 n=1 ACTIVE baseline codified at S24-absorption;
-second observation tightens variant baseline.** Sub-class 1 second
-observation tightens amendment class projection. Topology-primary
-tier-variant taxonomy structure preserved with operational-coupling-
-variant tagging extension (Sub-class 2a operational-coupling-count
-∈ {0, 1, 2} variants; Sub-class 2e (αa) reimplementation + (αb)
-use-case-divergence variants); future analogous topology +
-operational-coupling-variant observations apply variant-tagging
-convention OR sub-class-split convention at second observation per
-A3 tightening precedent. **Third Sub-class 2e variant observation
-tightens variant taxonomy at absorption #5+; fourth Sub-class 2a
-variant observation (e.g., new operational-coupling-count = 3+ if
-observed) tightens variant tagging axis at absorption #5+.**
+second observation tightens variant baseline.** **Sub-class 2j
+NEW codification at n=3 cross-Tier generalized baseline per S44-
+absorption #6 codification (Pattern F structural invariants scope;
+(αFFT) S38 + (αwavelet) S41 + (αEMD) S43 variants under "harness
+compare() structural identity invariants computation explicit at
+machine precision threshold" definitional scope; cross-mathematical-
+family + cross-Tier empirical generalization; A3 THIRD-OBSERVATION
+TIGHTENING precedent threshold SATISFIED at Pattern F scope at
+n=3 observations); fourth Sub-class 2j variant observation tightens
+variant taxonomy at absorption #7+; cross-Tier scope expansion
+candidate at fourth observation.** Sub-class 1 second observation
+tightens amendment class projection. Topology-primary tier-variant
+taxonomy structure preserved with operational-coupling-variant
+tagging extension (Sub-class 2a operational-coupling-count ∈ {0,
+1, 2} variants; Sub-class 2e (αa) reimplementation + (αb) use-case-
+divergence variants; Sub-class 2j (αFFT) + (αwavelet) + (αEMD)
+mathematical-family variants); future analogous topology +
+operational-coupling-variant + mathematical-family-variant
+observations apply variant-tagging convention OR sub-class-split
+convention at second observation per A3 tightening precedent.
+**Third Sub-class 2e variant observation tightens variant taxonomy
+at absorption #5+; fourth Sub-class 2a variant observation (e.g.,
+new operational-coupling-count = 3+ if observed) tightens variant
+tagging axis at absorption #5+; fourth Sub-class 2j mathematical-
+family-variant observation tightens variant taxonomy at absorption
+#7+.**
+
+**Sub-class taxonomy current-state-clarification observation
+banking at S44-absorption #6 per Chat S44 STOP 2 (γ)+(j)
+ratifications (partial scope clarification observation; NOT
+codification of banked candidates at S44 absent A3 second-
+observation tightening precedent threshold satisfaction; banked
+candidate inventory preservation for absorption #7+ disposition
+adoption):** Sub-class 2f + 2g + 2h candidates per S31 + S32 + S33
++ S34 commit message body forward state banking (Block 3
+Decomposition heterogeneous-Tier-surface Sub-class taxonomy
+growth observations per §4 forward instrumentation note 16
+codification at S35-absorption #5) preserved at NOT-CODIFIED
+banked status pending second-observation tightening at S46+ Q1
+entry recurrence OR absorption #7+ codification refinement
+disposition; current-state clarification: Sub-class 2f-2h banked
+candidates documented at §4 note 16 (NOT at A10 §3 codified Sub-
+class baseline scope). Sub-class 2i (S37 + S41 second-observation
+tightening; Tier III Pattern A.1 + §4.7.A variant 1
+reimplementation-of-dispatch scope) + Sub-class 2k (S39 first-
+instance baseline; Tier V Pattern J B.3 alignment-via-metric
+resolution + cross-package framing scope) + Sub-class 2l (S40 +
+S42 second-observation tightening; Tier IV Pattern A.3 self-parity
+/ paper-formula + §4.7.A variant 3 DEGENERATE DUAL-ARM sub-variant
++ single-layer scope) + Sub-class 2m (S43 first-instance baseline;
+Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE
+DUAL-ARM sub-variant + single-layer scope) candidates preserved
+at NOT-CODIFIED banked status per S37-S43 commit message body
+forward state banking; codification refinement candidate at
+absorption #7+ disposition adoption per A3 precedent threshold
+satisfaction at respective second-observation tightening recurrence
+(Sub-class 2i + 2l already at SECOND-OBSERVATION TIGHTENING; Sub-
+class 2k + 2m at FIRST-INSTANCE baseline pending second-observation
+tightening). **Block 5 Sub-class taxonomy growth Block-level
+observation completion at S43 close:** n=5 NEW Sub-class
+candidates within single Block scope (2i + 2j + 2k + 2l + 2m at
+S37-S43) + n=3 SECOND-OBSERVATION TIGHTENING observations within
+single Block (2i + 2j + 2l) = empirically the largest Sub-class
+taxonomy growth at single Block in apparatus history (vs Block 3
+n=3 NEW Sub-class candidates 2f + 2g + 2h at S32 + S33 + S34;
+Block 5 advances by 67% NEW Sub-class candidate count per single
+Block scope). **Forward instrumentation:** Sub-class 2f + 2g + 2h
++ 2i + 2k + 2m banked candidates pending second-observation
+tightening adoption disposition at absorption #7+; Sub-class 2l
+banked candidate pending codification adoption disposition at
+absorption #7+ per A3 SECOND-OBSERVATION TIGHTENING precedent
+threshold SATISFIED at S40 + S42 paired observations; Sub-class
+2j codified at S44-absorption #6 per A3 THIRD-OBSERVATION
+TIGHTENING precedent threshold SATISFIED at S38 + S41 + S43 cross-
+Tier observations (highest precedent threshold satisfaction among
+banked candidates drives codification adoption priority at S44).
 
 **Cross-reference:** S12 + S13 + S14a + S14b + S14c + S15 §2.5
 entries at `tsl_trust_inventory_techniques.md` (Q1 work program
@@ -1515,6 +1647,109 @@ FIFTH catalog block transition); heterogeneous-vs-homogeneous Tier-
 surface sub-pattern codification refinement at next Block close
 based on empirical Tier surface composition observation.
 
+**Forward instrumentation note 6 REFINEMENT at S44-absorption #6 per
+Chat S44 STOP 2 (d)+(e) ratifications — Block 5 Frequency Domain /
+Signal FULLY Q1-AMENDED milestone at S43 close (FIFTH catalog block
+fully Q1-amended; per-block continuation pattern n=5 catalog block
+observations REACHED at A3 second-observation tightening precedent
+threshold FURTHER REINFORCED satisfaction; heterogeneous Tier-
+surface variant A3 THIRD-OBSERVATION TIGHTENING precedent threshold
+SATISFIED at n=3 heterogeneous Block observations):**
+
+**Block 5 Frequency Domain / Signal (completed at S43; 7 entries
+across S37 + S38 + S39 + S40 + S41 + S42 + S43; cumulative ~10895
+net LOC across 7 §2.5 entries / 7 sub-sessions + 0 amendments + 0
+absorptions pre-S44; S44-absorption #6 = post-Block-5 closure /
+heterogeneous Tier III Pattern A.1 + Tier II.bit-exact Pattern A.2
++ Tier V Pattern J B.3 + Tier IV Pattern A.3 + Tier VI CAVEAT
+Pattern J Tier C = 5 distinct Tier characterizations):** 1 Tier
+III Pattern A.1 same-library (periodogram_spectral_density S37
+~945 LOC; Sub-class 2i candidate first-instance baseline + §4.7.A
+variant 1); 1 Tier II.bit-exact Pattern A.2 cross-package
+(fft_spectrum S38 ~1285 LOC; Sub-class 2j candidate first-instance
+baseline at Pattern F structural invariants FIRST observation +
+§4.7.A variant 1); 1 Tier V Pattern J B.3 alignment-via-metric
+resolution (lomb_scargle S39 ~1478 LOC; Sub-class 2k candidate
+first-instance baseline + §4.7.A variant 1); 1 Tier IV Pattern A.3
+self-parity / paper-formula (ssa S40 ~1613 LOC; Sub-class 2l
+candidate first-instance baseline + §4.7.A variant 3 DEGENERATE
+DUAL-ARM sub-variant first-instance baseline); 1 Tier III Pattern
+A.1 same-library REPEAT (wavelet_transform S41 ~1964 LOC; Sub-
+class 2i + 2j SECOND-OBSERVATION TIGHTENING + §4.7.A variant 1 +
+ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE FIRST
+observation); 1 Tier IV Pattern A.3 REPEAT (wavelet_coherence_phase_lag
+S42 ~2150 LOC; Sub-class 2l SECOND-OBSERVATION TIGHTENING + §4.7.A
+variant 3 DEGENERATE DUAL-ARM sub-variant second-observation
+tightening); 1 Tier VI CAVEAT Pattern J Tier C — different sifting
+libraries (emd_hht S43 ~2680 LOC NEW LARGEST single Q1 entry in
+apparatus history; Sub-class 2m candidate first-instance baseline
++ §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant first-
+instance baseline + §1.8 reroll_on_caveat=False APPLICABLE FIRST
+within Frequency Domain / Signal block + Pattern F structural
+invariants A3 THIRD-OBSERVATION TIGHTENING at n=3 mathematical
+families). Block footprint: 7 entries / ~10895 LOC / 7 sub-sessions
++ 0 amendment commits + 1 absorption commit (S44-absorption #6).
+**Block 5 cumulative LOC ~10895 = NEW LARGEST single-Block
+cumulative LOC in apparatus history (advances Block 3 ~3119 LOC
+baseline by ~249%; advances Block 1 ~1837 LOC baseline by ~493%).**
+
+**Per-block continuation pattern at n=5 catalog block observations
+(A3 second-observation tightening precedent threshold FURTHER
+REINFORCED satisfaction):** Block 1 Causality (6 entries / ~1837
+LOC / S12-S18 / 1 amendment + 1 absorption / homogeneous Tier
+II.bit-exact-throughout) + Block 12 Stationarity Tests (3 entries
+/ ~1737 LOC / S21-S23 / 0 amendments + 1 absorption / homogeneous
+Tier II.bit-exact-throughout) + Block 8 Missing Data (3 entries /
+~1551 LOC / S26-S28 / 0 amendments + 0 absorptions pre-S29; S29-
+absorption #4 / heterogeneous 3 Tier characterizations) + Block 3
+Decomposition (4 entries / ~3119 LOC / S31-S34 / 0 amendments + 0
+absorptions pre-S35; S35-absorption #5 / heterogeneous 4 Tier
+characterizations) + **Block 5 Frequency Domain / Signal (7
+entries / ~10895 LOC / S37-S43 / 0 amendments + 0 absorptions pre-
+S44; S44-absorption #6 / heterogeneous 5 Tier characterizations
+NEW LARGEST cumulative LOC + entry count single-Block in apparatus
+history)** = ~19139 LOC across 23 §2.5 entries / 23 sub-sessions
+across 5 fully Q1-amended catalog blocks at S43 close. Per-block
+continuation pattern characterization at n=5 catalog block
+observations: blocks complete in 3-7 entries (range expanded from
+n=4 baseline 3-4 to n=5 baseline 3-7 at Block 5 close); **LOC
+range expands ~1551-10895 per block** (Block 5 ~10895 LOC largest
+to-date reflecting Block 5 entry-count growth 7 vs prior 3-6
+entries + Block 5 per-entry LOC compound novelty surface
+elevation); amendment + absorption frequency varies (Block 1
+highest at 1+1; Block 12 + Block 8 + Block 3 + Block 5 each at 0
+amendments + 1 absorption ratio post-Block-close); per-block
+completion arc S<N> → S<N+2 to S<N+7> typical (Block 5: S37 → S43
+= 7 sub-sessions = LARGEST single-Block sub-session arc in
+apparatus history). **Heterogeneous-vs-homogeneous Tier-surface
+variant sub-pattern A3 THIRD-OBSERVATION TIGHTENING precedent
+threshold SATISFIED at n=3 heterogeneous Block observations** (Block
+8 + Block 3 + Block 5 all heterogeneous-Tier-surface; Block 1 +
+Block 12 both homogeneous-Tier-II.bit-exact-throughout):
+- **Block 5 heterogeneous (7 entries S37+S38+S39+S40+S41+S42+S43):**
+  Tier III Pattern A.1 same-library + Tier II.bit-exact Pattern A.2
+  cross-package + Tier V Pattern J B.3 alignment-via-metric +
+  Tier IV Pattern A.3 self-parity / paper-formula + Tier VI CAVEAT
+  Pattern J Tier C — different sifting libraries = **5 distinct
+  Tier characterizations across 7 entries = LARGEST heterogeneous-
+  Tier-surface composition in apparatus history (advances Block 3
+  n=4 distinct Tiers baseline by 25%)**; codification refinement
+  candidate at absorption #7+ for heterogeneous-Tier-surface
+  variant sub-pattern at n=5 distinct Tier observations within
+  single Block scope EMPIRICALLY ROBUSTLY GROUNDED.
+
+Forward instrumentation: per-block continuation pattern
+characterization tightens further at n=6 catalog block observation
+(S47+ SIXTH catalog block transition pending); heterogeneous-vs-
+homogeneous Tier-surface sub-pattern codification at n=3
+heterogeneous Block observations EMPIRICALLY ROBUSTLY GROUNDED
+per S44-absorption #6 refinement; cross-block per-entry LOC
+escalation pattern observation candidate at absorption #7+ (Block
+1 ~306 LOC/entry → Block 12 ~579 LOC/entry → Block 8 ~517 LOC/
+entry → Block 3 ~780 LOC/entry → Block 5 ~1556 LOC/entry =
+sustained escalation reflecting compound novelty surface
+accumulation across Q1 work program sub-session arc).
+
 **Forward instrumentation note — Discipline maturation observation:
 reactive-catch → proactive-prevention [SUPERSEDED BY §4.5 NEW
 SUB-SECTION AT S29-ABSORPTION #4; TEXT PRESERVED PER R3 MAINTENANCE
@@ -1867,6 +2102,69 @@ Tier-surface Block at S37+ FIFTH catalog block transition would
 provide n=2 Block-level Sub-class taxonomy growth observation per
 A3 precedent); codification deferred to absorption #6+.
 
+**Forward instrumentation note 16 REFINEMENT at S44-absorption #6
+per Chat S44 STOP 2 (e) ratification — Block 5 Frequency Domain /
+Signal Sub-class taxonomy growth Block-level observation at A3
+SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at n=2
+heterogeneous-Tier-surface Block-level Sub-class taxonomy growth
+observations (Block 3 + Block 5):** Block 5 Frequency Domain /
+Signal Block-level Sub-class taxonomy growth observation per S37-
+S43 sub-session arc empirically the LARGEST Sub-class taxonomy
+growth at single Block in apparatus history. **Empirical Sub-class
+taxonomy growth observations across Block 5:**
+- **Sub-class 2i candidate (S37 periodogram_spectral_density first-
+  instance baseline + S41 wavelet_transform second-observation
+  tightening):** Tier III Pattern A.1 same-library + §4.7.A variant
+  1 reimplementation-of-dispatch scope; n=2 ACTIVE banked candidate
+  status; A3 SECOND-OBSERVATION TIGHTENING precedent threshold
+  SATISFIED at Sub-class 2i scope per S37 + S41 paired observations;
+  codification refinement candidate at absorption #7+
+- **Sub-class 2j codified at S44-absorption #6 (S38 fft_spectrum
+  first-instance + S41 wavelet_transform second-observation
+  tightening + S43 emd_hht third-observation tightening):** Pattern
+  F structural invariants cross-Tier scope; n=3 ACTIVE codified at
+  A3 THIRD-OBSERVATION TIGHTENING precedent threshold SATISFIED;
+  codified at A10 §3 Sub-class 2j entry at S44-absorption #6
+- **Sub-class 2k candidate (S39 lomb_scargle first-instance
+  baseline):** Tier V Pattern J B.3 alignment-via-metric resolution
+  + cross-package framing scope; n=1 banked candidate status; A3
+  first-instance precedent n=1 baseline; codification deferred to
+  absorption #7+ second-observation tightening if recurs
+- **Sub-class 2l candidate (S40 ssa first-instance baseline + S42
+  wavelet_coherence_phase_lag second-observation tightening):**
+  Tier IV Pattern A.3 self-parity / paper-formula + §4.7.A variant
+  3 DEGENERATE DUAL-ARM sub-variant + single-layer scope; n=2 ACTIVE
+  banked candidate status; A3 SECOND-OBSERVATION TIGHTENING precedent
+  threshold SATISFIED at Sub-class 2l scope per S40 + S42 paired
+  observations; codification refinement candidate at absorption #7+
+- **Sub-class 2m candidate (S43 emd_hht first-instance baseline):**
+  Tier VI CAVEAT Pattern J Tier C — different sifting libraries +
+  §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant + single-
+  layer scope; n=1 banked candidate status; A3 first-instance
+  precedent n=1 baseline; codification deferred to absorption #7+
+  second-observation tightening if recurs
+
+**Block-level pattern observation at S44-absorption #6:** Block 5
+Frequency Domain / Signal produces n=5 NEW Sub-class candidates +
+n=3 SECOND-OBSERVATION TIGHTENING observations within single Block
+sub-session arc S37-S43 = empirically the LARGEST Sub-class
+taxonomy growth at single Block in apparatus history (advances
+Block 3 n=3 NEW Sub-class candidates baseline by 67% NEW Sub-class
+candidate count + 100% SECOND-OBSERVATION TIGHTENING observations).
+**Heterogeneous-Tier-surface Block correlation pattern empirically
+REINFORCED at n=2 Block-level observations (Block 3 + Block 5)
+per A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED;
+codification refinement candidate at absorption #7+ for
+heterogeneous-Tier-surface Block-level Sub-class taxonomy growth
+rate empirical correlation pattern definitional scope generalization
+EMPIRICALLY ROBUSTLY GROUNDED.** Forward observation banking:
+third heterogeneous-Tier-surface Block-level Sub-class taxonomy
+growth observation at next heterogeneous-Tier-surface Block close
+(S47+ SIXTH catalog block transition if heterogeneous) tightens
+pattern per A3 third-observation tightening precedent threshold
+satisfaction candidate; codification deferred to absorption #7+
+disposition adoption.
+
 **Forward instrumentation note 17 — Mod 3 chunked-surface content-
 completeness verification empirical pattern observation (NEW at
 S35-absorption #5 per apparatus operational review pause Chat
@@ -1924,6 +2222,266 @@ n=4+ recurrence at S36+ Q1 entries would warrant immediate Workstream
 B Mod 3 codification refinement at next Workstream B amendment cycle
 sub-session; n=3 consecutive at S35 within single sub-session
 (S31 + S35 STOP 1 + S35 STOP 1.5) reinforces refinement urgency.
+
+**Forward instrumentation note 18 — Heterogeneous Tier-surface
+variant sub-pattern at Block-internal Tier characterization
+diversity scope (NEW at S44-absorption #6 per Chat S44 STOP 2 (b)
+ratification; A3 FOURTH-OBSERVATION TIGHTENING precedent threshold
+SATISFIED at heterogeneous Tier-surface variant sub-pattern scope
+at n=5 distinct Tiers across 7 sub-sessions S37-S43 within Block
+5 Frequency Domain / Signal):** Block-internal Tier characterization
+diversity sub-pattern empirically distinct from cross-Block Tier
+characterization diversity scope. **Block-internal Tier surface
+heterogeneity observations (Block 5 baseline):**
+- Tier III Pattern A.1 same-library (S37 periodogram_spectral_density
+  + S41 wavelet_transform REPEAT) = n=2 observations
+- Tier II.bit-exact Pattern A.2 cross-package (S38 fft_spectrum) =
+  n=1 observation
+- Tier V Pattern J B.3 alignment-via-metric resolution (S39
+  lomb_scargle) = n=1 observation
+- Tier IV Pattern A.3 self-parity / paper-formula (S40 ssa + S42
+  wavelet_coherence_phase_lag REPEAT) = n=2 observations
+- Tier VI CAVEAT Pattern J Tier C — different sifting libraries
+  (S43 emd_hht) = n=1 observation
+**n=5 distinct Tier characterizations across n=7 entries within
+single Block scope = LARGEST Block-internal Tier surface
+heterogeneity observation in apparatus history** (advances Block
+3 n=4 distinct Tiers within 4 entries baseline by 25% Tier
+diversity count; advances Block 8 n=3 distinct Tiers within 3
+entries baseline by 67% Tier diversity count).
+
+**A3 FOURTH-OBSERVATION TIGHTENING precedent threshold SATISFIED
+at heterogeneous Tier-surface variant sub-pattern scope** at n=5
+distinct Tiers across 7 sub-sessions per Block 5 sub-session arc
+S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-
+exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV
+Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW). **Empirical
+heterogeneous-vs-homogeneous Tier-surface Block correlation
+pattern:** Block 1 + Block 12 homogeneous Tier II.bit-exact-
+throughout (single Tier characterization) vs Block 8 + Block 3 +
+Block 5 heterogeneous (3 + 4 + 5 distinct Tiers respectively) =
+post-Block-3 heterogeneous-Tier-surface trend empirically reinforced
+at Block 5 close (n=3 heterogeneous Block observations Block 8 +
+Block 3 + Block 5 per A3 THIRD-OBSERVATION TIGHTENING precedent
+threshold SATISFIED at heterogeneous-Tier-surface Block scope per
+§4 note 6 refinement at S44-absorption #6). Forward instrumentation:
+fifth Block-internal Tier-surface variant observation at S47+
+SIXTH catalog block transition tightens variant taxonomy per A3
+precedent at absorption #7+; cross-Block Tier-surface variant
+generalization (Block-level Tier-surface composition aggregate
+characterization scope distinct from Block-internal Tier-surface
+heterogeneity scope) codification refinement candidate at
+absorption #7+.
+
+**Forward instrumentation note 19 — Multi-precedent confluence
+sub-pattern at SAME audit + SAME entry codification scope (NEW at
+S44-absorption #6 per Chat S44 STOP 2 (c) ratification; A3 FOURTH-
+OBSERVATION TIGHTENING precedent threshold SATISFIED at multi-
+precedent confluence sub-pattern scope at n=4 distinct observations
+S38 + S41 + S42 + S43 + sustained ≥5 A3 threshold satisfactions
+per observation + record-high SEVEN A3 threshold satisfactions/
+reinforcements at S43 single observation):** Multi-precedent
+confluence sub-pattern characterizes empirical observations where
+multiple A3 precedent threshold satisfactions/reinforcements
+manifest at SAME audit + SAME §2.5 entry codification scope in
+single Q1 sub-session. **Empirical observations across Q1 sub-
+session arc:**
+- **S38 fft_spectrum FIRST-INSTANCE BASELINE (n=5 A3 precedent
+  threshold satisfactions):** Tier II.bit-exact Pattern A.2 cross-
+  package SECOND-OBSERVATION TIGHTENING + §4.7.A variant 1 fourth-
+  observation tightening + Pattern F NEW framing element first-
+  instance baseline + Sub-class 2j candidate first-instance baseline
+  + all-anchor-deferral discipline first-application baseline
+- **S41 wavelet_transform SECOND-INSTANCE (n=6 A3 precedent
+  threshold satisfactions):** Sub-class 2i SECOND-OBSERVATION
+  TIGHTENING + Pattern F SECOND-OBSERVATION TIGHTENING + ENGINE-
+  DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE FIRST observation
+  + Q-C HEIGHTENED DISCLOSURE REQUIREMENT SECOND-OBSERVATION
+  TIGHTENING + Q-D MEDIUM-HIGH SECOND-OBSERVATION TIGHTENING +
+  all-anchor-deferral discipline FOURTH-APPLICATION reinforcement
+- **S42 wavelet_coherence_phase_lag THIRD-INSTANCE (n=5 A3
+  precedent threshold satisfactions):** Tier IV Pattern A.3 SECOND-
+  OBSERVATION TIGHTENING + §4.7.A variant 3 DEGENERATE DUAL-ARM
+  sub-variant SECOND-OBSERVATION TIGHTENING + Sub-class 2l SECOND-
+  OBSERVATION TIGHTENING + §1.9 Filename divergence cross-block
+  extension THIRD-OBSERVATION TIGHTENING + all-anchor-deferral
+  discipline FIFTH-APPLICATION A3 further reinforcement
+- **S43 emd_hht FOURTH-INSTANCE (n=7 A3 precedent threshold
+  satisfactions = RECORD-HIGH single-observation count in
+  apparatus history):** Tier VI CAVEAT FIRST Q1 §2.5 entry within
+  Frequency Domain / Signal block (cross-Block extension) +
+  Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION
+  TIGHTENING at n=5 distinct Tiers + Pattern F structural
+  invariants A3 THIRD-OBSERVATION TIGHTENING at n=3 mathematical
+  families + All-anchor-deferral discipline SIXTH-APPLICATION A3
+  further reinforcement + §1.8 reroll_on_caveat=False discipline
+  FIRST applicability test within Frequency Domain / Signal block
+  scope + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant
+  FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone
+
+**A3 FOURTH-OBSERVATION TIGHTENING precedent threshold SATISFIED**
+at multi-precedent confluence sub-pattern scope at SAME audit +
+SAME entry codification surface at n=4 distinct observations (S38
++ S41 + S42 + S43) + sustained ≥5 A3 threshold satisfactions per
+observation + record-high SEVEN A3 threshold satisfactions/
+reinforcements at S43 single observation. **Codification refinement
+candidate at absorption #6+ EMPIRICALLY ROBUSTLY REINFORCED at
+FOUR sustained observations.** Forward instrumentation: fifth
+multi-precedent confluence observation at S46+ Q1 entry tightens
+variant taxonomy per A3 precedent at absorption #7+; cumulative
+A3 precedent threshold satisfaction count trajectory (5 → 6 → 5
+→ 7) empirically variable per host §2.5 entry compound novelty
+surface scope; record-high SEVEN A3 threshold satisfactions at
+S43 reflects Block 5 close milestone substantive forward
+instrumentation scope + Tier VI CAVEAT NEW Tier within Block
++ §1.8 APPLICABLE FIRST within Block + §4.7.A variant 3 NEW sub-
+variant + Pattern F THIRD-OBSERVATION compound novelty surface
+elevation.
+
+**Forward instrumentation note 20 — Q-D retraction surface FOUR-
+SUB-CATEGORY taxonomy expansion (NEW at S44-absorption #6 per
+Chat S44 STOP 2 (f) ratification):** Q-D retraction surface
+characterization at §2.5 entry codification scope FOUR-SUB-CATEGORY
+empirical taxonomy at S43 close:
+- **Sub-category 1 LOW retraction surface (S38 fft_spectrum):**
+  Tier II.bit-exact Pattern A.2 cross-package with bit-exact
+  parity validation at SHARED-pocketfft-backbone scope; both arms
+  exercise SAME library primitive at SAME mathematical scope;
+  audit validates library primitive correctness at metric scope;
+  cross-implementation parity established at scipy.fft +
+  numpy.fft pocketfft-shared scope; retraction surface LOW
+- **Sub-category 2 LOW-MEDIUM retraction surface (S37
+  periodogram_spectral_density + S39 lomb_scargle + S41
+  wavelet_transform):** Tier III Pattern A.1 same-library +
+  Tier V Pattern J B.3 alignment-via-metric + Tier III Pattern
+  A.1 same-library at NON-cross-package validation; audit
+  validates library primitive correctness at metric scope but
+  cross-implementation parity NOT established beyond same-library
+  self-test; retraction surface LOW-MEDIUM
+- **Sub-category 3 MEDIUM-HIGH retraction surface (S40 ssa + S42
+  wavelet_coherence_phase_lag):** Tier IV Pattern A.3 self-parity
+  / paper-formula + §4.7.A variant 3 DEGENERATE DUAL-ARM sub-
+  variant; harness defines from-scratch reimplementation invoked
+  at BOTH arms (TSL arm == reference arm identical helper
+  invocation); 0.0 abs diff GUARANTEED BY CONSTRUCTION; engine
+  math NEVER validated by audit; cross-implementation parity NOT
+  established; retraction surface MEDIUM-HIGH per Sub-class 2l
+  combined scope (Tier IV + §4.7.A variant 3 DEGENERATE DUAL-ARM)
+- **Sub-category 4 MEDIUM retraction surface (S43 emd_hht NEW
+  first-instance baseline at S43):** Tier VI CAVEAT Pattern J
+  Tier C — different sifting libraries + §4.7.A variant 3 NON-
+  DEGENERATE DUAL-ARM sub-variant; harness `_numpy_emd_minimal`
+  inline mirror at TSL arm + EXTERNAL PyEMD.EMD at reference arm
+  (TSL arm ≠ reference arm); ±2 IMF count divergence drives
+  CAVEAT verdict but structural identity invariants PASS at
+  machine precision + cumulative-energy-curve correlation PASS at
+  0.991 provides STRUCTURAL safety bound; cross-implementation
+  parity established at PyEMD scope only; retraction surface
+  MEDIUM per Sub-class 2m combined scope (Tier VI CAVEAT +
+  §4.7.A variant 3 NON-DEGENERATE DUAL-ARM)
+
+**FOUR-SUB-CATEGORY empirical taxonomy** at S43 close per Block 5
+sub-session arc S37-S43; codification refinement candidate at
+absorption #6+ for Q-D retraction surface taxonomy expansion
+definitional scope EMPIRICALLY GROUNDED at FOUR-SUB-CATEGORY
+taxonomy establishment. Forward instrumentation: fifth Q-D
+retraction surface sub-category observation at S46+ Q1 entry
+tightens taxonomy per A3 precedent at absorption #7+; cross-Sub-
+class retraction surface granularity expansion candidate at
+absorption #7+ (e.g., Q-D layer-specific retraction surface SEVEN-
+distinct-layer-specific scope granularity per S43 banking
+observation candidate at S44 close report forward state).
+
+**Forward instrumentation note 21 — Validation claim scope
+category taxonomy THREE-CATEGORY establishment (NEW at S44-
+absorption #6 per Chat S44 STOP 2 (g) ratification):** §2.5 entry
+codification validation claim scope characterization at THREE-
+CATEGORY empirical taxonomy at S43 close:
+- **Category 1 audit-validates-library-primitive at S37-S39 + S41
+  (n=4 observations):** S37 periodogram_spectral_density Tier III
+  Pattern A.1 same-library scipy.signal.periodogram self-test +
+  S38 fft_spectrum Tier II.bit-exact Pattern A.2 scipy.fft vs
+  numpy.fft pocketfft-shared-backbone + S39 lomb_scargle Tier V
+  Pattern J B.3 scipy.signal.lombscargle vs astropy.timeseries.LombScargle
+  metric-selection-aligned bit-exact + S41 wavelet_transform Tier
+  III Pattern A.1 pywt.wavedec self-test; audit DOES validate
+  library primitive at metric scope; structural-properties scope
+  + cross-implementation parity scope variable per entry
+- **Category 2 audit-validates-reimplementation-self-consistency-
+  only at S40 + S42 (n=2 observations):** S40 ssa Tier IV Pattern
+  A.3 + §4.7.A variant 3 DEGENERATE DUAL-ARM + S42
+  wavelet_coherence_phase_lag Tier IV Pattern A.3 + §4.7.A variant
+  3 DEGENERATE DUAL-ARM; audit validates `_ssa_reference` /
+  `_wavelet_coherence_reference` self-consistency at degenerate
+  dual-arm scope (TSL arm == reference arm identical helper
+  invocation; 0.0 abs diff GUARANTEED BY CONSTRUCTION); audit
+  does NOT validate library primitive correctness vs paper formula
+  NOR engine math NOR cross-implementation parity
+- **Category 3 audit-validates-IMF-count-CAVEAT-with-reconstruction-
+  identity-PASS-and-energy-curve-correlation-PASS-via-different-
+  sifting-libraries (Tier C convention) at S43 (n=1 first-instance
+  baseline):** S43 emd_hht Tier VI CAVEAT Pattern J Tier C +
+  §4.7.A variant 3 NON-DEGENERATE DUAL-ARM; audit validates
+  structural-properties scope (reconstruction identity + IMF count
+  + energy curve correlation) at Tier C convention with CAVEAT
+  verdict deterministic per `reroll_on_caveat = False` Session 5
+  lock; per-IMF bitwise parity mathematically intractable per
+  Pattern J / Tier C — different sifting libraries methodology
+
+**THREE-CATEGORY empirical taxonomy** at S43 close per Block 5
+sub-session arc S37-S43; codification refinement candidate at
+absorption #6+ for validation claim scope category taxonomy
+definitional scope EMPIRICALLY GROUNDED at THREE-CATEGORY
+taxonomy establishment. Forward instrumentation: fourth validation
+claim scope category observation at S46+ Q1 entry tightens
+taxonomy per A3 precedent at absorption #7+; potential Category 4
+candidates: layered-Tier-surface combined validation (e.g.,
+Tier I + Tier II overlay scope at S22 + S23 + S25 Block 12
+precedent) + cross-implementation parity established beyond single
+external library reference (Tier IV/V/VI scope) + REMEDIATED
+status dimension validation scope (S34 x13_seasonal_adjust scope).
+
+**Forward instrumentation note 22 — §4.7.A variant 3 sub-variant
+taxonomy TWO-SUB-VARIANT establishment (NEW at S44-absorption #6
+per Chat S44 STOP 2 (h) ratification; cross-reference §4.7.A
+codification at operational_disciplines_disposition_2_banking.md
+§4.7 scope per separate-document codification continuation):**
+§4.7.A variant 3 (Harness-reimplements-engine-math) sub-variant
+taxonomy expansion at TWO-SUB-VARIANT empirical taxonomy at S43
+close:
+- **Sub-variant 3.D DEGENERATE DUAL-ARM (S40 ssa first-instance
+  baseline + S42 wavelet_coherence_phase_lag second-observation
+  tightening; A3 SECOND-OBSERVATION TIGHTENING precedent threshold
+  SATISFIED):** harness defines from-scratch reimplementation
+  invoked at BOTH TSL-arm AND reference-arm with identical
+  arguments; TSL arm == reference arm identical helper invocation;
+  0.0 abs diff GUARANTEED BY CONSTRUCTION; audit validates
+  reimplementation self-consistency ONLY at degenerate dual-arm
+  scope
+- **Sub-variant 3.N NON-DEGENERATE DUAL-ARM (S43 emd_hht first-
+  instance baseline; A3 first-instance precedent n=1 baseline):**
+  harness defines from-scratch reimplementation invoked at TSL-arm
+  AND distinct external library invoked at reference-arm (TSL arm
+  ≠ reference arm); harness `_numpy_emd_minimal` mirrors engine
+  `_numpy_emd` fallback at TSL arm; reference arm invokes
+  EXTERNAL PyEMD.EMD library distinct implementation; ±2 IMF count
+  divergence empirical at structural-properties scope + 0.991
+  Pearson correlation on cumulative energy curve; audit validates
+  structural-properties scope at Tier C convention with CAVEAT
+  verdict deterministic per `reroll_on_caveat = False`
+
+**TWO-SUB-VARIANT empirical taxonomy** at S43 close per S40 + S42
++ S43 sub-session arc; codification refinement candidate at
+absorption #6+ for §4.7.A variant 3 sub-variant taxonomy expansion
+at A3 first-instance baseline observation EMPIRICALLY GROUNDED at
+NON-DEGENERATE DUAL-ARM sub-variant first-instance baseline at
+S43. Forward instrumentation: second NON-DEGENERATE DUAL-ARM sub-
+variant observation at S46+ Q1 entry tightens variant taxonomy
+per A3 precedent at absorption #7+; potential Sub-variant 3.M
+candidate (MIXED dual-arm: harness invokes engine `run()` directly
+AT TSL-arm + external library at reference-arm; distinct from
+Sub-variant 3.D both-helper-invocation AND Sub-variant 3.N
+inline-mirror-vs-external) at future Q1 entry codification.
 
 ## §4.5 Discipline maturation observation (reactive-catch → proactive-prevention) [NEW at S29-absorption #4 codification; promoted from §4 forward instrumentation note 7 per Chat ITEM 7 AFFIRMED commitment + EXTENDED at S35-absorption #5 to eleven-sustained-observation cross-session trajectory + EIGHT-timing-point empirical surface (NEW (vii) STOP-1.5-close-application-verification + NEW (viii) STOP-1-close-content-completeness verification per Revision 4 ratification) + bilateral cross-actor extension at n=11 total (n=3 Code→Chat + n=8 Chat→Code) per Revision 1 ratification + sustained Chat→Code direction sub-pattern variant cross-reference to A9 amendment Sub-pattern 4 codification + n=15 candidate banking forward instrumentation note per Revision 5 ratification]
 
