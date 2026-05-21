@@ -210,10 +210,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
             vol_rows,
         )
 
-        # Variance forecast
+        # Variance forecast.
+        # arch's default `method='analytic'` only supports horizon=1
+        # for EGARCH (Nelson's exponential parameterization has no
+        # closed-form multi-step formula). Route EGARCH multi-step
+        # forecasts to `method='simulation'`. Other engine-supported
+        # variants (symmetric GARCH at o=0; GJR-GARCH at vol="GARCH"
+        # + o>0 per _TID_VOL_MAP normalization) handle analytic
+        # multi-step natively. Surfaced as S54 (egarch) wrapper-layer
+        # check 3 failure with default analytic call returning
+        # 1-row "Note" table instead of horizon-rows forecast.
         progress_callback("Forecasting volatility", 70)
+        forecast_method = "simulation" if vol_type == "EGARCH" else "analytic"
+        forecast_kwargs = {"horizon": horizon, "reindex": False,
+                           "method": forecast_method}
+        if forecast_method == "simulation":
+            forecast_kwargs["simulations"] = 1000
         try:
-            fc = fit.forecast(horizon=horizon, reindex=False)
+            fc = fit.forecast(**forecast_kwargs)
             var_fc = fc.variance.values[-1] if hasattr(fc.variance, 'values') else np.asarray(fc.variance)[-1]
             vol_fc = np.sqrt(var_fc)
             fc_rows = []
