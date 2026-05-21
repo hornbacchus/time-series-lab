@@ -19735,17 +19735,32 @@ per observation).
 
 ### local_level (Phase 7+ S48; TWENTY-FOURTH §2.5 entry; FIRST State Space / Filtering block entry — Block 6 opens; Kalman filter already validated at §2 Tier 1a per `2a_kalman_filter_smoother`; local_level selected as first unvalidated State Space block entry per technique-complexity-ascending precedent)
 
-**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
-II.bit-exact — Phase 3 cross-package bit-exact parity validated
-(Pattern A.2 per scope_reframing §2 line 130; statsmodels
-`UnobservedComponents` vs R `KFAS::SSModel + fitSSM + KFS`).
-Per Session 9 closing finding (`docs/reference_parity/session_9_findings.md`
-line 22 verbatim: "p3_local_level and p3_kalman_imputation join
-Pattern A bit-exact regime when KFAS+statsmodels variance estimates
-align. Pattern A = 11 confirmed wrappers across 5 batches"). Verdict
-class: `mle_fit` (Kalman MLE; closed-form recursions given variances;
-likelihood-optimum convergence on (sigma_eps2, sigma_eta2) at MLE-
-class precision per Phase 3 Batch 5 audit class declaration at
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy; CORRECTED
+at S49):** Tier II.mle-band — Phase 3 cross-package PASS at MLE-class
+convergence precision (Pattern A.2 per scope_reframing §2 line 134;
+statsmodels `UnobservedComponents` vs R `KFAS::SSModel + fitSSM + KFS`;
+tolerance abs 1e-2 + rel 1e-1 per
+`tools/reference_parity/harness/tolerances.py` lines 1383-1386 —
+within Tier II.mle-band "1e-2 to 1e-1 abs typical" band per scope_reframing
+§136; NOT bit-exact at machine precision per scope_reframing §122
+strict bit-exact criterion). Per Session 9 closing finding
+(`docs/reference_parity/session_9_findings.md` line 22 verbatim:
+"p3_local_level and p3_kalman_imputation join Pattern A bit-exact
+regime when KFAS+statsmodels variance estimates align. Pattern A = 11
+confirmed wrappers across 5 batches") — Session 9 "Pattern A bit-exact
+regime" vocabulary predates the S6/S9 Tier II split into bit-exact
+vs mle-band sub-classes per scope_reframing §116-119 ("Original Tier
+II label deprecated. Suffix labeling ('.bit-exact' / '.mle-band')
+carries precision distinction semantically"); MLE-class convergence
+precision at 1e-2 abs is not bit-exact under post-S6/S9 taxonomy.
+S48 originally classified as Tier II.bit-exact inheriting Session 9
+"Pattern A bit-exact regime" vocabulary; corrected at S49 to Tier
+II.mle-band per S6/S9 tier-split refinement (Session 9 language predates
+split; MLE-band convergence precision is not bit-exact at machine
+precision per §122). Verdict class: `mle_fit` (Kalman MLE; closed-form
+recursions given variances; likelihood-optimum convergence on
+(sigma_eps2, sigma_eta2) at MLE-class precision per Phase 3 Batch 5
+audit class declaration at
 `p3_local_level.py:LocalLevelParity.verdict_class = "mle_fit"`).
 
 **Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
@@ -19763,18 +19778,20 @@ engine or harness-reimplements-engine-math pattern present. §1.9
 filename divergence sub-pattern variant NOT MANIFESTED at S48 —
 audit `p3_local_level.py` + engine `local_level.py` both preserve
 canonical catalog technique_id `local_level` exactly. ALL-ANCHOR-
-DEFERRAL DISCIPLINE OPERATIVE at S48 Step 0; Tier II.bit-exact +
-Pattern A.2 + verdict class `mle_fit` + single-layer topology
-empirically confirmed at Code Step 0 read of harness lines 41-58
-+ engine lines 82-83 + Session 9 closing finding + parity status
-doc line 120; STOP-BLOCKING discharged at Step 0 empirical surface.
+DEFERRAL DISCIPLINE OPERATIVE at S48 Step 0; Tier II.mle-band (per
+S49 correction) + Pattern A.2 + verdict class `mle_fit` + single-
+layer topology empirically confirmed at Code Step 0 read of harness
+lines 41-58 + engine lines 82-83 + Session 9 closing finding +
+parity status doc line 120; STOP-BLOCKING discharged at Step 0
+empirical surface.
 
 **Reference:** R `KFAS::SSModel + fitSSM + KFS` (KFAS 1.5.4 per
 Phase 5 Session 5 selective re-validation per
 `docs/reference_parity_phase5/session_1_findings.md` lines 38-46;
 Koopman-Durbin convention matches statsmodels)
-**Verdict:** PASS Pattern A bit-exact at MLE-class precision per
-Phase 3 Session 9
+**Verdict:** PASS Pattern A.2 at MLE-class convergence precision per
+Phase 3 Session 9 (corrected from "PASS Pattern A bit-exact" Session 9
+vocabulary at S49 per S6/S9 tier-split refinement)
 **Audit script:** `tools/reference_parity/harness/checks/p3_local_level.py`
 **Audit date:** 2026-04-29 (Phase 3 Batch 5 close per S9)
 **Re-validation:** Phase 5 Session 5 prompt step 3 sentinel
@@ -19896,9 +19913,11 @@ walk plus noise / local level / simple structural TS). MLE on
 `log(c(var(y)/2, var(y)/2))` initial seeding (KFAS side);
 statsmodels UC uses internal default initialization. Both
 implementations apply same Koopman-Durbin Kalman filter + smoother
-recursions; achieves Pattern A bit-exact regime when BFGS lands
-at same likelihood-optimum variances per Session 9 closing
-finding. Structural invariants (`kalman_covariance_ordering`:
+recursions; achieves Pattern A.2 MLE-class convergence precision
+(at 1e-2 abs tolerance band; per Tier II.mle-band sub-class per S49
+correction; Session 9 "Pattern A bit-exact regime" vocabulary predates
+S6/S9 tier-split refinement) when BFGS lands at same likelihood-
+optimum variances per Session 9 closing finding. Structural invariants (`kalman_covariance_ordering`:
 filtered cov ≤ predicted cov, smoothed ≤ filtered;
 `kalman_innovation_positivity`: F_t > 0 ∀ t) declared at wrapper
 class per Pattern F fourth concrete batch per
@@ -19980,17 +19999,297 @@ fixture parameters):**
   `p3_structural_ts`) — `p3_local_level` parity scope strictly
   single-state random walk + noise
 
-**Status (PASS Pattern A bit-exact MLE-class):** Layer 1 Kalman
-MLE math validated at MLE-class precision per Phase 3 Session 9
-+ Phase 5 Session 5 selective re-validation (`p3_local_level`
-PASS unchanged at re-validation per S5 prompt step 3 nine-package
-sentinel coverage). Layer 2 engine wrapper orchestration +
+**Status (Tier II.mle-band PASS at MLE-class convergence precision per
+S49 correction):** Layer 1 Kalman MLE math validated at MLE-class
+precision per Phase 3 Session 9 + Phase 5 Session 5 selective re-
+validation (`p3_local_level` PASS unchanged at re-validation per S5
+prompt step 3 nine-package sentinel coverage). Layer 2 engine wrapper orchestration +
 forecast/CI extraction + q-band classification + convergence
 handling NOT validated at `p3_local_level` parity audit; requires
 expert review for any published output depending on those paths
 beyond Layer 1 fitted-period state inference scope.
 
-## §3 Unvalidated catalog techniques (51 entries; ID-only enumeration)
+### local_linear_trend (Phase 7+ S49; TWENTY-FIFTH §2.5 entry; SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension — math-layer parity + 3-check wrapper-layer validation per user ratification at S49)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.mle-band — Phase 3 cross-package PASS at MLE-fit band tolerance
+with Pattern H DSCD identifiability sub-class (Pattern A.2 per
+scope_reframing §2 line 134; statsmodels `UnobservedComponents` at
+`level="local linear trend"` vs R `KFAS::SSModel + SSMtrend(degree=2)
++ fitSSM + KFS`; tolerance abs 2.0 + rel 2.0 + block_abs 10.0 +
+block_rel 10.0 per `tools/reference_parity/harness/tolerances.py`
+lines 1407-1410 widened band). Pattern H DSCD distinction preserved
+within Tier II.mle-band sub-class per scope_reframing §143-146
+verbatim ("Pattern H DSCD distinction per S4 finding preserved
+within Tier II.mle-band sub-class"). Per Phase 3 Batch 5 Session 9
+closing finding (`tools/reference_parity/reports/p3_batch_5_summary.md`
+line 14 verbatim: "`local_linear_trend.py` ... R KFAS ... **PASS**
+(widened LLT band — Pattern H DSCD identifiability) ... statsmodels
+and KFAS converge to different local optima of LLT 3-variance
+likelihood" + lines 25-27 verbatim: "p3_local_linear_trend exhibits
+classic LLT identifiability divergence: statsmodels drives `sigma_eta
+→ 0.51` while KFAS drives `sigma_eta → 1e-4` (with corresponding
+flip in `sigma_zeta`). Both are valid local optima of the same
+likelihood; widened band maps to PASS"). Verdict class: `mle_fit`
+(Kalman MLE on 3 variances sigma_eps2 + sigma_eta2 + sigma_zeta2;
+LLT identifiability is fundamentally weak per Pattern H DSCD).
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
+math-layer mapping + wrapper-layer validation extension):**
+local_linear_trend is 1:1 catalog↔wrapper mapping per
+`p3_local_linear_trend` harness Wrapper field
+(`engine/techniques/local_linear_trend.py` sole engine module).
+Single-layer math-layer mapping per Code S49 Step 0 empirical
+verification: engine `run()` math layer uses
+`statsmodels.tsa.statespace.structural.UnobservedComponents` at
+`level="local linear trend"` (engine lines 85-89); harness TSL
+arm (`p3_local_linear_trend.py:run_tsl` lines 57-60) uses SAME
+`statsmodels.UnobservedComponents` via
+`_kalman_helpers.fit_uc_model(y, level="local linear trend")`. No
+§4.7.A harness-bypasses-engine or harness-reimplements-engine-math
+pattern present. §1.9 filename divergence sub-pattern variant NOT
+MANIFESTED at S49 — audit `p3_local_linear_trend.py` + engine
+`local_linear_trend.py` both preserve canonical catalog technique_id
+`local_linear_trend` exactly. **NEW wrapper-layer validation scope
+extension per user ratification at S49** — each Q1 §2.5 entry now
+includes a wrapper-layer 3-check validation alongside the math-
+layer parity test per S49 trigger codification (NaN handling +
+preset config invocation + output shape/type verification).
+
+**Reference:** R `KFAS::SSModel + SSMtrend(degree=2) + fitSSM + KFS`
+(KFAS 1.5.4 per Phase 5 Session 5 selective re-validation;
+Koopman-Durbin convention matches statsmodels)
+**Verdict (math layer):** PASS Pattern H DSCD widened-band at MLE-
+class convergence precision per Phase 3 Session 9
+**Verdict (wrapper layer):** PASS 3/3 checks per S49 Code Step 2
+empirical verification at `tools/_s49_wrapper_layer_check.py`
+**Audit script:** `tools/reference_parity/harness/checks/p3_local_linear_trend.py`
+**Audit date:** 2026-04-29 (Phase 3 Batch 5 close per S9)
+**Primary metrics (math layer):** sigma_eps2 + sigma_eta2 +
+sigma_zeta2 + log_likelihood + level_smoothed + slope_smoothed
+vectors (T=200); per `tools/reference_parity/harness/tolerances.py`
+lines 1397-1411 widened-band ladder + justification verbatim "LLT
+3-variance identifiability is fundamentally weak: statsmodels and
+KFAS routinely converge to different local optima where one drives
+sigma_eta to zero and the other drives sigma_zeta to zero. Both
+are valid decompositions of same y. Pattern H DSCD instance for
+LLT family. Wide band to map to CAVEAT."
+
+**Wrapper-layer validation results (S49 NEW scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 4 NaN values
+  at indices [5, 17, 33, 48] of n=60 series. Wrapper returns non-
+  error response; emits warning "4 missing values linearly
+  interpolated." per engine lines 56-67. Deterministic handling
+  via linear interpolation between flanking non-NaN values; no
+  silent garbage output.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (maxiter=500 per `_PRESET_CONFIG` engine
+  lines 24-28); returned all 4 expected tables (`Forecast` +
+  `Smoothed Components` + `Model Summary` + `Residual Diagnostics`)
+  + `audit_fields` populated; no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table rows = horizon=12 (per `fc_rows` loop engine lines 131-138);
+  forecast + lower/upper CI bounds at h=1 all numeric (l=0.5441 <=
+  f=2.0799 <= u=3.6157; CI ordering invariant satisfied); summary
+  table columns = `["Metric", "Value"]` per engine line 208.
+
+Wrapper-layer validation harness at
+`tools/_s49_wrapper_layer_check.py` (transient verification
+artifact; not retained in production codebase).
+
+**Source files (single-layer math + 3-check wrapper layer per S49
+framing):**
+`tools/reference_parity/harness/checks/p3_local_linear_trend.py`
+lines 54-55 (harness fixture setup: invokes
+`_kalman_helpers.generate_llt_dgp(seed, n=200)` per helper lines
+39-58 producing y_t = mu_t + eps_t with mu_t = mu_{t-1} + beta_{t-1}
++ eta_t and beta_t = beta_{t-1} + zeta_t; sigma_eta=0.5 +
+sigma_zeta=0.1 + sigma_eps=1.0)
++ `tools/reference_parity/harness/checks/p3_local_linear_trend.py`
+lines 57-60 (harness TSL arm `run_tsl`: invokes `fit_uc_model(y,
+level="local linear trend")` returning 3 variances + log_likelihood
++ smoothed_state (T, 2) two-state level + slope)
++ `tools/reference_parity/harness/checks/p3_local_linear_trend.py`
+lines 62-122 (harness reference arm `run_reference`: invokes R
+KFAS via RBridge with `SSModel(y ~ SSMtrend(degree=2, Q=list(matrix(NA),
+matrix(NA))), H=matrix(NA))` at lines 73-77 + `fitSSM(mod,
+inits=log(c(var(y)/2, var(y)/4, var(y)/8)), method="BFGS")` at
+lines 79-80 + `KFS(mod_fitted)` at line 89; extracts sigma_eps2 =
+H[1,1,1] + sigma_eta2 = Q[1,1] + sigma_zeta2 = Q[2,2] + log_lik
++ level_smooth + slope_smooth from alphahat columns 1 and 2)
++ `tools/reference_parity/harness/checks/p3_local_linear_trend.py`
+lines 124-170 (harness `compare()`: `_compare_scalar` on 3 sigmas
++ log_likelihood; `_compare_vector` on level_smoothed +
+slope_smoothed at TSL `smoothed_state[:, 0]` + `smoothed_state[:, 1]`
+column extraction; outcome = max(BLOCK, CAVEAT, PASS) per status
+aggregation)
++ `engine/techniques/local_linear_trend.py` lines 85-89 (Layer 1
+shared math: engine module imports SAME
+`statsmodels.tsa.statespace.structural.UnobservedComponents` at
+`level="local linear trend"` followed by `model.fit(maxiter=cfg["maxiter"],
+disp=False)` at preset-dispatched maxiter Fast=100 / Balanced=500
+/ Thorough=1000 per `_PRESET_CONFIG` lines 24-28)
++ `engine/techniques/local_linear_trend.py` lines 56-77 + 96-161
++ 163-225 + 227-377 (Layer 2 engine-only: NaN linear interpolation
+lines 56-68 + n>=10 validation lines 70-75 + horizon + alpha +
+damped parameter resolution lines 77-79 + smoothed level + trend
++ fitted + residuals extraction lines 96-110 + forecast + CI
+construction lines 112-124 + sigma_obs/sigma_level/sigma_trend
+parsing from `fit.param_names` per Prompt C3 fix lines 168-182 +
+slope_adaptivity ratio computation lines 265-279 + summary +
+residual diagnostics tables lines 191-225 + trend direction
+interpretation lines 227-242 + plain English + audit_fields
+construction lines 244-331 + interpretation builder + naive baseline
++ trend extrapolation fields lines 281-367 + `damped` parameter
+acknowledged-not-wired per `damped_not_wired` field lines 362-366;
+math layer (Layer 1) exercised by harness via `fit_uc_model`
+helper; Layer 2 NOT exercised by math-layer harness but Layer 2
+sample paths exercised by NEW wrapper-layer validation per S49
+3-check coverage)
+
+**Validation claim scope (SINGLE-LAYER math + 3-check wrapper
+layer per S49 framing):** Per Code S49 Step 0-2 empirical
+verification:
+
+- **Layer 1 (Kalman MLE math via statsmodels.UC) VALIDATED at
+  Tier II.mle-band Pattern H DSCD widened-band:** `local_linear_trend`
+  engine math layer + `p3_local_linear_trend` harness TSL arm BOTH
+  invoke the SAME `statsmodels.UnobservedComponents` at `level="local
+  linear trend"`. Reference arm independently invokes R KFAS at
+  matched LLT state space specification (two-state level + slope)
+  + matched BFGS optimizer + matched initial variance seeding
+  `log(c(var(y)/2, var(y)/4, var(y)/8))`. Per Session 9 empirical
+  baseline + Pattern H DSCD widened-band tolerance: variance
+  estimates converge to different local optima of same likelihood
+  (statsmodels drives sigma_eta → 0.51 while KFAS drives sigma_eta
+  → 1e-4 with corresponding sigma_zeta flip); widened band 2.0 abs
+  + 2.0 rel maps both local optima to PASS. **Layer 1 PASS empirically
+  grounded with Pattern H DSCD CAVEAT-into-PASS-mapping disclosure
+  required for any published output dependent on specific sigma_eta
+  / sigma_zeta values.**
+- **Wrapper layer (Layer 2 sample paths via S49 NEW 3-check
+  scope) VALIDATED at 3/3 PASS:** Wrapper-layer 3-check validation
+  per S49 NEW scope extension covers Layer 2 sample paths beyond
+  the math-layer harness scope. NaN handling deterministic via
+  linear interpolation (warning emitted); preset config dispatch
+  returns expected 4-table structure + audit_fields; output shape/
+  type verification confirms forecast row count matches horizon +
+  CI bounds numeric + summary columns match expected. **Wrapper-
+  layer 3/3 PASS empirically grounded; Layer 2 sample paths
+  validated for the 3 check dimensions (NaN handling + preset
+  invocation + shape/type); Layer 2 paths NOT covered by 3 checks
+  (slope adaptivity ratio + trend direction interpretation + naive
+  baseline + trend extrapolation + interpretation builder + damped
+  parameter acknowledged-not-wired path) remain expert-review-
+  required per pre-S49 scope.**
+
+**Phase 3 algorithmic basis (extracted from harness + Session 9):**
+Closed-form Kalman recursions on linear-Gaussian state-space model
+with two states (level + slope): mu_t = mu_{t-1} + beta_{t-1} +
+eta_t (level evolution) + beta_t = beta_{t-1} + zeta_t (slope
+evolution) + y_t = mu_t + eps_t (observation). MLE on 3 variances
+(sigma_eps2, sigma_eta2, sigma_zeta2) via BFGS optimizer with
+`log(c(var(y)/2, var(y)/4, var(y)/8))` initial seeding (KFAS side);
+statsmodels UC uses internal default initialization. LLT identifi-
+ability is fundamentally weak (Pattern H DSCD per Phase 3 batch 5
+summary): two local optima of same likelihood routinely surface
+where one drives sigma_eta → 0 (rigid level, all trend variance
+in slope) and the other drives sigma_zeta → 0 (rigid slope, all
+trend variance in level). Both decompositions are mathematically
+valid; widened tolerance band maps both to PASS.
+
+**Phase 3 known failure modes (Session 9 + tolerance ladder
+justification):**
+
+- Pattern H DSCD identifiability ambiguity: statsmodels and KFAS
+  routinely converge to different local optima of LLT 3-variance
+  likelihood (sigma_eta → 0.51 vs sigma_eta → 1e-4); widened
+  tolerance 2.0 abs + 2.0 rel accommodates both optima
+- BFGS convergence-criterion + initial-seeding differences amplify
+  Pattern H DSCD at LLT relative to local_level (S48) — local_level
+  single-state MLE achieves tighter tolerance ladder (1e-2 abs);
+  LLT 3-variance widens to 2.0 abs
+- Smoothed level + slope vectors empirically converge at tighter
+  precision when both implementations land at compatible local
+  optima; Pattern H DSCD divergence drives the 3-variance widened
+  tolerance, not the smoothed state vectors per se
+- `damped` parameter (engine lines 79 + 366) is acknowledged-not-
+  wired: parameter accepted from `ctx.params` and surfaced at
+  `damped_not_wired` audit field but does NOT modify the statsmodels
+  fit invocation (no damped trend constraint applied); honest
+  disclosure flag per D7 design decision
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=200 fixture (`DGP_N = 200`); smaller T not validated; larger
+  T not validated
+- DGP sigma_eta=0.5 (level innovation) + sigma_zeta=0.1 (slope
+  innovation) + sigma_eps=1.0 (observation noise); other DGP
+  parameter regimes not validated at parity layer
+- LLT template only (level + slope; two-state Kalman); not broader
+  UnobservedComponents specifications (no seasonal/cycle component
+  coverage; see separate `p3_structural_ts` wrapper for multi-
+  component structural)
+- Linear-Gaussian state-space assumption strict — non-linear /
+  non-Gaussian observation noise NOT in scope
+- `damped` parameter (acknowledged-not-wired per engine `damped_not_wired`
+  disclosure) does NOT alter parity validation since the parameter
+  has no effect on the statsmodels fit invocation; any user
+  expectation of damped-trend behavior would surface as a
+  technique-level bug not a parity-validation issue
+
+**Phase 3 gap markings:**
+
+- Pattern H DSCD CAVEAT-into-PASS-mapping disclosure: parity verdict
+  PASS at widened-band tolerance does NOT imply that statsmodels
+  and KFAS agree on which local optimum is selected; any published
+  output dependent on specific sigma_eta / sigma_zeta partitioning
+  (rather than overall model fit) requires expert review
+- Layer 2 engine wrapper orchestration paths NOT covered by 3-
+  check wrapper-layer validation (slope_adaptivity ratio + trend
+  direction interpretation + slope-change detection lines 235-242
+  + naive baseline + trend extrapolation + interpretation builder
+  + damped_not_wired disclosure path) require expert review for
+  any published output sensitivity to those paths
+- `statsmodels.tsa.statespace.representation.UnobservedComponents.fit().get_forecast(steps=horizon, alpha=alpha)`
+  emits `FutureWarning: Unknown keyword arguments: dict_keys(['alpha']).
+  Passing unknown keyword arguments will raise a TypeError beginning
+  in version 0.15.` per Code S49 Step 2 wrapper-layer validation
+  empirical observation at `engine/techniques/local_linear_trend.py`
+  line 114 + 120; alpha parameter passed to `get_forecast()` is
+  deprecated in current statsmodels version and will become a hard
+  error in 0.15; engine code requires update to call `fc_result.conf_int(alpha=alpha)`
+  only (already correctly invoked at line 120) and drop the alpha
+  kwarg from `get_forecast(steps=horizon)` (line 114). Forward-
+  observation gap; surfaces only at preset-invocation run not at
+  math-layer parity audit; non-blocking at S49 validated status
+  but warrants engine-side fix before statsmodels 0.15 release.
+- Pattern F structural invariants NOT declared at
+  `p3_local_linear_trend.py` (no structural_invariants tuple per
+  class definition lines 36-55) — contrast `p3_local_level` which
+  declares kalman_covariance_ordering + kalman_innovation_positivity;
+  LLT pattern F coverage gap relative to local_level
+- Multivariate state-space + non-Gaussian observation noise out
+  of scope (see separate `p3_structural_ts` + `p3_particle_filter`
+  wrappers)
+
+**Status (Tier II.mle-band PASS at MLE-class convergence precision
+with Pattern H DSCD widened-band per S49):** Layer 1 Kalman MLE
+math validated at widened-band tolerance per Phase 3 Session 9 +
+Phase 5 Session 5 selective re-validation Pattern A regime
+inclusion conditional on MLE alignment per Session 9 close. Wrapper
+layer (S49 NEW 3-check scope) validated at 3/3 PASS — NaN handling
++ preset invocation + output shape/type. Layer 2 engine wrapper
+orchestration paths NOT covered by 3-check wrapper-layer validation
+(slope_adaptivity + trend direction + naive baseline + trend
+extrapolation + interpretation builder + damped_not_wired) require
+expert review for any published output sensitivity to those paths
+beyond Layer 1 fitted-period state inference scope + 3-check
+wrapper-layer validation scope.
+
+## §3 Unvalidated catalog techniques (50 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -20040,8 +20339,8 @@ descriptions, summaries).
 ### Regimes / Nonlinear (6 unvalidated)
 `critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
 
-### State Space / Filtering (3 unvalidated; kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens)
-`local_linear_trend`, `particle_filter`, `structural_ts`
+### State Space / Filtering (2 unvalidated; kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension)
+`particle_filter`, `structural_ts`
 
 ### Stationarity / Tests (0 unvalidated; Block 12 FULLY Q1-AMENDED — second catalog block to complete per Q1 work program scope after Block 1 Causality at S18; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22; pp_test moved to §2.5 per Phase 7+ S23)
 (all 3 techniques moved to §2.5)
@@ -20049,7 +20348,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 51 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
+**Total: 50 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
 
 ## §4 How to use this document
 
