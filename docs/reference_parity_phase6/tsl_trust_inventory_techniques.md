@@ -20322,7 +20322,23 @@ package vs Python `particles` library; S50 supplements with approach
 (c) degenerate-case Kalman validation as the methodologically
 strongest reference framing (Kalman IS the exact paper-defined
 optimal in this degenerate regime, not just another SMC
-implementation).
+implementation). **S50 forward-amendment (post-engine-fix commit
+176bd64):** S50 entry originally classified at Tier IV Pattern A.3
+/ em_stochastic / corr PASS with plateau caveat per commit 523fd27;
+engine SIS weight-update bug subsequently diagnosed (particle filter
+bias investigation at S52-side hygiene session) and fixed at engine
+commit 176bd64 (SIS multiply-update at `engine/techniques/particle_filter.py`
+lines 158-172). Post-fix, the particle filter achieves theoretical
+1/sqrt(N) convergence with RMSE ~0.01 at N=10000 against exact
+Kalman reference in linear-Gaussian degenerate case. **Tier IV
+Pattern A.3 classification preserved** (Kalman exact reference in
+degenerate case is methodologically correct regardless of pre-fix
+bias); **verdict class re-evaluated from em_stochastic to clean
+PASS at MLE-class precision** per post-fix empirical convergence —
+the apparent "stochasticity" pre-fix was bug-masked systematic bias,
+not genuine SMC Monte Carlo noise; post-fix SMC noise is bounded by
+theoretical 1/sqrt(N) rate, placing the verdict at MLE-class
+precision rather than em_stochastic / Tier C corr-only.
 
 **Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
 math-layer mapping + wrapper-layer validation extension):**
@@ -20364,11 +20380,12 @@ case Kalman validation)
 **Primary metric (math layer):** filtered_mean Pearson correlation
 vs hand-coded Kalman exact filter — PASS at corr=0.998802.
 
-**Substantive caveat — abs-tolerance plateau (S50 NOVEL empirical
-finding):** N-sweep convergence diagnostic at S50 Step 2 surfaced
-that TSL particle filter does NOT converge to the Kalman exact
-solution at the theoretical 1/sqrt(N) SMC rate. Empirical N-sweep
-(n=200, sigma_state=sigma_obs=1.0, seed=42):
+**[RESOLVED at engine fix commit 176bd64.] Substantive caveat — abs-
+tolerance plateau (S50 NOVEL empirical finding; RESOLVED post-engine-
+fix):** N-sweep convergence diagnostic at S50 Step 2 surfaced that
+TSL particle filter does NOT converge to the Kalman exact solution
+at the theoretical 1/sqrt(N) SMC rate. Empirical N-sweep at S50
+close (n=200, sigma_state=sigma_obs=1.0, seed=42; pre-engine-fix):
 
 ```
 N= 1000: max_abs=0.9058 mean_abs=0.1790 rmse=0.2471 corr=0.998681
@@ -20379,19 +20396,66 @@ N=50000: max_abs=0.7705 mean_abs=0.1750 rmse=0.2350 corr=0.998828
 
 50× particle count yields only 15% reduction in max_abs (0.91 → 0.77);
 RMSE flat at 0.235-0.247; correlation flat at 0.9988. NOT theoretical
-1/sqrt(N) scaling (would expect ~7× reduction). Indicates a
+1/sqrt(N) scaling (would expect ~7× reduction). Indicated a
 **systematic bias** between TSL bootstrap SMC and the Kalman exact
 solution in the linear-Gaussian degenerate case where they should
-agree in expectation. Likely sources (not investigated at S50 — flagged
-for forward hygiene session): (i) engine initialization variance
+agree in expectation. Three candidate sources flagged at S50 for
+forward hygiene session: (i) engine initialization variance
 (`sigma_state * 2` spread per engine line 137 vs Kalman's tight
 `P0=R`); (ii) weight-update or systematic-resampling convention;
 (iii) global-RNG seed-once pattern interacting with propagation
-noise structure. Bias magnitude bounded by ~one observation-noise
-standard deviation (max_abs ≈ 0.77 with sigma_obs=1.0); trajectory
-shape strongly preserved (corr=0.9988). Math-layer Pearson PASS
-verdict stands per Tier C convention; abs-tolerance plateau documented
-as substantive caveat at S50.
+noise structure.
+
+**Post-fix N-sweep (engine commit 176bd64; same DGP):**
+
+```
+N= 1000: rmse=0.0304 max_abs=0.1088 corr=0.999980
+N= 5000: rmse=0.0146 max_abs=0.0424 corr=0.999995
+N=10000: rmse=0.0111 max_abs=0.0355 corr=0.999997
+N=50000: rmse=0.0049 max_abs=0.0192 corr=1.000000
+```
+
+Theoretical 1/sqrt(N) scaling confirmed (RMSE(N=1000)/RMSE(N=10000)
+= 0.0304/0.0111 = 2.74 vs theoretical sqrt(10) = 3.16; within 1.0
+tolerance, run-to-run variation accounts for the difference). ~24×
+RMSE reduction at N=10000 (pre-fix 0.2371 → post-fix 0.0111).
+Pearson correlation now 0.999980 to 1.000000 across N-sweep (pre-
+fix 0.998 plateau).
+
+**Diagnosis (particle filter bias investigation; pre-engine-fix
+hygiene session):** 2×2 isolation test (REPLACE/MULTIPLY weight-
+update × adaptive/always resample at N=10000) cleanly attributed
+the bias to candidate (ii) — specifically the engine's weight-
+update line 167 (`weights = w / w_sum`) REPLACED weights with
+current-step likelihood only instead of MULTIPLYING current weights
+by current-step likelihood per textbook Sequential Importance
+Sampling (Doucet & Johansen 2009 §3-4). The bug was masked under
+always-resample regimes (resampling resets weights to uniform on
+each step, making multiply-vs-replace equivalent) but produced
+persistent bias under adaptive ESS<0.5*N resampling: between
+resample events, weights at t+1 should incorporate weights at t
+(SIS multiply), but the engine ignored prior weights — losing the
+sequential importance sampling property. Candidates (i) and (iii)
+empirically eliminated at the investigation.
+
+**Engine fix (commit 176bd64):** SIS multiply-update inserted at
+engine `particle_filter.py:161` via `log_w_combined = np.log(weights
++ 1e-300) + log_w` before max-log normalization; marginal likelihood
+accumulator at engine line 169 remains correct under combined log
+weights. 11 insertions + 3 deletions; 1 file changed.
+
+**Status post-amendment:** Math-layer Pearson PASS verdict
+strengthened from corr-only criterion (pre-fix Tier C convention)
+to MLE-class precision (post-fix theoretical 1/sqrt(N) convergence);
+abs-tolerance plateau caveat RESOLVED. Plateau was the signature of
+the SIS REPLACE-vs-MULTIPLY weight-update bug; post-fix engine
+exhibits no plateau. Caveat retained in record as historical context
+for the investigation that surfaced the bug — the audit instrument
+(particle filter parity validation against exact Kalman in the
+degenerate linear-Gaussian case) served as the diagnostic surface
+that detected the engine-side bug; without the methodologically
+strong reference framing (approach (c) Kalman exact), the bug would
+have remained masked.
 
 **Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
 
