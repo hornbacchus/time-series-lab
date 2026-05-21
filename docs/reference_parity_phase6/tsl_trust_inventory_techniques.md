@@ -20289,7 +20289,287 @@ expert review for any published output sensitivity to those paths
 beyond Layer 1 fitted-period state inference scope + 3-check
 wrapper-layer validation scope.
 
-## §3 Unvalidated catalog techniques (50 entries; ID-only enumeration)
+### particle_filter (Phase 7+ S50; TWENTY-SIXTH §2.5 entry; THIRD State Space / Filtering block entry; FIRST Tier IV Pattern A.3 entry within State Space / Filtering block via approach (c) degenerate linear-Gaussian Kalman-exact-reference framing)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier IV
+Pattern A.3 — Phase 3 self-parity / paper-formula validated (Pattern
+A.3 per scope_reframing §2 lines 159-168). TSL particle filter
+(numpy-based bootstrap SMC at `model="local_level"`) validated
+against the **exact Kalman filter** — the paper-defined optimal MMSE
+solution in the linear-Gaussian degenerate case where Kalman applies
+exactly. Approach (c) per S50 trigger: TSL numpy SMC vs hand-coded
+Kalman filter at variances pinned to DGP (sigma_state=sigma_obs=1.0);
+SMC convergence to Kalman in expectation at theoretical rate
+1/sqrt(N). Verdict class: `em_stochastic` (matches existing
+`p3_particle_filter.py:ParticleFilterParity.verdict_class =
+"em_stochastic"` declaration); SMC algorithms are stochastic per
+master plan §5 Tier C — comparison at distributional level (filtered-
+mean Pearson correlation) per Tier C convention. Existing Phase 3
+Batch 5 wrapper at `p3_particle_filter` uses approach (b) cross-
+package vs Python `particles` library; S50 supplements with approach
+(c) degenerate-case Kalman validation as the methodologically
+strongest reference framing (Kalman IS the exact paper-defined
+optimal in this degenerate regime, not just another SMC
+implementation).
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
+math-layer mapping + wrapper-layer validation extension):**
+particle_filter is 1:1 catalog↔wrapper mapping per
+`p3_particle_filter` harness Wrapper field
+(`engine/techniques/particle_filter.py` sole engine module). Single-
+layer math-layer mapping per Code S50 Step 0 empirical verification:
+engine `run()` math layer is pure numpy bootstrap SMC at engine lines
+129-193 (state transition + weight update + ESS computation +
+systematic resampling); harness TSL arm (`p3_particle_filter.py:run_tsl`
+lines 81-127) invokes the engine wrapper directly via RunContext —
+SAME path the §2.5 entry covers. No multi-layer downstream/upstream/
+parallel topology; no §4.7.A harness-bypasses-engine or harness-
+reimplements-engine-math pattern. §1.9 filename divergence sub-pattern
+variant NOT MANIFESTED at S50 — audit + engine + catalog all preserve
+canonical `particle_filter` exactly.
+
+**Reference (approach (c) per S50 trigger):** hand-coded Kalman
+filter for linear-Gaussian local-level (random walk + Gaussian noise)
+state-space model — the exact MMSE filter in the degenerate regime
+where Kalman applies analytically. No external library dependency
+for reference arm. Reference verified empirically at S50 against
+the same DGP that TSL particle filter consumes (DGP: x_t = x_{t-1}
++ eta_t, eta ~ N(0, 1); y_t = x_t + eps_t, eps ~ N(0, 1); n=200,
+seed=42; sigma_state=sigma_obs=1.0 pinned at both arms to DGP truth).
+**Existing Phase 3 reference (approach (b)):** Python `particles`
+library (Lagardère's SMC framework) per existing
+`p3_particle_filter.py` lines 129-177 (cross-package SMC vs SMC at
+1000 particles).
+**Verdict (math layer):** PASS at Pearson correlation criterion
+(corr=0.998802 at N=10000 particles; ≥0.85 PASS threshold per Tier
+C convention); CAVEAT on abs-tolerance plateau (see below).
+**Verdict (wrapper layer):** PASS 3/3 checks per S50 Code Step 2
+empirical verification.
+**Audit script:** `tools/reference_parity/harness/checks/p3_particle_filter.py`
+**Audit date:** 2026-04-29 (Phase 3 Batch 5 close per S9; approach
+(b) baseline) + 2026-05-21 (S50 supplemental approach (c) degenerate-
+case Kalman validation)
+**Primary metric (math layer):** filtered_mean Pearson correlation
+vs hand-coded Kalman exact filter — PASS at corr=0.998802.
+
+**Substantive caveat — abs-tolerance plateau (S50 NOVEL empirical
+finding):** N-sweep convergence diagnostic at S50 Step 2 surfaced
+that TSL particle filter does NOT converge to the Kalman exact
+solution at the theoretical 1/sqrt(N) SMC rate. Empirical N-sweep
+(n=200, sigma_state=sigma_obs=1.0, seed=42):
+
+```
+N= 1000: max_abs=0.9058 mean_abs=0.1790 rmse=0.2471 corr=0.998681
+N= 5000: max_abs=0.7955 mean_abs=0.1752 rmse=0.2372 corr=0.998804
+N=10000: max_abs=0.7837 mean_abs=0.1761 rmse=0.2371 corr=0.998802
+N=50000: max_abs=0.7705 mean_abs=0.1750 rmse=0.2350 corr=0.998828
+```
+
+50× particle count yields only 15% reduction in max_abs (0.91 → 0.77);
+RMSE flat at 0.235-0.247; correlation flat at 0.9988. NOT theoretical
+1/sqrt(N) scaling (would expect ~7× reduction). Indicates a
+**systematic bias** between TSL bootstrap SMC and the Kalman exact
+solution in the linear-Gaussian degenerate case where they should
+agree in expectation. Likely sources (not investigated at S50 — flagged
+for forward hygiene session): (i) engine initialization variance
+(`sigma_state * 2` spread per engine line 137 vs Kalman's tight
+`P0=R`); (ii) weight-update or systematic-resampling convention;
+(iii) global-RNG seed-once pattern interacting with propagation
+noise structure. Bias magnitude bounded by ~one observation-noise
+standard deviation (max_abs ≈ 0.77 with sigma_obs=1.0); trajectory
+shape strongly preserved (corr=0.9988). Math-layer Pearson PASS
+verdict stands per Tier C convention; abs-tolerance plateau documented
+as substantive caveat at S50.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 4 NaN values
+  at indices [10, 25, 40, 60] of n=80 series. Wrapper returns non-
+  error response; emits warning per engine lines 70-73 ("4 missing
+  observations. Particle filter will propagate particles without
+  conditioning on missing time steps."). Deterministic skip-update
+  handling at missing time steps; no silent garbage output.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_particles=2000 per `_PRESET_CONFIG` engine
+  lines 26-30); returned all 3 expected tables (`Forecast` +
+  `Filtered State` + `Model Summary`) + `audit_fields` populated;
+  no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table rows = horizon=12 (per `fc_rows` loop engine lines 214-222);
+  forecast + lower/upper CI bounds + std at h=1 all numeric (l=
+  -0.8631 ≤ m=2.2853 ≤ u=5.4615; CI ordering invariant satisfied);
+  summary table columns = `["Metric", "Value"]` per engine line 272.
+
+Wrapper-layer validation harness at
+`tools/_s50_particle_filter_check.py` (transient verification
+artifact; not retained in production codebase).
+
+**Source files (single-layer math + 3-check wrapper layer per S50
+framing):**
+`tools/reference_parity/harness/checks/p3_particle_filter.py` lines
+34-44 (existing harness fixture generator
+`_generate_local_level_obs`: produces y_t = mu_t + eps_t with mu_t
+= mu_{t-1} + eta_t at n=200, sigma_state=sigma_obs=1.0 default;
+seed=42)
++ `tools/reference_parity/harness/checks/p3_particle_filter.py` lines
+81-127 (existing harness TSL arm: invokes
+`engine.techniques.particle_filter.run()` via RunContext at
+preset="Fast", n_particles=1000)
++ `tools/reference_parity/harness/checks/p3_particle_filter.py` lines
+129-177 (existing harness approach (b) reference arm: Python
+`particles` library bootstrap SMC at N=1000, resampling="stratified",
+collect=[Moments()]; returns filtered_mean trajectory)
++ `tools/reference_parity/harness/checks/p3_particle_filter.py` lines
+179-251 (existing harness `compare()`: filtered_mean Pearson
+correlation at corr_pass=0.85 + corr_caveat=0.6 thresholds per Tier
+C convention)
++ `engine/techniques/particle_filter.py` lines 33-376 (Layer 1
+math: pure numpy bootstrap SMC at engine lines 129-193 — state
+transition + weight update with log-stability + ESS computation +
+systematic resampling at threshold; allowlist gate for model
+parameter at lines 93-110 per F-SS-PF-MODEL fix; auto-sigma
+estimation at lines 116-124; particle initialization at line 137
+with `sigma_state * 2` spread)
++ `engine/techniques/particle_filter.py` lines 382-440 (model
+function dispatch: `_get_model_functions(model_type)` returning
+state_transition + obs_log_likelihood + obs_func for 4 supported
+models: local_level / local_level_sv / nonlinear_growth / random_walk_sv)
++ `engine/techniques/particle_filter.py` lines 447-453 (systematic
+resampling helper)
++ S50 NOVEL: approach (c) reference framework — hand-coded Kalman
+filter for linear-Gaussian local-level (no production source; S50
+transient verification only)
+
+**Validation claim scope (SINGLE-LAYER math + 3-check wrapper layer
+per S50 framing; degenerate-case Kalman-exact-reference + Pearson-
+correlation primary metric):**
+
+- **Layer 1 (numpy bootstrap SMC math) VALIDATED at Tier IV Pattern
+  A.3 / em_stochastic class via approach (c) degenerate-case Kalman
+  reference:** TSL particle filter at `model="local_level"` produces
+  filtered_mean trajectory that tracks the exact Kalman filter at
+  Pearson corr=0.998802 (≥0.85 PASS criterion). The Kalman filter
+  IS the paper-defined optimal MMSE filter for linear-Gaussian
+  state-space — methodologically the strongest possible reference
+  in the degenerate case. **PASS at Pearson correlation; CAVEAT
+  on abs-tolerance plateau (max_abs ≈ 0.78 at N=10000-50000
+  invariant; non-theoretical-1/sqrt(N) scaling).** Approach (b)
+  baseline at Phase 3 Session 9 close: PASS per existing
+  `p3_particle_filter` audit at corr-based criterion vs Python
+  `particles` library SMC at N=1000.
+- **Other 3 models (local_level_sv + nonlinear_growth +
+  random_walk_sv) NOT VALIDATED at S50 approach (c) scope:** S50
+  approach (c) Kalman reference applies only to the linear-Gaussian
+  local_level degenerate case. The stochastic-volatility models
+  (local_level_sv + random_walk_sv) have nonlinear observation
+  equations; nonlinear_growth (Kitagawa 1996 benchmark) has nonlinear
+  state transition. Neither has a Kalman exact reference. These
+  3 models remain at the Phase 3 approach (b) PASS-via-particles-
+  library scope (validated trajectory shape via Pearson correlation
+  on local_level model fixture only per existing
+  `p3_particle_filter.py` lines 95-98).
+- **Wrapper layer (Layer 2 sample paths via S49+ NEW 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic (skip-update
+  at missing time steps); preset config dispatch returns expected
+  3-table structure + audit_fields; output shape/type verification
+  confirms forecast row count = horizon + CI bounds numeric + summary
+  columns match.
+
+**Phase 3 algorithmic basis (extracted from harness + engine + S50
+empirical analysis):** Bootstrap Sequential Monte Carlo particle
+filter (Gordon-Salmond-Smith 1993) for generic state-space model
+y_t | x_t ~ p(y_t | x_t) with x_t | x_{t-1} ~ p(x_t | x_{t-1}).
+Algorithm: propagate N particles via state transition; weight each
+by observation likelihood; resample when ESS drops below threshold
+× N; filtered state estimate = weighted particle mean. TSL engine
+default `local_level` model: x_t = x_{t-1} + eta_t with eta_t ~
+N(0, sigma_state); y_t = x_t + eps_t with eps_t ~ N(0, sigma_obs);
+default sigma_state=sigma_obs auto-estimated from diff(y) std if
+not provided.
+
+**Phase 3 known failure modes (Session 9 + S50 N-sweep diagnostic):**
+
+- SMC stochastic convergence: filtered_mean has finite-N Monte
+  Carlo variance bounded by ~filtered_variance/N_eff; per Tier C
+  convention, parity at particle level mathematically intractable;
+  parity validated at distributional level (Pearson correlation)
+- S50 NOVEL abs-tolerance plateau: empirical N-sweep at N ∈
+  {1000, 5000, 10000, 50000} shows convergence to Kalman exact
+  solution plateaus at max_abs ≈ 0.77, RMSE ≈ 0.235 — does NOT
+  follow theoretical 1/sqrt(N) SMC rate; suggests systematic bias
+  beyond Monte Carlo noise; non-blocking at Pearson PASS criterion
+  but warrants forward hygiene investigation
+- ESS collapse warnings: engine surfaces "All particle weights
+  collapsed to zero at t=N" warning + "Resampling occurred at almost
+  every time step" warning when ESS drops below 10 or resampling
+  exceeds 90% of time steps respectively
+- Allowlist gate at engine lines 93-110 (F-SS-PF-MODEL fix per CAI
+  Phase 2 Session 18): invalid `model` parameter rejected with
+  explicit error; pre-fix invalid strings fell through silently
+  to default `local_level` model
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters + S50 N-sweep):**
+
+- T=200 fixture (`DGP_N = 200`) per Phase 3 Batch 5 + S50 approach
+  (c) at same n=200; smaller T not validated; larger T not validated
+- DGP sigma_state=1.0 + sigma_obs=1.0 (signal-to-noise ratio q=1.0);
+  boundary q regimes (very low q << 1; very high q >> 1) NOT
+  validated at parity layer
+- `local_level` model only validated against external reference
+  (Phase 3 approach (b) particles + S50 approach (c) Kalman); other
+  3 supported models (local_level_sv + nonlinear_growth +
+  random_walk_sv) validated only via internal SMC consistency
+  (no external reference available for nonlinear / SV variants in
+  scope of S50)
+- N ≥ 1000 particles validated; N < 1000 behavior not characterized
+  at parity layer
+- Resampling threshold at 50% × N validated; other resampling
+  schedules not validated
+
+**Phase 3 gap markings:**
+
+- S50 NOVEL abs-tolerance plateau (max_abs ≈ 0.77 invariant from
+  N=1000 to N=50000) — flag for forward hygiene investigation;
+  likely sources to check: (i) engine `particles = np.random.normal(first_valid,
+  sigma_state * 2, size=n_particles)` initialization variance vs
+  Kalman's tight `P0=R` initialization; (ii) systematic-resampling
+  vs theoretical multinomial-resampling bias; (iii) `np.random.seed`
+  global-RNG seed-once pattern interaction with propagation noise
+  structure
+- 3 non-linear-Gaussian models (local_level_sv + nonlinear_growth
+  + random_walk_sv) require expert review for any published output
+  use; Phase 3 approach (b) particles library validates only
+  local_level model fixture
+- Forecast + CI extraction NOT in parity audit primary metrics
+  (audit covers filtered_mean trajectory correlation); forecast +
+  CI bounds at engine lines 196-227 require expert review for any
+  published forecast use beyond fitted-period state inference
+- ESS-based quality assessment + resampling event tracking NOT
+  independently validated; engine-internal diagnostic scheme
+- `auto_sigma` parameter (engine lines 116-124): auto-estimation
+  of sigma_state + sigma_obs from `np.std(np.diff(valid_vals),
+  ddof=1)` heuristic NOT validated against external reference
+  taxonomy; engine-internal heuristic
+
+**Status (Tier IV Pattern A.3 / em_stochastic per S50; PASS at Pearson
+correlation primary + CAVEAT on abs-tolerance plateau):** Layer 1
+bootstrap SMC math validated at Pearson correlation criterion
+(corr=0.998802 vs Kalman exact reference in linear-Gaussian
+degenerate case at N=10000 particles; PASS at ≥0.85 threshold per
+Tier C convention) via approach (c) S50 degenerate-case Kalman-
+exact-reference framing — methodologically the strongest reference
+available in this regime. Substantive caveat: abs-tolerance plateau
+at max_abs ≈ 0.77 invariant from N=1000 to N=50000 — does NOT
+follow theoretical 1/sqrt(N) SMC convergence; suggests systematic
+bias beyond Monte Carlo noise; flagged for forward hygiene
+investigation. Wrapper layer (S49+ NEW 3-check scope) validated at
+3/3 PASS. Non-local_level models + forecast/CI + ESS quality
+assessment require expert review for any published output sensitivity
+beyond local_level fitted-period state inference scope + 3-check
+wrapper-layer validation scope.
+
+## §3 Unvalidated catalog techniques (49 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -20339,8 +20619,8 @@ descriptions, summaries).
 ### Regimes / Nonlinear (6 unvalidated)
 `critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
 
-### State Space / Filtering (2 unvalidated; kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension)
-`particle_filter`, `structural_ts`
+### State Space / Filtering (1 unvalidated; kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension; particle_filter moved to §2.5 per Phase 7+ S50 — THIRD State Space / Filtering block entry; FIRST Tier IV Pattern A.3 entry via approach (c) degenerate linear-Gaussian Kalman-exact-reference framing with documented abs-tolerance plateau caveat)
+`structural_ts`
 
 ### Stationarity / Tests (0 unvalidated; Block 12 FULLY Q1-AMENDED — second catalog block to complete per Q1 work program scope after Block 1 Causality at S18; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22; pp_test moved to §2.5 per Phase 7+ S23)
 (all 3 techniques moved to §2.5)
@@ -20348,7 +20628,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (5 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately)
 `egarch`, `garch`, `gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 50 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
+**Total: 49 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter moved to §2.5; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
 
 ## §4 How to use this document
 
