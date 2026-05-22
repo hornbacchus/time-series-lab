@@ -4469,6 +4469,62 @@ third catalog block completion triggers per-block continuation
 pattern n=3 codification at §19.4 §4 forward instrumentation note
 6 refinement at next absorption cycle**.
 
+**Validation-Surface Coverage (VSC) — RATIFIED Tier 1 forward-amendment per inventory verification commit 12d3785 (Cat 1d revision-2 framework):**
+
+- **Validated configuration (harness math layer):** proportional
+  Denton (PFD) closed-form KKT system on `n_low=12`,
+  `high_per_low=4` (effective quarterly→monthly disaggregation;
+  `n_high=48`); harness inlines aggregation matrix `B` + first-
+  difference matrix `D` + scale-invariant parameterization
+  `z = y/p` minimizing `sum((z_t - z_{t-1})^2)` subject to
+  `B @ diag(p) @ z = agg`. Math algebraically identical to engine
+  `_denton_proportional` (PFD via H = D₁·diag(1/z) parameterization
+  minimizing `||H @ x||²`); algebraic identity transformation
+  preserved (`x = p·z` → `x_t/p_t - x_{t-1}/p_{t-1} = z_t -
+  z_{t-1}`).
+- **Engine preset default (Balanced):** `method = ctx.get_param(
+  "method", "chowlin")` at engine line 280 — **engine default
+  method is "chowlin" (Chow-Lin GLS regression-based), NOT
+  "denton"**. Chow-Lin pipeline at engine lines 336-450 invokes
+  GLS regression with AR(1) error structure + ML ρ estimation
+  (grid search at `n_grid=20` for Balanced, `n_grid=50` for
+  Thorough; Fast preset hardcodes `ρ=0.5`). When `method="denton"`
+  is explicitly invoked, engine pipeline at line 334 calls
+  `_denton_proportional(lo_clean, z_high, conversion_ratio)` —
+  this is the path the harness math mirrors. **Reference arm uses
+  R `tempdisagg::td(method="denton-cholette")` — Denton-Cholette
+  variant, NOT classical proportional Denton; different
+  optimization formulation (Cholette adds initial-value condition
+  + first-differences-of-residuals minimization).**
+- **Configuration match:** **NO** — TWO independent mismatches:
+  - **Engine method-default mismatch:** harness validates Denton
+    PFD; engine ribbon-default invocation goes to Chow-Lin (Layer
+    1E NOT audit-validated per existing `**Status:**` enumeration).
+    User invoking at default Balanced preset experiences Chow-Lin
+    GLS math NOT covered by Layer 1H Denton PFD parity claim.
+  - **Reference-method variant mismatch:** harness math is
+    classical proportional Denton (PFD); reference is Denton-
+    Cholette. Pattern J B.3 expected (algorithm-naming + variant
+    divergence) — the existing entry already documents this via
+    §1.7 caveat scope.
+- **Disclosure body (mismatch):** Engine ribbon-default invocation
+  goes to UNVALIDATED Chow-Lin GLS pipeline (Layer 1E §4.7.B
+  pattern: engine method math-extension beyond harness scope).
+  Math-layer parity claim applies ONLY to explicit
+  `method="denton"` invocation path (asymmetric retraction surface
+  enumerated at existing `**Status:**` block). Wrapper-layer 3-
+  check (S49+ protocol) covers engine code execution at preset
+  defaults (NaN handling + Balanced preset config invocation +
+  output shape/type verification) but does NOT validate Chow-Lin
+  Layer 1E math. Expert review required for Chow-Lin GLS + ML ρ
+  estimation paths at ribbon-default invocation.
+- **Cross-reference:** Cat 1d LEGITIMATE bypass-with-bypass-
+  rationale classification per audit-hygiene inventory verification
+  methodology revision-2 (inventory verification artifact §2.3 +
+  §3); VSC mismatch case institutionally aligned with S39
+  lomb_scargle + S40 emd_hht + S41+ ets/tbats/stl/intervention
+  analysis precedent at Tier 1 forward-amendment scope.
+
 ### loess_interpolation (Phase 7+ S27; eleventh §2.5 entry; SECOND Block 8 Missing Data entry; FIRST Tier III §2.5 precedent per scope_reframing §2 lines 151-157 Pattern A.1 same-library self-parity definition; FOURTH §4.7.A pattern observation per S25 codification with NEW STRUCTURAL MECHANISM VARIANT "harness-validates-different-use-case-of-same-library-function" per S27 (α) reframe; TWO-LAYER + HARNESS-AND-ENGINE-USE-SAME-LIBRARY-FOR-DIFFERENT-PURPOSES framing per S27 STOP 2 + Chat α reframe disposition)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
@@ -12355,6 +12411,64 @@ hypothesis empirical observation at Frequency Domain / Signal
 block close = n=3 Block-ordering observation tightening per A3
 precedent if empirically confirmed).
 
+**Validation-Surface Coverage (VSC) — RATIFIED Tier 1 forward-amendment per inventory verification commit 12d3785 (Cat 1d revision-2 framework):**
+
+- **Validated configuration (harness math layer):** scipy
+  `signal.lombscargle(t, y_demean, omegas, normalize=True)` direct
+  invocation on irregularly-sampled sinusoid fixture (`n=200`,
+  `missing_frac=0.3`, `true_freq=0.13`); frequency grid is
+  ordinary linspace `[1/T_span, 0.5]` converted to angular at
+  oversampling=5×n_kept (~700 trial frequencies); demeaning via
+  `y - np.mean(y)` per Lomb 1976 / Scargle 1982 formulation;
+  reference arm `astropy.timeseries.LombScargle(t, y,
+  normalization="standard", fit_mean=True, center_data=True)` on
+  IDENTICAL frequency grid; comparison aligned via peak-frequency
+  location (normalization-invariant metric per Pattern J B.3).
+- **Engine preset default (Balanced):** engine `lomb_scargle.py`
+  lines 96-99 + 111-127: `oversampling=5` (matches harness);
+  `n_top_freqs=10` (harness implicit n_top=1); `false_alarm_method
+  ="baluev"` (harness does NOT compute FAP). Frequency grid at
+  engine line 117-126 uses ANGULAR linspace `[omega_min,
+  omega_max]` directly with `omega_min = 2π/T_span` (matches
+  harness `2π * 1/T_span`) and **`omega_max = π * n / T_span`
+  (engine) vs harness `omega_max = 2π * 0.5 = π` — engine extends
+  to higher angular frequency by factor `n / T_span` ≈ 0.7-1.0
+  for typical sample sizes**. Engine also uses `n_freqs =
+  oversampling * n` matching harness oversampling.
+- **Configuration match:** **NO** — TWO mismatches:
+  - **Frequency-grid range mismatch:** engine `omega_max = π · n /
+    T_span` vs harness `omega_max = π`. For fixture n_kept ≈ 140
+    + T_span ≈ 199, engine `omega_max ≈ 2.21` vs harness `π ≈
+    3.14`; harness extends slightly HIGHER than engine.
+    Mathematically both grids cover the principal Nyquist range
+    at typical Lomb-Scargle scope; peak-frequency location
+    (validation metric) is normalization-invariant AND
+    grid-resolution-tolerant at the trial-frequency
+    `linspace`-grid scale per Pattern J B.3 alignment-via-metric
+    convention. Pre-existing entry already documents Tier V
+    Pattern J B.3 framing for normalization-convention divergence.
+  - **Output-scope mismatch:** engine outputs top-N peaks (N=10
+    Balanced) + FAP thresholds (Baluev approximation); harness
+    validates only the SINGLE top peak. Engine's downstream FAP
+    computation (Baluev or bootstrap depending on preset) NOT
+    parity-validated.
+- **Disclosure body (mismatch):** Math-layer parity claim applies
+  to TOP-1 peak-frequency location at the harness frequency grid
+  scope; user invoking at default Balanced preset receives
+  top-10-peaks table + Baluev FAP thresholds + bootstrap FAP at
+  Thorough — all generated from engine's slightly-different
+  angular frequency grid range. Peak-frequency identification at
+  primary period is grid-resolution-tolerant per Pattern J B.3
+  metric-alignment convention; FAP computation is engine-internal
+  + NOT externally cross-validated. Wrapper-layer 3-check (S49+
+  protocol) covers engine code execution at preset defaults.
+- **Cross-reference:** Cat 1d LEGITIMATE bypass-with-bypass-
+  rationale classification per audit-hygiene inventory verification
+  methodology revision-2 (inventory verification artifact §2.3 +
+  §3); VSC mismatch case institutionally aligned with S26
+  denton_chowlin_disaggregation + S40 (emd_hht via S43) +
+  Tier 1 forward-amendment scope.
+
 ### ssa (Phase 7+ S40; TWENTIETH §2.5 entry; FOURTH Frequency Domain / Signal block entry — FIFTH catalog block transition advances 3→4 of 7 entries Q1-amended per Q1 work program scope; FIRST Tier IV (Pattern A.3 self-parity / paper-formula validated) PRIMARY tier characterization Q1 §2.5 entry overall (S18 gcc_phat was Tier IV Pattern A.3 self-parity FIRST Q1 §2.5 entry at THREE-LAYER DOWNSTREAM-TOPOLOGY framing per Block 1 Causality completion; S40 ssa is FIRST Tier IV PRIMARY characterization at SINGLE-LAYER + degenerate-dual-arm-self-parity framing within Frequency Domain / Signal block at distinct structural scope); §4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at DEGENERATE DUAL-ARM SELF-PARITY sub-variant — FIRST-INSTANCE baseline observation at §2.5 entry codification scope per Code S40 Step 0 empirical surface (prior S14a + S18 + S26 + S27 + S31 + S32 + S33 + S37 + S38 + S39 PRESENT observations all variant 1 Harness-imports-library-directly; S40 ssa is FIRST EXPLICIT variant 3 PRESENT observation at §2.5 entry codification scope); NEW Sub-class 2l candidate first-instance baseline observation per A3 first-instance precedent + (αc) forward-instrumentation-note treatment (Tier IV Pattern A.3 self-parity / paper-formula + §4.7.A PRESENT variant 3 harness-reimplements-engine-math + degenerate-dual-arm-self-parity sub-variant + single-layer scope; NOT codification of Sub-class 2l); §1.9 Filename divergence sub-pattern variant SECOND-INSTANCE cross-block extension MANIFESTED at suffix-ADDITION direction per Code S40 Step 0 empirical re-Read (engine `ssa_model.py` ADDS `_model` suffix to catalog-id `ssa`; A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at §1.9 cross-block scope at n=2 cross-block observations; direction-distinct sub-variants S37 suffix-OMISSION + S40 suffix-ADDITION; codification refinement candidate at absorption #6+ for §1.9 definitional scope generalization direction-symmetric expansion); HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 THIRD-OBSERVATION TIGHTENING SUSTAINED AT S40 (n=4 distinct Tiers within Frequency Domain / Signal block at Tier III Pattern A.1 at S37 + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40; codification refinement candidate at absorption #6+ empirically REINFORCED); ALL-ANCHOR-DEFERRAL DISCIPLINE THIRD-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD REINFORCED AT S40 (n=3 sustained efficacy observations S38 + S39 + S40 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement empirically ROBUSTLY grounded); Sub-class taxonomy growth Block-level observation A3 FOURTH-OBSERVATION TIGHTENING REINFORCED at S40 (2i at S37 + 2j candidate at S38 + 2k at S39 + 2l at S40 = n=4 NEW Sub-class candidates first-instance baseline observations within Block 5 sub-session arc; codification refinement candidate at §19.4 §4 note 16 empirically REINFORCED); Pattern F structural invariants SECOND-OBSERVATION NOT MANIFESTED (SSA harness does NOT compute structural identity invariants; Pattern F NEW framing element observation remains at S38 first-instance baseline); §1.8 reroll_on_caveat=False discipline NOT APPLICABLE (PASS verdict Pattern A bit-exact NOT CAVEAT); CRITICAL CAVEAT — audit validates `_ssa_reference` SELF-CONSISTENCY ONLY (TSL arm == reference arm identical `_ssa_reference` invocation with identical arguments; 0.0 abs diff GUARANTEED BY CONSTRUCTION); engine `ssa_model.py::run()` math + Layer 2 orchestration (NaN handling + preset config dispatch + window length parameter resolution + trajectory matrix construction + numpy.linalg.svd + eigentriple grouping + diagonal averaging) NEVER exercised by audit — distinct validation claim scope from S37-S39 entries; SINGLE-LAYER + §4.7.A PRESENT variant 3 degenerate-dual-arm-self-parity framing per S40 STOP 2 empirical investigation + α + (αa) dispositions under Tier IV Pattern A.3 + paper-formula framing)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
@@ -13968,6 +14082,31 @@ working hypothesis empirical observation at Frequency Domain /
 Signal block close = n=4 Block-ordering observation tightening
 per A3 precedent if empirically confirmed across remaining S41-
 S43 arc).
+
+**Wrapper-layer validation results (S49+ scope retroactively applied per Tier 1 forward-amendment inventory verification commit 12d3785; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 NaN values
+  at indices [5, 23, 67, 134, 178] of n=200 sinusoidal fixture
+  with multiple periodic components. Wrapper returns non-error
+  response; emits warning "5 missing values linearly interpolated
+  for SSA." per engine `ssa_model.py` NaN interpolation pipeline.
+  Deterministic handling via linear interpolation between flanking
+  non-NaN values; no silent garbage output.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"`; returned all 4 expected tables
+  (`Singular Values & Explained Variance` + `Component Groups` +
+  `W-Correlation Matrix` + `SSA Decomposition`) + `audit_fields`
+  populated (16 keys); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Singular
+  Values table 20 rows × 5 cols; Component Groups 10 rows × 5
+  cols; W-Correlation Matrix 10 rows × 11 cols; SSA Decomposition
+  200 rows × 12 cols (one row per time index per
+  decomposition/reconstruction component). All rows + columns
+  numeric where expected.
+
+Wrapper-layer validation harness at `tools/_s62tier1_wrapper_layer_check.py` (transient verification artifact; not retained in production codebase).
+
+**Sub-variant 3.D cross-reference note (RATIFIED Tier 1 forward-amendment per inventory verification commit 12d3785):** This entry's harness operates under §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant framing (both arms invoke identical `_ssa_reference` local helper with identical arguments). Per inventory verification commit 12d3785 + audit-hygiene methodology revision-2: **§4.7.A variant 3 DEGENERATE DUAL-ARM framing at this entry is INSTITUTIONALLY EQUIVALENT to §4.7.A Sub-variant 3.D DEGENERATE-COHERENT framing per S60 + S61 precedent** (both document degenerate dual-arm + algorithm-level identity + explicit acknowledgment engine code path NOT exercised at math layer). Inventory classification: **Cat 2 DEGENERATE-COHERENT** per inventory verification artifact `docs/reference_parity_phase6/audit_hygiene_inventory_verification_2026-05-22.md` §2.4 (Cat 2 sub-variant preserve disposition per Option 1 ratification). Tier IV Pattern A.3 paper-formula validated PRIMARY tier characterization preserved unchanged (math-layer parity claim and Tier classification reflect validated `_ssa_reference` self-consistency surface; wrapper-layer 3-check addition above exercises engine code execution path that math-layer harness does not under degenerate dual-arm framing). NO harness math-layer rewrite required per Option 1 disposition.
 
 ### wavelet_transform (Phase 7+ S41; TWENTY-FIRST §2.5 entry; FIFTH Frequency Domain / Signal block entry — FIFTH catalog block transition advances 4→5 of 7 entries Q1-amended per Q1 work program scope; Tier III (Pattern A.1 same-library self-parity validated) characterization per S41 (α) ratification (SECOND Tier III Pattern A.1 Q1 §2.5 entry overall after S37 periodogram_spectral_density first-instance baseline; SUB-CLASS 2i SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at A3 second-observation tightening per Tier III Pattern A.1 same-library + §4.7.A PRESENT variant 1 single-tier scope at n=2 observations S37 + S41; codification adoption candidate at absorption #6+ for Sub-class 2i codification scope EMPIRICALLY ROBUSTLY GROUNDED); §4.7.A PRESENT variant 1 (Harness-imports-library-directly) at pywt direct invocation scope per S41 (α) ratification; PATTERN F STRUCTURAL INVARIANTS SECOND-OBSERVATION MANIFESTED at S41 — A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at Pattern F NEW framing element scope at n=2 observations S38 fft_spectrum + S41 wavelet_transform (wavelet_inverse_roundtrip PASS at 3.11e-15 max_abs_residual + wavelet_energy_conservation PASS at 3.41e-13 rel ~5e-16); Pattern F empirical generalization observation INSTITUTIONALLY SUBSTANTIVE — Pattern F structural invariants NOT FFT-specific, generalize to ANY wrapper with mathematical-identity preservation invariants (roundtrip identity + energy conservation Parseval-analog for orthogonal transforms); FFT-family (S38 fft_spectrum scipy.fft/numpy.fft pocketfft backbone) → wavelet-family (S41 wavelet_transform pywt DWT orthogonal db4 wavelet) Pattern F extension at n=2 distinct mathematical-family scope; Sub-class 2j Pattern F structural invariants Tier-agnostic codification scope refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED; (αa)+(αc) Sub-class 2i SECOND-OBSERVATION TIGHTENING + Pattern F SECOND-OBSERVATION TIGHTENING + (αc) forward-instrumentation-note treatment continuation at Sub-class 2j scope per Code recommendation + Chat ratification; §1.9 Filename divergence sub-pattern variant third-observation cross-block extension NOT MANIFESTED — wavelet_transform filenames PRESERVE catalog-id at all three layers per Code S41 Step 0 empirical re-Read; A3 second-observation tightening status at §1.9 cross-block scope PRESERVED from S40 at n=2 cross-block observations + direction-distinct sub-variants; ALL-ANCHOR-DEFERRAL DISCIPLINE FOURTH-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S41 at n=4 sustained efficacy observations S38 + S39 + S40 + S41 0-divergence; codification candidate at §1.7+ Workstream B §1.4 operational scope at absorption #6+ refinement EMPIRICALLY ROBUSTLY REINFORCED — STRONGEST empirical grounding for codification adoption among all absorption #6 candidates at S41 close; Heterogeneous Tier-surface variant observation A3 third-observation tightening SUSTAINED at n=4 distinct Tier characterizations (S41 Tier III REPEATS S37; not advanced to n=5 distinct Tiers); §1.8 reroll_on_caveat=False discipline NOT APPLICABLE (PASS verdict Pattern A same-library bit-exact NOT CAVEAT); SINGLE-LAYER + §4.7.A PRESENT variant 1 framing per S41 STOP 2 empirical investigation + α + (αa)+(αc) dispositions under Tier III Pattern A.1 + Pattern F SECOND-OBSERVATION + Sub-class 2i SECOND-OBSERVATION + multi-precedent confluence; analogous to S37 periodogram_spectral_density Block 5 first-entry precedent + Pattern F structural invariants Tier-agnostic generalization at S41)
 
@@ -17694,6 +17833,34 @@ distinct observations S38 + S41 + S42; codification refinement
 candidate at absorption #6+ for multi-precedent confluence sub-
 pattern definitional scope at §2.5 entry codification scope
 EMPIRICALLY ROBUSTLY REINFORCED at three sustained observations).
+
+**Wrapper-layer validation results (S49+ scope retroactively applied per Tier 1 forward-amendment inventory verification commit 12d3785; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Two-series input (n=200 each)
+  with 5 NaN values at indices [5, 23, 67, 134, 178] of series-1.
+  Wrapper returns non-error response; emits warning "5 rows
+  dropped due to missing values." per engine `wavelet_coherence.py`
+  NaN handling pipeline. Deterministic handling via row-drop
+  (distinct from S40 ssa's interpolation; appropriate for two-
+  series-aligned coherence computation where indicator-misalignment
+  would corrupt cross-wavelet spectrum); no silent garbage output.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_scales=64 + smoothing_width=5 per engine
+  `_PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])`);
+  returned all 4 expected tables (`Coherence by Scale (Top 10)` +
+  `Summary Statistics` + `Coherence Profile` + `Time-Varying
+  Coherence (scale=42.9, period=44.2)`) + `audit_fields`
+  populated (25 keys); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Coherence
+  by Scale 10 rows × 7 cols; Summary Statistics 9 rows × 2 cols;
+  Coherence Profile 64 rows × 5 cols (one row per scale per
+  Balanced preset n_scales=64 resolution); Time-Varying Coherence
+  200 rows × 3 cols (one row per time index). All rows + columns
+  numeric where expected.
+
+Wrapper-layer validation harness at `tools/_s62tier1_wrapper_layer_check.py` (transient verification artifact; not retained in production codebase).
+
+**Sub-variant 3.D cross-reference note (RATIFIED Tier 1 forward-amendment per inventory verification commit 12d3785):** This entry's harness operates under §4.7.A PRESENT variant 3 DEGENERATE DUAL-ARM SELF-PARITY sub-variant framing (both arms invoke identical `_wavelet_coherence_reference` local helper with identical arguments n_scales=64 + smoothing_width=5). Per inventory verification commit 12d3785 + audit-hygiene methodology revision-2: **§4.7.A variant 3 DEGENERATE DUAL-ARM framing at this entry is INSTITUTIONALLY EQUIVALENT to §4.7.A Sub-variant 3.D DEGENERATE-COHERENT framing per S60 + S61 precedent** (both document degenerate dual-arm + algorithm-level identity + explicit acknowledgment engine code path NOT exercised at math layer). Inventory classification: **Cat 2 DEGENERATE-COHERENT** per inventory verification artifact `docs/reference_parity_phase6/audit_hygiene_inventory_verification_2026-05-22.md` §2.4 (Cat 2 sub-variant preserve disposition per Option 1 ratification). Tier IV Pattern A.3 paper-formula validated PRIMARY tier characterization preserved unchanged (math-layer parity claim and Tier classification reflect validated `_wavelet_coherence_reference` self-consistency surface; wrapper-layer 3-check addition above exercises engine code execution path that math-layer harness does not under degenerate dual-arm framing). NO harness math-layer rewrite required per Option 1 disposition. Note: engine Balanced preset config (n_scales=64 + smoothing_width=5) MATCHES audit-pinned config per pre-existing entry note ("ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG DIVERGENCE NOT MANIFESTED"); wrapper-layer 3-check therefore validates same algorithmic-config scope as math-layer harness.
 
 ### emd_hht (Phase 7+ S43; TWENTY-THIRD §2.5 entry; SEVENTH Frequency Domain / Signal block entry — FIFTH catalog block FULLY Q1-AMENDED at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); FIRST Tier VI CAVEAT Q1 §2.5 entry within Frequency Domain / Signal block (S32 mstl_decompose + S33 stl_decompose Tier VI CAVEAT precedent within Block 3 Decomposition; S43 emd_hht is cross-Block Tier VI characterization extension FIRST-INSTANCE baseline observation per A3 first-instance precedent within Frequency Domain / Signal block scope); §4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation per Code S43 Step 0 empirical surface (THIRD §4.7.A variant 3 observation overall at §2.5 entry codification scope after S40 + S42 first + second observations at DEGENERATE DUAL-ARM sub-variant; S43 emd_hht is FIRST NEW NON-DEGENERATE DUAL-ARM sub-variant within §4.7.A variant 3 codified scope at TSL arm ≠ reference arm distinction — TSL arm `_numpy_emd_minimal` inline mirrors engine `_numpy_emd` fallback; reference arm invokes EXTERNAL PyEMD.EMD library distinct implementation; A3 first-instance precedent at §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant scope at S43; codification deferred to absorption #6+ second-observation tightening if recurs); NEW Sub-class 2m candidate first-instance baseline observation per A3 first-instance precedent + (αc) forward-instrumentation-note treatment per (αa)+(αc) Chat ratification (definitional scope working hypothesis: "Tier VI CAVEAT (Pattern J Tier C — different sifting libraries / no canonical reference) + §4.7.A PRESENT variant 3 (Harness-reimplements-engine-math) at NON-DEGENERATE DUAL-ARM sub-variant (TSL arm inline reimplementation mirrors engine fallback; reference arm distinct external library) + Pattern F structural invariants computation explicit (reconstruction_identity validation at both arms) + IMF count CAVEAT driver + cumulative energy curve Pearson correlation supplementary metric (Tier C convention) + single-layer scope"); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT lines 5-7 + tolerance class em_stochastic + audit lines 64-67 verbatim §1.8 reroll_on_caveat=False codification reference; cross-Block scope continuation observation per Block 3 S32 + S33 §1.8 applicability precedent); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED at S43 per A3 THIRD-OBSERVATION TIGHTENING precedent threshold SATISFIED at Pattern F scope at n=3 observations across n=3 mathematical families (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family) + cross-Tier (Tier II.bit-exact + Tier III + Tier VI CAVEAT) scope (harness compare() lines 198-210 reconstruction_identity validation at both arms at machine precision 1e-10 threshold; TSL 1.11e-16 + ref 0.0; Pattern F Tier-agnostic empirical generalization observation INSTITUTIONALLY SUBSTANTIVE across THREE distinct mathematical-family + Tier-characterization scopes; NEW Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic); §1.9 Filename divergence sub-pattern variant FOURTH-OBSERVATION NOT MANIFESTED at S43 (audit `p3_emd_hht_audit.md` + harness `p3_emd_hht.py` + engine `emd_hht.py` ALL preserve canonical catalog technique_id `emd_hht` exactly; preserves S42 THIRD-OBSERVATION TIGHTENING status at n=3 cross-block observations + direction sub-variant analysis n=2 suffix-omission + n=1 suffix-addition); HETEROGENEOUS TIER-SURFACE VARIANT OBSERVATION A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 per A3 FOURTH-OBSERVATION TIGHTENING precedent threshold SATISFIED at heterogeneous Tier-surface variant sub-pattern scope at n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers; codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY REINFORCED beyond S42 third-observation tightening baseline); ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION EMPIRICAL EFFICACY A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED AT S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Multi-precedent confluence at SAME audit + SAME entry codification scope FOURTH-INSTANCE per S38 + S41 + S42 + S43 sequential observations (SEVEN A3 precedent threshold satisfactions/reinforcements at S43 scope: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone = SEVEN record-high single-observation count in apparatus history; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation); BLOCK 5 FREQUENCY DOMAIN / SIGNAL FULLY Q1-AMENDED MILESTONE REACHED AT S43 CLOSE = FIFTH catalog block fully Q1-amended (5 of 13 = 38% catalog block-level completion); per-block continuation pattern n=5 catalog block observations REACHED at Block 5 close — codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations (Block 1 + Block 12 + Block 8 + Block 3 + Frequency Domain / Signal); CRITICAL CAVEAT — audit verdict CAVEAT (Pattern J Tier C; ±2 IMF count divergence with 0.99 correlation on energy curve) DETERMINISTIC at `reroll_on_caveat = False` Session 5 lock per audit lines 64-67 verbatim; engine `emd_hht.py:run()` math + Layer 2 orchestration (NaN handling via `_prepare_series` + preset config dispatch + emd package availability check + EMD/EEMD method dispatch + max_imfs + max_sift_iterations + ensemble_size + noise_width parameter resolution + EMD sifting + Hilbert transform + instantaneous frequency + amplitude analysis + summary tables + plain English + audit_fields construction) NEVER exercised by audit — distinct validation claim scope from S37-S39 + S41 audit-validates-library-primitive scope and from S40 + S42 audit-validates-reimplementation-self-consistency-only scope; NEW VALIDATION CLAIM SCOPE CATEGORY at S43 = audit-validates-IMF-count-CAVEAT-with-reconstruction-identity-PASS-and-energy-curve-correlation-PASS-via-different-sifting-libraries (Tier C convention))
 
@@ -21964,6 +22131,48 @@ engine wrapper orchestration paths (log-HAR + multi-step forecast
 builder) require expert review. Realized variance series construction
 (upstream of HAR-RV input) NOT in scope of parity audit — strategist
 responsible for realized-variance estimation methodology choice.
+
+**Validation-Surface Coverage (VSC) — RATIFIED Tier 1 forward-amendment per inventory verification commit 12d3785 (Cat 1d revision-2 framework):**
+
+- **Validated configuration (harness math layer):** OLS on lagged HAR
+  regressor matrix with constant intercept; `daily_lag=1`,
+  `weekly_lag=5`, `monthly_lag=22`, `use_log=False`, `h_ahead=1`;
+  NumPy `lstsq` direct invocation bypassing engine wrapper 6-decimal
+  output rounding (Phase 1 finding B8); reference arm independent
+  R `lm()` cross-package self-implementation per Corsi 2009
+  specification.
+- **Engine preset default (Balanced):** `daily_lag=1`, `weekly_lag=5`,
+  `monthly_lag=22`, `use_log=False`, `h_ahead=1` (all defaults match
+  harness validated configuration per engine `denton_chowlin_
+  disaggregation.py` analog at `engine/techniques/har_rv.py` lines
+  63-67). Core OLS coefficient math is preset-invariant: preset
+  toggles only downstream bootstrap CI computation
+  (`bootstrap_samples=0/500/2000` for Fast/Balanced/Thorough) +
+  residual diagnostics enable-flag (`compute_residual_diag=False/
+  True/True`). Coefficient + R² + sigma + AIC + BIC outputs are
+  identical across all presets.
+- **Configuration match:** **YES** — user invoking at default
+  Balanced preset experiences mathematically validated OLS
+  coefficient surface. Preset-dependent additions (bootstrap CIs +
+  Ljung-Box/Jarque-Bera/Durbin-Watson residual diagnostics) are
+  wrapper-layer-only outputs that do NOT affect parity-validated
+  math.
+- **Disclosure scope (no mismatch — no additional advisory beyond
+  pre-existing scope sections):** parity claim applies to OLS
+  coefficient + R² + sigma + AIC + BIC outputs at Standard Corsi
+  2009 (1/5/22) lag specification + Linear HAR + Single-period
+  forecast configuration. Non-default configurations (alternative
+  lag windows, `use_log=True`, `h_ahead > 1`) are expert-review-
+  required per pre-S49 scope (already enumerated at "Phase 3 known
+  failure modes" + "Phase 3 boundary of validity" + "Phase 3 gap
+  markings" sections above).
+- **Cross-reference:** Cat 1d LEGITIMATE bypass-with-bypass-rationale
+  classification per audit-hygiene inventory verification
+  methodology revision-2 (inventory verification artifact `docs/
+  reference_parity_phase6/audit_hygiene_inventory_verification_
+  2026-05-22.md` §2.3 + §3); precedent-preservation case (FIRST
+  Cat 1d §2.5 entry on master pre-dating Gate 2 VSC requirement
+  formalization).
 
 ### har_cj (Phase 7+ S57; THIRTY-FIRST §2.5 entry; FIFTH-AND-FINAL Volatility / Risk / Tails block entry — Block 13 FULLY Q1-AMENDED milestone REACHED at S57 close = 7 of 13 catalog blocks fully Q1-amended (54% catalog block-level completion); SECOND HAR-family entry; Tier IV Pattern A.3 paper-formula self-parity per ABD 2007)
 
