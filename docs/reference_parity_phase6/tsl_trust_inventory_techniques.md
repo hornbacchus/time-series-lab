@@ -21161,7 +21161,289 @@ observation expected per block: garch (S53) Tier II.mle-band; egarch
 sub-pattern (alpha-vs-gamma naming convention); HAR-family models
 are closed-form OLS not GARCH-MLE — different tier classification.
 
-## §3 Unvalidated catalog techniques (47 entries; ID-only enumeration)
+### egarch (Phase 7+ S54; TWENTY-EIGHTH §2.5 entry; SECOND Volatility / Risk / Tails block entry; FIRST Tier V Pattern J B.2 overlay entry within Volatility / Risk / Tails block; Pattern J B.2 sub-pattern SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework — A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at B.2 sub-pattern scope per first-instance S6 egarch baseline + S54 confirmation)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.mle-band primary + Tier V Pattern J B.2 overlay** — analogous to
+S23 pp_test ("Tier II.bit-exact-loose + Tier V Pattern J B.2
+overlay") and S28 kalman_imputation ("Tier II.mle-band primary +
+Pattern A conditional-on-MLE-alignment overlay") dual-tier framing
+precedents. Tier II.mle-band primary per Phase 3 cross-package PASS
+at MLE-fit band tolerance (Pattern A.2 per scope_reframing §2 line
+134; `p3_egarch` explicitly enumerated within the 13-wrapper Tier
+II.mle-band scope per scope_reframing §138 verbatim). Tier V Pattern
+J B.2 overlay per scope_reframing §2 line 176-181 verbatim ("ARCH/
+RUGARCH alpha-vs-gamma naming swap for `p3_egarch` (S6 / Batch 2;
+Pattern J B.2 internal-default divergence)"); documented swapped
+naming convention auto-aligned by harness helper. Tolerance ladder
+primary abs_tol 5e-2 + rel_tol 1e-1 + block_abs_tol 5e-1 +
+block_rel_tol 5e-1 per `tools/reference_parity/harness/tolerances.py`
+lines 985-993 (wider than sgarch + gjr_garch per "EGARCH log-variance
+parameterization amplifies optimizer divergence" justification).
+Verdict class: `mle_fit` per audit class declaration at
+`p3_egarch.py:EgarchParity.verdict_class = "mle_fit"`; "log-variance
+parameterization tends to amplify optimizer divergence relative to
+sGARCH/GJR; tolerance class still mle_fit but at the looser end of
+the band" per `verdict_class_rationale` line 56-64 verbatim.
+
+**Pattern J B.2 sub-pattern SECOND-OBSERVATION TIGHTENING:** Pattern
+J B.2 sub-pattern second-observation tightening per S47 Note 24
+codified framework; first-instance S6 egarch baseline (Phase 3 Batch
+2 Session 6 close per `tools/reference_parity/reports/phase3_cross_batch_findings.md`
++ S6 codification) + S54 egarch confirmation = **A3 SECOND-OBSERVATION
+TIGHTENING precedent threshold SATISFIED at B.2 sub-pattern scope**.
+Per scope_reframing §174-181 Tier V enumeration of Pattern J
+instances: `p3_ets` AIC scale offset (Pattern D) + `p3_var` AIC scale
+offset + `p3_egarch` alpha-vs-gamma naming swap (B.2) + `p3_lomb_scargle`
+normalization convention (B.3). Pattern J B.2 sub-class specifically
+identified at "internal-default divergence" — the ARCH and RUGARCH
+packages use swapped internal-default naming for the alpha and gamma
+roles in EGARCH:
+- **arch (Python):** `alpha` = magnitude-of-shock coefficient
+  (multiplies `|z| - E|z|`); `gamma` = leverage / sign-of-shock
+  coefficient
+- **rugarch (R):** `alpha` = leverage / sign-of-shock coefficient;
+  `gamma` = magnitude-of-shock coefficient
+
+Harness helper `_garch_helpers.run_reference_garch` (per
+`p3_egarch.py:run_reference` line 90-91 invocation) swaps the names
+on the rugarch side so the per-coefficient comparison aligns by
+economic role rather than by raw name. Diagnostic field
+`param_name_swap_applied: True` per
+`p3_egarch.py:compare` line 112 verbatim documents the alignment.
+**NOT a new sub-pattern variant requiring framework expansion** —
+existing Note 24 framework fully absorbs the second-observation
+tightening per A3 precedent threshold semantic; tightening documented
+in this §2.5 entry body only, no §4 forward instrumentation note
+codification required.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
+math-layer mapping + wrapper-layer validation extension):** egarch
+maps to engine `garch_model.py` (multi-variant module shared with
+garch + gjr_garch per `engine/techniques/registry.py` lines 289-290);
+engine resolves `technique_id="egarch"` → `vol="EGARCH" + o=1` per
+`_TID_VOL_MAP` at engine line 102. Harness `p3_egarch` validates the
+EGARCH variant of the shared engine module. Single-layer math-layer
+mapping per Code S54 Step 0 empirical verification: engine `run()`
+math layer uses `arch.arch_model(returns, vol='EGARCH', p=1, q=1,
+o=1, mean='Constant', dist='normal').fit()`; harness TSL arm
+(`_garch_helpers.py:run_tsl_garch`) invokes the engine wrapper
+directly via RunContext at variant="EGARCH". No §4.7.A harness-
+bypasses-engine or harness-reimplements-engine-math pattern. §1.9
+filename divergence sub-pattern variant NOT MANIFESTED at S54 —
+audit `p3_egarch.py` + engine `garch_model.py` (multi-variant) +
+catalog `egarch` consistent.
+
+**Reference:** R `rugarch::ugarchspec(model="eGARCH") + ugarchfit`
+(rugarch 1.5-1 per Phase 5 Session 5 selective re-validation; same
+EGARCH MLE on omega + alpha + gamma + beta log-variance coefficients;
+both implementations maximize the same Gaussian log-likelihood;
+**alpha/gamma name swap documented per Pattern J B.2 + harness helper
+auto-aligns**)
+**Verdict (math layer):** PASS Pattern A.2 at MLE-fit band per Phase
+3 Session 6 close + Phase 5 Session 5 selective re-validation
+(`p3_sgarch` + GARCH-family explicitly enumerated at re-validation
+per `docs/reference_parity_phase5/session_1_findings.md` line 40)
+**Verdict (wrapper layer):** PASS 3/3 checks per S54 re-execution
+Code Step 2 empirical verification at
+`tools/_s54_egarch_wrapper_check.py` (post engine fix `fffb425`)
+**Audit script:** `tools/reference_parity/harness/checks/p3_egarch.py`
++ `_garch_helpers.py` (shared business logic with sgarch + gjr_garch)
+**Audit date:** 2026-04-29 (Phase 3 Batch 2 close per S6)
+**Primary metrics (math layer):** omega + alpha + gamma + beta
+EGARCH(1,1,1) log-variance coefficient parameters + log_likelihood
++ AIC + BIC + conditional variance trajectory (T=1000 fixture per
+`_garch_helpers.generate_garch_dgp`); alpha/gamma compared post
+name-swap alignment per Pattern J B.2 helper logic.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS post engine
+fix `fffb425`):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 interior NaN
+  values at indices [20, 80, 150, 300, 400] of n=500 EGARCH-simulated
+  series with leverage. Wrapper returns non-error response; emits
+  warning ("5 interior missing values linearly interpolated.") per
+  engine `_prepare_series` lines 28-48.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `vol="EGARCH"` + `p=1` + `q=1` + `o=1`;
+  returned 4 expected tables (`Parameter Estimates` + `Model
+  Diagnostics` + `Conditional Volatility` + `Volatility Forecast`)
+  + `audit_fields` populated. **EGARCH log-variance persistence label
+  ("Persistence (beta, EGARCH log-variance)")** present in Model
+  Diagnostics table per CAI Phase 2 Session 6 fix F-G-T2-EGARCH-PERSIST
+  (engine lines 274-286); persistence formula `|beta|` (log-variance
+  AR coefficient) correctly distinguishes EGARCH from sgarch + gjr
+  variance-level `alpha + beta < 1` persistence semantic.
+- **Check 3 — Output shape/type verification:** PASS. Volatility
+  Forecast table rows = horizon=12; columns = `["Step", "Forecast
+  Variance", "Forecast Volatility"]`; first row numeric (step=1,
+  variance=0.6474, volatility=0.8046). **Wrapper-layer check 3 PASS
+  post engine fix `fffb425`**; initial S54 surface flagged the engine
+  analytic-vs-simulation forecast-method routing bug as separate
+  bug-fix session per SESSION_PROTOCOL escalation rule. EGARCH
+  multi-step forecasts now use Monte Carlo simulation (n=1000) per
+  arch package convention for non-linear variance specifications.
+
+Wrapper-layer validation harness at
+`tools/_s54_egarch_wrapper_check.py` (transient verification artifact;
+not retained in production codebase).
+
+**Reproducibility note — Monte Carlo simulation forecast:** EGARCH
+multi-step forecast uses Monte Carlo simulation (n=1000); forecast
+values are Monte Carlo estimates with ~1/sqrt(1000) ≈ 3% relative-
+scale stochasticity. For deterministic reproducibility (regulatory
+submissions, audit-trail forecasts), `arch` random seed should be set
+before forecast invocation via the engine's `ctx.seed` channel (engine
+line 64 sets `np.random.seed(ctx.seed)` at run() entry; arch internal
+RNG draws from numpy global state on engine invocation). Forecast
+reproducibility is bit-exact at fixed `ctx.seed` but Monte Carlo
+estimates differ across seeds at the ~3% relative scale. Analytic
+forecasts (used for symmetric GARCH + GJR-GARCH per engine routing
+post-`fffb425`) are deterministic regardless of seed.
+
+**Source files (single-layer math + 3-check wrapper layer per S54
+framing):**
+`tools/reference_parity/harness/checks/p3_egarch.py` lines 47-119
+(EgarchParity wrapper class with EGARCH variant tagging; declares
+structural invariants `garch_conditional_variance` at 0.0 abs +
+`garch_persistence` at 1e-3 rel; delegates to `_garch_helpers.compare_garch`
+for primary + secondary metric comparison; diagnostic field
+`param_name_swap_applied: True` per Pattern J B.2 alignment)
++ `tools/reference_parity/harness/checks/_garch_helpers.py` (shared
+business logic; `run_reference_garch` performs alpha/gamma name swap
+on rugarch side per Pattern J B.2 documented divergence)
++ `engine/techniques/garch_model.py` lines 11 + run() body (Layer 1
+shared math: engine imports `arch.arch_model` + invokes `.fit()` at
+`vol="EGARCH"` per `_TID_VOL_MAP` resolution at line 102)
++ `engine/techniques/garch_model.py` lines 213-228 (Layer 2 forecast
+routing post-`fffb425` engine fix: `forecast_method = "simulation"
+if vol_type == "EGARCH" else "analytic"`; simulation with n=1000 for
+EGARCH multi-step; analytic for symmetric GARCH + GJR-GARCH)
++ `engine/techniques/garch_model.py` lines 274-286 (Layer 2 EGARCH-
+specific persistence semantic: `|beta|` log-variance AR coefficient
+per F-G-T2-EGARCH-PERSIST fix; distinguishes EGARCH from variance-
+level `alpha + beta < 1` GARCH-family persistence)
++ `engine/techniques/registry.py` line 290 (`egarch` →
+`techniques.garch_model` multi-variant routing)
+
+**Validation claim scope (SINGLE-LAYER math + 3-check wrapper layer
+per S54 framing):** Per Code S54 Step 0-2 + S54 re-execution Step 2
+empirical verification:
+
+- **Layer 1 (Gaussian-innovation MLE on EGARCH log-variance via
+  arch.arch_model) VALIDATED at Tier II.mle-band primary + Tier V
+  Pattern J B.2 overlay:** egarch engine math layer + p3_egarch
+  harness TSL arm BOTH invoke the SAME `arch.arch_model` with
+  `vol='EGARCH', p=1, q=1, o=1, mean='Constant', dist='normal'`.
+  Reference arm independently invokes R rugarch at matched eGARCH
+  specification with alpha/gamma name swap auto-aligned by harness
+  helper per Pattern J B.2. Per Session 6 empirical baseline: EGARCH
+  log-variance parameterization amplifies optimizer divergence at
+  the looser end of the MLE-fit band (5e-2 abs + 1e-1 rel primary).
+  **Layer 1 PASS empirically grounded** with Pattern J B.2 alpha/gamma
+  name-swap disclosure required for any published output dependent
+  on per-coefficient values rather than overall model fit; arch and
+  rugarch use swapped naming conventions and any direct comparison
+  must apply the same alignment the harness helper applies internally.
+- **Wrapper layer (Layer 2 sample paths via S49+ NEW 3-check scope)
+  VALIDATED at 3/3 PASS post engine fix `fffb425`:** NaN handling
+  deterministic via interior linear interpolation; preset config
+  dispatch returns expected 4-table structure + EGARCH log-variance
+  persistence label per F-G-T2-EGARCH-PERSIST fix + audit_fields;
+  output shape/type verification confirms forecast row count matches
+  horizon + numeric variance + volatility columns. Layer 2 paths NOT
+  covered by 3 checks (rescale parameter handling + distribution
+  variant dispatch beyond normal + Model Diagnostics table derivation
+  + audit_fields construction + interpretation builder) remain
+  expert-review-required.
+
+**Phase 3 algorithmic basis (extracted from harness + Session 6):**
+Nelson Exponential GARCH (EGARCH) parameterizes log-variance (not
+variance) per:
+
+    log(sigma2_t) = omega + alpha*(|z_{t-1}| - E|z|)
+                          + gamma * z_{t-1}
+                          + beta * log(sigma2_{t-1})
+
+where `z_{t-1} = eps_{t-1} / sigma_{t-1}` is the standardized residual
++ `E|z| = sqrt(2/pi)` for Gaussian innovations. Asymmetric news-impact
+function: positive shocks (`z > 0`) and negative shocks (`z < 0`) have
+different effects on log-variance via the `gamma * z` leverage term.
+Stationarity condition: `|beta| < 1` (log-variance AR coefficient),
+distinct from GARCH-family variance-level `alpha + beta < 1`. Both
+arch (Python) and rugarch (R) implementations use Gaussian-innovation
+MLE on (omega, alpha, gamma, beta) parameters.
+
+**Phase 3 known failure modes (Session 6 + tolerance ladder
+justification):**
+
+- arch (Python) vs rugarch (R) **alpha/gamma name swap** (Pattern
+  J B.2): arch's "alpha" = magnitude-of-shock coefficient; rugarch's
+  "alpha" = leverage coefficient; harness helper aligns by economic
+  role (`param_name_swap_applied: True`); per-coefficient parity
+  PASS post-alignment
+- EGARCH log-variance parameterization amplifies optimizer divergence
+  vs variance-level GARCH-family — widened tolerance ladder 5e-2 abs
+  + 1e-1 rel primary; "at the looser end of the band" per
+  verdict_class_rationale
+- BFGS convergence-criterion differences between arch and rugarch
+  drive log-variance coefficient divergence at the 1e-2 to 5e-2 abs
+  scale; tolerance ladder accommodates
+- Distribution parameter choice (normal/t/skewt/ged) NOT validated
+  beyond `dist='normal'` Gaussian baseline at Phase 3 audit
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=1000 fixture (`generate_garch_dgp(n=1000)`); smaller T not
+  validated at parity layer
+- EGARCH(1,1,1) specification only (p=1 + q=1 + o=1); higher-order
+  EGARCH(p,q,o) NOT in parity scope at Phase 3 audit
+- `dist='normal'` Gaussian-innovation only validated; t / skewt / ged
+  distributions NOT in parity scope (covered by smoke test at S54
+  re-execution Step 2: dist=t PASSes forecast shape, but per-coefficient
+  parity NOT validated)
+- `mean='Constant'` baseline only validated
+- Multi-step forecast via Monte Carlo simulation (n=1000) post engine
+  fix `fffb425`; reproducibility deterministic at fixed `ctx.seed` but
+  Monte Carlo estimates differ ~3% across seeds (1/sqrt(1000) relative
+  scale)
+
+**Phase 3 gap markings:**
+
+- Distribution parameter (normal/t/skewt/ged) NOT validated beyond
+  Gaussian baseline — requires expert review for any published
+  output using non-Gaussian innovation
+- Higher-order EGARCH(p,q,o) for p+q+o > 3 NOT validated
+- Mean model parameter NOT validated beyond Constant baseline
+- Rescale parameter (engine default True) NOT independently validated
+- Monte Carlo simulation forecast reproducibility — ~3% relative-
+  scale stochasticity at n=1000 simulations; for deterministic
+  audit-trail forecasts, `ctx.seed` should be pinned explicitly
+- Layer 2 engine wrapper orchestration paths NOT covered by 3-check
+  wrapper-layer validation (rescale + distribution variants + Model
+  Diagnostics table derivation + EGARCH-specific persistence label
+  derivation + audit_fields construction + interpretation builder)
+  require expert review
+- Pattern F structural invariants declared at `p3_egarch.py`
+  (`garch_conditional_variance` + `garch_persistence`) populated at
+  wrapper class but primary verdict driven by scalar/vector metric
+  comparison
+
+**Status (Tier II.mle-band primary + Tier V Pattern J B.2 overlay
+PASS per S54 re-execution post engine fix `fffb425`):** Layer 1
+EGARCH log-variance Gaussian-innovation MLE math validated at MLE-
+fit band tolerance (widened per log-variance parameterization)
+per Phase 3 Session 6 + Phase 5 Session 5 selective re-validation;
+Pattern J B.2 alpha/gamma name-swap auto-aligned by harness helper.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS post
+engine fix `fffb425`. Layer 2 engine wrapper orchestration paths
+NOT covered by 3-check wrapper-layer validation (rescale +
+distribution + Model Diagnostics + interpretation builder) require
+expert review. Monte Carlo simulation forecast reproducibility ~3%
+relative scale at n=1000.
+
+## §3 Unvalidated catalog techniques (46 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -21217,10 +21499,10 @@ descriptions, summaries).
 ### Stationarity / Tests (0 unvalidated; Block 12 FULLY Q1-AMENDED — second catalog block to complete per Q1 work program scope after Block 1 Causality at S18; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22; pp_test moved to §2.5 per Phase 7+ S23)
 (all 3 techniques moved to §2.5)
 
-### Volatility / Risk / Tails (4 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately + garch moved to §2.5 per Phase 7+ S53 — FIRST Volatility / Risk / Tails block entry; Block 13 opens)
-`egarch`, `gjr_garch`, `har_cj`, `har_rv`
+### Volatility / Risk / Tails (3 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately + garch moved to §2.5 per Phase 7+ S53 — FIRST Volatility / Risk / Tails block entry; Block 13 opens; egarch moved to §2.5 per Phase 7+ S54 — SECOND Volatility / Risk / Tails block entry; FIRST Tier V Pattern J B.2 overlay entry within block; Pattern J B.2 sub-pattern SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework — A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at B.2 sub-pattern scope per first-instance S6 egarch baseline + S54 confirmation; engine forecast-method routing fix at commit fffb425 unblocked wrapper-layer check 3)
+`gjr_garch`, `har_cj`, `har_rv`
 
-**Total: 47 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch moved to §2.5; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails OPENED at S53 — FIRST entry garch validated per technique-complexity-ascending precedent; 4 remaining unvalidated entries in block (egarch + gjr_garch + har_cj + har_rv)**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
+**Total: 46 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53+S54 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch + egarch moved to §2.5; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails IN PROGRESS — opened at S53 (garch); advanced at S54 (egarch); 3 remaining unvalidated entries in block (gjr_garch + har_cj + har_rv)**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
 
 ## §4 How to use this document
 
