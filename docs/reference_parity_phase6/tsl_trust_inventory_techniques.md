@@ -21713,7 +21713,259 @@ framework substantively refined; no third-observation tightening
 manifested at S55 since outcome (ii) is scope-bounding evidence
 rather than further accumulation.
 
-## §3 Unvalidated catalog techniques (45 entries; ID-only enumeration)
+### har_rv (Phase 7+ S56; THIRTIETH §2.5 entry; FOURTH Volatility / Risk / Tails block entry; FIRST HAR-family entry within Volatility / Risk / Tails block — structurally distinct from GARCH-family MLE; OLS-precision Pattern A.2 cross-package framing)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact** — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2 per scope_reframing §2 line 130; TSL numpy `lstsq`
+versus R `lm()` from-scratch reimplementation; tolerance abs 1e-10
++ rel 1e-10 + block_abs 1e-6 + block_rel 1e-6 per
+`tools/reference_parity/harness/tolerances.py` lines 1478-1485 —
+explicitly bit-exact at machine precision per closed-form OLS
+arithmetic). Verdict class: `closed_form` per `p3_har_rv.py:HarRvParity.verdict_class
+= "closed_form"` declaration; "OLS is closed-form arithmetic given
+identical regressors and dependent variable; TSL's NumPy `lstsq`
+and R's `lm` should agree at machine precision" per
+verdict_class_rationale lines 104-113 verbatim. Per scope_reframing
+§2 line 130 + post-S6 inference: closed-form OLS achieving bit-
+exact cross-package tolerance places this firmly in Tier II.bit-
+exact (analogous to S26 denton_chowlin Tier II.bit-exact +
+classical_decompose S31 Tier II.bit-exact precedents for closed-
+form arithmetic at machine precision). **`p3_har_rv` NOT in
+scope_reframing §2 lines 127-131 12-wrapper Tier II.bit-exact
+explicit enumeration**; added per post-S6 inference grounded at
+empirical bit-exact tolerance + closed_form verdict class +
+cross-package Pattern A.2 mechanism (analogous to S23 p3_pp + S28
+kalman_imputation + S31 classical_decompose post-S6 inference
+precedents at Tier II addition).
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
+math-layer mapping + wrapper-layer validation extension):** har_rv
+is 1:1 catalog↔wrapper mapping per `p3_har_rv` harness Wrapper
+field (`engine/techniques/har_rv.py` sole engine module). Single-
+layer math-layer mapping per Code S56 Step 0 empirical verification:
+engine `run()` math layer constructs HAR regressors (daily +
+weekly + monthly lagged RV averages per Corsi 2009 specification)
++ applies `np.linalg.lstsq` for OLS solution; harness TSL arm
+(`p3_har_rv.py:run_tsl` lines 121-211) **replicates the engine's
+regressor construction in-line** + applies `np.linalg.lstsq`
+directly to bypass the wrapper's 6-decimal output rounding (per
+Phase 1 finding B8 — TSL output-rounding floor limits parity-audit
+precision; calling NumPy lstsq directly preserves full double
+precision). This is a **§4.7.A PRESENT variant 3 (Harness-
+reimplements-engine-math at DEGENERATE DUAL-ARM sub-variant)** —
+harness reimplements the engine's regressor construction + lstsq
+invocation in-line; both arms are mathematically identical (same
+numpy lstsq on same regressor matrix); audit-trail sanity check
+at harness lines 174-203 cross-checks the wrapper's rounded
+outputs against the direct lstsq within the rounding-floor
+~1e-6 abs to confirm the wrapper does what we claim. §1.9 filename
+divergence sub-pattern variant NOT MANIFESTED at S56 — audit
+`p3_har_rv.py` + engine `har_rv.py` + catalog `har_rv` consistent.
+
+**Reference:** R `lm()` base-R OLS function (R 4.5.3 per Phase 5
+Session 5 selective re-validation context; no specialized HAR-RV
+package required — Corsi 2009 model is closed-form OLS at the
+multi-horizon RV regressor matrix; `HARModel` R package flagged
+TBD-batch-2 in INVENTORY.md as non-trivial Windows install hurdle,
+so harness uses from-scratch reimplementation in R base instead
+per `p3_har_rv.py:run_reference` lines 214-275). Reference R code
+replicates TSL's regressor construction identically (daily = mean
+RV[t-1:t]; weekly = mean RV[t-5:t]; monthly = mean RV[t-22:t]; per
+lines 235-241) then fits `lm(Y ~ X_d + X_w + X_m)`.
+**Verdict (math layer):** PASS Pattern A.2 bit-exact at machine
+precision per Phase 3 Session 6 close (Phase 3 Batch 2 R volatility
+batch; verdict_class closed_form bit-exact at 1e-10 abs).
+**Verdict (wrapper layer):** PASS 3/3 checks per S56 Code Step 2
+empirical verification at `tools/_s56_har_rv_wrapper_check.py`.
+**Audit script:** `tools/reference_parity/harness/checks/p3_har_rv.py`
+**Audit date:** 2026-04-29 (Phase 3 Batch 2 close per S6)
+**Primary metrics (math layer):** beta_0 + beta_d + beta_w + beta_m
+coefficient vector + R² + residual sigma (T_eff=478 effective
+sample after monthly_lag=22 burn; per harness `DGP_N = 500`).
+**Secondary metrics:** AIC + BIC at abs_tol 1e-6.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 NaN values
+  at indices [25, 75, 150, 250, 350] of n=500 HAR-RV-simulated
+  series. Wrapper returns non-error response; emits warning ("5
+  missing values removed.") indicating drop-NaN semantics (distinct
+  from GARCH-family interior-linear-interpolation: HAR-RV wrapper
+  drops NaN rows since OLS regressor construction can't handle NaN
+  in lagged RV averages without window contamination).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `h_ahead=1`; returned 4 expected tables
+  (`HAR-RV Coefficients` + `Model Fit` + `Residual Diagnostics` +
+  `Fitted Values`) + `audit_fields` populated.
+- **Check 3 — Output shape/type verification:** PASS. All 4 tables
+  contain numeric output values; `audit_fields` populated with
+  keys including `model` + `use_log` + `daily_lag` + `weekly_lag`
+  + `monthly_lag`. Audit_fields structure confirms HAR-RV-specific
+  parameter tracking per Corsi 2009 lag specification.
+
+Wrapper-layer validation harness at
+`tools/_s56_har_rv_wrapper_check.py` (transient verification
+artifact; not retained in production codebase).
+
+**Source files (single-layer math + 3-check wrapper layer per S56
+framing):**
+`tools/reference_parity/harness/checks/p3_har_rv.py` lines 51-88
+(fixture generator `_generate_har_dgp`: produces Corsi 2009 HAR-RV
+realization at n=500 + burn=50 with beta_0=0.05 + beta_d=0.4 +
+beta_w=0.3 + beta_m=0.2 + sigma=0.05; rv positivity invariant
+enforced via `np.maximum(rv, 1e-6)`)
++ `tools/reference_parity/harness/checks/p3_har_rv.py` lines 91-211
+(HarRvParity wrapper class + run_tsl with in-line regressor
+construction + direct numpy lstsq to bypass wrapper 6-decimal
+rounding; audit-trail sanity check on wrapper outputs at lines
+174-203)
++ `tools/reference_parity/harness/checks/p3_har_rv.py` lines
+214-275 (run_reference: R `lm(Y ~ X_d + X_w + X_m)` from-scratch
+reimplementation via RBridge; replicates TSL's regressor
+construction identically; extracts coefficients + R² + sigma + AIC
++ BIC)
++ `tools/reference_parity/harness/checks/p3_har_rv.py` lines
+277-316 (compare(): `_compare_vector` on beta coefficient vector;
+`_compare_scalar` on R² + sigma at primary tolerance; AIC + BIC
+at secondary)
++ `engine/techniques/har_rv.py` lines 1-12 (Corsi 2009 HAR-RV
+specification documentation: `RV_t = beta_0 + beta_d * RV_{t-1} +
+beta_w * RV_{t-1:t-5} + beta_m * RV_{t-1:t-22} + eps_t` where
+`RV_{t-1:t-k}` is the average realized volatility over the past
+k days; captures heterogeneous market participants operating at
+different time horizons: daily + weekly + monthly)
++ `engine/techniques/har_rv.py` run() body (Layer 1 + Layer 2:
+NaN handling via drop-row + regressor construction with daily +
+weekly + monthly lag averages + `np.linalg.lstsq` OLS solve +
+HAR-RV Coefficients table + Model Fit summary + Residual
+Diagnostics + Fitted Values output + bootstrap-based confidence
+intervals at Balanced + Thorough presets + audit_fields)
++ `engine/techniques/har_rv.py` lines 25-29 (preset config:
+Fast=no bootstrap + no residual diag; Balanced=500 bootstrap
+samples + residual diag; Thorough=2000 bootstrap samples + residual
+diag)
++ `engine/techniques/registry.py` (catalog routing; har_rv →
+techniques.har_rv single module)
+
+**Validation claim scope (SINGLE-LAYER math + 3-check wrapper layer
+per S56 framing):** Per Code S56 Step 0-2 empirical verification:
+
+- **Layer 1 (closed-form OLS on multi-horizon HAR regressors via
+  numpy.linalg.lstsq) VALIDATED at Tier II.bit-exact:** har_rv
+  engine math layer constructs HAR regressors (daily + weekly +
+  monthly lagged RV averages) + applies numpy lstsq; harness TSL
+  arm replicates the regressor construction in-line + applies
+  numpy lstsq directly (bypassing wrapper 6-decimal rounding per
+  §4.7.A variant 3 DEGENERATE DUAL-ARM sub-variant per S40 + S42
+  + S56 precedent). Reference arm independently constructs identical
+  HAR regressors in R + applies R `lm()` base OLS. Per Session 6
+  empirical baseline + closed_form verdict class: NumPy lstsq and
+  R lm produce numerically equivalent coefficients at machine
+  precision (1e-10 abs); both implement the same normal-equations
+  solve. **Layer 1 PASS bit-exact empirically grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ NEW 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via drop-row
+  semantics (distinct from GARCH-family interior-linear-interpolation;
+  appropriate for OLS regressor construction where lagged window
+  contamination would corrupt the regression); preset config
+  dispatch returns expected 4-table structure + audit_fields with
+  HAR-RV-specific parameter tracking; output shape/type verification
+  confirms numeric outputs across all tables. Layer 2 paths NOT
+  covered by 3 checks (use_log variant + h_ahead multi-step forecast
+  + bootstrap confidence intervals at Balanced/Thorough presets +
+  Residual Diagnostics table derivation + Fitted Values table
+  derivation + audit_fields construction) remain expert-review-
+  required per pre-S49 scope.
+
+**Phase 3 algorithmic basis (extracted from harness + Corsi 2009):**
+Corsi (2009) "A Simple Approximate Long-Memory Model of Realized
+Volatility" Journal of Financial Econometrics. The HAR-RV model
+regresses realized variance at horizon h on three predictors:
+
+    RV_t = beta_0 + beta_d * RV_{t-1}
+                  + beta_w * mean(RV_{t-5:t-1})
+                  + beta_m * mean(RV_{t-22:t-1})
+                  + eps_t
+
+where RV_{t-k:t-1} denotes the average realized volatility over the
+past k days. Three regressors capture heterogeneous market
+participants operating at different time horizons: daily (1 day),
+weekly (5 days), monthly (22 days). OLS fit on four parameters
+(intercept + 3 slope coefficients). Effective sample T_eff = T -
+22 after monthly_lag burn. Closed-form normal-equations solve;
+numpy `lstsq` and R `lm` produce numerically equivalent coefficients
+at machine precision.
+
+**Phase 3 known failure modes (Session 6 + tolerance ladder
+justification):**
+
+- NaN handling: engine drops NaN rows (warning: "N missing values
+  removed.") rather than interpolating, since interior NaN in
+  realized variance series would corrupt lagged window averages
+  (weekly = mean over 5 days; monthly = mean over 22 days; a
+  single interior NaN propagates through 22 lagged averages)
+- Realized variance series construction (sampling frequency,
+  microstructure noise correction, jump-robust estimators) NOT
+  validated at parity layer — the engine accepts a pre-computed
+  realized variance series as input; downstream realized variance
+  estimation (e.g., 5-minute squared returns vs subsampled
+  estimators vs realized-kernel estimators) NOT in parity scope
+- T_eff must be sufficient for 4-parameter OLS identifiability;
+  Phase 3 fixture uses T=500 → T_eff=478 well above the
+  identifiability threshold
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=500 fixture (`DGP_N = 500`) with monthly_lag=22 burn →
+  T_eff=478; smaller T may have identifiability issues
+- DGP beta_0=0.05 + beta_d=0.4 + beta_w=0.3 + beta_m=0.2 +
+  sigma=0.05 specifies one Corsi 2009 process realization; other
+  process specifications not validated at parity layer
+- Standard Corsi 2009 daily/weekly/monthly lag specification
+  (1/5/22) validated; alternative lag specifications (user-
+  configurable `daily_lag` + `weekly_lag` + `monthly_lag`
+  parameters per engine docstring) NOT in parity scope
+- Linear HAR specification only validated; log-HAR variant
+  (`use_log=True` engine parameter) NOT in parity scope
+- Single-period forecast (`h_ahead=1`) implied at parity layer;
+  multi-step `h_ahead > 1` forecasts NOT validated
+
+**Phase 3 gap markings:**
+
+- Log-HAR variant (`use_log=True`) NOT validated against external
+  reference
+- Multi-step forecast (`h_ahead > 1`) NOT in parity audit primary
+  metrics — Phase 3 covers OLS coefficient + R² + sigma + AIC +
+  BIC at fitted period only
+- Alternative lag specifications (non-standard daily/weekly/monthly
+  windows) NOT validated
+- Bootstrap-based confidence intervals (engine preset Balanced=500
+  + Thorough=2000 bootstrap samples) NOT validated against external
+  reference — bootstrap implementation is engine-internal
+- Realized variance series construction (upstream of HAR-RV input)
+  is NOT in scope of `p3_har_rv` audit — the engine accepts a
+  pre-computed RV series; the strategist is responsible for
+  realized-variance estimation choice (sampling frequency,
+  microstructure noise correction, jump-robust estimators)
+- Layer 2 engine wrapper orchestration paths NOT covered by 3-
+  check wrapper-layer validation (Residual Diagnostics derivation
+  + Fitted Values table construction + bootstrap CI computation +
+  audit_fields construction + interpretation builder) require
+  expert review
+
+**Status (Tier II.bit-exact PASS per S56):** Layer 1 closed-form
+OLS math validated bit-exact at machine precision per Phase 3
+Session 6 + Phase 5 Session 5 selective re-validation. Wrapper
+layer (S49+ NEW 3-check scope) validated at 3/3 PASS. Layer 2
+engine wrapper orchestration paths (log-HAR + multi-step forecast
++ bootstrap CI + Residual Diagnostics + Fitted Values + interpretation
+builder) require expert review. Realized variance series construction
+(upstream of HAR-RV input) NOT in scope of parity audit — strategist
+responsible for realized-variance estimation methodology choice.
+
+## §3 Unvalidated catalog techniques (44 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -21769,10 +22021,10 @@ descriptions, summaries).
 ### Stationarity / Tests (0 unvalidated; Block 12 FULLY Q1-AMENDED — second catalog block to complete per Q1 work program scope after Block 1 Causality at S18; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22; pp_test moved to §2.5 per Phase 7+ S23)
 (all 3 techniques moved to §2.5)
 
-### Volatility / Risk / Tails (2 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately + garch moved to §2.5 per Phase 7+ S53 — FIRST Volatility / Risk / Tails block entry; Block 13 opens; egarch moved to §2.5 per Phase 7+ S54 — SECOND Volatility / Risk / Tails block entry; FIRST Tier V Pattern J B.2 overlay entry within block; Pattern J B.2 sub-pattern SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework — A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at B.2 sub-pattern scope per first-instance S6 egarch baseline + S54 confirmation; engine forecast-method routing fix at commit fffb425 unblocked wrapper-layer check 3; gjr_garch moved to §2.5 per Phase 7+ S55 — THIRD Volatility / Risk / Tails block entry; Pattern J B.2 sub-pattern SCOPE REFINEMENT per S55 outcome (ii) — naming-convention divergence empirically isolated to EGARCH log-variance parameterization, NOT GARCH-family-asymmetric-broadly; Note 24 framework substantively refined)
-`har_cj`, `har_rv`
+### Volatility / Risk / Tails (1 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately + garch moved to §2.5 per Phase 7+ S53 — FIRST Volatility / Risk / Tails block entry; Block 13 opens; egarch moved to §2.5 per Phase 7+ S54 — SECOND Volatility / Risk / Tails block entry; FIRST Tier V Pattern J B.2 overlay entry within block; Pattern J B.2 sub-pattern SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework — A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at B.2 sub-pattern scope per first-instance S6 egarch baseline + S54 confirmation; engine forecast-method routing fix at commit fffb425 unblocked wrapper-layer check 3; gjr_garch moved to §2.5 per Phase 7+ S55 — THIRD Volatility / Risk / Tails block entry; Pattern J B.2 sub-pattern SCOPE REFINEMENT per S55 outcome (ii) — naming-convention divergence empirically isolated to EGARCH log-variance parameterization, NOT GARCH-family-asymmetric-broadly; Note 24 framework substantively refined; har_rv moved to §2.5 per Phase 7+ S56 — FOURTH Volatility / Risk / Tails block entry; FIRST HAR-family entry within block at Tier II.bit-exact closed-form OLS Pattern A.2 cross-package per Corsi 2009 specification)
+`har_cj`
 
-**Total: 45 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53+S54+S55 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch + egarch + gjr_garch moved to §2.5; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails IN PROGRESS — opened at S53 (garch); advanced at S54 (egarch); advanced at S55 (gjr_garch); 2 remaining unvalidated entries in block (har_cj + har_rv); GARCH-family asymmetric-variant SUB-BLOCK COMPLETE at S55 close — only realized-volatility HAR-family entries remain**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
+**Total: 44 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53+S54+S55+S56 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch + egarch + gjr_garch + har_rv moved to §2.5; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails IN PROGRESS — opened at S53 (garch); advanced at S54 (egarch); advanced at S55 (gjr_garch); advanced at S56 (har_rv); 1 remaining unvalidated entry in block (har_cj); GARCH-family asymmetric-variant SUB-BLOCK COMPLETE at S55 close; HAR-RV closed-form OLS validated at S56**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
 
 ## §4 How to use this document
 
