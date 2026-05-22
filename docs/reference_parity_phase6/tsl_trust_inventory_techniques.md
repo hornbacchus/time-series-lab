@@ -23596,7 +23596,305 @@ variant 3.D framing empirically established across two instances
 (S60 forecast_combination + S61 block_bootstrap); Category 2
 DEGENERATE-COHERENT inventory exhausted post-S61.**
 
-## §3 Unvalidated catalog techniques (39 entries; ID-only enumeration)
+### random_forest_forecast (Phase 7+ S62; THIRTY-SIXTH §2.5 entry; FIRST ML / Deep Learning block entry — Block 7 opens per Cat 3 remediation cycle dispatch following triage close at HEAD a7746f1; FIRST §2.5 entry FOLLOWING CAT 3 REMEDIATION CYCLE (session 1/17 per triage close ordering; Tier A tree-family-sklearn-wrapped baseline); Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per ratified Tier 2 incremental forward-amendment pattern from inventory verification commit 12d3785)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per S62 Code Step 4 empirical verification + Cat 3
+remediation cycle session 1/17 disposition. Reference arm reimplements
+the engine's exact pipeline (NaN edge-strip + interior-interpolate +
+lag/rolling/diff/time feature engineering at Balanced preset config +
+sklearn `RandomForestRegressor.fit` at engine-resolved hyperparameters
++ TimeSeriesSplit CV + multi-step recursive forecast) using identical
+sklearn primitives at identical call sites. Both arms use
+`random_state=ctx.seed=42` ensuring bit-exact deterministic sklearn
+output. Engine table outputs round forecast values to 6 decimals
+(engine line 326) + feature importance + train/CV metrics to 4
+decimals (engine lines 320 + 339-343); compare() rounds REF outputs
+to match display precision per Phase 1 finding B8 precedent
+(p3_rolling_origin_cv + p3_conformal hygiene precedent).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 interior NaN
+  values at indices [5, 23, 67, 134, 178] of n=200 AR(1) series.
+  Wrapper returns non-error response; emits warning "5 interior
+  missing values were linearly interpolated." per engine
+  `_prepare_series` lines 35-55 (linear interpolation between flanking
+  non-NaN values; same NaN handling convention as block_bootstrap +
+  GARCH-family wrappers).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_estimators=200 + max_depth=10 +
+  min_samples_leaf=3 + n_lags=12 + rolling_windows=[3, 6, 12] per
+  engine `_PRESET_CONFIG` lines 24-27); returned 3 expected tables
+  (`Forecast` + `Model Summary` + `Feature Importance`) +
+  `audit_fields` populated (24 keys); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast table
+  12 rows × 2 cols [Step, Forecast]; Model Summary 16 × 2; Feature
+  Importance 15 × 2 (top 15 features sorted descending by importance
+  per engine line 319).
+
+Wrapper-layer validation harness at `tools/_rf_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness):** Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_random_forest.py` at
+`_reference_random_forest` lines 175-244 mirrors engine
+`random_forest_forecast.run()` pipeline at engine lines 183-433
+verbatim — same NaN handling, same feature engineering, same
+hyperparameters at Balanced preset, same TimeSeriesSplit CV, same
+multi-step recursive forecast. No external library reference (e.g.,
+R `randomForest` package) — sklearn is canonical; both arms invoke
+same sklearn primitives at identical call sites with identical seeds
+producing identical RandomForestRegressor fit objects.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 5 primary metrics: 12-step forecast
+values + top-15 sorted feature importances + train_rmse + train_r2
++ cv_rmse; n=200 AR(1) DGP + Balanced preset + seed=42 at runner
+CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S62 Code Step 6
+empirical verification.
+**Audit script:** `tools/reference_parity/harness/checks/p3_random_forest.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+abbreviated `_fit_predict` helper instantiating
+`RandomForestRegressor(n_estimators=100, max_depth=6,
+min_samples_leaf=5)` directly with hardcoded Fast-preset
+hyperparameters in BOTH arms — degenerate self-parity bypassing
+engine code path per inventory verification methodology revision-2
+Cat 3 DEGENERATE-VACUOUS classification).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 1/17
+close; post-triage classification confirmation; combined harness
+rewrite + §2.5 entry commit per Tier 2 incremental forward-amendment
+pattern).
+**Primary metrics (math layer):** 12-step recursive forecast values +
+top-15 sorted feature importances + in-sample `train_rmse` +
+`train_r2` + cross-validated `cv_rmse` (3-fold TimeSeriesSplit).
+
+**Source files (Cat 3 remediation post-rewrite):**
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  51-79 (DGP generator `_generate_ar_dgp` at n=200, AR(1) phi=0.6,
+  sigma=1.0; identical fixture shape to S21 adf_test + p3_kpss etc.)
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  88-138 (engine preset Balanced mirror `_ENGINE_BALANCED_PRESET` +
+  `_prepare_series_reference` NaN edge-strip + interior-interpolate
+  reimpl mirroring engine lines 35-55)
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  140-178 (engine `_create_features_reference` reimpl: lag features
+  1..n_lags + rolling mean/std features at rolling_windows + diff
+  feature + time index feature; mirrors engine lines 58-116)
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  180-211 (engine `_create_forecast_features_reference` recursive
+  multi-step feature builder; mirrors engine lines 119-165)
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  213-298 (engine `_reference_random_forest` end-to-end pipeline:
+  prepare_series + create_features + RandomForestRegressor.fit +
+  TimeSeriesSplit CV + recursive multi-step forecast at Balanced
+  preset hyperparameters; mirrors engine `run()` body verbatim)
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  300-394 (harness TSL arm `run_tsl` invokes engine via RunContext +
+  extracts forecast values from `Forecast` table col[1] + feature
+  importances from `Feature Importance` table col[1] + train/CV
+  metrics from `audit_fields`)
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  396-411 (harness reference arm `run_reference` invokes
+  `_reference_random_forest` at identical Balanced preset config)
++ `tools/reference_parity/harness/checks/p3_random_forest.py` lines
+  413-471 (compare() with engine output-rounding alignment per Phase
+  1 finding B8: 6-decimal forecast rounding + 4-decimal audit metric
+  rounding on REF side)
++ `engine/techniques/random_forest_forecast.py` lines 19-32 (engine
+  `_PRESET_CONFIG` Fast/Balanced/Thorough hyperparameter preset
+  dispatch; Balanced default at lines 24-27)
++ `engine/techniques/random_forest_forecast.py` lines 35-55 (engine
+  `_prepare_series` Layer 2 NaN edge-strip + interior linear-
+  interpolate; identical handling validated via Check 1 wrapper-layer
+  3-check)
++ `engine/techniques/random_forest_forecast.py` lines 58-116 (engine
+  `_create_features` Layer 2 feature engineering: lag + rolling
+  mean/std + diff + time index)
++ `engine/techniques/random_forest_forecast.py` lines 119-165 (engine
+  `_create_forecast_features` Layer 2 recursive multi-step feature
+  builder)
++ `engine/techniques/random_forest_forecast.py` lines 168-433 (engine
+  `run()` body: end-to-end Random Forest forecast pipeline; harness
+  reference arm `_reference_random_forest` mirrors this verbatim
+  modulo audit_fields construction + interpretation builder + plain
+  English summary which are presentation-layer only)
++ no separate audit markdown report; empirical baseline reference is
+  the runner CLI PASS verdict at this commit + Cat 3 remediation
+  cycle session 1/17 close
+
+**Validation claim scope (Cat 3 remediation cycle session 1/17 post-
+rewrite; engine code path EXERCISED via RunContext at math layer):**
+Per Code S62 Step 4 empirical verification:
+
+- **Layer 1 (Random Forest math at sklearn primitive + engine feature
+  engineering pipeline) VALIDATED at Tier II.bit-exact at engine
+  output-rounding floor:** Engine `random_forest_forecast` Layer 1
+  math + `p3_random_forest` harness TSL arm both invoke engine code
+  path via RunContext (post-rewrite); reference arm `_reference_
+  random_forest` invokes identical sklearn primitives at identical
+  hyperparameters + identical preprocessing pipeline at IDENTICAL call
+  sites. Bit-exact PASS at deterministic seed (random_state=42); 0.0
+  abs diff on forecast values + feature importances + train/CV
+  metrics. **Layer 1 PASS bit-exact empirically grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via interior
+  linear interpolation; preset config dispatch returns expected 3-
+  table structure + audit_fields with all 24 expected keys; output
+  shape/type verification confirms numeric outputs across all tables.
+  Layer 2 paths NOT covered by 3 checks (multi-step recursive
+  forecast accumulation + interpretation builder + plain English
+  summary + audit_fields construction) remain expert-review-required
+  per pre-S49 scope.
+
+**Phase 3 algorithmic basis (extracted from engine module):** Random
+Forest regression per Breiman (2001) "Random Forests" Machine
+Learning 45:5-32. Bagged decision trees with bootstrap-sample
+training + per-split random-subset feature consideration; ensemble
+prediction via mean of tree outputs. sklearn's
+`ensemble.RandomForestRegressor` is the canonical Python
+implementation; R `randomForest::randomForest` (Liaw + Wiener 2002)
+is the canonical R implementation. Engine wrapper adds time-series-
+specific feature engineering (lag features 1..n_lags + rolling
+mean/std at multiple windows + first-difference + normalized time
+index) producing a tabular regression problem from a univariate
+series. Forecast is recursive multi-step via sequential prediction-
+update of lag features.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session 1/17
+post-rewrite):**
+
+- Math-layer harness validates engine code path EXERCISED via
+  RunContext (post-rewrite Category 1 LEGITIMATE per Cat 3 remediation
+  cycle session 1/17). Pre-rewrite harness was Category 3 DEGENERATE-
+  VACUOUS — abbreviated `_fit_predict` helper instantiated
+  `RandomForestRegressor(n_estimators=100, max_depth=6,
+  min_samples_leaf=5)` directly with hardcoded Fast-preset
+  hyperparameters in BOTH arms, bypassing engine wrapper's preset
+  resolution + NaN handling + multi-feature engineering + recursive
+  multi-step forecast pipeline. Post-rewrite: harness math layer
+  validates the FULL engine pipeline at Balanced preset.
+- Engine output rounding floor (Phase 1 finding B8): forecast values
+  rounded to 6 decimals at engine line 326; feature importances +
+  train/CV metrics rounded to 4 decimals at engine lines 320 +
+  339-343. compare() rounds REF outputs to match display precision;
+  parity claim is bit-exact AT POST-ROUNDING display precision (sub-
+  rounding-floor precision not surfaced at parity layer).
+- sklearn `RandomForestRegressor` determinism depends on
+  `random_state` parameter; engine passes `random_state=ctx.seed`
+  ensuring deterministic forest construction at fixed seed. Triage
+  close empirically confirmed bit-exact reproducibility across
+  consecutive runs at seed=42 (max_abs_diff=0.0 across all
+  audit_fields + table outputs).
+- TimeSeriesSplit CV split count derivation `n_splits = min(3,
+  max(2, len(X) // 20))` is data-length-dependent; for n=200 fixture,
+  `n_splits=3` consistently. For other fixture sizes the CV split
+  count differs; not separately validated.
+- Engine CV model uses `n_estimators = max(50, n_estimators // 2)`
+  (engine line 280) producing 100 trees in CV vs 200 in main fit; CV
+  RMSE accordingly slightly lower precision than train RMSE (~50%
+  ensemble size).
+
+**Phase 3 boundary of validity (extracted from harness DGP + fixture
+parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1) phi=0.6 + sigma=1.0; smaller
+  T may have insufficient training samples after lag warmup; larger T
+  not validated; other DGP regimes not validated at parity layer
+- Horizon=12 fixed at harness `HORIZON` class attribute; alternative
+  horizons (engine default `horizon=12` matches) not separately
+  validated
+- Balanced preset config (n_estimators=200 + max_depth=10 +
+  min_samples_leaf=3 + n_lags=12 + rolling_windows=[3, 6, 12])
+  validated; Fast (smaller ensemble + fewer lags) + Thorough (larger
+  ensemble + more lags) presets NOT in parity scope at math layer;
+  wrapper-layer 3-check covers Balanced preset invocation
+- Univariate series only; no exogenous regressor support in engine
+  scope
+- AR(1) DGP-specific; non-linear DGP (e.g., regime-switching, AR
+  with trend, structural breaks) NOT in parity scope
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at math
+  layer (only Balanced); wrapper-layer 3-check at Check 2 covers
+  Balanced preset invocation only
+- Multi-step recursive forecast accumulation logic at engine lines
+  300-310 validated implicitly via end-to-end PASS; isolated forecast-
+  feature-update logic NOT separately unit-validated
+- sklearn `random_state` propagation to TimeSeriesSplit CV
+  sub-models verified via empirical bit-exact match; engine code
+  passes same `ctx.seed` to all sub-models per engine lines 256 +
+  283 — institutionally robust
+- OOB score reporting (engine line 346) NOT in audit_fields and NOT
+  in parity scope (engine reports "N/A" since `oob_score=False`
+  default in sklearn invocation at engine line 252)
+- Feature importance computation method (Gini/mean-decrease-impurity
+  per sklearn default) NOT explicitly documented in engine code;
+  inherited from sklearn default
+- `n_jobs=-1` engine setting (use all available cores) may produce
+  identical results across runs at fixed seed but is not formally
+  thread-deterministic per sklearn documentation; triage close
+  empirically confirmed bit-exact match at seed=42 across consecutive
+  runs
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor per
+S62 / Cat 3 remediation cycle session 1/17):** Layer 1 Random Forest
+math validated bit-exact at machine precision at deterministic seed
+post-rewrite via RunContext invocation of engine code path.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS. Layer
+2 engine wrapper orchestration paths NOT covered by 3-check (multi-
+step recursive forecast accumulation + interpretation builder +
+plain English summary + audit_fields construction) require expert
+review for any published output sensitivity beyond Layer 1 + 3-check
+scope.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework:**
+
+- **Validated configuration (harness math layer):** engine code path
+  EXERCISED via RunContext at Balanced preset (n_estimators=200 +
+  max_depth=10 + min_samples_leaf=3 + n_lags=12 + rolling_windows=[3,
+  6, 12]); horizon=12; seed=42.
+- **Engine preset default (Balanced):** all parameters match validated
+  configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 218.
+- **Configuration match:** **YES** — user invoking at default Balanced
+  preset experiences mathematically validated Layer 1 surface.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer (only Balanced); validated at wrapper-
+  layer 3-check Check 2 (Balanced preset invocation only). Alternative
+  horizons + non-AR(1) DGP regimes not in parity scope.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+1/17 — FIRST session of cycle):** Inventory verification commit
+12d3785 classified p3_random_forest as Cat 3 DEGENERATE-VACUOUS per
+refined methodology revision-2 (pre-rewrite harness `_fit_predict`
+helper hardcoded Fast-preset hyperparameters + minimal lag-only
+features bypassing engine pipeline at Balanced preset + multi-
+feature engineering + recursive multi-step forecast). Triage close
+at HEAD a7746f1 confirmed Cat 3 (bit-exact deterministic at fixed
+seed; rewrite feasible). This §2.5 entry closes the remediation
+cycle session 1/17 via combined harness rewrite + entry forward-
+amendment per Tier 2 incremental pattern from ratified plan-mode
+disposition.
+
+**Block 7 ML / Deep Learning open milestone:** S62 random_forest is
+FIRST §2.5 entry within Block 7 ML / Deep Learning catalog block —
+Block 7 opens per Cat 3 remediation cycle dispatch + Tier A tree-
+family sequential remediation ordering per triage close. Block 7
+catalog ordering (Tier A → Tier B → Tier C → Tier D per triage close
+recommendation): random_forest (THIS ENTRY S62) + gradient_boosting
+(S63) + xgboost (S64) + lightgbm (S65) + svr (S66) +
+quantile_regression (S67) — Tier A close; transfer_function
+(S68/Tier B specialized) + gp (S70/Tier C) + prophet (S71) + esn
+(S72) + autoencoder (S73/Tier D DL) + lstm_gru (S74) + tcn (S75) +
+nbeats (S76) + nhits (S77 — final cycle entry).
+
+## §3 Unvalidated catalog techniques (38 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -23634,8 +23932,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (14 unvalidated; transformer_forecast attention-capture validated separately)
-`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `random_forest_forecast`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
+### ML / Deep Learning (13 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ S62 Cat 3 remediation cycle session 1/17)
+`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
