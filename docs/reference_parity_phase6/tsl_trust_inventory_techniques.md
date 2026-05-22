@@ -22270,7 +22270,273 @@ at S57. Per-block engine-bug surfacing at S54 (analytic-vs-simulation
 forecast routing) demonstrates the audit instrument's diagnostic
 value beyond pure parity validation.
 
-## §3 Unvalidated catalog techniques (43 entries; ID-only enumeration)
+### robust_estimators (Phase 7+ S58; THIRTY-SECOND §2.5 entry; FIRST Evaluation / Uncertainty block entry — Block 4 opens per user day-job leverage prioritization; selected per technique-complexity-ascending precedent — closed-form M-estimator math is simplest in block; explicitly enumerated in scope_reframing §122-131 12-wrapper Tier II.bit-exact list)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact — Phase 3 cross-package bit-exact parity validated
+(Pattern A.2 per scope_reframing §2 line 130; `p3_robust_estimators`
+**explicitly enumerated within the 12-wrapper Tier II.bit-exact
+scope** per scope_reframing §127-131 verbatim: "p3_adf, p3_ccf,
+p3_classical_decompose, p3_denton_chowlin, p3_dtw, p3_fft_spectrum,
+p3_granger, p3_kpss, p3_pca, p3_robust_estimators, p3_var,
+p3_vecm"). Python `scipy.stats.trim_mean` + `scipy.stats.mstats.winsorize`
++ custom MAD/Qn via numpy versus R `robustbase::Qn` + R `stats::mad`
+(plus same-library self-test on scipy primitives for trim/winsor
+trimming-logic). Tolerance ladder primary abs_tol 1e-10 + rel_tol
+1e-10 + block_abs_tol 1e-6 + block_rel_tol 1e-6 (machine precision
+territory per closed-form arithmetic). Verdict class: `closed_form`
+per `p3_robust_estimators.py:RobustEstimatorsParity.verdict_class
+= "closed_form"` declaration; "trimmed mean, winsorized mean, MAD,
+and Qn are closed-form arithmetic on sorted/sliced data. scipy.stats
+and R stats::mad / robustbase::Qn implement identical formulae with
+identical consistency factors (1.4826 for MAD; 2.2219 for Qn).
+Bit-exact at machine precision expected modulo subprocess CSV
+roundtrip noise" per verdict_class_rationale lines 50-58 verbatim.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
+math-layer mapping + wrapper-layer validation extension):**
+robust_estimators is 1:1 catalog↔wrapper mapping per
+`p3_robust_estimators` harness Wrapper field
+(`engine/techniques/robust_estimators.py` sole engine module).
+Single-layer math-layer mapping per Code S58 Step 0 empirical
+verification: engine `run()` math layer uses `scipy.stats.trim_mean`
++ `scipy.stats.mstats.winsorize` + numpy-based MAD/Qn at engine
+lines 36-97 with consistency factors 1.4826 (MAD) and 2.2219 (Qn).
+Harness TSL arm (`p3_robust_estimators.py:run_tsl` lines 66-97
+sourced empirically) replicates the engine math directly via
+scipy.stats primitives + custom MAD/Qn — both arms use scipy
+primitives for trim/winsor (same-library Pattern A.1 sub-mechanism
+within Pattern A.2 cross-package framing). Reference arm invokes
+R `robustbase::Qn` + R `stats::mad` for cross-package validation
+of MAD + Qn. **HYBRID Pattern A.1 + A.2 framing per S58 first-
+instance observation:** trim_mean + winsorized_mean validated via
+Pattern A.1 same-library scipy primitive self-test; MAD + Qn
+validated via Pattern A.2 cross-package vs R robustbase + R
+stats::mad. No §4.7.A harness-bypasses-engine or harness-reimplements-
+engine-math pattern present. §1.9 filename divergence sub-pattern
+variant NOT MANIFESTED at S58.
+
+**Reference:** R `robustbase::Qn` + R `stats::mad` (R 4.5.3 + robustbase
+0.99-x per Phase 5 Session 5 selective re-validation context) for
+MAD + Qn cross-package validation; Python `scipy.stats.trim_mean`
++ `scipy.stats.mstats.winsorize` (same-library self-test) for
+trim_mean + winsorized_mean. Pattern A.2 cross-package primary
+framing for MAD + Qn (the two estimators with truly external
+references); Pattern A.1 same-library sub-mechanism for trim_mean
++ winsorized_mean (TSL engine and reference arm both call scipy
+primitives directly).
+**Verdict (math layer):** PASS Pattern A.2 bit-exact at machine
+precision per Phase 3 Session 8 close (Phase 3 Batch 8; verdict_class
+closed_form bit-exact at 1e-10 abs).
+**Verdict (wrapper layer):** PASS 3/3 checks per S58 Code Step 2
+empirical verification at `tools/_s58_robust_estimators_wrapper_check.py`.
+**Audit script:** `tools/reference_parity/harness/checks/p3_robust_estimators.py`
+**Audit date:** 2026-04-29 (Phase 3 Batch 8 close per S8)
+**Primary metrics (math layer):** trimmed_mean (at trim_fraction=0.10)
++ winsorized_mean (at winsor_fraction=0.10) + MAD (with 1.4826
+consistency factor) + Qn (with 2.2219 consistency factor); T=200
+heavy-tailed fixture (`_generate_robust_dgp(n=200, outlier_frac=0.05)`
+per Phase 3 harness lines 31-39).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 NaN values
+  at indices [10, 50, 100, 150, 175] of n=200 heavy-tailed series.
+  Wrapper returns non-error response; emits warning ("5 missing
+  values excluded from calculations.") per engine drop-NaN semantics
+  (engine lines 117-121: `clean = values[~np.isnan(values)]`).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `trim_fraction=0.10` + `winsor_fraction=0.10`;
+  returned 3 expected tables (`Location Estimators` + `Scale
+  Estimators` + `Diagnostics`) + `audit_fields` populated.
+- **Check 3 — Output shape/type verification:** PASS. All 3 tables
+  contain numeric output values; `audit_fields` populated with keys
+  including `n_valid` + `classical_mean` + `median` + `trimmed_mean`
+  + `trim_fraction` + `winsorized_mean`. Audit_fields structure
+  confirms robust-estimator-specific tracking (4 estimator outputs
+  + parameter tracking).
+
+Wrapper-layer validation harness at
+`tools/_s58_robust_estimators_wrapper_check.py` (transient
+verification artifact; not retained in production codebase).
+
+**Source files (single-layer math + 3-check wrapper layer per S58
+framing):**
+`tools/reference_parity/harness/checks/p3_robust_estimators.py`
+lines 31-39 (`_generate_robust_dgp` fixture generator: heavy-tailed
+N(0,1) with 5% extreme outliers at magnitude 5-15 sigma)
++ `tools/reference_parity/harness/checks/p3_robust_estimators.py`
+lines 42-97+ (RobustEstimatorsParity wrapper class; declares
+`closed_form` verdict class with consistency-factor-explicit
+rationale; run_tsl replicates engine math via scipy.stats primitives
++ numpy MAD/Qn; run_reference invokes R robustbase::Qn + stats::mad
+for MAD + Qn cross-package + scipy self-test for trim/winsor)
++ `engine/techniques/robust_estimators.py` lines 36-97 (Layer 1
+math: scipy.stats.trim_mean + scipy.stats.mstats.winsorize + custom
+MAD/Qn with consistency factors 1.4826 (MAD) and 2.2219 (Qn))
++ `engine/techniques/robust_estimators.py` lines 68-97 (Qn pairwise
+absolute differences computation; capped at n=2000 with subsample
+for O(n²) performance; h-th order statistic of all pairwise
+differences scaled by 2.2219)
++ `engine/techniques/robust_estimators.py` lines 100-200+ (Layer 2
+engine-only: NaN drop-row handling + n>=5 validation + preset
+config dispatch (Fast/Balanced = single 0.10 fraction; Thorough =
+sweep over [0.05, 0.10, 0.15, 0.20, 0.25]) + Location Estimators
+table + Scale Estimators table + Diagnostics table + audit_fields
+construction + interpretation builder)
++ `engine/techniques/robust_estimators.py` lines 148-160 (CAI
+Phase 2 Session 21 fix F-EU-RE-TRIM: explicit range gate on
+trim_fraction in (0, 0.5); pre-fix invalid fractions silently
+defaulted to 0.10)
++ `engine/techniques/registry.py` (catalog routing; robust_estimators
+→ techniques.robust_estimators single module)
+
+**Validation claim scope (SINGLE-LAYER math + 3-check wrapper layer
+per S58 framing; HYBRID Pattern A.1 + A.2 reference framing per
+S58 first-instance observation):** Per Code S58 Step 0-2 empirical
+verification:
+
+- **Layer 1 (closed-form robust estimator arithmetic via scipy.stats
+  + custom MAD/Qn) VALIDATED at Tier II.bit-exact:** robust_estimators
+  engine math layer + p3_robust_estimators harness TSL arm BOTH
+  invoke the SAME scipy.stats.trim_mean + scipy.stats.mstats.winsorize
+  for trim_mean + winsorized_mean (Pattern A.1 same-library sub-
+  mechanism). MAD + Qn validated against R robustbase::Qn + stats::mad
+  cross-package (Pattern A.2). Per Session 8 empirical baseline +
+  closed_form verdict class: scipy.stats and R stats::mad /
+  robustbase::Qn implement identical formulae with identical
+  consistency factors (1.4826 for MAD; 2.2219 for Qn); bit-exact
+  at machine precision modulo subprocess CSV roundtrip noise.
+  **Layer 1 PASS bit-exact empirically grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ NEW 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via drop-NaN
+  semantics (warning emitted); preset config dispatch returns
+  expected 3-table structure + audit_fields with robust-estimator-
+  specific parameter tracking; output shape/type verification
+  confirms numeric outputs across all tables. Layer 2 paths NOT
+  covered by 3 checks (Thorough preset trim/winsor fraction sweep
+  + Diagnostics table derivation + interpretation builder + Qn
+  pairwise-differences subsampling at n>2000 + range-gate validation
+  per F-EU-RE-TRIM fix) remain expert-review-required.
+
+**Phase 3 algorithmic basis (extracted from harness + Session 8):**
+Four robust location/scale estimators:
+- **Trimmed mean** (Tukey 1948): mean of central (1−2α)·n observations
+  after trimming α-fraction from each tail; closed-form per scipy
+  `trim_mean`
+- **Winsorized mean** (Dixon 1960): mean of series with α-fraction
+  tails replaced by the α-quantile values; closed-form per scipy
+  `mstats.winsorize`
+- **Median Absolute Deviation (MAD)**: median(|x_i − median(x)|)
+  scaled by 1.4826 (normal consistency factor); standard robust
+  scale estimator
+- **Qn scale estimator** (Rousseeuw & Croux 1993): h-th order
+  statistic of all pairwise absolute differences |x_i − x_j| (i<j)
+  scaled by 2.2219; h = choose(floor(n/2)+1, 2); high breakdown
+  point (50%) and efficient at Gaussian (82% asymptotic relative
+  efficiency vs std)
+
+All four are closed-form arithmetic given sorted/sliced data; bit-
+exact at machine precision when consistency factors match across
+implementations.
+
+**Phase 3 known failure modes (Session 8 + tolerance ladder
+justification):**
+
+- Qn O(n²) pairwise-differences computation: engine subsamples
+  to n=2000 with `np.random.default_rng(42)` for n > 2000 (engine
+  lines 73-78); performance vs accuracy trade-off; subsampling is
+  deterministic at fixed seed but introduces stochasticity at the
+  Qn estimator output relative to the full O(n²) calculation
+- Consistency factors hardcoded: 1.4826 for MAD + 2.2219 for Qn;
+  both implementations must use identical constants for bit-exact
+  parity (Phase 3 audit confirms both arms use these values)
+- Range gate on trim_fraction (0, 0.5) per F-EU-RE-TRIM Session 21
+  fix; user-supplied fractions outside (0, 0.5) reject with explicit
+  error (pre-fix silently defaulted to 0.10)
+- NaN drop semantics: removed via `clean = values[~np.isnan(values)]`
+  at engine line 118; alternative imputation strategies (mean/median
+  fill) NOT in engine scope
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with 5% outlier injection; smaller
+  T (n < 5) rejected by engine error gate
+- Heavy-tailed N(0,1) + extreme outliers at 5-15 sigma magnitude
+  per harness `_generate_robust_dgp`; other DGP regimes (skewed,
+  bimodal, heteroskedastic) NOT validated at parity layer
+- Standard trim_fraction = 0.10 and winsor_fraction = 0.10 baseline
+  validated; alternative fractions in (0, 0.5) NOT in parity scope
+  (Thorough preset sweeps [0.05, 0.10, 0.15, 0.20, 0.25] but parity
+  audit fixture uses 0.10 only)
+- Qn estimator at n=200 within the no-subsampling regime (n ≤ 2000);
+  Qn behavior at n > 2000 (subsampling regime) NOT in parity scope
+
+**Phase 3 gap markings:**
+
+- Qn O(n²) subsampling regime (n > 2000) NOT validated for bit-
+  exact parity — subsampling introduces seed-dependent stochasticity
+  even at deterministic seed
+- Thorough preset trim/winsor fraction sweep NOT validated against
+  external reference — only single 0.10 fraction baseline at parity
+  audit
+- NaN drop-row semantics validated; alternative imputation strategies
+  NOT in engine scope (out-of-scope by design)
+- Diagnostics table derivation NOT covered by 3-check wrapper-layer
+  validation
+- Layer 2 engine wrapper orchestration paths NOT covered by 3-check
+  wrapper-layer validation (preset config dispatch + interpretation
+  builder + audit_fields construction + range-gate validation)
+  require expert review
+- DGP boundary conditions (skewed/bimodal/heteroskedastic distributions)
+  NOT validated — Phase 3 audit uses heavy-tailed N(0,1) + extreme
+  outliers fixture only
+
+**Status (Tier II.bit-exact PASS per S58):** Layer 1 closed-form
+robust estimator math validated bit-exact at machine precision per
+Phase 3 Session 8 + Phase 5 Session 5 selective re-validation.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS. Layer
+2 engine wrapper orchestration paths (Thorough preset sweep +
+Diagnostics table + interpretation builder + Qn subsampling regime
++ range-gate validation) require expert review.
+
+**EVALUATION / UNCERTAINTY BLOCK OPEN MILESTONE (Block 4 opens at
+S58):** S58 robust_estimators is the FIRST Q1 §2.5 entry within the
+Evaluation / Uncertainty catalog block per user day-job leverage
+prioritization disposition (evaluation toolkit applies to all
+forecasting work at any desk). 4 remaining unvalidated entries in
+block (block_bootstrap + conformal_intervals + forecast_combination
++ rolling_origin_cv); block-level status now "in progress".
+Heterogeneous Tier-surface variant observation expected per block:
+robust_estimators (S58) Tier II.bit-exact closed-form; bootstrap-
+based methods (block_bootstrap + conformal_intervals) likely Tier
+V Pattern J at bootstrap-randomization scope or Tier IV Pattern
+A.3 paper-formula; rolling_origin_cv likely Tier II.bit-exact at
+mechanical-split + metric-computation scope; forecast_combination
+likely Tier II.bit-exact closed-form for simple/weighted averages
+with potential Tier V overlay for more complex Bates-Granger or
+ML-based combination methods.
+
+**Trigger-vs-catalog reconciliation note (S58 first-instance
+observation):** S58 trigger recommended `diebold_mariano` as the
+canonical forecast-comparison baseline entry for this block. **The
+catalog does NOT contain `diebold_mariano` as an Evaluation /
+Uncertainty entry** — the 5 unvalidated entries are
+`block_bootstrap` + `conformal_intervals` + `forecast_combination`
++ `robust_estimators` + `rolling_origin_cv` (per §3 enumeration at
+S58 Step 0 read). The Evaluation / Uncertainty catalog block is
+oriented around **uncertainty quantification + cross-validation +
+resampling** methodologies rather than forecast-comparison test
+statistics (DM, MZ, PT). Forecast-comparison tests may be a
+separate sub-block at the larger catalog level (e.g., within
+Forecasting Classical or as a hypothetical future block) but are
+not currently in scope. Selection of robust_estimators at S58
+followed technique-complexity-ascending precedent + cleanest tier
+classification heuristic (explicit enumeration in scope_reframing
+§122-131 12-wrapper Tier II.bit-exact list).
+
+## §3 Unvalidated catalog techniques (42 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -22299,8 +22565,8 @@ descriptions, summaries).
 ### Decomposition & Seasonal Adjustment (0 unvalidated; Block 3 FULLY Q1-AMENDED — FOURTH catalog block to complete per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; classical_decompose moved to §2.5 per Phase 7+ S31; mstl_decompose moved to §2.5 per Phase 7+ S32; stl_decompose moved to §2.5 per Phase 7+ S33; x13_seasonal_adjust moved to §2.5 per Phase 7+ S34 — FOURTH-AND-FINAL Block 3 entry)
 (all 4 techniques moved to §2.5)
 
-### Evaluation / Uncertainty (5 unvalidated)
-`block_bootstrap`, `conformal_intervals`, `forecast_combination`, `robust_estimators`, `rolling_origin_cv`
+### Evaluation / Uncertainty (4 unvalidated; robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens)
+`block_bootstrap`, `conformal_intervals`, `forecast_combination`, `rolling_origin_cv`
 
 ### Forecasting (Classical) (8 unvalidated)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
@@ -22329,7 +22595,7 @@ descriptions, summaries).
 ### Volatility / Risk / Tails (0 unvalidated; Block 13 FULLY Q1-AMENDED — SEVENTH catalog block to complete per Q1 work program scope at S57 close = 7 of 13 catalog blocks fully Q1-amended (54% catalog block-level completion); stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately + garch moved to §2.5 per Phase 7+ S53 — FIRST Volatility / Risk / Tails block entry; Block 13 opens; egarch moved to §2.5 per Phase 7+ S54 — SECOND block entry; FIRST Tier V Pattern J B.2 overlay entry within block; Pattern J B.2 SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework; engine forecast-method routing fix at commit fffb425 unblocked wrapper-layer check 3; gjr_garch moved to §2.5 per Phase 7+ S55 — THIRD block entry; Pattern J B.2 SCOPE REFINEMENT per outcome (ii); har_rv moved to §2.5 per Phase 7+ S56 — FOURTH block entry; FIRST HAR-family entry at Tier II.bit-exact closed-form OLS per Corsi 2009; har_cj moved to §2.5 per Phase 7+ S57 — FIFTH-AND-FINAL block entry; SECOND HAR-family entry at Tier IV Pattern A.3 paper-formula self-parity per ABD 2007 with BNS jump-detection decomposition)
 (all 5 techniques moved to §2.5)
 
-**Total: 43 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53+S54+S55+S56+S57 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch + egarch + gjr_garch + har_rv + har_cj moved to §2.5; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails FULLY Q1-AMENDED at S57 close — SEVENTH catalog block fully Q1-amended (7 of 13 = 54% catalog block-level completion); 5-sub-session arc S53-S57 complete: opens at S53 (garch); advances at S54 (egarch + Pattern J B.2 second-observation tightening + engine forecast-method routing fix fffb425); advances at S55 (gjr_garch + Pattern J B.2 scope refinement); advances at S56 (har_rv); COMPLETES at S57 (har_cj). Heterogeneous Tier-surface within Block 13: Tier II.mle-band ×3 + Tier V Pattern J B.2 overlay ×1 + Tier II.bit-exact ×1 + Tier IV Pattern A.3 ×1 = 4 distinct Tier characterizations across 5 sub-sessions**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
+**Total: 42 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53+S54+S55+S56+S57+S58 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch + egarch + gjr_garch + har_rv + har_cj + robust_estimators moved to §2.5; **Block 4 Evaluation / Uncertainty OPENED at S58 — FIRST entry robust_estimators validated per technique-complexity-ascending precedent + scope_reframing §122-131 explicit Tier II.bit-exact enumeration; 4 remaining unvalidated entries in block (block_bootstrap + conformal_intervals + forecast_combination + rolling_origin_cv)**; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails FULLY Q1-AMENDED at S57 close — SEVENTH catalog block fully Q1-amended (7 of 13 = 54% catalog block-level completion); 5-sub-session arc S53-S57 complete: opens at S53 (garch); advances at S54 (egarch + Pattern J B.2 second-observation tightening + engine forecast-method routing fix fffb425); advances at S55 (gjr_garch + Pattern J B.2 scope refinement); advances at S56 (har_rv); COMPLETES at S57 (har_cj). Heterogeneous Tier-surface within Block 13: Tier II.mle-band ×3 + Tier V Pattern J B.2 overlay ×1 + Tier II.bit-exact ×1 + Tier IV Pattern A.3 ×1 = 4 distinct Tier characterizations across 5 sub-sessions**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
 
 ## §4 How to use this document
 
