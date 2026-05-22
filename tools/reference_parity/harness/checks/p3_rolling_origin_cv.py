@@ -182,9 +182,19 @@ class RollingOriginCvParity(P3ParityCheck):
         self, tsl: dict[str, Any], ref: dict[str, Any],
     ) -> ParityResult:
         ladder = get_ladder(self.technique_id)
+        # TSL output-rounding floor: engine rounds MAE to 4 decimals
+        # at table column 4 per engine line 212 (`round(mae_val, 4)`).
+        # Round REF to match the display precision the user sees;
+        # parity is asserted at the precision actually exposed to
+        # downstream consumers. Per Phase 1 finding B8 precedent
+        # (p3_har_rv handles same pattern via direct lstsq bypass;
+        # this harness invokes the wrapper directly so the rounding
+        # floor must be matched on the reference side instead).
+        ref_per_fold_mae_rounded = np.round(ref["per_fold_mae"], 4)
         primary = {
             "per_fold_mae": _compare_vector(
-                tsl["per_fold_mae"], ref["per_fold_mae"], ladder["primary"],
+                tsl["per_fold_mae"], ref_per_fold_mae_rounded,
+                ladder["primary"],
             ),
         }
         statuses = [primary[k]["status"] for k in primary]
