@@ -21965,7 +21965,312 @@ builder) require expert review. Realized variance series construction
 (upstream of HAR-RV input) NOT in scope of parity audit — strategist
 responsible for realized-variance estimation methodology choice.
 
-## §3 Unvalidated catalog techniques (44 entries; ID-only enumeration)
+### har_cj (Phase 7+ S57; THIRTY-FIRST §2.5 entry; FIFTH-AND-FINAL Volatility / Risk / Tails block entry — Block 13 FULLY Q1-AMENDED milestone REACHED at S57 close = 7 of 13 catalog blocks fully Q1-amended (54% catalog block-level completion); SECOND HAR-family entry; Tier IV Pattern A.3 paper-formula self-parity per ABD 2007)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier IV
+Pattern A.3 — Phase 3.5 self-parity / paper-formula validated
+(Pattern A.3 per scope_reframing §2 lines 159-168; from-scratch
+Python reimplementation per Andersen-Bollerslev-Diebold (2007) +
+Huang-Tauchen (2005) BNS jump-detection test). TSL `har_cj.py`
+validated against an internal paper-formula reimplementation that
+applies identical preprocessing (BNS z-statistic with `theta = (pi/2)²
++ pi − 5`; `max(TQ, BV²)` variance flooring; forward-Phi(1−alpha)
+z threshold; `J = max(RV − BV, 0)` on jump days else 0; `C = RV − J`;
+lagged-window regressors at 1/5/22 daily/weekly/monthly cascades;
+OLS via `np.linalg.lstsq`). Verdict class: `closed_form` per audit
+report (`tools/reference_parity/reports/3b_har_cj_audit.md` lines
+29-37 + 78-94 verbatim "OLS bitwise parity between TSL and reimpl
+is expected because both implementations apply the same [7-step
+pipeline]"). Tolerance ladder primary abs_tol 1e-6 + rel_tol 1e-6
+(TSL output-rounding floor at 6-decimal serialization; underlying
+OLS via `np.linalg.lstsq` is bitwise-identical between TSL and
+reimpl on identical inputs per LAPACK gelsd reproducibility). Per
+scope_reframing §159-168 Tier IV enumeration: explicit 5-wrapper
+list (p3_bocpd + p3_cusum_page_hinkley + p3_stl_esd + p3_wavelet_coherence
++ p3_ssa) is Phase 3 enumeration; har_cj is **Phase 3.5 wrapper
+(`3b_har_cj` audit ID; not `p3_*` prefix)** added per post-S6
+inference grounded at empirical mechanism (from-scratch paper-
+formula self-parity reimpl + closed-form OLS bit-exact at machine
+precision floored to 1e-6 by TSL output rounding); analogous to
+S18 gcc_phat_delay + S40 ssa + S42 wavelet_coherence_phase_lag
+post-S6 Tier IV addition precedents.
+
+**Framing precedent note (1:1 catalog↔wrapper; SINGLE-LAYER
+math-layer mapping + wrapper-layer validation extension; §4.7.A
+PRESENT variant 3 DEGENERATE DUAL-ARM sub-variant):** har_cj is
+1:1 catalog↔wrapper mapping per `3b_har_cj` audit Wrapper field
+(`engine/techniques/har_cj.py` sole engine module). Single-layer
+math-layer mapping per Code S57 Step 0 empirical verification:
+engine `run()` math layer implements BNS jump-detection + jump/
+continuous decomposition + 7-regressor HAR-CJ OLS; harness
+(`tools/reference_parity/harness/checks/har_cj.py`) implements
+from-scratch reimplementation of the SAME 7-step pipeline per ABD
+2007 + Huang-Tauchen 2005 specification — both arms mathematically
+identical (DEGENERATE DUAL-ARM sub-variant per S40 + S42 + S56
+precedent). §1.9 filename divergence sub-pattern variant NOT
+MANIFESTED at S57 — audit `har_cj.py` + engine `har_cj.py` (same
+filename; namespace separation via directory) + catalog `har_cj`
+consistent.
+
+**Reference:** From-scratch Python reimplementation per ABD 2007
+("Roughing It Up: Including Jump Components in the Measurement,
+Modeling, and Forecasting of Return Volatility" Review of Economics
+and Statistics) + Huang-Tauchen 2005 BNS jump-detection test. No
+external library reference (highfrequency R package not in scope
+of `3b_har_cj` audit — paper-formula self-parity sufficient at
+methodological strength given closed-form OLS arithmetic +
+deterministic BNS test). Pattern A.3 / Tier IV self-parity scope.
+**Verdict (math layer):** PASS at 1e-6 abs/rel TSL output-rounding-
+floor tolerance per Phase 3.5 audit close (coefficient vector max
+abs diff 4.359e-07; max rel diff 4.246e-02 driven by Intercept
+near-zero rel-scale at 8.6e-6 magnitude; all 7 coefficients PASS
+per audit lines 43-52 verbatim).
+**Verdict (wrapper layer):** PASS 3/3 checks per S57 Code Step 2
+empirical verification at `tools/_s57_har_cj_wrapper_check.py`.
+**Audit script:** `tools/reference_parity/harness/checks/har_cj.py`
+**Audit report:** `tools/reference_parity/reports/3b_har_cj_audit.md`
+**Audit date:** 2026-04-24 (Phase 3.5 audit; 8-wrapper allowlist
+analog at Phase 1/2 era extension).
+**Primary metrics (math layer):** beta_0 + 3 continuous-cascade
+coefficients (beta_cd + beta_cw + beta_cm) + 3 jump-cascade
+coefficients (beta_jd + beta_jw + beta_jm) = 7-vector + R² +
+residual sigma + continuous-persistence-sum + jump-persistence-sum
++ jump fraction (Phase 3.5 audit fixture: T=1500 + M=78 + jump
+prob ~5% per ABD 2007 fixture-shape).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 NaN values
+  at indices [25, 75, 150, 250, 350] in RV (paired BV preserved
+  non-NaN). Wrapper returns non-error response; emits warning ("5
+  rows with NaN in RV / BV / TQ dropped.") indicating drop-row
+  semantics on any-position NaN (engine lines 151-164). Distinct
+  from HAR-RV (S56) single-series drop semantics — HAR-CJ requires
+  paired RV + BV alignment, so any NaN in either series drops the
+  row.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `M=78` (intraday sampling frequency per
+  engine line 115-130 required parameter; no default since BNS
+  z-statistic depends on M) + `h_ahead=1`. Returned 5 tables
+  (`HAR-CJ Coefficients` + `Jump Detection Summary` + `Model Fit`
+  + `Residual Diagnostics` + `Fitted Values`) + `audit_fields`
+  populated.
+- **Check 3 — Output shape/type verification:** PASS. HAR-CJ
+  Coefficients table has 7 rows (intercept + 3 continuous-cascade
+  + 3 jump-cascade coefficients) all numeric in Estimate column;
+  audit_fields populated with HAR-CJ-specific parameter tracking
+  (series_name + model + use_log + daily_lag + weekly_lag +
+  monthly_lag).
+
+Wrapper-layer validation harness at
+`tools/_s57_har_cj_wrapper_check.py` (transient verification
+artifact; not retained in production codebase).
+
+**Source files (single-layer math + 3-check wrapper layer per S57
+framing):**
+`tools/reference_parity/harness/checks/har_cj.py` (Phase 3.5
+wrapper; from-scratch Python reimplementation of ABD 2007 + Huang-
+Tauchen 2005 BNS test; mathematically identical to engine math
+layer per DEGENERATE DUAL-ARM sub-variant)
++ `tools/reference_parity/reports/3b_har_cj_audit.md` (Phase 3.5
+audit report; PASS verdict per coefficient parity at 1e-6 abs/rel
+floor; R1 paper-validation sanity check confirms reimpl produces
+ABD-2007-consistent coefficients on synthetic-but-paper-shaped
+fixture)
++ `engine/techniques/har_cj.py` lines 1-56 (Layer 1 specification
+documentation: ABD 2007 HAR-CJ specification with 7-regressor
+cascade — intercept + continuous-daily + continuous-weekly +
+continuous-monthly + jump-daily + jump-weekly + jump-monthly;
+distinguishes from HAR-RV single-cascade per Corsi 2009)
++ `engine/techniques/har_cj.py` lines 77-300+ (Layer 1 + Layer 2:
+input validation requiring 2-3 series (RV + BV + optional TQ) +
+required M parameter; BNS jump detection with `theta = (pi/2)² +
+pi − 5` constant; `max(TQ, BV²)` variance flooring; forward-
+Phi(1−jump_alpha) z threshold at default 0.01; jump/continuous
+decomposition; lagged-window regressor construction; OLS via
+`np.linalg.lstsq`; bootstrap CI at Balanced + Thorough presets;
+audit_fields construction)
++ `engine/techniques/har_cj.py` lines 70-74 (preset config: Fast=no
+bootstrap + no residual diag; Balanced=500 bootstrap samples +
+residual diag; Thorough=2000 bootstrap samples + residual diag)
++ `engine/techniques/registry.py` (catalog routing; har_cj →
+techniques.har_cj single module)
+
+**Validation claim scope (SINGLE-LAYER math + 3-check wrapper layer
+per S57 framing):** Per Code S57 Step 0-2 empirical verification:
+
+- **Layer 1 (closed-form OLS on 7-regressor HAR-CJ cascade via
+  numpy.linalg.lstsq + BNS jump detection per ABD 2007 + Huang-
+  Tauchen 2005) VALIDATED at Tier IV Pattern A.3:** har_cj engine
+  math layer + Phase 3.5 audit harness BOTH implement the same
+  7-step pipeline (BNS z-statistic + variance flooring + z
+  threshold + J = max(RV−BV, 0) + C = RV−J + lagged-window
+  regressors + OLS lstsq). Reference is from-scratch Python
+  reimplementation per ABD 2007 specification (DEGENERATE DUAL-ARM
+  sub-variant). Per Phase 3.5 audit empirical baseline: coefficient
+  vector PASS at 1e-6 abs floor (max abs diff 4.359e-07; underlying
+  OLS bit-exact at LAPACK gelsd precision; observed divergence is
+  TSL output-rounding floor at 6-decimal serialization). **Layer
+  1 PASS bit-exact empirically grounded** at 1e-6 floor — true
+  underlying OLS is bitwise reproducible between engine and reimpl
+  on identical inputs.
+- **Wrapper layer (Layer 2 sample paths via S49+ NEW 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via drop-row
+  semantics on any-position NaN in paired RV + BV (+ optional TQ);
+  preset config dispatch returns expected 5-table structure with
+  HAR-CJ-specific Jump Detection Summary table + audit_fields with
+  HAR-CJ-specific parameter tracking; output shape/type verification
+  confirms 7-row coefficient table (intercept + 3 continuous-
+  cascade + 3 jump-cascade) all numeric. Layer 2 paths NOT covered
+  by 3 checks (TQ fallback approximation `BV²` with honest-disclosure
+  trigger per engine lines 183-187 + log-HAR variant (`use_log=True`)
+  + multi-step forecast (`h_ahead > 1`) + bootstrap CI computation
+  + Jump Detection Summary table derivation + Residual Diagnostics
+  + interpretation builder) remain expert-review-required.
+
+**Phase 3.5 algorithmic basis (extracted from audit + ABD 2007 +
+Huang-Tauchen 2005):** ABD 2007 HAR-CJ specification: decompose
+realized variance RV into continuous variation C (smooth diffusion
+component) and jump variation J via the Barndorff-Nielsen-Shephard
+(2004) bipower variation BV: `J_t = max(RV_t − BV_t, 0)` on days
+flagged as containing jumps by the BNS z-statistic, else `J_t = 0`;
+`C_t = RV_t − J_t`. Then fit 7-regressor HAR-family OLS:
+
+    y_t = beta_0
+        + beta_cd * C_{t-1} + beta_cw * avg_wk(C) + beta_cm * avg_mo(C)
+        + beta_jd * J_{t-1} + beta_jw * avg_wk(J) + beta_jm * avg_mo(J)
+        + epsilon_t
+
+Expected empirical finding per ABD 2007: jumps have near-zero
+persistence (beta_j coefficients small, often insignificant) while
+continuous volatility is highly persistent (Sigma beta_c ≈ 0.7-0.9).
+Strategist gets a direct read on whether realized volatility
+variation is driven by persistent continuous dynamics or transient
+jumps. BNS z-statistic uses Huang-Tauchen (2005) `theta = (pi/2)²
++ pi − 5` constant; jump-test threshold at forward-Phi(1−jump_alpha)
+quantile (default jump_alpha=0.01 → z=2.326).
+
+**Phase 3.5 known failure modes (audit + tolerance ladder
+justification):**
+
+- TSL output-rounding floor at 6-decimal serialization caps audit
+  precision at ~1e-6 abs even when underlying OLS is bitwise
+  identical between TSL and reimpl (LAPACK gelsd reproducibility
+  per audit lines 90-94 verbatim "numpy's lstsq uses SVD (LAPACK
+  gelsd) by default; on identical inputs, results are bitwise
+  reproducible across runs and processes on the same machine")
+- NaN handling: drop-row semantics on any-position NaN in paired
+  RV + BV (+ optional TQ); single NaN in either series drops the
+  row to preserve series alignment
+- TQ optional input — if absent, engine approximates TQ as BV²
+  with Tier 3 D2 honest-disclosure trigger per engine lines 183-187
+- M parameter required (no default); BNS z-statistic depends on M
+  (intraday sampling frequency); robust default not available
+  across asset classes / session lengths
+
+**Phase 3.5 boundary of validity (extracted from audit fixture +
+engine specification):**
+
+- T=1500 fixture per Phase 3.5 audit (`3b_har_cj_audit.md`); T_eff
+  = 1478 after monthly_lag=22 burn; smaller T may have identifiability
+  issues for the 7-parameter regression
+- M=78 (intraday sampling frequency) per audit fixture; alternative
+  M values would change BNS z-statistic scaling but should preserve
+  OLS bit-exact parity
+- DGP per ABD 2007 fixture-shape: AR(1) on log(C) with persistence
+  0.95; jumps injected on ~5% of days as Exp(0.5)·C; BV simulated
+  as C + 5% log-normal noise; TQ ≈ BV² + noise. Other process
+  specifications not validated at parity layer
+- jump_alpha=0.01 default (BNS test significance level); alternative
+  jump_alpha values change jump-detection threshold but should
+  preserve OLS bit-exact parity given identical decomposition between
+  TSL and reimpl
+- Standard daily/weekly/monthly lag specification (1/5/22) validated;
+  alternative lag specifications NOT in parity scope
+- Linear HAR-CJ specification validated; log-HAR variant
+  (`use_log=True`) NOT in parity scope (engine docstring warns
+  against log-HAR with HAR-CJ because J=0 days create log-space
+  spikes)
+- Single-period forecast (`h_ahead=1`) implied at parity layer;
+  multi-step `h_ahead > 1` forecasts NOT validated
+
+**Phase 3.5 gap markings:**
+
+- Log-HAR variant (`use_log=True`) NOT validated against external
+  reference (engine docstring explicitly warns against log-HAR for
+  HAR-CJ due to log-space spikes at J=0 days)
+- Multi-step forecast (`h_ahead > 1`) NOT in parity audit primary
+  metrics
+- Alternative jump-detection methods (threshold-based jump tests
+  beyond BNS) NOT validated
+- TQ approximation as BV² (engine fallback when user does not
+  supply TQ) NOT validated for sensitivity — engine surfaces honest-
+  disclosure trigger per D2 design decision but quantitative
+  sensitivity NOT in parity scope
+- Bootstrap-based confidence intervals (engine preset Balanced=500
+  + Thorough=2000 bootstrap samples) NOT validated against external
+  reference — bootstrap implementation is engine-internal
+- Realized variance + bipower variation series construction
+  (upstream of HAR-CJ inputs) NOT in scope of `3b_har_cj` audit —
+  strategist responsible for RV + BV + TQ estimation methodology
+  choice (sampling frequency, microstructure noise correction,
+  jump-robust estimators); BV constant `pi/2` is fundamental to
+  the BNS framework but BV computation itself is upstream
+- Layer 2 engine wrapper orchestration paths (TQ fallback + Jump
+  Detection Summary derivation + Residual Diagnostics + Fitted
+  Values + bootstrap CI + audit_fields construction + interpretation
+  builder) NOT covered by 3-check wrapper-layer validation; require
+  expert review
+
+**Status (Tier IV Pattern A.3 PASS per S57):** Layer 1 ABD 2007
+HAR-CJ 7-regressor OLS validated bit-exact at machine precision
+(floored to 1e-6 by TSL output rounding) per Phase 3.5 audit close.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS. Layer
+2 engine wrapper orchestration paths (TQ fallback + Jump Detection
+Summary + log-HAR + multi-step forecast + bootstrap CI + Residual
+Diagnostics + interpretation builder) require expert review.
+Realized variance + bipower variation + tripower quarticity series
+construction (upstream of HAR-CJ inputs) NOT in scope of parity
+audit — strategist responsible for upstream estimation methodology
+choice.
+
+**VOLATILITY / RISK / TAILS BLOCK CLOSE MILESTONE (Block 13 FULLY
+Q1-AMENDED at S57):** Block 13 Volatility / Risk / Tails completes
+Q1 amendment arc with FIVE sequential entries S53-S57:
+- S53 garch (FIRST Block 13 entry; Tier II.mle-band; symmetric
+  GARCH(p,q) variance-only baseline)
+- S54 egarch (SECOND Block 13 entry; Tier II.mle-band primary +
+  Tier V Pattern J B.2 overlay; A3 SECOND-OBSERVATION TIGHTENING
+  at B.2 sub-pattern scope per S47 Note 24 codified framework;
+  engine forecast-method routing fix at commit `fffb425` unblocked
+  wrapper-layer check 3)
+- S55 gjr_garch (THIRD Block 13 entry; Tier II.mle-band single-
+  tier; Pattern J B.2 sub-pattern SCOPE REFINEMENT per outcome
+  (ii) — naming-convention divergence empirically isolated to
+  EGARCH log-variance parameterization)
+- S56 har_rv (FOURTH Block 13 entry; FIRST HAR-family entry; Tier
+  II.bit-exact closed-form OLS Pattern A.2 cross-package per Corsi
+  2009 specification)
+- S57 har_cj (FIFTH-AND-FINAL Block 13 entry; SECOND HAR-family
+  entry; Tier IV Pattern A.3 paper-formula self-parity per ABD
+  2007 specification with BNS jump-detection decomposition)
+
+**7 of 13 catalog blocks now fully Q1-amended (54% catalog block-
+level completion)** post-S57 close: Block 1 Causality + Block 12
+Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition
++ Block 5 Frequency Domain / Signal + Block 6 State Space /
+Filtering + Block 13 Volatility / Risk / Tails. Heterogeneous Tier-
+surface variant observation within Block 13: Tier II.mle-band ×3
+(S53 + S54 primary + S55) + Tier V Pattern J B.2 overlay ×1 (S54)
++ Tier II.bit-exact ×1 (S56) + Tier IV Pattern A.3 ×1 (S57) = 4
+distinct Tier characterizations across 5 sub-sessions. Block 13
+substantively closed: GARCH-family asymmetric-variant sub-block
+complete at S55; HAR-family realized-volatility sub-block complete
+at S57. Per-block engine-bug surfacing at S54 (analytic-vs-simulation
+forecast routing) demonstrates the audit instrument's diagnostic
+value beyond pure parity validation.
+
+## §3 Unvalidated catalog techniques (43 entries; ID-only enumeration)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -22021,10 +22326,10 @@ descriptions, summaries).
 ### Stationarity / Tests (0 unvalidated; Block 12 FULLY Q1-AMENDED — second catalog block to complete per Q1 work program scope after Block 1 Causality at S18; adf_test moved to §2.5 per Phase 7+ S21; kpss_test moved to §2.5 per Phase 7+ S22; pp_test moved to §2.5 per Phase 7+ S23)
 (all 3 techniques moved to §2.5)
 
-### Volatility / Risk / Tails (1 unvalidated; stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately + garch moved to §2.5 per Phase 7+ S53 — FIRST Volatility / Risk / Tails block entry; Block 13 opens; egarch moved to §2.5 per Phase 7+ S54 — SECOND Volatility / Risk / Tails block entry; FIRST Tier V Pattern J B.2 overlay entry within block; Pattern J B.2 sub-pattern SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework — A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at B.2 sub-pattern scope per first-instance S6 egarch baseline + S54 confirmation; engine forecast-method routing fix at commit fffb425 unblocked wrapper-layer check 3; gjr_garch moved to §2.5 per Phase 7+ S55 — THIRD Volatility / Risk / Tails block entry; Pattern J B.2 sub-pattern SCOPE REFINEMENT per S55 outcome (ii) — naming-convention divergence empirically isolated to EGARCH log-variance parameterization, NOT GARCH-family-asymmetric-broadly; Note 24 framework substantively refined; har_rv moved to §2.5 per Phase 7+ S56 — FOURTH Volatility / Risk / Tails block entry; FIRST HAR-family entry within block at Tier II.bit-exact closed-form OLS Pattern A.2 cross-package per Corsi 2009 specification)
-`har_cj`
+### Volatility / Risk / Tails (0 unvalidated; Block 13 FULLY Q1-AMENDED — SEVENTH catalog block to complete per Q1 work program scope at S57 close = 7 of 13 catalog blocks fully Q1-amended (54% catalog block-level completion); stochastic_volatility + caviar_quantile_dynamics + evt_pot_gpd validated separately + garch moved to §2.5 per Phase 7+ S53 — FIRST Volatility / Risk / Tails block entry; Block 13 opens; egarch moved to §2.5 per Phase 7+ S54 — SECOND block entry; FIRST Tier V Pattern J B.2 overlay entry within block; Pattern J B.2 SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework; engine forecast-method routing fix at commit fffb425 unblocked wrapper-layer check 3; gjr_garch moved to §2.5 per Phase 7+ S55 — THIRD block entry; Pattern J B.2 SCOPE REFINEMENT per outcome (ii); har_rv moved to §2.5 per Phase 7+ S56 — FOURTH block entry; FIRST HAR-family entry at Tier II.bit-exact closed-form OLS per Corsi 2009; har_cj moved to §2.5 per Phase 7+ S57 — FIFTH-AND-FINAL block entry; SECOND HAR-family entry at Tier IV Pattern A.3 paper-formula self-parity per ABD 2007 with BNS jump-detection decomposition)
+(all 5 techniques moved to §2.5)
 
-**Total: 44 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53+S54+S55+S56 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch + egarch + gjr_garch + har_rv moved to §2.5; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails IN PROGRESS — opened at S53 (garch); advanced at S54 (egarch); advanced at S55 (gjr_garch); advanced at S56 (har_rv); 1 remaining unvalidated entry in block (har_cj); GARCH-family asymmetric-variant SUB-BLOCK COMPLETE at S55 close; HAR-RV closed-form OLS validated at S56**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
+**Total: 43 unvalidated technique IDs across 13 catalog categories** (post-Phase-7+-S12+S13+S14c+S15+S17+S18+S21+S22+S23+S26+S27+S28+S31+S32+S33+S34+S37+S38+S39+S40+S41+S42+S43+S48+S49+S50+S51+S53+S54+S55+S56+S57 amendments; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay + adf_test + kpss_test + pp_test + denton_chowlin_disaggregation + loess_interpolation + kalman_imputation + classical_decompose + mstl_decompose + stl_decompose + x13_seasonal_adjust + periodogram_spectral_density + fft_spectrum + lomb_scargle + ssa + wavelet_transform + wavelet_coherence_phase_lag + emd_hht + local_level + local_linear_trend + particle_filter + structural_ts + garch + egarch + gjr_garch + har_rv + har_cj moved to §2.5; **Block 6 State Space / Filtering FULLY Q1-AMENDED at S51 close — SIXTH catalog block fully Q1-amended (6 of 13 = 46% catalog block-level completion)**; **Block 13 Volatility / Risk / Tails FULLY Q1-AMENDED at S57 close — SEVENTH catalog block fully Q1-amended (7 of 13 = 54% catalog block-level completion); 5-sub-session arc S53-S57 complete: opens at S53 (garch); advances at S54 (egarch + Pattern J B.2 second-observation tightening + engine forecast-method routing fix fffb425); advances at S55 (gjr_garch + Pattern J B.2 scope refinement); advances at S56 (har_rv); COMPLETES at S57 (har_cj). Heterogeneous Tier-surface within Block 13: Tier II.mle-band ×3 + Tier V Pattern J B.2 overlay ×1 + Tier II.bit-exact ×1 + Tier IV Pattern A.3 ×1 = 4 distinct Tier characterizations across 5 sub-sessions**; **Block 1 Causality + Block 12 Stationarity Tests + Block 8 Missing Data + Block 3 Decomposition + Block 5 Frequency Domain / Signal ALL FIVE FULLY Q1-AMENDED — FIRST FIVE catalog blocks to complete per Q1 work program scope at S43 close = 5 of 13 catalog blocks fully Q1-amended (38% catalog block-level completion); per-block continuation pattern at n=5 catalog block observations REACHED at S43 close per absorption #6+ codification refinement candidate at §19.4 §4 note 6 refinement n=4 → n=5 EMPIRICALLY ROBUSTLY GROUNDED at sustained five catalog block fully Q1-amended observations; FIFTH catalog block Frequency Domain / Signal completion arc S37 + S38 + S39 + S40 + S41 + S42 + S43 COMPLETED at S43 close: opens at S37 with periodogram_spectral_density first-entry + advances at S38 with fft_spectrum second-entry + advances at S39 with lomb_scargle third-entry + advances at S40 with ssa fourth-entry + advances at S41 with wavelet_transform fifth-entry + advances at S42 with wavelet_coherence_phase_lag sixth-entry + COMPLETES at S43 with emd_hht seventh-entry FINAL Block 5 entry; HETEROGENEOUS Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED AT S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW = n=5 distinct Tiers); Block ordering working hypothesis seventh-position verification at S43 per Code Step 0 empirical re-Read COMPLETING 7-entry Block 5 arc; ALL-ANCHOR-DEFERRAL DISCIPLINE SIXTH-APPLICATION empirical efficacy A3 SECOND-OBSERVATION TIGHTENING PRECEDENT THRESHOLD FURTHER REINFORCED at S43 (n=6 sustained efficacy observations S38 + S39 + S40 + S41 + S42 + S43 0-divergence; STRONGEST cumulative empirical grounding among absorption #6 candidates at S43 close); Sub-class 2i SECOND-OBSERVATION TIGHTENING at S41 (preserved through S43) + Sub-class 2l SECOND-OBSERVATION TIGHTENING at S42 (preserved through S43) + NEW Sub-class 2m candidate first-instance baseline observation at S43 (Tier VI CAVEAT Pattern J Tier C + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant; codification deferred to absorption #6+ second-observation tightening if recurs); Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING MANIFESTED AT S43 (S38 fft_spectrum FFT-family + S41 wavelet_transform wavelet-family + S43 emd_hht EMD-family empirical generalization Tier-agnostic across cross-Tier scope Tier II.bit-exact + Tier III + Tier VI CAVEAT; Sub-class 2j codification refinement candidate at absorption #6+ EMPIRICALLY ROBUSTLY GROUNDED at three-observation tightening Tier-agnostic across mathematical families + Tier characterizations); §1.9 THIRD-OBSERVATION TIGHTENING cross-block extension MANIFESTED at SUFFIX-OMISSION direction at S42 preserved through S43 (S43 §1.9 FOURTH-OBSERVATION NOT MANIFESTED — canonical catalog technique_id `emd_hht` preserved exactly at all three layers); §4.7.A variant 3 (Harness-reimplements-engine-math) THIRD-INSTANCE TIGHTENING at §2.5 entry codification scope at S43 with NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline observation (S40 + S42 DEGENERATE DUAL-ARM SECOND-OBSERVATION TIGHTENING + S43 NEW NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE; sub-variant taxonomy expansion at A3 first-instance baseline observation EMPIRICALLY GROUNDED); §1.8 reroll_on_caveat=False discipline APPLICABLE at S43 — FIRST applicability test within Frequency Domain / Signal block scope per S37-S42 §1.8 NOT APPLICABLE banking series (audit verdict CAVEAT + cross-Block scope continuation per Block 3 S32 + S33 §1.8 applicability precedent; n=3 §1.8 applicability observations across S32 + S33 + S43 at n=2 catalog blocks; A3 second-observation tightening precedent threshold SATISFIED at §1.8 cross-Block scope continuation at n=2 cross-Block observations); ENGINE-DEFAULT-CONFIG vs AUDIT-PINNED-CONFIG match at S43 at Balanced preset parameter scope preserving S41 FIRST observation as SINGLE-INSTANCE at Pattern F validation scope divergence dimension; A9 Class A counter post-S43 status preserved n=14 ACTIVE + n=15-n=20 candidates banked + S40 + S41 + S42 + S43 SUSTAINED no new Class A catch per prior-turn-ratification-acknowledgment discipline operationalization institutional learning sustainment; Multi-precedent confluence at S43 INSTITUTIONALLY SUBSTANTIVE FOURTH-INSTANCE (S38 first-instance baseline + S41 second-instance + S42 third-instance + S43 FOURTH-INSTANCE per SEVEN A3 precedent threshold satisfactions/reinforcements at SAME entry codification scope = record-high single-observation count in apparatus history: Tier VI CAVEAT FIRST Q1 §2.5 entry within Frequency Domain / Signal block + Heterogeneous Tier-surface variant A3 FOURTH-OBSERVATION TIGHTENING + Pattern F structural invariants A3 THIRD-OBSERVATION TIGHTENING + All-anchor-deferral discipline SIXTH-APPLICATION + §1.8 reroll_on_caveat=False discipline FIRST applicability test within Block 5 + §4.7.A variant 3 NON-DEGENERATE DUAL-ARM sub-variant FIRST-INSTANCE baseline + Block 5 FULLY Q1-AMENDED milestone; A3 FOURTH-OBSERVATION TIGHTENING PRECEDENT THRESHOLD SATISFIED at multi-precedent confluence sub-pattern scope at SAME audit + SAME entry codification surface at n=4 distinct observations + sustained ≥5 A3 threshold satisfactions per observation)**).
 
 ## §4 How to use this document
 
