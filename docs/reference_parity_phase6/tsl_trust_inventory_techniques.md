@@ -23900,7 +23900,346 @@ Block 7 ordering applies to ML-block techniques only (SC1-SC6 +
 SC10-SC17); SC7-SC9 are cross-block Cat 3 remediations (Block 10 +
 Block 1 + Block 8 respectively).
 
-## §3 Unvalidated catalog techniques (38 entries; ID-only enumeration)
+### gradient_boosting_forecast (Phase 7+ SC2; THIRTY-SEVENTH §2.5 entry; SECOND ML / Deep Learning block entry; Cat 3 remediation cycle session 2/17 per triage close ordering; SECOND Tier A tree-family-sklearn-wrapped session; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; SC1 random_forest family-template SECOND-INSTANCE empirical validation)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per SC2 Code Step 4 empirical verification + Cat 3
+remediation cycle session 2/17 disposition. Reference arm reimplements
+the engine's exact pipeline (NaN edge-strip + interior-interpolate +
+lag/rolling/diff/time feature engineering at Balanced preset config +
+sklearn `GradientBoostingRegressor.fit` at engine-resolved
+hyperparameters with `subsample=0.8` + TimeSeriesSplit CV + multi-step
+recursive forecast) using identical sklearn primitives at identical
+call sites. Both arms use `random_state=ctx.seed=42` ensuring bit-
+exact deterministic sklearn output. Engine table outputs round
+forecast values to 6 decimals (engine line 327) + feature importance
++ train/CV metrics to 4 decimals (engine lines 321 + 340-344);
+compare() rounds REF outputs to match display precision per Phase 1
+finding B8 (SC1 family template precedent).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 interior NaN
+  values at indices [5, 23, 67, 134, 178] of n=200 AR(1) series.
+  Wrapper returns non-error response; emits warning "5 interior
+  missing values were linearly interpolated." per engine
+  `_prepare_series` lines 34-54 (linear interpolation between flanking
+  non-NaN values; same NaN handling convention as random_forest +
+  block_bootstrap + GARCH-family wrappers).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_estimators=300 + max_depth=4 +
+  learning_rate=0.05 + n_lags=12 + rolling_windows=[3, 6, 12] +
+  subsample=0.8 per engine `_PRESET_CONFIG` lines 23-26 + subsample
+  conditional at line 260); returned 3 expected tables (`Forecast` +
+  `Model Summary` + `Feature Importance`) + `audit_fields` populated
+  (24 keys); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast table
+  10 rows × 2 cols [Step, Forecast] (horizon=10 default at engine
+  line 206); Model Summary 15 × 2; Feature Importance 15 × 2 (top 15
+  features sorted descending by importance per engine line 320).
+
+Wrapper-layer validation harness at `tools/_gbr_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness):** Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_gradient_boosting.py` at
+`_reference_gradient_boosting` lines 75-159 mirrors engine
+`gradient_boosting_forecast.run()` pipeline at engine lines 167-429
+verbatim — same NaN handling, same feature engineering, same
+hyperparameters at Balanced preset, same TimeSeriesSplit CV, same
+multi-step recursive forecast, same `subsample=0.8` setting at non-
+Fast presets. Shares `_prepare_series_reference` +
+`_create_features_reference` + `_create_forecast_features_reference`
+helpers with SC1 random_forest (engine `_prepare_series` +
+`_create_features` + `_create_forecast_features` are byte-identical
+across `random_forest_forecast.py` + `gradient_boosting_forecast.py`
+per Disposition 2 verbatim-mirror pattern; identical preprocessing +
+feature engineering between the two tree-family techniques empirically
+verified at engine source comparison).
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 5 primary metrics: 10-step forecast
+values + top-15 sorted feature importances + train_rmse + train_r2
++ cv_rmse; n=200 AR(1) DGP + Balanced preset + seed=42 at runner
+CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC2 Code Step 6
+empirical verification.
+**Audit script:** `tools/reference_parity/harness/checks/p3_gradient_boosting.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+abbreviated `_fit_predict` helper instantiating
+`GradientBoostingRegressor(n_estimators=100, max_depth=3,
+learning_rate=0.1)` directly with hardcoded Fast-preset
+hyperparameters in BOTH arms + minimal lag-only features (NO
+subsample) — degenerate self-parity bypassing engine code path per
+inventory verification methodology revision-2 Cat 3 DEGENERATE-
+VACUOUS classification).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 2/17
+close; combined harness rewrite + §2.5 entry commit per Tier 2
+incremental forward-amendment pattern; SC1 family-template second-
+instance empirical application).
+**Primary metrics (math layer):** 10-step recursive forecast values +
+top-15 sorted feature importances + in-sample `train_rmse` +
+`train_r2` + cross-validated `cv_rmse` (3-fold TimeSeriesSplit).
+
+**Source files (Cat 3 remediation post-rewrite; SC1 family-template
+second-instance):**
++ `tools/reference_parity/harness/checks/p3_gradient_boosting.py`
+  lines 19-25 (imports `_generate_ar_dgp` +
+  `_prepare_series_reference` + `_create_features_reference` +
+  `_create_forecast_features_reference` from SC1
+  `p3_random_forest.py` per Disposition 2 verbatim-mirror pattern at
+  engine source level; institutional dependency on SC1 family-
+  template stub functions)
++ `tools/reference_parity/harness/checks/p3_gradient_boosting.py`
+  lines 56-69 (engine preset Balanced mirror `_ENGINE_BALANCED_PRESET`
+  with full GBR-specific hyperparameter set including `subsample`
+  field absent from SC1 random_forest preset)
++ `tools/reference_parity/harness/checks/p3_gradient_boosting.py`
+  lines 75-159 (engine `_reference_gradient_boosting` end-to-end
+  pipeline: prepare_series + create_features +
+  GradientBoostingRegressor.fit + TimeSeriesSplit CV + recursive
+  multi-step forecast at Balanced preset hyperparameters; mirrors
+  engine `run()` body verbatim)
++ `tools/reference_parity/harness/checks/p3_gradient_boosting.py`
+  lines 197-244 (harness TSL arm `run_tsl` invokes engine via
+  RunContext + extracts forecast values from `Forecast` table col[1]
+  + feature importances from `Feature Importance` table col[1] +
+  train/CV metrics from `audit_fields`)
++ `tools/reference_parity/harness/checks/p3_gradient_boosting.py`
+  lines 246-256 (harness reference arm `run_reference` invokes
+  `_reference_gradient_boosting` at identical Balanced preset config)
++ `tools/reference_parity/harness/checks/p3_gradient_boosting.py`
+  lines 258-318 (compare() with engine output-rounding alignment per
+  Phase 1 finding B8 + SC1 family-template precedent: 6-decimal
+  forecast rounding + 4-decimal audit metric rounding on REF side)
++ `engine/techniques/gradient_boosting_forecast.py` lines 18-31
+  (engine `_PRESET_CONFIG` Fast/Balanced/Thorough hyperparameter
+  preset dispatch; Balanced default at lines 23-26)
++ `engine/techniques/gradient_boosting_forecast.py` lines 34-54
+  (engine `_prepare_series` Layer 2 NaN edge-strip + interior linear-
+  interpolate; byte-identical to random_forest_forecast.py lines
+  35-55)
++ `engine/techniques/gradient_boosting_forecast.py` lines 57-115
+  (engine `_create_features` Layer 2 feature engineering; byte-
+  identical to random_forest_forecast.py lines 58-116)
++ `engine/techniques/gradient_boosting_forecast.py` lines 118-164
+  (engine `_create_forecast_features` Layer 2 recursive multi-step
+  feature builder; byte-identical to random_forest_forecast.py lines
+  119-165)
++ `engine/techniques/gradient_boosting_forecast.py` lines 167-429
+  (engine `run()` body: end-to-end Gradient Boosting forecast pipeline;
+  harness reference arm `_reference_gradient_boosting` mirrors this
+  verbatim modulo audit_fields construction + interpretation builder
+  + plain English summary which are presentation-layer only)
++ no separate audit markdown report; empirical baseline reference is
+  the runner CLI PASS verdict at this commit + Cat 3 remediation
+  cycle session 2/17 close
+
+**Validation claim scope (Cat 3 remediation cycle session 2/17 post-
+rewrite; engine code path EXERCISED via RunContext at math layer):**
+Per Code SC2 Step 4 empirical verification:
+
+- **Layer 1 (Gradient Boosting math at sklearn primitive + engine
+  feature engineering pipeline + subsample=0.8 stochastic regression
+  with random_state=42) VALIDATED at Tier II.bit-exact at engine
+  output-rounding floor:** Engine `gradient_boosting_forecast` Layer 1
+  math + `p3_gradient_boosting` harness TSL arm both invoke engine
+  code path via RunContext (post-rewrite); reference arm
+  `_reference_gradient_boosting` invokes identical sklearn primitives
+  at identical hyperparameters (including `subsample=0.8` for non-Fast
+  presets) + identical preprocessing pipeline at IDENTICAL call sites.
+  Bit-exact PASS at deterministic seed (random_state=42); 0.0 abs diff
+  on forecast values + feature importances + train/CV metrics. Note:
+  `subsample=0.8` produces stochastic gradient boosting (per-iteration
+  random row subsampling) but sklearn's GBR is fully deterministic at
+  fixed `random_state`. **Layer 1 PASS bit-exact empirically grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via interior
+  linear interpolation; preset config dispatch returns expected 3-
+  table structure + audit_fields with all 24 expected keys; output
+  shape/type verification confirms numeric outputs across all tables.
+  Layer 2 paths NOT covered by 3 checks (multi-step recursive
+  forecast accumulation + interpretation builder + plain English
+  summary + audit_fields construction) remain expert-review-required
+  per pre-S49 scope.
+
+**Phase 3 algorithmic basis (extracted from engine module):** Gradient
+Boosting per Friedman (2001) "Greedy Function Approximation: A
+Gradient Boosting Machine" Annals of Statistics 29(5):1189-1232 +
+Friedman (2002) "Stochastic Gradient Boosting" Computational
+Statistics & Data Analysis 38:367-378 (subsample variant). Sequential
+construction of an additive model from weak learners (typically
+shallow regression trees) where each learner fits the negative
+gradient of the loss function (squared-error for regression) with
+respect to the current ensemble's prediction. sklearn's
+`ensemble.GradientBoostingRegressor` is the canonical Python
+implementation. Engine wrapper adds time-series-specific feature
+engineering (lag features 1..n_lags + rolling mean/std at multiple
+windows + first-difference + normalized time index) producing a
+tabular regression problem from a univariate series + uses
+`subsample=0.8` for non-Fast presets (stochastic gradient boosting)
++ applies recursive multi-step forecasting via sequential prediction-
+update of lag features.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session 2/17
+post-rewrite):**
+
+- Math-layer harness validates engine code path EXERCISED via
+  RunContext (post-rewrite Category 1 LEGITIMATE per Cat 3 remediation
+  cycle session 2/17). Pre-rewrite harness was Category 3 DEGENERATE-
+  VACUOUS — abbreviated `_fit_predict` helper instantiated
+  `GradientBoostingRegressor(n_estimators=100, max_depth=3,
+  learning_rate=0.1)` directly with hardcoded Fast-preset
+  hyperparameters in BOTH arms, bypassing engine wrapper's preset
+  resolution + NaN handling + multi-feature engineering + recursive
+  multi-step forecast pipeline + `subsample=0.8` stochastic
+  configuration. Post-rewrite: harness math layer validates the FULL
+  engine pipeline at Balanced preset.
+- Engine output rounding floor (Phase 1 finding B8): forecast values
+  rounded to 6 decimals at engine line 327; feature importances +
+  train/CV metrics rounded to 4 decimals at engine lines 321 +
+  340-344. compare() rounds REF outputs to match display precision;
+  parity claim is bit-exact AT POST-ROUNDING display precision (sub-
+  rounding-floor precision not surfaced at parity layer).
+- sklearn `GradientBoostingRegressor` determinism depends on
+  `random_state` parameter; engine passes `random_state=ctx.seed`
+  ensuring deterministic boosting at fixed seed AND deterministic
+  `subsample=0.8` row sampling at fixed seed. Triage close
+  empirically confirmed bit-exact reproducibility across consecutive
+  runs at seed=42 (max_abs_diff=0.0 across all audit_fields + table
+  outputs).
+- CV model uses `max(50, n_estimators // 2)` trees + omits
+  `subsample` parameter (defaults to 1.0; engine line 280 produces
+  non-stochastic CV evaluation distinct from main-model stochastic
+  fitting). This is intentional engine design (CV with simpler model
+  for evaluation speed) but means CV RMSE precision differs from
+  what a 1-to-1 main-model CV would produce.
+
+**Phase 3 boundary of validity (extracted from harness DGP + fixture
+parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1) phi=0.6 + sigma=1.0; smaller
+  T may have insufficient training samples after lag warmup; larger T
+  not validated; other DGP regimes not validated at parity layer
+- Horizon=10 fixed at harness `HORIZON` class attribute matching
+  engine default `horizon=10` at line 206
+- Balanced preset config (n_estimators=300 + max_depth=4 +
+  learning_rate=0.05 + n_lags=12 + rolling_windows=[3, 6, 12] +
+  subsample=0.8) validated; Fast (smaller ensemble + larger learning
+  rate + NO subsample at engine line 260) + Thorough (larger ensemble
+  + smaller learning rate + more lags) presets NOT in parity scope
+  at math layer; wrapper-layer 3-check covers Balanced preset
+  invocation
+- Univariate series only; no exogenous regressor support in engine
+  scope
+- AR(1) DGP-specific; non-linear DGP (e.g., regime-switching, AR
+  with trend, structural breaks) NOT in parity scope
+- `loss="squared_error"` only validated; alternative loss functions
+  (absolute_error, huber, quantile per sklearn GBR support) NOT
+  validated
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at math
+  layer (only Balanced); wrapper-layer 3-check at Check 2 covers
+  Balanced preset invocation only
+- Multi-step recursive forecast accumulation logic at engine lines
+  301-309 validated implicitly via end-to-end PASS; isolated forecast-
+  feature-update logic NOT separately unit-validated
+- Subsample-dependent stochastic gradient boosting variant validated
+  at `subsample=0.8` (Balanced) only; alternative subsample values
+  not validated
+- Feature importance computation method (mean-decrease-impurity per
+  sklearn GBR default) NOT explicitly documented in engine code;
+  inherited from sklearn default
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor per
+SC2 / Cat 3 remediation cycle session 2/17):** Layer 1 Gradient
+Boosting math validated bit-exact at machine precision at
+deterministic seed post-rewrite via RunContext invocation of engine
+code path. Wrapper layer (S49+ NEW 3-check scope) validated at 3/3
+PASS. Layer 2 engine wrapper orchestration paths NOT covered by
+3-check (multi-step recursive forecast accumulation + interpretation
+builder + plain English summary + audit_fields construction) require
+expert review for any published output sensitivity beyond Layer 1 +
+3-check scope.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close):**
+
+- **Validated configuration (harness math layer):** engine code path
+  EXERCISED via RunContext at Balanced preset (n_estimators=300 +
+  max_depth=4 + learning_rate=0.05 + n_lags=12 + rolling_windows=[3,
+  6, 12] + subsample=0.8); horizon=10; seed=42; loss="squared_error".
+- **Engine preset default (Balanced):** all parameters match validated
+  configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 219 + subsample
+  conditional at engine line 260 (`subsample=0.8 if ctx.preset !=
+  "Fast" else 1.0`).
+- **Configuration match:** **YES** — user invoking at default Balanced
+  preset experiences mathematically validated Layer 1 surface.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer (only Balanced); validated at wrapper-
+  layer 3-check Check 2 (Balanced preset invocation only). Alternative
+  horizons + non-AR(1) DGP regimes + alternative loss functions not
+  in parity scope.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+2/17 — SECOND session of cycle):** Inventory verification commit
+12d3785 classified p3_gradient_boosting as Cat 3 DEGENERATE-VACUOUS
+per refined methodology revision-2 (pre-rewrite harness `_fit_predict`
+helper hardcoded Fast-preset hyperparameters + minimal lag-only
+features bypassing engine pipeline at Balanced preset + multi-
+feature engineering + recursive multi-step forecast +
+`subsample=0.8` stochastic configuration). Triage close at HEAD
+a7746f1 confirmed Cat 3 (bit-exact deterministic at fixed seed;
+rewrite feasible). This §2.5 entry closes the remediation cycle
+session 2/17 via combined harness rewrite + entry forward-amendment
+per Tier 2 incremental pattern.
+
+**SC1 family-template second-instance empirical validation (per
+Disposition 2 RATIFIED at SC1 close):** SC2 gradient_boosting is the
+SECOND-INSTANCE application of the SC1 random_forest family template
+established at SC1 commit 0cb1fb8. Template elements empirically
+validated at SC2 application:
+- Engine `_PRESET_CONFIG[Balanced]` verbatim copy as harness module
+  constant (`_ENGINE_BALANCED_PRESET`) per Disposition 2 — preserved
+  at SC2 with GBR-specific fields (added `subsample` field absent
+  from SC1 random_forest preset)
+- Engine helper functions (`_prepare_series` + `_create_features` +
+  `_create_forecast_features`) IMPORTED from SC1 `p3_random_forest.py`
+  module rather than re-defined — empirically valid because engine
+  source code is byte-identical across `random_forest_forecast.py`
+  + `gradient_boosting_forecast.py` for these three helpers
+- VSC section embedded directly in new entry per Disposition 3 (not
+  retroactive)
+- Audit-hygiene cross-reference + Cat 3 remediation cycle session
+  N/17 progress note + Block 7 catalog-state position notation
+- Engine output rounding alignment at 6-decimal forecast + 4-decimal
+  audit metrics in compare() per Phase 1 finding B8 (verbatim from
+  SC1)
+- Bit-exact PASS at runner CLI achieved at first attempt (no
+  rounding-floor mismatch debugging needed) — template empirically
+  robust
+
+**Template refinements observed at SC2 (forward-instrumentation for
+SC3-SC6 Tier A remaining sessions):**
+- Shared helper imports across Tier A entries (`_prepare_series_
+  reference` + `_create_features_reference` + `_create_forecast_
+  features_reference` from SC1) work cleanly because engine source
+  is byte-identical at these three functions. Future Tier A sessions
+  (SC3 xgboost + SC4 lightgbm + SC5 svr + SC6 quantile_regression)
+  should verify engine source identity at these helpers BEFORE
+  reusing; if engine diverges (e.g., SVR doesn't use lag-feature
+  engineering), separate `_reference_<technique>` reimpl required.
+- Engine preset config field set differs per technique (random_forest
+  has `min_samples_leaf`; gradient_boosting has `learning_rate` +
+  `subsample`; xgboost will have its own set). Verbatim mirror per
+  Disposition 2 means each `_ENGINE_BALANCED_PRESET` is technique-
+  specific; engineering source must be re-read per session.
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -23938,8 +24277,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (13 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1 Cat 3 remediation cycle session 1/17 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
-`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
+### ML / Deep Learning (12 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
+`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
