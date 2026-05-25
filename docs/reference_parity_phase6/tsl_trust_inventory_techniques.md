@@ -23596,11 +23596,11 @@ variant 3.D framing empirically established across two instances
 (S60 forecast_combination + S61 block_bootstrap); Category 2
 DEGENERATE-COHERENT inventory exhausted post-S61.**
 
-### random_forest_forecast (Phase 7+ S62; THIRTY-SIXTH §2.5 entry; FIRST ML / Deep Learning block entry — Block 7 opens per Cat 3 remediation cycle dispatch following triage close at HEAD a7746f1; FIRST §2.5 entry FOLLOWING CAT 3 REMEDIATION CYCLE (session 1/17 per triage close ordering; Tier A tree-family-sklearn-wrapped baseline); Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per ratified Tier 2 incremental forward-amendment pattern from inventory verification commit 12d3785)
+### random_forest_forecast (Phase 7+ SC1; THIRTY-SIXTH §2.5 entry; FIRST ML / Deep Learning block entry — Block 7 opens per Cat 3 remediation cycle dispatch following triage close at HEAD a7746f1; FIRST §2.5 entry FOLLOWING CAT 3 REMEDIATION CYCLE (session 1/17 per triage close ordering; Tier A tree-family-sklearn-wrapped baseline); Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per ratified Tier 2 incremental forward-amendment pattern from inventory verification commit 12d3785; **session numbering convention SC1-SC17 sub-numbered for Cat 3 remediation cycle per Chat ratified Disposition 1 Option B — preserves institutional record that conformal_intervals retains its originally-assigned S62 number in the Q1 work program design + distinguishes Cat 3 remediation work as separate sequence from routine §2.5 cadence; retag applied at fix-up commit before SC2 dispatch**)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
 II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
-rounding floor)** per S62 Code Step 4 empirical verification + Cat 3
+rounding floor)** per SC1 Code Step 4 empirical verification + Cat 3
 remediation cycle session 1/17 disposition. Reference arm reimplements
 the engine's exact pipeline (NaN edge-strip + interior-interpolate +
 lag/rolling/diff/time feature engineering at Balanced preset config +
@@ -23654,7 +23654,7 @@ max_rel_diff=0.0` across all 5 primary metrics: 12-step forecast
 values + top-15 sorted feature importances + train_rmse + train_r2
 + cv_rmse; n=200 AR(1) DGP + Balanced preset + seed=42 at runner
 CLI execution).
-**Verdict (wrapper layer):** PASS 3/3 checks per S62 Code Step 6
+**Verdict (wrapper layer):** PASS 3/3 checks per SC1 Code Step 6
 empirical verification.
 **Audit script:** `tools/reference_parity/harness/checks/p3_random_forest.py`
 (rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
@@ -23728,7 +23728,7 @@ top-15 sorted feature importances + in-sample `train_rmse` +
 
 **Validation claim scope (Cat 3 remediation cycle session 1/17 post-
 rewrite; engine code path EXERCISED via RunContext at math layer):**
-Per Code S62 Step 4 empirical verification:
+Per Code SC1 Step 4 empirical verification:
 
 - **Layer 1 (Random Forest math at sklearn primitive + engine feature
   engineering pipeline) VALIDATED at Tier II.bit-exact at engine
@@ -23842,7 +23842,7 @@ parameters):**
   runs
 
 **Status (Tier II.bit-exact PASS at engine output-rounding floor per
-S62 / Cat 3 remediation cycle session 1/17):** Layer 1 Random Forest
+SC1 / Cat 3 remediation cycle session 1/17):** Layer 1 Random Forest
 math validated bit-exact at machine precision at deterministic seed
 post-rewrite via RunContext invocation of engine code path.
 Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS. Layer
@@ -23882,17 +23882,23 @@ cycle session 1/17 via combined harness rewrite + entry forward-
 amendment per Tier 2 incremental pattern from ratified plan-mode
 disposition.
 
-**Block 7 ML / Deep Learning open milestone:** S62 random_forest is
+**Block 7 ML / Deep Learning open milestone:** SC1 random_forest is
 FIRST §2.5 entry within Block 7 ML / Deep Learning catalog block —
 Block 7 opens per Cat 3 remediation cycle dispatch + Tier A tree-
 family sequential remediation ordering per triage close. Block 7
 catalog ordering (Tier A → Tier B → Tier C → Tier D per triage close
-recommendation): random_forest (THIS ENTRY S62) + gradient_boosting
-(S63) + xgboost (S64) + lightgbm (S65) + svr (S66) +
-quantile_regression (S67) — Tier A close; transfer_function
-(S68/Tier B specialized) + gp (S70/Tier C) + prophet (S71) + esn
-(S72) + autoencoder (S73/Tier D DL) + lstm_gru (S74) + tcn (S75) +
-nbeats (S76) + nhits (S77 — final cycle entry).
+recommendation): random_forest (THIS ENTRY SC1) + gradient_boosting
+(SC2) + xgboost (SC3) + lightgbm (SC4) + svr (SC5) +
+quantile_regression (SC6) — Tier A close; transfer_function
+(SC7/Tier B specialized; though resides in Block 10 Causality /
+Lead-Lag catalog scope per §3 enumeration) + dtw_alignment_lag (SC8;
+Block 1) + loess_interpolation (SC9; Block 8) — Tier B close;
+gaussian_process (SC10/Tier C) + prophet (SC11) + esn (SC12) — Tier
+C close; autoencoder (SC13/Tier D DL) + lstm_gru (SC14) + tcn (SC15)
++ nbeats (SC16) + nhits (SC17 — final cycle entry). **Note:**
+Block 7 ordering applies to ML-block techniques only (SC1-SC6 +
+SC10-SC17); SC7-SC9 are cross-block Cat 3 remediations (Block 10 +
+Block 1 + Block 8 respectively).
 
 ## §3 Unvalidated catalog techniques (38 entries; ID-only enumeration)
 
@@ -23932,7 +23938,7 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (13 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ S62 Cat 3 remediation cycle session 1/17)
+### ML / Deep Learning (13 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1 Cat 3 remediation cycle session 1/17 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
 `autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `gradient_boosting_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)

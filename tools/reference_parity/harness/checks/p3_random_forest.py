@@ -13,7 +13,7 @@ sklearn primitive at identical engine-resolved hyperparameters
 so any divergence isolates the engine wrapper's orchestration vs
 the paper-formula reference.
 
-Rewritten at S62-side Cat 3 remediation cycle session 1/17 per
+Rewritten at SC1-side Cat 3 remediation cycle session 1/17 per
 triage close (Cat 3 bit-exact deterministic confirmation) +
 inventory verification 12d3785 + Tier 2 incremental forward-
 amendment pattern. The original harness implemented an
