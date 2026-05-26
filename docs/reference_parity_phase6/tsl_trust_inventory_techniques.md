@@ -24598,7 +24598,370 @@ engines with primary/fallback dispatch:
   engine has seasonal-naive fallback) should apply this SC3
   template element
 
-## §3 Unvalidated catalog techniques (36 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### lightgbm_forecast (Phase 7+ SC4; THIRTY-NINTH §2.5 entry; FOURTH ML / Deep Learning block entry; Cat 3 remediation cycle session 4/17 per triage close ordering; FOURTH Tier A tree-family-sklearn-wrapped session; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; SC3 fallback-dispatch template element SECOND-INSTANCE empirical validation with NEW comment-only-divergence handling at AST hash check + NEW post-fit importance normalization pipeline step)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per SC4 Code Step 4 empirical verification + Cat 3
+remediation cycle session 4/17 disposition. Reference arm reimplements
+the engine's exact primary-path pipeline (NaN edge-strip + interior-
+interpolate + lag/rolling/diff/time feature engineering at Balanced
+preset config + lightgbm `LGBMRegressor.fit` at engine-resolved
+hyperparameters with `num_leaves=31` leaf-wise growth + `subsample=
+0.8` + `colsample_bytree=0.8` stochastic LightGBM + post-fit
+importance normalization to sum-to-1 + TimeSeriesSplit CV + multi-
+step recursive forecast). Both arms use `random_state=ctx.seed=42`
+ensuring bit-exact deterministic LightGBM output. Fallback path
+(sklearn GBR when lightgbm unavailable) NOT validated at math layer.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 interior NaN
+  values at indices [5, 23, 67, 134, 178] of n=200 AR(1) series.
+  Wrapper returns non-error response; emits warning "5 interior
+  missing values were linearly interpolated." per engine
+  `_prepare_series` lines 52-72 (byte-identical to SC1+SC2+SC3 NaN
+  handling pipeline at AST source-segment hash level).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_estimators=300 + max_depth=6 + num_leaves=31
+  + learning_rate=0.05 + n_lags=12 + rolling_windows=[3, 6, 12] +
+  subsample=0.8 + colsample_bytree=0.8 per engine `_PRESET_CONFIG`
+  lines 37-42); returned 3 expected tables (`Forecast` + `Model
+  Summary` + `Feature Importance`) + `audit_fields` populated (27
+  keys; includes `backend="lightgbm"` field confirming primary path
+  dispatch + `num_leaves` field LightGBM-specific addition); no
+  error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast table
+  12 rows × 2 cols [Step, Forecast] (horizon=12 default at engine
+  line 222); Model Summary 18 × 2 (includes `num_leaves` row +
+  `Backend` row); Feature Importance 15 × 2 (top 15 features
+  sorted descending; importance values are normalized-to-sum-to-1
+  fractions per engine lines 297-301, distinct from RF+GBR+XGB which
+  expose sklearn-API normalized importances natively).
+
+Wrapper-layer validation harness at `tools/_lgb_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness):** Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_lightgbm.py` at
+`_reference_lightgbm` lines 95-205 mirrors engine
+`lightgbm_forecast.run()` primary path at engine lines 203-507
+verbatim — same NaN handling, same feature engineering, same
+hyperparameters at Balanced preset, same `num_leaves=31` leaf-wise
+growth control, same `subsample=0.8` + `colsample_bytree=0.8`
+stochastic configuration, same post-fit importance normalization
+to sum-to-1, same TimeSeriesSplit CV, same multi-step recursive
+forecast.
+
+**Helper identity note (per SC4 Step 1 AST hash check):** Engine
+`_prepare_series` + `_create_features` at LightGBM engine lines
+52-133 are byte-identical (AST source-segment SHA256 hash match) to
+SC1 random_forest functions. **`_create_forecast_features` at
+LightGBM engine lines 136-181 SHA256 hash DIFFERS from SC1 RF
+version** (`97ab66c14484c5d5` RF vs `e598dd6a587adb14` LGB) — but
+divergence is **COMMENT-ONLY**: RF version includes comment line
+`# Placeholder for recursive prediction (will be set later)` before
+the `extended.append(0.0)` statement; LightGBM version omits this
+comment. Behavioral logic byte-identical at runtime (verified at
+manual code-level inspection). Layer 2 family-shared helper imports
+from SC1 ratified at behavior scope (FOURTH-INSTANCE confirmation
+of two-layer template); institutional nuance documented for forward
+sessions: AST source-segment SHA256 hash is comment-sensitive +
+non-behavioral divergence does NOT preclude helper reuse if
+manual code inspection confirms behavioral identity. Subsequent
+sessions should AST-check first, then manually inspect on mismatch.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 5 primary metrics: 12-step forecast
+values + top-15 sorted normalized feature importances + train_rmse
++ train_r2 + cv_rmse; n=200 AR(1) DGP + Balanced preset + seed=42
+at runner CLI execution; lightgbm 4.6.0 primary path).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC4 Code Step 6
+empirical verification.
+**Audit script:** `tools/reference_parity/harness/checks/p3_lightgbm.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+abbreviated `_fit_predict` helper instantiating `lgb.LGBMRegressor(
+n_estimators=100, max_depth=4, learning_rate=0.1, num_leaves=15,
+subsample=1.0, colsample_bytree=1.0, deterministic=True,
+force_col_wise=True, n_jobs=1)` directly with hardcoded Fast-preset
+hyperparameters in BOTH arms + minimal lag-only features + NO post-
+fit importance normalization — degenerate self-parity bypassing
+engine code path per inventory verification methodology revision-2
+Cat 3 DEGENERATE-VACUOUS classification).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 4/17
+close).
+**Primary metrics (math layer):** 12-step recursive forecast values +
+top-15 sorted normalized feature importances + in-sample `train_rmse`
++ `train_r2` + cross-validated `cv_rmse` (3-fold TimeSeriesSplit).
+
+**Source files (Cat 3 remediation post-rewrite; two-layer family
+template fourth-instance with comment-only divergence + new
+importance-normalization pipeline step):**
++ `tools/reference_parity/harness/checks/p3_lightgbm.py` lines 70-78
+  (Layer 2 helper imports from SC1: `_generate_ar_dgp` +
+  `_prepare_series_reference` + `_create_features_reference` +
+  `_create_forecast_features_reference`; `_create_forecast_features_
+  reference` reused at behavior scope despite SHA256 mismatch from
+  comment-only divergence)
++ `tools/reference_parity/harness/checks/p3_lightgbm.py` lines 81-92
+  (Layer 1 engine preset Balanced mirror `_ENGINE_BALANCED_PRESET`
+  with LightGBM-specific `num_leaves=31` field absent from
+  SC1+SC2+SC3 presets)
++ `tools/reference_parity/harness/checks/p3_lightgbm.py` lines 95-205
+  (engine `_reference_lightgbm` primary-path pipeline reimpl
+  including post-fit importance normalization to sum-to-1 mirroring
+  engine lines 297-301)
++ `tools/reference_parity/harness/checks/p3_lightgbm.py` lines 240-302
+  (harness TSL arm `run_tsl` invokes engine via RunContext + verifies
+  `backend="lightgbm"` dispatch confirmation per SC3 template element
+  second-instance + extracts forecast + importances + train/CV
+  metrics from engine output)
++ `tools/reference_parity/harness/checks/p3_lightgbm.py` lines 304-317
+  (harness reference arm `run_reference` invokes
+  `_reference_lightgbm` at identical Balanced preset config)
++ `tools/reference_parity/harness/checks/p3_lightgbm.py` lines 319-374
+  (compare() with engine output-rounding alignment per Phase 1
+  finding B8: 6-decimal forecast + 4-decimal audit metric rounding)
++ `engine/techniques/lightgbm_forecast.py` lines 22-27 (engine
+  `_has_lightgbm()` dispatch helper; primary/fallback selection
+  analogous to SC3 xgboost engine `_has_xgboost()` pattern)
++ `engine/techniques/lightgbm_forecast.py` lines 30-49 (engine
+  `_PRESET_CONFIG` Fast/Balanced/Thorough hyperparameter preset
+  dispatch with LightGBM-specific `num_leaves` field; Balanced
+  default at lines 37-42)
++ `engine/techniques/lightgbm_forecast.py` lines 52-181 (engine
+  `_prepare_series` + `_create_features` + `_create_forecast_
+  features` Layer 2 helpers; first two byte-identical to
+  random_forest_forecast.py; `_create_forecast_features`
+  comment-only-divergent per Step 1 AST hash check finding)
++ `engine/techniques/lightgbm_forecast.py` lines 279-319 (engine
+  primary/fallback dispatch: lightgbm.LGBMRegressor primary at
+  lines 284-294 + post-fit importance normalization at lines
+  297-301; sklearn.GradientBoostingRegressor fallback at lines
+  308-318 with NO importance normalization step)
++ `engine/techniques/lightgbm_forecast.py` lines 184-521 (engine
+  `run()` body: end-to-end LightGBM forecast pipeline; harness
+  reference arm `_reference_lightgbm` mirrors this primary-path-only
+  verbatim modulo fallback dispatch + audit_fields construction)
++ no separate audit markdown report; empirical baseline reference is
+  the runner CLI PASS verdict at this commit
+
+**Validation claim scope (Cat 3 remediation cycle session 4/17 post-
+rewrite; engine code path EXERCISED via RunContext at math layer at
+primary lightgbm path + post-fit importance normalization step):**
+
+- **Layer 1 (LightGBM math at lightgbm.LGBMRegressor primary path +
+  engine feature engineering pipeline + num_leaves=31 leaf-wise
+  growth + subsample=0.8 + colsample_bytree=0.8 stochastic +
+  post-fit importance normalization to sum-to-1) VALIDATED at Tier
+  II.bit-exact at engine output-rounding floor:** Engine
+  `lightgbm_forecast` Layer 1 primary-path math + `p3_lightgbm`
+  harness TSL arm both invoke engine code path via RunContext;
+  reference arm `_reference_lightgbm` invokes identical lightgbm
+  primitives at identical hyperparameters at IDENTICAL call sites
+  AND mirrors engine's importance normalization step exactly. Bit-
+  exact PASS at deterministic seed; 0.0 abs diff across all primary
+  metrics. **Layer 1 PRIMARY PATH PASS bit-exact empirically
+  grounded.**
+- **Layer 1 FALLBACK PATH (sklearn GBR when lightgbm unavailable)
+  NOT VALIDATED at math layer:** Engine fallback dispatch at engine
+  lines 308-318 invokes sklearn `GradientBoostingRegressor` at
+  mapped hyperparameters (n_estimators + max_depth + learning_rate +
+  subsample; OMITS LightGBM-specific num_leaves + colsample_bytree +
+  importance-normalization step). **Mathematical equivalence
+  assessment: NOT EQUIVALENT.** sklearn GBR uses depth-first
+  greedy tree growth with `max_depth` as primary complexity control;
+  LightGBM uses leaf-wise greedy growth with `num_leaves` as primary
+  control + histogram-based split finding for speed. Outputs are
+  NOT numerically equivalent between primary + fallback even at
+  fixed seed + identical mapped hyperparameters. Users in non-
+  lightgbm environments receive engine output covered by wrapper-
+  layer 3-check only.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic; preset
+  config dispatch returns expected 3-table structure + audit_fields
+  with all 27 expected keys including `backend="lightgbm"` +
+  `num_leaves` dispatch-confirmation fields; output shape/type
+  verification confirms numeric outputs. Layer 2 paths NOT covered
+  (multi-step recursive forecast accumulation + interpretation
+  builder + plain English summary + audit_fields construction +
+  fallback path dispatch when lightgbm unavailable + importance
+  normalization for fallback path NONE) require expert review.
+
+**Phase 3 algorithmic basis (extracted from engine module):** LightGBM
+(Light Gradient Boosting Machine) per Ke et al. (2017) "LightGBM:
+A Highly Efficient Gradient Boosting Decision Tree" NeurIPS 2017.
+LightGBM extends gradient boosting with: (a) leaf-wise greedy tree
+growth (vs depth-first growth in sklearn GBR + XGBoost default;
+controlled by `num_leaves` rather than `max_depth`), (b)
+histogram-based split finding for O(#bins) split candidates rather
+than O(#samples), (c) Gradient-based One-Side Sampling (GOSS) for
+data sampling, (d) Exclusive Feature Bundling (EFB) for sparse
+feature handling. lightgbm.LGBMRegressor is the canonical Python
+sklearn-API wrapper. Engine wrapper adds time-series-specific
+feature engineering (lag features + rolling mean/std + diff + time
+index) producing tabular regression problem from univariate series
++ post-fit importance normalization to sum-to-1 fractions for
+cross-technique comparability. Forecast is recursive multi-step
+via sequential prediction-update.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session 4/17
+post-rewrite):**
+
+- Math-layer harness validates engine PRIMARY PATH (lightgbm
+  available) via RunContext post-rewrite Category 1 LEGITIMATE per
+  Cat 3 remediation cycle session 4/17. Pre-rewrite harness was
+  Category 3 DEGENERATE-VACUOUS — abbreviated `_fit_predict` helper
+  instantiated `lgb.LGBMRegressor` with hardcoded Fast-preset
+  hyperparameters in BOTH arms + minimal lag-only features + NO
+  importance normalization step, bypassing engine pipeline.
+- Engine FALLBACK PATH (sklearn GBR when lightgbm unavailable) NOT
+  math-layer-parity validated. Hyperparameter mapping at engine
+  fallback (lines 308-318) omits LightGBM-specific `num_leaves` +
+  `colsample_bytree` + uses sklearn-specific `loss="squared_error"`.
+  Fallback also omits the post-fit importance normalization step,
+  meaning feature importance values reported by fallback are sklearn-
+  default scale (mean-decrease-impurity, already 0-1 normalized) NOT
+  normalized-fractions-of-split-counts (LightGBM primary scale).
+  Users in non-lightgbm environments receive both algorithmically
+  distinct output AND distinct importance scale.
+- Engine output rounding floor (Phase 1 finding B8): forecast values
+  rounded to 6 decimals at engine line 398; importances + train/CV
+  metrics rounded to 4 decimals.
+- lightgbm `LGBMRegressor` determinism: triage close empirically
+  confirmed bit-exact reproducibility at seed=42 across consecutive
+  runs (max_abs_diff=0.0). LightGBM uses OpenMP threading but is
+  deterministic at fixed `random_state` for the regression
+  objective.
+- CV model uses `max(50, n_estimators // 2)` trees + omits subsample
+  / colsample_bytree (engine lines 343-351; defaults to 1.0 for
+  both; non-stochastic CV evaluation distinct from main-model
+  stochastic LightGBM fitting). num_leaves preserved at CV scope.
+
+**Phase 3 boundary of validity (extracted from harness DGP + fixture
+parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1); other DGP regimes not
+  validated
+- Horizon=12 fixed at harness `HORIZON` class attribute matching
+  engine default at line 222
+- Balanced preset config (n_estimators=300 + max_depth=6 +
+  num_leaves=31 + learning_rate=0.05 + n_lags=12 + rolling_windows=
+  [3, 6, 12] + subsample=0.8 + colsample_bytree=0.8) validated at
+  PRIMARY lightgbm path only
+- Univariate series only
+- AR(1) DGP-specific
+- `objective="regression"` only validated; alternative LightGBM
+  objectives (regression_l1 + huber + quantile + etc.) NOT validated
+- lightgbm 4.6.0 validated
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at math
+  layer (only Balanced)
+- Engine FALLBACK PATH NOT math-layer-parity validated; sklearn GBR
+  produces mathematically distinct output from LightGBM primary
+  path (depth-first vs leaf-wise tree growth + histogram-based vs
+  exact split finding); importance scale also differs between
+  primary + fallback
+- Multi-step recursive forecast accumulation validated implicitly
+  via end-to-end PASS
+- num_leaves-controlled leaf-wise growth validated at num_leaves=31
+  (Balanced) only
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor at
+PRIMARY PATH per SC4 / Cat 3 remediation cycle session 4/17):**
+Layer 1 LightGBM math validated bit-exact at machine precision at
+deterministic seed post-rewrite via RunContext invocation of engine
+primary-path code including importance normalization step. Wrapper
+layer (S49+ NEW 3-check scope) validated at 3/3 PASS. Layer 2
+engine wrapper orchestration paths NOT covered by 3-check.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close) + SC3 fallback-dispatch three-state classification
+SECOND-INSTANCE application:**
+
+- **Validated configuration (harness math layer):** engine PRIMARY
+  PATH (lightgbm installed) exercised via RunContext at Balanced
+  preset (n_estimators=300 + max_depth=6 + num_leaves=31 +
+  learning_rate=0.05 + n_lags=12 + rolling_windows=[3, 6, 12] +
+  subsample=0.8 + colsample_bytree=0.8 + post-fit importance
+  normalization to sum-to-1); horizon=12; seed=42;
+  objective="regression".
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 235 + primary-path
+  dispatch via `_has_lightgbm()` at engine line 270.
+- **Configuration match:** **YES** at PRIMARY PATH — user invoking
+  at default Balanced preset with lightgbm installed experiences
+  mathematically validated Layer 1 surface.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer (only Balanced). **FALLBACK PATH
+  DISCLOSURE per SC3 template element second-instance application:**
+  primary lightgbm path is math-layer-parity validated; sklearn GBR
+  fallback path (engine lines 308-318, dispatched when
+  `_has_lightgbm()` returns False) is wrapper-layer-3-check covered
+  but NOT math-layer-parity validated. **Mathematical equivalence
+  assessment between primary + fallback: NOT EQUIVALENT.** Fallback
+  uses depth-first tree growth (sklearn GBR) vs LightGBM leaf-wise
+  growth + histogram splits — different boosting algorithms produce
+  numerically distinct outputs even at fixed seed + identical
+  mapped hyperparameters. Importance scale ALSO differs (LightGBM
+  normalized-split-counts vs sklearn GBR mean-decrease-impurity).
+  Users in non-lightgbm environments experience fallback path
+  output that the math-layer parity claim does NOT cover.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+4/17 — FOURTH session of cycle):** Inventory verification commit
+12d3785 classified p3_lightgbm as Cat 3 DEGENERATE-VACUOUS per
+refined methodology revision-2. Triage close at HEAD a7746f1
+confirmed Cat 3 (bit-exact deterministic at fixed seed; rewrite
+feasible). This §2.5 entry closes the remediation cycle session
+4/17 via combined harness rewrite + entry forward-amendment per
+Tier 2 incremental pattern + two-layer family template + SC3
+fallback-dispatch template element.
+
+**SC3 fallback-dispatch template element SECOND-INSTANCE empirical
+validation:** SC4 lightgbm is SECOND-INSTANCE application of SC3
+fallback-handling template element. Template elements preserved at
+SC4:
+- `run_tsl` verifies `backend="lightgbm"` audit_field dispatch
+  (raises if dispatched to fallback unexpectedly)
+- VSC section FALLBACK PATH DISCLOSURE enumerating fallback
+  hyperparameter mapping + mathematical equivalence assessment +
+  EXTENDED at SC4 to include importance-scale equivalence assessment
+  (NEW SC4 nuance: LightGBM has post-fit importance normalization
+  step distinct from RF+GBR+XGB which expose sklearn-normalized
+  importances natively)
+- Gap markings flag fallback path as NOT math-layer-parity validated
+
+**NEW SC4 template refinement (AST hash check + manual code
+inspection two-stage helper-identity verification):** SC4 introduces
+two-stage helper identity verification when AST source-segment
+SHA256 hash check shows divergence:
+1. Stage 1 (automated): AST hash check per SC3 precedent
+2. Stage 2 (manual; NEW at SC4): if Stage 1 shows divergence,
+   manual code-level inspection to determine whether divergence is
+   COMMENT-ONLY (preserve reuse) or BEHAVIORAL (reimplement). SC4
+   `_create_forecast_features` divergence is COMMENT-ONLY (LightGBM
+   omits `# Placeholder for recursive prediction (will be set
+   later)` comment vs RF version); reuse ratified.
+3. Forward-instrumentation: SC5+ sessions should apply two-stage
+   verification when AST hash mismatches; institutional precedent
+   established.
+
+**NEW SC4 template refinement (post-fit transformation pipeline
+mirroring):** SC4 introduces explicit handling for engines with
+post-fit transformation steps (LightGBM importance normalization
+to sum-to-1 at engine lines 297-301). Reference arm must mirror
+these post-fit transformations exactly. Forward-instrumentation:
+SC5+ sessions should scan engine `run()` body for post-fit
+transformations between primitive `.fit()` call and audit_fields
+emission; mirror in reference arm to preserve parity.
+
+## §3 Unvalidated catalog techniques (35 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -24636,8 +24999,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (11 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
-`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`
+### ML / Deep Learning (10 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
+`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
