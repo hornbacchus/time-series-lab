@@ -24241,6 +24241,365 @@ SC3-SC6 Tier A remaining sessions):**
   Disposition 2 means each `_ENGINE_BALANCED_PRESET` is technique-
   specific; engineering source must be re-read per session.
 
+### xgboost_forecast (Phase 7+ SC3; THIRTY-EIGHTH §2.5 entry; THIRD ML / Deep Learning block entry; Cat 3 remediation cycle session 3/17 per triage close ordering; THIRD Tier A tree-family-sklearn-wrapped session; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; SC1+SC2 two-layer family template THIRD-INSTANCE empirical validation with NEW dispatch handling for fallback path)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per SC3 Code Step 4 empirical verification + Cat 3
+remediation cycle session 3/17 disposition. Reference arm reimplements
+the engine's exact primary-path pipeline (NaN edge-strip + interior-
+interpolate + lag/rolling/diff/time feature engineering at Balanced
+preset config + xgboost `XGBRegressor.fit` at engine-resolved
+hyperparameters with `subsample=0.8` + `colsample_bytree=0.8`
+stochastic XGBoost + TimeSeriesSplit CV + multi-step recursive
+forecast) using identical xgboost primitive at identical call sites.
+Both arms use `random_state=ctx.seed=42` ensuring bit-exact
+deterministic XGBoost output. Fallback path (sklearn GBR when xgboost
+unavailable) NOT validated at math layer; covered at wrapper-layer
+3-check at Check 2.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 interior NaN
+  values at indices [5, 23, 67, 134, 178] of n=200 AR(1) series.
+  Wrapper returns non-error response; emits warning "5 interior
+  missing values were linearly interpolated." per engine
+  `_prepare_series` lines 46-66 (byte-identical to SC1 random_forest
+  + SC2 gradient_boosting NaN handling pipeline; linear interpolation
+  between flanking non-NaN values).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_estimators=300 + max_depth=6 +
+  learning_rate=0.05 + n_lags=12 + rolling_windows=[3, 6, 12] +
+  subsample=0.8 + colsample_bytree=0.8 per engine `_PRESET_CONFIG`
+  lines 33-37); returned 3 expected tables (`Forecast` + `Model
+  Summary` + `Feature Importance`) + `audit_fields` populated (26
+  keys; includes `backend="xgboost"` field confirming primary path
+  dispatch); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast table
+  12 rows × 2 cols [Step, Forecast] (horizon=12 default at engine
+  line 215); Model Summary 17 × 2 (includes `Backend` row for
+  dispatch verification); Feature Importance 15 × 2 (top 15 features
+  sorted descending by importance per engine line 390).
+
+Wrapper-layer validation harness at `tools/_xgb_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness):** Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_xgboost.py` at
+`_reference_xgboost` lines 90-203 mirrors engine
+`xgboost_forecast.run()` primary path at engine lines 196-504
+verbatim — same NaN handling, same feature engineering, same
+hyperparameters at Balanced preset, same TimeSeriesSplit CV, same
+multi-step recursive forecast, same `subsample=0.8` +
+`colsample_bytree=0.8` stochastic XGBoost configuration.
+
+**Helper identity note (per SC3 Step 1 empirical verification per
+ratified workflow):** Engine `_prepare_series` + `_create_features` +
+`_create_forecast_features` at `engine/techniques/xgboost_forecast.py`
+lines 46-176 are byte-identical (AST source-segment SHA256 hash
+match) to corresponding functions at `engine/techniques/random_
+forest_forecast.py` lines 35-165. Layer 2 family-shared helper
+imports from SC1 `p3_random_forest.py` per ratified two-layer family
+template; no `_reference_xgboost_*` helper reimplementation
+required. This is the THIRD-INSTANCE empirical confirmation of the
+two-layer template (SC1 → SC2 → SC3); engine source is byte-
+identical at these three preprocessing helpers across random_forest +
+gradient_boosting + xgboost engine modules.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 5 primary metrics: 12-step forecast
+values + top-15 sorted feature importances + train_rmse + train_r2
++ cv_rmse; n=200 AR(1) DGP + Balanced preset + seed=42 at runner
+CLI execution; xgboost 3.2.0 primary path).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC3 Code Step 6
+empirical verification.
+**Audit script:** `tools/reference_parity/harness/checks/p3_xgboost.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+abbreviated `_fit_predict` helper instantiating
+`xgb.XGBRegressor(n_estimators=100, max_depth=4, learning_rate=0.1,
+subsample=1.0, colsample_bytree=1.0, tree_method="hist",
+n_jobs=1)` directly with hardcoded Fast-preset hyperparameters in
+BOTH arms + minimal lag-only features — degenerate self-parity
+bypassing engine code path per inventory verification methodology
+revision-2 Cat 3 DEGENERATE-VACUOUS classification).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 3/17
+close).
+**Primary metrics (math layer):** 12-step recursive forecast values +
+top-15 sorted feature importances + in-sample `train_rmse` +
+`train_r2` + cross-validated `cv_rmse` (3-fold TimeSeriesSplit).
+
+**Source files (Cat 3 remediation post-rewrite; two-layer family
+template third-instance):**
++ `tools/reference_parity/harness/checks/p3_xgboost.py` lines 64-72
+  (Layer 2 helper imports from SC1: `_generate_ar_dgp` +
+  `_prepare_series_reference` + `_create_features_reference` +
+  `_create_forecast_features_reference`)
++ `tools/reference_parity/harness/checks/p3_xgboost.py` lines 75-87
+  (Layer 1 engine preset Balanced mirror `_ENGINE_BALANCED_PRESET`
+  with XGBoost-specific fields including `subsample` +
+  `colsample_bytree` absent from SC1+SC2 presets)
++ `tools/reference_parity/harness/checks/p3_xgboost.py` lines 90-203
+  (engine `_reference_xgboost` primary-path pipeline reimpl)
++ `tools/reference_parity/harness/checks/p3_xgboost.py` lines 240-307
+  (harness TSL arm `run_tsl` invokes engine via RunContext + verifies
+  `backend="xgboost"` dispatch confirmation + extracts forecast +
+  importances + train/CV metrics from engine output)
++ `tools/reference_parity/harness/checks/p3_xgboost.py` lines 309-322
+  (harness reference arm `run_reference` invokes
+  `_reference_xgboost` at identical Balanced preset config)
++ `tools/reference_parity/harness/checks/p3_xgboost.py` lines 324-381
+  (compare() with engine output-rounding alignment per Phase 1
+  finding B8: 6-decimal forecast rounding + 4-decimal audit metric
+  rounding on REF side)
++ `engine/techniques/xgboost_forecast.py` lines 19-24 (engine
+  `_has_xgboost()` dispatch helper; primary/fallback selection)
++ `engine/techniques/xgboost_forecast.py` lines 27-43 (engine
+  `_PRESET_CONFIG` Fast/Balanced/Thorough hyperparameter preset
+  dispatch; Balanced default at lines 33-37)
++ `engine/techniques/xgboost_forecast.py` lines 46-176 (engine
+  `_prepare_series` + `_create_features` + `_create_forecast_
+  features` Layer 2 helpers; byte-identical to random_forest_
+  forecast.py + gradient_boosting_forecast.py at these three
+  functions)
++ `engine/techniques/xgboost_forecast.py` lines 282-318 (engine
+  primary/fallback dispatch: xgboost.XGBRegressor primary at lines
+  287-297; sklearn.GradientBoostingRegressor fallback at lines
+  307-314)
++ `engine/techniques/xgboost_forecast.py` lines 179-518 (engine
+  `run()` body: end-to-end XGBoost forecast pipeline; harness
+  reference arm `_reference_xgboost` mirrors this primary-path-only
+  verbatim modulo fallback dispatch + audit_fields construction +
+  interpretation builder + plain English summary)
++ no separate audit markdown report; empirical baseline reference is
+  the runner CLI PASS verdict at this commit
+
+**Validation claim scope (Cat 3 remediation cycle session 3/17 post-
+rewrite; engine code path EXERCISED via RunContext at math layer at
+primary xgboost path):** Per Code SC3 Step 4 empirical verification:
+
+- **Layer 1 (XGBoost math at xgboost.XGBRegressor primary path +
+  engine feature engineering pipeline + subsample=0.8 +
+  colsample_bytree=0.8 stochastic configuration with
+  random_state=42) VALIDATED at Tier II.bit-exact at engine output-
+  rounding floor:** Engine `xgboost_forecast` Layer 1 primary-path
+  math + `p3_xgboost` harness TSL arm both invoke engine code path
+  via RunContext (post-rewrite); reference arm `_reference_xgboost`
+  invokes identical xgboost primitives at identical hyperparameters
+  at IDENTICAL call sites. Bit-exact PASS at deterministic seed
+  (random_state=42); 0.0 abs diff on forecast values + feature
+  importances + train/CV metrics. Note: `subsample=0.8` +
+  `colsample_bytree=0.8` produce stochastic XGBoost (per-iteration
+  random row + column subsampling) but xgboost is fully deterministic
+  at fixed `random_state`. **Layer 1 PRIMARY PATH PASS bit-exact
+  empirically grounded.**
+- **Layer 1 FALLBACK PATH (sklearn GBR when xgboost unavailable)
+  NOT VALIDATED at math layer:** Engine fallback dispatch at engine
+  lines 307-314 invokes sklearn `GradientBoostingRegressor` at
+  mapped hyperparameters (n_estimators + max_depth + learning_rate +
+  subsample; OMITS xgboost-specific colsample_bytree + objective
+  fields). Reference arm does NOT mirror fallback dispatch (validates
+  primary path only); user invoking engine in environment WITHOUT
+  xgboost installed experiences fallback path which math-layer
+  parity claim does NOT cover. Wrapper-layer 3-check at Check 2
+  covers engine code execution at whichever dispatch path is active
+  at engine-invocation time.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via interior
+  linear interpolation; preset config dispatch returns expected 3-
+  table structure + audit_fields with all 26 expected keys (including
+  `backend="xgboost"` dispatch-confirmation field); output shape/type
+  verification confirms numeric outputs across all tables. Layer 2
+  paths NOT covered by 3 checks (multi-step recursive forecast
+  accumulation + interpretation builder + plain English summary +
+  audit_fields construction + fallback path dispatch when xgboost
+  unavailable) remain expert-review-required per pre-S49 scope.
+
+**Phase 3 algorithmic basis (extracted from engine module):** XGBoost
+(eXtreme Gradient Boosting) per Chen + Guestrin (2016) "XGBoost: A
+Scalable Tree Boosting System" KDD 2016 + Friedman (2001) "Greedy
+Function Approximation: A Gradient Boosting Machine" foundation.
+XGBoost extends gradient boosting with: (a) regularization in
+objective function (L1 + L2 penalties on leaf weights), (b)
+second-order Taylor expansion for loss function (Newton boosting vs
+GBR first-order gradient boosting), (c) sparsity-aware split
+finding for missing values, (d) approximate split finding for
+scalability, (e) column subsampling per tree
+(`colsample_bytree=0.8` at Balanced) for variance reduction beyond
+GBR row-subsample-only stochastic boosting, (f) tree_method
+dispatch (default `hist` for histogram-based fast approximate
+splits). xgboost.XGBRegressor is the canonical Python sklearn-API
+wrapper. Engine wrapper adds time-series-specific feature
+engineering (lag features + rolling mean/std + diff + time index)
+producing tabular regression problem from univariate series.
+Forecast is recursive multi-step via sequential prediction-update.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session 3/17
+post-rewrite):**
+
+- Math-layer harness validates engine PRIMARY PATH (xgboost
+  available) via RunContext post-rewrite Category 1 LEGITIMATE per
+  Cat 3 remediation cycle session 3/17. Pre-rewrite harness was
+  Category 3 DEGENERATE-VACUOUS — abbreviated `_fit_predict` helper
+  instantiated `xgb.XGBRegressor` with hardcoded Fast-preset
+  hyperparameters in BOTH arms + minimal lag-only features (NO
+  subsample/colsample_bytree at engine Balanced preset values),
+  bypassing engine wrapper's preset resolution + NaN handling +
+  multi-feature engineering + recursive multi-step forecast pipeline.
+- Engine FALLBACK PATH (sklearn GBR when xgboost unavailable) NOT
+  math-layer-parity validated. Hyperparameter mapping at engine
+  fallback (lines 307-314) omits xgboost-specific
+  `colsample_bytree` + uses sklearn-specific `loss="squared_error"`
+  + drops xgboost `objective` field. Fallback path produces
+  mathematically distinct output from primary path (different
+  underlying boosting variant: Friedman 2001 sklearn GBR vs Chen +
+  Guestrin 2016 XGBoost with second-order Taylor + column
+  subsampling); users in non-xgboost environments receive engine
+  output covered by wrapper-layer 3-check only.
+- Engine output rounding floor (Phase 1 finding B8): forecast values
+  rounded to 6 decimals at engine line 397; feature importances +
+  train/CV metrics rounded to 4 decimals at engine lines 391 +
+  412-416. compare() rounds REF outputs to match display precision.
+- xgboost `XGBRegressor` determinism depends on `random_state`
+  parameter; engine passes `random_state=ctx.seed` ensuring
+  deterministic XGBoost at fixed seed AND deterministic
+  `subsample=0.8` row sampling + `colsample_bytree=0.8` column
+  sampling at fixed seed. Triage close empirically confirmed bit-
+  exact reproducibility across consecutive runs at seed=42
+  (max_abs_diff=0.0).
+- CV model uses `max(50, n_estimators // 2)` trees + omits
+  `subsample` + `colsample_bytree` parameters (engine lines 342-348;
+  defaults to 1.0 for both; non-stochastic CV evaluation distinct
+  from main-model stochastic XGBoost fitting). Intentional engine
+  design but means CV RMSE precision differs from 1-to-1 main-model
+  CV.
+
+**Phase 3 boundary of validity (extracted from harness DGP + fixture
+parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1) phi=0.6 + sigma=1.0;
+  smaller T may have insufficient training samples; larger T not
+  validated; other DGP regimes not validated at parity layer
+- Horizon=12 fixed at harness `HORIZON` class attribute matching
+  engine default `horizon=12` at line 215
+- Balanced preset config (n_estimators=300 + max_depth=6 +
+  learning_rate=0.05 + n_lags=12 + rolling_windows=[3, 6, 12] +
+  subsample=0.8 + colsample_bytree=0.8) validated at PRIMARY xgboost
+  path only; Fast + Thorough presets NOT in parity scope at math
+  layer; wrapper-layer 3-check covers Balanced preset invocation
+- Univariate series only; no exogenous regressor support in engine
+  scope
+- AR(1) DGP-specific; non-linear DGP not validated
+- `objective="reg:squarederror"` only validated; alternative
+  objectives (reg:squaredlogerror + reg:gamma + reg:tweedie + etc.)
+  NOT validated
+- xgboost 3.2.0 validated; other xgboost versions may have different
+  internal behavior at tree_method dispatch + default hyperparameter
+  resolution
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at math
+  layer (only Balanced); wrapper-layer 3-check at Check 2 covers
+  Balanced preset invocation only
+- Engine FALLBACK PATH (sklearn GBR dispatch when xgboost not
+  installed) NOT math-layer-parity validated — see "Phase 3 known
+  failure modes" for details. Users in non-xgboost environments
+  receive engine output that math-layer parity claim does NOT cover.
+- Multi-step recursive forecast accumulation logic validated
+  implicitly via end-to-end PASS; isolated forecast-feature-update
+  logic NOT separately unit-validated
+- Subsample + colsample_bytree stochastic XGBoost validated at
+  `subsample=0.8` + `colsample_bytree=0.8` (Balanced) only;
+  alternative values not validated
+- xgboost `tree_method` default (`hist` for xgboost 1.0+; `exact`
+  for older versions) not explicitly pinned in engine code; relies
+  on xgboost default behavior
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor at
+PRIMARY PATH per SC3 / Cat 3 remediation cycle session 3/17):**
+Layer 1 XGBoost math validated bit-exact at machine precision at
+deterministic seed post-rewrite via RunContext invocation of engine
+primary-path code. Wrapper layer (S49+ NEW 3-check scope) validated
+at 3/3 PASS. Layer 2 engine wrapper orchestration paths NOT covered
+by 3-check (multi-step recursive forecast accumulation + fallback
+dispatch + interpretation builder + plain English summary +
+audit_fields construction) require expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close):**
+
+- **Validated configuration (harness math layer):** engine PRIMARY
+  PATH (xgboost installed) exercised via RunContext at Balanced
+  preset (n_estimators=300 + max_depth=6 + learning_rate=0.05 +
+  n_lags=12 + rolling_windows=[3, 6, 12] + subsample=0.8 +
+  colsample_bytree=0.8); horizon=12; seed=42;
+  objective="reg:squarederror".
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 228 + primary-path
+  dispatch via `_has_xgboost()` at engine line 273.
+- **Configuration match:** **YES** at PRIMARY PATH — user invoking
+  at default Balanced preset with xgboost installed experiences
+  mathematically validated Layer 1 surface.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer (only Balanced). **FALLBACK PATH DISCLOSURE:
+  primary xgboost path is math-layer-parity validated; sklearn GBR
+  fallback path (engine lines 307-314, dispatched when
+  `_has_xgboost()` returns False) is wrapper-layer-3-check covered
+  but NOT math-layer-parity validated.** Users invoking engine in
+  environment WITHOUT xgboost installed experience fallback path
+  which the math-layer parity claim does NOT cover. Fallback uses
+  mathematically distinct boosting variant (sklearn GBR Friedman
+  2001 first-order gradient vs primary XGBoost Chen + Guestrin 2016
+  second-order Taylor + column subsampling); outputs are NOT
+  numerically equivalent between primary + fallback even at fixed
+  seed.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+3/17 — THIRD session of cycle):** Inventory verification commit
+12d3785 classified p3_xgboost as Cat 3 DEGENERATE-VACUOUS per
+refined methodology revision-2. Triage close at HEAD a7746f1
+confirmed Cat 3 (bit-exact deterministic at fixed seed; rewrite
+feasible). This §2.5 entry closes the remediation cycle session
+3/17 via combined harness rewrite + entry forward-amendment per
+Tier 2 incremental pattern + two-layer family template established
+at SC1 + SC2.
+
+**SC1+SC2 two-layer family template third-instance empirical
+validation:** SC3 xgboost is THIRD-INSTANCE application of the
+family template. Template elements preserved at SC3:
+- Engine `_PRESET_CONFIG[Balanced]` verbatim copy as harness module
+  constant per Disposition 2 — extended cleanly to include XGBoost-
+  specific `subsample` + `colsample_bytree` fields absent from
+  SC1+SC2 presets
+- Layer 2 family-shared helper imports from SC1 — VERIFIED byte-
+  identical at engine source per SC3 Step 1 AST hash check
+- VSC section embedded directly per Disposition 3 — extended with
+  FALLBACK PATH DISCLOSURE section for the engine's primary/
+  fallback dispatch
+- Bit-exact PASS at runner CLI achieved at first attempt
+- Audit-hygiene cross-reference + cycle progress note + Block 7
+  catalog-state position notation
+
+**NEW SC3 template element (forward-instrumentation for fallback-
+dispatch engine modules):** SC3 introduces explicit handling for
+engines with primary/fallback dispatch:
+- `run_tsl` verifies `backend` audit_field matches expected primary
+  dispatch (raises RuntimeError if engine dispatched to fallback)
+- §2.5 entry VSC section adds FALLBACK PATH DISCLOSURE enumerating
+  fallback hyperparameter mapping + mathematical equivalence (or
+  non-equivalence) between primary + fallback
+- §2.5 entry gap markings flag fallback path as NOT math-layer-
+  parity validated
+- Forward sessions with engine fallback dispatch (likely SC4
+  lightgbm — engine may have similar dispatch — and SC11 prophet —
+  engine has seasonal-naive fallback) should apply this SC3
+  template element
+
+## §3 Unvalidated catalog techniques (36 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
 validation; not currently recommended for published output
@@ -24277,8 +24636,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (12 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
-`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`, `xgboost_forecast`
+### ML / Deep Learning (11 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
+`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lightgbm_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
