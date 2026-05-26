@@ -24961,7 +24961,391 @@ SC5+ sessions should scan engine `run()` body for post-fit
 transformations between primitive `.fit()` call and audit_fields
 emission; mirror in reference arm to preserve parity.
 
-## §3 Unvalidated catalog techniques (35 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### svr_forecast (Phase 7+ SC5; FORTIETH §2.5 entry; FIFTH ML / Deep Learning block entry; Cat 3 remediation cycle session 5/17 per triage close ordering; FIRST kernel-method session in Tier A — architectural transition out of tree-family cohort; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; SC4 two-stage helper identity verification THIRD-INSTANCE application + NEW pre-fit scaling pipeline mirroring + 2-table output structure distinct from SC1-SC4 3-table pattern)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per SC5 Code Step 4 empirical verification + Cat 3
+remediation cycle session 5/17 disposition. Reference arm reimplements
+the engine's exact pipeline including dual StandardScaler scaling
+on X + y + sklearn.svm.SVR.fit at engine-resolved hyperparameters +
+inverse-scaling on predictions + TimeSeriesSplit CV on pre-scaled
+arrays + multi-step recursive forecast with per-step scale → predict
+→ inverse-scale. sklearn SVR libsvm backend is deterministic at
+fixed input + hyperparameters; no random state required.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 interior NaN
+  values at indices [5, 23, 67, 134, 178] of n=200 AR(1) series.
+  Wrapper returns non-error response; emits warning "5 interior
+  missing values were linearly interpolated." per engine
+  `_prepare_series` lines 34-54 (byte-identical to SC1-SC4 NaN
+  handling pipeline at AST hash level).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (kernel="rbf" + C=10.0 + epsilon=0.05 +
+  gamma="scale" + n_lags=12 + rolling_windows=[3, 6, 12] per
+  engine `_PRESET_CONFIG` lines 23-26); returned **2 expected
+  tables** (`Forecast` + `Model Summary` — note: SVR has NO
+  `Feature Importance` table since sklearn SVR doesn't expose
+  `feature_importances_` attribute, distinct from SC1-SC4 tree-
+  family 3-table output structure); `audit_fields` populated (26
+  keys including SVR-specific `n_support_vectors` + `sv_ratio` +
+  `scaling_applied=True` fields); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table 12 rows × 2 cols [Step, Forecast]; Model Summary 18 × 2
+  (includes SVR-specific `Support Vectors` + `SV Ratio` + `Kernel`
+  + `C` + `Epsilon` + `Gamma` rows).
+
+Wrapper-layer validation harness at `tools/_svr_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness):** Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_svr.py` at
+`_reference_svr` lines 100-200 mirrors engine `svr_forecast.run()`
+pipeline at engine lines 183-444 verbatim including all SC5
+architectural elements (dual StandardScaler scaling on X + y +
+SVR.fit + inverse-scaling on predictions + CV with pre-scaled
+arrays + recursive multi-step forecast with per-step
+scale-predict-inverse-scale).
+
+**Helper identity note (per SC5 Step 1 two-stage verification per
+SC4 methodology):** Engine `_prepare_series` + `_create_features`
+at SVR engine lines 34-115 are byte-identical (AST source-segment
+SHA256 hash match) to SC1 RF functions. **`_create_forecast_features`
+at SVR engine lines 118-163 SHA256 hash DIFFERS** (SC1 RF
+`97ab66c14484c5d5` vs SVR `e598dd6a587adb14`) — Stage 2 manual
+inspection confirms COMMENT-ONLY divergence (RF includes
+`# Placeholder for recursive prediction (will be set later)`
+comment vs SVR omits, same pattern as SC4 LightGBM). Behavioral
+logic byte-identical at runtime. Reuse ratified per SC4 two-stage
+methodology. THIRD-INSTANCE confirmation of two-stage helper
+identity verification framework (SC4 LightGBM + SC5 SVR both
+exhibit identical comment-only divergence pattern at
+`_create_forecast_features` — comment-strip pattern empirically
+consistent across multiple engine modules; codification refinement
+candidate at absorption #6+).
+
+**SC5 architectural transition note (FIRST kernel-method session;
+NEW pipeline elements vs SC1-SC4 tree-family):**
+
+1. **Dual StandardScaler scaling pipeline:** Engine lines 257-261
+   apply separate `StandardScaler()` to X (features) AND y (target);
+   both `fit_transform`'d on training data. Reference arm mirrors
+   this two-scaler approach exactly.
+2. **Inverse-scaling on predictions:** Engine lines 274-275 + 315-
+   317 apply `scaler_y.inverse_transform(...)` to predictions
+   before final output (both for in-sample predictions used in
+   train_rmse + train_mae + train_r2 computation AND for recursive
+   multi-step forecast values).
+3. **CV with pre-scaled arrays:** Engine lines 294-295 reuse the
+   pre-computed `X_scaled` + `y_scaled` arrays inside CV loop
+   (does NOT re-scale per fold — keeps scaler-state consistent
+   between train + validation splits per engine design choice).
+4. **2-table output structure:** Engine outputs only `Forecast` +
+   `Model Summary` tables (NO `Feature Importance` table since
+   SVR doesn't expose `feature_importances_`); distinct from SC1-
+   SC4 3-table pattern.
+5. **Support vector audit fields:** Engine reports `n_support_
+   vectors` + `sv_ratio` + `scaling_applied=True` audit fields
+   specific to SVR.
+6. **NO fallback dispatch:** sklearn always available; no
+   `_has_svr()` dispatch helper; SC3-established fallback-handling
+   template element NOT APPLICABLE at SC5.
+7. **NO ensemble / stochastic subsampling:** SVR is a single
+   deterministic fit (libsvm SMO optimizer); no `subsample` or
+   `n_estimators` hyperparameters. Engine preset has only kernel +
+   C + epsilon + gamma + n_lags + rolling_windows fields.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 6 primary metrics: 12-step forecast
+values + train_rmse + train_r2 + cv_rmse + n_support_vectors +
+sv_ratio; n=200 AR(1) DGP + Balanced preset + seed=42 at runner
+CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC5 Code Step 6
+empirical verification.
+**Audit script:** `tools/reference_parity/harness/checks/p3_svr.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+abbreviated `_fit_predict` helper instantiating `SVR(kernel="rbf",
+C=1.0, epsilon=0.1, gamma="scale", cache_size=200, max_iter=-1)`
+directly with hardcoded Fast-preset hyperparameters + single
+StandardScaler on X only (NO y-scaling) + NO inverse-scaling step
++ minimal lag-only features — degenerate self-parity bypassing
+engine pipeline at Balanced preset + dual-scaler approach +
+inverse-transform output + recursive multi-step forecast).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 5/17
+close).
+**Primary metrics (math layer):** 12-step recursive forecast values
++ in-sample `train_rmse` + `train_r2` + cross-validated `cv_rmse`
+(3-fold TimeSeriesSplit) + `n_support_vectors` (integer count) +
+`sv_ratio` (support-vector-fraction-of-training-samples).
+
+**Source files (Cat 3 remediation post-rewrite; SC5 architectural
+transition + scaling pipeline mirroring):**
++ `tools/reference_parity/harness/checks/p3_svr.py` lines 73-81
+  (Layer 2 helper imports from SC1 random_forest; helper identity
+  per SC4 two-stage methodology applied at SC5)
++ `tools/reference_parity/harness/checks/p3_svr.py` lines 83-93
+  (Layer 1 engine preset Balanced mirror `_ENGINE_BALANCED_PRESET`
+  with SVR-specific kernel/C/epsilon/gamma fields)
++ `tools/reference_parity/harness/checks/p3_svr.py` lines 100-200
+  (engine `_reference_svr` end-to-end pipeline reimpl including
+  dual StandardScaler scaling + SVR fit + inverse-scaling on
+  predictions + CV with pre-scaled arrays + recursive forecast with
+  per-step scale-predict-inverse-scale)
++ `tools/reference_parity/harness/checks/p3_svr.py` lines 230-285
+  (harness TSL arm `run_tsl` invokes engine via RunContext +
+  extracts forecast + train/CV metrics + SVR-specific support
+  vector fields from engine audit_fields)
++ `tools/reference_parity/harness/checks/p3_svr.py` lines 287-296
+  (harness reference arm `run_reference` invokes `_reference_svr`)
++ `tools/reference_parity/harness/checks/p3_svr.py` lines 298-372
+  (compare() with engine output-rounding alignment per Phase 1
+  finding B8: 6-decimal forecast + 4-decimal audit metrics +
+  exact-match comparison for integer n_support_vectors)
++ `engine/techniques/svr_forecast.py` lines 18-31 (engine
+  `_PRESET_CONFIG` Fast/Balanced/Thorough hyperparameter preset
+  dispatch with SVR-specific kernel/C/epsilon/gamma fields;
+  Balanced default at lines 23-26)
++ `engine/techniques/svr_forecast.py` lines 34-163 (engine
+  preprocessing helpers; `_prepare_series` + `_create_features`
+  byte-identical to RF; `_create_forecast_features` comment-only-
+  divergent per SC4 two-stage methodology)
++ `engine/techniques/svr_forecast.py` lines 257-271 (engine dual
+  StandardScaler pipeline + SVR fit)
++ `engine/techniques/svr_forecast.py` lines 274-281 (engine
+  in-sample inverse-scaling)
++ `engine/techniques/svr_forecast.py` lines 290-306 (engine CV
+  with pre-scaled arrays)
++ `engine/techniques/svr_forecast.py` lines 311-323 (engine
+  multi-step recursive forecast with per-step scaling)
++ `engine/techniques/svr_forecast.py` lines 166-458 (engine
+  `run()` body: end-to-end SVR forecast pipeline; harness reference
+  arm `_reference_svr` mirrors this verbatim modulo audit_fields
+  construction + interpretation builder + plain English summary)
++ no separate audit markdown report; empirical baseline reference
+  is the runner CLI PASS verdict at this commit
+
+**Validation claim scope (Cat 3 remediation cycle session 5/17 post-
+rewrite; engine code path EXERCISED via RunContext at math layer
+INCLUDING dual scaling pipeline + inverse-scaling transformations):**
+
+- **Layer 1 (SVR math at sklearn.svm.SVR + engine feature
+  engineering pipeline + dual StandardScaler scaling + inverse-
+  scaling on predictions) VALIDATED at Tier II.bit-exact at engine
+  output-rounding floor:** Engine `svr_forecast` Layer 1 math +
+  `p3_svr` harness TSL arm both invoke engine code path via
+  RunContext; reference arm `_reference_svr` invokes identical
+  sklearn SVR primitive at identical hyperparameters at IDENTICAL
+  call sites AND mirrors the full dual-scaler + inverse-scaling
+  pipeline exactly. Bit-exact PASS at deterministic libsvm SMO
+  optimizer (no random state required); 0.0 abs diff across all
+  primary metrics including integer support vector count.
+  **Layer 1 PASS bit-exact empirically grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic; preset
+  config dispatch returns expected **2-table structure** (not 3
+  like SC1-SC4 tree-family) + audit_fields with 26 expected keys
+  including SVR-specific `n_support_vectors` + `sv_ratio` +
+  `scaling_applied`; output shape/type verification confirms
+  numeric outputs. Layer 2 paths NOT covered (multi-step recursive
+  forecast accumulation with scaling + interpretation builder +
+  plain English summary + audit_fields construction) require
+  expert review.
+
+**Phase 3 algorithmic basis (extracted from engine module):**
+Support Vector Regression (SVR) per Drucker et al. (1997)
+"Support Vector Regression Machines" NeurIPS 1996 + Schölkopf +
+Smola (1998) "A Tutorial on Support Vector Regression" foundation.
+SVR extends Vapnik's epsilon-insensitive loss to regression: fits
+a function within an epsilon-tube around training data using
+support vectors that lie on or outside the tube. RBF kernel
+(`exp(-gamma * ||x - x'||^2)`) is the default; `C` controls
+regularization strength (higher C → tighter fit, more support
+vectors); `epsilon` controls tube width (zero loss inside tube).
+sklearn `svm.SVR` uses the libsvm backend (SMO optimization;
+deterministic at fixed input + hyperparameters). Engine wrapper
+adds time-series-specific feature engineering (lag features +
+rolling mean/std + diff + time index) + DUAL StandardScaler
+pipeline (kernel methods are scale-sensitive; both features AND
+target standardized) + inverse-scaling on predictions for output
+in original scale + recursive multi-step forecast.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session 5/17
+post-rewrite):**
+
+- Math-layer harness validates engine code path EXERCISED via
+  RunContext (post-rewrite Category 1 LEGITIMATE). Pre-rewrite
+  was Category 3 DEGENERATE-VACUOUS — abbreviated `_fit_predict`
+  helper instantiated SVR with Fast-preset hyperparameters + only
+  X-scaling (no y-scaling) + no inverse-transform — degenerate
+  self-parity bypassing engine's full dual-scaler + inverse-scaling
+  pipeline + Balanced preset hyperparameter resolution + recursive
+  multi-step forecast.
+- Engine output rounding floor (Phase 1 finding B8): forecast values
+  rounded to 6 decimals at engine line 332; train/CV metrics +
+  sv_ratio rounded to 4 decimals at engine lines 413-418.
+- sklearn SVR determinism: libsvm SMO optimizer is deterministic at
+  fixed input + hyperparameters (no random state parameter). Triage
+  close empirically confirmed bit-exact reproducibility at
+  consecutive runs.
+- CV model is single SVR fit per fold (no n_estimators reduction
+  like tree-family CV pattern); CV RMSE precision matches main-
+  model precision (distinct from SC1-SC4 tree-family CV which uses
+  reduced-tree-count CV models).
+- StandardScaler order-of-operations: engine applies `fit_transform`
+  on training data (both X and y separately), then `transform` on
+  forecast features per step. Reference arm matches this order
+  exactly. Distinct from SC1-SC4 which had no scaling step.
+
+**Phase 3 boundary of validity (extracted from harness DGP + fixture
+parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1); other DGP regimes not
+  validated
+- Horizon=12 fixed at harness `HORIZON` class attribute matching
+  engine default at line 206
+- Balanced preset config (kernel="rbf" + C=10.0 + epsilon=0.05 +
+  gamma="scale" + n_lags=12 + rolling_windows=[3, 6, 12])
+  validated; Fast + Thorough presets NOT in parity scope at math
+  layer
+- Univariate series only
+- AR(1) DGP-specific
+- `kernel="rbf"` only validated; alternative kernels (linear, poly,
+  sigmoid) NOT validated at math layer despite engine allowlist
+  acceptance
+- `gamma="scale"` only validated; alternative gamma values ("auto"
+  or float) NOT validated
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer (only Balanced)
+- Alternative kernels (linear, poly, sigmoid) NOT validated at
+  math layer despite engine allowlist acceptance
+- Alternative gamma values NOT validated
+- Multi-step recursive forecast accumulation validated implicitly
+  via end-to-end PASS; isolated per-step scaling logic NOT
+  separately unit-validated
+- StandardScaler statistical assumptions (zero mean + unit variance
+  on training data) are sklearn-default; engine does NOT
+  customize scaling per Phase 3 audit scope
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC5 / Cat 3 remediation cycle session 5/17):** Layer 1 SVR
+math validated bit-exact at machine precision at deterministic
+libsvm SMO optimizer post-rewrite via RunContext invocation of
+engine code path INCLUDING dual scaling pipeline + inverse-scaling
+transformations. Wrapper layer (S49+ NEW 3-check scope) validated
+at 3/3 PASS at 2-table output structure. Layer 2 engine wrapper
+orchestration paths NOT covered by 3-check require expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close):**
+
+- **Validated configuration (harness math layer):** engine code
+  path EXERCISED via RunContext at Balanced preset (kernel="rbf"
+  + C=10.0 + epsilon=0.05 + gamma="scale" + n_lags=12 +
+  rolling_windows=[3, 6, 12] + dual StandardScaler scaling + inverse-
+  scaling on predictions); horizon=12; seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 216.
+- **Configuration match:** **YES** — user invoking at default
+  Balanced preset experiences mathematically validated Layer 1
+  surface including dual-scaler + inverse-scaling pipeline.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer (only Balanced). Alternative kernels +
+  alternative gamma values NOT validated despite engine allowlist
+  acceptance; users invoking with non-RBF kernel + non-"scale"
+  gamma experience untested algorithm paths. **NO fallback dispatch
+  disclosure section applicable at SC5** (sklearn always available;
+  SC3-established fallback-handling template element NOT APPLICABLE
+  per SC5 architectural transition observation).
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+5/17 — FIFTH session of cycle; FIRST kernel-method session):**
+Inventory verification commit 12d3785 classified p3_svr as Cat 3
+DEGENERATE-VACUOUS. Triage close at HEAD a7746f1 confirmed Cat 3
+(bit-exact deterministic at fixed input; rewrite feasible). This
+§2.5 entry closes the remediation cycle session 5/17 via combined
+harness rewrite + entry forward-amendment per Tier 2 incremental
+pattern + family template + SC4 two-stage helper identity
+verification methodology + NEW SC5 architectural transition
+handling for kernel methods with scaling pipeline.
+
+**SC4 two-stage helper identity verification THIRD-INSTANCE
+empirical validation:** SC5 SVR is THIRD-INSTANCE application of
+SC4 two-stage helper identity verification methodology. Template
+elements preserved at SC5:
+- Stage 1 AST source-segment SHA256 hash check
+- Stage 2 manual code inspection on hash mismatch to determine
+  COMMENT-ONLY vs BEHAVIORAL divergence
+- COMMENT-ONLY divergence preserves helper reuse; BEHAVIORAL
+  divergence requires reimplementation
+
+**SC4 + SC5 paired comment-only divergence pattern observation:**
+SC4 LightGBM + SC5 SVR both exhibit identical comment-only
+divergence at `_create_forecast_features` (engine versions both
+omit RF's `# Placeholder for recursive prediction (will be set
+later)` comment). Pattern empirically consistent across n=2
+distinct engine modules; suggests comment was added to RF source
+post-creation and not propagated to subsequent technique modules.
+Codification refinement candidate at absorption #6+ for two-stage
+helper identity verification methodology: empirically established
+COMMENT-ONLY DIVERGENCE PATTERN at `_create_forecast_features`
+across tree-family + SVR engine modules; future engine module
+audits may bypass Stage 2 for this specific helper at
+COMMENT-ONLY-EXPECTED status if hash differs from RF.
+
+**NEW SC5 template refinement (pre-fit scaling pipeline mirroring
++ post-fit inverse-transformation):** SC5 introduces explicit
+handling for engines with pre-fit scaling pipelines + post-fit
+inverse-transformations:
+- Pre-fit pipeline (scaling): scan engine `run()` body between
+  feature creation and primitive `.fit()` call for any scaling /
+  normalization / centering operations. Mirror exactly in reference
+  arm (including separate scalers for X and y when present).
+- Post-fit inverse-transformation: scan engine `run()` body between
+  primitive `.predict()` call and output / audit_fields emission
+  for any inverse-scaling / denormalization / decentering operations.
+  Mirror exactly to ensure predictions are in identical scale at
+  both arms.
+- Recursive forecast scaling per step: when engine recursive
+  forecast applies per-step scaling, reference arm must mirror
+  this per-step pattern (NOT batch-scale all forecast steps at
+  once).
+- Forward-instrumentation: SC6+ sessions should scan engine
+  pipeline for pre-fit scaling + post-fit inverse-transformation.
+  Likely SC6 quantile_regression has NO scaling pipeline (linear
+  regression on lag features); SC10 gaussian_process has scaling
+  per RBF kernel scale-sensitivity (similar to SC5 SVR). DL family
+  (SC13-SC17) typically has scaling per neural network convention
+  (StandardScaler or MinMaxScaler).
+
+**SC5 architectural transition observations (forward-instrumentation
+for Tier A close + Tier B-D upcoming sessions):**
+
+- Tier A.6 (SC6 quantile_regression — final Tier A session) is
+  ALSO sklearn-based; likely follows tree-family pattern (linear
+  regression on lag features; NO scaling pipeline). Two-stage
+  helper identity verification expected to show MATCH at all 3
+  RF helpers OR comment-only divergence at `_create_forecast_
+  features` per SC4+SC5 pattern.
+- Tier B (SC7-SC9) cross-block specialized: transfer_function
+  (linear regression-based), dtw (DP), loess (NaN imputation).
+  These will NOT follow family template; require per-technique
+  bespoke reference reimplementation.
+- Tier C (SC10-SC12) probabilistic/ESN: gaussian_process likely
+  has scaling pipeline (RBF kernel scale-sensitive); prophet has
+  Stan optimization; esn has reservoir computing.
+- Tier D (SC13-SC17) DL family: PyTorch-based; will likely require
+  device handling (CPU vs CUDA) + scaling pipelines + sequence
+  preparation distinct from tabular ML pattern.
+
+## §3 Unvalidated catalog techniques (34 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -24999,8 +25383,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (10 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
-`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `svr_forecast`, `tcn_forecast`
+### ML / Deep Learning (9 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
+`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
