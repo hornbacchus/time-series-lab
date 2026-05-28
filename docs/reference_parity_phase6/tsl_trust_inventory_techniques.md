@@ -27723,7 +27723,263 @@ explicitly per SC13 template (architecture-specific non-determinism
 check: dropout in eval mode, hidden state initialization, batch
 handling). Estimated session time: ~2-2.5h.
 
-## §3 Unvalidated catalog techniques (28 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### lstm_gru_forecast (Phase 7+ SC14; FORTY-SEVENTH §2.5 entry; ELEVENTH ML / Deep Learning block entry; Cat 3 remediation cycle session 14/17 — Tier D.2 PyTorch recurrent architecture; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; **PARTIAL Tier A pattern FIFTH-INSTANCE** confirmation; **SC13 DL family determinism profile INHERITED + recurrent-architecture cross-invocation bit-exact CONFIRMED**)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor at CPU PyTorch backend)** per SC14 Code Step 4
+empirical verification + Cat 3 remediation cycle session 14/17
+disposition. **SC13 DL family determinism profile inherited +
+verified for recurrent architecture**: cross-invocation BIT-EXACT
+at CPU PyTorch LSTM (Step 2 verification → max_abs_diff=0.0).
+
+**Tier D recurrent-architecture determinism verification (Step 2
+inherits SC13 profile):**
+- Hidden state init (h0, c0 for LSTM): PyTorch default zero init;
+  both arms use same convention. Bit-exact.
+- Gate weight init order (LSTM 4 gates input/forget/cell/output;
+  GRU 3 gates reset/update/new): PyTorch nn.LSTM/nn.GRU consume RNG
+  in deterministic order during construction. Both arms construct
+  identical layers in identical order.
+- Dropout in eval mode: engine + reference both call `model.eval()`
+  before in-sample predictions + forecast generation.
+- cuDNN recurrent non-determinism: NOT exercised at audit
+  environment (torch 2.11.0+cpu).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Via SC1 `_prepare_series`
+  helper reuse (Stage 1 AST hash MATCH; PARTIAL Tier A pattern
+  FIFTH-INSTANCE).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (hidden_size=64 + n_layers=2 + epochs=100 +
+  n_lags=12 + lr=0.005 + use_torch=True per engine `_PRESET_CONFIG`
+  lines 32-35); returned 3 expected tables (`Forecast` + `Model
+  Summary` + `Training Loss`) + `audit_fields` populated with LSTM/
+  GRU-specific fields including `backend="pytorch"` + `model_type=
+  "lstm"` + `hidden_size` + `n_layers` + `n_params` + `final_loss`
+  + `initial_loss` + `loss_curve_summary`; no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table 10 × 2; Model Summary 14 × 2; Training Loss ~20 × 2 (down-
+  sampled epoch × loss).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness; SC14 Tier D.2 + PARTIAL Tier A fifth-instance):**
+Reference reimplementation at `tools/reference_parity/harness/
+checks/p3_lstm_gru.py` `_reference_lstm_gru_forecast` lines 165-275
+mirrors engine `lstm_gru_forecast.run()` primary PyTorch path at
+engine lines 281-313 verbatim including `_train_torch_model` at
+engine lines 86-136 (LSTMModel/GRUModel classes with `nn.LSTM`/
+`nn.GRU` + Linear readout + Adam + MSE + epochs training loop) +
+`_predict_torch` at engine lines 139-154 (recursive multi-step
+forecast). DL determinism configuration via `_setup_dl_determinism`
+inherited from SC13.
+
+**Helper identity note (per SC14 Step 1 two-stage verification per
+SC4 methodology + SC10-SC13 PARTIAL Tier A precedent):**
+
+Stage 1 (AST source-segment SHA256 hash check):
+- `_prepare_series`: **MATCH SC1 RF** (hash 57bae54d463c2fd7)
+- `_create_features`: **ABSENT**
+- `_create_forecast_features`: **ABSENT**
+
+Stage 2: ABSENT helpers indicate architectural distinctness.
+PARTIAL Tier A pattern FIFTH-INSTANCE confirmation per SC10 +
+SC11 + SC12 + SC13 + SC14 sustained pattern. **n=5 sustained
+observations across THREE distinct cohorts** (Tier C SC10-SC12 +
+Tier D opening SC13 + Tier D.2 SC14); codification ROBUSTLY
+ROBUSTLY GROUNDED at A3 fourth-observation-tightening + Tier-
+agnostic generalization.
+
+**Fallback dispatch handling (SC3 template element SIXTH-INSTANCE
+application):** Engine `_has_torch()` + preset flag `use_torch`
+dispatches to PyTorch LSTM/GRU primary path when torch available +
+preset enables; sklearn `MLPRegressor` fallback when torch
+unavailable. **Mathematical equivalence assessment (primary vs
+fallback): CATEGORICALLY DIFFERENT.** PyTorch LSTM/GRU (recurrent
+neural network with gated memory cells) vs sklearn MLPRegressor
+(feed-forward MLP with lag features). NOT numerically equivalent.
+
+**LSTM vs GRU selection note:** Engine supports both via
+`model_type` parameter (allowlist "lstm" / "gru" at engine line
+242); Balanced preset default is "lstm" (engine line 237).
+**SC14 validates LSTM at Balanced preset default; GRU NOT
+validated at math layer** (covered at wrapper-layer 3-check Check 2
+allowlist-gate verification only).
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 9 primary metrics: 10-step forecast
+values [first=0.324915] + final_loss=0.131069 + initial_loss=
+1.037061 + rmse=0.4628 + mae=0.3378 + r²=0.866 + n_params=50497
+exact + n_train=188 exact + forecast_end_value=1.693678; n=200
+AR(1) DGP + Balanced preset + seed=42 + model_type="lstm" at
+runner CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC14 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_lstm_gru.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+local `_fit_predict` with hardcoded hidden_size=16 + epochs=5 +
+1-layer LSTM architecture in BOTH arms — degenerate self-parity
+bypassing engine's Balanced preset hidden_size=64 + n_layers=2 +
+epochs=100 + multi-feature engineering pipeline).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 14/17
+close).
+**Primary metrics (math layer):** 10-step recursive forecast +
+final_loss + initial_loss + rmse + mae + r² + integer n_params +
+integer n_train + forecast_end_value scalar.
+
+**Validation claim scope (Cat 3 remediation cycle session 14/17
+post-rewrite; engine code path EXERCISED via RunContext at math
+layer at PyTorch CPU LSTM backend):**
+
+- **Layer 1 (PyTorch LSTM math at CPU backend with torch.manual_
+  seed + deterministic gate weight initialization + Adam
+  optimization + MSE loss + epochs + recursive multi-step
+  forecast) VALIDATED at Tier II.bit-exact at engine output-
+  rounding floor:** Engine `_train_torch_model` + reference
+  `_reference_lstm_gru_forecast` invoke identical PyTorch
+  primitives at identical hyperparameters at IDENTICAL call sites
+  with IDENTICAL weight initialization order. Bit-exact PASS at
+  deterministic seed; 0.0 abs diff across all primary metrics
+  including integer parameter count (50497) confirming identical
+  architecture instantiation. **Layer 1 PyTorch CPU LSTM PASS
+  bit-exact empirically grounded.**
+- **Layer 1 GRU PATH NOT VALIDATED at math layer:** Engine GRU
+  code path (model_type="gru" parameter) is allowlist-accepted but
+  NOT exercised at SC14 audit (Balanced preset default "lstm").
+- **Layer 1 SKLEARN MLP FALLBACK NOT VALIDATED at math layer:**
+  sklearn MLPRegressor fallback at engine lines 157-171 covered at
+  wrapper-layer 3-check Check 2 only.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via SC1 reuse; preset
+  config dispatch returns expected 3-table structure; output shape/
+  type verification confirms numeric outputs. Layer 2 paths NOT
+  covered (GRU code path + sklearn MLP fallback + interpretation
+  builder + plain English summary) require expert review.
+
+**Phase 3 algorithmic basis (extracted from engine module):**
+LSTM per Hochreiter + Schmidhuber (1997) "Long Short-Term Memory"
+Neural Computation 9(8) + GRU per Cho et al. (2014) "Learning
+Phrase Representations using RNN Encoder-Decoder for Statistical
+Machine Translation" EMNLP. LSTM addresses vanishing gradient
+problem in vanilla RNN via gated memory cells (input/forget/cell/
+output gates); GRU simplifies LSTM by combining cell and hidden
+states with reset/update gates. PyTorch `nn.LSTM` and `nn.GRU`
+implement these architectures with `batch_first=True` convention
+expected by engine. Engine wraps recurrent layer with linear
+readout to produce single-output forecast; Adam optimizer +
+MSE loss + sliding window sequence input + recursive multi-step
+forecast via 1-step-ahead prediction in autoregressive loop.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session
+14/17 post-rewrite):**
+
+- Math-layer harness validates engine PyTorch CPU LSTM code path
+  (post-rewrite Category 1 LEGITIMATE). Pre-rewrite was Category 3
+  DEGENERATE-VACUOUS — `_fit_predict` helper with hardcoded
+  hidden_size=16 + epochs=5 + 1-layer LSTM architecture.
+- Engine output rounding floor (Phase 1 finding B8): forecast 6-
+  decimal; loss 6-decimal; rmse + mae + r² 4-decimal; integer
+  counts exact.
+- PyTorch CPU determinism: requires explicit configuration per SC13
+  established profile; SC14 verified for recurrent architecture
+  (LSTM specifically).
+- GRU code path identical pattern but NOT separately validated at
+  SC14 audit (Balanced preset default "lstm"); users invoking with
+  `model_type="gru"` experience untested algorithm path at math
+  layer.
+- Adam optimizer state deterministic at fixed seed + identical
+  gradients; engine + reference perform identical training steps in
+  identical order.
+
+**Phase 3 boundary of validity:**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1); other DGP regimes not
+  validated
+- Horizon=10 fixed
+- Balanced preset config validated at LSTM path; Fast (use_torch=
+  False → sklearn fallback) + Thorough presets NOT in parity scope
+- model_type="lstm" validated; "gru" NOT validated at math layer
+- Univariate series only
+- AR(1) DGP-specific
+- **PyTorch CPU backend validated; sklearn MLP fallback + GPU
+  backend NOT validated**
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer
+- GRU code path NOT validated at math layer (allowlist-accepted)
+- Sklearn MLP fallback NOT math-layer validated
+- GPU/CUDA backend NOT validated at SC14 audit (CPU-only)
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC14 / Cat 3 remediation cycle session 14/17):** Layer 1
+PyTorch LSTM math validated bit-exact at machine precision at
+deterministic seed post-rewrite via RunContext invocation of engine
+code path at CPU backend. Wrapper layer (S49+ NEW 3-check scope)
+validated at 3/3 PASS. Layer 2 engine wrapper orchestration paths
+NOT covered by 3-check require expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3) + SC3
+fallback three-state framework SIXTH-INSTANCE application:**
+
+- **Validated configuration (harness math layer):** engine PyTorch
+  CPU LSTM code path EXERCISED via RunContext at Balanced preset
+  (hidden_size=64 + n_layers=2 + epochs=100 + n_lags=12 + lr=0.005
+  + use_torch=True + model_type="lstm" default); horizon=10;
+  seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 256 + primary path
+  dispatch via `_has_torch()` at engine line 272.
+- **Configuration match:** **YES at CPU PyTorch LSTM backend** —
+  user invoking at default Balanced preset with torch installed in
+  CPU environment + default model_type="lstm" experiences
+  mathematically validated Layer 1 surface.
+- **Disclosure scope:** Fast (use_torch=False → sklearn fallback) +
+  Thorough preset configurations NOT validated at math layer.
+  **GRU PATH DISCLOSURE:** model_type="gru" allowlist-accepted at
+  engine line 242 but NOT validated at math layer; users invoking
+  GRU experience untested algorithm path. **MLP FALLBACK PATH
+  DISCLOSURE per SC3 template element SIXTH-INSTANCE:** PyTorch
+  primary path math-layer validated; sklearn MLPRegressor fallback
+  (engine lines 157-171, dispatched when `_has_torch()` returns
+  False OR preset `use_torch=False`) is wrapper-layer-3-check
+  Check 2 covered but NOT math-layer-parity validated.
+  **Mathematical equivalence: NOT EQUIVALENT** (recurrent LSTM/GRU
+  vs feed-forward MLP — categorically different architectures).
+  **GPU/CUDA backend DISCLOSURE per SC13 precedent:** SC14 validates
+  CPU PyTorch backend; CUDA backend NOT exercised; user-environment-
+  specific.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+14/17 — Tier D.2):** Inventory verification commit 12d3785
+classified p3_lstm_gru as Cat 3 DEGENERATE-VACUOUS. Triage close
+at HEAD a7746f1 confirmed Cat 3. This §2.5 entry closes the
+remediation cycle session 14/17 via combined harness rewrite +
+entry forward-amendment per Tier 2 incremental pattern + PARTIAL
+Tier A pattern FIFTH-INSTANCE + SC13 DL family determinism
+profile INHERITANCE + recurrent-architecture cross-invocation
+bit-exact VERIFICATION.
+
+**Legacy `_make_sequences` stub at SC14 lstm_gru:** p3_tcn +
+p3_nbeats + p3_nhits dependents still import `_make_sequences`
+from p3_lstm_gru pending SC15/SC16/SC17 remediation. Stub
+preserves 3D shape `(n_samples, lookback, 1)` per pre-rewrite
+convention. Removal scheduled at SC17 nhits close (last Tier D
+dependent).
+
+**SC15 tcn projection (next Tier D session per triage close
+ordering):** Engine `tcn_forecast.py` is PyTorch Temporal
+Convolutional Network (TCN); convolutional architecture distinct
+from recurrent. Inherit SC13 determinism configuration + verify
+cross-invocation reproducibility (convolutional ops typically
+deterministic on CPU). Engine preset likely has n_channels +
+kernel_size + dilations + epochs + lr fields. Estimated session
+time: ~2-2.5h.
+
+## §3 Unvalidated catalog techniques (27 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -27761,8 +28017,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (4 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11; echo_state_network moved to §2.5 per Phase 7+ SC12; autoencoder_anomaly moved to §2.5 per Phase 7+ SC13 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A complete post-SC6; TIER B complete post-SC9; TIER C complete post-SC12; TIER D DL family opens at SC13; SC14 lstm_gru next**)
-`lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `tcn_forecast`
+### ML / Deep Learning (3 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11; echo_state_network moved to §2.5 per Phase 7+ SC12; autoencoder_anomaly moved to §2.5 per Phase 7+ SC13; lstm_gru_forecast moved to §2.5 per Phase 7+ SC14 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A complete post-SC6; TIER B complete post-SC9; TIER C complete post-SC12; TIER D DL family opens at SC13; SC14 lstm_gru recurrent-architecture FIRST-INSTANCE within Tier D + DL determinism profile INHERITED from SC13 + cross-invocation BIT-EXACT recurrent-architecture CONFIRMED; SC15 tcn next**)
+`nbeats_forecast`, `nhits_forecast`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
