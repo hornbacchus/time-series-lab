@@ -5228,6 +5228,246 @@ third catalog block completion triggers per-block continuation
 pattern n=3 codification at §19.4 §4 forward instrumentation note
 6 refinement at next absorption cycle (absorption #4)**.
 
+---
+
+**SC9 FORWARD-AMENDMENT (Cat 3 remediation cycle session 9/17;
+TIER B CLOSE; MOST SEVERE Cat 3 STRUCTURAL DEFECT in inventory
+verification cycle):** This S27 entry is forward-amended at Cat 3
+remediation cycle session 9/17 close per Tier 2 incremental
+forward-amendment pattern. SECOND cycle session forward-amending
+an existing §2.5 entry (SC8 dtw_alignment_lag was first; SC9 loess
+is second; n=2 forward-amendment sessions in cycle). **SC9 closes
+Tier B cross-block specialized cohort (SC7-SC9).**
+
+**STRUCTURAL CORRECTION — MOST SEVERE Cat 3 case in cycle:**
+
+The pre-rewrite S27 framing above acknowledged "harness-validates-
+different-use-case-of-same-library-function" per α reframe. The
+inventory verification 12d3785 Gate 1 finding + triage close
+empirical investigation revealed that this characterization was
+**institutionally accurate but operationally insufficient**: the
+"different use case" is not a minor configuration variance but a
+**categorically different operation** with no shared validation
+surface with engine behavior.
+
+Pre-rewrite validation surface: `statsmodels.lowess` SMOOTHING
+primitive applied to CLEAN data — produces smoothed-curve output
+at observed positions. Validated bit-exact at smoothing surface
+per Tier III same-library self-test convention.
+
+Engine actual behavior: LOESS-based NaN-IMPUTATION applied to
+data WITH MISSING VALUES — produces imputed values at missing
+positions only. Engine REJECTS clean data with explicit error
+"Series 'y' has no missing values. LOESS interpolation requires
+at least one missing value." per engine lines 101-107. Engine
+never invokes the smoothing-on-clean-data code path the pre-
+rewrite harness validated.
+
+**Pre-rewrite parity claim was technically valid at smoothing
+surface but DEGENERATE-VACUOUS relative to engine's actual
+operation** — analogous to validating that a kitchen knife cuts
+through paper when the appliance under audit is a blender.
+Smoothing and imputation are categorically different operations
+that happen to share the LOESS local-regression primitive
+internally. Pre-rewrite §4.7.A "harness-validates-different-use-
+case-of-same-library-function" pattern framing is preserved above
+as historically accurate at S27 reframe scope but does NOT
+constitute valid engine-behavior validation.
+
+**SC9 STRUCTURAL CORRECTION MATRIX:**
+
+| Aspect | Pre-rewrite (WRONG surface) | Post-rewrite (CORRECT surface) |
+|---|---|---|
+| Validation target | Smoothed curve at observed positions | Imputed values at missing positions |
+| Engine behavior validated | NONE — engine never invoked clean-data code path | LOESS-imputation at NaN positions via engine code path |
+| Technique semantics | Smoothing (mischaracterization) | NaN-imputation (correct) |
+| Engine acceptance of fixture | Engine REJECTS clean data (pre-rewrite fixture invalid for engine) | Engine ACCEPTS NaN-containing fixture |
+| Cat classification | Cat 3 DEGENERATE-VACUOUS (per inventory verification 12d3785 Gate 1) | Cat 1 LEGITIMATE post-rewrite |
+| Tier classification | Tier III same-library self-test at smoothing surface | Tier II.bit-exact at engine output-rounding floor (imputation surface) |
+| §4.7.A framing | "Harness-validates-different-use-case-of-same-library-function" pattern (institutionally honest but operationally insufficient) | Standard same-library self-parity at engine-validated surface |
+
+**Pre-rewrite parity claim SUPERSEDED:** All claims above this SC9
+forward-amendment block reflect the pre-rewrite parity-claim scope.
+The Tier III classification at smoothing surface is preserved as
+historically accurate at pre-rewrite scope but does NOT extend to
+the engine's NaN-imputation behavior. The "Important nuance (Tier
+III definitional scope...)" caveat at line 4727-4730 + the §4.7.A
+"new structural mechanism variant" framing per S27 (α) reframe
+disposition are preserved as institutionally honest at-original-
+write-time but the underlying Cat 3 finding at inventory verification
+12d3785 demonstrates that these framings were insufficient to
+constitute valid engine-behavior validation. Post-rewrite SC9
+parity claim CLOSES the engine-behavior validation at IMPUTATION
+surface via engine code path exercise.
+
+**Post-rewrite parity claim (Cat 3 → Cat 1 LEGITIMATE; STRUCTURAL
+CORRECTION):**
+
+**Post-rewrite Tier (RECLASSIFIED):** Tier III (pre-rewrite same-
+library smoothing self-test) → **Tier II.bit-exact (post-rewrite
+engine-code-path-exercised at imputation surface with engine output-
+rounding floor alignment per Phase 1 finding B8)**. Tier
+reclassification rationale: pre-rewrite Tier III applied to
+smoothing primitive on clean data which is NOT engine behavior;
+post-rewrite Tier II.bit-exact applies to engine's actual imputation
+behavior via RunContext invocation. Tier reclassification is the
+FIRST tier-reclassification forward-amendment in the cycle (SC8
+preserved Tier II.bit-exact across pre/post rewrite scope; SC9
+reclassifies Tier III → Tier II.bit-exact).
+
+**Post-rewrite Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling (UNIQUE DEFINITIONAL SEMANTICS at SC9):**
+  PASS. Two distinct sub-checks:
+  - **Sub-check 1.a:** NaN-containing input (5 NaN values at indices
+    [10, 33, 67, 134, 178] of n=200 sinusoidal fixture). Wrapper
+    returns non-error response; engine performs imputation at
+    missing positions; no error emitted (NaN is REQUIRED, not
+    exceptional, for engine to even run).
+  - **Sub-check 1.b:** Clean-data rejection verification (institutional
+    completeness). Wrapper returns explicit error: "Series 'y' has
+    no missing values. LOESS interpolation requires at least one
+    missing value." per engine lines 101-107. Error response
+    correctly emitted at definitional boundary.
+  - **UNIQUE SC9 NaN-handling semantics:** Engine is the FIRST
+    technique in the cycle (SC1-SC9) where NaN is the REQUIRED
+    operating condition rather than exceptional handling. SC1-SC8
+    techniques all handled NaN via "drop or interpolate" (SC1-SC4
+    interpolate; SC5 dual-scale-pipeline-aware-drop; SC6 multi-
+    quantile-aware; SC7 row-aligned drop; SC8 independent per-
+    series drop). SC9 LOESS-imputation INVERTS this convention:
+    NaN is the engine's input domain.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (frac=0.2 + it=3 per engine `_PRESET_CONFIG`
+  line 27); returned 3 expected tables (`Imputed Series` +
+  `Imputed Values` + `Diagnostics`); audit fields populated (~8
+  keys including frac + it + n_missing + n_gaps + max_gap_length
+  + missing_fraction + rmse_observed + mae_observed); no error
+  response.
+- **Check 3 — Output shape/type verification:** PASS. Imputed
+  Series 200 × 5 [Time / Original / Imputed / LOESS Smooth /
+  Status]; Imputed Values 5 × 3 [Time / Index / Imputed Value]
+  (n_missing=5 rows for sub-check 1.a fixture); Diagnostics 10 × 2.
+
+Wrapper-layer validation harness at `tools/_loess_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Post-rewrite Reference (Pattern A.3 paper-formula self-parity at
+corrected harness; SC9 Tier B.3 STRUCTURAL bespoke per-session
+reimplementation):** Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_loess.py` at
+`_reference_loess_interpolation` lines 75-165 mirrors engine
+`loess_interpolation.run()` pipeline at engine lines 88-301 verbatim
+at Balanced preset (no LOO-CV auto-frac-selection at Balanced
+preset; only Thorough preset triggers `_auto_select_frac`).
+`_NAN_INJECTION_INDICES` fixture pattern at harness lines 63-65
+ensures deterministic NaN positions matching engine's required-NaN
+input domain.
+
+**Helper identity note (per SC9 Step 1 verification per Tier B
+projection):** Engine `loess_interpolation.py` exposes only
+`_auto_select_frac` + `run` + `build_interpretation`; NO tree-
+family helpers. Tier B Layer 2 family-shared helpers from SC1 NOT
+APPLICABLE per SC7+SC8 forward-instrumentation + SC9 empirical
+confirmation. THIRD-INSTANCE confirmation of SC7 bespoke-per-
+session pattern (n=3 within Tier B; **codification threshold
+reached** per A3 second-observation tightening precedent →
+SC10+ should codify "Tier B bespoke per-session" as established
+sub-pattern).
+
+**Post-rewrite Verdict (math layer):** PASS bit-exact (`max_abs_diff
+=0.0 + max_rel_diff=0.0` across all 10 primary metrics: imputed
+values at 10 missing positions [tsl_first=0.439413] + smoothed_all
+200-value vector [tsl_first=0.043128] + frac=0.2 exact + rmse=0.270981
+exact + mae=0.214286 exact + it=3 exact + n_missing=10 exact +
+n_gaps=10 exact + max_gap_length=1 exact + missing_fraction=0.05
+exact; n=200 sinusoidal-with-NaN DGP + Balanced preset + seed=42 at
+runner CLI execution).
+**Post-rewrite Verdict (wrapper layer):** PASS 3/3 checks per SC9
+Code Step 6 empirical verification including Sub-check 1.b clean-
+data-rejection verification.
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d revision-2
+framework + SC9 retroactive amendment per Disposition 3:**
+
+- **Validated configuration (harness math layer):** engine code path
+  EXERCISED via RunContext at Balanced preset (frac=0.2 + it=3);
+  NaN-containing 1-series fixture (n=200 sinusoidal with NaN at 10
+  fixed indices); seed=42; missing_fraction=0.05; LOESS-imputation
+  surface (engine's actual operation).
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 124.
+- **Configuration match:** **YES** — user invoking at default
+  Balanced preset on series WITH missing values experiences
+  mathematically validated LOESS-imputation surface.
+- **Disclosure scope:** Fast (frac=0.3 + it=1) preset configuration
+  NOT validated at math layer. **Thorough (frac=None + it=5) preset
+  triggers `_auto_select_frac` LOO-CV path at engine lines 32-74
+  which is NOT validated at math layer (Thorough auto-frac
+  selection NOT in parity scope; covered at wrapper-layer 3-check
+  Check 2 if Thorough preset invoked separately).** Engine's
+  clean-data rejection path at lines 101-107 validated at wrapper-
+  layer 3-check Sub-check 1.b. Multi-NaN consecutive-gap patterns
+  (n_gaps > 1 with max_gap_length > 1) NOT exercised at fixture
+  (NaN at scattered indices producing n_gaps=10 + max_gap=1);
+  consecutive-NaN path covered at code-reading only.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+9/17 — TIER B CLOSE; MOST SEVERE Cat 3 STRUCTURAL DEFECT):**
+Inventory verification commit 12d3785 classified p3_loess as Cat
+3 DEGENERATE-VACUOUS per refined methodology revision-2 + Gate 1
+finding. Triage close at HEAD a7746f1 empirically confirmed Cat 3
+via observing engine returns error on clean fixture; reference
+fixture MUST inject NaN. This S27 entry FORWARD-AMENDMENT closes
+the remediation cycle session 9/17 via combined harness
+STRUCTURAL rewrite + S27 entry forward-amendment per Tier 2
+incremental pattern + bespoke per-session reimplementation
+(Tier B.3 THIRD-INSTANCE confirmation; codification threshold
+reached).
+
+**TIER B CLOSE MILESTONE — Cross-block specialized cohort COMPLETE
+post-SC9:** Cat 3 remediation cycle Tier B (cross-block specialized
+sequential remediation per triage close ordering):
+- SC7 transfer_function (162907d): Tier II.bit-exact; FIRST Tier B
+  session; bespoke per-session pattern established
+- SC8 dtw_alignment_lag (f2ff73f): Tier II.bit-exact preserved;
+  FIRST cycle forward-amendment; Tier B bespoke pattern SECOND-
+  INSTANCE confirmation
+- SC9 loess_interpolation (THIS ENTRY): Tier II.bit-exact post-
+  rewrite (RECLASSIFIED from Tier III pre-rewrite); SECOND cycle
+  forward-amendment; Tier B bespoke pattern THIRD-INSTANCE
+  confirmation; MOST SEVERE Cat 3 STRUCTURAL DEFECT in inventory
+  verification cycle; STRUCTURAL CORRECTION at validation surface
+
+**SC9 institutional novelty observations (forward-instrumentation
+for SC10-SC17 Tier C-D upcoming sessions):**
+
+1. **FIRST tier-reclassification forward-amendment in cycle:** SC8
+   preserved Tier II.bit-exact across pre/post rewrite scope
+   (Layer 1 scope expansion + Layer 2+3 sub-component validation
+   addition); SC9 reclassifies Tier III → Tier II.bit-exact at
+   structural-surface-correction scope. Forward sessions with
+   Cat 3 structural correction should explicitly assess tier
+   reclassification per Tier transition rules.
+2. **FIRST clean-data-rejection wrapper-layer Sub-check semantics:**
+   SC9 introduces Sub-check 1.b validation for techniques where
+   NaN is REQUIRED rather than exceptional. Forward sessions with
+   similar required-NaN semantics (none expected in remaining
+   SC10-SC17 cohort per architectural review) should apply Sub-
+   check 1.b pattern.
+3. **NaN-handling convention inversion at SC9:** SC1-SC8 techniques
+   all handled NaN via "drop or interpolate" exceptional path; SC9
+   inverts to "NaN is required input domain". Inversion is unique
+   to SC9 in cycle; forward sessions revert to SC1-SC8 convention.
+4. **Cat 3 severity gradient established:** SC9 represents the
+   highest Cat 3 severity in cycle (categorically wrong validation
+   surface). SC1-SC8 Cat 3 cases were "engine richer pipeline than
+   harness validates" (subset relationship at validation surface);
+   SC9 Cat 3 case is "wrong technique entirely validated" (disjoint
+   relationship). Forward sessions should assess Cat 3 severity at
+   structural-correction-needed scope.
+
 ### kalman_imputation (Phase 7+ S28; TWELFTH §2.5 entry; THIRD-AND-FINAL Block 8 Missing Data entry; **BLOCK 8 FULLY Q1-AMENDED milestone** = THIRD catalog block fully Q1-amended after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23; FIRST Tier II.mle-band + Pattern A conditional-on-MLE-alignment overlay §2.5 precedent; FIRST Sub-class 2a standalone-only variant Q1 §2.5 entry; Sub-class 2a (αa) variant tagging n=3 baseline UPGRADE to codification-stable per A3 second-observation tightening precedent threshold; FIRST audit-content-distribution variant disclosure per S28 dedicated-audit-absent structural anomaly per CHAT RATIFICATION #6 (α) ratification)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
