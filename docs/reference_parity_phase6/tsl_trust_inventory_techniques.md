@@ -26506,7 +26506,340 @@ Engine preset likely has window-size + normalization-mode +
 step-pattern fields specific to DTW. Estimated session time:
 ~1.5-2h per Tier B per-session complexity.
 
-## §3 Unvalidated catalog techniques (32 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### gaussian_process_forecast (Phase 7+ SC10; FORTY-THIRD §2.5 entry; SEVENTH ML / Deep Learning block entry; Cat 3 remediation cycle session 10/17 — **TIER C OPENING** per triage close ordering; FIRST probabilistic/Bayesian/reservoir cohort session post-Tier-B close; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; **FIRST PARTIAL Tier A helper-reuse pattern** in cycle — sklearn-backbone with SC1 `_prepare_series` reuse + bespoke GP-specific pipeline)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per SC10 Code Step 4 empirical verification + Cat
+3 remediation cycle session 10/17 disposition. Reference arm
+reimplements engine's exact pipeline: PARTIAL Tier A family-shared
+helper reuse (`_prepare_series_reference` from SC1 random_forest;
+Stage 1 AST hash MATCH) + bespoke GP-specific pipeline (y-only
+z-score normalization + time-index input + ConstantKernel * RBF +
+WhiteKernel composite at engine `length_scale_init = n/5.0` +
+sklearn GaussianProcessRegressor fit at engine n_restarts=5 +
+alpha=1e-7 + posterior mean + posterior std prediction +
+denormalization + normal-z CI construction). Both arms use
+`random_state=42` ensuring deterministic L-BFGS-B optimizer
+restarts.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 3 interior
+  NaN values at indices [5, 23, 67] of n=100 AR(1) series. Wrapper
+  returns non-error response; emits warning "3 interior missing
+  values were linearly interpolated." per engine `_prepare_series`
+  lines 26-46 (AST hash MATCH to SC1 RF; reuses Layer 2 family-
+  shared NaN handling pattern). Additional GP-specific warning
+  about Bayesian credible interval semantics emitted at engine
+  lines 213-221.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_restarts=5 + max_train=500 + alpha=1e-7
+  per engine `_PRESET_CONFIG` line 21); returned 3 expected tables
+  (`Forecast` + `Fitted Values` + `Model Summary`) + `audit_fields`
+  populated (~20 keys including GP-specific `log_marginal_likelihood`
+  + `length_scale` + `kernel_type` + `kernel_params` + `r2` +
+  `avg_forecast_std`); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table 10 rows × 5 cols [Step / Forecast / Std Dev / Lower 95% /
+  Upper 95%]; Fitted Values 100 × 5 [Time / Original / Fitted /
+  Residual / Std Dev]; Model Summary 10 × 2.
+
+Wrapper-layer validation harness at `tools/_gp_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness; SC10 PARTIAL Tier A pattern):** Reference reimplementation
+in `tools/reference_parity/harness/checks/p3_gp.py` at
+`_reference_gaussian_process` lines 110-235 mirrors engine
+`gaussian_process_forecast.run()` pipeline at engine lines 49-401
+verbatim (RBF kernel + Balanced preset path). Imports SC1
+`_prepare_series_reference` for Layer 2 family-shared NaN handling
+helper reuse (Stage 1 AST hash MATCH); reimplements all other
+pipeline elements bespoke per GP architectural distinctness from
+tree-family pattern.
+
+**Helper identity note (per SC10 Step 1 two-stage verification +
+INSTITUTIONAL FINDING for bespoke-per-session codification
+question):**
+
+Stage 1 (AST source-segment SHA256 hash check):
+- `_prepare_series`: **MATCH SC1 RF** (hash 57bae54d463c2fd7)
+- `_create_features`: **ABSENT** (GP uses time-index input, not
+  lag features)
+- `_create_forecast_features`: **ABSENT** (GP predicts directly
+  at horizon time indices, not recursive multi-step)
+
+Stage 2 (manual code inspection per SC4 methodology): ABSENT
+helpers indicate architectural distinctness; GP uses fundamentally
+different feature engineering (time-index regression vs lag-feature
+tabular regression) and forecast generation (direct prediction at
+horizon time indices vs recursive multi-step iteration). PARTIAL
+reuse pattern ratified: `_prepare_series` reused from SC1 +
+remaining pipeline bespoke per-session.
+
+**FIRST PARTIAL Tier A pattern in cycle — institutional finding
+for bespoke-per-session codification:** SC10 is the FIRST sklearn-
+backbone session exhibiting PARTIAL helper reuse (1 MATCH + 2
+ABSENT), distinct from prior cycle patterns:
+
+| Tier | Sessions | Helper outcome |
+|---|---|---|
+| Tier A.1-A.5 tree-family | SC1-SC5 | 3/3 MATCH or COMMENT-ONLY (full helper reuse) |
+| Tier A.6 multi-quantile | SC6 | 1 MATCH + 1 BEHAVIORAL + 1 ABSENT (partial reuse, behavioral reimpl) |
+| Tier B specialized | SC7-SC9 | 0/3 (all ABSENT; pure bespoke per-session) |
+| Tier C.1 GP | **SC10** | **1 MATCH + 2 ABSENT (PARTIAL Tier A; sklearn-backbone + bespoke GP-specific)** |
+
+**Codification implication:** The bespoke-per-session pattern
+established at Tier B is NOT strictly Tier-B-specific. Sklearn-
+backbone-but-architecturally-distinct techniques (GP at SC10) can
+exhibit a PARTIAL pattern where some Tier A helpers reuse and
+feature engineering is bespoke. Codification refinement candidate
+at absorption #6+ for sub-pattern enumeration:
+- "Full Tier A pattern" (3/3 helper reuse; SC1-SC5)
+- "Partial Tier A pattern" (some helpers reuse + bespoke feature
+  engineering; SC6 + SC10)
+- "Tier B bespoke" (0/3 helper reuse; pure per-session;
+  SC7-SC9)
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 9 primary metrics: 10-step posterior
+mean forecast values + 10-step posterior std + 10-step lower CI +
+10-step upper CI + log_marginal_likelihood=-109.8153 +
+rmse=0.3962 + r2=0.8868 + avg_forecast_std=1.1558 +
+length_scale=1.778282; n=100 AR(1) DGP + Balanced preset +
+seed=42 at runner CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC10 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_gp.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+local `_fit_predict` helper with hardcoded n_restarts=2 +
+normalize_y=True via sklearn's built-in normalization + 6-lag
+lookback feature matrix instead of engine's time-index input —
+degenerate self-parity bypassing engine's Balanced preset config
++ kernel construction + y-only normalization + time-index input +
+posterior std + CI machinery).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 10/17
+close; **TIER C OPENING milestone**).
+**Primary metrics (math layer):** 10-step posterior mean forecast
++ 10-step posterior std + 10-step lower-95-CI + 10-step
+upper-95-CI + log_marginal_likelihood + in-sample rmse + r² +
+avg_forecast_std + length_scale (extracted from optimized kernel).
+
+**Source files (Cat 3 remediation post-rewrite; SC10 PARTIAL Tier
+A pattern):**
++ `tools/reference_parity/harness/checks/p3_gp.py` lines 87-95
+  (Layer 2 family-shared helper import from SC1: only
+  `_prepare_series_reference`; NOT `_create_features_reference` or
+  `_create_forecast_features_reference` per Step 1 ABSENT outcome
+  for those two helpers in GP engine)
++ `tools/reference_parity/harness/checks/p3_gp.py` lines 99-104
+  (Layer 1 engine preset Balanced mirror with GP-specific
+  n_restarts + max_train + alpha fields)
++ `tools/reference_parity/harness/checks/p3_gp.py` lines 110-235
+  (bespoke `_reference_gaussian_process` end-to-end pipeline
+  reimpl + GP-specific kernel construction + y-only normalization
+  + time-index input + posterior prediction + denormalization +
+  CI computation)
++ `tools/reference_parity/harness/checks/p3_gp.py` lines 278-355
+  (harness TSL arm `run_tsl` invokes engine via RunContext +
+  extracts forecast + posterior std + CI from "Forecast" table +
+  audit fields)
++ `tools/reference_parity/harness/checks/p3_gp.py` lines 357-372
+  (harness reference arm `run_reference`)
++ `tools/reference_parity/harness/checks/p3_gp.py` lines 374-460
+  (compare() with engine output-rounding alignment per Phase 1
+  finding B8)
++ `engine/techniques/gaussian_process_forecast.py` lines 19-23
+  (engine `_PRESET_CONFIG`; Balanced at line 21)
++ `engine/techniques/gaussian_process_forecast.py` lines 26-46
+  (engine `_prepare_series`; byte-identical to SC1 RF per AST
+  hash)
++ `engine/techniques/gaussian_process_forecast.py` lines 49-401
+  (engine `run()` body: end-to-end GP forecast pipeline)
++ no separate audit markdown report; empirical baseline reference
+  is the runner CLI PASS verdict at this commit
+
+**Validation claim scope (Cat 3 remediation cycle session 10/17
+post-rewrite; engine code path EXERCISED via RunContext at math
+layer including posterior std + CI machinery):**
+
+- **Layer 1 (GP math at sklearn GaussianProcessRegressor with
+  ConstantKernel * RBF + WhiteKernel composite + L-BFGS-B
+  optimization with deterministic n_restarts at fixed
+  random_state + posterior mean + posterior std prediction +
+  denormalization) VALIDATED at Tier II.bit-exact at engine
+  output-rounding floor:** Engine `gaussian_process_forecast`
+  Layer 1 math + `p3_gp` harness TSL arm both invoke engine code
+  path via RunContext; reference arm `_reference_gaussian_process`
+  invokes identical sklearn primitives at identical hyperparameters
+  at IDENTICAL call sites including identical kernel construction
+  + identical y-only normalization + identical time-index input +
+  identical denormalization. Bit-exact PASS at deterministic seed;
+  0.0 abs diff across all primary metrics INCLUDING posterior
+  std (institutional uncertainty quantification surface) and
+  confidence interval bounds. **Layer 1 PASS bit-exact empirically
+  grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via SC1-
+  identical `_prepare_series`; preset config dispatch returns
+  expected 3-table structure including 5-col Forecast table with
+  posterior std + Lower/Upper CI columns; output shape/type
+  verification confirms numeric outputs. Layer 2 paths NOT covered
+  (Matern + RationalQuadratic kernel alternatives + subsample-
+  trigger path at n > max_train + length_scale bound-detection
+  logic + interpretation builder + GP credible-interval-vs-
+  prediction-interval disclosure warning) remain expert-review-
+  required per pre-S49 scope.
+
+**Phase 3 algorithmic basis (extracted from engine module):**
+Gaussian Process Regression per Rasmussen + Williams (2006)
+"Gaussian Processes for Machine Learning" MIT Press. GP models a
+function `f(x)` as a multivariate Gaussian distribution with mean
+`m(x)` and covariance `k(x, x')` (the kernel). Conditional on
+observed data, the posterior at any test point is also Gaussian
+with closed-form mean and variance. sklearn
+`GaussianProcessRegressor` uses L-BFGS-B for kernel hyperparameter
+optimization via marginal likelihood maximization; multiple
+restarts (`n_restarts_optimizer`) with random initialization
+mitigate local minima. Engine uses composite kernel
+`ConstantKernel(1.0) * RBF(length_scale=n/5) + WhiteKernel(0.1)`
+at Balanced preset: ConstantKernel scales overall amplitude; RBF
+provides smooth interpolation with length-scale controlling
+smoothness; WhiteKernel models observation noise. Forecast
+predictions return posterior mean (point forecast) and posterior
+std (Bayesian credible interval — NOT frequentist prediction
+interval; engine emits disclosure warning per lines 213-221).
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session
+10/17 post-rewrite):**
+
+- Math-layer harness validates engine code path EXERCISED via
+  RunContext (post-rewrite Category 1 LEGITIMATE). Pre-rewrite
+  was Category 3 DEGENERATE-VACUOUS — `_fit_predict` helper
+  hardcoded n_restarts=2 + lag-feature matrix + sklearn's built-in
+  normalize_y=True (DIFFERENT from engine's manual y-normalization
+  at lines 142-151).
+- Engine output rounding floor (Phase 1 finding B8): forecast +
+  std + CI at 6 decimals; log_marginal_likelihood + rmse + r² +
+  avg_forecast_std at 4 decimals; length_scale at 6 decimals.
+- GP determinism: sklearn `GaussianProcessRegressor` with fixed
+  `random_state` is deterministic at L-BFGS-B optimization
+  including all `n_restarts_optimizer` restarts. Triage close
+  empirically confirmed bit-exact reproducibility at seed=42.
+- Length-scale extraction logic (engine lines 326-343) uses
+  hyperparameter-metadata introspection to extract length_scale
+  from optimized kernel; reference arm mirrors this exactly.
+  Length_scale value bit-exact match (1.778282) confirms kernel
+  optimization convergence equivalence.
+- GP credible interval is NOT a frequentist prediction interval
+  (engine disclosure at lines 213-221). Bayesian credible band is
+  conditional on fitted kernel; coverage depends on kernel
+  capturing true autocovariance. Engine warns users to use
+  conformal prediction or rolling-origin bootstrap for calibrated
+  coverage. Reference arm computes IDENTICAL Bayesian credible
+  band; same disclosure applies.
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=100 fixture (`DGP_N = 100`) with AR(1) phi=0.6 + sigma=1.0;
+  other DGP regimes not validated
+- Horizon=10 fixed at harness `HORIZON` matching engine default
+  at line 89
+- Balanced preset config (n_restarts=5 + max_train=500 +
+  alpha=1e-7) validated; Fast (n_restarts=2 + alpha=1e-5) +
+  Thorough (n_restarts=15 + alpha=1e-10) presets NOT in parity
+  scope at math layer
+- RBF kernel default validated; Matern + RationalQuadratic
+  alternatives NOT in math-layer parity scope (covered at engine
+  allowlist; wrapper-layer 3-check Check 2 covers RBF default
+  only)
+- Univariate series only
+- Confidence level 0.95 default; other levels not validated
+- `normalize=True` default; `normalize=False` path not validated
+- Subsample-trigger path at n > max_train=500 not exercised at
+  fixture n=100
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer (only Balanced)
+- Alternative kernels (Matern + RationalQuadratic) NOT validated
+  at math layer
+- Subsample-trigger path at n > max_train NOT exercised
+- Length_scale bound-detection logic (engine lines 336-340) NOT
+  separately unit-validated; validated implicitly via length_scale
+  audit field match
+- GP Bayesian credible interval vs frequentist prediction interval
+  is a SEMANTIC caveat (not numerical defect); engine emits
+  disclosure warning; reference arm matches Bayesian credible
+  band exactly
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC10 / Cat 3 remediation cycle session 10/17 / TIER C
+OPENING):** Layer 1 GP math validated bit-exact at machine
+precision at deterministic seed post-rewrite via RunContext
+invocation of engine code path INCLUDING posterior std +
+confidence interval bounds. Wrapper layer (S49+ NEW 3-check
+scope) validated at 3/3 PASS. Layer 2 engine wrapper orchestration
+paths NOT covered by 3-check require expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close):**
+
+- **Validated configuration (harness math layer):** engine code
+  path EXERCISED via RunContext at Balanced preset (n_restarts=5
+  + max_train=500 + alpha=1e-7 + RBF kernel default + normalize=
+  True default + confidence_level=0.95 default); horizon=10;
+  seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 125.
+- **Configuration match:** **YES** — user invoking at default
+  Balanced preset experiences mathematically validated Layer 1
+  surface including posterior std + CI machinery.
+- **Disclosure scope:** Fast + Thorough preset configurations
+  NOT validated at math layer (only Balanced). Matern +
+  RationalQuadratic kernel alternatives NOT validated despite
+  engine allowlist acceptance; users invoking with non-RBF kernel
+  experience untested algorithm paths. Subsample-trigger path at
+  n > max_train=500 NOT exercised at fixture. Alternative
+  confidence levels NOT validated. **GP credible interval is
+  Bayesian-kernel-conditional, NOT frequentist prediction
+  interval** — institutional semantic disclosure preserved from
+  engine warning at lines 213-221; user advisory that empirical
+  coverage may be optimistic if kernel does not capture true
+  series autocovariance.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+10/17 — TIER C OPENING):** Inventory verification commit 12d3785
+classified p3_gp as Cat 3 DEGENERATE-VACUOUS. Triage close at HEAD
+a7746f1 confirmed Cat 3 (bit-exact deterministic at fixed seed;
+rewrite feasible). This §2.5 entry closes the remediation cycle
+session 10/17 via combined harness rewrite + entry forward-
+amendment per Tier 2 incremental pattern + PARTIAL Tier A helper-
+reuse pattern (FIRST instance in cycle).
+
+**TIER C OPENING MILESTONE — Probabilistic/Bayesian/reservoir
+cohort dispatched post-Tier-B close:** SC10 gaussian_process is
+FIRST Tier C session. Tier C continues with SC11 prophet (Stan
+optimization + seasonal-naive fallback per SC3 fallback-handling
+template element applicability) + SC12 esn (numpy reservoir
+computing; sparse-matrix reservoir + warmup + ridge regression
+readout). Tier C close at SC12; Tier D DL family opens at SC13
+autoencoder.
+
+**SC11 prophet projection (next Tier C session per triage close
+ordering):** Engine `prophet_forecast.py` likely has
+`_has_prophet()` dispatch + seasonal-naive fallback when prophet
+unavailable (SC3 fallback-handling template element APPLICABLE).
+Engine preset likely has changepoint_prior_scale + seasonality
+parameters + frequency inference logic. Bespoke per-session
+reimplementation expected (Stan optimization is distinct from
+sklearn-backbone). Estimated session time: ~1.5-2h.
+
+## §3 Unvalidated catalog techniques (31 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -26544,8 +26877,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (8 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A tree-family ML cohort COMPLETE post-SC6** — SC7 transfer_function dispatches Tier B cross-block specialized cohort next)
-`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `tcn_forecast`
+### ML / Deep Learning (7 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A tree-family complete post-SC6; TIER B cross-block specialized complete post-SC9; TIER C probabilistic/Bayesian/reservoir cohort opens at SC10**)
+`autoencoder_anomaly`, `echo_state_network`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
