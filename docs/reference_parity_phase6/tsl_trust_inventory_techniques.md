@@ -29050,7 +29050,338 @@ dependency on `_seed_torch` removed at SC17 rewrite via
 orphaned post-SC16). Removal at separate SC17 cleanup commit per
 Tier A `_make_lag_features` cleanup precedent.
 
-## §3 Unvalidated catalog techniques (24 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### conformal_intervals (Phase 7+ S62; FIFTY-FIRST §2.5 entry; FIFTH-AND-FINAL Evaluation / Uncertainty block entry; **Block 4 Evaluation / Uncertainty FULLY Q1-AMENDED — NINTH catalog block to complete per Q1 work program scope at S62 close = 9 of 13 catalog blocks fully Q1-amended (69% catalog block-level completion)**; Q1 cadence resumption entry post-Cat-3-cycle close at SC17 a54b430; cascade-resolution entry — p3_conformal was the original Cat 3 finding at S62 Step 1 that triggered the inventory verification cascade + 17-session Cat 3 remediation cycle, now closing the loop with the §2.5 entry against the corrected harness; **MANDATORY Path B forward observation embedded per user disposition: ENG-EXT-CONFORMAL-001 commissions CQR + EnbPI/SPCI Q2+ engine extension for institutional-fixed-income-use-case scope**)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor at corrected harness)** per S62 Code Step 2
+empirical verification + S62 §2.5 entry disposition.
+
+**Engine variant validated:** Split conformal per Vovk-Gammerman-
+Shafer 2005 + Papadopoulos et al. 2002 with pmdarima.auto_arima base
+forecaster + rolling-refit one-step-ahead calibration residuals via
+`model.update()`. Engine fits auto_arima(stepwise=True, max_p=5,
+max_q=5) on the training split (75% of input at Balanced
+`cal_fraction=0.25`); rolls one-step-ahead through the calibration
+window updating model state after each step; computes conformal
+quantile `q_level = min(ceil((n_cal+1)*(1-alpha))/n_cal, 1.0)` over
+absolute residuals; produces point forecast over horizon with
+constant-width intervals = point ± conformal_q.
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness):** Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_conformal.py`
+`_reference_split_conformal` lines 41-97 mirrors engine
+`conformal_intervals.run()` pipeline at engine lines 170-260 verbatim
+including identical pmdarima.auto_arima parameterization
+(stepwise=True, max_p=5, max_q=5; Balanced preset per engine line
+59) + identical train/calibration split logic (lines 53-61) +
+identical rolling-refit one-step-ahead calibration loop (lines 71-78
+with `model.update(np.array([cal[i]]))` matching engine lines
+211-215) + identical conformal quantile formula (lines 80-83) +
+identical interval construction (lines 86-89). Both arms call
+`np.random.seed(42)` per engine seed propagation at engine line 115;
+auto_arima at fixed seed is deterministic.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Via engine `_prepare_series`
+  at engine lines 64-84 (strip-edge-NaN + linearly-interp-interior-
+  NaN); harness fixture `_generate_ar_dgp` produces NaN-free series
+  so the strip path is covered by null-pass; the wrapper layer
+  preserves the engine helper invocation order without bypass.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (cal_fraction=0.25 + max_p=5 + max_q=5 +
+  stepwise=True per engine `_PRESET_CONFIG` lines 57-61); returned
+  2 expected tables (`Forecast with Conformal Intervals` 6-column
+  + `Diagnostics`) + audit-field-equivalent diagnostics row
+  containing `Conformal Quantile` value extracted via Diagnostics
+  table row lookup; no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  with Conformal Intervals table 5 × 6 (Step + Point Forecast +
+  Conformal Lower + Conformal Upper + Parametric Lower +
+  Parametric Upper); Diagnostics table contains Conformal Quantile
+  scalar value extractable as float; all numeric outputs verified
+  at harness column-index extraction sites (cols 1/2/3 for
+  conformal triple).
+
+**Coverage validation (per original S62 scope; methodological
+correctness check beyond implementation parity):**
+
+- **Design:** 100 independent AR(1) DGP realizations (phi=0.6,
+  sigma=1.0, n=401 per realization with seeds 1000-1099); for each,
+  pass y[:400] to split-conformal pipeline at Balanced preset
+  hyperparameters (engine-equivalent reference) with horizon=1;
+  check whether true next observation y[400] falls within
+  [conformal_lower, conformal_upper]. Engine bit-exactness per math-
+  layer finding means reference coverage = engine coverage.
+- **Target coverage:** 0.9500 (engine default `confidence_level=
+  0.95` per engine line 135).
+- **Empirical coverage:** **0.9700 (97/100)**.
+- **Binomial SE (n=100):** 0.0218.
+- **2-σ tolerance band:** [0.9064, 0.9936].
+- **Verdict:** **PASS** — empirical coverage within 2-σ binomial
+  band of target. Slight OVER-coverage (+2.0 pp) is consistent with
+  finite-sample conformal-quantile ceiling formula
+  `ceil((n_cal+1)*(1-alpha))/n_cal` at n_cal=100 + alpha=0.05
+  yielding q_level = 0.96 (i.e. 96th-percentile residual, not 95th);
+  this is the textbook over-coverage trade-off for finite-sample
+  validity per VGS 2005 §2.
+- **Mean interval width:** 4.0146 (units of AR(1) σ); std width
+  0.3826. Across-realization width variability is small (~10% of
+  mean) reflecting stable conformal-quantile estimation at n_cal=
+  100.
+- **Methodological scope:** Coverage validation exercises the
+  horizon-1 setting where split conformal's exchangeability-based
+  guarantee is closest to applicable. **Multi-step coverage NOT
+  validated**: conformal intervals are constant-width across
+  horizon (point ± conformal_q) while ARIMA multi-step forecast
+  variance grows; expected empirical coverage degrades with
+  horizon h > 1. Engine emits an exchangeability-violation warning
+  when calibration-residual lag-1 ACF |ρ| > 0.2 (engine lines
+  235-243); at AR(1) phi=0.6 the auto_arima residuals are
+  approximately white so this warning is not triggered at the
+  validation DGP.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 4 primary metrics: 5-step point_forecast
+[first=0.590774] + conf_lower [first=-1.30953] + conf_upper [first=
+2.491078] + conformal_q scalar=1.900304; n=400 AR(1) DGP + Balanced
+preset + seed=42 at runner CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S62 Code Step 3.
+**Verdict (coverage layer):** PASS empirical coverage 0.9700 vs
+target 0.9500 within 2-σ band [0.9064, 0.9936] at horizon=1 over
+n=100 independent AR(1) realizations.
+**Audit script:** `tools/reference_parity/harness/checks/p3_conformal.py`
+(corrected harness at commit a06646e; the pre-rewrite harness was
+the original Cat 3 finding — see audit-hygiene cross-reference
+below).
+**Audit date:** 2026-05-28 (S62 §2.5 entry post-Cat-3-cycle close).
+**Primary metrics (math layer):** 5-step point forecast + 5-step
+conformal lower interval bound + 5-step conformal upper interval
+bound + conformal quantile scalar.
+
+**Validation claim scope (S62 — corrected harness at a06646e;
+engine code path EXERCISED via RunContext at math layer at split
+conformal with pmdarima.auto_arima primary backend):**
+
+- **Layer 1 (split conformal math with auto_arima base forecaster
+  + rolling-refit one-step-ahead calibration residuals + conformal
+  quantile + constant-width interval construction) VALIDATED at
+  Tier II.bit-exact at engine output-rounding floor:** Engine
+  `conformal_intervals.run()` + reference
+  `_reference_split_conformal` invoke identical pmdarima primitives
+  at identical hyperparameters at IDENTICAL call sites with
+  IDENTICAL calibration loop sequencing + IDENTICAL conformal
+  quantile formula. Bit-exact PASS at deterministic seed; 0.0 abs
+  diff across all primary metrics. **Layer 1 split conformal +
+  auto_arima base PASS bit-exact empirically grounded.**
+- **Layer 1 PARAMETRIC ARIMA INTERVAL not separately validated at
+  math layer:** Engine output table also emits Parametric Lower +
+  Parametric Upper columns (auto_arima's native Gaussian-residual
+  intervals); harness extracts only the conformal columns (1/2/3).
+  Parametric column math is auto_arima internal + covered by
+  pmdarima upstream tests.
+- **Layer 2 (coverage methodology) VALIDATED at empirical coverage
+  PASS at horizon=1:** Conformal intervals at engine implementation
+  + Balanced hyperparameters DO achieve the target coverage rate
+  within finite-sample 2-σ tolerance under AR(1) DGP. The split
+  conformal guarantee per VGS 2005 holds at the validation DGP.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via engine `_prepare_series`;
+  preset config dispatch returns expected 2-table structure +
+  Diagnostics extraction path; output shape/type verification
+  confirms numeric outputs at conformal-column extraction sites.
+  Layer 2 paths NOT covered (parametric interval column emission +
+  interpretation builder + plain English summary + exchangeability-
+  violation warning emission) require expert review.
+
+**Phase 3 algorithmic basis (extracted from engine module + harness
+reference):** Split conformal prediction per Vovk + Gammerman +
+Shafer (2005) "Algorithmic Learning in a Random World" §2 + Papa-
+dopoulos et al. (2002) "Inductive Confidence Machines for Regression"
+ECML. Distribution-free finite-sample coverage guarantee at level
+(1 - α) under data exchangeability. Engine application to time-series
+forecasting per the broader conformal-time-series literature
+(Stankeviciute-Alaa-van der Schaar 2021 NeurIPS; Xu-Xie 2021 ICML
+SPCI). Pipeline: (1) train auto_arima on training split; (2) compute
+one-step-ahead calibration residuals via rolling refit (model.update
+through calibration window); (3) compute conformal quantile via
+ceiling formula `ceil((n_cal+1)(1-α))/n_cal`-th quantile of absolute
+residuals (finite-sample-valid quantile per VGS 2005 §2.2.3); (4)
+emit point forecast + intervals at point ± conformal_q. Exchange-
+ability assumption flagged via lag-1 ACF check (engine lines 235-243)
+with user warning when |ρ| > 0.2.
+
+**Phase 3 known failure modes (S62 / engine variant scope):**
+
+- Math-layer harness validates engine split conformal + auto_arima
+  code path (corrected harness Category 1 LEGITIMATE at a06646e).
+  Pre-correction harness was Category 3 DEGENERATE-VACUOUS (naive
+  last-value forecaster as base predictor — see audit-hygiene
+  cross-reference).
+- Engine output rounding floor (Phase 1 finding B8): forecast +
+  interval bounds + conformal_q rounded to 6 decimals at engine
+  lines 267-271 + 286.
+- pmdarima.auto_arima determinism at fixed seed: deterministic at
+  CPU; relies on numpy global RNG state which engine pins via
+  `np.random.seed(ctx.seed)` at engine line 115. Reference matches.
+- **Exchangeability assumption (VGS 2005):** Split conformal
+  coverage guarantee assumes exchangeable data. Time series
+  generally do NOT satisfy exchangeability due to serial
+  dependence; the guarantee is only approximate under stationarity
+  + short-range dependence. Engine flags via lag-1 ACF warning
+  but does NOT enforce. Coverage validation at AR(1) phi=0.6
+  DGP showed PASS within 2-σ; under strongly persistent series
+  (e.g. AR(1) phi >> 0.8 or long-memory) coverage is expected to
+  degrade. Out-of-scope for split conformal — see Path B forward
+  observation below.
+- **Multi-step coverage degradation:** Conformal intervals are
+  constant width across horizon (= point ± conformal_q at fixed
+  calibration quantile); ARIMA multi-step forecast variance grows
+  with horizon, so empirical coverage at h > 1 systematically
+  under-shoots the target. Engine + harness do NOT separately
+  validate multi-step coverage; horizon=1 validation only.
+
+**Phase 3 boundary of validity:**
+
+- T=400 input fixture (`DGP_N = 400`) for math-layer parity check;
+  T=400 + 1 with 100 independent realizations for coverage check
+- horizon=5 fixed (math-layer parity scope); horizon=1 fixed
+  (coverage scope)
+- Balanced preset config validated; Fast (max_p=2, max_q=2,
+  cal_fraction=0.2) + Thorough (max_p=7, max_q=7, stepwise=False,
+  cal_fraction=0.3) NOT in parity scope
+- Univariate series only
+- AR(1) DGP phi=0.6 sigma=1.0 (stationary, short-range dependence,
+  approximately exchangeable auto_arima residuals)
+- conf_level=0.95 fixed; alternative target coverage levels NOT
+  validated
+- seasonal=False fixed; seasonal split conformal NOT validated
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer
+- Multi-step coverage (h > 1) NOT validated; expected to degrade
+- Strongly-persistent DGPs (phi > 0.8) NOT validated; expected
+  exchangeability-warning trigger + potential under-coverage
+- Seasonal series (auto_arima with seasonal=True) NOT validated
+- Parametric ARIMA interval column NOT separately validated (covered
+  by pmdarima upstream tests but not in TSL parity scope)
+- Alternative target coverage levels (0.90, 0.99) NOT validated
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor +
+coverage validation PASS at horizon=1 per S62 close):** Layer 1
+split conformal + auto_arima math validated bit-exact at machine
+precision at deterministic seed against the corrected harness at
+commit a06646e. Wrapper layer (S49+ NEW 3-check scope) validated
+at 3/3 PASS. Coverage layer (methodological correctness) validated
+at horizon=1 within 2-σ binomial tolerance.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math + coverage layers):**
+  engine split conformal code path EXERCISED via RunContext at
+  Balanced preset (cal_fraction=0.25 + max_p=5 + max_q=5 +
+  stepwise=True; auto_arima seasonal=False) + horizon=5 (math
+  parity) / horizon=1 (coverage) + confidence_level=0.95 + seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 144 + primary
+  dispatch via pmdarima.auto_arima.
+- **Configuration match:** **YES at split conformal + pmdarima
+  auto_arima primary backend** — user invoking at default Balanced
+  preset with pmdarima installed experiences mathematically
+  validated Layer 1 surface AND methodologically validated coverage
+  (within finite-sample 2-σ tolerance) at horizon=1 under stationary
+  short-range-dependent series.
+- **Disclosure scope:** Fast (max_p=2, max_q=2, cal_fraction=0.2)
+  + Thorough (max_p=7, max_q=7, stepwise=False, cal_fraction=0.3)
+  preset configurations NOT validated at math layer. **MULTI-STEP
+  COVERAGE DISCLOSURE:** Coverage validated at horizon=1 only;
+  constant-width intervals systematically under-cover at horizon
+  > 1 due to growing ARIMA forecast variance. **PERSISTENCE
+  DISCLOSURE:** AR(1) phi=0.6 DGP validated; strongly-persistent
+  series (phi > 0.8 or long-memory) may trigger engine
+  exchangeability-violation warning AND exhibit under-coverage.
+  **SEASONAL DISCLOSURE:** seasonal=False validated; seasonal
+  auto_arima base path NOT exercised. **TARGET-COVERAGE-LEVEL
+  DISCLOSURE:** confidence_level=0.95 validated; alternative target
+  levels (0.90, 0.99) NOT separately validated though same finite-
+  sample VGS 2005 guarantee applies algorithmically.
+
+**Path B forward observation (ENG-EXT-CONFORMAL-001 commission per
+user disposition — MANDATORY embedded per S62 entry scope):**
+
+Engine current scope validates split conformal only. For
+institutional fixed-income research analyst use cases, two
+additional conformal prediction variants are substantively important
+but currently OUT OF ENGINE SCOPE:
+
+1. **CQR (Conformalized Quantile Regression)** per Romano +
+   Patterson + Candès (2019) "Conformalized Quantile Regression"
+   NeurIPS — adaptive interval widths responding to local
+   uncertainty (VaR-like risk applications). Split conformal
+   produces constant-width intervals which over-cover in low-
+   volatility regimes and under-cover in high-volatility regimes;
+   CQR addresses this via quantile-regression base + conformal
+   correction on the quantile residuals, producing
+   heteroskedasticity-adaptive widths.
+2. **EnbPI / SPCI (time-series-specific conformal variants):**
+   EnbPI per Chernozhukov + Wuthrich + Zhu (2018) "Exact and Robust
+   Conformal Inference Methods for Predictive Machine Learning with
+   Dependent Data" arXiv:1802.06300 + SPCI per Xu + Xie (2021)
+   "Conformal Prediction Interval for Dynamic Time-Series" ICML —
+   address exchangeability violation under serial dependence via
+   ensemble-batched-prediction-intervals (EnbPI) or sequential
+   weighted conformal scoring (SPCI). Relevant for sequential
+   yield/FX forecasting where the iid exchangeability assumption
+   of split conformal does not hold.
+
+**Both commissioned for Q2+ engine extension under work program
+ENG-EXT-CONFORMAL-001 per user Path B disposition.** Validation at
+Q2+ §2.5 entries closes the institutional-fixed-income-use-case
+scope gap. Until Q2+ landing, users requiring adaptive interval
+widths (CQR) or formally-guaranteed time-series coverage (EnbPI/
+SPCI) must use external libraries (e.g. `mapie`, `crepes`) outside
+the TSL engine; the engine's split conformal output should be
+treated as a baseline with documented approximate-coverage
+limitations under serial dependence.
+
+**Audit-hygiene cross-reference (S62 / Cat 3 cascade resolution —
+Q1 cadence resumption):**
+
+S62 conformal_intervals is the **cascade-origin** entry: when the
+session originally executed, Step 1 surfaced that the p3_conformal
+harness implemented a naive last-value forecaster as the base
+predictor in a degenerate self-parity loop, while the engine wraps
+pmdarima.auto_arima. This was the FIRST Category 3 DEGENERATE-
+VACUOUS finding at the harness-vs-engine algorithmic-divergence
+scope and triggered the **inventory verification cascade** (commit
+12d3785) which surfaced 16 additional Cat 3 candidates. The
+inventory finding seeded the **17-session Cat 3 remediation cycle**
+(SC1-SC17) which completed at commit a54b430 with all 17 Cat 3
+DEGENERATE-VACUOUS harnesses remediated Category 3 → Category 1
+LEGITIMATE across 4 Tiers (A tree-family ML + B cross-block
+specialized + C probabilistic/Bayesian/reservoir + D DL family).
+
+The p3_conformal harness itself was rewritten at commit a06646e
+(during the original S62 session before cascade expansion) —
+reference reimpl uses pmdarima.auto_arima at identical engine
+hyperparameters with rolling-refit one-step-ahead calibration
+residuals + identical conformal quantile formula + identical
+interval construction. compare()-side rounding alignment at 6-
+decimal floor per Phase 1 finding B8 precedent.
+
+**This §2.5 entry closes the cascade loop:** validates against the
+corrected harness, closes the Evaluation / Uncertainty catalog
+block (BLOCK COMPLETE 5/5 entries; NINTH catalog block fully Q1-
+amended at 9/13 = 69%), and resumes Q1 audit cadence post-cascade.
+Forward state: next block selection for Q1 cadence continuation.
+
+## §3 Unvalidated catalog techniques (23 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -29079,8 +29410,8 @@ descriptions, summaries).
 ### Decomposition & Seasonal Adjustment (0 unvalidated; Block 3 FULLY Q1-AMENDED — FOURTH catalog block to complete per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; classical_decompose moved to §2.5 per Phase 7+ S31; mstl_decompose moved to §2.5 per Phase 7+ S32; stl_decompose moved to §2.5 per Phase 7+ S33; x13_seasonal_adjust moved to §2.5 per Phase 7+ S34 — FOURTH-AND-FINAL Block 3 entry)
 (all 4 techniques moved to §2.5)
 
-### Evaluation / Uncertainty (1 unvalidated; robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61)
-`conformal_intervals`
+### Evaluation / Uncertainty (0 unvalidated; **Block 4 FULLY Q1-AMENDED** — NINTH catalog block to complete per Q1 work program scope at S62 close = 9 of 13 catalog blocks fully Q1-amended (69% catalog block-level completion); robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61; conformal_intervals moved to §2.5 per Phase 7+ S62 — FIFTH-AND-FINAL block entry; Q1 cadence resumption entry post-Cat-3-cycle close at SC17 a54b430; cascade-resolution entry — p3_conformal was the original Cat 3 finding at S62 Step 1 that triggered the inventory verification cascade + 17-session Cat 3 remediation cycle, now closed at S62 §2.5 entry against the corrected harness; MANDATORY Path B forward observation embedded: ENG-EXT-CONFORMAL-001 commissions CQR + EnbPI/SPCI Q2+ engine extension for institutional-fixed-income-use-case scope)
+(all 5 techniques moved to §2.5)
 
 ### Forecasting (Classical) (7 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening)
 `arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`
