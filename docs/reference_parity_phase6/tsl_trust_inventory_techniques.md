@@ -25345,7 +25345,401 @@ for Tier A close + Tier B-D upcoming sessions):**
   device handling (CPU vs CUDA) + scaling pipelines + sequence
   preparation distinct from tabular ML pattern.
 
-## §3 Unvalidated catalog techniques (34 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### quantile_regression (Phase 7+ SC6; FORTY-FIRST §2.5 entry; SIXTH ML / Deep Learning block entry; Cat 3 remediation cycle session 6/17 — TIER A CLOSE per triage close ordering; SIXTH-AND-FINAL Tier A tree-family ML cohort session; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; SC4 two-stage helper identity verification FOURTH-INSTANCE application with FIRST BEHAVIORAL DIVERGENCE outcome at Stage 2 + multi-quantile architecture handling)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per SC6 Code Step 4 empirical verification + Cat 3
+remediation cycle session 6/17 disposition. Reference arm
+reimplements the engine's exact multi-quantile pipeline (NaN edge-
+strip + interior-interpolate + QR-specific create_features +
+auto-0.5-injection + 7 separate sklearn GradientBoostingRegressor
+models with `loss="quantile"` at engine-resolved alpha values per
+quantile + per-quantile recursive forecast trajectory + quantile
+crossing detection). Both arms use `random_state=ctx.seed=42`
+ensuring bit-exact deterministic sklearn output.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 5 interior NaN
+  values at indices [5, 23, 67, 134, 178] of n=200 AR(1) series.
+  Wrapper returns non-error response; emits warning "5 interior
+  missing values were linearly interpolated." per engine
+  `_prepare_series` lines 37-57 (byte-identical to SC1 RF NaN
+  handling at AST hash level). Additional warning about quantile
+  crossings (13 points) is expected algorithm behavior per
+  independent-quantile-GBR convention; not an audit concern.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_estimators=200 + max_depth=4 +
+  learning_rate=0.05 + n_lags=12 + rolling_windows=[3, 6, 12] +
+  quantiles=[0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95] per engine
+  `_PRESET_CONFIG` lines 24-28); returned 3 expected tables
+  (`Quantile Forecasts` + `Prediction Intervals` + `Model
+  Summary`); `audit_fields` populated (18 keys including QR-specific
+  `n_quantiles` + `quantiles` list + `n_crossings` +
+  `top_features_per_quantile` dict); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Quantile
+  Forecasts 10 rows × 8 cols [Step + 7 Q-columns] (multi-quantile
+  wide format distinct from SC1-SC5 single-column forecast); pPredic-
+  tion Intervals 10 × 8 [Step + Median + 3 pairs of Lower/Upper for
+  paired quantile coverage]; Model Summary 11 × 2.
+
+Wrapper-layer validation harness at `tools/_qr_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness):** Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_quantile_regression.py` at
+`_reference_quantile_regression` lines 175-265 mirrors engine
+`quantile_regression_model.run()` pipeline at engine lines 152-399
+verbatim including auto-0.5-injection (engine lines 208-210) +
+per-quantile model fitting loop + per-quantile recursive forecast
+trajectory + quantile crossing detection (engine lines 303-308).
+
+**Helper identity note (per SC6 Step 1 two-stage verification per
+SC4 methodology):**
+
+Stage 1 (AST source-segment SHA256 hash check):
+- `_prepare_series`: MATCH SC1 RF (hash `57bae54d463c2fd7`)
+- `_create_features`: **DIFFER** (RF=`f69ca3848531a82c` vs QR=
+  `5655a18ea743ce57`)
+- `_create_forecast_features`: **ABSENT** (QR engine does NOT
+  have this function; uses `_build_forecast_features` single-step
+  builder instead)
+
+Stage 2 (manual code inspection on hash mismatch / absent):
+- `_create_features`: **BEHAVIORAL DIVERGENCE** — QR version
+  OMITS early-exit guard `if n <= max_lookback + 1: return None,
+  None, None` (RF lines 64-68). Divergence is inert at parity
+  fixture (n=200 >> max_lookback+1=13) but constitutes formal
+  behavioral divergence per SC4 two-stage methodology. Implemented
+  as `_reference_quantile_create_features` for institutional
+  honesty (engine source match at line level).
+- `_create_forecast_features` ABSENT: replaced by
+  `_build_forecast_features` (single-step feature vector builder
+  at QR engine lines 106-136); STRUCTURALLY DIFFERENT from
+  SC1-SC5 batch builder. Implemented as
+  `_reference_quantile_build_forecast_features` for institutional
+  honesty.
+
+**FIRST BEHAVIORAL DIVERGENCE outcome at SC6** in Cat 3 remediation
+cycle (SC1-SC5 all had MATCH or COMMENT-ONLY divergence at Stage
+2). Validates SC4 two-stage methodology empirically: Stage 1 hash
+check catches the divergence; Stage 2 manual inspection
+distinguishes the divergence type; appropriate reimplementation
+follows. **n=3 comment-only codification opportunity NOT REACHED at
+SC6** (SC4 LightGBM + SC5 SVR were comment-only; SC6 QR is
+behavioral). Pattern remains at n=2 comment-only observations;
+codification deferred per A3 first-instance precedent.
+
+**SC6 architectural elements (multi-quantile pattern distinct from
+SC1-SC5 single-trajectory pattern):**
+
+1. **Multi-quantile model fitting:** ONE GBR model per quantile
+   alpha; 7 models for Balanced preset (vs SC1-SC5 single-model
+   pattern)
+2. **Forced 0.5 median auto-injection:** engine adds 0.5 if absent
+   (no-op for Balanced preset which already includes 0.5)
+3. **Per-quantile recursive forecast trajectory:** each quantile
+   model's predictions extend its own recursive sequence (each
+   quantile gets its own forward path; no shared median-based
+   extension)
+4. **3-table output structure with multi-quantile wide format:**
+   Quantile Forecasts (wide: 8 cols = Step + 7 quantiles) +
+   Prediction Intervals (paired Lower/Upper) + Model Summary
+5. **No CV computation:** engine does NOT compute `cv_rmse`; only
+   median model `train_rmse` + `train_mae` reported
+6. **NO fallback dispatch:** sklearn always available; SC3 element
+   NOT APPLICABLE
+7. **NO scaling pipeline:** unlike SC5 SVR; SC5 refinement NOT
+   APPLICABLE
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 4 primary metrics: 70-value flat
+forecast vector [7 quantiles × 10 horizon steps] + train_rmse_median
++ n_crossings exact match [10] + n_quantiles exact match [7
+post-auto-injection]; n=200 AR(1) DGP + Balanced preset + seed=42).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC6 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+abbreviated `_fit_predict` helper with hardcoded Fast-preset
+hyperparameters at 3 quantile alphas only [0.1, 0.5, 0.9] + minimal
+lag-only features — degenerate self-parity bypassing engine pipeline
+at Balanced preset 7 alphas + auto-0.5-injection + per-quantile
+recursive forecast).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 6/17
+close; **TIER A CLOSE milestone — SC1-SC6 tree-family ML cohort
+complete**).
+**Primary metrics (math layer):** 70-value flat forecast vector
+(7 quantiles × 10 horizon steps; quantile-major ordering) +
+in-sample `train_rmse_median` + integer `n_crossings` + integer
+`n_quantiles` (auto-injection verification).
+
+**Source files (Cat 3 remediation post-rewrite; SC6 multi-quantile
+architecture + BEHAVIORAL DIVERGENCE at Stage 2):**
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 80-87 (Layer 2 helper imports from SC1: only
+  `_generate_ar_dgp` + `_prepare_series_reference`; NOT
+  `_create_features_reference` or `_create_forecast_features_
+  reference` because Stage 2 found BEHAVIORAL DIVERGENCE)
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 90-100 (Layer 1 engine preset Balanced mirror
+  `_ENGINE_BALANCED_PRESET` with QR-specific `quantiles` field)
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 103-148 (`_reference_quantile_create_features` reimpl
+  mirroring engine lines 60-103 verbatim; OMITS early-exit guard
+  to match engine source exactly)
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 151-180 (`_reference_quantile_build_forecast_features`
+  reimpl mirroring engine `_build_forecast_features` lines 106-136
+  — NEW single-step feature builder)
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 183-262 (`_reference_quantile_regression` end-to-end pipeline
+  reimpl mirroring engine `run()` body including auto-0.5-injection
+  + per-quantile model loop + per-quantile recursive forecast +
+  crossing count)
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 305-360 (harness TSL arm `run_tsl` invokes engine via
+  RunContext + extracts wide-format Quantile Forecasts table +
+  flattens to quantile-major vector for parity comparison)
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 362-372 (harness reference arm `run_reference`)
++ `tools/reference_parity/harness/checks/p3_quantile_regression.py`
+  lines 374-432 (compare() with engine output-rounding alignment:
+  6-decimal forecast + 4-decimal audit metrics + exact integer
+  match for n_crossings + n_quantiles)
++ `engine/techniques/quantile_regression_model.py` lines 18-34
+  (engine `_PRESET_CONFIG` with QR-specific quantiles field;
+  Balanced has 7 alphas)
++ `engine/techniques/quantile_regression_model.py` lines 37-103
+  (engine helpers: `_prepare_series` byte-identical to SC1 RF;
+  `_create_features` BEHAVIORAL DIVERGENCE missing early-exit
+  guard)
++ `engine/techniques/quantile_regression_model.py` lines 106-136
+  (engine `_build_forecast_features` single-step builder)
++ `engine/techniques/quantile_regression_model.py` lines 226-242
+  (engine per-quantile model fitting loop)
++ `engine/techniques/quantile_regression_model.py` lines 246-256
+  (engine per-quantile recursive forecast trajectory)
++ `engine/techniques/quantile_regression_model.py` lines 303-315
+  (engine crossing count + warning)
++ no separate audit markdown report; empirical baseline reference
+  is the runner CLI PASS verdict at this commit
+
+**Validation claim scope (Cat 3 remediation cycle session 6/17
+post-rewrite; engine code path EXERCISED via RunContext at math
+layer at multi-quantile pipeline):**
+
+- **Layer 1 (multi-quantile GBR math at sklearn + engine feature
+  engineering + per-quantile recursive forecast) VALIDATED at Tier
+  II.bit-exact at engine output-rounding floor:** Engine
+  `quantile_regression_model` Layer 1 math + `p3_quantile_regression`
+  harness TSL arm both invoke engine code path via RunContext;
+  reference arm `_reference_quantile_regression` invokes identical
+  sklearn primitives at identical alphas + identical
+  hyperparameters at IDENTICAL call sites with identical recursive
+  forecast extension logic. Bit-exact PASS at deterministic seed;
+  0.0 abs diff across all 70 forecast values + train_rmse +
+  integer crossing count + integer quantile count.
+  **Layer 1 PASS bit-exact empirically grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic; preset
+  config dispatch returns expected **3-table multi-quantile
+  structure** + audit_fields with 18 expected keys including
+  QR-specific multi-quantile metadata; output shape/type
+  verification confirms wide-format Quantile Forecasts + paired
+  Prediction Intervals. Layer 2 paths NOT covered by 3-check
+  (Prediction Intervals construction with coverage-pair logic +
+  per-quantile top-features extraction + interpretation builder)
+  require expert review.
+
+**Phase 3 algorithmic basis (extracted from engine module):**
+Quantile regression via gradient boosting per Friedman (2001) +
+Koenker (2005) "Quantile Regression" foundation. Quantile loss is
+the asymmetric absolute deviation: `L_alpha(r) = alpha * max(r, 0)
++ (1 - alpha) * max(-r, 0)` where r = y - y_hat; minimizing
+expected quantile loss at level alpha yields the conditional
+alpha-quantile of y given x. sklearn GBR with `loss="quantile"` +
+`alpha=q` implements this loss per Friedman 2001 ensemble. Engine
+fits ONE GBR per quantile alpha and produces per-quantile recursive
+forecasts. **Independent quantile fitting does NOT enforce
+monotonicity** (lower quantile predictions can exceed upper at
+some inputs); crossing count reported as warning. Engine wrapper
+adds time-series-specific feature engineering (lag + rolling
+mean/std + diff + time index) + auto-0.5-injection for median
+guarantee + multi-quantile output table construction with paired
+Lower/Upper prediction intervals.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session 6/17
+post-rewrite):**
+
+- Math-layer harness validates engine code path EXERCISED via
+  RunContext (post-rewrite Category 1 LEGITIMATE). Pre-rewrite
+  harness was Category 3 DEGENERATE-VACUOUS — abbreviated
+  `_fit_predict` with hardcoded Fast-preset hyperparameters at 3
+  alphas only.
+- Engine output rounding floor (Phase 1 finding B8): forecast
+  values rounded to 6 decimals at engine lines 266 + 275 + 283;
+  train metrics 4 decimals at audit lines 374-375.
+- sklearn GBR determinism: deterministic at fixed `random_state`
+  per Friedman 2001 + sklearn API contract. Triage close
+  empirically confirmed bit-exact reproducibility.
+- **Quantile crossing intrinsic to independent quantile GBR:**
+  10 crossings observed at parity fixture; expected algorithm
+  behavior not a parity concern. Engine reports crossing count;
+  reference arm matches exactly (bit-exact integer crossing
+  count).
+- Auto-0.5-injection: engine forces 0.5 quantile if absent (no-op
+  for Balanced preset). Reference arm mirrors this exactly.
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1); other DGP regimes not
+  validated
+- Horizon=10 fixed at harness `HORIZON` class attribute matching
+  engine default at line 173
+- Balanced preset config validated; Fast (3 quantiles) + Thorough
+  (9 quantiles) presets NOT in parity scope at math layer
+- Univariate series only
+- 7 standard quantile alphas at Balanced; user-customized
+  quantile lists NOT in parity scope
+- `loss="quantile"` only validated (engine doesn't support
+  alternative loss functions for quantile regression)
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer (only Balanced)
+- User-customized quantile lists NOT validated (only Balanced
+  preset 7 alphas)
+- Prediction Intervals coverage-pair construction logic (engine
+  lines 270-293) NOT separately unit-validated; covered implicitly
+  via Quantile Forecasts parity (intervals derive from quantile
+  forecasts directly)
+- Per-quantile top-5 feature importance extraction NOT separately
+  unit-validated
+- Quantile crossing monotonicity is NOT enforced — engine reports
+  count + warning but does NOT correct via sorting / isotonic
+  regression. Users should be aware that 5-15% crossings are
+  intrinsic to independent quantile GBR fitting.
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC6 / Cat 3 remediation cycle session 6/17 / TIER A CLOSE):**
+Layer 1 multi-quantile GBR math validated bit-exact at machine
+precision post-rewrite via RunContext invocation of engine code
+path. Wrapper layer (S49+ NEW 3-check scope) validated at 3/3
+PASS at 3-table multi-quantile output structure. Layer 2 engine
+wrapper orchestration paths NOT covered by 3-check require expert
+review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close):**
+
+- **Validated configuration (harness math layer):** engine code
+  path EXERCISED via RunContext at Balanced preset (n_estimators
+  =200 + max_depth=4 + learning_rate=0.05 + n_lags=12 +
+  rolling_windows=[3, 6, 12] + quantiles=[0.05, 0.1, 0.25, 0.5,
+  0.75, 0.9, 0.95]); horizon=10; seed=42; loss="quantile".
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 183.
+- **Configuration match:** **YES** — user invoking at default
+  Balanced preset experiences mathematically validated Layer 1
+  surface including auto-0.5-injection + per-quantile recursive
+  forecast pattern.
+- **Disclosure scope:** Fast (3 quantiles) + Thorough (9 quantiles)
+  preset configurations NOT validated at math layer; user-
+  customized quantile lists NOT validated. **NO fallback dispatch
+  disclosure section applicable** (sklearn always available; SC3
+  template element NOT APPLICABLE).
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+6/17 — SIXTH-AND-FINAL Tier A session; TIER A CLOSE milestone):**
+Inventory verification commit 12d3785 classified p3_quantile_regression
+as Cat 3 DEGENERATE-VACUOUS. Triage close at HEAD a7746f1 confirmed
+Cat 3 (bit-exact deterministic at fixed seed; rewrite feasible).
+This §2.5 entry closes the remediation cycle session 6/17 via
+combined harness rewrite + entry forward-amendment per Tier 2
+incremental pattern + family template + SC4 two-stage helper
+identity verification + SC5 pre-fit / post-fit pipeline scanning
++ multi-quantile architecture handling.
+
+**TIER A CLOSE MILESTONE — Tree-family ML cohort COMPLETE
+post-SC6:** Cat 3 remediation cycle Tier A (tree-family ML /
+sklearn-wrapped sequential remediation per triage close ordering):
+- SC1 random_forest (0cb1fb8): Tier II.bit-exact; helpers reused
+- SC2 gradient_boosting (aaf5cf1): Tier II.bit-exact; helpers
+  reused; family template established
+- SC3 xgboost (6a6f489): Tier II.bit-exact at PRIMARY PATH;
+  helpers reused; SC3 fallback-dispatch template element
+  established
+- SC4 lightgbm (27aeaa3): Tier II.bit-exact at PRIMARY PATH;
+  helpers reused (2 MATCH + 1 comment-only); two-stage methodology
+  established; post-fit transformation pipeline mirroring
+  established
+- SC5 svr (fe98e85): Tier II.bit-exact; helpers reused (2 MATCH
+  + 1 comment-only); kernel-method architectural transition; pre-
+  fit + post-fit pipeline scanning established
+- SC6 quantile_regression (THIS ENTRY): Tier II.bit-exact; FIRST
+  BEHAVIORAL DIVERGENCE outcome at Stage 2; multi-quantile
+  architecture handling
+
+**SC4 two-stage helper identity verification FOURTH-INSTANCE
+empirical validation with FIRST behavioral divergence outcome:**
+
+| Session | Stage 1 outcome | Stage 2 outcome | Decision |
+|---|---|---|---|
+| SC1 RF | n/a (baseline) | n/a | Established helpers |
+| SC2 GBR | 3/3 MATCH | n/a | Reuse |
+| SC3 XGB | 3/3 MATCH | n/a | Reuse |
+| SC4 LGB | 2/3 MATCH + 1 DIFFER | COMMENT-ONLY | Reuse |
+| SC5 SVR | 2/3 MATCH + 1 DIFFER | COMMENT-ONLY | Reuse |
+| SC6 QR | 1/3 MATCH + 1 DIFFER + 1 ABSENT | BEHAVIORAL | Reimplement |
+
+n=2 sustained COMMENT-ONLY observation (SC4 + SC5); n=1 BEHAVIORAL
+divergence (SC6). Codification of "comment-only divergence is
+expected pattern" candidate DEFERRED at SC6 since the BEHAVIORAL
+case interrupts the consistency required for codification. A3
+first-instance precedent preserved at SC6.
+
+**Legacy `_make_lag_features` stub cleanup readiness:** Per SC5
+forward-instrumentation, the legacy stub at SC1 `p3_random_forest.py`
+can be removed at Tier A close. Empirical verification: NO remaining
+external dependencies on `_make_lag_features` outside SC1 itself
+(`grep -rln "_make_lag_features" tools/reference_parity/harness/checks/
+| grep -v "p3_random_forest"` returns empty). All Tier A dependents
+(SC2-SC6) have been rewritten to import the family-template helpers
+directly (`_prepare_series_reference` + `_create_features_reference`
++ `_create_forecast_features_reference`). Cleanup commit can proceed
+as separate institutional commit post-SC6 close per user-preferred
+audit-trail granularity. Separate commit specification:
+- Subject: "audit-hygiene: remove _make_lag_features legacy stub at
+  SC1 random_forest post-Tier-A close"
+- Removes ~5-10 LOC at p3_random_forest.py
+- References Tier A close institutional milestone explicitly
+
+**Tier B SC7-SC9 cross-block specialized cohort transition:** Post-
+SC6 close, Tier A tree-family / sklearn-wrapped cohort COMPLETE.
+Tier B cross-block specialized cohort dispatches next:
+- SC7 transfer_function (Block 10 Causality / Lead-Lag): engine
+  adds AR(r)-noise + Almon polynomial; bespoke per-session work
+  expected — family template Layer 2 helpers likely NOT applicable
+  given linear-regression vs tree-family architectural distance
+- SC8 dtw_alignment_lag (Block 1 Causality already FULLY Q1-
+  AMENDED; cross-block remediation): engine adds configurable
+  window / normalization / step pattern beyond harness basic DP
+- SC9 loess_interpolation (Block 8 Missing Data already FULLY Q1-
+  AMENDED; cross-block remediation): structural rewrite — engine
+  is fundamentally NaN-imputation, NOT smoothing primitive validated
+  by pre-rewrite harness
+
+Tier B sessions will exercise distinct architectural patterns
+relative to Tier A family template + may require per-session
+bespoke reimplementation rather than family-shared infrastructure.
+
+## §3 Unvalidated catalog techniques (33 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -25383,8 +25777,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (9 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close)
-`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `quantile_regression`, `tcn_forecast`
+### ML / Deep Learning (8 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6 — sub-numbered SC1-SC17 convention per Chat ratified Disposition 1 Option B; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A tree-family ML cohort COMPLETE post-SC6** — SC7 transfer_function dispatches Tier B cross-block specialized cohort next)
+`autoencoder_anomaly`, `echo_state_network`, `gaussian_process_forecast`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
