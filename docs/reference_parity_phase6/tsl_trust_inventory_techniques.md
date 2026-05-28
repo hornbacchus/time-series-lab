@@ -28273,7 +28273,382 @@ backcast/forecast head split). Engine preset likely has stack_types
 + n_blocks + n_layers_per_block + hidden_layer_units + epochs + lr
 fields. Estimated session time: ~2-2.5h.
 
-## §3 Unvalidated catalog techniques (26 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### nbeats_forecast (Phase 7+ SC16; FORTY-NINTH §2.5 entry; THIRTEENTH ML / Deep Learning block entry; Cat 3 remediation cycle session 16/17 — Tier D.4 PyTorch basis-expansion architecture; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; **PARTIAL Tier A pattern SEVENTH-INSTANCE** confirmation; **SC13/SC14/SC15 DL family determinism profile INHERITED + basis-expansion-architecture cross-invocation bit-exact CONFIRMED**)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor at CPU PyTorch backend)** per SC16 Code Step 4
+empirical verification + Cat 3 remediation cycle session 16/17
+disposition. **SC13/SC14/SC15 DL family determinism profile
+inherited + verified for basis-expansion architecture**: cross-
+invocation BIT-EXACT at CPU PyTorch NBEATS (Step 2 verification →
+max_abs_diff=0.0 across forecast + final_loss + initial_loss +
+rmse + r²; n_params / n_train exact integer match).
+
+**Tier D basis-expansion-architecture-specific determinism
+verification (Step 2 inherits SC13/SC14/SC15 profile):**
+- Stack stacking order: engine `NBEATS` constructs
+  `nn.ModuleList([NBEATSStack(...) for _ in range(n_stacks)])`
+  where n_stacks=len(stack_types). For Balanced (stack_types=
+  ["generic", "generic"]) constructs 2 stacks. Reference reimpl
+  constructs in identical order.
+- Block stacking within stack: engine `NBEATSStack` constructs
+  `nn.ModuleList([NBEATSBlock(input_size, hidden, theta, theta)
+  for _ in range(n_blocks)])`. For Balanced n_blocks=3, each
+  stack contains 3 blocks. Reference matches exactly.
+- Block FC init order: engine `NBEATSBlock` constructs `fc =
+  nn.Sequential(Linear(input_size, hidden), ReLU, Linear(hidden,
+  hidden), ReLU, Linear(hidden, hidden), ReLU, Linear(hidden,
+  hidden), ReLU)` — 4-layer FC tower with ReLU intervening
+  activations. Reference matches.
+- Theta projection + heads init order: within each block,
+  `theta_b = Linear(hidden, theta_b_size, bias=False)` then
+  `theta_f = Linear(hidden, theta_f_size, bias=False)` then
+  `backcast_fc = Linear(theta_b_size, input_size)` then
+  `forecast_fc = Linear(theta_f_size, horizon)`. Construction-
+  order RNG-draw-preserving.
+- Doubly-residual stacking: engine `NBEATSStack.forward` computes
+  `residual = x; stack_forecast = 0; for block in blocks:
+  backcast, forecast = block(residual); residual = residual -
+  backcast; stack_forecast += forecast`. Engine `NBEATS.forward`
+  computes `residual = x; total = 0; for stack in stacks:
+  residual, forecast = stack(residual); total += forecast`.
+  Reference implements identical residual subtraction wiring.
+- Gradient clipping: engine applies
+  `torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)` after
+  `loss.backward()` and before `optimizer.step()`. Reference
+  applies identical clip in identical order.
+- **"Generic" basis observation (algorithmic note):** ALL stack_types
+  ("generic" / "trend" / "seasonality") instantiate IDENTICAL
+  `NBEATSBlock` architecture — engine implementation does NOT
+  differentiate basis function initialization or basis structure
+  across stack_types. Only the COUNT (`len(stack_types)`)
+  determines model topology; stack_types semantic content is
+  recorded in audit_fields but not used in engine math. Departure
+  from Oreshkin et al. 2019 §3.3 interpretable basis specification
+  — engine uses generic FC basis for ALL stack types. **This is an
+  engine-implementation observation, NOT a parity defect**:
+  reference reimpl matches engine behavior exactly (both arms
+  construct identical FC blocks regardless of declared stack_type).
+  Documented for §2.5 transparency.
+- cuDNN non-determinism: NOT exercised at audit environment
+  (torch 2.11.0+cpu); CPU FC ops deterministic.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Via SC1 `_prepare_series`
+  helper reuse (Stage 1 AST hash MATCH; PARTIAL Tier A pattern
+  SEVENTH-INSTANCE).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (stack_types=["generic", "generic"] +
+  n_blocks=3 + hidden_size=128 + theta_size=32 + epochs=150 +
+  n_lags=16 + lr=0.005 + use_torch=True per engine `_PRESET_CONFIG`
+  lines 35-38); returned 3 expected tables (`Forecast` + `Model
+  Summary` + `Training Loss`) + `audit_fields` populated with
+  NBEATS-specific fields including `backend="pytorch"` +
+  `stack_types` + `n_blocks` + `hidden_size` + `n_params=364572`
+  (integer exact) + `final_loss` + `initial_loss` +
+  `loss_curve_summary`; no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table 10 × 2; Model Summary 14 × 2; Training Loss ~20 × 2 (down-
+  sampled epoch × loss).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness; SC16 Tier D.4 + PARTIAL Tier A seventh-instance):**
+Reference reimplementation at `tools/reference_parity/harness/
+checks/p3_nbeats.py` `_reference_nbeats_forecast` mirrors engine
+`nbeats_forecast.run()` primary PyTorch path at engine lines
+362-398 verbatim including `_train_torch_nbeats` at engine lines
+153-183 (NBEATSBlock + NBEATSStack + NBEATS classes with 4-layer
+FC tower + theta projections + backcast/forecast heads + Adam +
+MSE + grad clip 1.0 + epochs training loop) + `_predict_torch_
+nbeats` at engine lines 186-195 (direct multi-step forecast via
+single forward pass returning full horizon). DL determinism
+configuration via `_setup_dl_determinism` inherited from SC13/
+SC14/SC15. Sequence construction via bespoke `_create_sequences_
+nbeats` (NBEATS multi-horizon target variant; distinct from SC14
+DL-family-shared 1-step variant).
+
+**Helper identity note (per SC16 Step 1 two-stage verification per
+SC4 methodology + SC10-SC15 PARTIAL Tier A precedent):**
+
+Stage 1 (AST source-segment SHA256 hash check):
+- `_prepare_series`: **MATCH SC1 RF** verbatim (strip-edge-NaN +
+  interp-interior body identical modulo function-name token only).
+- `_create_sequences`: **MISMATCH SC14 p3_lstm_gru** — NBEATS
+  signature `(data, lookback, horizon)` returns y of shape
+  (n_samples, horizon) (horizon-step targets, direct multi-step
+  prediction); SC14 signature `(data, seq_len)` returns y of shape
+  (n_samples,) (1-step target, recursive multi-step prediction).
+  DL-family-shared sequence helper pattern does NOT extend to
+  basis-expansion architecture due to direct-multi-step vs
+  recursive-multi-step architectural divergence. Bespoke NBEATS-
+  specific `_create_sequences_nbeats` reimpl required per-session.
+- `_create_lag_features`: **ABSENT** (fallback-only).
+
+Stage 2: PARTIAL Tier A pattern SEVENTH-INSTANCE confirmation at
+sustained n=7 cumulative observations (SC10 GP + SC11 prophet +
+SC12 esn + SC13 autoencoder + SC14 lstm_gru + SC15 tcn + SC16
+nbeats); A3 fourth-observation-tightening threshold satisfied
+n=4-fold post-SC16; **architecture-type-agnostic generalization
+SUSTAINED across FOUR distinct DL architecture types** (feed-
+forward + recurrent + convolutional + basis-expansion all exhibit
+PARTIAL Tier A pattern under shared determinism profile).
+**Codification refinement at SC16:** DL-family-shared
+`_create_sequences` reuse pattern observed n=1 at SC15 tcn (SC14
+→SC15 sustained); SC16 nbeats demonstrates windowing-helper reuse
+is **architecture-type-conditional, not universal** within DL
+family — direct-multi-step architectures (NBEATS, likely NHITS at
+SC17) require bespoke multi-horizon variant due to target output
+shape distinction; recursive-multi-step architectures (LSTM/GRU
+SC14, TCN SC15) share 1-step variant. **Reuse-conditionality
+sub-pattern at A3 first-instance baseline observation at SC16**
+(absorption #6+ codification candidate).
+
+**Fallback dispatch handling (SC3 template element EIGHTH-INSTANCE
+application):** Engine `_has_torch()` + preset flag `use_torch`
+dispatches to PyTorch NBEATS primary path when torch available +
+preset enables; sklearn ENSEMBLE fallback (Ridge +
+GradientBoostingRegressor + MLPRegressor averaged) when torch
+unavailable (Fast preset uses sklearn ensemble by default).
+**Mathematical equivalence assessment (primary vs fallback):
+CATEGORICALLY DIFFERENT.** PyTorch NBEATS (basis-expansion
+architecture with doubly-residual stacking + direct multi-step
+forecast via single forward pass) vs sklearn ENSEMBLE of {Ridge
+linear, gradient-boosted trees, MLP feed-forward} averaged via
+mean (recursive single-step forecast). NOT numerically equivalent
+— fundamentally different architectures + different ensembling +
+different forecast generation mode. **NOTE: NBEATS fallback is
+the FIRST ensemble-based fallback observed in DL family** (SC13
+autoencoder fallback = MLP single-model; SC14 lstm_gru fallback =
+MLP single-model; SC15 tcn fallback = MLP single-model; SC16
+nbeats fallback = 3-model ensemble averaged).
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 8 primary metrics: 10-step forecast
+values [first=-0.980407] + final_loss=4e-06 + initial_loss=
+1.134332 + rmse=0.001 + r²=1.0 + n_params=364572 exact + n_train=
+175 exact + forecast_end_value=0.685826; n=200 AR(1) DGP +
+Balanced preset + seed=42 at runner CLI execution). **Note: high
+in-sample R² (1.0) + extremely low final_loss (4e-06) reflect
+NBEATS model capacity (364K params) overfitting AR(1) DGP at 150
+epochs; in-sample metrics not predictive of out-of-sample
+performance.**
+**Verdict (wrapper layer):** PASS 3/3 checks per SC16 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_nbeats.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+local `_fit_predict` with hardcoded HIDDEN=16 + N_EPOCHS=3 +
+2-layer FC NBEATS block (vs engine 4-layer FC) + 2-block stack
+(vs engine 3-block per stack with 2 stacks) + 1-step target (vs
+engine horizon-step direct multi-step) + theta projections OMITTED
+ENTIRELY (vs engine theta_b/theta_f + backcast_fc/forecast_fc
+4-projection structure) — degenerate self-parity bypassing engine's
+Balanced preset stack_types/blocks/theta basis-expansion pipeline).
+**Audit date:** 2026-05-28 (Cat 3 remediation cycle session 16/17
+close).
+**Primary metrics (math layer):** 10-step direct forecast +
+final_loss + initial_loss + rmse + r² + integer n_params + integer
+n_train + forecast_end_value scalar.
+
+**Validation claim scope (Cat 3 remediation cycle session 16/17
+post-rewrite; engine code path EXERCISED via RunContext at math
+layer at PyTorch CPU NBEATS backend):**
+
+- **Layer 1 (PyTorch NBEATS math at CPU backend with
+  torch.manual_seed + deterministic linear layer initialization
+  across all stacks + blocks + theta projections + backcast/
+  forecast heads + Adam optimization + MSE loss + gradient
+  clipping at norm 1.0 + epochs + direct multi-step forecast)
+  VALIDATED at Tier II.bit-exact at engine output-rounding floor:**
+  Engine `_train_torch_nbeats` + reference
+  `_reference_nbeats_forecast` invoke identical PyTorch primitives
+  at identical hyperparameters at IDENTICAL call sites with
+  IDENTICAL weight initialization order across all 2 stacks × 3
+  blocks × 8 linear layers per block. Bit-exact PASS at
+  deterministic seed; 0.0 abs diff across all primary metrics
+  including integer parameter count (364572) confirming identical
+  architecture instantiation. **Layer 1 PyTorch CPU NBEATS PASS
+  bit-exact empirically grounded.**
+- **Layer 1 SKLEARN ENSEMBLE FALLBACK NOT VALIDATED at math
+  layer:** sklearn 3-model ensemble (Ridge + GBR + MLP averaged)
+  fallback at engine lines 198-245 covered at wrapper-layer
+  3-check Check 2 only.
+- **Layer 1 ALTERNATIVE STACK_TYPES NOT VALIDATED at math layer:**
+  Balanced default `["generic", "generic"]` validated; Thorough
+  preset's `["trend", "seasonality", "generic"]` allowlist-
+  accepted but NOT exercised. (However, engine implementation
+  observation: all stack_types instantiate identical block
+  architecture — semantic interpretability claim per
+  paper §3.3 NOT realized in engine code; documented above.)
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via SC1 reuse; preset
+  config dispatch returns expected 3-table structure; output shape/
+  type verification confirms numeric outputs. Layer 2 paths NOT
+  covered (sklearn ensemble fallback + interpretation builder +
+  plain English summary) require expert review.
+
+**Phase 3 algorithmic basis (extracted from engine module):** N-BEATS
+per Oreshkin et al. (2019) "N-BEATS: Neural Basis Expansion Analysis
+for Interpretable Time Series Forecasting" arXiv:1905.10437. Doubly-
+residual stacking architecture (paper §3.2): each block produces
+backcast (input reconstruction) + forecast; residual = input -
+backcast feeds next block; stack forecast = sum of block forecasts;
+total forecast = sum of stack forecasts. Each block: 4-layer FC
+tower with ReLU → theta projection (bias-free linear) → basis
+expansion (backcast / forecast linear heads). Paper proposes
+interpretable basis variants (polynomial trend basis §3.3.1 +
+Fourier seasonal basis §3.3.2) — TSL engine implements only generic
+FC basis regardless of declared stack_type (documented departure).
+Adam optimizer + MSE loss + gradient clipping at norm 1.0 + sliding
+window sequence input (X shape (n_samples, lookback), y shape
+(n_samples, horizon)) + direct multi-step forecast via single model
+forward pass producing all horizon steps simultaneously.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session
+16/17 post-rewrite):**
+
+- Math-layer harness validates engine PyTorch CPU NBEATS code path
+  (post-rewrite Category 1 LEGITIMATE). Pre-rewrite was Category 3
+  DEGENERATE-VACUOUS — `_fit_predict` helper with hardcoded
+  HIDDEN=16 + N_EPOCHS=3 + 2-layer FC + 2 blocks + theta
+  projections omitted.
+- Engine output rounding floor (Phase 1 finding B8): forecast 6-
+  decimal; loss 6-decimal; rmse + r² 4-decimal; integer counts
+  exact (n_params + n_train).
+- PyTorch CPU determinism: requires explicit configuration per SC13
+  established profile; SC16 verified for basis-expansion
+  architecture (NBEATS with doubly-residual stacking + theta
+  projections).
+- Adam optimizer state deterministic at fixed seed; gradient
+  clipping at norm 1.0 deterministic; engine + reference perform
+  identical training steps in identical order.
+- Engine `audit_fields` does NOT include `mae` (only `rmse` +
+  `r2`); harness excludes mae from compare scope accordingly.
+  Consistent with SC15 tcn convention; distinct from SC14
+  lstm_gru.
+- **Engine "interpretable basis" semantic claim NOT realized in
+  engine code:** all stack_types ("generic" / "trend" /
+  "seasonality") instantiate identical FC block architecture.
+  Reference reimpl matches engine behavior exactly (parity
+  preserved); flagged as engine-implementation observation NOT
+  parity defect.
+
+**Phase 3 boundary of validity:**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1); other DGP regimes not
+  validated
+- Horizon=10 fixed
+- Balanced preset config (stack_types=["generic", "generic"])
+  validated; Fast (use_torch=False → sklearn ensemble) + Thorough
+  (3-stack ["trend", "seasonality", "generic"] with 4 blocks +
+  hidden=256 + theta=64) NOT in parity scope
+- Univariate series only
+- AR(1) DGP-specific
+- **PyTorch CPU backend validated; sklearn ensemble fallback + GPU
+  backend NOT validated**
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer
+- Sklearn ensemble fallback NOT math-layer validated
+- GPU/CUDA backend NOT validated at SC16 audit (CPU-only)
+- Alternative stack_types ("trend" / "seasonality") NOT validated
+  at math layer (and per engine implementation observation, all
+  stack_types currently equivalent at engine code; semantic
+  differentiation per paper §3.3 NOT realized)
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC16 / Cat 3 remediation cycle session 16/17):** Layer 1
+PyTorch NBEATS math validated bit-exact at machine precision at
+deterministic seed post-rewrite via RunContext invocation of engine
+code path at CPU backend. Wrapper layer (S49+ NEW 3-check scope)
+validated at 3/3 PASS. Layer 2 engine wrapper orchestration paths
+NOT covered by 3-check require expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3) + SC3
+fallback three-state framework EIGHTH-INSTANCE application:**
+
+- **Validated configuration (harness math layer):** engine PyTorch
+  CPU NBEATS code path EXERCISED via RunContext at Balanced preset
+  (stack_types=["generic", "generic"] + n_blocks=3 +
+  hidden_size=128 + theta_size=32 + epochs=150 + n_lags=16 +
+  lr=0.005 + use_torch=True); horizon=10; seed=42; n_params=364572
+  (derived from architecture).
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 294 + primary path
+  dispatch via `_has_torch()` at engine line 353.
+- **Configuration match:** **YES at CPU PyTorch NBEATS backend** —
+  user invoking at default Balanced preset with torch installed in
+  CPU environment experiences mathematically validated Layer 1
+  surface.
+- **Disclosure scope:** Fast (use_torch=False → sklearn ensemble
+  Ridge+GBR+MLP) + Thorough (3-stack ["trend", "seasonality",
+  "generic"] with hidden=256 + theta=64 + n_blocks=4) preset
+  configurations NOT validated at math layer. **SKLEARN ENSEMBLE
+  FALLBACK PATH DISCLOSURE per SC3 template element EIGHTH-
+  INSTANCE:** PyTorch primary path math-layer validated; sklearn
+  ensemble fallback (engine lines 198-245, dispatched when
+  `_has_torch()` returns False OR preset `use_torch=False`) is
+  wrapper-layer-3-check Check 2 covered but NOT math-layer-parity
+  validated. **Mathematical equivalence: NOT EQUIVALENT** (NBEATS
+  basis-expansion neural net with direct multi-step forecast vs
+  Ridge+GBR+MLP ensemble averaged with recursive single-step
+  forecast — categorically different architectures, ensembling,
+  and forecast generation mode). **STACK_TYPES DISCLOSURE
+  (engine-implementation observation):** Engine accepts stack_types
+  allowlist `{"generic", "trend", "seasonality"}` but instantiates
+  identical FC block architecture for ALL types — semantic
+  interpretability claim per Oreshkin et al. §3.3 NOT realized in
+  engine code. Users invoking with non-default stack_types
+  experience identical model topology to "generic" (only
+  COUNT/`len(stack_types)` affects topology). **GPU/CUDA backend
+  DISCLOSURE per SC13/SC14/SC15 precedent:** SC16 validates CPU
+  PyTorch backend; CUDA backend NOT exercised; user-environment-
+  specific.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+16/17 — Tier D.4):** Inventory verification commit 12d3785
+classified p3_nbeats as Cat 3 DEGENERATE-VACUOUS. Triage close at
+HEAD a7746f1 confirmed Cat 3. This §2.5 entry closes the
+remediation cycle session 16/17 via combined harness rewrite +
+entry forward-amendment per Tier 2 incremental pattern + PARTIAL
+Tier A pattern SEVENTH-INSTANCE + SC13/SC14/SC15 DL family
+determinism profile INHERITANCE + basis-expansion-architecture
+cross-invocation bit-exact VERIFICATION (extends feed-forward +
+recurrent + convolutional → basis-expansion generalization at
+n=4 sustained DL architecture types).
+
+**Legacy `_make_sequences` + `_seed_torch` stubs at SC14 lstm_gru
+status (post-SC16):** `_make_sequences` is now FULLY ORPHANED
+(p3_tcn dep removed at SC15; p3_nbeats dep removed at SC16);
+`_seed_torch` still imported by p3_nhits (last Tier D dependent).
+Both stubs preserved pending SC17 nhits remediation per cycle plan;
+removal scheduled at SC17 nhits close.
+
+**SC17 nhits projection (FINAL Tier D session + Cat 3 remediation
+cycle CLOSE per triage close ordering):** Engine `nhits_forecast.py`
+is PyTorch NHITS (Hierarchical Interpolation for Time Series; Challu
+et al. 2022 arXiv:2201.12886); hierarchical-interpolation
+architecture extending NBEATS with multi-rate signal decomposition
++ expressivity ratios per stack. Distinct from SC13 feed-forward +
+SC14 recurrent + SC15 convolutional + SC16 basis-expansion →
+hierarchical-interpolation architecture. Inherit SC13/SC14/SC15/SC16
+determinism configuration + verify cross-invocation reproducibility
+(hierarchical-interpolation-specific parity risks: multi-rate
+sampling + interpolation method determinism + expressivity ratio
+schedules). Engine preset likely has stack_types + n_blocks +
+n_pool_kernel_sizes + n_freq_downsample + interpolation_mode +
+hidden_size + epochs + lr + n_lags fields. **CYCLE CLOSE:** SC17
+nhits remediation close concludes Cat 3 remediation cycle SC1-SC17;
+remaining S62 conformal_intervals retains original assignment as
+routine Q1 cadence entry. Legacy `_make_sequences` + `_seed_torch`
+stub cleanup at SC17 close (final Tier D dependent). Estimated
+session time: ~2-2.5h.
+
+## §3 Unvalidated catalog techniques (25 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -28311,8 +28686,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (2 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11; echo_state_network moved to §2.5 per Phase 7+ SC12; autoencoder_anomaly moved to §2.5 per Phase 7+ SC13; lstm_gru_forecast moved to §2.5 per Phase 7+ SC14; tcn_forecast moved to §2.5 per Phase 7+ SC15 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A complete post-SC6; TIER B complete post-SC9; TIER C complete post-SC12; TIER D DL family opens at SC13; SC14 lstm_gru recurrent-architecture FIRST-INSTANCE within Tier D; SC15 tcn convolutional-architecture FIRST-INSTANCE within Tier D + DL determinism profile INHERITED from SC13/SC14 + cross-invocation BIT-EXACT convolutional-architecture CONFIRMED (extends feed-forward + recurrent → convolutional generalization); SC16 nbeats next**)
-`nbeats_forecast`, `nhits_forecast`
+### ML / Deep Learning (1 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11; echo_state_network moved to §2.5 per Phase 7+ SC12; autoencoder_anomaly moved to §2.5 per Phase 7+ SC13; lstm_gru_forecast moved to §2.5 per Phase 7+ SC14; tcn_forecast moved to §2.5 per Phase 7+ SC15; nbeats_forecast moved to §2.5 per Phase 7+ SC16 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A complete post-SC6; TIER B complete post-SC9; TIER C complete post-SC12; TIER D DL family opens at SC13; SC14 lstm_gru recurrent-architecture FIRST-INSTANCE within Tier D; SC15 tcn convolutional-architecture FIRST-INSTANCE within Tier D; SC16 nbeats basis-expansion-architecture FIRST-INSTANCE within Tier D + DL determinism profile INHERITED from SC13/SC14/SC15 + cross-invocation BIT-EXACT basis-expansion-architecture CONFIRMED (extends feed-forward + recurrent + convolutional → basis-expansion generalization at n=4 sustained DL architecture types); SC17 nhits CYCLE CLOSE next**)
+`nhits_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
