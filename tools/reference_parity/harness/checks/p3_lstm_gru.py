@@ -121,22 +121,6 @@ def _generate_ar_dgp(
     return y[50:]
 
 
-def _seed_torch(seed: int) -> None:
-    """Legacy DL determinism helper preserved for back-compat with
-    p3_autoencoder + p3_gp imports. SC13 introduced standardized
-    `_setup_dl_determinism` (per p3_autoencoder); this legacy helper
-    has SAME behavior (back-compat preserved for institutional
-    import-stability)."""
-    import torch  # type: ignore
-    import random  # type: ignore
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if hasattr(torch.backends, "cudnn"):
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-
-
 def _setup_dl_determinism(seed: int):
     """Tier D family determinism configuration per SC13 establishment
     + SC14 recurrent-architecture verification (Step 2 cross-
@@ -166,27 +150,6 @@ def _create_sequences_reference(data, seq_len):
         X.append(data[i:i + seq_len])
         y.append(data[i + seq_len])
     return np.array(X), np.array(y)
-
-
-def _make_sequences(
-    y: np.ndarray, lookback: int = 12,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Legacy DL-family sequence builder retained for back-compat —
-    p3_tcn + p3_nbeats + p3_nhits still import this symbol pending
-    their respective Cat 3 → Cat 1 remediation sessions per triage
-    close ordering (Tier D sessions SC15-SC17). Returns (X, y_target)
-    where X shape is `(n_samples, lookback, 1)` — 3D as required by
-    PyTorch recurrent/conv input convention. Mirrors the pre-rewrite
-    scope; once dependent harnesses are remediated the import
-    dependencies fall away and this stub can be removed.
-    """
-    n_seq = len(y) - lookback
-    X = np.zeros((n_seq, lookback, 1), dtype=np.float32)
-    target = np.zeros(n_seq, dtype=np.float32)
-    for i in range(n_seq):
-        X[i, :, 0] = y[i:i + lookback]
-        target[i] = y[i + lookback]
-    return X, target
 
 
 def _reference_lstm_gru_forecast(
