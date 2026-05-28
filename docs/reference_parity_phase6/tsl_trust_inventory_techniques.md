@@ -27083,7 +27083,356 @@ seed for both reservoir initialization + ridge regression. Estimated
 session time: ~1.5-2h. **Tier C close at SC12;** Tier D DL family
 opens at SC13 autoencoder.
 
-## §3 Unvalidated catalog techniques (30 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### echo_state_network (Phase 7+ SC12; FORTY-FIFTH §2.5 entry; NINTH ML / Deep Learning block entry; Cat 3 remediation cycle session 12/17 — **TIER C CLOSE** per triage close ordering; THIRD-AND-FINAL Tier C session; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; **PARTIAL Tier A pattern THIRD-INSTANCE** confirmation (SC10 + SC11 + SC12; A3 second-observation-tightening threshold REINFORCED at n=3); **RETURN TO Tier II.bit-exact** post SC11 mle-band — numpy cross-invocation determinism confirmed)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine
+output-rounding floor)** per SC12 Code Step 4 empirical verification
++ Cat 3 remediation cycle session 12/17 disposition. SC12 RETURNS
+to Tier II.bit-exact post SC11 prophet Tier II.mle-band — confirms
+SC11 Stan-MAP non-determinism is Stan-specific (not general DL/
+probabilistic-cohort issue). Engine numpy ESN uses local
+`np.random.RandomState(seed)` instance per `_NumpyESN.__init__` at
+engine line 87 — no global RNG state leakage between invocations;
+deterministic cross-invocation reproducibility.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with interior NaN
+  values via SC1 `_prepare_series` helper reuse (Stage 1 AST hash
+  MATCH; PARTIAL Tier A pattern THIRD-INSTANCE).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (reservoir_size=200 + spectral_radius=0.9 +
+  leak_rate=0.3 + input_scaling=1.0 + ridge_alpha=1e-6 + warmup=20
+  + sparsity=0.1 per engine `_PRESET_CONFIG` lines 37-42); returned
+  2 expected tables (`Forecast` + `Model Summary`) + `audit_fields`
+  populated with ESN-specific fields including `backend="numpy"` +
+  reservoir hyperparameters; no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast 12 ×
+  2 [Step + Forecast]; Model Summary 15 × 2 (includes
+  ESN-specific Reservoir Size + Spectral Radius + Leak Rate + Ridge
+  Alpha rows).
+
+**Cross-invocation reproducibility verification (Step 2 of SC12
+workflow per SC11 prophet within-process-vs-cross-invocation
+finding):** SC11 prophet surfaced that triage's "engine twice"
+bit-exact result tested within-process re-invocation, not cross-
+invocation (engine arm vs independent reference arm). SC12
+explicitly verified ESN cross-invocation reproducibility: invoked
+engine TWICE as separate Python computations at seed=42 →
+**max_abs_diff=0.0 (BIT-EXACT cross-invocation).** Engine numpy ESN
+uses local RandomState instance (engine line 87) — no global state
+leakage; deterministic across invocations. Distinct from SC11
+prophet Stan-MAP global state cross-invocation variance.
+
+**Engine backend dispatch matrix at SC12 audit environment:**
+
+| Reservoirpy install | Reservoirpy run success | Engine backend |
+|---|---|---|
+| **Yes (0.4.1) in audit env** | **No (Exception in audit env)** | **numpy** (validated at SC12) |
+| Yes | Yes | reservoirpy (NOT validated at SC12) |
+| No | n/a | numpy (validated at SC12 via direct fallback path) |
+
+In audit environment: reservoirpy 0.4.1 imports successfully
+(`_has_reservoirpy()` returns True at engine line 397), BUT
+`_run_reservoirpy_esn` invocation triggers Exception in audit-
+environment Python + numpy combination → engine try/except at
+engine lines 413-417 catches Exception + emits warning + falls back
+to numpy ESN via `_run_numpy_esn` at engine line 422. Audit
+validates numpy backend (what actually runs in audit environment).
+Reservoirpy primary path coverage gap: NOT math-layer validated;
+documented in VSC section.
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness; SC12 Tier C close + bespoke per-session ESN reimpl):**
+Reference reimplementation at `tools/reference_parity/harness/
+checks/p3_esn.py` `_ReferenceNumpyESN` class lines 88-180 mirrors
+engine `_NumpyESN` class at engine lines 75-216 verbatim including
+identical RandomState draw order: (1) W_in via rng.randn FIRST;
+(2) reservoir W + sparsity mask SECOND; (3) bias via rng.randn
+THIRD. CRITICAL ESN parity element: random draw order must match
+exactly because numpy RandomState consumes RNG state sequentially.
+Reference `_reference_esn` function lines 183-275 mirrors engine
+`run()` body at engine lines 310-563 numpy backend path verbatim
+including y-normalization + warmup cap + `_run_numpy_esn`
+equivalent + denormalization + metrics computation. Reuses SC1
+`_prepare_series_reference` for NaN handling (PARTIAL Tier A
+pattern THIRD-INSTANCE per SC10+SC11 precedent).
+
+**Helper identity note (per SC12 Step 1 two-stage verification per
+SC4 methodology + SC10/SC11 PARTIAL Tier A precedent):**
+
+Stage 1 (AST source-segment SHA256 hash check):
+- `_prepare_series`: **MATCH SC1 RF** (hash 57bae54d463c2fd7)
+- `_create_features`: **ABSENT**
+- `_create_forecast_features`: **ABSENT**
+
+Stage 2: ABSENT helpers indicate architectural distinctness
+(reservoir computing pipeline distinct from sklearn-tree-family).
+**PARTIAL Tier A pattern THIRD-INSTANCE confirmation** (SC10 GP
+first instance; SC11 prophet second; SC12 esn third; A3 second-
+observation-tightening precedent threshold REINFORCED at n=3
+sustained observations; codification refinement candidate at
+absorption #6+ for "Tier-A-prepare-series-reuse-with-bespoke-
+feature-engineering" sub-pattern EMPIRICALLY ROBUSTLY GROUNDED).
+
+**SC12 institutional finding for PARTIAL Tier A codification:**
+
+| Tier | Sessions | Helper outcome | Pattern |
+|---|---|---|---|
+| Tier A.1-A.5 tree-family | SC1-SC5 | 3/3 MATCH or COMMENT-ONLY | Full Tier A |
+| Tier A.6 multi-quantile | SC6 | 1 MATCH + 1 BEHAVIORAL + 1 ABSENT | Partial Tier A |
+| Tier B specialized | SC7-SC9 | 0/3 (all ABSENT) | Tier B bespoke |
+| Tier C SC10 GP | SC10 | 1 MATCH + 2 ABSENT | **Partial Tier A** |
+| Tier C SC11 prophet | SC11 | 1 MATCH + 2 ABSENT | **Partial Tier A** |
+| Tier C SC12 esn | SC12 | 1 MATCH + 2 ABSENT | **Partial Tier A** |
+
+**Tier C cohort uniformly exhibits PARTIAL Tier A pattern (n=3/3
+within Tier C; 100% within-cohort consistency).** Codification at
+absorption #6+ for "Tier C PARTIAL Tier A pattern" as cohort
+convention EMPIRICALLY ROBUSTLY GROUNDED.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 6 primary metrics: 12-step forecast
+values [first=4.873015] + rmse=0.1299 + mae=0.0949 + r²=0.9897 +
+n_train=180 exact integer match + forecast_end_value=3.170057
+exact; n=200 AR(1) DGP + Balanced preset + seed=42 at runner CLI
+execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC12 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_esn.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+local `_fit_predict` helper with hardcoded reservoir_size=50 +
+spectral_radius=0.9 + leak_rate=0.3 + ridge=1e-6 + reservoirpy
+backend in BOTH arms — degenerate self-parity bypassing engine's
+Balanced preset (reservoir_size=200 + warmup=20 + sparsity=0.1) +
+numpy fallback backend dispatch + denormalization + recursive
+multi-step forecast).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 12/17
+close; **TIER C CLOSE milestone**).
+**Primary metrics (math layer):** 12-step recursive forecast values
++ in-sample rmse + mae + r² + integer n_train (mirroring engine
+audit formula `n - warmup`) + forecast_end_value scalar.
+
+**Source files (Cat 3 remediation post-rewrite; SC12 PARTIAL Tier
+A third-instance + Tier C close):**
++ `tools/reference_parity/harness/checks/p3_esn.py` lines 60-67
+  (Layer 2 family-shared helper import from SC1)
++ `tools/reference_parity/harness/checks/p3_esn.py` lines 69-79
+  (Layer 1 engine preset Balanced mirror with ESN-specific fields)
++ `tools/reference_parity/harness/checks/p3_esn.py` lines 82-181
+  (`_ReferenceNumpyESN` class mirroring engine `_NumpyESN` at
+  engine lines 75-216 verbatim with identical RandomState draw
+  order)
++ `tools/reference_parity/harness/checks/p3_esn.py` lines 184-285
+  (`_reference_esn` end-to-end pipeline + n_train_audit formula
+  mirror per engine audit field convention)
++ `tools/reference_parity/harness/checks/p3_esn.py` lines 318-385
+  (harness TSL arm + backend verification)
++ `engine/techniques/echo_state_network.py` lines 30-49 (engine
+  `_PRESET_CONFIG`; Balanced at lines 37-42)
++ `engine/techniques/echo_state_network.py` lines 52-72 (engine
+  `_prepare_series`; byte-identical to SC1 RF per AST hash)
++ `engine/techniques/echo_state_network.py` lines 75-216 (engine
+  `_NumpyESN` class)
++ `engine/techniques/echo_state_network.py` lines 219-272 (engine
+  `_run_reservoirpy_esn` primary path; NOT math-layer validated at
+  SC12)
++ `engine/techniques/echo_state_network.py` lines 275-307 (engine
+  `_run_numpy_esn` fallback path)
++ `engine/techniques/echo_state_network.py` lines 310-577 (engine
+  `run()` body)
++ no separate audit markdown report; empirical baseline reference
+  is the runner CLI PASS verdict at this commit
+
+**Validation claim scope (Cat 3 remediation cycle session 12/17
+post-rewrite; engine code path EXERCISED via RunContext at math
+layer at NUMPY backend):**
+
+- **Layer 1 (ESN reservoir computing at numpy backend with local
+  RandomState seed + leaky-integrator + ridge regression closed-
+  form readout + recursive forecast) VALIDATED at Tier II.bit-
+  exact at engine output-rounding floor:** Engine `_run_numpy_esn`
+  + reference `_reference_esn` invoke identical numpy primitives
+  at identical hyperparameters at IDENTICAL call sites with
+  IDENTICAL random draw order (W_in → W → bias). Bit-exact PASS
+  at deterministic seed; 0.0 abs diff across all primary metrics.
+  **Layer 1 numpy backend PASS bit-exact empirically grounded.**
+- **Layer 1 RESERVOIRPY PRIMARY PATH (reservoirpy backend when
+  reservoirpy run succeeds) NOT VALIDATED at math layer:**
+  Reservoirpy primary path at engine lines 219-272 covered at
+  wrapper-layer 3-check Check 2 only (audit-environment engine
+  falls back to numpy due to reservoirpy Exception at runtime;
+  reservoirpy execution path not exercised at SC12 audit).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via SC1
+  reuse; preset config dispatch returns expected 2-table structure
+  + audit_fields populated. Layer 2 paths NOT covered (reservoirpy
+  primary path execution + reservoirpy → numpy fallback transition
+  logic + interpretation builder) remain expert-review-required.
+
+**Phase 3 algorithmic basis (extracted from engine module):** Echo
+State Networks per Jaeger (2001) "The echo state approach to
+analysing and training recurrent neural networks" + Lukoševičius +
+Jaeger (2009) "Reservoir computing approaches to recurrent neural
+network training" Computer Science Review. ESN architecture: random
+sparse reservoir matrix `W` (size N×N) with controlled spectral
+radius (echo state property requires `|λ_max| < 1` for stability;
+engine uses 0.9 default); random input weights `W_in` mapping
+input to reservoir; leaky-integrator state update `x(t) = (1-α)·x(t-1)
++ α·tanh(W_in·u(t) + W·x(t-1) + b)`; warmup transient discarded
+(engine 20 steps default); ridge regression closed-form readout
+`W_out = (S^T·S + λ·I)^-1 · S^T·T` where S is collected reservoir
+states; multi-step recursive forecast via state evolution. Only the
+readout layer is trained; reservoir is random + fixed — making ESN
+efficient vs traditional RNN backpropagation. Engine implements
+this in pure numpy fallback path at lines 75-216 + 275-307.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session
+12/17 post-rewrite):**
+
+- Math-layer harness validates engine NUMPY backend code path
+  (post-rewrite Category 1 LEGITIMATE). Pre-rewrite was Category 3
+  DEGENERATE-VACUOUS — local `_fit_predict` helper with hardcoded
+  Fast-preset-style hyperparameters + reservoirpy backend only +
+  minimal output extraction.
+- Engine output rounding floor (Phase 1 finding B8): forecast 6-
+  decimal; rmse + mae + r² 4-decimal; integer n_train.
+- numpy ESN determinism: local RandomState(seed) instance per
+  `_NumpyESN.__init__` ensures cross-invocation reproducibility
+  (engine + reference produce identical reservoir matrices at fixed
+  seed). CRITICAL: random draw order MUST match between engine +
+  reference (numpy RNG state is order-dependent); reference mirrors
+  engine draw order: W_in → W → bias.
+- Engine audit field `n_train` uses `n - warmup` formula at engine
+  line 524 (NOT `len(targets_valid)` from metric calculation at
+  engine line 451). These differ by 1 for typical fixture (n=200,
+  warmup=20 → n_train_audit=180 vs n_train_metric=179). Reference
+  mirrors engine AUDIT field formula for parity at audit_fields
+  surface.
+- Engine reservoirpy primary path may fail at runtime in some
+  Python + numpy combinations; engine falls back to numpy via
+  try/except at engine lines 413-417. Audit-environment-specific
+  behavior; users in different environments may exercise either
+  primary or fallback path.
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1); other DGP regimes not
+  validated
+- Horizon=12 fixed at harness `HORIZON`
+- Balanced preset config validated; Fast (reservoir_size=100 +
+  sparsity=0.1 + warmup=10) + Thorough (reservoir_size=500 +
+  spectral_radius=0.95 + sparsity=0.05) presets NOT in parity
+  scope at math layer
+- Univariate series only
+- AR(1) DGP-specific
+- **NUMPY backend validated at math layer; reservoirpy backend
+  NOT validated**
+- Audit-environment-specific reservoirpy → numpy fallback dispatch
+  validated implicitly via successful `backend="numpy"`
+  verification in `run_tsl`
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer
+- Reservoirpy backend primary path NOT validated at math layer
+  (covered at wrapper-layer 3-check Check 2 only as audit-
+  environment-specific dispatch outcome)
+- Reservoirpy → numpy fallback transition logic + interpretation
+  builder + plain English summary NOT separately unit-validated
+- Multi-step recursive forecast accumulation logic validated
+  implicitly via end-to-end PASS
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC12 / Cat 3 remediation cycle session 12/17 / TIER C
+CLOSE):** Layer 1 ESN numpy math validated bit-exact at machine
+precision at deterministic local RandomState seed post-rewrite
+via RunContext invocation of engine code path. Wrapper layer
+(S49+ NEW 3-check scope) validated at 3/3 PASS. Layer 2 engine
+wrapper orchestration paths NOT covered by 3-check require
+expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close) + SC3 fallback three-state framework FOURTH-INSTANCE
+application:**
+
+- **Validated configuration (harness math layer):** engine NUMPY
+  backend code path EXERCISED via RunContext at Balanced preset
+  (reservoir_size=200 + spectral_radius=0.9 + leak_rate=0.3 +
+  input_scaling=1.0 + ridge_alpha=1e-6 + warmup=20 + sparsity=0.1);
+  horizon=12; seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 354.
+- **Configuration match:** **YES at NUMPY BACKEND** — user invoking
+  at default Balanced preset in audit-environment-equivalent
+  context (reservoirpy fails at runtime → numpy fallback)
+  experiences mathematically validated Layer 1 surface.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer. **RESERVOIRPY PRIMARY PATH DISCLOSURE
+  per SC3 template element fourth-instance application:** numpy
+  fallback path is math-layer-parity validated; reservoirpy primary
+  path (engine lines 219-272, dispatched when `_has_reservoirpy()`
+  returns True AND `_run_reservoirpy_esn` succeeds) is wrapper-
+  layer-3-check Check 2 covered but NOT math-layer-parity
+  validated. **Mathematical equivalence assessment between
+  reservoirpy + numpy backends: PARTIALLY EQUIVALENT.** Both
+  implement ESN reservoir computing at identical hyperparameters,
+  but reservoirpy may use slightly different reservoir
+  initialization conventions + ridge regression numerical methods.
+  Bit-exact equivalence NOT guaranteed; mle-band agreement
+  expected. Users in environments where reservoirpy succeeds at
+  runtime experience reservoirpy backend which math-layer parity
+  claim does NOT cover at bit-exact precision.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+12/17 — TIER C CLOSE):** Inventory verification commit 12d3785
+classified p3_esn as Cat 3 DEGENERATE-VACUOUS. Triage close at HEAD
+a7746f1 confirmed Cat 3 (bit-exact deterministic at fixed seed;
+rewrite feasible). This §2.5 entry closes the remediation cycle
+session 12/17 via combined harness rewrite + entry forward-
+amendment per Tier 2 incremental pattern + PARTIAL Tier A pattern
+THIRD-INSTANCE confirmation + return to Tier II.bit-exact.
+
+**TIER C CLOSE MILESTONE — Probabilistic/Bayesian/reservoir
+cohort COMPLETE post-SC12:** Cat 3 remediation cycle Tier C
+(probabilistic/Bayesian/reservoir sequential remediation per
+triage close ordering):
+- SC10 gaussian_process (01ea2de): Tier II.bit-exact; PARTIAL Tier
+  A pattern FIRST-INSTANCE established
+- SC11 prophet (ba5e7dc): Tier II.mle-band (FIRST mle-band in
+  cycle); PARTIAL Tier A pattern SECOND-INSTANCE; Stan-MAP cross-
+  invocation non-determinism documented
+- SC12 esn (THIS ENTRY): Tier II.bit-exact (RETURN to bit-exact
+  post-SC11); PARTIAL Tier A pattern THIRD-INSTANCE; numpy cross-
+  invocation determinism confirmed
+
+**Tier D DL family opens at SC13 (autoencoder; first PyTorch-based
+session in cycle).** Tier D projected pattern per SC11 within-
+process-vs-cross-invocation finding: DL training stochasticity
+hypothesis needs explicit cross-invocation verification before
+assuming bit-exact (triage's "engine twice" bit-exact may have
+tested within-process only; PyTorch's cuDNN/CUDA backends may
+exhibit cross-invocation variance even at fixed torch.manual_seed).
+SC13+ sessions should apply Step 2 cross-invocation reproducibility
+verification before Tier classification.
+
+**SC13 autoencoder projection (next Tier D session per triage close
+ordering):** Engine `autoencoder_anomaly.py` is PyTorch-based MLP
+autoencoder (engine has Fast → sklearn-MLP fallback per inventory
+verification artifact); reconstruction loss + anomaly threshold
+output. Engine preset likely has window_size + epochs +
+hidden_layers + learning_rate fields. CRITICAL SC13 verification:
+cross-invocation reproducibility at fixed torch.manual_seed +
+deterministic algorithms enabled. If cross-invocation BIT-EXACT:
+Tier II.bit-exact. If cross-invocation mle-band: Tier II.mle-band
+per SC11 prophet precedent. Estimated session time: ~2-2.5h (PyTorch
+complexity + cross-invocation verification overhead).
+
+## §3 Unvalidated catalog techniques (29 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -27121,8 +27470,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (6 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A tree-family complete post-SC6; TIER B cross-block specialized complete post-SC9; TIER C probabilistic/Bayesian/reservoir cohort SC10-SC12 in progress (2 of 3 complete post-SC11)**)
-`autoencoder_anomaly`, `echo_state_network`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `tcn_forecast`
+### ML / Deep Learning (5 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11; echo_state_network moved to §2.5 per Phase 7+ SC12 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A tree-family complete post-SC6; TIER B cross-block specialized complete post-SC9; TIER C probabilistic/Bayesian/reservoir cohort COMPLETE post-SC12; TIER D DL family opens at SC13 autoencoder next**)
+`autoencoder_anomaly`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
