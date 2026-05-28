@@ -1792,6 +1792,196 @@ absorption cycle. **A9 Class B counter post-S17: n=2 ACTIVE**
 (codification threshold reached per A9 forward instrumentation;
 sub-class refinement candidate for next §19.4 absorption).
 
+---
+
+**SC8 FORWARD-AMENDMENT (Cat 3 remediation cycle session 8/17; commit
+to be referenced post-push):** This S17 entry is forward-amended at
+Cat 3 remediation cycle session 8/17 close per Tier 2 incremental
+forward-amendment pattern (ratified at inventory verification commit
+12d3785). **FIRST cycle session forward-amending an existing §2.5
+entry** (SC1-SC7 all created new entries; SC8 is the first session
+to amend an existing entry per Tier 2 incremental pattern). SC8
+forward-amends the pre-rewrite S17 parity claim with the post-
+rewrite corrected parity claim covering Layer 1 + Layer 2 + Layer 3
+sub-components 3a/3b/3c per bespoke per-session reimplementation.
+
+**Pre-rewrite Cat 3 DEGENERATE-VACUOUS classification at inventory
+verification 12d3785 + Gate 1 finding:** Pre-rewrite harness at
+`tools/reference_parity/harness/checks/p3_dtw.py` lines 36-69 used
+local helper `_dtw_distance` implementing UNCONSTRAINED DP with
+squared Euclidean local cost + NO Sakoe-Chiba window constraint +
+NO z-normalization + NO step_pattern variant + NO backtrack +
+returned a scalar `dtw_distance` value only. Both arms compared a
+single scalar (TSL arm = harness `_dtw_distance`; REF arm =
+`dtaidistance.dtw.distance`) — degenerate self-parity bypassing
+engine code path entirely. Layer 2 (engine DTW core with window +
+step_pattern variants + pre-processing) and Layer 3 (post-processing
+sub-components 3a/3b/3c) were explicitly flagged at pre-rewrite S17
+entry as "expert-review-required" per the three-layer downstream-
+topology framing documented above. The Cat 3 finding at inventory
+verification 12d3785 confirmed empirically that the pre-rewrite
+parity claim was degenerate — Layer 1 dtaidistance.dtw cross-package
+PASS verdict measured `_dtw_distance` (harness helper) vs
+`dtaidistance.dtw.distance` agreement, NOT engine code path
+exercise.
+
+**Pre-rewrite parity claim SUPERSEDED:** All claims above this SC8
+forward-amendment block reflect the pre-rewrite parity-claim scope.
+The Tier II.bit-exact classification at Layer 1 (harness reference
+DP + dtaidistance.dtw) is preserved as historically accurate at
+pre-rewrite scope but does NOT extend to engine code path. The
+"Conditional for Layer 2" + "Conditional for Layer 3" caveats at
+Q-C provenance audit + the Layer 1/Layer 2/Layer 3 retraction
+surfaces at Q-D are preserved as historically accurate at pre-
+rewrite scope; post-rewrite SC8 parity claim CLOSES Layer 2 + Layer
+3 sub-components 3a/3b/3c at engine code path scope (Layer 3 sub-
+component 3d multi-table output construction validated via wrapper-
+layer 3-check Check 3 at post-rewrite scope).
+
+**Post-rewrite parity claim (Cat 3 → Cat 1 LEGITIMATE):**
+
+**Post-rewrite Tier (preserved Tier II.bit-exact at engine output-
+rounding floor):** Reference arm bespoke per-session reimplementation
+mirrors engine `dtw_alignment_lag.run()` pipeline at engine lines
+56-413 verbatim including Layer 2 (Sakoe-Chiba window +
+z-normalization + step_pattern=symmetric2 + subsample-trigger logic
+at engine lines 141-152) + Layer 3 sub-components 3a (backtrack at
+engine lines 469-491) + 3b (lag extraction via x_to_y dict + per-x
+averaging + carry-forward at engine lines 185-198) + 3c (lag
+segmentation via `_segment_lags` at engine lines 494-525). Layer 3
+sub-component 3d (multi-table output) validated via wrapper-layer
+3-check Check 3 output shape/type verification.
+
+**Post-rewrite Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Two-series input with 3 NaN
+  values in X at indices [5, 23, 67]. Wrapper returns non-error
+  response; emits warning per engine NaN drop semantics (drop
+  independently per series, not row-aligned; engine lines
+  101-102). Distinct from SC7 transfer_function row-aligned drop
+  pattern.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (window_frac=0.20 + subsample=2 per engine
+  `_PRESET_CONFIG` line 51 + normalize=True default + step_pattern=
+  symmetric2 default); returned 4 expected tables (`DTW Summary`
+  + `Time-Varying Lag (from DTW alignment)` + `Lag Segments` +
+  `Warping Path`) + `audit_fields` populated with ~17 keys
+  including DTW-specific `dtw_distance` + `dtw_normalized` +
+  `mean_lag`/`median_lag`/`std_lag`/`min_lag`/`max_lag` +
+  `distortion_ratio` + `path_length` + `n_segments` +
+  `window_frac` + `normalized` + `step_pattern`; no error response.
+- **Check 3 — Output shape/type verification:** PASS. DTW Summary
+  15 × 2; Time-Varying Lag ~100 × 4 (downsampled to max_display=500;
+  for n=100 fixture full 100 rows × 4 cols [Time / X / Y /
+  Local Lag]); Lag Segments 5 × 5 [Start / End / Length / Mean
+  Lag / Std Lag]; Warping Path 118 × 3 [X Index / Y Index / Lag].
+
+Wrapper-layer validation harness at `tools/_dtw_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Post-rewrite Reference (Pattern A.3 paper-formula self-parity at
+corrected harness; SC8 Tier B.2 bespoke per-session reimplementation):**
+Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_dtw.py` at
+`_reference_dtw_alignment_lag` lines 175-265 mirrors engine
+`dtw_alignment_lag.run()` pipeline at engine lines 56-413 verbatim.
+`_reference_dtw_forward_dp` lines 80-130 mirrors engine `_dtw` at
+engine lines 416-491 verbatim including Sakoe-Chiba window +
+symmetric2 step pattern + tie-breaking via Python's `min()` which
+returns first-encountered minimum (deterministic at fixed input).
+`_reference_segment_lags` lines 133-160 mirrors engine
+`_segment_lags` at engine lines 494-525 verbatim.
+
+**Helper identity note (per SC8 Step 1 verification per Tier B
+projection):** Engine `dtw_alignment_lag.py` exposes only `run` +
+`_dtw` + `_segment_lags` + `build_interpretation`; NO tree-family
+helpers. Tier B Layer 2 family-shared helpers from SC1 NOT
+APPLICABLE per SC7 forward-instrumentation + SC8 helper-identity
+empirical confirmation. SECOND-INSTANCE bespoke per-session
+reimplementation pattern per SC7 first-instance baseline.
+
+**Post-rewrite Verdict (math layer):** PASS bit-exact (`max_abs_diff
+=0.0 + max_rel_diff=0.0` across all 10 primary metrics: dtw_distance
+=4.1222 + dtw_normalized=0.034934 + mean_lag=-4.68 + median_lag=-5.0
++ std_lag=4.71 + min_lag=-13.0 + max_lag=4.0 + distortion_ratio=1.18
++ path_length=118 exact integer match + n_segments=5 exact integer
+match; n=100 warped-sinusoid pair DGP + Balanced preset + seed=42
+at runner CLI execution).
+**Post-rewrite Verdict (wrapper layer):** PASS 3/3 checks per SC8
+Code Step 6.
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d revision-2
+framework + SC8 retroactive amendment per Disposition 3:**
+
+- **Validated configuration (harness math layer):** engine code
+  path EXERCISED via RunContext at Balanced preset (window_frac=
+  0.20 + subsample=2 + normalize=True + step_pattern=symmetric2);
+  2-series X+Y warped-sinusoid pair fixture; seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 114.
+- **Configuration match:** **YES** — user invoking at default
+  Balanced preset experiences mathematically validated Layer 1 +
+  Layer 2 + Layer 3 sub-components 3a/3b/3c surface.
+- **Disclosure scope:** Fast (window_frac=0.10 + subsample=4) +
+  Thorough (window_frac=0.50 + subsample=1) preset configurations
+  NOT validated at math layer (only Balanced). `step_pattern=
+  symmetric1` (diagonal-only) path NOT validated at math layer
+  (only symmetric2 default). `normalize=False` path NOT validated
+  at math layer (only normalize=True default). Subsample-trigger
+  path (only triggered when `min(nx, ny) > 500`) NOT exercised at
+  fixture n=100; subsample logic validated by code-reading only.
+
+**SC8 Layer 3 sub-component coverage gain vs pre-rewrite scope:**
+
+| Sub-component | Pre-rewrite scope | Post-rewrite scope |
+|---|---|---|
+| 3a — Warping path backtrack | NOT parity-validated | **VALIDATED at bit-exact** (`path_length=118` exact match) |
+| 3b — Time-varying lag extraction (x_to_y + averaging + carry-forward) | NOT parity-validated | **VALIDATED at bit-exact** (`mean_lag`/`median_lag`/`std_lag`/`min_lag`/`max_lag` all 0.0 abs diff) |
+| 3c — Lag segmentation via change-point heuristic | NOT parity-validated | **VALIDATED at bit-exact** (`n_segments=5` exact integer match) |
+| 3d — Multi-table output construction | NOT parity-validated | **Wrapper-layer 3-check Check 3 covered** (4 expected tables with expected shape/type) |
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+8/17 — SECOND Tier B session; FIRST cycle session forward-amending
+existing §2.5 entry):** Inventory verification commit 12d3785
+classified p3_dtw as Cat 3 DEGENERATE-VACUOUS per refined methodology
+revision-2 + Gate 1 finding. Triage close at HEAD a7746f1 confirmed
+Cat 3 (bit-exact deterministic at fixed input; rewrite feasible).
+This S17 entry FORWARD-AMENDMENT closes the remediation cycle
+session 8/17 via combined harness rewrite + S17 entry forward-
+amendment per Tier 2 incremental pattern + bespoke per-session
+reimplementation (Tier B.2 SECOND-INSTANCE confirmation of SC7
+bespoke-per-session pattern; n=2 within Tier B; codification
+candidate at absorption #6+ if SC9 loess also exhibits bespoke
+pattern).
+
+**Pre-rewrite "Q3b extension pending" disposition CLOSED at SC8 for
+Balanced preset:** Pre-rewrite S17 entry flagged "parameter-
+sensitivity coverage NOT established at this validation tier (Q3b
+extension pending)". SC8 closes the Q3b extension for Balanced
+preset configuration (single-seeded fixture; full Layer 1 + Layer 2
++ Layer 3 sub-components 3a/3b/3c parity established). Q3b
+extension REMAINS pending for Fast + Thorough preset configurations
++ symmetric1 step pattern + `normalize=False` path + multi-fixture
+parameter-sensitivity coverage. Wrapper-layer 3-check Check 2
+exercises engine code path at Balanced preset only.
+
+**S17 amendment history (institutional preservation):** S17 §2.5
+entry was originally validated at Phase 7+ S17 (Q1 §2.5 trust
+documentation remediation) under three-layer downstream-topology
+framing per α disposition. Pre-rewrite parity claim covered Layer 1
+only at p3_dtw audit (dtw_distance scalar comparison via
+dtaidistance.dtw cross-package bit-exact PASS). SC8 forward-
+amendment (this section) supersedes the pre-rewrite Layer 1-only
+parity claim with post-rewrite Layer 1+2+3 parity claim covering
+Layer 2 (engine DTW core with Sakoe-Chiba window + z-normalization
++ symmetric2 step pattern + subsample logic) + Layer 3 sub-
+components 3a/3b/3c (backtrack + lag extraction + segmentation) +
+Layer 3 sub-component 3d (multi-table output) wrapper-layer
+coverage. Pre-rewrite framing preserved above for institutional
+audit-trail granularity; post-rewrite parity scope reflects
+corrected harness + engine code path exercise.
+
 ### gcc_phat_delay (Phase 7+ S18; sixth §2.5 entry; FIRST Tier IV Q1 entry; FIRST Pattern A.3 self-parity Q1 entry; completes Block 1 Causality; THREE-LAYER DOWNSTREAM-TOPOLOGY framing per S15/S17 precedent + Tier IV adaptation per S18 STOP 2 empirical investigation + β disposition)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
