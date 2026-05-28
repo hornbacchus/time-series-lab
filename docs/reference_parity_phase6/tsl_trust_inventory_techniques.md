@@ -27979,7 +27979,301 @@ deterministic on CPU). Engine preset likely has n_channels +
 kernel_size + dilations + epochs + lr fields. Estimated session
 time: ~2-2.5h.
 
-## §3 Unvalidated catalog techniques (27 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### tcn_forecast (Phase 7+ SC15; FORTY-EIGHTH §2.5 entry; TWELFTH ML / Deep Learning block entry; Cat 3 remediation cycle session 15/17 — Tier D.3 PyTorch convolutional architecture; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; **PARTIAL Tier A pattern SIXTH-INSTANCE** confirmation; **SC13/SC14 DL family determinism profile INHERITED + convolutional-architecture cross-invocation bit-exact CONFIRMED**)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor at CPU PyTorch backend)** per SC15 Code Step 4
+empirical verification + Cat 3 remediation cycle session 15/17
+disposition. **SC13/SC14 DL family determinism profile inherited +
+verified for convolutional architecture**: cross-invocation BIT-
+EXACT at CPU PyTorch TCN (Step 2 verification → max_abs_diff=0.0
+across forecast + final_loss + initial_loss + rmse + r²; n_params /
+n_train / receptive_field exact integer match).
+
+**Tier D convolutional-architecture determinism verification (Step 2
+inherits SC13/SC14 profile):**
+- Conv layer weight init order: engine `_build_tcn_model` constructs
+  blocks in deterministic order — for each level i in
+  0..num_levels: ResidualBlock(in_ch, out_ch, kernel_size,
+  dilation=2**i) where in_ch=input_size if i==0 else
+  n_channels[i-1] and out_ch=n_channels[i]. Within each block:
+  conv1 (CausalConv1d in→out) then conv2 (CausalConv1d out→out)
+  then downsample (nn.Conv1d in→out, 1x1) ONLY IF in_ch != out_ch.
+  Reference reimpl constructs in identical order. RNG draw order
+  preserved.
+- Dilation factor handling: engine uses dilation=2**i (exponential
+  growth). For Balanced (n_channels=[32, 32]) dilations are [1, 2].
+  Padding `(kernel_size-1)*dilation` then right-crop
+  `out[:, :, :-padding]` enforces causal convolution. Reference
+  reimpl applies identical formula.
+- Residual connection init: engine `ResidualBlock.forward` computes
+  `residual = x if downsample is None else downsample(x)` then
+  `relu(out + residual)`. Reference reimpl applies identical
+  residual wiring.
+- Receptive field: engine formula
+  `sum((k-1) * 2**i for i in range(len(n_channels))) + 1`. For
+  Balanced (k=3, levels=2): 2·1 + 2·2 + 1 = 7. Reference matches
+  exactly (audit integer field).
+- Dropout in eval mode: engine + reference both call `model.eval()`
+  before in-sample predictions + forecast generation; dropout
+  becomes identity.
+- cuDNN convolution non-determinism: NOT exercised at audit
+  environment (torch 2.11.0+cpu); CPU conv ops deterministic.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Via SC1 `_prepare_series`
+  helper reuse (Stage 1 AST hash MATCH; PARTIAL Tier A pattern
+  SIXTH-INSTANCE).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (n_channels=[32, 32] + kernel_size=3 +
+  epochs=100 + n_lags=16 + lr=0.005 + use_torch=True per engine
+  `_PRESET_CONFIG` lines 32-35); returned 3 expected tables
+  (`Forecast` + `Model Summary` + `Training Loss`) + `audit_fields`
+  populated with TCN-specific fields including `backend="pytorch"`
+  + `n_channels` + `kernel_size` + `receptive_field=7` (integer
+  exact) + `n_params=9537` (integer exact) + `final_loss` +
+  `initial_loss` + `loss_curve_summary`; no error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table 10 × 2; Model Summary 14 × 2; Training Loss ~20 × 2 (down-
+  sampled epoch × loss).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness; SC15 Tier D.3 + PARTIAL Tier A sixth-instance):**
+Reference reimplementation at `tools/reference_parity/harness/
+checks/p3_tcn.py` `_reference_tcn_forecast` mirrors engine
+`tcn_forecast.run()` primary PyTorch path at engine lines 261-294
+verbatim including `_train_torch_tcn` at engine lines 141-167
+(CausalConv1d + ResidualBlock + TCN classes with `nn.Conv1d` +
+dilation=2**i + residual + 1x1 downsample + Linear readout + Adam +
+MSE + epochs training loop) + `_predict_torch_tcn` at engine lines
+170-185 (recursive multi-step forecast with (1, 1, n_lags) input
+reshape) + receptive-field formula at engine line 293. DL
+determinism configuration via `_setup_dl_determinism` inherited
+from SC13/SC14.
+
+**Helper identity note (per SC15 Step 1 two-stage verification per
+SC4 methodology + SC10-SC14 PARTIAL Tier A precedent):**
+
+Stage 1 (AST source-segment SHA256 hash check):
+- `_prepare_series`: **MATCH SC1 RF** verbatim (strip-edge-NaN +
+  interp-interior body identical modulo function-name token only).
+- `_create_sequences`: **MATCH SC14 p3_lstm_gru**
+  `_create_sequences_reference` verbatim (sliding-window 2D output
+  body identical; TCN applies `.unsqueeze(1)` AFTER to add conv
+  channel dim).
+- `_create_lag_features`: **ABSENT** (fallback-only feature path;
+  primary path uses shared sequence builder).
+
+Stage 2: ABSENT helpers indicate fallback-only feature path; primary
+path uses shared sequence builder. PARTIAL Tier A pattern SIXTH-
+INSTANCE confirmation per SC10 + SC11 + SC12 + SC13 + SC14 + SC15
+sustained pattern. **n=6 sustained observations across THREE
+distinct cohorts** (Tier C SC10-SC12 sklearn-backbone + Tier D
+opening SC13 feed-forward + Tier D.2 SC14 recurrent + Tier D.3
+SC15 convolutional); A3 fourth-observation-tightening threshold
+satisfied n=3-fold post-SC15; codification ROBUSTLY ROBUSTLY
+GROUNDED at architecture-type-agnostic generalization within DL
+family (feed-forward + recurrent + convolutional all exhibit
+PARTIAL Tier A pattern under shared determinism profile).
+
+**Fallback dispatch handling (SC3 template element SEVENTH-INSTANCE
+application):** Engine `_has_torch()` + preset flag `use_torch`
+dispatches to PyTorch TCN primary path when torch available +
+preset enables; sklearn `MLPRegressor` fallback when torch
+unavailable. **Mathematical equivalence assessment (primary vs
+fallback): CATEGORICALLY DIFFERENT.** PyTorch TCN (dilated causal
+convolutional network with residual blocks; receptive field grows
+exponentially with depth) vs sklearn MLPRegressor (feed-forward
+MLP with lag features). NOT numerically equivalent — fundamentally
+different architectures with different inductive biases.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 9 primary metrics: 10-step forecast
+values [first=-0.233676] + final_loss=0.2929 + initial_loss=
+2.23263 + rmse=0.6376 + r²=0.7477 + n_params=9537 exact + n_train=
+184 exact + receptive_field=7 exact + forecast_end_value=-0.375804;
+n=200 AR(1) DGP + Balanced preset + seed=42 at runner CLI
+execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC15 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_tcn.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+local `_fit_predict` with hardcoded HIDDEN_CHANNELS=8 + N_EPOCHS=5
++ 2-layer dilated TCN architecture in BOTH arms — degenerate self-
+parity bypassing engine's Balanced preset n_channels=[32, 32] +
+kernel_size=3 + epochs=100 + receptive-field/causal-padding/
+residual pipeline).
+**Audit date:** 2026-05-28 (Cat 3 remediation cycle session 15/17
+close).
+**Primary metrics (math layer):** 10-step recursive forecast +
+final_loss + initial_loss + rmse + r² + integer n_params + integer
+n_train + integer receptive_field + forecast_end_value scalar.
+
+**Validation claim scope (Cat 3 remediation cycle session 15/17
+post-rewrite; engine code path EXERCISED via RunContext at math
+layer at PyTorch CPU TCN backend):**
+
+- **Layer 1 (PyTorch TCN math at CPU backend with torch.manual_
+  seed + deterministic conv weight initialization across stacked
+  ResidualBlocks + dilated causal convolution + Adam optimization
+  + MSE loss + epochs + recursive multi-step forecast) VALIDATED
+  at Tier II.bit-exact at engine output-rounding floor:** Engine
+  `_train_torch_tcn` + reference `_reference_tcn_forecast` invoke
+  identical PyTorch primitives at identical hyperparameters at
+  IDENTICAL call sites with IDENTICAL weight initialization order
+  across all conv layers + residual downsamples + Linear readout.
+  Bit-exact PASS at deterministic seed; 0.0 abs diff across all
+  primary metrics including integer parameter count (9537) +
+  integer receptive field (7) confirming identical architecture
+  instantiation. **Layer 1 PyTorch CPU TCN PASS bit-exact
+  empirically grounded.**
+- **Layer 1 SKLEARN MLP FALLBACK NOT VALIDATED at math layer:**
+  sklearn MLPRegressor fallback at engine lines 305-340 covered at
+  wrapper-layer 3-check Check 2 only.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via SC1 reuse; preset
+  config dispatch returns expected 3-table structure; output shape/
+  type verification confirms numeric outputs. Layer 2 paths NOT
+  covered (sklearn MLP fallback + interpretation builder + plain
+  English summary) require expert review.
+
+**Phase 3 algorithmic basis (extracted from engine module):** TCN
+per Bai + Kolter + Koltun (2018) "An Empirical Evaluation of Generic
+Convolutional and Recurrent Networks for Sequence Modeling"
+arXiv:1803.01271. Dilated causal 1D convolutions enable exponentially
+growing receptive field with linear depth; residual blocks (Bai-
+Kolter-Koltun §2.2) stack two causal conv layers per block with
+identity-or-1x1-conv shortcut for channel dimension matching;
+exponential dilation schedule d=2**i across blocks. PyTorch
+`nn.Conv1d` with `padding=(k-1)*d` + right-crop achieves causality.
+Engine: 2 levels at Balanced (channels=[32, 32], k=3) → RF=7;
+3 levels at Thorough (channels=[64, 64, 64], k=5) → RF=29. Adam
+optimizer + MSE loss + sliding window sequence input (2D
+`(n_samples, seq_len)` then `.unsqueeze(1)` to add channel dim) +
+recursive multi-step forecast via 1-step-ahead prediction in
+autoregressive loop with (1, 1, n_lags) input reshape per
+`_predict_torch_tcn`.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session
+15/17 post-rewrite):**
+
+- Math-layer harness validates engine PyTorch CPU TCN code path
+  (post-rewrite Category 1 LEGITIMATE). Pre-rewrite was Category 3
+  DEGENERATE-VACUOUS — `_fit_predict` helper with hardcoded
+  HIDDEN_CHANNELS=8 + N_EPOCHS=5 + 2-layer architecture.
+- Engine output rounding floor (Phase 1 finding B8): forecast 6-
+  decimal; loss 6-decimal; rmse + r² 4-decimal; integer counts
+  exact (n_params + n_train + receptive_field).
+- PyTorch CPU determinism: requires explicit configuration per SC13
+  established profile; SC15 verified for convolutional architecture
+  (TCN with stacked dilated causal conv blocks).
+- Adam optimizer state deterministic at fixed seed + identical
+  gradients; engine + reference perform identical training steps in
+  identical order.
+- Engine `audit_fields` does NOT include `mae` (only `rmse` +
+  `r2`); harness excludes mae from compare scope accordingly.
+  Distinct from SC14 lstm_gru which DOES emit `mae` in audit.
+
+**Phase 3 boundary of validity:**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1); other DGP regimes not
+  validated
+- Horizon=10 fixed
+- Balanced preset config validated at TCN path; Fast (use_torch=
+  False → sklearn fallback) + Thorough (3-level TCN with k=5) NOT
+  in parity scope
+- Univariate series only
+- AR(1) DGP-specific
+- **PyTorch CPU backend validated; sklearn MLP fallback + GPU
+  backend NOT validated**
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer
+- Sklearn MLP fallback NOT math-layer validated
+- GPU/CUDA backend NOT validated at SC15 audit (CPU-only)
+- Alternative n_channels configurations + alternative kernel_size +
+  alternative dilation schedules NOT validated (Balanced preset
+  defaults exclusively)
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC15 / Cat 3 remediation cycle session 15/17):** Layer 1
+PyTorch TCN math validated bit-exact at machine precision at
+deterministic seed post-rewrite via RunContext invocation of engine
+code path at CPU backend. Wrapper layer (S49+ NEW 3-check scope)
+validated at 3/3 PASS. Layer 2 engine wrapper orchestration paths
+NOT covered by 3-check require expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3) + SC3
+fallback three-state framework SEVENTH-INSTANCE application:**
+
+- **Validated configuration (harness math layer):** engine PyTorch
+  CPU TCN code path EXERCISED via RunContext at Balanced preset
+  (n_channels=[32, 32] + kernel_size=3 + epochs=100 + n_lags=16 +
+  lr=0.005 + use_torch=True); horizon=10; seed=42; receptive_field=
+  7 (derived).
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 234 + primary path
+  dispatch via `_has_torch()` at engine line 252.
+- **Configuration match:** **YES at CPU PyTorch TCN backend** —
+  user invoking at default Balanced preset with torch installed in
+  CPU environment experiences mathematically validated Layer 1
+  surface.
+- **Disclosure scope:** Fast (use_torch=False → sklearn fallback) +
+  Thorough (3-level TCN with k=5, n_channels=[64, 64, 64] →
+  receptive field 29) preset configurations NOT validated at math
+  layer. **MLP FALLBACK PATH DISCLOSURE per SC3 template element
+  SEVENTH-INSTANCE:** PyTorch primary path math-layer validated;
+  sklearn MLPRegressor fallback (engine lines 305-340, dispatched
+  when `_has_torch()` returns False OR preset `use_torch=False`)
+  is wrapper-layer-3-check Check 2 covered but NOT math-layer-
+  parity validated. **Mathematical equivalence: NOT EQUIVALENT**
+  (dilated causal convolutional TCN vs feed-forward MLP —
+  categorically different architectures with different inductive
+  biases; TCN exploits temporal locality + exponential receptive
+  field, MLP treats lag features as exchangeable inputs).
+  **GPU/CUDA backend DISCLOSURE per SC13/SC14 precedent:** SC15
+  validates CPU PyTorch backend; CUDA backend NOT exercised; user-
+  environment-specific. cuDNN convolution kernels may exhibit non-
+  determinism on GPU not fully suppressed by
+  `use_deterministic_algorithms(True)`.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+15/17 — Tier D.3):** Inventory verification commit 12d3785
+classified p3_tcn as Cat 3 DEGENERATE-VACUOUS. Triage close at
+HEAD a7746f1 confirmed Cat 3. This §2.5 entry closes the
+remediation cycle session 15/17 via combined harness rewrite +
+entry forward-amendment per Tier 2 incremental pattern + PARTIAL
+Tier A pattern SIXTH-INSTANCE + SC13/SC14 DL family determinism
+profile INHERITANCE + convolutional-architecture cross-invocation
+bit-exact VERIFICATION (extends feed-forward + recurrent →
+convolutional generalization).
+
+**Legacy `_make_sequences` + `_seed_torch` stubs at SC14 lstm_gru
+status:** Post-SC15 close, only p3_nbeats + p3_nhits dependents
+remain (p3_tcn dependency removed via SC15 rewrite). Stubs
+preserved pending SC16/SC17 remediation. Removal scheduled at
+SC17 nhits close (last Tier D dependent).
+
+**SC16 nbeats projection (next Tier D session per triage close
+ordering):** Engine `nbeats_forecast.py` is PyTorch N-BEATS
+forecast (Oreshkin et al. 2019 arXiv:1905.10437); basis-expansion
+architecture with stacks of fully-connected blocks producing
+backcast + forecast via shared basis (generic basis OR
+trend/seasonal interpretable basis). Distinct from SC13 feed-
+forward + SC14 recurrent + SC15 convolutional → basis-expansion
+architecture. Inherit SC13/SC14/SC15 determinism configuration +
+verify cross-invocation reproducibility (basis-expansion-specific
+parity risks: block stacking order + basis function init +
+backcast/forecast head split). Engine preset likely has stack_types
++ n_blocks + n_layers_per_block + hidden_layer_units + epochs + lr
+fields. Estimated session time: ~2-2.5h.
+
+## §3 Unvalidated catalog techniques (26 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -28017,8 +28311,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (3 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11; echo_state_network moved to §2.5 per Phase 7+ SC12; autoencoder_anomaly moved to §2.5 per Phase 7+ SC13; lstm_gru_forecast moved to §2.5 per Phase 7+ SC14 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A complete post-SC6; TIER B complete post-SC9; TIER C complete post-SC12; TIER D DL family opens at SC13; SC14 lstm_gru recurrent-architecture FIRST-INSTANCE within Tier D + DL determinism profile INHERITED from SC13 + cross-invocation BIT-EXACT recurrent-architecture CONFIRMED; SC15 tcn next**)
-`nbeats_forecast`, `nhits_forecast`, `tcn_forecast`
+### ML / Deep Learning (2 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11; echo_state_network moved to §2.5 per Phase 7+ SC12; autoencoder_anomaly moved to §2.5 per Phase 7+ SC13; lstm_gru_forecast moved to §2.5 per Phase 7+ SC14; tcn_forecast moved to §2.5 per Phase 7+ SC15 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A complete post-SC6; TIER B complete post-SC9; TIER C complete post-SC12; TIER D DL family opens at SC13; SC14 lstm_gru recurrent-architecture FIRST-INSTANCE within Tier D; SC15 tcn convolutional-architecture FIRST-INSTANCE within Tier D + DL determinism profile INHERITED from SC13/SC14 + cross-invocation BIT-EXACT convolutional-architecture CONFIRMED (extends feed-forward + recurrent → convolutional generalization); SC16 nbeats next**)
+`nbeats_forecast`, `nhits_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
