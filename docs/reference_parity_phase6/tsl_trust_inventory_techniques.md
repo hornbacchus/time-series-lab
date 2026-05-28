@@ -29381,7 +29381,391 @@ block (BLOCK COMPLETE 5/5 entries; NINTH catalog block fully Q1-
 amended at 9/13 = 69%), and resumes Q1 audit cadence post-cascade.
 Forward state: next block selection for Q1 cadence continuation.
 
-## §3 Unvalidated catalog techniques (23 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### pca_analysis (Phase 7+ S63; FIFTY-SECOND §2.5 entry; FIRST Multivariate Systems block entry; Block 10 opens; **Cat 1d VSC=NO disclosure embedded per Gate 2 finding** — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: **COVERED — no engine gap** per S63 Step 1; first Q1 cadence routine §2.5 entry post-S62 Evaluation/Uncertainty block close)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.1 same-library cross-package self-parity at
+machine precision)** per S63 Code Step 2 empirical verification.
+NumPy `eigh` on covariance matrix (TSL math path) vs
+`sklearn.decomposition.PCA` (reference). Closed-form
+eigendecomposition of the centered data's covariance matrix;
+eigenvalues unique + eigenvectors unique up to sign (handled via
+max-abs-positive sign canonicalization on both sides). Machine-
+precision parity at `max_abs_diff ≤ 8e-14` across all primary
+metrics.
+
+**Engine variant validated (at math layer, indirectly via
+inlining):** PCA on centered covariance matrix via NumPy
+`np.linalg.eigh` per engine lines 285-298 (engine path when
+`standardize=False`). Harness `run_tsl` deliberately inlines this
+math (numpy eigh on `(Y_centered.T @ Y_centered) / (n - 1)`) per
+Phase 1 finding B8 precedent (engine wrapper rounds loadings to
+4-decimal and scores to 6-decimal, capping parity at ~1e-4 to
+~1e-6; the inline path validates underlying engine math at machine
+precision instead). Cross-library reference vs sklearn PCA confirms
+engine math is correct at the standardize=False configuration.
+
+**Reference (Pattern A.1 same-library cross-package self-parity):**
+Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_pca.py` `run_reference`
+lines 155-179 invokes `sklearn.decomposition.PCA(n_components=p)`
+fit-transform on the same DGP. sklearn internally uses
+`np.linalg.svd` on centered data (equivalent decomposition);
+loadings = `components_.T` to match TSL convention (p, k) shape.
+Both arms apply identical max-abs-positive sign canonicalization
+(`_sign_canonicalize` at lines 67-78) per column before comparison
+to resolve PCA's intrinsic sign ambiguity. Reference scores
+recomputed with sign-canonicalized loadings to keep scores ↔
+loadings consistent.
+
+**Helper identity note (per S63 Step 1; informational — not a
+Cat 1 same-engine reuse pattern since this is a Pattern A.1
+cross-package check, NOT a Pattern A.3 self-parity check):**
+
+- `_generate_pca_dgp` (harness-internal): NOT shared with any
+  other harness — bespoke (n, p, k_factors) factor-model DGP for
+  multivariate fixture construction.
+- `_sign_canonicalize` (harness-internal): applied identically to
+  both arms to resolve sign ambiguity intrinsic to
+  eigendecomposition; algorithm-agnostic.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine `_prepare_matrix` lines
+  67-83 strips entirely-NaN series + linearly interpolates per-
+  series interior NaN + drops rows with residual NaN. Verified by
+  injecting interior NaN at positions [5, 0] + [10, 2] into a 5-
+  series fixture: engine returned `status=success` + emitted 2
+  NaN-interpolation warnings per series + audit `n_obs=200`
+  (no rows dropped post-interpolation).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"`; returned audit fields populated correctly
+  (`standardized=True` ← confirms engine default per engine line
+  35; `rotation="none"`; `n_components=5`; `n_series=5`;
+  `n_obs=200`; `pc1_variance_pct=59.28`; `kaiser_components=2`);
+  no error response.
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 4 expected tables (`Explained Variance` 5 × 4 [Component
+  + Eigenvalue + Variance % + Cumulative %]; `Loadings` 5 × 6;
+  `Component Scores` 200 × 6 [time-series label + PC1..PC5];
+  `Model Summary`). **Reconstruction Error table CONDITIONALLY
+  emitted only when `n_components < n_series`** per engine line
+  441; at test case `n_components=5=n_series` table is correctly
+  absent.
+
+**Verdict (math layer):** PASS bit-exact at machine precision
+(`max_abs_diff` per metric: eigenvalues 7.99e-15, loadings 4.37e-
+14, scores 7.64e-14, total_variance 7.99e-15; n=200 fixture with
+p=5 series + k_factors=2 latent factors at seed=42 at runner CLI
+execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S63 Code Step 3
+including engine-default `standardize=True` confirmation.
+**Audit script:** `tools/reference_parity/harness/checks/p3_pca.py`.
+**Audit date:** 2026-05-28 (S63 §2.5 entry; Multivariate Systems
+block opens; first Q1 cadence routine entry post-Cat-3-cycle close
++ Evaluation/Uncertainty block close).
+**Primary metrics (math layer):** explained-variance vector
+(eigenvalues; 5-component) + loadings matrix (sign-canonicalized;
+5 × 5 flattened to 25-vector) + scores matrix (sign-canonicalized;
+200 × 5 flattened to 1000-vector).
+**Secondary metric:** total variance scalar.
+
+**Validation claim scope (S63; engine math validated indirectly at
+`standardize=False` configuration via inline-math harness pattern;
+engine wrapper code path exercised only at wrapper-layer 3-check
+scope; math-layer comparison crosses TWO library implementations of
+covariance-matrix eigendecomposition):**
+
+- **Layer 1 (covariance-matrix PCA via numpy eigh; sklearn PCA via
+  np.linalg.svd cross-library) VALIDATED at Tier II.bit-exact:**
+  Both libraries compute eigenvalues + eigenvectors of the same
+  centered-covariance matrix; numerical algorithms differ (eigh =
+  symmetric eigendecomposition LAPACK driver; svd = singular-value
+  decomposition LAPACK driver) but the mathematical result is
+  identical up to sign + machine precision. Machine-precision
+  agreement (max_abs ≤ 8e-14) confirms both implementations are
+  algorithmically correct.
+- **Layer 1 CORRELATION-MATRIX PCA (engine default
+  `standardize=True`) NOT VALIDATED at math layer:** See VSC section
+  below.
+- **Layer 1 VARIMAX ROTATION (Thorough preset) NOT VALIDATED at math
+  layer:** Engine `_varimax_rotation` at lines 107-147 implements
+  paired-PC angle iteration; Balanced preset uses `rotation=None`.
+- **Layer 1 RECONSTRUCTION ERROR computation (Balanced/Thorough
+  presets when n_components < n_series) NOT VALIDATED at math
+  layer:** Engine emits per-series RMSE at lines 441-462; covered
+  at wrapper-layer 3-check Check 3 conditional-emission
+  verification only.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via `_prepare_matrix`
+  exercising series-level + row-level NaN paths; preset config
+  dispatch returns expected 4-table structure with engine-default
+  `standardize=True`; output shape/type verification confirms
+  table column schemas + per-observation time-series Component
+  Scores emission (yield-curve-factor-decomposition workflow
+  surface).
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Principal Component Analysis per Pearson
+(1901) "On Lines and Planes of Closest Fit to Systems of Points in
+Space" Phil Mag 2(11) + Jolliffe (2002) "Principal Component
+Analysis" Springer 2nd ed. §1-§2. Eigendecomposition of the
+centered covariance matrix (`standardize=False`) or correlation
+matrix (`standardize=True`) yields eigenvalues (component
+variances) + eigenvectors (principal axes / loadings); scores =
+projections of centered data onto principal axes. PCA is closed-
+form arithmetic — no iteration, no random initialization, no
+hyperparameter tuning. Eigenvalues unique; eigenvectors unique up
+to sign. Standard convention for time-series PCA on correlated
+series (yield curves, sectoral employment, cross-asset returns):
+the dominant component on `standardize=True` aligns with the "level
+factor" (common shift across all variables); engine encodes this
+via PC1-anchored max-abs-positive sign convention at engine lines
+379-382 (per the engine's two-rule sign-normalization comment at
+lines 333-378). Higher components frequently interpretable as
+"slope" (PC2: front-end vs back-end of curve) + "curvature"
+(PC3: belly vs wings) under yield-curve application per Litterman-
+Scheinkman (1991) "Common Factors Affecting Bond Returns" J Fixed
+Income 1(1).
+
+**Phase 3 known failure modes (S63 / corrected harness scope):**
+
+- Math-layer harness deliberately inlines engine math (numpy eigh
+  on centered covariance) per Phase 1 finding B8 — engine wrapper
+  rounds loadings to 4 decimals + scores to 6 decimals (engine
+  lines 407 + 429); inline path achieves machine-precision parity
+  vs wrapper-path 1e-4 to 1e-6 floor. Engine wrapper code path is
+  NOT exercised by math-layer harness; ONLY exercised at wrapper-
+  layer 3-check scope. Documented as intentional harness design
+  per the harness module-level docstring at lines 119-122.
+- Engine eigenvalue clamp: engine clamps eigenvalues to ≥ 0 at
+  engine line 297 to handle floating-point numerical-precision
+  cases where eigh produces tiny negative eigenvalues for near-
+  rank-deficient covariance matrices. Reference does not clamp;
+  divergence appears only when underlying covariance is numerically
+  degenerate (NOT exercised at the validation DGP which produces
+  well-conditioned (n=200, p=5) covariance).
+- Engine "loadings" definition diverges from harness: engine emits
+  `loadings = eigenvectors * sqrt(eigenvalues)` at engine line 321
+  (factor-analysis convention; loadings = correlation between PC
+  and original variable when `standardize=True`); harness "loadings"
+  = raw eigenvectors. The two differ by a scalar column-wise multiplier
+  (sqrt of eigenvalue). Engine convention is consistent with
+  Jolliffe 2002 §2.4 factor-loading terminology + with `Loadings`
+  table emission used by yield-curve-strategist workflow. Math-
+  layer harness compares raw eigenvectors (sklearn convention)
+  cross-library; the sqrt-eigenvalue scaling step is engine-internal
+  and NOT separately validated.
+- Engine sign convention diverges from harness: engine anchors PC1
+  only (max-abs-positive on PC1; PC2..PCn left as eigh returned)
+  per the two-rule comment at lines 333-378; harness applies max-
+  abs-positive to all PCs symmetrically (both arms) per
+  `_sign_canonicalize` at lines 67-78. At the validation DGP both
+  conventions agree on PC1 sign; PC2+ sign-flip difference is
+  absorbed by the harness's symmetric canonicalization (both arms
+  agree under harness convention).
+
+**Phase 3 boundary of validity:**
+
+- (n, p) = (200, 5) fixture with k_factors=2 latent factor model
+  (`_generate_pca_dgp`); other shapes + factor structures not
+  validated
+- `standardize=False` math validated; `standardize=True` engine
+  default NOT validated (see VSC below)
+- `rotation=None` (Balanced default) validated; `rotation="varimax"`
+  (Thorough default) NOT validated
+- `n_components=p=5` (all components) validated; `n_components < p`
+  truncation NOT separately validated though same eigendecomposition
+  algorithm applies
+- Univariate-series PCA NOT applicable (engine requires n_series ≥
+  2 per `_prepare_matrix` line 58)
+- Reconstruction Error computation (Balanced when n_components < n_series)
+  NOT separately validated at math layer
+
+**Phase 3 gap markings:**
+
+- `standardize=True` engine-default math path NOT validated at
+  math layer (Cat 1d VSC=NO — see VSC section)
+- Varimax rotation (Thorough preset; engine lines 107-147) NOT
+  validated
+- Reconstruction Error per-series RMSE NOT separately validated
+- Engine PC1-only sign convention NOT validated at math layer
+  (harness uses symmetric canonicalization)
+- Engine "loadings = eigenvectors × sqrt(eigenvalues)" scaling step
+  NOT separately validated (math-layer harness compares raw
+  eigenvectors)
+
+**Status (Tier II.bit-exact PASS at machine precision per S63 /
+first Multivariate Systems block entry):** Layer 1 covariance-
+matrix PCA math validated bit-exact at machine precision via cross-
+library check (numpy eigh vs sklearn PCA) at the inline harness
+path. Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS
+including engine-default `standardize=True` confirmation. Layer 1
+correlation-matrix PCA (engine default) NOT separately validated
+— see Cat 1d VSC=NO disclosure below.
+
+**Validation-Surface Coverage (VSC) — Cat 1d VSC=NO disclosure per
+Gate 2 finding embedded at S63 entry:**
+
+- **Validated configuration (harness math layer):** Engine math
+  for `standardize=False` configuration validated via inline
+  harness path (NumPy `np.linalg.eigh` on centered covariance
+  matrix) vs sklearn PCA reference. `n_components=5=p` (all
+  components); k_factors=2 latent factor DGP at n=200; seed=42.
+- **Engine preset default (Balanced):** `standardize=True`
+  (correlation-matrix PCA) per engine `_PRESET_CONFIG["Balanced"]`
+  at engine line 35 + applied via engine lines 276-281 (data
+  divided by per-series standard deviation post-centering before
+  covariance computation).
+- **Configuration match:** **NO — Cat 1d VSC=NO at standardize
+  axis.** Validated config (`standardize=False` ⇒ covariance-matrix
+  PCA) differs from engine default (`standardize=True` ⇒ correlation-
+  matrix PCA). Mathematical implication:
+    - On `standardize=False` (validated): eigendecomposition of
+      `(X_centered).T @ X_centered / (n-1)` ⇒ eigenvalues reflect
+      variances in original units; high-variance variables dominate
+      PC1.
+    - On `standardize=True` (engine default): eigendecomposition of
+      `(Z_standardized).T @ Z_standardized / (n-1)` where Z is z-
+      scored ⇒ eigenvalues reflect proportions of total
+      standardized variance; variables contribute equally
+      irrespective of original scale; eigenvalues sum to `p`
+      (number of series).
+    - The two configurations produce DIFFERENT eigenvalues + DIFFERENT
+      eigenvectors unless all variables are already on common scale
+      (i.e. all std deviations equal). For typical multivariate
+      time-series applications (yield curves with rates in same
+      units; sectoral GDP with growth rates in same units; cross-
+      asset returns in same units), the configurations are CLOSE
+      but not identical; for cross-scale applications (mixed unit
+      systems; price levels + log returns), the configurations
+      diverge materially.
+- **User-facing risk surface:** User invoking engine at default
+  Balanced preset experiences `standardize=True` (correlation-matrix
+  PCA) which is NOT separately math-layer validated at S63.
+  Wrapper-layer 3-check confirms engine emits the standardize=True
+  output structure correctly (audit `standardized=True`); the
+  underlying numpy eigh + sklearn StandardScaler-equivalent
+  arithmetic is well-understood + algorithmically standard, so the
+  divergence is BOUNDED in algorithmic-novelty risk.
+- **Mitigation suggestion:** User requiring math-layer validation
+  at default `standardize=True` path should either (a) explicitly
+  set `standardize=False` to invoke the math-layer-validated path
+  if the application warrants covariance-matrix PCA (typical when
+  variables are pre-scaled or share units; e.g. cross-asset
+  returns in basis points), OR (b) await Q2+ harness re-execution
+  at `standardize=True` config (commissioned per Path B disposition
+  below).
+- **Path B forward observation (low-priority Q2+ work item per
+  user disposition):** Re-execute p3_pca harness at `standardize=
+  True` configuration in a future session to extend math-layer
+  validation to the engine default; divergence with standardize=
+  False configuration is well-understood algorithmically (standard
+  PCA literature; Jolliffe 2002 §2.5 covariance vs correlation PCA)
+  + not algorithmically novel; deferred Q2+ per low-priority
+  designation. NOT bundled with ENG-EXT-CONFORMAL-001 as this is
+  a HARNESS scope extension, not an engine extension.
+
+**ENG-EXT yield-curve-factor-decomposition workflow scan outcome
+(S63 Step 1):**
+
+The yield-curve-factor-decomposition workflow (institutional fixed-
+income rates-desk-standard PCA use case) requires three elements:
+
+(a) **factor-scores time series** (per-component time-series of
+    scores — what a rates strategist plots; PC1/PC2/PC3 score
+    trajectories over time): **PRESENT** ✓ — engine emits
+    `Component Scores` table at engine lines 415-436 with per-
+    observation time-series of all PCs (up to 100k-row cap).
+(b) **variance-explained-per-component decomposition** (how much
+    yield-curve variation each factor captures): **PRESENT** ✓ —
+    engine emits `Explained Variance` table at engine lines 387-
+    399 with per-component eigenvalue + variance % +
+    cumulative %.
+(c) **loadings interpretability for yield-curve (level/slope/
+    curvature labeling)**: **PRESENT** ✓ in functional sense —
+    engine emits `Loadings` table at engine lines 401-413 with
+    per-series weights for each PC; engine sign-normalizes PC1
+    explicitly to be the "level factor" per engine lines 367-378
+    comment ("anchored independently: make its largest-absolute
+    loading positive. On yield curves / employment by sector /
+    etc. this produces a PC1 where scores rise when the overall
+    level rises — matching intuition"). PC2/PC3 NOT explicitly
+    labeled as slope/curvature by engine (per Litterman-Scheinkman
+    1991 convention) but the underlying loadings are produced for
+    user-side interpretation.
+
+**Verdict: COVERED — NO ENG-EXT gap surfaced for the rates-desk-
+standard yield-curve-factor-decomposition workflow.** Engine PCA
+emits the full (a) + (b) + (c) substantive workflow elements.
+
+Secondary nice-to-have ENG-EXT candidates considered but NOT
+material at S63:
+
+- Sparse PCA per Zou-Hastie-Tibshirani (2006) "Sparse Principal
+  Component Analysis" J Comp Graph Stat 15(2) for interpretable
+  factor loadings with L1 penalty: NOT material — yield-curve
+  loadings are typically dense (level/slope/curvature all involve
+  most maturities) and standard PCA loadings are interpretable
+  directly without sparsification.
+- PCA-with-Bartlett-test for component significance per Bartlett
+  (1950) "Tests of Significance in Factor Analysis" Br J Psychol
+  Stat Sect 3: NOT material — the Kaiser criterion is already
+  emitted (`kaiser_components` in audit_fields + Model Summary
+  table); strategists use Kaiser + scree-plot inspection rather
+  than formal hypothesis tests for component retention.
+
+**No ENG-EXT bundling-with-ENG-EXT-CONFORMAL-001 candidate
+surfaced at S63.** Future Multivariate Systems sessions (S64 var,
+S65 vecm, S66 dynamic_factor_model, S67 bvar) will continue
+ENG-EXT candidate surveillance per established Path B forward-
+observation pattern.
+
+**Audit-hygiene cross-reference (S63 / Cat 1d VSC=NO disclosure
+per Gate 2 finding):** Gate 2 audit-hygiene checkpoint identified
+`p3_pca` as Cat 1d VSC=NO due to engine-default `standardize=True`
+≠ harness-validated `standardize=False` configuration divergence.
+S63 §2.5 entry embeds the disclosure explicitly + documents the
+mathematical implication + user-facing risk surface + Q2+
+mitigation. Harness math-layer-validation path (numpy eigh on
+covariance vs sklearn PCA covariance-matrix decomposition) is
+mathematically correct for the `standardize=False` engine code
+path; the engine `standardize=True` path is algorithmically
+standard (z-score + same eigendecomposition pipeline) and the
+divergence is well-bounded per the Cat 1d disclosure.
+
+**Multivariate Systems block opening note (S63 first entry):**
+Block 10 Multivariate Systems opens at S63 pca_analysis per
+ratified ascending-complexity dispatch ordering (pca_analysis →
+var → vecm → dynamic_factor_model → bvar). Block contains 8 total
+catalog entries: 3 validated separately pre-Q1
+(johansen_cointegration + forecast_reconciliation +
+bond_yield_forecast) + 5 unvalidated dispatch-set (S63-S67). Block
+is statsmodels-heavy, bit-exact-prone, low determinism-complication
+risk (no DL/Stan). Strongest cross-pattern reinforcement with
+prior State Space block (S48-S51) + validated BVAR/bond_yield_
+forecast work. Maximum institutional-fixed-income strategist
+utility (VAR/VECM/DFM/PCA = core cross-asset rates strategy
+toolkit) per user disposition. **Post-S63: Multivariate Systems
+block 4/8 §2.5-validated (3 separate + S63 pca_analysis); 4
+remaining in dispatch-set via S64-S67.** Block close projected at
+S67 bvar.
+
+**SC64 var projection (next Multivariate Systems block session per
+ascending-complexity dispatch ordering):** Engine
+`engine/techniques/var.py` is statsmodels-based vector
+autoregression. **Pre-existing condition flagged for S64 handling:
+aic/bic Tier V Pattern D CAVEAT** identified at the original
+`e72d6f5` CI investigation (statsmodels vs R AIC scale offset);
+S64 §2.5 entry must account for the pre-existing CAVEAT per
+established Tier V Pattern D disclosure framework. Engine wraps
+statsmodels.tsa.vector_ar.var_model; Pattern A.1 same-library
+cross-package self-parity expected at Tier II.bit-exact at primary
+metrics (coefficient matrices + intercept + log-likelihood +
+forecasts) with Pattern D aic/bic exception. Estimated session
+time: ~1-1.5h.
+
+## §3 Unvalidated catalog techniques (22 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -29425,8 +29809,8 @@ descriptions, summaries).
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
 
-### Multivariate Systems (5 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately)
-`bvar`, `dynamic_factor_model`, `pca_analysis`, `var`, `vecm`
+### Multivariate Systems (4 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap)
+`bvar`, `dynamic_factor_model`, `var`, `vecm`
 
 ### Regimes / Nonlinear (6 unvalidated)
 `critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
