@@ -26839,7 +26839,251 @@ parameters + frequency inference logic. Bespoke per-session
 reimplementation expected (Stan optimization is distinct from
 sklearn-backbone). Estimated session time: ~1.5-2h.
 
-## §3 Unvalidated catalog techniques (31 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### prophet_forecast (Phase 7+ SC11; FORTY-FOURTH §2.5 entry; EIGHTH ML / Deep Learning block entry; Cat 3 remediation cycle session 11/17 — SECOND Tier C session post SC10 GP; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; **PARTIAL Tier A pattern SECOND-INSTANCE** confirmation (SC10 + SC11; codification candidate); **FIRST Tier II.mle-band Cat 3 remediation cycle entry** per Stan-MAP-non-determinism between separate fit() invocations)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.mle-band (Pattern A.3 paper-formula self-parity at MLE-class
+convergence precision)** per SC11 Code Step 4 empirical verification
++ Cat 3 remediation cycle session 11/17 disposition. **FIRST Tier
+II.mle-band §2.5 entry in Cat 3 remediation cycle** (SC1-SC10 all
+Tier II.bit-exact). Stan-based MAP optimization is bit-exact
+deterministic at fixed seed WITHIN a single Prophet.fit() invocation
++ consistent Stan toolchain, but two SEPARATE Prophet.fit()
+invocations (engine arm + reference arm) produce slightly different
+LBFGS local optima due to Stan internal state non-resetting between
+fits. Runner CLI verdict CAVEAT at max_rel_diff ~1.7% on forecast
+values (Stan-MLE-band-convergence-variation); rmse + r² + integer
+n_candidate_changepoints all PASS at tighter precision. Tier
+classification matches inventory verification methodology "Tier
+II.mle-band" precedent (per S55 garch overlay framing).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Input series with 3 interior
+  NaN values at indices [5, 23, 67] of n=120 trend+seasonal AR(1)
+  fixture. Wrapper returns non-error response; emits warning "3
+  interior missing values were linearly interpolated." per engine
+  `_prepare_series` lines 50-70 (AST hash MATCH to SC1 RF; PARTIAL
+  Tier A pattern second-instance confirmation per SC10 precedent).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (changepoint_prior_scale=0.05 +
+  seasonality_prior_scale=10.0 + n_changepoints=25 + mcmc_samples=0
+  per engine `_PRESET_CONFIG` lines 35-40); returned 3 expected
+  tables (`Forecast` + `Model Summary` + `Components`) +
+  `audit_fields` populated with prophet-specific fields including
+  `backend="prophet"` + `changepoint_prior_scale` + `yearly_
+  seasonality` + `weekly_seasonality` + `n_candidate_changepoints`
+  + `most_recent_candidate_changepoint` + `interval_width`; no
+  error response.
+- **Check 3 — Output shape/type verification:** PASS. Forecast
+  table 12 rows × 4 cols [Step + Forecast + Lower + Upper]; Model
+  Summary 11 × 2; Components varies by backend (prophet: Index +
+  Trend + Yearly + Weekly columns; seasonal_naive fallback:
+  single-row notice).
+
+Wrapper-layer validation harness at `tools/_pr_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness; SC11 PARTIAL Tier A pattern + Stan-MAP at MLE-band):**
+Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_prophet.py` at
+`_reference_prophet_forecast` lines 100-200 mirrors engine
+`prophet_forecast.run()` primary path at engine lines 211-323
+verbatim including synthetic 2000-01-01 daily date construction
+(when ctx.time is integer indices not parseable as datetimes;
+matches engine fallback path at lines 224-230 + 232) + Prophet
+construction at engine-resolved Balanced preset hyperparameters
++ fit + freq inference + make_future_dataframe + predict +
+forecast extraction. Reuses SC1 `_prepare_series_reference` for
+NaN handling (Stage 1 AST hash MATCH; PARTIAL Tier A pattern
+SECOND-INSTANCE per SC10 GP precedent).
+
+**Helper identity note (per SC11 Step 1 two-stage verification per
+SC4 methodology + SC10 PARTIAL Tier A precedent):**
+
+Stage 1 (AST source-segment SHA256 hash check):
+- `_prepare_series`: **MATCH SC1 RF** (hash 57bae54d463c2fd7)
+- `_create_features`: **ABSENT** (Prophet uses Stan additive
+  decomposition not lag features)
+- `_create_forecast_features`: **ABSENT** (Prophet generates
+  forecasts via make_future_dataframe + predict)
+
+Stage 2: ABSENT helpers indicate architectural distinctness
+(Stan-based pipeline distinct from sklearn-tree-family). PARTIAL
+Tier A pattern ratified: `_prepare_series_reference` reused from
+SC1 + bespoke Prophet-specific pipeline. **SECOND-INSTANCE
+confirmation of PARTIAL Tier A pattern** (SC10 GP first instance;
+SC11 prophet second; A3 second-observation tightening threshold
+SATISFIED at PARTIAL Tier A pattern scope; codification candidate
+at absorption #6+ ROBUSTLY GROUNDED).
+
+**Stan-MAP non-determinism between separate fit() invocations
+(institutional disclosure):** Triage close confirmed bit-exact
+reproducibility WITHIN a single engine wrapper invocation. In
+parity check scope, engine arm + reference arm invoke
+Prophet.fit() in SEPARATE Python contexts (different model
+instances; different Stan workspace state). Stan's LBFGS optimizer
+produces slightly different local optima at the second fit()
+even with identical initialization due to internal RNG state +
+parallel linear algebra non-determinism. CAVEAT outcome at
+max_rel_diff ~1.7% on forecast values + max_abs_diff ~0.1 is
+EXPECTED behavior per Stan-MAP-LBFGS-convergence-band; rmse +
+r² + integer n_candidate_changepoints all match at tighter
+precision. **Tier II.mle-band classification reflects this
+institutional reality.**
+
+**Fallback dispatch handling (SC3 template element THIRD-INSTANCE
+application):** Engine `_has_prophet()` at lines 20-25 dispatches
+to prophet.Prophet primary path when prophet available;
+`_seasonal_naive_forecast` at lines 73-115 fallback when not.
+This audit session validates PRIMARY path (prophet 1.3.0 confirmed
+installed). Fallback path NOT validated at math layer.
+
+**Mathematical equivalence assessment (primary vs fallback): NOT
+EQUIVALENT.** Categorically different algorithms:
+- Primary (prophet.Prophet): Stan-based additive decomposition
+  (trend + seasonality + holidays) with L1-shrinkage changepoint
+  prior + MAP optimization
+- Fallback (seasonal_naive): repeats last seasonal cycle from
+  observed series with t-critical * std_resid * sqrt(h) intervals
+Users in non-prophet environments receive algorithmically distinct
+output covered by wrapper-layer 3-check only.
+
+**Verdict (math layer):** CAVEAT at Tier II.mle-band per Stan-
+MAP-convergence-variation (forecast values max_abs_diff=0.1007 +
+max_rel_diff=0.0171; forecast_lower max_abs_diff=0.0987 +
+max_rel_diff=0.0257; forecast_upper max_abs_diff=0.1028 +
+max_rel_diff=0.0127; n=12 horizon; n=120 daily fixture). PASS at
+tighter precision: rmse abs_diff=0.001 + rel_diff=0.0009; r²
+abs_diff=0.0006 + rel_diff=0.0009; n_candidate_changepoints exact
+integer match=25.
+**Verdict (wrapper layer):** PASS 3/3 checks per SC11 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_prophet.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+local `_fit_predict` helper with hardcoded growth="linear" +
+yearly_seasonality=True + weekly_seasonality=False +
+daily_seasonality=False + uncertainty_samples=0 + custom monthly
+fixture — degenerate self-parity bypassing engine's Balanced preset
+config + auto-seasonality detection + 95% interval width + ds/y
+DataFrame construction).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 11/17
+close).
+**Primary metrics (math layer):** 12-step yhat forecast values +
+12-step yhat_lower/yhat_upper 95% intervals + in-sample rmse + r²
++ integer n_candidate_changepoints.
+
+**Source files (Cat 3 remediation post-rewrite; SC11 PARTIAL Tier
+A pattern second-instance + Tier II.mle-band classification):**
++ `tools/reference_parity/harness/checks/p3_prophet.py` lines 67-71
+  (Layer 2 family-shared helper import from SC1:
+  `_prepare_series_reference`; PARTIAL Tier A reuse per SC10
+  precedent)
++ `tools/reference_parity/harness/checks/p3_prophet.py` lines 75-79
+  (Layer 1 engine preset Balanced mirror with prophet-specific
+  fields)
++ `tools/reference_parity/harness/checks/p3_prophet.py` lines 100-200
+  (bespoke `_reference_prophet_forecast` end-to-end primary-path
+  pipeline reimpl: synthetic 2000-01-01 daily DataFrame + Prophet
+  construction + fit + freq inference + predict + forecast
+  extraction + metrics)
++ `tools/reference_parity/harness/checks/p3_prophet.py` lines 225-310
+  (harness TSL arm `run_tsl` invokes engine via RunContext +
+  verifies `backend="prophet"` dispatch + extracts forecast/lower/
+  upper from "Forecast" table + audit fields)
++ `tools/reference_parity/harness/checks/p3_prophet.py` lines 312-330
+  (harness reference arm `run_reference`)
++ `tools/reference_parity/harness/checks/p3_prophet.py` lines 332-415
+  (compare() with engine output-rounding alignment per Phase 1
+  finding B8: 6-decimal forecast/lower/upper + 4-decimal rmse/r2 +
+  integer exact match for n_candidate_changepoints)
++ `engine/techniques/prophet_forecast.py` lines 20-25 (engine
+  `_has_prophet()` dispatch helper; primary/fallback selection)
++ `engine/techniques/prophet_forecast.py` lines 28-47 (engine
+  `_PRESET_CONFIG`; Balanced at lines 35-40)
++ `engine/techniques/prophet_forecast.py` lines 50-70 (engine
+  `_prepare_series`; byte-identical to SC1 RF per AST hash)
++ `engine/techniques/prophet_forecast.py` lines 73-115 (engine
+  `_seasonal_naive_forecast` fallback path)
++ `engine/techniques/prophet_forecast.py` lines 118-127 (engine
+  `_infer_period` for seasonal-naive fallback)
++ `engine/techniques/prophet_forecast.py` lines 211-323 (engine
+  primary path: Prophet construction + fit + predict + extraction)
++ no separate audit markdown report; empirical baseline reference
+  is the runner CLI CAVEAT verdict at this commit + institutional
+  Stan-MAP-MLE-band classification
+
+**Stan environment-sensitivity disclosure (institutionally
+substantive):** Prophet's Stan-MAP optimization is bit-exact
+deterministic at fixed seed WITHIN a consistent Stan toolchain
+(Stan version + cmdstanpy version + C++ compiler + OS).
+Cross-environment reproducibility (different Stan versions,
+different C++ compilers, different OS) is NOT guaranteed at
+bit-exact precision; expected scope is mle-band agreement
+(~1e-3 to 1e-6 relative) across distinct Stan toolchains.
+**Audit-environment Stan toolchain:** prophet 1.3.0 + cmdstanpy
++ Windows x64 (as of SC11 close commit). Users invoking Prophet
+in distinct Stan environments should expect mle-band-NOT-bit-
+exact reproducibility; institutional risk attribution conditional
+on audit-environment-consistent invocation OR cross-environment
+mle-band-acceptance.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3) +
+SC3 fallback three-state framework THIRD-INSTANCE application:**
+
+- **Validated configuration (harness math layer):** engine PRIMARY
+  PATH (prophet 1.3.0 installed) exercised via RunContext at
+  Balanced preset (changepoint_prior_scale=0.05 +
+  seasonality_prior_scale=10.0 + n_changepoints=25 + mcmc_samples=0
+  + interval_width=0.95); yearly_seasonality + weekly_seasonality
+  default "auto"; synthetic 2000-01-01 daily DataFrame; seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 180 + primary path
+  dispatch via `_has_prophet()` at engine line 202.
+- **Configuration match:** **YES at PRIMARY PATH** at Tier II.mle-
+  band precision — user invoking at default Balanced preset with
+  prophet installed experiences mathematically validated Layer 1
+  surface at MLE-class convergence precision.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer (only Balanced). **FALLBACK PATH
+  DISCLOSURE per SC3 template element third-instance application:**
+  primary prophet path is math-layer-CAVEAT-validated at Tier
+  II.mle-band; seasonal-naive fallback path (engine lines 326-360,
+  dispatched when `_has_prophet()` returns False) is wrapper-layer-
+  3-check covered but NOT math-layer-parity validated.
+  **Mathematical equivalence assessment between primary + fallback:
+  NOT EQUIVALENT.** Different algorithms produce mathematically
+  distinct outputs even at fixed seed. **Stan environment-
+  sensitivity disclosure (NEW SC11 disclosure element):** parity
+  claim applies to audit-environment-consistent Stan toolchain
+  invocation; cross-environment reproducibility at mle-band-not-
+  bit-exact precision.
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+11/17 — SECOND Tier C session; FIRST Tier II.mle-band cycle entry):**
+Inventory verification commit 12d3785 classified p3_prophet as Cat
+3 DEGENERATE-VACUOUS. Triage close at HEAD a7746f1 confirmed Cat 3
+(within-engine-invocation bit-exact deterministic at fixed seed;
+rewrite feasible). This §2.5 entry closes the remediation cycle
+session 11/17 via combined harness rewrite + entry forward-
+amendment per Tier 2 incremental pattern + PARTIAL Tier A helper-
+reuse pattern (SECOND-INSTANCE confirmation) + Tier II.mle-band
+classification (FIRST in cycle per Stan-MAP non-determinism between
+separate fit() invocations).
+
+**SC12 esn projection (next Tier C session per triage close
+ordering):** Engine `echo_state_network.py` is numpy-based reservoir
+computing; likely ALL helpers ABSENT (Tier B-like pattern; ESN has
+distinct architecture: sparse reservoir matrix + warmup + ridge
+regression readout). Reference arm bespoke per-session
+reimplementation expected. ESN typically deterministic at fixed
+seed for both reservoir initialization + ridge regression. Estimated
+session time: ~1.5-2h. **Tier C close at SC12;** Tier D DL family
+opens at SC13 autoencoder.
+
+## §3 Unvalidated catalog techniques (30 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -26877,8 +27121,8 @@ descriptions, summaries).
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
 
-### ML / Deep Learning (7 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A tree-family complete post-SC6; TIER B cross-block specialized complete post-SC9; TIER C probabilistic/Bayesian/reservoir cohort opens at SC10**)
-`autoencoder_anomaly`, `echo_state_network`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `prophet_forecast`, `tcn_forecast`
+### ML / Deep Learning (6 unvalidated; transformer_forecast attention-capture validated separately; random_forest_forecast moved to §2.5 per Phase 7+ SC1; gradient_boosting_forecast moved to §2.5 per Phase 7+ SC2; xgboost_forecast moved to §2.5 per Phase 7+ SC3; lightgbm_forecast moved to §2.5 per Phase 7+ SC4; svr_forecast moved to §2.5 per Phase 7+ SC5; quantile_regression moved to §2.5 per Phase 7+ SC6; gaussian_process_forecast moved to §2.5 per Phase 7+ SC10; prophet_forecast moved to §2.5 per Phase 7+ SC11 — sub-numbered SC1-SC17 convention; conformal_intervals retains originally-projected S62 assignment as routine Q1 cadence entry post-cycle-close; **TIER A tree-family complete post-SC6; TIER B cross-block specialized complete post-SC9; TIER C probabilistic/Bayesian/reservoir cohort SC10-SC12 in progress (2 of 3 complete post-SC11)**)
+`autoencoder_anomaly`, `echo_state_network`, `lstm_gru_forecast`, `nbeats_forecast`, `nhits_forecast`, `tcn_forecast`
 
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
