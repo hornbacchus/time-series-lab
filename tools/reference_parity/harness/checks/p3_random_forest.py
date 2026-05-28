@@ -60,28 +60,6 @@ def _generate_ar_dgp(
     return y[50:]
 
 
-def _make_lag_features(
-    y: np.ndarray, n_lags: int = 6,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Legacy n_lag-only feature builder retained for back-compat —
-    p3_gradient_boosting + p3_lightgbm + p3_svr + p3_quantile_regression
-    + p3_xgboost still import this symbol pending their respective Cat
-    3 → Cat 1 remediation sessions per triage close ordering (Tier A
-    sessions 2-6). Returns (X, y_target) with NaN-row drop. Mirrors the
-    pre-rewrite scope; once dependent harnesses are remediated the
-    import dependencies fall away and this stub can be removed.
-    """
-    n = len(y)
-    feats: list[np.ndarray] = []
-    for lag in range(1, n_lags + 1):
-        f = np.full(n, np.nan)
-        f[lag:] = y[:-lag]
-        feats.append(f)
-    X = np.column_stack(feats)
-    mask = ~np.any(np.isnan(X), axis=1)
-    return X[mask], y[mask]
-
-
 # Engine preset Balanced config (engine `random_forest_forecast.py`
 # lines 24-27). Mirrored verbatim so REF arm exercises identical
 # engine math at identical hyperparameters.
