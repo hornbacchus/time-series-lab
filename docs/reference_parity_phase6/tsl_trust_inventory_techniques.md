@@ -30198,7 +30198,420 @@ cointegrating-relations interpretability + impulse-response
 analysis at level (related to ENG-EXT-MULTIVARIATE-001 scope).
 Estimated session time: ~1-1.5h.
 
-## §3 Unvalidated catalog techniques (21 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### vecm (Phase 7+ S65; FIFTY-FOURTH §2.5 entry; THIRD Multivariate Systems block entry; third dispatch-set entry in ascending-complexity ordering; **β/α Phillips triangular normalization canonicalization** applied identically on both arms — α·β' product identified; individual β, α normalization-dependent but canonicalization aligns them; **ENG-EXT-MULTIVARIATE-001 scope extension** per S65 ENG-EXT scan — engine VECM emits NEITHER IRF NOR FEVD even at point-estimate level, broader gap than VAR; cross-reference to johansen_cointegration validated separately — VECM rank-test machinery uses same statsmodels Johansen implementation)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**PRIMARY metrics: Tier II.bit-exact at machine precision (Pattern
+A.1 same-library cross-package self-parity post β/α
+canonicalization)** per S65 Code Step 2 empirical verification.
+Python statsmodels `statsmodels.tsa.vector_ar.vecm.VECM` (TSL math
+path) vs R `urca::ca.jo` + `vars::vec2var` + `urca::cajorls`
+(reference). Both implement identical Johansen reduced-rank
+regression (closed-form OLS on cointegrating vectors after rank
+restriction collapses to analytical solution). Machine-precision
+parity at `max_abs_diff ≤ 3e-13` post β/α canonicalization across
+both primary metrics (β + α). **SECONDARY metric loglik:**
+Tier II.bit-exact at `max_abs_diff = 5.91e-11`.
+
+**Engine variant validated (at math layer, indirectly via
+inlining):** statsmodels `VECM(Y, k_ar_diff=1, coint_rank=1,
+deterministic="ci")` invoking Johansen reduced-rank regression
+with constant inside cointegrating relation. Harness `run_tsl`
+inlines this math (engine wrapper invokes the same `VECM.fit()` at
+engine lines 195-204). Pattern A.1 cross-library reference vs R
+`urca::ca.jo(K=k_ar_diff+1, ecdet="const", spec="longrun")` +
+`vars::cajorls(jt, r=coint_rank)` for coefficient extraction.
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via R urca + vars):** Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_vecm.py` `run_reference`
+lines 181-280 invokes R via RBridge. Two-step R workflow:
+(1) `urca::ca.jo` runs Johansen procedure determining cointegration
+rank from trace statistics + critical values; (2) `vars::vec2var`
+converts the cointegration test to VAR form + `urca::cajorls`
+returns restricted-regression coefficients. R `ca.jo` eigenvectors
+in `jt@V` correspond to β (cointegrating vectors); first r columns
+× first k rows extracted. α loadings from `cajorls(jt, r)`
+restricted regression coefficient matrix. Reference `α` reshaped
+to statsmodels `(k, r)` convention via column-major transpose.
+
+**β/α normalization canonicalization (per S65 Step 4; engine-level
++ harness-level both applied):**
+
+- **Engine-level (already implemented at engine lines 226-246):**
+  Engine applies **Phillips triangular form** post-fit: for each
+  cointegrating vector j, divide β[:, j] by β[0, j] (or by the
+  largest-absolute element if β[0, j] is degenerate near zero) to
+  produce β[0, j] = 1; simultaneously multiply α[:, j] by the same
+  scalar so the product α · β' is **invariant** under
+  normalization. This makes audit `beta_normalized` user-stable
+  across re-fits.
+- **Harness-level (at compare() lines 290-321):** Re-normalize
+  both arms identically via first-element-to-1 (Phillips
+  triangular); sign-align α columns based on β[1, j] sign
+  agreement between arms. Both `tsl_beta_norm` and `ref_beta_norm`
+  arrive at compare with β[0, 0] = 1.0 (verified at S65 runner
+  CLI: `'tsl_first': 1.0, 'ref_first': 1.0`).
+- **Identification invariant verified:** α · β' is **identified**
+  (model-implied dynamics same across normalizations); individual
+  β, α are normalization-dependent but canonicalize to common
+  convention across arms. Post-canonicalization β agreement at
+  9.99e-16 + α agreement at 2.78e-13 confirms the underlying
+  reduced-rank regression math is identical between statsmodels
+  VECM and R urca/vars implementations.
+
+**Helper identity note (per S65 Step 1; informational — not a
+Cat 1 same-engine reuse pattern):**
+
+- `_generate_vecm_dgp` (harness-internal): NOT shared with any
+  other harness — bespoke bivariate cointegrated DGP via random-
+  walk y2 + stationary cointegrating relation y1 = 0.7·y2 + ξ
+  (cointegrating vector (1, -0.7) ⇒ y1 - 0.7·y2 ∼ I(0)).
+
+**Cross-reference to johansen_cointegration validated separately:**
+Engine VECM internally invokes `select_coint_rank` (at engine line
+156) which is the statsmodels Johansen rank-test implementation —
+same underlying machinery as the separately-validated
+`johansen_cointegration` technique. **Cointegration-rank
+verification inherits trust from johansen_cointegration validation
+scope**: at S65 audit DGP (bivariate cointegrated rank-1), engine
+audit `trace_stat=175.907` vastly exceeds 5% critical value
+`15.4943` confirming rank=1; runner CLI structural-invariant
+`vecm_cointegration_rank` passes at exact integer match.
+Cross-implementation rank agreement between statsmodels (engine)
+and R urca::ca.jo (harness reference) verified at S65 runner CLI
+output `tsl_rank_asserted=1`, `ref_rank_inferred=1`.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine per-column NaN
+  interpolation at engine lines 67-73 (linear interpolation when
+  ≥ 2 valid values per series) followed by aligned-NaN row drop.
+  Verified by injecting interior NaN at [8, 0] + [18, 1] in a
+  2-series fixture: engine returned `status=success` + emitted
+  per-series NaN-interpolation warnings.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"`; returned audit fields populated correctly
+  (`lag_order=1` AIC argmin-selected; `coint_rank=1` selected via
+  `select_coint_rank` from Johansen trace test;
+  `deterministic="ci"` engine default per engine line 90 ↔ R
+  `ecdet="const"`; `horizon=10`; `trace_stat=175.907` vs
+  `trace_cv_5pct=15.4943` confirming rank=1 strongly rejected at
+  5% significance; `half_life_periods=0.25` periods derived from
+  α[0, 0] = -0.935; `beta_normalized=[1.0, -0.7026]` ≈ true
+  cointegrating vector (1, -0.7) confirming DGP recovery;
+  `alpha_normalized=[-0.935, -0.064]`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 4 expected core tables (`VECM Forecast` 10 × 3 [Step +
+  2 series]; `Model Summary` 6 × 2; `Cointegrating Vectors (beta)`
+  1 × 3 [Vector + 2 series]; `Adjustment Coefficients (alpha)` 2
+  × 2 [Variable + 1 cointegrating equation]) + optional
+  `Residual Summary` table emitted at engine lines 284-302.
+  **No IRF table; no FEVD table** — see ENG-EXT-MULTIVARIATE-001
+  scope extension below.
+
+**Verdict (math layer — primary):** PASS bit-exact at machine
+precision post-canonicalization (`max_abs_diff` per metric: β
+9.99e-16, α 2.78e-13; n=500 bivariate cointegrated DGP at seed=42
+at runner CLI execution; β both arms first element = 1.0
+confirming Phillips triangular alignment).
+**Verdict (math layer — secondary):** PASS at machine precision
+(loglik max_abs_diff=5.91e-11; well within secondary tier
+tolerance for a quantity with ~|1083| magnitude — relative
+diff=5.45e-14 ≈ machine epsilon).
+**Verdict (wrapper layer):** PASS 3/3 checks per S65 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_vecm.py`.
+**Audit date:** 2026-05-28 (S65 §2.5 entry; Multivariate Systems
+block third entry; β/α normalization canonicalization;
+ENG-EXT-MULTIVARIATE-001 scope extension; johansen_cointegration
+cross-reference).
+**Primary metrics (math layer):** β cointegrating vector matrix
+(k, r) = (2, 1) post-Phillips-triangular-normalization, flattened
+to 2-vector + α adjustment coefficient matrix (k, r) = (2, 1)
+post-sign-alignment, flattened to 2-vector.
+**Secondary metric:** Log-likelihood scalar.
+**Structural invariant:** Cointegrating rank exact integer match
+(`vecm_cointegration_rank` PASS at rank=1 across implementations).
+
+**Validation claim scope (S65; engine math validated indirectly at
+primary-metric scope via inline-math harness pattern; β/α
+canonicalization applied identically on both arms before
+comparison; cross-implementation rank-test verified separately
+via johansen_cointegration validation):**
+
+- **Layer 1 (statsmodels VECM Johansen reduced-rank regression
+  primary metrics — β + α) VALIDATED at Tier II.bit-exact:**
+  Post-canonicalization both metrics agree at machine precision.
+  Cross-library agreement (statsmodels Python vs R urca + vars)
+  confirms both implementations correctly implement Johansen 1991
+  reduced-rank regression.
+- **Layer 1 SECONDARY METRIC loglik VALIDATED at Tier II.bit-
+  exact:** Despite harness note about possible "initial-values
+  divergence" between statsmodels VECM and R vars::vec2var, at
+  S65 audit the loglik values agree at relative precision 5.45e-14
+  (machine epsilon scale).
+- **Layer 1 SHORT-RUN AR DIFF COEFS (Γ) NOT separately compared
+  at math layer at S65:** Harness `run_tsl` extracts γ at line
+  156 but compare() does not include γ in primary metrics scope.
+  Reference R workflow also does not extract Γ explicitly (focus
+  on β + α as the identifying cointegration structure).
+- **Layer 1 COINTEGRATING RANK STRUCTURAL INVARIANT VALIDATED:**
+  `vecm_cointegration_rank` structural invariant passes at exact
+  integer match between asserted tsl rank=1 and R-inferred rank=1
+  via Johansen trace test.
+- **Layer 1 FORECASTS (`fit.predict()`) NOT separately validated
+  at math layer:** Engine emits 10-step forecast in `VECM
+  Forecast` table; harness primary metrics scope excludes forecast
+  vector (cross-implementation forecast computation involves
+  VECM→VAR form conversion which may diverge at machine precision
+  due to recursion accumulation but is well-understood
+  algorithmically).
+- **Layer 1 IRF + FEVD NOT EMITTED by engine VECM** — see
+  ENG-EXT-MULTIVARIATE-001 scope extension below.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via per-column linear
+  interpolation; preset config dispatch returns expected 4-table
+  core structure + Residual Summary conditional table; output
+  shape/type verification confirms table column schemas + audit
+  field population including Phillips-normalized β + α + Johansen
+  trace diagnostic + half-life-of-adjustment.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Vector Error Correction Model per Engle-
+Granger (1987) "Co-integration and Error Correction: Representation,
+Estimation, and Testing" Econometrica 55(2) — first formalized
+cointegration + error-correction representation; Granger
+Representation Theorem establishes equivalence between cointegrated
+VAR-in-levels and ECM-in-differences. Estimation theory per
+Johansen (1991) "Estimation and Hypothesis Testing of Cointegration
+Vectors in Gaussian Vector Autoregressive Models" Econometrica
+59(6) — Johansen reduced-rank ML estimator collapses to closed-
+form eigendecomposition on the sample canonical-correlation matrix
+between residuals from auxiliary regressions; cointegrating vectors
+are the eigenvectors corresponding to the r largest squared
+canonical correlations. Engine wraps `statsmodels.tsa.vector_ar.
+vecm.VECM` + `select_coint_rank` (Johansen trace test) +
+`select_order` (lag-order IC selection). β is identified only up
+to normalization (engine applies Phillips triangular β[0, j] = 1);
+α scales compensatingly so α · β' (the error-correction loading
+matrix) is identified. Cointegration-rank semantics: r = k - #unit
+roots in the level system; r = 0 means no cointegration (VAR-in-
+differences); r = k means level VAR; 0 < r < k is the cointegrated
+case where r linear combinations are stationary.
+
+**Phase 3 known failure modes (S65 / corrected-harness scope):**
+
+- Math-layer harness inlines statsmodels VECM.fit per Phase 1
+  finding B8 — engine wrapper rounds β + α to 6 decimals at engine
+  lines 252 + 263; inline path achieves machine-precision parity
+  vs wrapper-path 1e-6 floor.
+- β/α individual normalization is convention-dependent (Phillips
+  triangular β[0, j] = 1; alternative: Johansen normalization where
+  β is orthonormal in inner product induced by the auxiliary
+  regression residual covariance). α · β' product is invariant.
+  Harness canonicalizes both arms to Phillips triangular before
+  comparison.
+- α-sign canonicalization edge case: harness sign-aligns α columns
+  based on β[1, j] sign agreement (per harness compare lines 310-
+  321). For r = 1 + k = 2 bivariate case this works robustly; for
+  larger systems with multiple cointegrating vectors near β[1, j]
+  ≈ 0, sign canonicalization may need fallback to alternative pivot
+  index. NOT exercised at S65 DGP.
+- Cointegration rank selection edge case: when trace statistic is
+  near the 5% critical value boundary, rank inference can flip
+  between r and r+1 across implementations with different
+  small-sample corrections. NOT exercised at S65 DGP (trace stat
+  175.907 vastly exceeds 15.494 critical).
+- Lag-order selection: engine `select_order().aic` argmin
+  algorithm NOT separately exercised in math-layer parity (harness
+  pins `k_ar_diff = 1`). Same Tier V Pattern D characterization as
+  S64 VAR applies if aic/bic compared cross-implementation —
+  formula-family divergence between statsmodels small-sample form
+  and R likelihood-based form, argmin-preserving.
+
+**Phase 3 boundary of validity:**
+
+- T=500 bivariate (k=2) cointegrated VAR(2) fixture with rank=1
+  cointegration + cointegrating vector (1, -0.7); other dimensions
+  + persistence levels + rank structures NOT validated though same
+  closed-form reduced-rank regression algorithm applies
+- `deterministic="ci"` (constant inside cointegrating relation)
+  validated; alternatives ("n" no deterministic, "co" constant
+  outside, "li" linear inside, "lo" linear outside) NOT validated
+  though same Johansen procedure applies
+- k_ar_diff=1 (VECM lag-difference order = VAR(2) - 1) pinned;
+  automatic lag selection NOT separately validated at math layer
+- coint_rank=1 pinned; automatic rank inference cross-checked via
+  trace test but NOT separately validated as primary metric
+- Short-run AR coefficients (Γ) NOT separately validated at math
+  layer
+- Forecasts NOT separately validated at math layer
+- IRF + FEVD: NOT EMITTED by engine — see ENG-EXT-MULTIVARIATE-001
+  scope extension below
+
+**Phase 3 gap markings:**
+
+- β/α canonicalization required to achieve parity (algorithmic
+  identifiability ambiguity, not implementation error)
+- Γ short-run AR diff coefficient matrix NOT validated
+- Forecast vector NOT separately validated
+- Lag-order selection NOT validated at math layer (Tier V Pattern
+  D applies per S64 characterization if aic/bic compared)
+- Automatic rank inference NOT validated as primary metric
+- Alternative deterministic specifications NOT validated
+- **VECM-context IRF NOT EMITTED by engine** — see ENG-EXT-
+  MULTIVARIATE-001 scope extension below
+- **VECM-context FEVD NOT EMITTED by engine** — see ENG-EXT-
+  MULTIVARIATE-001 scope extension below
+
+**Status (PRIMARY Tier II.bit-exact PASS at machine precision
+post-canonicalization + SECONDARY Tier II.bit-exact loglik PASS
++ wrapper-layer 3/3 PASS per S65 / third Multivariate Systems
+block entry):** Layer 1 statsmodels VECM Johansen reduced-rank
+regression math validated bit-exact at machine precision via
+cross-library check post β/α Phillips-triangular canonicalization.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS
+including 4-table core output structure (Forecast + Summary + β +
+α) + Residual Summary conditional table + Phillips-triangular β +
+α audit-field disclosure + Johansen trace-statistic audit-field
+disclosure + half-life-of-adjustment derived audit field.
+**ENG-EXT-MULTIVARIATE-001 scope extension** — VECM-context IRF +
+FEVD entirely absent (broader gap than VAR).
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** statsmodels
+  `VECM(Y, k_ar_diff=1, coint_rank=1, deterministic="ci").fit()`
+  with explicit lag + rank pin via fixture spec. Pattern A.1
+  cross-library reference: R `urca::ca.jo(K=2, ecdet="const",
+  spec="longrun")` + `vars::cajorls(r=1)`. Bivariate cointegrated
+  rank-1 DGP at n=500, seed=42.
+- **Engine preset default (Balanced):** Automatic lag selection
+  via `select_order(maxlags=8, deterministic="ci").aic` per engine
+  lines 119-138; automatic rank inference via `select_coint_rank(
+  signif=0.05)` per engine lines 156-170; `deterministic="ci"`
+  default per engine line 90.
+- **Configuration match:** **YES at primary metrics math layer
+  modulo lag-and-rank-pin convention** — user invoking at default
+  Balanced preset gets automatic lag + rank selection; for the
+  validation DGP (true VECM with k_ar_diff=1, rank=1), automatic
+  selection agrees with harness pin (audit confirms `lag_order=1`
+  + `coint_rank=1`).
+- **Disclosure scope:** Alternative `deterministic` settings ("n",
+  "co", "li", "lo") NOT validated at math layer though same
+  Johansen procedure applies. Alternative lag orders + ranks NOT
+  validated. Short-run AR diff coefs Γ NOT validated. Forecast
+  vector NOT separately validated. IRF + FEVD NOT EMITTED by
+  engine VECM (see ENG-EXT below).
+
+**ENG-EXT-MULTIVARIATE-001 scope extension per S65 ENG-EXT scan
+(VECM-context IRF + FEVD gap; broader than VAR scope):**
+
+S65 engine VECM scan identifies a **broader gap** than S64 VAR
+scan: engine VECM emits **neither IRF nor FEVD** even at point-
+estimate level.
+
+**VECM-emitted institutional-rates workflow elements:**
+
+(a) **Cointegrating vectors β:** PRESENT — engine emits
+    `Cointegrating Vectors (beta)` table with Phillips-triangular-
+    normalized β at engine lines 248-258.
+(b) **Adjustment coefficients α:** PRESENT — engine emits
+    `Adjustment Coefficients (alpha)` table with compensatingly-
+    scaled α at engine lines 259-269.
+(c) **Half-life of adjustment:** PRESENT (audit field) — engine
+    computes `half_life_periods = -ln(2) / ln(1 + α[0, 0])` for
+    the first equation's first cointegrating relation at engine
+    lines 329-341, gated on α[0, 0] ∈ (-2, 0) range for sensible
+    half-life interpretation.
+(d) **Johansen trace statistic + critical value:** PRESENT (audit
+    fields) — engine emits `trace_stat` + `trace_cv_5pct` at
+    engine line 162-163; user can compare against critical value
+    to assess rank-test significance.
+
+**VECM-absent institutional-rates workflow elements (extending
+ENG-EXT-MULTIVARIATE-001 scope):**
+
+5. **VECM-context IRF (point estimates):** ABSENT — engine VECM
+   does NOT call `fit.irf()` despite statsmodels VECM supporting
+   IRF via VAR-form conversion (`fit` object has `irf()` method
+   inherited from underlying VAR machinery). For rates-strategist
+   workflow under cointegration (e.g. how does a transitory shock
+   to short rates propagate through the term structure given the
+   curve's long-run equilibrium?), VECM IRF is the substantive
+   output. **Broader gap than S64 VAR**: VAR emits IRF point
+   estimates + only confidence-band gap; VECM emits **no IRF at
+   all**.
+6. **VECM-context FEVD (variance decomposition):** ABSENT —
+   analogous to (5); engine VECM does NOT call `fit.fevd()`. For
+   rates-strategist workflow (decomposing variance of long-run
+   yield-curve dynamics into structural shock sources), VECM FEVD
+   is the substantive output.
+7. **VECM-context IRF confidence bands:** ABSENT (downstream
+   dependency on (5)).
+8. **VECM-context SVAR identification:** ABSENT (downstream
+   dependency on (5); Cholesky-orthogonalized IRF + sign-
+   restriction + Blanchard-Quah + proxy-SVAR all require the
+   underlying IRF computation first).
+
+**Commission disposition update: ENG-EXT-MULTIVARIATE-001 scope
+EXTENDED at S65 to include VECM-context IRF + FEVD point estimates
++ confidence bands + SVAR identification.** Bundle with S64 VAR
+scope under unified Q2 sprint. Priority order revision: (1) VAR
+IRF bootstrap CI [BASELINE rates workflow]; (2) **VECM IRF + FEVD
+point estimates [NEW; VECM-context substantive workflow]**;
+(3) VAR sign-restriction SVAR; (4) VAR Blanchard-Quah; (5) VAR
+proxy-SVAR; (6) VECM IRF confidence bands + SVAR identification
+[downstream of (2)]. Until Q2+ landing, users requiring VECM
+impulse-response analysis must use external libraries (e.g. R
+`vars::vec2var()` + `irf()`, or Python statsmodels VECM + manual
+`fit.irf()` call from Python script) outside the TSL engine.
+
+**Audit-hygiene cross-reference (S65 / β/α canonicalization
+disclosure + ENG-EXT-MULTIVARIATE-001 scope extension):**
+
+β/α normalization canonicalization is engine-level + harness-level
+both applied — engine applies Phillips triangular form at fit time
+(audit `beta_normalized` user-stable); harness compare()
+re-normalizes both arms identically before primary metric
+comparison. Post-canonicalization machine-precision agreement
+empirically confirms underlying Johansen reduced-rank regression
+math is identical between statsmodels VECM and R urca/vars
+implementations. **Cross-reference to johansen_cointegration
+separately-validated technique**: engine VECM uses same statsmodels
+Johansen rank-test machinery; rank verification at S65 inherits
+trust from johansen_cointegration validation scope.
+
+ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 to include VECM-
+context IRF + FEVD point estimates (broader gap than VAR
+identified at S64; VAR has point estimates + CI-band gap; VECM
+has full IRF/FEVD absence). Bundle with ENG-EXT-CONFORMAL-001 for
+Q2 sprint at revised priority ordering.
+
+**Multivariate Systems block progress note (S65 third entry):**
+Block 10 Multivariate Systems advances at S65 vecm per ratified
+ascending-complexity dispatch ordering. **Post-S65: Multivariate
+Systems block 6/8 §2.5-validated (3 separate + S63 pca_analysis +
+S64 var + S65 vecm); 2 remaining in dispatch-set via S66-S67.**
+Block close projected at S67 bvar.
+
+**S66 dynamic_factor_model projection (next Multivariate Systems
+block session per ascending-complexity dispatch ordering):**
+Engine `engine/techniques/dynamic_factor_model.py` is statsmodels-
+based dynamic factor model. DFM is the state-space factor extraction
+sibling to PCA — observed series modeled as linear combinations of
+latent factors evolving as VAR. Expected: Pattern A.1 same-library
+cross-package self-parity vs R `MARSS` or `nfactors` package.
+Pre-existing risks: (a) factor sign convention (analogous to PCA
+sign convention; harness sign-canonicalize); (b) Kalman filter
+initialization convention may diverge between Python statsmodels
+and R alternatives; (c) ENG-EXT scan: check whether engine DFM
+emits factor-scores time series + variance decomposition (analogous
+to PCA workflow elements present at S63). Estimated session time:
+~1-1.5h.
+
+## §3 Unvalidated catalog techniques (20 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -30242,8 +30655,8 @@ descriptions, summaries).
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
 
-### Multivariate Systems (3 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint)
-`bvar`, `dynamic_factor_model`, `vecm`
+### Multivariate Systems (2 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering)
+`bvar`, `dynamic_factor_model`
 
 ### Regimes / Nonlinear (6 unvalidated)
 `critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
