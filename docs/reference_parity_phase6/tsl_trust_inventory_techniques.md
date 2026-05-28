@@ -29765,7 +29765,440 @@ metrics (coefficient matrices + intercept + log-likelihood +
 forecasts) with Pattern D aic/bic exception. Estimated session
 time: ~1-1.5h.
 
-## §3 Unvalidated catalog techniques (22 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### var (Phase 7+ S64; FIFTY-THIRD §2.5 entry; SECOND Multivariate Systems block entry; second dispatch-set entry in ascending-complexity ordering; **pre-existing aic/bic Tier V Pattern D CAVEAT** documented per e72d6f5 CI investigation finding — argmin-preserving lag-order selection NOT invalidated; **ENG-EXT-MULTIVARIATE-001 commission per Path B forward observation** — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah advanced identification ABSENT)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**PRIMARY metrics: Tier II.bit-exact at machine precision (Pattern
+A.1 same-library cross-package self-parity)** per S64 Code Step 2
+empirical verification. Python statsmodels `statsmodels.tsa.api.VAR`
+(TSL engine wrap) vs R `vars::VAR` (reference); both implement
+identical OLS-on-stacked-equations closed-form normal-equations
+solve. Machine-precision parity at `max_abs_diff ≤ 5e-12` across
+all 5 primary metrics (coefs + intercept + sigma_u + loglik +
+forecast). **SECONDARY metrics aic/bic: Tier V Pattern D CAVEAT
+(Documented Sub-Class Divergence within information-criterion
+formula scope)** — see pre-existing CAVEAT disclosure below.
+
+**Engine variant validated (at math layer, indirectly via
+inlining):** statsmodels `VAR.fit(maxlags=p, trend="c")` invoking
+OLS-on-stacked-equations at fixed lag order p=2 with constant
+trend. Harness `run_tsl` deliberately inlines this math (engine
+wraps the same `statsmodels.tsa.api.VAR` invocation at engine
+lines 169-176 / 171-173 inside the `model.fit` block) per Phase 1
+finding B8 precedent (engine wrapper rounds coefficient table to
+6 decimals at engine line 302; inline path achieves machine-
+precision parity vs wrapper-path 1e-6 floor). Pattern A.1 cross-
+library reference vs R `vars::VAR` confirms engine math is correct.
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via R vars):** Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_var.py` `run_reference`
+lines 185-289 invokes R `vars::VAR(Y, p=2, type="const")` via
+RBridge. R `vars::VAR` returns per-equation lm() objects; reference
+extracts AR coefficient matrices via `coef(fit$varresult[[i]])` +
+reshapes to statsmodels `(p, k_eq, k_var)` convention via transposed
+column-major reshape. Sigma_u recomputed in R per
+`crossprod(residuals)/(nrow - (p*k + 1))` matching statsmodels
+divisor convention. h-step forecast extracted via `predict(fit,
+n.ahead=h)$fcst`. Both libraries implement OLS-on-stacked-equations
+closed-form normal-equations solve — coefficients agree at machine
+precision modulo numerical-precision drift.
+
+**Helper identity note (per S64 Step 1; informational — not a
+Cat 1 same-engine reuse pattern since this is a Pattern A.1
+cross-library check, NOT a Pattern A.3 self-parity check):**
+
+- `_generate_var_dgp` (harness-internal): NOT shared with any
+  other harness — bespoke stationary VAR(2) DGP at k=2 with A1 +
+  A2 coefficients chosen so companion eigenvalues are well inside
+  unit circle (max |λ| ≈ 0.64 per audit `max_root_modulus`).
+- Companion-form eigenvalue construction (harness lines 162-172):
+  Pattern F structural invariant — verifies `max |λ_companion| <
+  1` at runtime; engine emits equivalent `max_root_modulus` audit
+  field at engine lines 270-275 + 285-287.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine `_prepare_series`
+  pattern + aligned-NaN interpolation at engine lines 104-119
+  applied per-column with linear interpolation when ≥ 2 valid
+  values per series. Verified by injecting interior NaN at [5, 0]
+  + [15, 1] in a 2-series fixture: engine returned `status=success`
+  + emitted NaN-interpolation warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"`; returned audit fields populated correctly
+  (`var_order=2` lag-selected via AIC argmin; `n_variables=2`;
+  `aic=0.0663` + `bic=0.1508` per statsmodels small-sample form —
+  see CAVEAT below; `ic_used="aic"` engine default; `horizon=10`;
+  `irf_periods=20`; `trend="c"`; `max_root_modulus=0.6374`
+  confirming stationarity); Granger causality test results emitted
+  per Balanced preset gate at engine lines 311-324.
+- **Check 3 — Output shape/type verification:** PASS. Engine emitted
+  6 tables (`VAR Forecast` 10 × 3 [Step + 2 series]; `Model
+  Summary` 9 × 2; `Coefficients` 10 × 3 [Equation + Parameter +
+  Estimate, 2 eqs × 5 params each = 10 rows for VAR(2)+const];
+  `Impulse Response Function (Orthogonalized)` 84 × 4 [Period +
+  Shock + Response + IRF, 21 periods × 2 shocks × 2 responses];
+  `Forecast Error Variance Decomposition (%)` 40 × 4 [Variable +
+  Period + Due to x1 + Due to x2, 20 periods × 2 variables];
+  `Granger Causality (from VAR)` 2 × 5).
+
+**Verdict (math layer — primary):** PASS bit-exact at machine
+precision (`max_abs_diff` per metric: coefs 7.22e-16, intercept
+1.60e-16, sigma_u 2.22e-16, loglik 4.55e-12, forecast 6.11e-16;
+n=500 bivariate VAR(2) DGP at seed=42 at runner CLI execution).
+**Verdict (math layer — secondary):** CAVEAT for aic/bic per pre-
+existing Tier V Pattern D; see disclosure below.
+**Verdict (wrapper layer):** PASS 3/3 checks per S64 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_var.py`.
+**Audit date:** 2026-05-28 (S64 §2.5 entry; Multivariate Systems
+block second entry; pre-existing aic/bic CAVEAT formally
+documented).
+**Primary metrics (math layer):** stacked AR coefficient matrix
+(p, k, k) = (2, 2, 2) flattened to 8-vector + intercept vector
+(k=2) + Sigma residual covariance matrix (k, k) = (2, 2) flattened
+to 4-vector + log-likelihood scalar + h-step forecast (horizon, k)
+= (5, 2) flattened to 10-vector.
+**Secondary metrics:** AIC + BIC (pre-existing Tier V Pattern D
+CAVEAT — see disclosure below).
+**Diagnostic metric:** Companion-form eigenvalue magnitudes for
+Pattern F structural-invariant `var_eigenvalues` (max < 1).
+
+**Pre-existing aic/bic Tier V Pattern D CAVEAT disclosure
+(e72d6f5 CI investigation finding; documented in S64 §2.5 entry
+per ratified handling):**
+
+- **Manifestation at S64 audit:** runner CLI reports
+  `aic: tsl=0.0663 vs ref=2859.52` (abs_diff=2859.45) and
+  `bic: tsl=0.1508 vs ref=2901.63` (abs_diff=2901.48). The
+  discrepancy is NOT a simple constant offset — values differ by
+  ~4 orders of magnitude reflecting different IC formula families.
+- **Formula divergence (Tier V Pattern D — Documented Sub-Class
+  Divergence within mle_fit information-criterion scope):**
+    - **statsmodels VAR AIC** (per Lütkepohl 2005 §4.3 small-sample
+      form): `AIC_sm = log|Σ_u| + 2·(k²·p + k)/T` (entropy-based
+      Lütkepohl form; reports IC per observation on log-determinant
+      scale).
+    - **R vars::VAR AIC** (per standard `AIC()` likelihood-based
+      method): `AIC_R = -2·log L + 2·n_params` (full likelihood-
+      based form; reports IC summed across observations).
+    - The two formulas differ by a multiplicative T factor + an
+      additive `T·k·log(2π) + T·k` constant (likelihood
+      normalization). Both monotonically depend on `log|Σ_u|` +
+      parameter count.
+- **Argmin-preserving (lag-order selection UNCHANGED):** Since
+  both formulas are monotonically increasing in `log|Σ_u|` (model
+  badness) + parameter count, and the additive constants do not
+  depend on p, the argmin over lag orders p ∈ {1, 2, …, max_lag}
+  is **identical** under both formulas. Engine's automatic lag
+  selection (`select_order(maxlags=max_lag, trend=trend_param).aic`
+  at engine line 155) selects the same p as R `VARselect(Y,
+  lag.max=max_lag, type="const")$selection["AIC(n)"]`. Lag-order
+  selection validity NOT compromised by the IC scale divergence.
+- **User-facing implication:** Absolute AIC/BIC values reported in
+  TSL `Model Summary` table are correct on **statsmodels Lütkepohl
+  small-sample scale**. **Do NOT cross-reference TSL AIC/BIC
+  against R `vars::VAR` AIC/BIC without accounting for the
+  formula divergence** — the two are NOT directly comparable
+  without rescaling. Within a TSL session (comparing lag orders or
+  comparing nested VAR specifications fit within TSL), the IC
+  values are internally consistent and standard model-selection
+  use applies. For external cross-reference (e.g. a strategist
+  comparing TSL VAR IC against literature-reported R-vars IC for
+  the same data + lag order), explicit formula-conversion is
+  required.
+- **Tier V Pattern D classification (cross-package IC scale
+  divergence; pre-existing, well-understood):** Pattern D applies
+  to documented sub-class divergence within information-criterion
+  formula families. This is NOT a new finding at S64 — surfaced at
+  `e72d6f5` CI investigation; S64 §2.5 entry formally documents
+  per established Tier V Pattern D disclosure framework. NOT a
+  REGRESSION; NOT a methodological error in TSL; reflects a
+  well-known statsmodels-vs-R IC convention difference per
+  Lütkepohl 2005 §4.3 small-sample form selection.
+
+**Validation claim scope (S64; engine math validated indirectly at
+primary-metric scope via inline-math harness pattern; engine wrapper
+code path exercised only at wrapper-layer 3-check scope; math-layer
+comparison crosses Python statsmodels and R vars library
+implementations of OLS-on-stacked-equations VAR):**
+
+- **Layer 1 (statsmodels VAR OLS-on-stacked-equations primary
+  metrics) VALIDATED at Tier II.bit-exact:** Coefficients +
+  intercept + sigma_u + log-likelihood + h-step forecast all
+  agree at machine precision (max_abs ≤ 5e-12). Cross-library
+  agreement (statsmodels Python vs R vars) confirms both
+  implementations are algorithmically correct on standard
+  OLS-on-stacked-equations VAR estimation.
+- **Layer 1 SECONDARY METRICS aic/bic Tier V Pattern D CAVEAT:**
+  Pre-existing IC formula-family divergence documented; argmin-
+  preserving for lag-order selection. See disclosure above.
+- **Layer 1 STRUCTURAL INVARIANTS (Pattern F
+  `companion_eigenvalues_stable`) VALIDATED:** Companion-form
+  eigenvalue magnitudes computed at engine + harness; max |λ| ≈
+  0.64 confirms stationarity per structural-invariant tolerance.
+- **Layer 1 IRF / FEVD math NOT separately validated at S64 audit:**
+  Engine emits Cholesky-orthogonalized IRF via `fit.irf().orth_irfs`
+  + FEVD via `fit.fevd().decomp`; these are statsmodels-internal
+  computations applied to the VAR fit. **Math-layer parity NOT
+  audited by p3_var harness** (harness primary metrics scope
+  excludes IRF/FEVD vectors). Engine wrapper code paths exercised
+  at wrapper-layer 3-check Check 3 (table-emission-only
+  verification).
+- **Layer 1 GRANGER CAUSALITY (within-VAR test) NOT separately
+  validated at S64 audit:** Engine emits F-statistic + p-value
+  per ordered pair at engine lines 311-324 via
+  `fit.test_causality(caused, [causing], kind="f")`; covered at
+  wrapper-layer 3-check Check 2 emission-only verification.
+- **Layer 1 LAG SELECTION ALGORITHM NOT separately validated at
+  math layer:** Harness pins `p=2` explicitly; engine
+  `select_order(maxlags=max_lag, trend=trend_param).aic` argmin
+  algorithm NOT separately exercised in math-layer parity (would
+  require cross-implementation lag-selection grid match which is
+  ARGMIN-PRESERVING per Tier V Pattern D disclosure but not
+  bit-exact at IC-value scope).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via aligned interpolation;
+  preset config dispatch returns expected 6-table structure
+  including IRF + FEVD + Granger; output shape/type verification
+  confirms table column schemas + per-period × shock × response
+  IRF emission + per-variable × period × source FEVD emission.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Vector Autoregression per Sims (1980)
+"Macroeconomics and Reality" Econometrica 48(1) — pioneered VAR
+as a "tractable system of dynamic equations" for macroeconomic
+analysis without the strong identifying restrictions of structural
+simultaneous-equations models. Estimation theory per Lütkepohl
+(2005) "New Introduction to Multiple Time Series Analysis"
+Springer §3-§4 — OLS-on-stacked-equations is the closed-form ML
+estimator under Gaussian innovations; coefficients identical to
+equation-by-equation OLS. Engine wraps `statsmodels.tsa.api.VAR`
+which implements Lütkepohl's small-sample IC forms (§4.3) +
+Cholesky orthogonalization for IRF/FEVD (§2.3.2). Cholesky-SVAR
+identification is recursive: the first-ordered variable can
+contemporaneously affect all subsequent variables but not vice
+versa — engine surfaces this ordering assumption as a warning per
+engine lines 203-209 emphasizing the structural assumption.
+
+**Phase 3 known failure modes (S64 / corrected-harness scope):**
+
+- Math-layer harness deliberately inlines engine math (statsmodels
+  VAR.fit) per Phase 1 finding B8 — engine wrapper rounds
+  coefficient table to 6 decimals at engine line 302; inline path
+  achieves machine-precision parity vs wrapper-path 1e-6 floor.
+  Engine wrapper code path NOT exercised by math-layer harness;
+  ONLY exercised at wrapper-layer 3-check scope.
+- **aic/bic Tier V Pattern D CAVEAT (pre-existing per e72d6f5 CI
+  investigation):** statsmodels Lütkepohl small-sample IC vs R
+  vars likelihood-based IC formula family divergence. Argmin-
+  preserving; absolute values NOT cross-reference-safe without
+  formula conversion. See disclosure above.
+- Lag-selection convergence at near-equal-IC lag orders: when AIC
+  is approximately equal across two candidate lag orders, the
+  argmin selection can flip across precision-sensitive
+  implementations. NOT exercised at the validation DGP (p=2 is
+  clearly preferred at AIC argmin distance > 0.1).
+- Cholesky ordering sensitivity: IRF + FEVD are ordering-dependent
+  per the engine's surface warning; user must select variable
+  ordering reflecting their structural identification assumption.
+  This is a USER-FACING modeling choice, not an engine limitation.
+
+**Phase 3 boundary of validity:**
+
+- T=500 bivariate (k=2) VAR(2) fixture with stationary
+  coefficients (max companion |λ| ≈ 0.64); other dimensions +
+  persistence levels NOT validated though same closed-form OLS
+  algorithm applies
+- Trend="c" (constant) validated; trend="ct" (constant + linear
+  trend) + trend="n" (no constant) NOT validated though same OLS
+  algorithm with augmented design matrix applies
+- Lag order p=2 pinned; automatic lag selection NOT separately
+  validated at math layer
+- Cholesky-orthogonalized IRF point estimates NOT separately
+  validated (wrapper-layer table-emission scope only)
+- FEVD point estimates NOT separately validated (wrapper-layer
+  scope only)
+- Granger causality F-test NOT separately validated (wrapper-
+  layer scope only)
+- IC values: aic/bic Tier V Pattern D CAVEAT applies (cross-
+  reference scope excluded)
+
+**Phase 3 gap markings:**
+
+- IRF math-layer parity NOT validated (engine emits Cholesky-
+  orthogonalized point estimates; statsmodels-internal computation)
+- FEVD math-layer parity NOT validated (engine emits Cholesky FEVD
+  decomposition; statsmodels-internal computation)
+- Granger causality F-test math-layer parity NOT validated
+- Lag selection algorithm math-layer parity NOT validated
+- aic/bic cross-package absolute parity NOT achievable per Tier V
+  Pattern D pre-existing CAVEAT
+- **IRF confidence bands NOT EMITTED by engine** — see ENG-EXT-
+  MULTIVARIATE-001 commission below
+- **Sign-restriction / Blanchard-Quah / proxy-SVAR identification
+  NOT IMPLEMENTED** — see ENG-EXT-MULTIVARIATE-001 commission
+  below
+
+**Status (PRIMARY Tier II.bit-exact PASS at machine precision +
+SECONDARY aic/bic Tier V Pattern D pre-existing CAVEAT documented
++ wrapper-layer 3/3 PASS per S64 / second Multivariate Systems
+block entry):** Layer 1 statsmodels VAR OLS-on-stacked-equations
+math validated bit-exact at machine precision via cross-library
+check (statsmodels Python vs R vars). Wrapper layer (S49+ NEW
+3-check scope) validated at 3/3 PASS including 6-table output
+structure (Forecast + Summary + Coefficients + IRF + FEVD +
+Granger). Pre-existing aic/bic Tier V Pattern D CAVEAT formally
+documented; argmin-preserving for lag-order selection.
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** statsmodels
+  `VAR(Y).fit(p=2, trend="c")` with explicit lag pin via fixture
+  spec (`DGP_P_FIT=2`). Pattern A.1 cross-library reference: R
+  `vars::VAR(Y, p=2, type="const")`. Bivariate VAR(2) DGP at
+  n=500, seed=42.
+- **Engine preset default (Balanced):** Automatic lag selection
+  via `select_order(maxlags=8, trend="c").aic` argmin per engine
+  lines 137-138 + 154-155; trend="c" default per engine line 132.
+  IC used = "aic" default per engine line 142. horizon=10 +
+  irf_periods=20 defaults.
+- **Configuration match:** **YES at primary metrics math layer
+  modulo lag-pin convention** — user invoking at default Balanced
+  preset will get automatic lag selection (rather than pinned
+  p=2); for the validation DGP (true VAR(2)) AIC argmin selects
+  p=2 matching harness pin. Coefficient + intercept + sigma_u +
+  loglik + forecast math validated. **NO at secondary metrics
+  scope** for cross-reference against R vars per Tier V Pattern D
+  CAVEAT — see disclosure above.
+- **Disclosure scope:** Trend="ct" (constant + trend) and trend=
+  "n" (no constant) preset alternatives NOT validated at math
+  layer. Lag orders other than p=2 NOT validated at math layer
+  (though same closed-form OLS algorithm applies). IRF / FEVD /
+  Granger causality / lag selection algorithm covered at wrapper-
+  layer 3-check emission scope only. aic/bic absolute values NOT
+  cross-reference-safe against R vars without formula conversion.
+
+**ENG-EXT-MULTIVARIATE-001 commission (Path B forward observation
+per S64 ENG-EXT scan; MATERIAL gap surfaced — bundle with ENG-EXT-
+CONFORMAL-001 for Q2 sprint):**
+
+S64 engine VAR scan identifies the institutional-rates VAR
+workflow as PARTIAL: core point-estimate components present,
+institutional-grade depth components ABSENT.
+
+**Present (engine VAR currently emits):**
+
+(a) **IRF point estimates:** PRESENT — engine emits Cholesky-
+    orthogonalized IRFs via `fit.irf(irf_periods).orth_irfs` at
+    engine lines 210-237. Output: 84-row table at (Period, Shock,
+    Response, IRF) for 21 periods × 2 shocks × 2 responses on
+    bivariate VAR(2). Standard rates-strategist workflow:
+    short-rate shock → curve response across maturities + back-end
+    shock → front-end response.
+(b) **FEVD point estimates:** PRESENT — engine emits Cholesky FEVD
+    via `fit.fevd(irf_periods).decomp` at engine lines 240-257.
+    Standard rates-strategist workflow: variance attribution of
+    each yield-curve point to each fundamental shock over forecast
+    horizon.
+(c) **Cholesky-recursive SVAR identification:** PRESENT (basic
+    form) — engine orders shocks by user's input series order;
+    surfaces ordering-assumption warning at engine lines 203-209.
+
+**Absent (ENG-EXT-MULTIVARIATE-001 candidates):**
+
+1. **IRF CONFIDENCE BANDS** (institutional-grade requirement):
+   Engine emits IRF point estimates only. statsmodels supports
+   asymptotic confidence bands via `irf.cov(orth=True)` + bootstrap
+   bands via `irf.errband_mc(orth=True, repl=1000, signif=0.05)`
+   per Lütkepohl 2005 §3.7 + Kilian-Lütkepohl 2017 §12.2.
+   **Rates-desk institutional-grade requirement: bootstrap 95%
+   bands on every IRF for policy-shock significance assessment.**
+   Without confidence bands, point estimates of impulse responses
+   are not actionable for policy-transmission analysis or trade-
+   recommendation production.
+2. **SIGN-RESTRICTION SVAR identification** per Uhlig (2005)
+   "What Are the Effects of Monetary Policy on Output? Results
+   from an Agnostic Identification Procedure" J Mon Econ 52(2) +
+   Rubio-Ramirez-Waggoner-Zha (2010) RES — institutional-grade
+   alternative to Cholesky-recursive for cases where strict
+   ordering assumption is implausible (e.g. monetary policy
+   shocks where prices + output respond simultaneously).
+3. **BLANCHARD-QUAH long-run restrictions** per Blanchard-Quah
+   (1989) "The Dynamic Effects of Aggregate Demand and Supply
+   Disturbances" AER 79(4) — long-run-neutrality identification
+   for separating supply vs demand shocks.
+4. **PROXY-SVAR (instrumental SVAR)** per Mertens-Ravn (2013)
+   "The Dynamic Effects of Personal and Corporate Income Tax
+   Changes in the United States" AER 103(4) + Stock-Watson (2018)
+   — external instrument identification for individual structural
+   shocks; institutional-grade for fiscal-policy + monetary-policy
+   shock identification.
+
+**Commission disposition: ENG-EXT-MULTIVARIATE-001 commissioned
+for Q2+ engine extension per user Path B disposition.** Bundle
+with ENG-EXT-CONFORMAL-001 (CQR + EnbPI/SPCI from S62) for Q2
+sprint. Validation at Q2+ §2.5 entries closes institutional-rates
+VAR workflow scope gap. Until Q2+ landing, users requiring IRF
+confidence bands or advanced SVAR identification must use external
+libraries (e.g. R `vars` + `svars`; Python statsmodels VAR with
+manual `irf.errband_mc` call from a Python script) outside the
+TSL engine.
+
+Secondary nice-to-have ENG-EXT candidates considered but
+deprioritized at S64:
+
+- **Smooth-transition VAR (STVAR)** per Granger-Teräsvirta (1993)
+  for regime-dependent shock transmission: nice-to-have for
+  business-cycle-conditional rates analysis but lower priority
+  than baseline IRF confidence bands.
+- **Time-varying-parameter VAR (TVP-VAR)** per Primiceri (2005)
+  RES for structural-break-robust analysis: institutional-grade
+  for crisis-period rates analysis but substantially more
+  engineering complexity than baseline IRF confidence bands.
+
+ENG-EXT-MULTIVARIATE-001 Q2 sprint scope priority: (1) IRF
+bootstrap confidence bands [BASELINE]; (2) sign-restriction SVAR
+[ADVANCED IDENTIFICATION]; (3) Blanchard-Quah [LONG-RUN
+RESTRICTIONS]; (4) proxy-SVAR [INSTRUMENT]; STVAR + TVP-VAR
+deprioritized to Q3+ unless surfaced by subsequent Multivariate
+Systems sessions.
+
+**Audit-hygiene cross-reference (S64 / pre-existing aic/bic CAVEAT
+documentation):** Pre-existing aic/bic Tier V Pattern D CAVEAT
+identified at `e72d6f5` CI investigation surface (statsmodels-vs-R
+IC formula divergence). S64 §2.5 entry formally documents per
+established Tier V Pattern D disclosure framework. ENG-EXT-
+MULTIVARIATE-001 surfaced at S64 ENG-EXT scan per Path B forward-
+observation protocol; institutional-rates VAR workflow PARTIAL
+gap (IRF + FEVD + Cholesky-SVAR point estimates present; IRF
+confidence bands + sign-restriction + Blanchard-Quah + proxy-SVAR
+advanced identification absent). Bundle with ENG-EXT-CONFORMAL-001
+for Q2 sprint.
+
+**Multivariate Systems block progress note (S64 second entry):**
+Block 10 Multivariate Systems advances at S64 var per ratified
+ascending-complexity dispatch ordering. **Post-S64: Multivariate
+Systems block 5/8 §2.5-validated (3 separate +
+S63 pca_analysis + S64 var); 3 remaining in dispatch-set via
+S65-S67.** Block close projected at S67 bvar.
+
+**S65 vecm projection (next Multivariate Systems block session per
+ascending-complexity dispatch ordering):** Engine
+`engine/techniques/vecm.py` (verify exact module name) is
+statsmodels-based Vector Error Correction Model. VECM is VAR-with-
+cointegration; expected Pattern A.1 same-library cross-package
+self-parity vs R `vars::vec2var` or `urca::ca.jo` for cointegration
+testing. Pre-existing condition: VECM β + α + Γ matrices may have
+sign-normalization conventions that differ between statsmodels and
+R; harness should sign-canonicalize per established PCA precedent.
+ENG-EXT candidate continuation: check whether engine VECM emits
+cointegrating-relations interpretability + impulse-response
+analysis at level (related to ENG-EXT-MULTIVARIATE-001 scope).
+Estimated session time: ~1-1.5h.
+
+## §3 Unvalidated catalog techniques (21 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -29809,8 +30242,8 @@ descriptions, summaries).
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
 
-### Multivariate Systems (4 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap)
-`bvar`, `dynamic_factor_model`, `var`, `vecm`
+### Multivariate Systems (3 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint)
+`bvar`, `dynamic_factor_model`, `vecm`
 
 ### Regimes / Nonlinear (6 unvalidated)
 `critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
