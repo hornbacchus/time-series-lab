@@ -25739,7 +25739,344 @@ Tier B sessions will exercise distinct architectural patterns
 relative to Tier A family template + may require per-session
 bespoke reimplementation rather than family-shared infrastructure.
 
-## §3 Unvalidated catalog techniques (33 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### transfer_function (Phase 7+ SC7; FORTY-SECOND §2.5 entry; FIRST Forecasting (Classical) block entry — Block 2 opens per Cat 3 remediation cycle dispatch; Cat 3 remediation cycle session 7/17 — **TIER B OPENING** per triage close ordering; FIRST Tier B cross-block specialized session post-Tier-A close; Cat 3 → Cat 1 LEGITIMATE rewrite + §2.5 entry committed together per Tier 2 incremental forward-amendment pattern; **NEW SC7 template element: bespoke per-session reimplementation** — Tier A Layer 2 family-shared helpers NOT APPLICABLE per architectural distance from tree-family pattern)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
+II.bit-exact (Pattern A.3 paper-formula self-parity at engine output-
+rounding floor)** per SC7 Code Step 4 empirical verification + Cat 3
+remediation cycle session 7/17 disposition. Reference arm reimplements
+the engine's exact Box-Jenkins transfer function pipeline (drop
+aligned NaN + design matrix construction [intercept + X lag terms +
+AR(Y) lag terms + optional extra exogenous] + OLS via
+`np.linalg.lstsq` + standard errors via (X^T X)^-1 * mse + t-stats
++ p-values via scipy.stats.t + goodness-of-fit metrics + distributed
+lag weights extraction + residual diagnostics Jarque-Bera +
+Durbin-Watson + Ljung-Box). Both arms produce bit-exact identical
+output at fixed input since OLS is deterministic.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Two-series input (Y + X, n=200)
+  with 5 interior NaN values at indices [5, 23, 67, 134, 178] of Y
+  series. Wrapper returns non-error response; emits warning "5
+  rows dropped due to missing values." per engine `dropna_aligned`
+  at line 78 (row-aligned drop semantics distinct from SC1-SC6
+  interpolate-and-keep pattern; appropriate for two-series
+  regression where interpolation would corrupt the X→Y lag
+  alignment).
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` (max_lag=8 + ar_order=1 +
+  include_contemporaneous=True per engine `_PRESET_CONFIG` line
+  27); returned 4 expected tables (`Coefficients` + `Distributed
+  Lag Weights` + `Model Summary` + `Residual Diagnostics`); audit
+  fields populated (~24 keys including transfer-function-specific
+  `y_series` + `x_series` + `additional_exog_used` + `peak_lag` +
+  `peak_lag_weight` + `long_run_multiplier`); no error response.
+- **Check 3 — Output shape/type verification:** PASS. Coefficients
+  table 11 rows × 6 cols [Parameter / Estimate / Std Error /
+  t-Stat / P-Value / Sig] (11 = intercept + 9 X lag terms [0..8] +
+  1 AR term); Distributed Lag Weights 9 × 3 [Lag / Weight /
+  Cumulative]; Model Summary 14 × 2; Residual Diagnostics 5 × 2.
+
+Wrapper-layer validation harness at `tools/_tf_wrapper_check.py`
+(transient verification artifact; not retained in production codebase).
+
+**Reference (Pattern A.3 paper-formula self-parity at corrected
+harness; SC7 Tier B bespoke per-session reimplementation):**
+Reference reimplementation in
+`tools/reference_parity/harness/checks/p3_transfer_function.py` at
+`_reference_transfer_function` lines 85-200 mirrors engine
+`transfer_function.run()` pipeline at engine lines 57-450 verbatim
+at unrestricted-polynomial path (Balanced preset default).
+
+**Helper identity note (per SC7 Step 1 verification per Tier B
+projection):** Engine `transfer_function.py` exposes ONLY `run` +
+`_almon_basis` + `build_interpretation` functions; NO `_prepare_series`
+or `_create_features` or `_create_forecast_features`. Tree-family
+Layer 2 helpers from SC1 `p3_random_forest.py` NOT APPLICABLE per
+Tier B architectural distance. Bespoke per-session reimplementation:
+`_reference_transfer_function` implements the full engine pipeline
+inline + `_almon_basis_reference` mirrors engine `_almon_basis`
+verbatim for forward-instrumentation (Balanced preset uses
+unrestricted path; Almon basis reference retained for Thorough preset
++ user-customized invocation paths). Confirms SC6 forward-instrumentation
+that Tier B sessions require bespoke per-session pattern.
+
+**SC7 architectural elements (Tier B opening; distinct from Tier A
+tree-family pattern):**
+
+1. **Two-series input pattern:** Y (output) + X (transfer input) +
+   optional additional exogenous series (engine lines 61-68); distinct
+   from SC1-SC6 single-series tabular ML pattern
+2. **OLS-based linear model:** `np.linalg.lstsq` (deterministic at
+   fixed input); no ensemble / stochastic / iterative components;
+   distinct from SC1-SC4 stochastic boosting + SC5 kernel SVM + SC6
+   multi-quantile boosting
+3. **Box-Jenkins transfer function architecture:** Y = c + Σ w_k X_{t-k}
+   + Σ φ_j Y_{t-j} + e; combines distributed-lag and AR(Y) components
+   in a single OLS regression
+4. **Optional Almon polynomial restriction:** `_almon_basis` lines
+   466-475 + Almon path at engine lines 195-204; Balanced preset uses
+   `polynomial='unrestricted'` default; Almon NOT validated at math
+   layer
+5. **NO forecast generation:** engine fits the model + produces
+   coefficients + diagnostics, but does NOT generate forecast time
+   series. Distinct from SC1-SC6 which all have multi-step recursive
+   forecasts.
+6. **4-table output structure:** Coefficients (with significance
+   stars) + Distributed Lag Weights (with cumulative column) + Model
+   Summary + Residual Diagnostics (with JB + DW + LB at lag 10).
+7. **No fallback dispatch:** numpy + scipy + statsmodels all always
+   available; SC3 fallback-handling template element NOT APPLICABLE.
+8. **No scaling pipeline:** OLS on raw lag features; SC5 scaling
+   refinement NOT APPLICABLE.
+
+**Verdict (math layer):** PASS bit-exact (`max_abs_diff=0.0 +
+max_rel_diff=0.0` across all 14 primary metrics: 11-element
+coefficient vector + 11 standard errors + 11 t-stats + 11 p-values
++ 9 lag weights + R² + adj-R² + RMSE + AIC + BIC + long-run
+multiplier + Jarque-Bera p-value + Durbin-Watson statistic +
+Ljung-Box p-value; n=200 AR(1)-X DGP + Balanced preset + seed=42 at
+runner CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per SC7 Code Step 6.
+**Audit script:** `tools/reference_parity/harness/checks/p3_transfer_function.py`
+(rewritten Cat 3 → Cat 1 at this commit; pre-rewrite harness used
+local helper `_fit_distributed_lag` implementing plain OLS at
+hardcoded `n_lags=3` with NO AR(r)-noise component + NO Almon
+polynomial + NO contemporaneous-flag handling + NO extra-exog
+support + NO residual diagnostics — bypassing engine's substantively
+richer transfer function model).
+**Audit date:** 2026-05-22 (Cat 3 remediation cycle session 7/17
+close; **TIER B OPENING milestone**).
+**Primary metrics (math layer):** 11-element OLS coefficient vector
+[intercept + X_lag0..X_lag8 + Y_AR1] + 11 standard errors + 11
+t-stats + 11 p-values + 9 distributed lag weights + R-squared +
+adjusted R-squared + RMSE + AIC + BIC + long-run multiplier +
+Jarque-Bera p-value + Durbin-Watson statistic + Ljung-Box p-value
+at lag 10.
+
+**Source files (Cat 3 remediation post-rewrite; SC7 Tier B opening
+with bespoke per-session implementation):**
++ `tools/reference_parity/harness/checks/p3_transfer_function.py`
+  lines 68-72 (Layer 1 engine preset Balanced mirror
+  `_ENGINE_BALANCED_PRESET` with transfer-function-specific
+  `max_lag` + `ar_order` + `include_contemporaneous` fields;
+  distinct from SC1-SC6 tree-family preset structure)
++ `tools/reference_parity/harness/checks/p3_transfer_function.py`
+  lines 75-92 (DGP generator `_generate_transfer_dgp` updated to
+  include AR(1) noise component matching engine's expected model
+  structure)
++ `tools/reference_parity/harness/checks/p3_transfer_function.py`
+  lines 95-103 (`_almon_basis_reference` mirroring engine
+  `_almon_basis` at engine lines 466-475; retained for Thorough
+  preset + user-customized Almon-polynomial invocation paths
+  despite Balanced preset using unrestricted default)
++ `tools/reference_parity/harness/checks/p3_transfer_function.py`
+  lines 106-200 (`_reference_transfer_function` end-to-end pipeline
+  reimpl: NaN drop + design matrix construction + OLS via lstsq +
+  standard errors + t-stats + p-values + goodness-of-fit + lag
+  weights + residual diagnostics)
++ `tools/reference_parity/harness/checks/p3_transfer_function.py`
+  lines 232-340 (harness TSL arm `run_tsl` invokes engine via
+  RunContext with 2-series input + extracts coefficients + lag
+  weights + audit fields)
++ `tools/reference_parity/harness/checks/p3_transfer_function.py`
+  lines 342-352 (harness reference arm `run_reference`)
++ `tools/reference_parity/harness/checks/p3_transfer_function.py`
+  lines 354-460 (compare() with engine output-rounding alignment
+  per Phase 1 finding B8: 6-decimal coefficients/std-errors/p-values
+  + 4-decimal t-stats/r-squared/rmse + 2-decimal AIC/BIC +
+  6-decimal long-run-multiplier + 4-decimal jb/dw + 6-decimal lb_p)
++ `engine/techniques/transfer_function.py` lines 25-29 (engine
+  `_PRESET_CONFIG` Fast/Balanced/Thorough preset dispatch; Balanced
+  at line 27)
++ `engine/techniques/transfer_function.py` lines 32-450 (engine
+  `run()` body: end-to-end transfer function pipeline; harness
+  reference arm `_reference_transfer_function` mirrors verbatim
+  at unrestricted-polynomial Balanced preset path)
++ `engine/techniques/transfer_function.py` lines 466-475 (engine
+  `_almon_basis` for Almon polynomial restriction; harness
+  `_almon_basis_reference` mirrors verbatim though unexercised at
+  Balanced preset default)
++ no separate audit markdown report; empirical baseline reference is
+  the runner CLI PASS verdict at this commit
+
+**Validation claim scope (Cat 3 remediation cycle session 7/17 post-
+rewrite; engine code path EXERCISED via RunContext at math layer):**
+
+- **Layer 1 (Box-Jenkins transfer function math via OLS on design
+  matrix [intercept + X lag terms + AR(Y) terms] + standard
+  inference + goodness-of-fit + residual diagnostics) VALIDATED at
+  Tier II.bit-exact at engine output-rounding floor:** Engine
+  `transfer_function` Layer 1 math + `p3_transfer_function` harness
+  TSL arm both invoke engine code path via RunContext; reference
+  arm `_reference_transfer_function` invokes identical numpy +
+  scipy + statsmodels primitives at identical hyperparameters at
+  IDENTICAL call sites with identical design-matrix construction.
+  Bit-exact PASS at deterministic OLS; 0.0 abs diff across all
+  primary metrics. **Layer 1 PASS bit-exact empirically grounded.**
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling deterministic via row-
+  aligned drop; preset config dispatch returns expected 4-table
+  structure + audit_fields with ~24 expected keys including
+  transfer-function-specific fields; output shape/type verification
+  confirms numeric outputs across all tables. Layer 2 paths NOT
+  covered by 3 checks (Almon polynomial restriction path +
+  additional exogenous series handling + interpretation builder +
+  plain English summary + audit_fields construction) remain
+  expert-review-required per pre-S49 scope.
+
+**Phase 3 algorithmic basis (extracted from engine module):**
+Box-Jenkins transfer function model per Box-Jenkins-Reinsel (1994)
+"Time Series Analysis: Forecasting and Control" Chapter 11 +
+Almon polynomial distributed lag per Almon (1965) "The
+Distributed Lag Between Capital Appropriations and Expenditures"
+Econometrica. The transfer function model relates an output
+series Y to one or more input series X with lagged effects:
+Y(t) = c + Σ_{k=0}^{b} w_k X(t-k) + Σ_{j=1}^{r} φ_j Y(t-j) + e(t).
+Engine uses OLS estimation on the full design matrix via
+`np.linalg.lstsq` (deterministic at fixed input). Optional Almon
+polynomial restriction parameterizes lag weights as `w_k = Σ_d
+γ_d k^d` reducing parameter count from (max_lag + 1) to
+(almon_degree + 1) — useful for long lag specifications with
+limited data.
+
+**Phase 3 known failure modes (Cat 3 remediation cycle session 7/17
+post-rewrite):**
+
+- Math-layer harness validates engine code path EXERCISED via
+  RunContext (post-rewrite Category 1 LEGITIMATE). Pre-rewrite
+  harness was Category 3 DEGENERATE-VACUOUS — local helper
+  `_fit_distributed_lag` implementing plain OLS at hardcoded
+  `n_lags=3` with NO AR(r)-noise + NO Almon + NO contemporaneous
+  flag + NO extra exog + NO residual diagnostics, bypassing
+  engine's substantively richer transfer function model.
+- Engine output rounding floor (Phase 1 finding B8): coefficients
+  + std errors + p-values + lag weights at 6 decimals; t-stats +
+  r-squared + rmse at 4 decimals; AIC + BIC at 2 decimals;
+  long-run multiplier at 6 decimals; jb + dw at 4 decimals;
+  lb_p at 6 decimals.
+- numpy.linalg.lstsq determinism: deterministic at fixed input +
+  matrix conditioning. Triage close empirically confirmed bit-
+  exact reproducibility.
+- Standard errors via direct `(X^T X)^-1 * mse` matrix inversion
+  (engine line 261); pseudo-inverse fallback when near-singular
+  (engine line 264 + warning). Reference arm matches this fallback
+  exactly.
+- Ljung-Box p-value uses `statsmodels.stats.diagnostic.
+  acorr_ljungbox` at `lb_lag = min(10, max(1, len(resid) // 5))`
+  per engine line 368; for n=200 fixture, lb_lag=10.
+
+**Phase 3 boundary of validity (extracted from harness DGP +
+fixture parameters):**
+
+- T=200 fixture (`DGP_N = 200`) with AR(1)-X driver + AR(1)-noise
+  on Y; other DGP regimes not validated
+- 2-series fixture (Y + X); additional exogenous series support
+  not exercised at parity layer
+- Balanced preset config (max_lag=8 + ar_order=1 +
+  include_contemporaneous=True + polynomial='unrestricted')
+  validated; Fast (max_lag=4 + ar_order=0) + Thorough (max_lag=12
+  + ar_order=2) presets NOT in parity scope at math layer
+- Univariate output Y series (transfer-function-specific
+  architecture)
+- AR(1)-X-driven DGP + AR(1)-Y-noise composition; other DGP
+  structures not validated
+- `polynomial='unrestricted'` only validated at math layer;
+  `polynomial='almon'` path NOT in parity scope despite
+  `_almon_basis_reference` retained for completeness
+
+**Phase 3 gap markings:**
+
+- Alternative preset configs (Fast + Thorough) NOT validated at
+  math layer (only Balanced)
+- Almon polynomial path NOT validated at math layer (only
+  unrestricted)
+- Additional exogenous series handling NOT validated at math layer
+  (only 2-series Y+X fixture)
+- Interpretation builder + plain English summary + audit_fields
+  composition NOT in math-layer parity scope
+- Pseudo-inverse fallback path for near-singular design matrices
+  NOT separately validated (engine line 264 + warning); reference
+  arm matches the fallback logic but parity fixture does not
+  exercise singularity
+
+**Status (Tier II.bit-exact PASS at engine output-rounding floor
+per SC7 / Cat 3 remediation cycle session 7/17 / TIER B OPENING):**
+Layer 1 Box-Jenkins transfer function OLS math validated bit-exact
+at machine precision at deterministic input post-rewrite via
+RunContext invocation of engine code path. Wrapper layer (S49+
+NEW 3-check scope) validated at 3/3 PASS at 4-table output
+structure. Layer 2 engine wrapper orchestration paths NOT covered
+by 3-check require expert review.
+
+**Validation-Surface Coverage (VSC) — embedded at first-time §2.5
+entry per Cat 1d revision-2 framework (Disposition 3 ratified at
+SC1 close):**
+
+- **Validated configuration (harness math layer):** engine code
+  path EXERCISED via RunContext at Balanced preset (max_lag=8 +
+  ar_order=1 + include_contemporaneous=True +
+  polynomial='unrestricted'); 2-series input (Y + X);
+  seed=42.
+- **Engine preset default (Balanced):** all parameters match
+  validated configuration per engine `_PRESET_CONFIG.get(ctx.preset,
+  _PRESET_CONFIG["Balanced"])` at engine line 85.
+- **Configuration match:** **YES** — user invoking at default
+  Balanced preset experiences mathematically validated Layer 1
+  surface.
+- **Disclosure scope:** Fast + Thorough preset configurations NOT
+  validated at math layer (only Balanced). `polynomial='almon'`
+  path NOT validated despite engine allowlist acceptance; users
+  invoking with Almon polynomial restriction experience untested
+  algorithm path. Additional exogenous series (beyond Y + X) NOT
+  validated at parity layer. **NO fallback dispatch disclosure
+  section applicable at SC7** (numpy + scipy + statsmodels always
+  available; SC3 template element NOT APPLICABLE).
+
+**Audit-hygiene cross-reference (Cat 3 remediation cycle session
+7/17 — TIER B OPENING):** Inventory verification commit 12d3785
+classified p3_transfer_function as Cat 3 DEGENERATE-VACUOUS per
+refined methodology revision-2 + Gate 2 finding. Triage close at
+HEAD a7746f1 confirmed Cat 3 (bit-exact deterministic at fixed
+input; rewrite feasible). This §2.5 entry closes the remediation
+cycle session 7/17 via combined harness rewrite + entry forward-
+amendment per Tier 2 incremental pattern + **Tier B bespoke per-
+session reimplementation** (Layer 2 family-shared helpers NOT
+APPLICABLE).
+
+**TIER B OPENING MILESTONE — Cross-block specialized cohort
+dispatched post-Tier-A close:** SC7 transfer_function is FIRST
+Tier B session. Block 2 Forecasting (Classical) opens per Cat 3
+remediation cycle dispatch ordering; transfer_function is FIRST
+§2.5 entry within Block 2 (other Block 2 entries: arima +
+arimax_sarimax + auto_arima + ets_hw + intermittent_demand +
+sarima + theta_forecast — 7 remaining at post-SC7 close).
+
+**NEW SC7 template element (Tier B bespoke per-session pattern
+empirically established):** SC7 establishes the template element
+for Tier B sessions: Layer 2 family-shared helpers from Tier A
+NOT APPLICABLE; bespoke per-session reimplementation mirrors
+engine pipeline verbatim. Pattern empirically grounded at first
+instance; codification candidate at absorption #6+ if SC8 dtw +
+SC9 loess also exhibit bespoke-per-session pattern (n=3 within
+Tier B). Engine helpers retained for completeness even when
+unexercised at primary preset path (`_almon_basis_reference`
+example at SC7 for Almon Thorough-preset path) per institutional
+honesty + forward-instrumentation for Thorough/Fast preset
+validation extensions.
+
+**SC8 dtw_alignment_lag projection (next Tier B session per
+triage close ordering):** SC8 dtw is dynamic programming over
+distance matrix; expected ALL engine helpers ABSENT (no
+preprocessing pipeline at all; pure DP). Engine likely has only
+`run` + perhaps a DP-loop helper. Reference arm bespoke
+reimplementation expected mirroring engine DP loop verbatim.
+Engine preset likely has window-size + normalization-mode +
+step-pattern fields specific to DTW. Estimated session time:
+~1.5-2h per Tier B per-session complexity.
+
+## §3 Unvalidated catalog techniques (32 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -25771,8 +26108,8 @@ descriptions, summaries).
 ### Evaluation / Uncertainty (1 unvalidated; robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61)
 `conformal_intervals`
 
-### Forecasting (Classical) (8 unvalidated)
-`arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`, `transfer_function`
+### Forecasting (Classical) (7 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening)
+`arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`
 
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
