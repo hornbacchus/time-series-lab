@@ -728,6 +728,52 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
     },
 
     # ------------------------------------------------------------------
+    # Phase 7+ S73 — auto_arima (pmdarima vs R forecast::auto.arima).
+    # NEW harness (Disposition B; net-new harness construction, not the
+    # read+verify pattern of S68-S72). Two parity layers: (1) order-
+    # selection-algorithm cross-implementation (Hyndman-Khandakar 2008
+    # stepwise; pmdarima vs R auto.arima); (2) SARIMAX-fit-at-selected-
+    # order (same backbone validated at S62/S70/S71/S72). When both arms
+    # select the SAME order (path a), primary metrics (coefs + loglik +
+    # forecast) compare at the §7.1 MLE-fit band identical to
+    # p3_arima_manual. When orders DIFFER (path b), coef-by-coef is
+    # meaningless (different models); forecast-only comparison applies
+    # at a widened band absorbing model-selection-driven divergence.
+    # Same numeric band as p3_arima_manual; the path determination is
+    # made in the harness at runtime, not by separate ladders.
+    # ------------------------------------------------------------------
+    "p3_auto_arima": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-2,
+            "block_rel_tol": 1e-1,
+        },
+        "secondary": {
+            "abs_tol": 1e-2,
+            "rel_tol": 5e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 5e-1,
+        },
+        "justification": (
+            "Phase 7+ S73 auto_arima. Same §7.1 MLE-fit band as "
+            "p3_arima_manual for the SARIMAX-fit-at-selected-order "
+            "layer (pmdarima fits the selected order via statsmodels "
+            "SARIMAX; R forecast::auto.arima fits via stats::arima — "
+            "same Gaussian-innovation MLE). The order-selection-"
+            "algorithm layer (Hyndman-Khandakar 2008 stepwise) is "
+            "validated by selected-order AGREEMENT (path a) when "
+            "pmdarima + R auto.arima converge to the same order; if "
+            "orders DIFFER (path b), forecast-only parity at the same "
+            "band characterizes model-selection-driven divergence. "
+            "Cross-reference S62 conformal_intervals SARIMAX backbone "
+            "for the fit layer; the order-selection-cross-implementation "
+            "layer is novel to S73."
+        ),
+    },
+
+    # ------------------------------------------------------------------
     # Phase 3 Session 3 — additional Batch 1 entries.
     # ETS / TBATS use the §7.1 MLE-fit band (deterministic optimizer);
     # Theta is closed-form post-deseasonalization; intermittent demand

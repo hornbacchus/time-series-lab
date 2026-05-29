@@ -33440,7 +33440,411 @@ whether the harness pins/validates differently. Estimated session
 time: ~1.5h (order-selection-search divergence handling may add
 complexity).
 
-## §3 Unvalidated catalog techniques (13 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### auto_arima (Phase 7+ S73; SIXTY-SECOND §2.5 entry; SEVENTH Forecasting Classical block entry; SIXTH DISPATCH-SET entry per ascending-complexity ordering; **CLOSES the ARIMA arc** [S70 arima → S71 sarima → S72 arimax_sarimax → **S73 auto_arima**]; **Disposition B — NET-NEW HARNESS CONSTRUCTION** [no prior p3_auto_arima harness existed; auto_arima was the lone ARIMA-family path UNCOVERED by a dedicated parity harness pre-S73; ratified at S72-close user disposition to build full validation rather than cross-reference-only Disposition A or defer]; **selected-order PATH (a) AGREEMENT** [pmdarima AND R forecast::auto.arima both select (1,1,1) on the ARIMA(1,1,1) DGP → coef-by-coef parity of the agreed model]; engine API path: pmdarima.auto_arima → statsmodels SARIMAX backbone; **NO engine-IMPROVEMENT candidate** [engine-improvement queue stays n=1 (ets_hw only)]; **NO aic/bic Tier V Pattern D CAVEAT** [aic abs_diff=4.4e-8]; **PARTIAL cross-reference scope** — S62 SARIMAX backbone covers fit-at-selected-order layer; order-selection-algorithm-cross-implementation layer is NOVEL to S73)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.mle-band (Pattern A.1 same-library cross-package self-
+parity at `mle_fit` verdict_class tolerance 1e-3 abs / 1e-2 rel
+per master plan §7.1; PATH (a) selected-order agreement)** per S73
+Code Step 2 empirical verification. pmdarima `auto_arima` (TSL
+math path; Hyndman-Khandakar 2008 stepwise → statsmodels SARIMAX
+fit) vs R `forecast::auto.arima` (reference; Hyndman-Khandakar
+2008 stepwise → stats::arima fit). **Both arms select (1,1,1)**
+on the ARIMA(1,1,1) DGP (selected-order AGREEMENT); coef-by-coef
+parity of the agreed model PASSES well within mle-band. **SECONDARY
+metrics aic/bic: clean PASS at ~4.4e-8 — NO Tier V Pattern D
+CAVEAT** (both use full-Gaussian-likelihood AIC).
+
+**Disposition B harness-construction note (S73 NET-NEW WORK):**
+Prior to S73, auto_arima had **NO dedicated parity harness, no
+fixture, no report, no tolerance-ladder entry** — the lone ARIMA-
+family path uncovered by direct parity validation (auto_arima
+appeared in the harness layer only as a SUB-COMPONENT of p3_conformal
++ p3_rolling_origin_cv, not as technique-under-test). S73 STEP 1
+surfaced this gap; user ratified **Disposition B (build full
+validation)** over Disposition A (cross-reference-only) or
+Disposition C (defer). S73 constructed:
+- NEW `tools/reference_parity/harness/checks/p3_auto_arima.py`
+  (AutoArimaParity; technique_id `p3_auto_arima`) with R-bridge
+  reference arm — net-new harness, not the read+verify pattern of
+  S68-S72.
+- NEW `p3_auto_arima` tolerance-ladder entry in
+  `tools/reference_parity/harness/tolerances.py` (§7.1 MLE-fit band
+  identical to p3_arima_manual; justification documents the two-
+  layer parity scope).
+- The harness implements **runtime selected-order path
+  determination**: compares pmdarima + R selected orders at
+  compare() time → path (a) coef-by-coef if agree, path (b)
+  forecast-only if differ.
+
+**Engine variant validated (at math layer; pmdarima + wrapper
+exercised):** pmdarima `auto_arima(y, d=None, max_p=5, max_q=5,
+max_d=2, seasonal=False, start_P=0, max_P=0, start_Q=0, max_Q=0,
+max_D=0, stepwise=True, information_criterion="aic")` — mirroring
+engine `_run_auto_arima` non-seasonal Balanced config (engine
+lines 159-183). pmdarima fits the selected order via statsmodels
+SARIMAX. Harness exercises BOTH the direct pmdarima auto_arima fit
+(for selected-order + AR/MA coefficient extraction via
+`model.arima_res_`) AND the public wrapper (`arima_mod.run` with
+technique_id="auto_arima" for AIC + selected-order cross-check);
+wrapper selected-order=(1,1,1) + AIC=1134.07 match the direct fit.
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via R forecast::auto.arima):** Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_auto_arima.py`
+`run_reference` invokes R `forecast::auto.arima(y, max.p=5,
+max.q=5, max.d=2, seasonal=FALSE, stepwise=TRUE, ic="aic",
+allowmean=FALSE, allowdrift=FALSE)` via RBridge, extracting the
+selected order via `arimaorder(fit)` + AR/MA coefs + loglik +
+forecast + aic/bic. Both implement the Hyndman-Khandakar (2008)
+stepwise order-selection algorithm.
+
+**Selected-order path determination (S73 critical methodology
+element):**
+
+- **PATH (a) selected-order AGREEMENT confirmed at S73.** pmdarima
+  selects (1,1,1); R forecast::auto.arima selects (1,1,1); orders
+  MATCH on the ARIMA(1,1,1) DGP. The `selected_order_match`
+  primary metric PASSES (integer match). Coef-by-coef parity of
+  the agreed (1,1,1) model proceeds.
+- **Stepwise-algorithm cross-implementation finding:** both
+  independent Hyndman-Khandakar 2008 stepwise implementations
+  (pmdarima Python + R forecast::auto.arima) converge to the SAME
+  order on a clean ARIMA(1,1,1) DGP — confirming the order-
+  selection algorithm is implementation-robust at least for well-
+  identified DGPs. (Path (b) divergence — which would have
+  triggered forecast-only parity — did NOT manifest at this
+  fixture; the harness retains the path-(b) branch for fixtures
+  where the stepwise heuristics diverge.)
+- **pmdarima stepwise determinism:** confirmed at S73 Step-1 probe
+  (2 runs → same (1,1,1) order); consistent with the S62 within-
+  pmdarima determinism finding.
+
+**API path positioning note (sixth data point in API-positioning
+pattern S68-S73):** S68 ets_hw CLASSICAL (engine-IMPROVEMENT flag);
+S69 theta_forecast + S70 arima + S71 sarima + S72 arimax_sarimax +
+S73 auto_arima all MODERN (NO flag). **Pattern observation (n=6):**
+Forecasting Classical engine modules use the MODERN statsmodels/
+pmdarima API in 5 of 6 cases; only ets_hw uses legacy classical.
+Engine-improvement queue remains n=1 (ets_hw isolated case);
+modern-API convention is the engine norm, reinforced at n=6 (final
+ARIMA-arc data point).
+
+**Cross-reference scope (PARTIAL — explicitly disclosed per S73
+methodology):**
+
+- **S62 conformal_intervals SARIMAX backbone — APPLIES to the
+  FIT-AT-SELECTED-ORDER layer:** S62 exercised pmdarima auto_arima
+  as the conformal base forecaster; pmdarima fits the selected
+  order via statsmodels SARIMAX, the same backbone validated at
+  S62 + S70 + S71 + S72. The auto_arima FIT layer inherits trust.
+  **SEVENTH cross-reference trust-inheritance instance in Q1
+  cadence.**
+- **S62 cross-reference does NOT cover the ORDER-SELECTION-
+  ALGORITHM-CROSS-IMPLEMENTATION layer:** at S62, parity was
+  pmdarima-vs-pmdarima (within-implementation determinism); S73 is
+  pmdarima-vs-R (cross-implementation stepwise-algorithm parity).
+  **The order-selection-cross-implementation layer is NOVEL to
+  S73** — validated here for the first time (path (a) agreement on
+  the ARIMA(1,1,1) DGP). This PARTIAL cross-reference scope is
+  disclosed explicitly: do NOT read S62 as having validated
+  cross-implementation order selection.
+- **State Space block S48-S51 Kalman backbone — APPLIES:**
+  statsmodels SARIMAX (pmdarima fit) uses Kalman-filter MLE.
+- **S70/S71/S72 ARIMA-arc siblings — APPLY:** auto_arima is the
+  automatic-order-selection sibling in the ARIMA arc; the agreed
+  (1,1,1) fit reproduces S70 manual ARIMA(1,1,1) exactly
+  (ar=0.6006, ma=0.4887, loglik=-564.03, aic=1134.07 identical to
+  S70).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine `_prepare_series`
+  (shared with S70 manual ARIMA) strips edge NaN + interpolates
+  interior. Verified by injecting interior NaN at [10] + [50] in a
+  400-observation fixture: engine returned `status=success` +
+  NaN-interpolation warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + technique_id="auto_arima"; returned audit
+  fields populated correctly (`method="auto_arima"`;
+  `order="(1,1,1)"` auto-selected; `ic="aic"`; `stepwise=True`;
+  `n_candidates_searched=15`; `max_p/q/d=5/5/2`; `aic=1134.07`;
+  `bic=1146.03`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 4 expected tables (`Forecast` 5 × 4 [Step + Forecast +
+  Lower 95% + Upper 95%]; `Fitted Values`; `Model Summary`;
+  `Residual Diagnostics`) — shares `_build_output` with S70 manual
+  ARIMA.
+
+**Verdict (math layer — primary):** PASS at mle-band tolerance
+(path (a) agreement): `selected_order_match` PASS [tsl (1,1,1) ==
+ref (1,1,1)]; ar_coefs max_abs_diff=5.62e-6; ma_coefs 5.02e-6;
+loglik 2.22e-8; forecast 1.09e-4; n=400 ARIMA(1,1,1) DGP φ=0.6
+θ=0.4 σ=1.0 at seed=42, horizon=5 at runner CLI execution.
+**Verdict (math layer — secondary):** clean PASS — aic abs_diff=
+4.43e-8; bic abs_diff=4.43e-8 (NO Tier V Pattern D CAVEAT).
+**Verdict (wrapper layer):** PASS 3/3 checks per S73 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/
+p3_auto_arima.py` (technique_id `p3_auto_arima`; NEW at S73).
+**Audit date:** 2026-05-28 (S73 §2.5 entry; Forecasting Classical
+block sixth dispatch-set entry; ARIMA arc CLOSES; net-new harness
+construction per Disposition B).
+**Primary metrics (math layer):** selected-order integer match +
+(path a) AR + MA coefs + log-likelihood + h-step point forecast
+(h=5).
+**Secondary metrics:** AIC + BIC (at agreed order) — clean PASS,
+no IC CAVEAT.
+**Diagnostic metrics:** selected orders by arm + path determination
+(`selected_order_path="a_selected_order_agreement"`).
+
+**Validation claim scope (S73; engine math validated at primary-
+metric scope via NEW harness; wrapper code path exercised at
+wrapper-layer 3-check scope + direct pmdarima cross-check; math-
+layer comparison crosses Python pmdarima auto_arima and R
+forecast::auto.arima implementations of the Hyndman-Khandakar 2008
+stepwise algorithm + the downstream SARIMAX/arima fit):**
+
+- **Layer 1a (order-selection-algorithm cross-implementation)
+  VALIDATED at selected-order AGREEMENT (path a):** pmdarima +
+  R auto.arima both select (1,1,1) on the ARIMA(1,1,1) DGP. NOVEL
+  S73 layer (not covered by S62). Validation scope: agreement at
+  this DGP; path (b) divergence branch retained for DGPs where
+  stepwise heuristics diverge (not exercised at S73 fixture).
+- **Layer 1b (SARIMAX fit-at-selected-order) VALIDATED at Tier
+  II.mle-band:** AR/MA coefs + loglik + forecast at the agreed
+  (1,1,1) order agree within mle-band; reproduces S70 manual
+  ARIMA(1,1,1) exactly. Cross-references S62/S70/S71/S72 SARIMAX
+  backbone.
+- **Layer 1 SECONDARY METRICS aic/bic clean PASS:** No IC
+  formula-family divergence.
+- **Layer 1 FORECAST PREDICTION INTERVALS NOT separately validated
+  at math layer:** Engine emits 95% PI columns; cross-
+  implementation PI comparison NOT in current parity scope.
+- **Layer 1 STEPWISE-SEARCH TRAJECTORY NOT validated at math
+  layer:** Engine emits a candidate-COUNT estimate
+  (`n_candidates_searched`); the per-candidate AIC search
+  trajectory is NOT emitted (minor user-convenience gap).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling; preset config dispatch
+  returns expected 4-table structure with auto_arima-specific
+  audit fields (selected order + IC + stepwise + candidate count);
+  output shape/type verification confirms Forecast PI columns.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Automatic ARIMA order selection per Hyndman-
+Khandakar (2008) "Automatic Time Series Forecasting: The forecast
+Package for R" J Stat Software 27(3) — stepwise traversal of the
+(p,d,q)[(P,D,Q,m)] order space: determine differencing d via
+KPSS/unit-root tests, then stepwise-search AR/MA orders minimizing
+the information criterion (AIC default) by perturbing one order
+component at a time from a starting model, accepting improvements
+until no neighbor improves. Engine uses pmdarima `auto_arima`
+(the canonical Python port of Hyndman-Khandakar); reference R
+`forecast::auto.arima` (the original implementation). Once the
+order is selected, the fit is standard Gaussian-innovation ARIMA
+MLE (statsmodels SARIMAX / stats::arima). Same SARIMAX backbone
+as S62/S70/S71/S72.
+
+**Phase 3 known failure modes (S73 / NEW-harness scope):**
+
+- NET-NEW harness construction (Disposition B): p3_auto_arima.py
+  + tolerances entry created at S73; no prior coverage existed.
+- **Selected-order divergence risk (path b) NOT triggered at S73
+  fixture** but retained in the harness: on DGPs where pmdarima +
+  R auto.arima stepwise heuristics diverge (different starting
+  orders, tie-breaking, acceptance criteria), the harness falls
+  back to forecast-only parity. The clean ARIMA(1,1,1) DGP
+  produced agreement; ambiguous/weakly-identified DGPs could
+  produce divergence (documented as a known characterization, not
+  a failure).
+- **NO IC CAVEAT** (consistent with S70/S71/S72): both use full-
+  Gaussian-likelihood AIC.
+- **NO engine-IMPROVEMENT** (consistent with S69-S72): engine uses
+  modern pmdarima → SARIMAX backbone.
+- Deterministic-optimizer convergence-criterion divergence at the
+  fit layer: ~5e-6 abs on coefficients; well within mle-band.
+- pmdarima + R auto.arima default-config alignment: the harness
+  forces matching config (seasonal=FALSE, stepwise=TRUE, ic="aic",
+  allowmean/allowdrift=FALSE on the R side to match pmdarima
+  non-seasonal non-drift defaults) for apples-to-apples comparison.
+
+**Phase 3 boundary of validity:**
+
+- T=400 ARIMA(1,1,1) fixture (φ=0.6, θ=0.4, σ=1.0, d=1); other
+  DGP regimes + orders NOT validated at math layer
+- non-seasonal auto_arima validated; seasonal auto_arima
+  (seasonal=True with m) NOT validated at math layer
+- selected-order AGREEMENT (path a) validated on the clean
+  ARIMA(1,1,1) DGP; selected-order DIVERGENCE (path b) NOT
+  exercised (no divergence at this fixture)
+- IC="aic" validated; alternative ICs (bic, hqic, oob) NOT
+  validated
+- horizon=5 forecast validated; longer horizons NOT separately
+  exercised
+- prediction intervals + stepwise-search trajectory NOT validated
+  at math layer
+
+**Phase 3 gap markings:**
+
+- Seasonal auto_arima NOT validated (non-seasonal only)
+- Selected-order DIVERGENCE path (b) NOT exercised (no divergence
+  at the ARIMA(1,1,1) DGP; branch retained for future fixtures)
+- Alternative information criteria NOT validated
+- Prediction intervals NOT validated at math layer
+- Stepwise-search trajectory diagnostic (per-candidate AIC) NOT
+  emitted by engine (candidate-count estimate only; minor user-
+  convenience candidate)
+
+**Status (PRIMARY Tier II.mle-band PASS at path (a) selected-order
+agreement + SECONDARY clean PASS with NO IC CAVEAT + wrapper-layer
+3/3 PASS per S73 / Forecasting Classical block sixth dispatch-set
+entry, ARIMA arc CLOSES; NET-NEW harness per Disposition B):**
+Layer 1a order-selection-algorithm cross-implementation validated
+at selected-order agreement [(1,1,1) both arms]; Layer 1b SARIMAX
+fit-at-selected-order validated at mle-band (reproduces S70 manual
+ARIMA(1,1,1) exactly). S62 SARIMAX backbone + State Space block
+Kalman backbone + S70/S71/S72 ARIMA-arc sibling cross-references
+inherit trust (PARTIAL scope: S62 covers fit layer, NOT order-
+selection-cross-implementation). Wrapper layer (S49+ 3-check)
+validated at 3/3 PASS.
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** pmdarima
+  `auto_arima(max_p=5, max_q=5, max_d=2, seasonal=False,
+  stepwise=True, information_criterion="aic")` → selected (1,1,1)
+  → statsmodels SARIMAX fit. Pattern A.1 cross-library reference:
+  R `forecast::auto.arima(max.p=5, max.q=5, max.d=2,
+  seasonal=FALSE, stepwise=TRUE, ic="aic", allowmean=FALSE,
+  allowdrift=FALSE)`. ARIMA(1,1,1) DGP at n=400, seed=42.
+- **Engine preset default (Balanced):** `_run_auto_arima` non-
+  seasonal config (engine lines 120-183): max_p=5, max_q=5,
+  max_d=2, seasonal=False default, stepwise=True, ic="aic"
+  default. Matches validated configuration.
+- **Configuration match:** **YES at primary metrics math layer**
+  — user invoking auto_arima at default Balanced preset (non-
+  seasonal) experiences the math-validated path; the selected
+  order + fit reproduce the validated result on the validation
+  DGP. For seasonal auto_arima (seasonal=True) or alternative ICs,
+  math-layer validation does NOT exercise alternative
+  configurations.
+- **Disclosure scope:** Seasonal auto_arima NOT validated.
+  Alternative information criteria (bic/hqic/oob) NOT validated.
+  Selected-order DIVERGENCE path (b) NOT exercised at this DGP
+  (clean ARIMA(1,1,1) → agreement; ambiguous DGPs could diverge).
+  Prediction intervals + stepwise-search trajectory covered at
+  wrapper-layer emission scope only.
+
+**ENG-EXT institutional-rates auto_arima workflow scan outcome
+(S73 Step 1; standard workflow + auto-order-selection; no NEW
+ENG-EXT-FORECASTING-001 candidate surfaced):**
+
+(a) **Automatic order selection + point forecast:** PRESENT ✓ —
+    pmdarima auto_arima selects order + `Forecast` table h-step
+    forecasts.
+(b) **Prediction intervals:** PRESENT ✓ — Lower/Upper 95% columns.
+(c) **Selected-order disclosure:** PRESENT ✓ — audit `order` +
+    `ic` + `stepwise` + `n_candidates_searched`.
+(d) **Residual diagnostics + baseline:** PRESENT ✓ — shared
+    `_build_output` with S70 ARIMA (Residual Diagnostics +
+    baseline comparison).
+(e) **Stepwise-search trajectory (per-candidate AIC):** NOT
+    emitted (candidate-COUNT estimate only). Minor USER-CONVENIENCE
+    candidate — a strategist debugging why a specific order was
+    selected would benefit from the search trajectory, but the
+    count estimate + final order suffice for standard use.
+
+**Verdict: COVERED at standard workflow elements + auto-order-
+selection disclosure.** No new ENG-EXT-FORECASTING-001 commission
+surfaced. Stepwise-search-trajectory diagnostic noted as minor
+USER-CONVENIENCE candidate (low priority).
+
+**Audit-hygiene cross-reference (S73 / Disposition B net-new
+harness + PARTIAL S62 cross-reference + ARIMA arc close):**
+
+S73 auto_arima was the lone ARIMA-family path uncovered by a
+dedicated parity harness pre-S73. User ratified Disposition B
+(build full validation) at S72-close. S73 constructed a NEW
+p3_auto_arima.py harness + tolerance-ladder entry with R-bridge
+reference + runtime selected-order path determination. Outcome:
+PATH (a) selected-order AGREEMENT [(1,1,1) both arms] → coef-by-
+coef parity at mle-band. NO engine-IMPROVEMENT (modern pmdarima →
+SARIMAX). NO aic/bic Tier V Pattern D CAVEAT. PARTIAL cross-
+reference: S62 conformal_intervals SARIMAX backbone covers the
+fit-at-selected-order layer (SEVENTH cross-reference trust-
+inheritance instance in Q1 cadence); the order-selection-
+algorithm-cross-implementation layer is NOVEL to S73 (validated
+here first). API-positioning pattern sixth data point (n=6: S68
+classical + S69-S73 modern; modern-API engine norm with ets_hw
+lone exception — final ARIMA-arc data point).
+
+**ARIMA arc CLOSE documentation (S70-S73; the ARIMA arc within
+Forecasting Classical completes at S73):**
+
+The ARIMA arc (S70 arima + S71 sarima + S72 arimax_sarimax + S73
+auto_arima) completes at S73. Arc methodology summary:
+
+- **Uniform modern statsmodels/pmdarima state-space SARIMAX
+  backbone across all four entries:** S70 `tsa.arima.model.ARIMA`
+  (wraps SARIMAX); S71 `tsa.statespace.sarimax.SARIMAX` (direct);
+  S72 `tsa.statespace.sarimax.SARIMAX` with exog; S73 pmdarima
+  auto_arima → statsmodels SARIMAX. All on the same Kalman-filter
+  Gaussian-likelihood MLE backbone validated at S62 conformal
+  base.
+- **NO engine-IMPROVEMENT across the arc** (all modern API;
+  contrast ets_hw classical at S68). Engine-improvement queue
+  unchanged at n=1 (ets_hw) across S70-S73.
+- **NO aic/bic Tier V Pattern D CAVEAT across the arc** (all use
+  full-Gaussian-likelihood AIC; clean PASS at ~4.4e-8 to ~1.2e-7;
+  confirms the technique-specific-not-cross-package-systematic
+  characterization of IC formula-family divergence established at
+  S64/S68 disconfirmation).
+- **Progressive feature coverage:** S70 single ARIMA (richest
+  output: + Residual Diagnostics) → S71 seasonal extension (no
+  seasonal weak-identification at T=240) → S72 exogenous extension
+  (+ exogenous-coefficient P-Value significance; future-xreg
+  consistency verified) → S73 automatic order selection (novel
+  order-selection-algorithm-cross-implementation layer; net-new
+  harness; path (a) agreement).
+- **Cross-reference trust-inheritance:** all four arc entries
+  cross-reference S62 SARIMAX backbone + State Space block S48-S51
+  Kalman backbone; the arc contributes 4 of the Q1-cadence cross-
+  reference trust-inheritance instances (S70 = 4th, S71 = 5th,
+  S72 = 6th, S73 = 7th).
+- **S73-specific novelty:** auto_arima introduced the order-
+  selection-algorithm-cross-implementation parity layer (pmdarima
+  vs R auto.arima Hyndman-Khandakar stepwise), validated at
+  selected-order agreement; this layer is NOT covered by the S62
+  pmdarima-vs-pmdarima determinism validation.
+
+**Forecasting Classical block progress note (S73 sixth dispatch-
+set entry; ARIMA arc CLOSES):** Block 2 Forecasting Classical
+advances at S73 auto_arima per ratified ascending-complexity
+dispatch ordering. **Post-S73: Forecasting Classical block 7/8
+§2.5-validated** (SC7 transfer_function + S68 ets_hw + S69
+theta_forecast + S70 arima + S71 sarima + S72 arimax_sarimax +
+S73 auto_arima). **1 remaining in dispatch-set via S74
+intermittent_demand (BLOCK CLOSE session).** ARIMA arc COMPLETE
+(S70-S73). Block close projected at S74 intermittent_demand.
+
+**S74 intermittent_demand projection (FINAL Forecasting Classical
+block session + BLOCK CLOSE per ascending-complexity dispatch
+ordering):** Engine `engine/techniques/intermittent_demand.py` is
+intermittent-demand forecasting (Croston 1972 + SBA Syntetos-
+Boylan 2005 + TSB Teunter-Syntetos-Babai 2011 variants). BESPOKE
+exponential-smoothing recursion (NOT statsmodels-backed; closed-
+form Croston-family). Expected Pattern A.1 cross-package vs R
+`tsintermittent::crost` / `croston` OR bespoke self-parity per
+Cat 1d if engine output-rounding floor. CLOSES the Forecasting
+Classical block (ELEVENTH catalog block fully Q1-amended at S74
+close projected). Different from the ARIMA arc (no SARIMAX
+backbone; no order selection; closed-form intermittent-demand
+recursion). Pre-existing risk: Croston-family variant selection +
+zero-demand-period handling + smoothing-parameter convention.
+Estimated session time: ~1.5h.
+
+## §3 Unvalidated catalog techniques (12 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -33472,8 +33876,8 @@ descriptions, summaries).
 ### Evaluation / Uncertainty (0 unvalidated; **Block 4 FULLY Q1-AMENDED** — NINTH catalog block to complete per Q1 work program scope at S62 close = 9 of 13 catalog blocks fully Q1-amended (69% catalog block-level completion); robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61; conformal_intervals moved to §2.5 per Phase 7+ S62 — FIFTH-AND-FINAL block entry; Q1 cadence resumption entry post-Cat-3-cycle close at SC17 a54b430; cascade-resolution entry — p3_conformal was the original Cat 3 finding at S62 Step 1 that triggered the inventory verification cascade + 17-session Cat 3 remediation cycle, now closed at S62 §2.5 entry against the corrected harness; MANDATORY Path B forward observation embedded: ENG-EXT-CONFORMAL-001 commissions CQR + EnbPI/SPCI Q2+ engine extension for institutional-fixed-income-use-case scope)
 (all 5 techniques moved to §2.5)
 
-### Forecasting (Classical) (4 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE path; FIRST engine-IMPROVEMENT candidate within Q1 cycle (migrate to statespace ETS); engine-improvement queue n=1; pre-existing aic/bic Tier V Pattern D CAVEAT; β/γ corner-solution landing; theta_forecast moved to §2.5 per Phase 7+ S69 — THIRD Block 2 entry; SECOND dispatch-set entry; engine uses `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API); NO engine-IMPROVEMENT candidate; cross-API-paradigm Pattern A.1 vs R `forecast::thetaf`; forecast PASS at mle-band 3 orders tighter; rmse Secondary BLOCK is HARNESS metric-extraction artifact NOT math-layer divergence — overall PASS; arima moved to §2.5 per Phase 7+ S70 — FOURTH Block 2 entry; THIRD dispatch-set entry; opens ARIMA arc S70-S73; engine uses MODERN `statsmodels.tsa.arima.model.ARIMA` (state-space/Kalman MLE; wraps SARIMAX — NOT deprecated legacy wrapper); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (both statsmodels + R forecast::Arima(method="ML") use full-Gaussian-likelihood AIC; clean PASS at 4.5e-8 — distinct from S64 VAR + S68 ets_hw IC formula-family divergence); S62 conformal_intervals SARIMAX backbone cross-reference (FOURTH cross-reference trust-inheritance instance in Q1 cadence) + State Space block S48-S51 Kalman backbone cross-reference BOTH APPLY; API-positioning pattern n=3 [S68 classical + S69 modern + S70 modern; modern-API engine norm, ets_hw lone classical exception]; richest block output [4 tables incl Residual Diagnostics]; sarima moved to §2.5 per Phase 7+ S71 — FIFTH Block 2 entry; FOURTH dispatch-set entry; ARIMA arc midpoint; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=1.16e-7; confirms S70 disconfirmation of universal-CAVEAT hypothesis — IC divergence technique-specific not cross-package-systematic); seasonal-component convergence as tight as non-seasonal (no seasonal weak-identification at T=240); S62 SARIMAX + State Space S48-S51 + S70 arima sibling cross-references ALL APPLY — FIFTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=4 [S68 classical + S69/S70/S71 modern]; arimax_sarimax moved to §2.5 per Phase 7+ S72 — SIXTH Block 2 entry; FIFTH dispatch-set entry; ARIMA arc 3-of-4; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` with exog (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=7.7e-8); exogenous beta convergence machine-precision (recovers DGP true β=1.5); future xreg handling verified consistent across arms (harness deterministic future_x to both; engine production last-value-carry-forward is separate modeling-policy default not a parity concern); S62 SARIMAX + State Space S48-S51 + S70/S71 ARIMA-arc siblings cross-references ALL APPLY — SIXTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=5 [S68 classical + S69/S70/S71/S72 modern]; most institutionally-complete block entry [exogenous-coefficient P-Value significance + residual diagnostics + baseline native])
-`auto_arima`, `intermittent_demand`
+### Forecasting (Classical) (4 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE path; FIRST engine-IMPROVEMENT candidate within Q1 cycle (migrate to statespace ETS); engine-improvement queue n=1; pre-existing aic/bic Tier V Pattern D CAVEAT; β/γ corner-solution landing; theta_forecast moved to §2.5 per Phase 7+ S69 — THIRD Block 2 entry; SECOND dispatch-set entry; engine uses `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API); NO engine-IMPROVEMENT candidate; cross-API-paradigm Pattern A.1 vs R `forecast::thetaf`; forecast PASS at mle-band 3 orders tighter; rmse Secondary BLOCK is HARNESS metric-extraction artifact NOT math-layer divergence — overall PASS; arima moved to §2.5 per Phase 7+ S70 — FOURTH Block 2 entry; THIRD dispatch-set entry; opens ARIMA arc S70-S73; engine uses MODERN `statsmodels.tsa.arima.model.ARIMA` (state-space/Kalman MLE; wraps SARIMAX — NOT deprecated legacy wrapper); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (both statsmodels + R forecast::Arima(method="ML") use full-Gaussian-likelihood AIC; clean PASS at 4.5e-8 — distinct from S64 VAR + S68 ets_hw IC formula-family divergence); S62 conformal_intervals SARIMAX backbone cross-reference (FOURTH cross-reference trust-inheritance instance in Q1 cadence) + State Space block S48-S51 Kalman backbone cross-reference BOTH APPLY; API-positioning pattern n=3 [S68 classical + S69 modern + S70 modern; modern-API engine norm, ets_hw lone classical exception]; richest block output [4 tables incl Residual Diagnostics]; sarima moved to §2.5 per Phase 7+ S71 — FIFTH Block 2 entry; FOURTH dispatch-set entry; ARIMA arc midpoint; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=1.16e-7; confirms S70 disconfirmation of universal-CAVEAT hypothesis — IC divergence technique-specific not cross-package-systematic); seasonal-component convergence as tight as non-seasonal (no seasonal weak-identification at T=240); S62 SARIMAX + State Space S48-S51 + S70 arima sibling cross-references ALL APPLY — FIFTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=4 [S68 classical + S69/S70/S71 modern]; arimax_sarimax moved to §2.5 per Phase 7+ S72 — SIXTH Block 2 entry; FIFTH dispatch-set entry; ARIMA arc 3-of-4; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` with exog (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=7.7e-8); exogenous beta convergence machine-precision (recovers DGP true β=1.5); future xreg handling verified consistent across arms (harness deterministic future_x to both; engine production last-value-carry-forward is separate modeling-policy default not a parity concern); S62 SARIMAX + State Space S48-S51 + S70/S71 ARIMA-arc siblings cross-references ALL APPLY — SIXTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=5 [S68 classical + S69/S70/S71/S72 modern]; most institutionally-complete block entry [exogenous-coefficient P-Value significance + residual diagnostics + baseline native]; auto_arima moved to §2.5 per Phase 7+ S73 — SEVENTH Block 2 entry; SIXTH dispatch-set entry; CLOSES ARIMA arc S70-S73; **Disposition B NET-NEW HARNESS CONSTRUCTION** [no prior p3_auto_arima harness existed — lone ARIMA-family path uncovered pre-S73; user ratified build-full-validation over cross-reference-only/defer; NEW p3_auto_arima.py + tolerances entry constructed]; selected-order PATH (a) AGREEMENT [pmdarima AND R forecast::auto.arima both select (1,1,1) on ARIMA(1,1,1) DGP → coef-by-coef parity; reproduces S70 manual ARIMA exactly]; NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=4.4e-8); PARTIAL cross-reference scope [S62 SARIMAX backbone covers fit-at-selected-order layer — SEVENTH cross-reference trust-inheritance instance; order-selection-algorithm-cross-implementation layer NOVEL to S73]; State Space S48-S51 + S70/S71/S72 ARIMA-arc siblings APPLY; API-positioning pattern n=6 [S68 classical + S69-S73 modern])
+`intermittent_demand`
 
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
