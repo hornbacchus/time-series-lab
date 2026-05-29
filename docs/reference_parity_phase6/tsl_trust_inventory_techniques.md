@@ -37128,7 +37128,352 @@ the STAR γ-pathology CAVEAT (a documented statistical property of
 STAR estimation, not an engine defect). Estimated session time: ~1h
 (Class B-CAVEAT existing-harness).
 
-## §3 Unvalidated catalog techniques (2 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### star (Phase 7+ S84; SEVENTY-THIRD §2.5 entry; FIFTH Regimes / Nonlinear block entry; **FIRST Class B-CAVEAT entry of the block**; weakly-identified-γ CAVEAT DOCUMENTATION [statistical property, NOT a fixable bug — contrast S83 flaky-harness]; engine: BESPOKE Smooth Transition AutoRegression (scipy.optimize NLS; `star_model.py`; LSTAR/ESTAR; logistic/exponential smooth transition; Balanced LSTAR, transition variable s(t)=y(t−d) d=1; **raw γ — NOT standardized γ/σ_s**); **Tier V CAVEAT (Pattern H DSCD; weakly-identified-γ)** — **transition location c VALIDATED at Tier II.mle-band quality (abs_diff=0.0021, rel=0.5% vs R tsDyn::star — load-bearing), transition speed γ carries a documented weak-identification CAVEAT (tsl=1024.8 vs ref=100.0, rel=0.90; both far above DGP γ=5.0)**; verdict_class `mle_fit`; cross-package vs R `tsDyn::star` (LSTAR m=1,d=1); **ENGINE-IMPROVEMENT candidate: γ-reparameterization (standardized γ/σ_s per Teräsvirta 1994) — the documented-CAVEAT's standard remedy; queue → n=2 (ets_hw + star γ-reparameterization)**; MRSTAR multiple-transition + Teräsvirta LM linearity-test minor ENG-EXT candidates logged)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier V CAVEAT (Pattern H DSCD; weakly-identified-γ parameter-
+identifiability)** per S84 Code Step 2 empirical verification. The
+transition LOCATION c is validated at Tier II.mle-band quality; the
+transition SPEED γ carries a documented weak-identification CAVEAT.
+Engine bespoke STAR (TSL math path) vs R `tsDyn::star` (reference) on
+a synthetic LSTAR(1) logistic fixture (n=500, φ_low=0.7, φ_high=−0.3,
+γ=5.0, c=0.0, σ=1.0). **This is a CAVEAT-DOCUMENTATION entry** (the
+γ-weak-identification is a genuine statistical property of the STAR
+model, documented as a known condition — NOT a fixable bug, contrast
+the S83 markov_switching flaky-harness which required a fix).
+
+**Math-layer metrics (cross-package vs R tsDyn::star):**
+
+| Metric | Status | abs_diff | rel_diff | tsl | ref |
+|---|---|---|---|---|---|
+| c (location) | PASS | 0.00215 | 0.00535 | 0.399259 | 0.401405 |
+| γ (speed) | CAVEAT | 924.80 | 0.9024 | 1024.80 | 100.00 |
+
+**c-validation is load-bearing:** the transition location (WHERE the
+regime transition centers — the substantively interesting parameter
+for institutional rate-regime analysis) matches R tsDyn::star to
+abs_diff=0.0021 / rel=0.5% (Tier II.mle-band quality). Both arms
+agree on c (≈0.40) even though they disagree on γ by an order of
+magnitude — confirming the divergence is confined to the weakly-
+identified speed parameter, not the location.
+
+**Weakly-identified-γ CAVEAT (statistical property; the load-bearing
+disclosure of this entry):** When the smooth transition is sharp, the
+logistic G(s)=1/(1+exp(−γ(s−c))) degenerates toward a step function
+(γ→∞), and the likelihood surface becomes FLAT in γ — any
+sufficiently-large γ produces a near-identical fit over the observed
+range of the transition variable. Consequently γ is WEAKLY IDENTIFIED
+BY CONSTRUCTION: independent optimizers land at wildly different large-
+γ values (engine scipy L-BFGS-B → γ=1024.8; R tsDyn::star → γ=100.0;
+both far above the DGP γ=5.0, neither "recovering" it because the
+sample transition is effectively sharp). This is IDENTIFIABILITY, NOT
+CONVERGENCE FAILURE — no optimizer change resolves it (a flat
+objective ridge has no unique argmax). It is a well-known property of
+STAR estimation (Teräsvirta 1994). The engine emits cosmetic
+`RuntimeWarning: overflow encountered in exp` when γ is large (numpy:
+exp(large)→inf, 1/(1+inf)→0; the logistic saturates correctly to 0/1)
+and the engine's in-product summary HONESTLY flags the regime as
+"very fast (nearly SETAR-like)" when γ>100. **Practical guidance:
+trust the transition LOCATION c (validated); treat the transition
+SPEED γ as INDICATIVE-ONLY when large (γ ≳ 100 → effectively a sharp
+SETAR-like transition; the exact γ magnitude is not identified).**
+This is a STAR-model statistical pathology, NOT an engine defect.
+
+**Engine variant validated (at math layer; engine wrapper exercised
+via RunContext):** Bespoke LSTAR(1) — logistic transition
+G(s)=1/(1+exp(−γ(s−c))), transition variable s(t)=y(t−1), AR order 1
+(harness override; Balanced max_ar=4 data-adaptive), regime AR via
+scipy.optimize.minimize (L-BFGS-B, 5 seeded starting points via
+`np.random.RandomState(ctx.seed)`, objective = SSE, γ forced positive
+`abs(θ)+1e-6`), best-of-restarts selected. Engine `run()` +
+`_fit_star` in `star_model.py`. Harness invokes the ENGINE wrapper
+DIRECTLY (`star_mod.run` via RunContext at Balanced, transition=
+logistic, ar_order=1) — the engine code path IS the math-layer path
+(like S81 SETAR; not a bypass).
+
+**Reference (cross-package vs R tsDyn::star):** Reference at
+`tools/reference_parity/harness/checks/p3_star.py` `run_reference`
+lines 125-184 calls R `tsDyn::star(y, m=1, d=1)` (LSTAR). γ read from
+`coef(fit)["gamma"]`, c from `coef(fit)["th"]`; log-likelihood
+computed manually from residuals (tsDyn::star has no logLik method).
+γ sign-canonicalized via |γ| (γ>0 convention). The harness has an
+explicit non-convergence CAVEAT path (if R tsDyn::star fails → all-NA
+→ CAVEAT); on this fixture R CONVERGED (γ=100.0, c=0.4014), so the
+CAVEAT here is the γ-divergence (within the [0.5, 1.0] rel block band
+→ CAVEAT), NOT a reference-non-convergence. GENUINE cross-package
+check (bespoke scipy vs R tsDyn), not self-parity — statsmodels lacks
+a first-class STAR estimator (parallel to S81 SETAR).
+
+**Class B-CAVEAT note (FIRST Regimes-block CAVEAT entry; documented,
+NOT fixed):** Per the block-open probe, star is Class B-CAVEAT — the
+Phase 3 Batch 4 harness pre-existed at CAVEAT status. UNLIKE S83
+markov_switching (a FIXABLE harness flakiness bug that was fixed
+before the §2.5 write), the S84 CAVEAT is a STATISTICAL PROPERTY
+(weakly-identified γ) that is DOCUMENTED as a known condition — there
+is no code fix because there is no bug (the flat-likelihood-ridge in γ
+is intrinsic to STAR). This is the block's first CAVEAT-documentation
+entry (the second, S85 nar_narx, will be a NO-REFERENCE CAVEAT).
+Analogous in spirit to the S64 var aic/bic Tier V Pattern D formula-
+family CAVEAT (documented-divergence, not a defect), but here the
+CAVEAT is parameter-identifiability rather than IC-formula-family.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS (graceful). Engine accepted
+  injected interior NaN (2 points) + ran to `status=success`,
+  emitting "2 NaN values linearly interpolated" (the `run()` NaN
+  branch lines 73-83).
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"` (transition=logistic, ar_order=1); returned
+  `model="LSTAR(1)"`, `star_type="LSTAR"`, `ar_order=1`, `delay=1`,
+  γ=1024.8, c=0.399, `transition_speed="very fast (nearly SETAR-
+  like)"` — the engine's honest in-product weak-identification
+  disclosure.
+- **Check 3 — Output shape/type verification:** PASS. Engine emitted
+  5 tables (Forecast / Model Coefficients / Fitted Values &
+  Transition / Model Summary / Residual Diagnostics) + a 11-field
+  audit; types correct (γ float, c float, star_type str) + plain-
+  English summary.
+
+**Verdict (math layer):** CAVEAT at Tier V (Pattern H DSCD; weakly-
+identified-γ) — c PASS (abs_diff=0.0021, rel=0.5%; Tier II.mle-band
+quality), γ CAVEAT (abs_diff=924.8, rel=0.90; within the [0.5, 1.0]
+rel block band); n=500 LSTAR(1) at seed=42, Balanced, runner CLI
+9.37s.
+**Verdict (wrapper layer):** PASS 3/3 checks per S84 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_star.py`
+(technique_id `p3_star`).
+**Audit date:** 2026-05-29 (S84 §2.5 entry; Regimes / Nonlinear block
+FIFTH entry; first Class B-CAVEAT).
+**Primary metrics (math layer):** transition location c (validated) +
+transition speed γ (weakly-identified CAVEAT).
+
+**Determinism profile:** The engine STAR fit is CROSS-INVOCATION
+BIT-EXACT within-process — refitting at the same seed reproduces γ +
+c identically (run2 = run3: γ=1024.802853, c=0.399259) because the
+scipy L-BFGS-B restarts are seeded (`np.random.RandomState(ctx.seed)`).
+The γ-divergence is therefore a CROSS-PACKAGE statistical
+identifiability divergence (engine deterministic γ=1024.8 vs R
+deterministic γ=100.0 — both valid points on the flat γ-ridge), NOT
+within-engine flakiness. Contrast S83 (engine sound + harness flaky →
+fixed); here BOTH engine and harness are deterministic and the CAVEAT
+is intrinsic to the STAR likelihood geometry → documented, not fixed.
+The forecast path uses a seeded 500-path simulation, off the parity
+surface.
+
+**Validation claim scope (S84; engine math validated at transition-
+location scope via cross-package check vs R tsDyn::star; transition-
+speed weakly-identified CAVEAT documented; engine wrapper code path
+exercised at both math-layer + wrapper-layer 3-check scopes):**
+
+- **Layer 1 (transition location c) VALIDATED at Tier II.mle-band
+  quality:** c matches R tsDyn::star to abs_diff=0.0021 / rel=0.5% —
+  the substantive STAR parameter (regime-transition center) is
+  cross-package-validated.
+- **Layer 1 (transition speed γ) DOCUMENTED-CAVEAT (weakly
+  identified):** γ diverges across independent optimizers (1024.8 vs
+  100.0) by statistical identifiability (flat likelihood ridge for
+  large γ), not engine error. Trust c; treat γ as indicative-only
+  when large.
+- **Layer 1 (regime AR coefficients + log-likelihood + IC) NOT
+  separately asserted:** the harness asserts γ + c only; the per-
+  regime φ coefficients + likelihood are emitted but not cross-
+  package-asserted (the γ-divergence would propagate into the
+  regime-weighted fit comparison; c + the location-anchored fit are
+  the validated quantities).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** graceful NaN; Balanced LSTAR(1) dispatch +
+  11-field audit + honest weak-identification disclosure; output
+  shape/type verification (5 tables).
+
+**Phase 3 algorithmic basis (extracted from engine module + harness
+reference):** Smooth Transition AutoRegressive model per Teräsvirta
+(1994) "Specification, estimation, and evaluation of smooth
+transition autoregressive models" JASA 89(425) + Chan-Tong (1986)
+STAR origins. STAR generalizes SETAR (S81): instead of an abrupt
+threshold switch, the transition between regimes is SMOOTH, governed
+by a logistic (LSTAR) or exponential (ESTAR) transition function
+G(s)∈[0,1] of the transition variable s(t)=y(t−d). The transition
+speed γ controls how rapidly G moves from 0 to 1; the location c is
+the transition midpoint (G(c)=0.5 for LSTAR). As γ→∞ the LSTAR
+collapses to a SETAR step. Estimation by nonlinear least squares
+(scipy.optimize). Institutionally relevant for rates: smooth regime
+transitions (the curve smoothly transitioning between low-rate and
+high-rate dynamics). Engine implements bespoke; reference is R
+tsDyn::star. **Honest disclosure:** the transition speed γ is weakly
+identified when the transition is sharp (a documented STAR pathology);
+the transition location c is the reliably-estimated parameter.
+
+**Phase 3 known failure modes (S84 / Class B-CAVEAT scope):**
+
+- WEAKLY-IDENTIFIED γ (the documented CAVEAT): γ→∞ degeneracy on
+  sharp transitions → flat likelihood ridge → optimizers diverge
+  (1024.8 vs 100.0) by identifiability, not convergence; intrinsic to
+  STAR, not fixable. c remains validated.
+- Cross-package c parity validates the transition location against R
+  tsDyn::star (independent implementation); catches transition-
+  location regressions at mle-band.
+- Raw-γ exp-overflow: the engine applies raw γ to (s−c); large γ
+  triggers cosmetic numpy overflow warnings (logistic saturates
+  correctly). The γ-reparameterization engine-IMPROVEMENT (γ/σ_s)
+  would remove both the overflow AND improve γ-identifiability.
+- Per-regime φ coefficients + likelihood NOT cross-package-asserted
+  (γ-divergence would propagate).
+- Forecast band seeded-stochastic, off parity surface.
+
+**Phase 3 boundary of validity:**
+
+- LSTAR(1) logistic fixture (n=500, transition var y(t−1), d=1);
+  ESTAR + higher AR orders + alternative delays NOT validated at math
+  layer
+- transition location c validated at mle-band; transition speed γ
+  weakly-identified CAVEAT (indicative-only when large)
+- regime AR coefficients + log-likelihood + IC NOT separately
+  asserted
+- Balanced LSTAR (max_ar=4 data-adaptive) at ar_order=1 validated;
+  Fast + Thorough (ESTAR "both") NOT separately validated
+- forecast simulation band NOT asserted (seeded-stochastic)
+
+**Phase 3 gap markings:**
+
+- transition speed γ weakly-identified (documented CAVEAT; not a
+  validatable parameter when transition sharp)
+- regime AR coefficients + likelihood + IC NOT cross-package-asserted
+- ESTAR + higher AR orders + delay d>1 NOT validated
+- raw γ (NOT standardized γ/σ_s) — engine-IMPROVEMENT candidate
+- forecast band NOT asserted (seeded-stochastic)
+
+**Status (Tier V CAVEAT [c-validated at Tier II.mle-band quality; γ
+weakly-identified] + wrapper-layer 3/3 PASS per S84 / Regimes /
+Nonlinear block FIFTH entry; FIRST Class B-CAVEAT):** Layer 1
+transition location c validated vs R tsDyn::star at abs_diff=0.0021
+(rel 0.5%); transition speed γ documented-CAVEAT (weakly identified;
+1024.8 vs 100.0 by identifiability). Wrapper layer (S49+ 3-check
+scope) validated at 3/3 PASS including graceful NaN handling + honest
+in-product weak-identification disclosure + 5 output tables. Engine
+CROSS-INVOCATION BIT-EXACT (seeded L-BFGS-B). **ENGINE-IMPROVEMENT
+candidate: γ-reparameterization (standardized γ/σ_s per Teräsvirta
+1994) → queue n=2.**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** bespoke LSTAR at
+  ar_order=1, delay d=1, logistic transition, scipy L-BFGS-B 5 seeded
+  starts (Balanced with ar_order=1 override). Cross-package reference:
+  R tsDyn::star (m=1, d=1). LSTAR(1), n=500.
+- **Engine preset default (Balanced):** star_type=LSTAR, max_ar=4
+  (AR order data-adaptive min(max_ar, max(1, n//15))), delay d=1,
+  maxiter=500, np.random.seed(ctx.seed), raw γ.
+- **Configuration match:** **YES at the transition-location +
+  LSTAR(1) surface** — a user at default Balanced experiences the
+  math-validated transition-location estimation + LSTAR logistic
+  transition (the c-validated core). The validated AR order (1,
+  harness override) is tighter than the Balanced default ceiling
+  (max_ar=4); the transition-location estimation is AR-order-
+  robust so the c-validation transfers, and the γ-CAVEAT is
+  parameter-intrinsic (applies at all AR orders).
+- **Disclosure scope:** transition speed γ weakly-identified
+  (indicative-only when large). ESTAR + AR>1 + delay d>1 NOT
+  validated. regime AR coefficients + likelihood NOT asserted. raw γ
+  (not standardized) — engine-IMPROVEMENT candidate.
+
+**ENGINE-IMPROVEMENT candidate (S84 Step 1; γ-reparameterization;
+queue → n=2):** The engine applies RAW γ to (s−c) in the transition
+function (`G=1/(1+exp(−γ(s−c)))`, `star_model.py` line 435); it
+computes the transition-variable SD `s_std` but uses it ONLY for
+initialization (c_init + restart perturbation), NOT to scale γ. The
+standard Teräsvirta (1994) remedy for the weakly-identified-γ
+pathology this entry documents is to STANDARDIZE γ by σ_s (the
+transition-variable standard deviation) — i.e.
+`G=1/(1+exp(−(γ/σ_s)(s−c)))` — which makes γ scale-free, improves
+identifiability + cross-implementation comparability, and removes the
+raw-γ exp-overflow. **This is a genuine engine-IMPROVEMENT candidate
+(upgrade existing STAR capability to a better-identified
+parameterization), flagged for the Q2+ engine-improvement queue →
+queue advances to n=2 (ets_hw statespace migration + star
+γ-reparameterization).** NOT a bug (the current raw-γ fit is correct;
+γ is simply weakly identified on the raw scale); the reparameterization
+is an identifiability improvement. Surfaced + flagged per the trigger;
+proceeds with the CAVEAT §2.5 entry (the CAVEAT is valid regardless).
+
+**ENG-EXT institutional-rates STAR workflow scan outcome (S84 Step 1;
+transition params + per-regime AR + transition values present; MRSTAR
++ Teräsvirta-LM minor candidates; no NEW ENG-EXT-REGIMES-001
+commission):**
+
+(a) **Transition function parameters (γ + c):** PRESENT ✓ — Model
+    Coefficients + Model Summary tables (γ speed + c location).
+(b) **Per-regime AR coefficients:** PRESENT ✓ — Model Coefficients
+    table (Regime 1 G=0 + Regime 2 G=1 intercept + AR lags).
+(c) **Transition function values G(s_t) + fitted/residuals:** PRESENT
+    ✓ — Fitted Values & Transition table (G(s_t) per observation).
+(d) **LSTAR / ESTAR selection:** PRESENT ✓ — star_type LSTAR/ESTAR/
+    both (Thorough fits both + selects by AIC).
+(e) **Teräsvirta LM linearity test (STAR-nonlinearity test):**
+    ABSENT — engine emits Jarque-Bera + Durbin-Watson residual
+    diagnostics but NOT the Teräsvirta (1994) LM test for STAR
+    nonlinearity (H0: linear AR vs H1: STAR). Minor ENG-EXT candidate.
+(f) **Multiple-transition (MRSTAR / multi-regime STAR):** ABSENT —
+    engine is single-transition (2-regime) LSTAR/ESTAR. Minor ENG-EXT
+    candidate (multi-regime smooth transition).
+
+**Verdict: COVERED at standard 2-regime STAR workflow elements.** No
+new ENG-EXT-REGIMES-001 commission surfaced at S84. The PRIMARY
+forward item is the γ-reparameterization ENGINE-IMPROVEMENT (queue
+n=2); Teräsvirta-LM linearity test + MRSTAR noted as minor ENG-EXT
+candidates.
+
+**Audit-hygiene cross-reference (S84 / Class B-CAVEAT):** S84 star is
+a Class B-CAVEAT existing-harness validation — the harness pre-existed
+at CAVEAT status; S84 DOCUMENTS the weakly-identified-γ CAVEAT as a
+known statistical condition (NO code fix; contrast S83's fixable
+flaky-harness). Cross-package vs R tsDyn::star: transition location c
+validated at Tier II.mle-band quality (abs 0.0021); transition speed γ
+documented-CAVEAT (weakly identified, 1024.8 vs 100.0). Engine cross-
+invocation BIT-EXACT. ENGINE-IMPROVEMENT candidate: γ-reparameterization
+(standardized γ/σ_s) → queue n=2. MRSTAR + Teräsvirta-LM minor ENG-EXT
+candidates logged.
+
+**Cross-reference (S81 SETAR — smooth-transition generalization;
+c-validation parallel):** S84 STAR is the smooth-transition
+generalization of S81 SETAR (S81 = abrupt threshold; S84 = smooth
+logistic/exponential transition). The c-validation PARALLELS S81: S81
+SETAR validated the threshold location c (bit-identical, the abrupt-
+transition location); S84 STAR validates the transition location c (at
+mle-band, the smooth-transition midpoint). CRUCIALLY, the STAR
+transition speed γ is EXACTLY the new parameter that SETAR's abrupt
+threshold lacks — and it is precisely this new parameter that is
+weakly identified (when γ→∞ STAR collapses back to SETAR, where γ is
+meaningless). So the S81→S84 progression shows: the shared parameter
+(transition location) validates in both; the STAR-specific parameter
+(transition speed) carries the CAVEAT. Both bespoke scipy vs R tsDyn
+(no first-class statsmodels TAR/STAR).
+
+**Regimes / Nonlinear block progress note (S84 FIFTH entry; FINAL Q1
+block; FIRST Class B-CAVEAT):** Block 11 Regimes / Nonlinear advances
+at S84 star per ratified ascending-complexity intra-block ordering
+(critical_slowing_down → tar_setar → hmm → markov_switching → star →
+nar_narx). **Post-S84: Regimes / Nonlinear block 5/6 §2.5-validated.**
+The block's Class B PASS tier (S80-S83) is complete; S84 is the FIRST
+of the 2 Class B-CAVEAT entries. **1 remaining in dispatch-set: S85
+nar_narx (NO-REFERENCE CAVEAT) — the FINAL Q1 session.** **Q1 closes
+at S85 (nar_narx) → THIRTEENTH-AND-FINAL catalog block fully Q1-
+amended (13 of 13 = 100% catalog completion).**
+
+**S85 nar_narx projection (FINAL Q1 session per ascending-complexity
+dispatch ordering; SECOND Class B-CAVEAT entry; Q1 CLOSE):** Engine
+`engine/techniques/nar_narx.py` is a Nonlinear AutoRegressive (with
+eXogenous inputs) neural model via `sklearn.MLPRegressor`. Class B-
+CAVEAT per the block-open probe — NO-REFERENCE CAVEAT (R tsDyn::nlar
+failed to converge; no working cross-package reference). S85 will
+require a NO-REFERENCE disposition decision (self-parity vs Pattern
+J/K methodology-zoo avoidance vs documented-no-reference). FINAL Q1
+session → block close → 13/13 catalog blocks 100% Q1-amended.
+Estimated session time: ~1h (Class B-CAVEAT existing-harness;
+NO-REFERENCE disposition).
+
+## §3 Unvalidated catalog techniques (1 entry; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -37175,8 +37520,8 @@ descriptions, summaries).
 ### Multivariate Systems (0 unvalidated; **Block 10 FULLY Q1-AMENDED** — TENTH catalog block to complete per Q1 work program scope at S67 close = 10 of 13 catalog blocks fully Q1-amended (77% catalog block-level completion); johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome; bvar moved to §2.5 per Phase 7+ S67 — FIFTH-AND-FINAL Multivariate Systems block entry; **BLOCK CLOSE at S67**; Disposition A (cross-reference existing validations) — bvar is DISTINCT catalog entry from bond_yield_forecast (analytical Normal-Inverse-Wishart posterior vs CCM-2019 Gibbs sampler with stochastic volatility); already validated at Phase 1 `1c_bvar_irf_fevd` IRF/FEVD parity (machine precision; re-confirmed at S67 runner CLI) + Phase 4 S5 BVAR coefficient parity vs R BVAR::bvar (PASS-A.2 DOCUMENTED-DIVERGENCE per prior-parameterization differences per master plan §7.1 Pattern H); ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at Bayesian level for users invoking bvar — engine emits posterior IRF + FEVD with credible bands as native output (Bayesian analog of bootstrap CI bands per Sims-Zha 1999); cross-reference trust-inheritance pattern A3 SECOND-OBSERVATION TIGHTENING at n=3 within-block observations S65+S66+S67)
 (all 5 techniques moved to §2.5 across S63-S67 cycle)
 
-### Regimes / Nonlinear (2 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; tar_setar moved to §2.5 per Phase 7+ S81 — SECOND Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE Threshold/Self-Exciting TAR (numpy+scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); Tier II.mle-band [threshold scalar at abs_tol=1e-2/rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL; both arms picked same observed data point]; cross-package vs R tsDyn::setar (m=2, thDelay=0, nthresh=1); regime-assignment boundary rule (≤-into-low / strict->-into-high) verified matches DGP + tsDyn convention; per-regime AR coefficients NOT independently asserted (threshold-only; deterministic given threshold); NO engine-IMPROVEMENT candidate (bespoke scipy; queue stays n=1); multiple-threshold/3-regime ENG-EXT candidate RULED OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000 threshold inference) minor candidate logged; hmm moved to §2.5 per Phase 7+ S82 — THIRD Regimes / Nonlinear block entry; FIRST em_stochastic / Tier II.em-band entry of block; Class B existing-harness; engine `hmmlearn.GaussianHMM` (Gaussian-emission HMM; Baum-Welch EM, 5 restarts at Balanced, label_regimes_by_dominant_key canonicalization); Tier II.em-band [emission means/covariances + log-likelihood machine-precision (same optimum); transition matrix within widened DSCD-EM band 0.3 abs/1.0 rel, divergence dominated by depmixS4 multinomial-logit extraction]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R depmixS4 (independent Baum-Welch EM); label-switching canonicalization (state mean-sort ascending both arms — lineage S65 VECM β/α + S66 DFM rotation); engine cross-invocation BIT-EXACT (seeded EM restarts) → em-band purely cross-package per S66 DFM precedent; Viterbi Secondary BLOCK = documented harness 0-vs-1-index artifact (Python {0,1} vs R {1,2}; overall PASS); NO engine-IMPROVEMENT candidate (hmmlearn standalone; queue stays n=1); multivariate-emission-HMM ENG-EXT candidate RULED OUT (engine treats all series as observation dimensions → multivariate native); automatic state-count-selection (BIC-sweep/HDP-HMM) minor candidate logged; covariance_type full(engine)≡diag(harness) no-op at n_features=1; markov_switching moved to §2.5 per Phase 7+ S83 — FOURTH Regimes / Nonlinear block entry; SECOND em_stochastic / Tier II.em-band entry; CLOSES the block's Class B PASS tier (S80-S83); engine statsmodels MarkovRegression(order=0)/MarkovAutoregression(order≥1; Hamilton 1989; Balanced k=2/order=1/switching_variance=True; Hamilton-filter EM, search_reps=25, label_regimes_by_dominant_key canonicalization, manual regime-weighted forecast); Tier II.em-band [regime means + log-likelihood machine-precision (same optimum); transition matrix within em-band 0.055 abs vs R MSwM — tighter than S82 HMM 0.237]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R MSwM::msmFit; regime-label canonicalization (mean-sort ascending both arms — FOURTH lineage instance S65 VECM β/α → S66 DFM → S82 HMM → S83); engine cross-invocation BIT-EXACT (seeded EM search_reps=25) → em-band purely cross-package per S66/S82; REQUIRED S83 audit-hygiene determinism micro-fix (commit 3c5f3b6: seed-pin + search_reps 3→25 in flaky bypass run_tsl; 2 BLOCK/3 PASS → uniform PASS across 5 runs; engine itself sound — fix-don't-caveat per Cat 3 precedent); VSC PARTIAL [math layer validates engine FAST preset order=0 mean-switching; Balanced AR(1)+switching-variance exercised at wrapper-layer only]; NO engine-IMPROVEMENT candidate (modern statsmodels API; multi-step-forecast NotImplementedError is statsmodels limitation handled by engine manual construction; queue stays n=1); multi-step-regime-forecast ENG-EXT candidate RULED OUT (engine native manual construction); TVTP (Filardo 1994 time-varying transition probabilities) minor candidate logged; only 2 Class B-CAVEAT entries remain (S84 star + S85 nar_narx); Q1 closes at S85)
-`nar_narx`, `star`
+### Regimes / Nonlinear (1 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; tar_setar moved to §2.5 per Phase 7+ S81 — SECOND Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE Threshold/Self-Exciting TAR (numpy+scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); Tier II.mle-band [threshold scalar at abs_tol=1e-2/rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL; both arms picked same observed data point]; cross-package vs R tsDyn::setar (m=2, thDelay=0, nthresh=1); regime-assignment boundary rule (≤-into-low / strict->-into-high) verified matches DGP + tsDyn convention; per-regime AR coefficients NOT independently asserted (threshold-only; deterministic given threshold); NO engine-IMPROVEMENT candidate (bespoke scipy; queue stays n=1); multiple-threshold/3-regime ENG-EXT candidate RULED OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000 threshold inference) minor candidate logged; hmm moved to §2.5 per Phase 7+ S82 — THIRD Regimes / Nonlinear block entry; FIRST em_stochastic / Tier II.em-band entry of block; Class B existing-harness; engine `hmmlearn.GaussianHMM` (Gaussian-emission HMM; Baum-Welch EM, 5 restarts at Balanced, label_regimes_by_dominant_key canonicalization); Tier II.em-band [emission means/covariances + log-likelihood machine-precision (same optimum); transition matrix within widened DSCD-EM band 0.3 abs/1.0 rel, divergence dominated by depmixS4 multinomial-logit extraction]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R depmixS4 (independent Baum-Welch EM); label-switching canonicalization (state mean-sort ascending both arms — lineage S65 VECM β/α + S66 DFM rotation); engine cross-invocation BIT-EXACT (seeded EM restarts) → em-band purely cross-package per S66 DFM precedent; Viterbi Secondary BLOCK = documented harness 0-vs-1-index artifact (Python {0,1} vs R {1,2}; overall PASS); NO engine-IMPROVEMENT candidate (hmmlearn standalone; queue stays n=1); multivariate-emission-HMM ENG-EXT candidate RULED OUT (engine treats all series as observation dimensions → multivariate native); automatic state-count-selection (BIC-sweep/HDP-HMM) minor candidate logged; covariance_type full(engine)≡diag(harness) no-op at n_features=1; markov_switching moved to §2.5 per Phase 7+ S83 — FOURTH Regimes / Nonlinear block entry; SECOND em_stochastic / Tier II.em-band entry; CLOSES the block's Class B PASS tier (S80-S83); engine statsmodels MarkovRegression(order=0)/MarkovAutoregression(order≥1; Hamilton 1989; Balanced k=2/order=1/switching_variance=True; Hamilton-filter EM, search_reps=25, label_regimes_by_dominant_key canonicalization, manual regime-weighted forecast); Tier II.em-band [regime means + log-likelihood machine-precision (same optimum); transition matrix within em-band 0.055 abs vs R MSwM — tighter than S82 HMM 0.237]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R MSwM::msmFit; regime-label canonicalization (mean-sort ascending both arms — FOURTH lineage instance S65 VECM β/α → S66 DFM → S82 HMM → S83); engine cross-invocation BIT-EXACT (seeded EM search_reps=25) → em-band purely cross-package per S66/S82; REQUIRED S83 audit-hygiene determinism micro-fix (commit 3c5f3b6: seed-pin + search_reps 3→25 in flaky bypass run_tsl; 2 BLOCK/3 PASS → uniform PASS across 5 runs; engine itself sound — fix-don't-caveat per Cat 3 precedent); VSC PARTIAL [math layer validates engine FAST preset order=0 mean-switching; Balanced AR(1)+switching-variance exercised at wrapper-layer only]; NO engine-IMPROVEMENT candidate (modern statsmodels API; multi-step-forecast NotImplementedError is statsmodels limitation handled by engine manual construction; queue stays n=1); multi-step-regime-forecast ENG-EXT candidate RULED OUT (engine native manual construction); TVTP (Filardo 1994 time-varying transition probabilities) minor candidate logged; only 2 Class B-CAVEAT entries remain (S84 star + S85 nar_narx); star moved to §2.5 per Phase 7+ S84 — FIFTH Regimes / Nonlinear block entry; FIRST Class B-CAVEAT entry; weakly-identified-γ CAVEAT DOCUMENTATION (statistical property, NOT a fixable bug — contrast S83 flaky-harness); engine BESPOKE Smooth Transition AutoRegression (scipy.optimize NLS; star_model.py; LSTAR/ESTAR; Balanced LSTAR, transition var s(t)=y(t−d) d=1; raw γ NOT standardized γ/σ_s); Tier V CAVEAT (Pattern H DSCD; weakly-identified-γ) — transition location c VALIDATED at Tier II.mle-band quality (abs 0.0021/rel 0.5% vs R tsDyn::star — load-bearing), transition speed γ documented-CAVEAT (tsl 1024.8 vs ref 100.0, rel 0.90; flat likelihood ridge for large γ → identifiability not convergence; both far above DGP γ=5.0); verdict_class mle_fit; cross-package vs R tsDyn::star (LSTAR m=1,d=1); engine cross-invocation BIT-EXACT (seeded L-BFGS-B) → γ-divergence is cross-package statistical identifiability NOT engine flakiness (contrast S83 fixable bug); ENGINE-IMPROVEMENT candidate γ-reparameterization (standardized γ/σ_s per Teräsvirta 1994 — the documented-CAVEAT's standard remedy; queue → n=2: ets_hw + star γ-reparameterization); c-validation parallels S81 SETAR threshold-c (STAR γ is exactly the smooth-transition-speed parameter SETAR's abrupt threshold lacks — and it carries the CAVEAT); MRSTAR multiple-transition + Teräsvirta-LM linearity-test minor ENG-EXT candidates logged; 1 Class B-CAVEAT remains (S85 nar_narx NO-REFERENCE — FINAL Q1 session); Q1 closes at S85)
+`nar_narx`
 
 ### State Space / Filtering (0 unvalidated; Block 6 FULLY Q1-AMENDED — SIXTH catalog block to complete per Q1 work program scope at S51 close = 6 of 13 catalog blocks fully Q1-amended (46% catalog block-level completion); kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension; particle_filter moved to §2.5 per Phase 7+ S50 — THIRD State Space / Filtering block entry; FIRST Tier IV Pattern A.3 entry via approach (c) degenerate linear-Gaussian Kalman-exact-reference framing with documented abs-tolerance plateau caveat; structural_ts moved to §2.5 per Phase 7+ S51 — FOURTH-AND-FINAL State Space / Filtering block entry; multi-component 4-variance Kalman MLE)
 (all 4 techniques moved to §2.5)
