@@ -84,8 +84,19 @@ class MarkovSwitchingParity(P3ParityCheck):
 
         with _w.catch_warnings():
             _w.simplefilter("ignore")
+            # Pin the global RNG before fitting. statsmodels'
+            # ``search_reps`` random EM starts draw from ``np.random``;
+            # without a fixed seed AND with too few restarts the EM can
+            # land in a degenerate single-regime basin on unlucky starts
+            # (both regime means collapse to the overall sample mean,
+            # spurious positive log-likelihood), producing a
+            # nondeterministic BLOCK across process invocations. Mirror
+            # the engine wrapper's discipline (``np.random.seed(ctx.seed)``
+            # + ``search_reps=25``) so this bypass path is deterministic
+            # and robust to the same degenerate-optimum risk.
+            np.random.seed(42)
             model = MarkovRegression(y, k_regimes=k, switching_variance=False)
-            fit = model.fit(disp=False, search_reps=3)
+            fit = model.fit(disp=False, search_reps=25)
 
         # Extract regime-specific means + transition probs.
         # statsmodels MarkovRegression: param_names lives on the
