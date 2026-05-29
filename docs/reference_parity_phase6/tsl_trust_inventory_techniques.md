@@ -35717,6 +35717,97 @@ Estimated session time: ~1h (Class B existing-harness).
 
 ### bocpd (Phase 7+ S79; SIXTY-EIGHTH §2.5 entry; FIFTH-AND-FINAL Change Points / Anomalies block entry; **CLOSES Change Points / Anomalies block — TWELFTH catalog block to complete per Q1 work program scope at S79 close = 12 of 13 catalog blocks fully Q1-amended (92% catalog block-level completion)**; Class B existing-harness validation [Phase 3 Batch 6 harness pre-existing + PASS per S75 block-open probe]; engine: BESPOKE Adams-MacKay 2007 recursion (normal-inverse-gamma conjugate; Student-t posterior predictive; deterministic recursive run-length posterior); **Tier II.bit-exact** [n_change_points + change-point-set bit-exact]; Pattern A.3 self-parity [PyPI bocd uses non-conjugate Gaussian → self-parity only path]; **NO engine-IMPROVEMENT candidate** [deterministic Bayesian recursion; queue stays n=1 (ets_hw)]; **ENG-EXT-CHANGEPOINT-001 COMMISSIONED at n=3** — BOCPD univariate-only (THIRD instance after S75 CUSUM + S78 PELT); systematic multivariate-change-point gap across ALL block change-point techniques)
 
+═══════════════════════════════════════════════════════════════════
+**ENG-EXT-CHANGEPOINT-001 A1c AMENDMENT (Q2 Workstream A, commission 1
+of 3, sub-build 3 of 3 — FINAL; commit `129f232`; ADDITIVE — not
+breaking; second self-parity A-build):** bocpd now supports MULTIVARIATE
+(joint-across-curve-points) change detection via a multivariate
+Normal-Inverse-Wishart (NIW) generalization. **This COMPLETES
+ENG-EXT-CHANGEPOINT-001** (A1a PELT + A1b CUSUM + A1c BOCPD — all three
+S75/S78/S79 univariate-only detectors now multivariate). The S79
+univariate validation below STANDS unchanged (univariate path
+byte-identical). **It also SURFACED a latent S79 bug — see below.**
+═══════════════════════════════════════════════════════════════════
+
+**Multivariate capability (A1c):** AUTO-DETECT (`ctx.get_all_series()`):
+**1 series → the existing univariate NIG path, UNCHANGED/byte-identical**
+(branch skipped for k=1); **≥2 series → a new JOINT multivariate path**
+(stack to `(n, k)`; NaN ROW-DROP matching S79's strip). The
+Adams-MacKay recursion STRUCTURE (run-length posterior + hazard) is
+identical to S79; only the conjugate predictive goes matrix-valued:
+scalar Normal-Inverse-Gamma → **multivariate Normal-Inverse-Wishart →
+multivariate-Student-t predictive**.
+
+**NIW hyperparameterization (reduction-preserving):** μ₀ = sample mean
+vector; κ₀ = prior_kappa; **ν₀ = (k−1) + 2·prior_alpha** (predictive
+dof = ν₀−k+1 = 2·prior_alpha = S79's df at k=1; proper IW since ν₀ >
+k−1); **Ψ₀ = 2·prior_beta·I_k** (= 2β at k=1). Rank-1 conjugate update
+`Ψ' = Ψ + (κ/κ')·(x−μ)(x−μ)ᵀ`. **FAITHFUL GENERALIZATION:** the
+multivariate-t log-predictive reduces EXACTLY to S79's
+`_student_t_logpdf` at k=1 (verified: −4.85379232 ==). This CLOSES the
+A-phase reduction-property thread — A1a (additive penalty) reduces,
+A1b (norm-based CUSUM) inherently does NOT, A1c (probability model)
+reduces — confirming the corrected discipline "principled-for-its-type,
+not universal-reduction." (The k=1 reduction is conceptual: code paths
+are disjoint — 1 series → univariate NIG; ≥2 → multivariate NIW.)
+
+**Cholesky-stable per-step matrix computation (A1c numerical
+care-point):** the scale matrix Σ_t is decomposed at EVERY recursion
+step. UNCONDITIONAL Cholesky (no guard branch): `L = cholesky(Σ_t)`;
+quadratic form via triangular solve; `logdet = 2·Σ log(diag(L))`. Σ_t
+is PD-by-construction (Ψ₀ = 2β·I regularizes even at run-length 0;
+dof = ν−k+1 ≥ 2α > 0 always) — a STRUCTURAL regularization (the prior,
+not a numerical patch), identical across both self-parity arms.
+
+**DETECTION CRITERION CORRECTED + S79 LATENT BUG SURFACED (the load-
+bearing A1c finding):** S79's change-point criterion — threshold
+`cp_prob = R[t+1,0] > 0.5` — is **NON-FUNCTIONAL**: `R[t+1,0] == hazard`
+EXACTLY, data-independent (the Adams-MacKay split normalizes to
+P(run-length=0) = hazard regardless of the data; confirmed empirically
+cp_prob ≡ 0.01 everywhere). It can NEVER cross 0.5 → **S79's n_cps=0 was
+a BROKEN criterion, not a thin-but-correct fixture.** The CORRECT BOCPD
+signal is the MAP run-length COLLAPSING to a fresh run: the multivariate
+path detects a change where the MAP run length drops sharply
+(> min_gap) — on a clear joint shift it cleanly localizes the change
+(MAP run-length 100→1 at t=100). The univariate S79 path KEEPS its
+original (broken) criterion for byte-identical backward-compat; **the
+S79 univariate-criterion bug is DOCUMENTED here + BANKED as a separate
+univariate-fix candidate** (a B-style engine-IMPROVEMENT on the
+existing technique — out of A1c's A-extension scope; would re-open S79
+with its own re-validation). Transitional inconsistency (multivariate
+correct / univariate broken-pending-fix) disclosed; resolves when the
+banked S79 fix lands.
+
+**METHODOLOGY NOTE (self-parity blind spot — bank):** S79 was bit-exact
+AND broken simultaneously — both true, because **self-parity validates
+that two implementations MATCH, NOT that the shared formulation is
+CORRECT.** S79's self-parity held (engine + reference implemented the
+same broken criterion identically). A blind spot to flag for ALL
+self-parity validations: a clean cross-implementation reference (where
+available) would have caught it; self-parity cannot. (A1c's non-zero-
+detection fixture + the MAP-reset correction together exercise the full
+detection path, mitigating this for the multivariate.)
+
+**Multivariate validation (new `p3_bocpd_multivariate`; SELF-PARITY,
+Tier II.bit-exact, on a NON-ZERO detection set).** No library for
+multivariate BOCPD → from-scratch reimplementation of the IDENTICAL
+NIW formulation (same NIW hyperparams, rank-1 update, Cholesky-based
+log-mv-t, log-space recursion, MAP-reset detection — the LARGEST
+numerical surface of the three sub-builds; identical-formulation
+discipline at its most demanding). **Result: BIT-EXACT joint
+change-point set on a NON-ZERO set** (n_change_points 1==1; joint set
+intersection=1 at [100]) — STRONGER than S79's bit-exact-on-empty (it
+exercises the full detection-and-agreement path). No-change control 0;
+deterministic across 3 runs. Wrapper-layer 3/3 PASS (NaN row-drop;
+multivariate dispatch; 4 tables). **Backward-compat GATE (firm):**
+univariate `p3_bocpd` PASSES UNCHANGED.
+
+**ADDITIVE-not-breaking.** Univariate byte-identical. Multi-series
+input was previously silently reduced to series-1; under auto-detect it
+now does joint multivariate (intended). No new technique_id / catalog
+entry. No new precision-tier (joint change-point SET comparison;
+predictive internal).
+
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
 **Tier II.bit-exact (Pattern A.3 paper-formula self-parity at
 deterministic recursive Bayesian update)** per S79 Code Step 2
@@ -38218,13 +38309,21 @@ catalog completion).** §3 unvalidated → 0.
       S64, extended S65).
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
-      instances). **Q2 Workstream A commission 1 of 3 — PARTIALLY
-      DELIVERED: A1a PELT multivariate joint detection done (commit
-      `253bcad`; ADDITIVE auto-detect, bit-exact vs direct ruptures;
-      S78 amendment) + A1b CUSUM multivariate Crosier-MCUSUM joint
-      detection done (commit `581175a`; ADDITIVE auto-detect,
-      bootstrap-calibrated thresholds, SELF-PARITY bit-exact; S75
-      amendment); A1c BOCPD (multivariate-NIW self-parity) pending.**
+      instances). **Q2 Workstream A commission 1 of 3 — FULLY DELIVERED
+      (FIRST A-commission COMPLETE):** A1a PELT multivariate joint
+      detection (commit `253bcad`; cross-package bit-exact; S78
+      amendment) + A1b CUSUM multivariate Crosier-MCUSUM (commit
+      `581175a`; bootstrap-calibrated, self-parity bit-exact; S75
+      amendment) + A1c BOCPD multivariate-NIW (commit `129f232`;
+      Cholesky-stable, MAP-reset detection, self-parity bit-exact on a
+      NON-ZERO set; S79 amendment). **The n=3 univariate-only finding
+      (S75/S78/S79) is RESOLVED — three COMPLEMENTARY joint
+      capabilities: PELT = joint SEGMENTATION (regime-boundary dates),
+      CUSUM = joint MONITORING (online deviation-alarm), BOCPD = joint
+      POSTERIOR (Bayesian run-length over curve-wide change).** Banked
+      (A1c finding): S79 univariate cp_prob detection criterion is
+      non-functional (R[t+1,0]≡hazard) — separate univariate-fix
+      candidate.
 - **Engine-improvement queue (n=2 at Q1 close → n=1 post-B1 → n=0
   post-B2; WORKSTREAM B COMPLETE):** ~~ets_hw statespace migration
   (S68)~~ **RESOLVED at B1 (commit `6281e2e`; classical→state-space
