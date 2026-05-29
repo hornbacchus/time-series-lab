@@ -35306,6 +35306,65 @@ the slowest probe at 4.06s — ruptures DP).
 
 ### pelt_change_points (Phase 7+ S78; SIXTY-SEVENTH §2.5 entry; FOURTH Change Points / Anomalies block entry; FIRST ruptures-backed block entry [cusum/stl_esd/intervention were bespoke/statsmodels]; Class B existing-harness validation [Phase 3 Batch 6 harness pre-existing + PASS per S75 block-open probe]; engine: `ruptures.Pelt` (Killick-Fearnhead-Eckley 2012; EXACT dynamic-programming change-point detection); **Tier II.bit-exact** [n_change_points + change-point-position set bit-exact]; Pattern A.1 same-library [ruptures.Pelt both arms]; **NO engine-IMPROVEMENT candidate** [exact deterministic algorithm via mature ruptures; queue stays n=1 (ets_hw)]; **ENG-EXT-CHANGEPOINT-001 candidate at n=2** — engine PELT is UNIVARIATE, second univariate-only change-point instance after S75 CUSUM → multivariate change-point detection across the curve consolidated as a tracked candidate)
 
+═══════════════════════════════════════════════════════════════════
+**ENG-EXT-CHANGEPOINT-001 A1a AMENDMENT (Q2 Workstream A, commission 1
+of 3, sub-build 1 of 3; commit `253bcad`; ADDITIVE — not breaking):**
+pelt_change_points now supports MULTIVARIATE (joint-across-curve-points)
+change-point detection — the FIRST net-new capability of Q2's
+engine-extension workstream. This DELIVERS the ENG-EXT-CHANGEPOINT-001
+candidate (flagged at n=2 here, commissioned at n=3 at S79) for the
+PELT detector. The S78 univariate validation below STANDS unchanged
+(univariate path byte-identical). ENG-EXT-CHANGEPOINT-001 PARTIALLY
+delivered: A1a PELT (this) done; A1b CUSUM + A1c BOCPD pending.
+═══════════════════════════════════════════════════════════════════
+
+**Multivariate capability (A1a):** the engine AUTO-DETECTS from input
+dimensionality (`ctx.get_all_series()`): **1 series → the existing
+univariate path, UNCHANGED/byte-identical** (the S78-validated path is
+untouched — the multivariate branch is skipped for k=1); **≥2 series →
+a new JOINT multivariate path** that stacks the series to an (n, k)
+signal (mirroring `vecm_model`/`hmm_model`), NaN-interpolates per
+column, and passes the (n, k) signal directly to `ruptures.Pelt` (NO
+reshape) — ruptures' native multivariate cost yields a SINGLE JOINT
+breakpoint set (the curve-wide regime-shift dates: a date where the
+WHOLE curve shifts regime simultaneously, the institutional target).
+**Multivariate BIC penalty:** `pen = log(n)·Σ_j var_j`
+(dimensionally-correct — reduces EXACTLY to the univariate
+`log(n)·σ²` at k=1, and matches the l2 cost's feature-summing; aic =
+2·Σvar, mbic = 3·log(n)·Σvar). Output: joint Change Points table +
+per-series Segments means + Detection Parameters (mode="multivariate",
+n_features); audit adds `mode`, `n_features`, `features`,
+`penalty_value`.
+
+**Multivariate validation (new `p3_pelt_multivariate` check; Tier
+II.bit-exact, Pattern A.1 same-library):** engine multivariate-PELT vs
+a DIRECT `ruptures.Pelt` invocation on the SAME (n, k) signal with the
+IDENTICAL numeric penalty (`penalty_value` exposed in audit → the
+reference uses the exact same pen, isolating the wrapper's
+stacking/argument-handling from any penalty-convention divergence —
+the S81/B2 identical-parameterization discipline). **Result: BIT-EXACT
+joint breakpoint set match** (n_change_points 3==3; joint position set
+intersection=3, no tsl-only/ref-only; recovers the DGP joint breaks);
+deterministic across 3 runs. Fixture: (n=600, k=3) joint-mean-shift,
+4 joint segments. Wrapper-layer 3/3 PASS (per-column NaN interpolation;
+multivariate dispatch; joint+Segments output). **Backward-compat GATE
+(firm):** existing univariate `p3_pelt` PASSES UNCHANGED — univariate
+output byte-identical.
+
+**ADDITIVE-not-breaking + honest disclosure:** the univariate
+(single-series) path — what S78 validated — is byte-identical. Today
+multi-series input was silently reduced to series-1 (univariate);
+under auto-detect, multi-series input now does joint multivariate (the
+intended behavior — passing a curve = wanting joint detection). No new
+technique_id / catalog entry (same technique gaining capability).
+
+**Validation-pattern note:** no new precision-tier needed — the
+multivariate output is a JOINT change-point SET (time indices), so
+set-comparison + bit-exact (deterministic PELT) extends the univariate
+S75/S78/S79 pattern unchanged. The A-phase rhythm (design → build →
+validate-net-new → §2.5 amendment) is established here for A1b/A1c +
+the MULTIVARIATE-001 / CONFORMAL-001 commissions.
+
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
 **Tier II.bit-exact (Pattern A.1 same-library cross-package self-
 parity at EXACT deterministic dynamic-programming algorithm)** per
@@ -38073,7 +38132,12 @@ catalog completion).** §3 unvalidated → 0.
       S64, extended S65).
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
-      instances).
+      instances). **Q2 Workstream A commission 1 of 3 — PARTIALLY
+      DELIVERED: A1a PELT multivariate joint detection done (commit
+      `253bcad`; ADDITIVE auto-detect, bit-exact vs direct ruptures;
+      see the S78 pelt_change_points A1a amendment); A1b CUSUM
+      (Crosier-MCUSUM self-parity) + A1c BOCPD (multivariate-NIW
+      self-parity) pending.**
 - **Engine-improvement queue (n=2 at Q1 close → n=1 post-B1 → n=0
   post-B2; WORKSTREAM B COMPLETE):** ~~ets_hw statespace migration
   (S68)~~ **RESOLVED at B1 (commit `6281e2e`; classical→state-space
