@@ -60,6 +60,56 @@ def _prepare_series(values):
     return trimmed
 
 
+def _mc_irf_bands(fit, steps, repl, signif, seed, orth=True, burn=100):
+    """Monte-Carlo confidence bands for the (orthogonalized) IRF.
+
+    ENG-EXT-MULTIVARIATE-001 M1. Reimplements statsmodels'
+    ``VARResults.irf_resim`` body but with DISTINCT per-replication seeds
+    derived deterministically from ``seed`` (master ``RandomState(seed)`` →
+    ``repl`` child seeds). This works around a statsmodels bug: ``irf_resim``
+    passes the SAME fixed ``seed`` to ``util.varsim`` on every replication,
+    so ``RandomState(seed=seed)`` reproduces the IDENTICAL simulation each
+    iteration → zero across-replication variance → a degenerate (lower==upper)
+    band; while ``seed=None`` restores variance but is non-deterministic
+    (ignores any global seed). Distinct-per-replication seeds give BOTH proper
+    variance (each replication a different simulation) AND reproducibility
+    (the whole ensemble is a deterministic function of ``seed``).
+
+    Returns ``(lower, upper)`` each shape ``(steps + 1, neqs, neqs)``, indexed
+    ``[horizon, response, shock]`` (same convention as ``orth_irfs``).
+    """
+    from statsmodels.tsa.api import VAR as _VAR
+    from statsmodels.tsa.vector_ar import util as _util
+
+    coefs = fit.coefs
+    intercept = fit.intercept
+    sigma_u = fit.sigma_u
+    k_ar = fit.k_ar
+    neqs = fit.neqs
+    nobs = fit.nobs
+    trend = fit.trend
+    exog = getattr(fit, "exog", None)
+    nobs_original = nobs + k_ar
+
+    master = np.random.RandomState(seed)
+    child_seeds = master.randint(0, 2 ** 31 - 1, size=repl)
+
+    ma_coll = np.zeros((repl, steps + 1, neqs, neqs))
+    for i in range(repl):
+        sim = _util.varsim(
+            coefs, intercept, sigma_u,
+            seed=int(child_seeds[i]), steps=nobs_original + burn,
+        )[burn:]
+        refit = _VAR(sim, exog=exog).fit(maxlags=k_ar, trend=trend)
+        ma = refit.orth_ma_rep(maxn=steps) if orth else refit.ma_rep(maxn=steps)
+        ma_coll[i, :, :, :] = ma
+
+    ma_sort = np.sort(ma_coll, axis=0)
+    low_idx = int(round(signif / 2 * repl) - 1)
+    upp_idx = int(round((1 - signif / 2) * repl) - 1)
+    return ma_sort[low_idx, :, :, :], ma_sort[upp_idx, :, :, :]
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
     Fit a VAR model to 2+ series.
@@ -323,7 +373,68 @@ def run(ctx: RunContext, progress_callback) -> dict:
             except Exception:
                 pass
 
+        # ENG-EXT-MULTIVARIATE-001 M1 — IRF confidence bands (ADDITIVE).
+        # Parametric Gaussian Monte-Carlo error bands around the
+        # orthogonalized point IRF: simulate `repl` datasets from the fitted
+        # VAR (Gaussian innovations), refit each, take the signif/2 &
+        # 1-signif/2 percentiles. Uses the in-engine `_mc_irf_bands` helper
+        # (DISTINCT per-replication seeds derived from ctx.seed) rather than
+        # statsmodels `errband_mc`, which has a seed bug that collapses the
+        # band to zero width (see the helper docstring). Preset-gated
+        # (Balanced/Thorough only; Fast skips — MC bootstrap is expensive)
+        # and deterministic in ctx.seed. Computed LAST (after every
+        # deterministic output above) so the band RNG cannot perturb any
+        # existing result — the point-IRF / FEVD tables are byte-identical;
+        # the band table is a purely additive output.
+        irf_band_table = None
+        irf_band_signif = 0.05
+        irf_band_repl = {"Balanced": 500, "Thorough": 2000}.get(ctx.preset, 0)
+        irf_band_seed = int(ctx.seed)
+        irf_band_computed = False
+        if irf_band_repl > 0:
+            progress_callback("Bootstrapping IRF confidence bands", 80)
+            try:
+                band_irf = fit.irf(irf_periods)
+                lower, upper = _mc_irf_bands(
+                    fit, irf_periods, irf_band_repl,
+                    irf_band_signif, irf_band_seed, orth=True,
+                )
+                band_point = getattr(band_irf, "orth_irfs", None)
+                if band_point is None:
+                    band_point = band_irf.irfs
+                band_rows = []
+                n_band_t = min(irf_periods + 1, lower.shape[0])
+                for t in range(n_band_t):
+                    for shock_idx in range(k):
+                        for resp_idx in range(k):
+                            band_rows.append([
+                                t,
+                                names[shock_idx],
+                                names[resp_idx],
+                                round(float(band_point[t, resp_idx, shock_idx]), 6),
+                                round(float(lower[t, resp_idx, shock_idx]), 6),
+                                round(float(upper[t, resp_idx, shock_idx]), 6),
+                            ])
+                irf_band_table = make_table(
+                    "Impulse Response Function — Confidence Bands",
+                    ["Period", "Shock", "Response", "IRF", "Lower", "Upper"],
+                    band_rows,
+                )
+                irf_band_computed = True
+                warn_list.append(
+                    f"IRF {int((1 - irf_band_signif) * 100)}% confidence bands "
+                    f"computed via Monte-Carlo bootstrap ({irf_band_repl} "
+                    f"replications, seed={irf_band_seed}). Bands are around the "
+                    "orthogonalized (Cholesky) point IRF and inherit the same "
+                    "ordering assumption."
+                )
+            except Exception as e:
+                warn_list.append(f"IRF confidence-band computation failed: {e}")
+                irf_band_computed = False
+
         tables = [fc_table, summary_table, coef_table, irf_table, fevd_table]
+        if irf_band_table is not None:
+            tables.append(irf_band_table)
         if gc_rows:
             gc_table = make_table(
                 "Granger Causality (from VAR)",
@@ -345,10 +456,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     f"{a} -> {b}" for a, b in sig_pairs
                 ) + "."
 
+        if irf_band_computed:
+            plain += (
+                f" {int((1 - irf_band_signif) * 100)}% Monte-Carlo confidence "
+                "bands accompany the impulse responses."
+            )
+
         charting = (
             "Multi-panel line chart: one panel per variable showing original, "
             "fitted, and forecast. Separate IRF chart: grid of impulse-response "
-            "plots. FEVD stacked area chart."
+            "plots, each with its confidence band (lower/upper) shaded around "
+            "the point response. FEVD stacked area chart."
         )
 
         progress_callback("Done", 100)
@@ -385,6 +503,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "max_root_modulus": (round(max_root_modulus, 4)
                                      if max_root_modulus is not None else None),
                 "granger_within_var": gc_rows,
+                # ENG-EXT-MULTIVARIATE-001 M1 — IRF confidence-band metadata.
+                "irf_band_computed": bool(irf_band_computed),
+                "irf_band_signif": float(irf_band_signif),
+                "irf_band_repl": int(irf_band_repl),
+                "irf_band_method": "montecarlo_gaussian_distinct_seed",
+                "irf_band_seed": int(irf_band_seed),
             },
         )
 

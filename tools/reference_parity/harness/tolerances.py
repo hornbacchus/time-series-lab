@@ -1108,6 +1108,62 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ENG-EXT-MULTIVARIATE-001 M1 — the FIRST interval/band ladder.
+    # First instantiation of the reserved bootstrap_distributional
+    # verdict_class: the metric is band width-ratio + coverage, NOT point
+    # max_abs_diff. Three arms: selfparity_endpoint (tight; engine
+    # _mc_irf_bands vs from-scratch identical MC), point_anchor (band center
+    # vs R point IRF), and the two load-bearing distributional cross-package
+    # arms (width-ratio + containment vs R vars::irf). Pattern generalizes to
+    # CONFORMAL-001 (the conformal_coverage sibling).
+    "p3_var_irf_bands": {
+        "type": "bootstrap_distributional",
+        "selfparity_endpoint": {
+            "abs_tol": 1e-8,
+            "rel_tol": 1e-8,
+            "block_abs_tol": 1e-6,
+            "block_rel_tol": 1e-6,
+        },
+        "point_anchor": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-6,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-3,
+        },
+        "crosspkg_width_ratio": {
+            "pass_lo": 0.85,
+            "pass_hi": 1.18,
+            "block_lo": 0.70,
+            "block_hi": 1.43,
+        },
+        "crosspkg_containment": {
+            "pass_min": 0.95,
+            "block_min": 0.90,
+        },
+        "justification": (
+            "ENG-EXT-MULTIVARIATE-001 M1 — VAR IRF bootstrap confidence "
+            "bands, the first interval-validation. ARM 1 (selfparity_"
+            "endpoint): the engine _mc_irf_bands and a from-scratch "
+            "reimplementation of the IDENTICAL Monte-Carlo formulation use "
+            "the same distinct-per-replication-seed scheme + percentile "
+            "indices → expected bit-exact; 1e-8 PASS / 1e-6 BLOCK floors "
+            "leave headroom for incidental float-assoc noise. ARM 3 (point_"
+            "anchor): band center = orthogonalized point IRF vs R vars::irf "
+            "point IRF; 1e-6 absorbs the Sigma-divisor-convention difference "
+            "(Pattern H DSCD, as in p3_var) while staying far tighter than "
+            "the band geometry. ARM 2 (load-bearing, distributional): the "
+            "engine band is parametric-Gaussian-MC; R vars::irf is residual-"
+            "resampling — endpoints can never match, so width-ratio + "
+            "containment are compared. width-ratio PASS [0.85,1.18] / BLOCK "
+            "[0.70,1.43] and containment PASS>=0.95 / BLOCK>=0.90 are "
+            "calibrated UNDER THE GAUSSIAN-INNOVATION DGP (where the two "
+            "bootstrap methods converge); a non-Gaussian DGP would "
+            "legitimately diverge and require widening. Do NOT widen to mask "
+            "a real formulation difference — the cross-package arm gates "
+            "(the A1c self-parity-validates-match-not-correctness lesson)."
+        ),
+    },
+
     "p3_vecm": {
         # Phase 3.5 Session 3 (Item 1): tightened from canonical
         # mle_fit band (1e-3 abs / 1e-2 rel) to single_impl_mle
