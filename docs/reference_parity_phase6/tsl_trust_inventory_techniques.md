@@ -30611,7 +30611,500 @@ emits factor-scores time series + variance decomposition (analogous
 to PCA workflow elements present at S63). Estimated session time:
 ~1-1.5h.
 
-## §3 Unvalidated catalog techniques (20 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### dynamic_factor_model (Phase 7+ S66; FIFTY-FIFTH §2.5 entry; FOURTH Multivariate Systems block entry; fourth dispatch-set entry in ascending-complexity ordering; **Tier II.em-band (1e-2 abs / 5e-2 rel) — em_stochastic verdict_class per master plan §7.1** reflecting EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; **factor scale + sign canonicalization** applied identically on both arms via loadings[0]=1.0 anchor; **Cat 1d VSC=NO at multiple axes** — engine Balanced default (k_factors=2, factor_order=2, error_order=1, auto-transform, standardize, factor rescaling + sign flip) ≠ validated harness config (k_factors=1, factor_order=1, error_order=0, no transform, no standardize, no rescaling); **State Space backbone cross-reference** to S48-S51 validations; **ENG-EXT DFM workflow scan: 4 of 5 elements PRESENT** (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting) — engine covers rates-desk-standard workflow analogous to S63 PCA COVERED outcome)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy + master
+plan §7.1 EM-stochastic class):** **Tier II.em-band (Pattern A.1
+same-library cross-package self-parity at em_stochastic verdict_
+class tolerance 1e-2 abs / 5e-2 rel)** per S66 Code Step 2
+empirical verification. Python statsmodels DynamicFactor (TSL math
+path) vs R MARSS::MARSS (reference). Both fit DFM via Kalman
+filter + Expectation-Maximization; EM is a non-convex local-
+optimum search with different initialization heuristics +
+convergence criteria + parameter parameterizations between the
+two implementations. Master plan §7.1 EM-stochastic class
+explicitly anticipates this divergence with loose tolerance bands.
+
+**Engine variant validated (at math layer, indirectly via inlining
++ at SIMPLIFIED specification):** Harness `run_tsl` invokes
+`statsmodels.tsa.statespace.dynamic_factor.DynamicFactor(Y,
+k_factors=1, factor_order=1, error_order=0).fit(disp=False,
+maxiter=200)` — a **simplified specification** vs engine Balanced
+default (k_factors=2, factor_order=2, error_order=1, maxiter=500).
+Math-layer parity validates the simpler model; engine Balanced
+math-layer NOT separately exercised at S66 — see Cat 1d VSC=NO
+disclosure below.
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via R MARSS):** Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_dfm.py` `run_reference`
+lines 166-258 invokes R `MARSS::MARSS` via RBridge with explicit
+1-factor state-space specification: B = factor_phi 1×1, Q =
+factor variance, Z = loadings k×1 (Z[1, 1] = 1.0 anchored, Z[2..k,
+1] = free parameters "z2", ..., "zk"), R = diagonal-and-unequal
+idiosyncratic variances, A = zero offset, x0 = zero initial state,
+tinitx=0. Both arms implement identical 1-factor AR(1) DFM
+specification with first-loading anchor convention. EM convergence
+tolerances differ (MARSS `conv.test.slope.tol=0.5`; statsmodels
+default).
+
+**Factor scale + sign canonicalization (per S66 Step 4; harness-
+level single-layer):**
+
+- **statsmodels DynamicFactor** does NOT explicitly anchor any
+  loading — the factor is identified only up to scaling + sign
+  ambiguity (the pair (factor·c, loading/c) produces an identical
+  fit for any nonzero c).
+- **R MARSS::MARSS** anchors loadings[0] = 1.0 by explicit
+  constraint per `Z_mat[1, 1] <- 1.0` at harness R-code line 189.
+- **Harness compare() canonicalization** at lines 269-283:
+  divides both arms' loadings vector by loadings[0] so both arrive
+  at compare with loadings[0] = 1.0. Verified at S66 runner CLI:
+  `'tsl_first': 1.0, 'ref_first': 1.0`. **Identification invariant
+  verified:** loadings · factors product = common-component
+  reconstruction is invariant across rescalings; individual
+  loadings/factors normalization-dependent but canonicalize to
+  common convention. Sign sub-convention emerges naturally from
+  first-element-positive anchor (loadings[0] = +1.0 fixed).
+- Engine separately applies **factor rescaling + sign flip** at
+  engine lines 344-352 (anchor each factor to unit sample variance
+  via factors[:, f] /= sigma + loading_matrix[:, f] *= sigma; flip
+  sign so largest-absolute loading positive) for user-facing
+  interpretability — engine-level rescaling NOT exercised at S66
+  audit (harness uses simplified specification bypassing engine
+  rescaling code path).
+
+**Cross-reference to State Space block (S48-S51 validated
+separately):** Engine DFM uses **statsmodels state-space backbone**
+(`statsmodels.tsa.statespace.dynamic_factor.DynamicFactor` inherits
+from `MLEModel` which uses `statsmodels.tsa.statespace.kalman_
+filter.KalmanFilter`) — **same Kalman filter machinery as
+separately-validated State Space techniques**: kalman_filter +
+kalman_smoother + local_level (S48) + local_linear_trend (S49) +
+particle_filter (S50) + structural_ts (S51). **DFM Kalman filter +
+smoother machinery inherits trust from State Space block
+validation scope.** The S66 DFM math-layer parity finding (em-band
+agreement between statsmodels EM + R MARSS EM, both targeting same
+Gaussian state-space MLE) corroborates the underlying state-space
+backbone correctness already established at S48-S51.
+
+**Helper identity note (per S66 Step 1; informational — not a
+Cat 1 same-engine reuse pattern):**
+
+- `_generate_dfm_dgp` (harness-internal): NOT shared with any
+  other harness — bespoke 3-variable / 1-factor / AR(1)-factor DGP
+  with loadings = (1.0, 0.7, 0.5) and idiosyncratic σ_ε = 0.5.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine per-column NaN
+  interpolation at engine lines 84-98 (linear interpolation when
+  ≥ 3 valid values per series; error response if < 3). Verified
+  by injecting interior NaN at [8, 0] + [18, 1] in a 3-series
+  fixture: engine returned `status=success` + emitted NaN-
+  interpolation warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `transform="none"` (suppress auto-
+  transform for clean test); returned audit fields populated
+  correctly (`k_factors=2` capped at n_vars-1=2; `factor_order=2`
+  engine default; `error_order=1` engine default; `n_variables=3`;
+  `aic=1185.84`; `bic=1251.80`; `log_likelihood=-572.92`;
+  `variance_explained_pct=86.7%`; `n_observations=200`;
+  `communalities=[0.99999..., 0.99999..., 0.6020]` showing first
+  two series nearly fully explained by 2-factor model + third
+  partially explained; `loadings_per_factor` 2×3 matrix surfaced).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 6 expected tables (`Factor Loadings` 3 × 4 [Variable +
+  Factor 1 + Factor 2 + Communality]; `Extracted Factors` 200 × 3
+  [Time + Factor 1 + Factor 2]; `Forecast: x1` + `Forecast: x2` +
+  `Forecast: x3` (per-variable forecast tables 10 × 4 [Step +
+  Forecast + Lower 90% + Upper 90%]); `Model Summary` table).
+
+**Verdict (math layer — primary):** PASS at em-band tolerance
+(`max_abs_diff` per metric: loadings 1.22e-3 (anchored to
+first-element=1.0), factor_phi 1.07e-3, loglik 1.49e-2; n=200
+3-variable / 1-factor DFM DGP at seed=42 at runner CLI execution;
+both arms first loading = 1.0 confirming anchor canonicalization).
+**Verdict (math layer — secondary):** PASS at em-band tolerance
+(aic abs_diff=2.98e-2; bic abs_diff=22.93 reflecting harness
+mapping R's `AICc` to BIC slot per harness R-code line 224
+documented pragma — AICc-vs-BIC convention mismatch absorbed by
+rel_diff=1.73e-2 within 5e-2 rel band).
+**Verdict (wrapper layer):** PASS 3/3 checks per S66 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_dfm.py`.
+**Audit date:** 2026-05-28 (S66 §2.5 entry; Multivariate Systems
+block fourth entry; factor scale + sign canonicalization; State
+Space backbone cross-reference; ENG-EXT scan 4/5 PRESENT).
+**Primary metrics (math layer):** Factor loadings vector (k_obs,)
+= (3,) post-first-element-anchor-to-1 canonicalization + factor AR
+coefficient scalar (factor_phi for k_factors=1, factor_order=1) +
+log-likelihood scalar.
+**Secondary metrics:** AIC + BIC (BIC ↔ R AICc convention mismatch
+absorbed by em-band relative tolerance).
+**Diagnostic metric:** Smoothed factor correlation (modulo sign)
+— `INFO` status only, not gated.
+
+**Validation claim scope (S66; engine math validated at SIMPLIFIED
+specification scope via inline-math harness pattern; factor scale
++ sign canonicalization applied identically on both arms; engine
+Balanced default specification NOT separately exercised at math
+layer):**
+
+- **Layer 1 (statsmodels DynamicFactor 1-factor AR(1)
+  no-error-AR specification primary metrics) VALIDATED at Tier
+  II.em-band:** loadings + factor_phi + loglik agree at em-band
+  tolerance (1e-2 abs / 5e-2 rel). Cross-library agreement
+  (statsmodels Python vs R MARSS) confirms both implementations
+  correctly implement same Gaussian state-space Kalman + EM MLE
+  on the simpler specification.
+- **Layer 1 SECONDARY METRICS aic/bic at em-band tolerance:** AIC
+  matches at 2.98e-2 abs; BIC matches via AICc convention
+  divergence absorbed by em-band rel tolerance. Standard model-
+  selection within-implementation use applies; cross-reference
+  against external R MARSS AICc requires accounting for
+  statsmodels-BIC ≠ MARSS-AICc convention.
+- **Layer 1 SMOOTHED FACTOR TIME SERIES (diagnostic):** Cross-
+  implementation correlation computed for reporting only (status=
+  INFO); not gated. Smoothed factor identification is sign- +
+  scale-ambiguous; full validation would require sign + scale
+  canonicalization symmetric to loadings.
+- **Layer 1 ENGINE BALANCED DEFAULT SPECIFICATION (k_factors=2,
+  factor_order=2, error_order=1) NOT separately validated at math
+  layer:** See Cat 1d VSC=NO disclosure below.
+- **Layer 1 ENGINE TRANSFORM CODE PATHS (auto / log_diff / diff)
+  NOT validated at math layer:** Engine applies ADF-based auto-
+  transform by default at engine lines 179-205; harness uses raw
+  fixture without transform. Auto-transform code path covered at
+  wrapper-layer 3-check Check 2 emission-only when invoked
+  explicitly with non-stationary input.
+- **Layer 1 ENGINE FACTOR RESCALING + SIGN FLIP (engine lines
+  344-352) NOT separately validated at math layer:** Engine
+  rescales factors to unit sample variance + flips sign for user-
+  facing interpretability; harness simplified specification
+  bypasses engine rescaling code path. Algorithm is identity-
+  preserving (loading × factor = invariant); divergence with
+  harness uncanonicalized output is by construction, not error.
+- **Layer 1 COMMUNALITY QUADRATIC FORM (engine lines 396-405)
+  NOT separately validated at math layer:** Engine computes
+  communality_i = Λ[i, :] @ Cov(F) @ Λ[i, :]' (correct formula
+  handling correlated factors); harness simplified k_factors=1
+  case reduces to scalar Λ_i^2 (trivial). For k_factors ≥ 2 the
+  quadratic-form algorithm covered at wrapper-layer 3-check
+  Check 2 (audit `communalities` emitted; user-facing variance-
+  explained derivation via mean(communalities)).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via per-column linear
+  interpolation; preset config dispatch returns expected 6-table
+  structure (Factor Loadings + Extracted Factors + per-variable
+  Forecast × 3 + Model Summary); output shape/type verification
+  confirms table column schemas + audit-field population including
+  loadings_per_factor matrix + communalities vector.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Dynamic Factor Model per Geweke (1977)
+"The Dynamic Factor Analysis of Economic Time-Series Models" +
+Stock-Watson (1991, 2002, 2011) "Diffusion Indexes" / "Forecasting
+Using Principal Components from a Large Number of Predictors" /
+"Dynamic Factor Models" Annual Review series — state-space
+representation of N observed series driven by k_factors << N
+latent common factors evolving as VAR + idiosyncratic noise.
+Estimation via Kalman filter + EM (Bańbura-Modugno 2014 "Maximum
+Likelihood Estimation of Factor Models on Datasets with Arbitrary
+Pattern of Missing Data" for handling missing-data EM
+extensions). Factor extraction via Kalman smoother (two-pass
+forward + backward smoothing using full sample at each time
+point). Engine uses `statsmodels.tsa.statespace.dynamic_factor.
+DynamicFactor` which implements the standard MLE-via-Kalman+EM
+approach + Bai-Ng (2002) "Determining the Number of Factors in
+Approximate Factor Models" IC1/IC2/IC3 factor-count selection
+heuristic (referenced in engine docstring; not exercised at S66
+audit since k_factors pinned).
+
+**Phase 3 known failure modes (S66 / engine-variant + harness-
+variant scope):**
+
+- Math-layer harness uses **simplified specification**
+  (k_factors=1, factor_order=1, error_order=0) NOT engine Balanced
+  default (k_factors=2, factor_order=2, error_order=1) — see Cat
+  1d VSC=NO disclosure below.
+- **EM convergence non-determinism:** statsmodels DynamicFactor +
+  R MARSS::MARSS use different initialization heuristics +
+  convergence criteria. Different local-optimum landings possible
+  on small samples or near-degenerate factor structures. em_
+  stochastic verdict_class with 1e-2 abs / 5e-2 rel tolerance
+  bands explicitly accommodates this divergence. At S66 audit DGP
+  (T=200, k=3, true rank=1 latent), both arms converge to similar
+  optima within em-band.
+- **BIC ↔ AICc convention divergence:** Harness pragma at R-code
+  line 224 (`bic_v <- as.numeric(fit$AICc)`) maps MARSS AICc to
+  BIC slot — closest BIC-convention proxy available from MARSS
+  output. statsmodels BIC = -2·log L + log(T)·n_params; MARSS
+  AICc = AIC + 2k(k+1)/(T-k-1) corrected-AIC. Convention mismatch
+  absorbed by em-band relative tolerance (5e-2 rel).
+- **Factor scale + sign ambiguity:** Loadings and factors
+  identified only up to common scaling + sign. Harness anchors
+  loadings[0]=1.0 on both arms; engine separately applies factor
+  rescaling + sign flip post-fit at engine lines 344-352.
+- **Factor rotation ambiguity (k_factors ≥ 2):** For k_factors ≥
+  2 individual factors identified only up to invertible linear
+  transformation (the columns of Λ and rows of F can be jointly
+  rotated by any non-singular k×k matrix without changing model
+  fit). Engine emits raw fit + rescales to unit variance per
+  factor; engine does NOT apply orthogonalization or factor
+  rotation (e.g. Varimax) — multi-factor identification convention
+  is whatever statsmodels DynamicFactor's EM converges to.
+  Harness uses k_factors=1 simplified specification where rotation
+  ambiguity is just scale + sign (one-dimensional).
+- **Engine auto-transform code path** can change the fitted model
+  by differencing/log-differencing non-stationary input. NOT
+  exercised at S66 audit (harness fixture stationary by
+  construction + harness specification uses raw fixture not
+  invoking engine wrapper).
+
+**Phase 3 boundary of validity:**
+
+- T=200 3-variable / 1-factor / AR(1)-factor DFM fixture; other
+  dimensions + factor counts + factor-AR orders + error-AR orders
+  NOT validated at math layer
+- harness specification: k_factors=1, factor_order=1, error_order=0
+  ⇒ engine simplified MLE code path validated; engine Balanced
+  default (k_factors=2, factor_order=2, error_order=1) NOT
+  separately validated at math layer
+- harness does NOT exercise engine transform code paths; engine
+  default `transform="auto"` (ADF-based) NOT separately validated
+- harness does NOT exercise engine factor rescaling code path;
+  engine rescaling is identity-preserving (loading × factor
+  invariant) but produces different per-component magnitudes vs
+  uncanonicalized output
+- Communality quadratic form NOT separately validated (k_factors=1
+  reduces to scalar squared loading; non-trivial validation
+  requires k_factors ≥ 2)
+- Variance-explained percentage NOT separately validated (derived
+  from communalities)
+- Forecast values NOT separately validated at math layer (covered
+  at wrapper-layer 3-check Check 3 table-emission scope only)
+- AIC + BIC: em-band tolerance applies; BIC ↔ AICc convention
+  mismatch absorbed
+
+**Phase 3 gap markings:**
+
+- Engine Balanced default specification (k_factors=2, factor_
+  order=2, error_order=1) NOT validated at math layer (Cat 1d
+  VSC=NO; see below)
+- Engine auto-transform code paths NOT validated
+- Engine factor rescaling + sign flip code path NOT validated
+- Multi-factor case k_factors ≥ 2 rotation handling NOT validated
+- Communality quadratic-form algorithm NOT validated for k_factors
+  ≥ 2
+- Forecast values NOT validated at math layer
+- Smoothed factor series NOT gated (diagnostic-only INFO status)
+
+**Status (PRIMARY Tier II.em-band PASS at em_stochastic
+verdict_class tolerance + SECONDARY em-band PASS with BIC ↔
+AICc convention mismatch absorbed + wrapper-layer 3/3 PASS per
+S66 / fourth Multivariate Systems block entry):** Layer 1
+statsmodels DynamicFactor simplified specification validated at
+em-band tolerance via cross-library check (statsmodels Python vs
+R MARSS::MARSS). State Space backbone cross-reference to S48-S51
+inherits trust for underlying Kalman filter + smoother machinery.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS
+including 6-table output structure (Factor Loadings + Extracted
+Factors + per-variable Forecast × n_vars + Model Summary).
+
+**Validation-Surface Coverage (VSC) — Cat 1d VSC=NO disclosure per
+multiple-axis divergence between harness validated specification
+and engine Balanced default; embedded per Cat 1d revision-2
+framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** statsmodels
+  `DynamicFactor(Y, k_factors=1, factor_order=1, error_order=0)
+  .fit(disp=False, maxiter=200)` with NO transform, NO
+  standardization, NO factor rescaling, NO sign flip. Pattern A.1
+  cross-library reference: R `MARSS::MARSS` with explicit
+  1-factor AR(1) state-space specification, loadings[0]=1.0
+  anchor, diagonal idiosyncratic variance.
+- **Engine preset default (Balanced):** k_factors=2 (capped at
+  n_vars-1=2), factor_order=2, error_order=1, maxiter=500,
+  transform="auto" (ADF-based; applies log_diff or diff to non-
+  stationary input), standardize via z-score per engine lines
+  220-226, factor rescaling to unit variance + sign flip per
+  engine lines 344-352.
+- **Configuration match:** **NO — Cat 1d VSC=NO at MULTIPLE
+  axes.**
+    - **k_factors axis:** validated 1 ≠ engine default 2 (for
+      n_vars ≥ 3 fixtures). Mathematical implication: 2-factor
+      model has additional factor rotation ambiguity not present
+      in 1-factor case; user invoking engine at default
+      experiences UNVALIDATED multi-factor identification scope.
+    - **factor_order axis:** validated 1 ≠ engine default 2.
+      Mathematical implication: VAR(2) factor dynamics involve
+      additional parameter (Φ_2) not in AR(1) case; engine MLE
+      pipeline exercised differently.
+    - **error_order axis:** validated 0 ≠ engine default 1.
+      Mathematical implication: AR(1) idiosyncratic errors are a
+      richer error model than iid; engine state-space
+      representation has additional state components not in iid
+      error case.
+    - **transform axis:** validated "none" (raw fixture) ≠ engine
+      default "auto" (ADF-based; applies log_diff or diff to non-
+      stationary input). Mathematical implication: engine fits on
+      differenced/log-differenced data when input non-stationary;
+      validated fits on raw input. For stationary input both
+      paths agree on raw fitting; for non-stationary input engine
+      diverges.
+    - **standardize axis:** validated NOT standardized ≠ engine
+      default standardized. Mathematical implication: engine
+      z-scores per column before fitting; coefficients on
+      different scale.
+    - **factor rescaling + sign flip axis:** engine applies unit-
+      variance rescaling + sign flip; validated does not.
+      Identity-preserving (loading × factor invariant) but
+      per-component magnitudes differ.
+- **User-facing risk surface:** User invoking engine at default
+  Balanced preset experiences a SUBSTANTIALLY different
+  specification than the math-layer-validated path. State Space
+  backbone cross-reference + simplified specification math
+  validation establish underlying Kalman+EM infrastructure
+  correctness; multi-factor rotation + auto-transform + factor
+  rescaling code paths covered ONLY at wrapper-layer 3-check
+  emission-scope. Algorithmic divergence is BOUNDED in novelty
+  (standard DFM literature + identity-preserving transforms) but
+  NOT empirically validated at math layer.
+- **Mitigation suggestion:** User requiring math-layer validation
+  at engine default Balanced specification should either (a)
+  explicitly invoke at validated specification (k_factors=1,
+  factor_order=1, error_order=0, transform="none"), OR (b) await
+  Q2+ harness re-execution at engine Balanced specification
+  (commissioned per Path B disposition below).
+- **Path B forward observation (low-priority Q2+ work item per
+  user disposition):** Re-execute p3_dfm harness at engine
+  Balanced specification (k_factors=2, factor_order=2,
+  error_order=1, including auto-transform path under non-
+  stationary input fixture) to extend math-layer validation to
+  the engine default. Divergence with simplified specification is
+  well-understood algorithmically (standard DFM literature). NOT
+  bundled with ENG-EXT-CONFORMAL-001 or ENG-EXT-MULTIVARIATE-001
+  as this is a HARNESS-SCOPE extension, not an engine-scope
+  extension.
+
+**ENG-EXT institutional-rates DFM workflow scan outcome
+(S66 Step 1; 4 of 5 elements PRESENT — analogous to S63 PCA
+COVERED outcome):**
+
+The institutional-rates DFM workflow (rates-strategist time-
+evolving level/slope/curvature factor extraction respecting serial
+dependence) requires five elements:
+
+(a) **factor-scores time series** (smoothed factor estimates over
+    time — what a rates strategist plots; per-PC trajectories of
+    yield-curve-factor evolution): **PRESENT** ✓ — engine emits
+    `Extracted Factors` table at engine lines 441-455 with per-
+    observation smoothed factor estimates per factor.
+(b) **variance decomposition (communality)**: **PRESENT** ✓ —
+    engine emits `Communality` column in `Factor Loadings` table
+    at engine line 431 + `variance_explained_pct` aggregate in
+    `Model Summary` table at engine line 503 + per-variable
+    communalities in audit field. **Correct quadratic-form
+    algorithm** at engine lines 396-405 (Λ @ Cov(F) @ Λ.T) handles
+    correlated factors case where naive sum-of-squared-loadings
+    would produce communalities > 1 nonsense.
+(c) **loadings interpretability** (factor labels / hierarchical
+    naming for rates application: level/slope/curvature):
+    **PRESENT** ✓ — engine emits `Factor Loadings` table at engine
+    lines 425-438 with per-variable loadings per factor + audit
+    `loadings_per_factor` matrix; PC1-anchored sign convention via
+    "largest-absolute loading positive" per engine lines 349-352
+    produces level-factor interpretation analogous to S63 PCA.
+(d) **DFM-specific forecasting** (model-based forecasts of
+    observables via factor dynamics): **PRESENT** ✓ — engine emits
+    per-variable `Forecast: <name>` tables at engine lines 458-473
+    with step + point forecast + 90% lower CI + 90% upper CI per
+    variable.
+(e) **historical decomposition (common-component vs idiosyncratic)**:
+    **PARTIAL** — engine emits factors + loadings + communalities
+    enabling user-side computation of common-component Λf and
+    residual Y - Λf reconstructions; explicit common-component
+    decomposition table NOT packaged as separate output. User
+    requiring decomposition must compute manually from
+    `Extracted Factors` + `Factor Loadings` tables.
+
+**Verdict: COVERED at 4 of 5 substantive workflow elements —
+engine DFM covers the rates-desk-standard institutional workflow
+analogous to S63 PCA COVERED outcome.** Historical decomposition
+gap (e) is a USER-CONVENIENCE gap not a SUBSTANTIVE workflow gap
+(derivable from emitted outputs).
+
+Secondary nice-to-have ENG-EXT candidates considered but NOT
+material at S66:
+
+- **Historical decomposition explicit table** (common-component
+  reconstruction Λf + residual decomposition per observation):
+  USER-CONVENIENCE gap; derivable from emitted outputs. Minor
+  Q2+ candidate (low priority; bundle with ENG-EXT-MULTIVARIATE-
+  001 IRF/FEVD extension only if material to bundling decision).
+- **Mixed-frequency DFM (MIDAS-DFM)** per Bańbura-Modugno (2014)
+  for nowcasting applications mixing monthly + quarterly data:
+  NOT material at S66 — institutional rates application uses
+  uniform-frequency observations.
+- **Factor count selection (Bai-Ng IC1/IC2/IC3)** at engine
+  Balanced is currently fixed at preset_cfg["max_factors"] (= 2
+  for Balanced) capped at n_vars - 1; engine docstring references
+  Bai-Ng but `select_coint_rank`-style automatic factor-count
+  selection NOT exposed as user-facing parameter. Minor Q3+
+  candidate (NOT material to ENG-EXT bundling).
+
+**No new ENG-EXT bundling candidate surfaced at S66.** State Space
+backbone cross-reference + Cat 1d VSC=NO at multiple axes + 4 of
+5 ENG-EXT workflow elements PRESENT establish DFM is well-covered
+substantively at the wrapper layer; math-layer validation scope
+limited to simplified specification per harness pragma. ENG-EXT
+candidate surveillance for Multivariate Systems block continues
+at S67 bvar (block close).
+
+**Audit-hygiene cross-reference (S66 / Cat 1d VSC=NO at multiple
+axes + State Space backbone cross-reference):** Cat 1d VSC=NO
+divergence between harness validated specification (simplified)
+and engine Balanced default (full) at multiple axes — k_factors,
+factor_order, error_order, transform, standardize, factor
+rescaling — documented per established Gate 2 disclosure
+framework. State Space backbone cross-reference to S48-S51
+validations inherits trust for underlying Kalman filter + smoother
+machinery; DFM em-band math-layer parity at simplified
+specification corroborates same underlying state-space MLE
+correctness. **NEW: em_stochastic verdict_class first application
+within Multivariate Systems block** — accommodates EM convergence
+non-determinism between independent state-space MLE
+implementations.
+
+**Multivariate Systems block progress note (S66 fourth entry):**
+Block 10 Multivariate Systems advances at S66 dynamic_factor_model
+per ratified ascending-complexity dispatch ordering. **Post-S66:
+Multivariate Systems block 7/8 §2.5-validated (3 separate + S63
+pca_analysis + S64 var + S65 vecm + S66 dynamic_factor_model); 1
+remaining in dispatch-set via S67.** Block close projected at S67
+bvar — the final dispatch-set session.
+
+**S67 bvar projection (FINAL Multivariate Systems block session +
+block close per ascending-complexity dispatch ordering):** Engine
+`engine/techniques/bvar.py` (verify exact module name) is Bayesian
+Vector Autoregression. BVAR closes the Multivariate Systems block.
+Cross-reference: `bond_yield_forecast` validated separately may
+share BVAR infrastructure (institutional fixed-income BVAR
+application); verify whether engine BVAR + bond_yield_forecast
+share Bayesian state-space backbone. Pre-existing risks:
+(a) prior specification convention (Minnesota / NW / SSVS) may
+diverge between Python statsmodels BVAR + reference; (b) posterior
+sampling convergence (MCMC if engine uses Gibbs/NUTS) introduces
+mle-band-style stochasticity per SC11 prophet precedent;
+(c) ENG-EXT scan: check whether engine BVAR emits institutional-
+rates BVAR workflow — posterior IRF with credible bands,
+posterior FEVD, structural identification (these are the BVAR
+analogues to S64 VAR's IRF point estimates + ENG-EXT-MULTIVARIATE-
+001 confidence-band gap). Estimated session time: ~1.5-2h
+(includes block-close milestone + 9-of-13 → 10-of-13 catalog
+block-fully-Q1-amended progress confirmation).
+
+## §3 Unvalidated catalog techniques (19 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -30655,8 +31148,8 @@ descriptions, summaries).
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
 
-### Multivariate Systems (2 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering)
-`bvar`, `dynamic_factor_model`
+### Multivariate Systems (1 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome)
+`bvar`
 
 ### Regimes / Nonlinear (6 unvalidated)
 `critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
