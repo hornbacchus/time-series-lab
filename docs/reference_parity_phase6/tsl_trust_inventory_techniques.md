@@ -33844,7 +33844,447 @@ recursion). Pre-existing risk: Croston-family variant selection +
 zero-demand-period handling + smoothing-parameter convention.
 Estimated session time: ~1.5h.
 
-## §3 Unvalidated catalog techniques (12 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### intermittent_demand (Phase 7+ S74; SIXTY-THIRD §2.5 entry; EIGHTH-AND-FINAL Forecasting Classical block entry; SEVENTH-AND-FINAL DISPATCH-SET entry per ascending-complexity ordering; **CLOSES Forecasting Classical block — ELEVENTH catalog block to complete per Q1 work program scope at S74 close = 11 of 13 catalog blocks fully Q1-amended (85% catalog block-level completion)**; STRUCTURAL BREAK from the ARIMA arc — BESPOKE closed-form Croston-family recursion, NOT statsmodels-backed; engine API path: bespoke `_croston` / `_sba` / `_tsb` closed-form exponential-smoothing recursions; **NO engine-IMPROVEMENT candidate** [SBA bias correction IS implemented; all three Croston-family variants present + selectable; engine-improvement queue stays n=1 (ets_hw only)]; Croston variant validated: CLASSIC CROSTON [`_croston` at fixed α=0.1]; **forecast Tier II.bit-exact at machine precision** [abs_diff=3.77e-15]; fitted-vector Secondary BLOCK is a documented R-croston-fitted-CONVENTION difference NOT a forecast/math divergence — overall PASS)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**PRIMARY metric (flat forecast): Tier II.bit-exact at machine
+precision (Pattern A.1 same-library cross-package self-parity at
+`closed_form` verdict_class)** per S74 Code Step 2 empirical
+verification. TSL bespoke `_croston` (TSL math path; closed-form
+two-parallel-SES recursion) vs R `forecast::croston` (reference;
+same Croston 1972 recursion). Flat forecast PASS at `abs_diff=
+3.77e-15` (machine precision). **SECONDARY metric (in-sample
+fitted vector): BLOCK on a documented R-croston-fitted-CONVENTION
+difference — NOT a forecast/math finding — see disclosure below.**
+
+**Engine variant validated (at math layer; bespoke recursion
+directly):** TSL `_croston(values, alpha=0.1, beta=0.1, horizon)`
+— the classic Croston 1972 method (two parallel SES recursions:
+demand-size `z_hat` + inter-arrival-interval `p_hat`, recombined
+as `z_hat / p_hat`). Harness calls `_croston` directly at fixed
+α=0.1 (matching R `forecast::croston` default) for the canonical
+Croston path; the public wrapper (Balanced preset) tests both
+croston + sba variants over an alpha grid + selects best by MSE
+(exercised at wrapper-layer 3-check).
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via R forecast::croston):** Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_intermittent.py`
+`run_reference` lines 135-172 invokes R `forecast::croston(y,
+h=horizon, alpha=0.1)` via RBridge. R croston implements the
+original Croston 1972 method (SES on demand sizes z_t +
+inter-arrival intervals p_t, forecast z_hat/p_hat). Both arms use
+identical alpha + identical first-non-zero initialization → flat
+forecast agrees at machine precision.
+
+**Implementation pattern note (STRUCTURAL BREAK from ARIMA arc):**
+Unlike the ARIMA arc (S70-S73; all statsmodels/pmdarima state-
+space SARIMAX backbone) + the ETS/Theta entries (S68/S69;
+statsmodels classical/state-space), intermittent_demand is
+**BESPOKE** — engine implements the Croston-family recursions
+directly in numpy (`_croston` lines 344-378, `_sba` lines 381-417,
+`_tsb` lines 420-448), NOT a library wrap. This is a return to the
+bespoke-per-session pattern (cf. Tier B Cat 3 sessions SC7-SC9).
+Reference R `forecast::croston` is an INDEPENDENT implementation
+of the same Croston 1972 recursion; machine-precision forecast
+agreement confirms both bespoke implementations are
+algorithmically identical at the canonical Croston path.
+
+**Croston variant disclosure:** Engine implements THREE variants:
+- **classic Croston** (`_croston`; original 1972; known
+  positively-biased — Syntetos-Boylan 2005 §2);
+- **SBA** (`_sba`; Syntetos-Boylan Approximation; bias-corrects
+  classic Croston by factor `(1 - β/2)` at engine lines 410-416);
+- **TSB** (`_tsb`; Teunter-Syntetos-Babai; demand-probability
+  updating for obsolescence handling).
+Balanced preset tests {croston, sba} over an alpha grid + selects
+the min-MSE result; Thorough adds TSB. **S74 validates the CLASSIC
+CROSTON path** (the harness compares `_croston` vs R croston at
+fixed α=0.1). SBA + TSB NOT separately math-layer validated (SBA
+is trivially derivable as classic-Croston × (1-β/2) bias
+correction; TSB has no clean R reference per harness docstring
+lines 16-19).
+
+**NO engine-IMPROVEMENT (SBA bias correction present):** A
+potential engine-IMPROVEMENT concern at S74 Step 1 was whether the
+engine ships ONLY classic Croston (the known positively-biased
+variant) without the SBA bias correction — which would be a
+documented-deficiency engine-IMPROVEMENT candidate. **The engine
+DOES implement SBA** (`_sba` with the `(1 - β/2)` bias correction)
+AND the Balanced preset tests both croston + sba selecting the
+min-MSE result. **NO engine-IMPROVEMENT candidate surfaced**;
+engine-improvement queue remains n=1 (ets_hw only) at Forecasting
+Classical block close.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling (zero-demand-vs-missing semantics):**
+  PASS. **Distinct from all prior techniques:** zero-demand
+  periods are VALID data in intermittent-demand (not sentinel/
+  missing); engine treats NaN → 0 demand (engine lines 59-63)
+  rather than interpolating, which is the correct intermittent-
+  demand convention. Verified by injecting NaN: engine returned
+  `status=success` + "NaN values treated as zero demand" warning
+  + audit `zero_fraction=0.74` reflecting zeros as valid data.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"`; returned audit fields populated correctly
+  (`best_method="CROSTON"` selected by min-MSE; `alpha=0.1`;
+  `beta=0.1`; `mse=5.324`; `forecast=1.3967`; `demand_pattern=
+  "Intermittent"` per Syntetos-Boylan ADI/CV² classification;
+  `adi=3.85`; `cv2_demand=0.059`; `zero_fraction=0.74`;
+  `methods_tested=10` [2 methods × 5 alpha-grid]; `baseline_rmse=
+  2.2965`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 5 expected tables (`Method Comparison` [variant × alpha
+  grid with MSE/RMSE/forecast]; `Best Model Summary`; `Demand
+  Characteristics` [ADI + CV² + Syntetos-Boylan pattern
+  classification]; `Fitted Values (Best Model)`; `Forecast`).
+
+**Verdict (math layer — primary):** PASS bit-exact at machine
+precision (flat forecast abs_diff=3.77e-15; tsl=1.3966717030 vs
+ref=1.3966717030; n=100 zero-inflated demand DGP p=0.25 mean=5
+std=1.5 at seed=42, α=0.1, horizon=5 at runner CLI execution).
+**Verdict (math layer — secondary):** fitted-vector BLOCK is a
+documented R-croston-fitted-CONVENTION difference (NOT a forecast
+divergence); see disclosure below. Overall runner CLI outcome PASS
+(primary forecast passes at machine precision; BLOCK confined to
+secondary fitted-vector convention).
+**Verdict (wrapper layer):** PASS 3/3 checks per S74 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/
+p3_intermittent.py` (technique_id `p3_intermittent`).
+**Audit date:** 2026-05-28 (S74 §2.5 entry; Forecasting Classical
+BLOCK CLOSE; structural break from ARIMA arc).
+**Primary metric (math layer):** flat forecast value (constant
+across horizon for Croston).
+**Secondary metric:** in-sample fitted-values vector (CONVENTION-
+difference BLOCK; see below).
+**Diagnostic:** demand-size estimate z_hat + inter-arrival
+estimate p_hat at end of training.
+
+**fitted-vector Secondary BLOCK disclosure (R-croston-fitted-
+CONVENTION difference; NOT a forecast/math finding):**
+
+- **Manifestation at S74 audit:** runner CLI reports secondary
+  `fitted: max_abs_diff=0.8, tsl_first=0.8 vs ref_first=0.0`
+  (BLOCK).
+- **Root cause:** TSL `_croston` emits a per-period fitted value
+  `z_hat / p_hat` at EVERY period (including the first, after the
+  first-non-zero initialization), whereas R `forecast::croston`'s
+  `fitted` slot uses a different in-sample-fitted CONVENTION
+  (R's croston fitted indexing initializes/offsets differently —
+  ref_first=0.0 reflects R producing no fitted demand-rate at the
+  pre-first-demand period). This is a fitted-vector indexing/
+  initialization convention divergence between the two
+  implementations, NOT a divergence in the Croston recursion math
+  or the forecast.
+- **NOT a forecast/math divergence:** the PRIMARY flat forecast
+  (the user-facing output of Croston, the demand rate carried
+  forward across the horizon) agrees at machine precision (3.77e-
+  15). The fitted-vector convention difference affects only the
+  in-sample-fitted display series, which is a Secondary-tier
+  diagnostic. The Croston recursion (z_hat + p_hat updates) is
+  bit-identical — confirmed by the machine-precision forecast
+  agreement (the forecast IS z_hat/p_hat at the final period).
+- **Overall outcome PASS:** fitted-vector is Secondary-tier; the
+  primary forecast passes at machine precision; runner CLI overall
+  verdict PASS. Analogous to S68 ets_hw aic-scale + S69 theta
+  rmse-extraction Secondary-tier divergences — a documented
+  convention/extraction difference, NOT a math-layer finding.
+- **Optional harness refinement (low priority):** align the fitted-
+  vector comparison to R's croston fitted convention (offset by
+  one period / handle pre-first-demand initialization) to enable
+  fitted-vector parity; deferred as HARNESS-scope low-priority
+  item (does not affect the math-layer forecast validation which
+  is the substantive parity claim).
+
+**Validation claim scope (S74; engine math validated at flat-
+forecast scope via bespoke-vs-R-croston cross-package check;
+wrapper code path exercised at wrapper-layer 3-check scope; math-
+layer comparison crosses TSL bespoke `_croston` and R
+forecast::croston implementations of the Croston 1972 recursion):**
+
+- **Layer 1 (classic Croston flat-forecast recursion) VALIDATED
+  at Tier II.bit-exact at machine precision:** TSL `_croston` +
+  R forecast::croston produce machine-precision-identical flat
+  forecasts at fixed α=0.1. Cross-implementation agreement
+  (two independent bespoke implementations of Croston 1972)
+  confirms the recursion math is correct.
+- **Layer 1 SECONDARY fitted-vector: R-croston-fitted-CONVENTION
+  difference (BLOCK):** in-sample-fitted indexing/initialization
+  convention divergence; NOT a forecast/math finding. The Croston
+  recursion is bit-identical (forecast agrees at machine
+  precision).
+- **Layer 1 SBA + TSB variants NOT separately validated at math
+  layer:** SBA is trivially derivable as classic-Croston × (1-β/2)
+  (closed-form bias correction on the verified Croston output);
+  TSB has no clean R reference (per harness docstring). Both
+  covered at wrapper-layer 3-check emission scope (Method
+  Comparison table tests croston + sba; Thorough adds TSB).
+- **Layer 1 ALPHA-GRID OPTIMIZATION NOT validated at math layer:**
+  Engine Balanced grid-optimizes alpha by min MSE; harness pins
+  α=0.1. Grid optimization is deterministic (fixed grid + min
+  MSE); not exercised in math-layer parity (analogous to S72/S73
+  grid/order-selection pinning).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** zero-demand-vs-missing semantics (NaN→0
+  valid data); preset config dispatch returns expected 5-table
+  structure with Syntetos-Boylan demand classification; output
+  shape/type verification confirms Method Comparison + Demand
+  Characteristics structure.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Intermittent demand forecasting per Croston
+(1972) "Forecasting and Stock Control for Intermittent Demands"
+Operational Research Quarterly 23(3) — decomposes demand into
+demand-SIZE (z_t; magnitude of nonzero demands) + inter-arrival
+INTERVAL (p_t; periods between nonzero demands), applies separate
+simple exponential smoothing to each (updated only on nonzero-
+demand periods), recombines into a demand-rate forecast z_hat/
+p_hat. SBA bias correction per Syntetos-Boylan (2005) "The
+Accuracy of Intermittent Demand Estimates" Intl J Forecasting
+21(2) — classic Croston is positively biased; SBA multiplies by
+`(1 - β/2)`. TSB per Teunter-Syntetos-Babai (2011) "Intermittent
+Demand: Linking Forecasting to Inventory Obsolescence" Eur J
+Operational Research 214(3) — replaces inter-arrival interval with
+demand-PROBABILITY updating (updated every period, including
+zeros) for obsolescence handling. Engine implements all three
+bespoke; Syntetos-Boylan ADI/CV² classification (engine lines
+96-105) categorizes the series (Smooth / Intermittent / Erratic /
+Lumpy).
+
+**Phase 3 known failure modes (S74 / bespoke-recursion scope):**
+
+- Math-layer harness validates the classic Croston flat-forecast
+  recursion directly (`_croston` vs R croston); bespoke-vs-bespoke
+  cross-implementation at machine precision.
+- **fitted-vector R-croston-CONVENTION BLOCK (Secondary):** R
+  forecast::croston fitted-value indexing/initialization differs
+  from TSL per-period z_hat/p_hat output; documented as a
+  convention difference, NOT a forecast/math finding (forecast
+  agrees at machine precision).
+- SBA + TSB NOT separately math-layer validated (SBA trivially
+  derivable; TSB no clean R reference).
+- Alpha-grid optimization NOT exercised at math layer (harness
+  pins α=0.1; engine grid-optimizes by min MSE deterministically).
+- Zero-demand semantics: zeros are VALID data (not missing);
+  engine treats NaN→0 (correct intermittent-demand convention),
+  distinct from interpolation/drop used by other techniques.
+
+**Phase 3 boundary of validity:**
+
+- T=100 zero-inflated demand DGP (p_demand=0.25, mean=5, std=1.5);
+  other intermittent patterns + ADI/CV² regimes NOT validated at
+  math layer
+- classic Croston at fixed α=0.1 validated; SBA + TSB variants NOT
+  separately math-layer validated
+- alpha-grid optimization NOT validated at math layer (harness
+  pins α=0.1)
+- fixed-smoothing-parameter convention validated; the engine grid-
+  optimizes alpha (deterministic min-MSE selection) which is NOT
+  separately math-layer validated
+- horizon=5 flat forecast validated (Croston produces constant
+  flat forecast across horizon)
+- in-sample fitted-vector NOT validated (R-croston-convention
+  BLOCK)
+
+**Phase 3 gap markings:**
+
+- fitted-vector parity NOT achievable per R-croston-fitted-
+  convention difference (HARNESS-scope low-priority refinement
+  candidate: align to R fitted convention)
+- SBA + TSB variants NOT separately validated (SBA derivable; TSB
+  no R reference)
+- alpha-grid optimization NOT validated (harness pins α)
+- Syntetos-Boylan demand classification NOT separately validated
+  (emission scope only)
+
+**Status (PRIMARY Tier II.bit-exact PASS at machine precision +
+SECONDARY fitted-vector R-croston-convention BLOCK + wrapper-layer
+3/3 PASS per S74 / Forecasting Classical BLOCK CLOSE):** Layer 1
+classic Croston flat-forecast recursion validated bit-exact at
+machine precision via bespoke-vs-R-croston cross-package check.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS
+including zero-demand-semantics handling + 5-table output
+structure with Syntetos-Boylan demand classification. **NO engine-
+IMPROVEMENT candidate (SBA + all variants present).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** TSL `_croston`
+  at α=β=0.1, classic Croston variant, fixed alpha. Pattern A.1
+  cross-library reference: R `forecast::croston(y, h, alpha=0.1)`.
+  Zero-inflated demand DGP at n=100, seed=42.
+- **Engine preset default (Balanced):** methods=["croston","sba"]
+  + alpha_grid=[0.05, 0.1, 0.15, 0.2, 0.3] + min-MSE selection
+  (engine line 28). The validated config pins classic Croston at
+  α=0.1; engine Balanced default tests both croston + sba over the
+  grid + selects min-MSE (which may select SBA or a different
+  alpha depending on data).
+- **Configuration match:** **YES at the classic-Croston-α=0.1
+  surface** — when the engine min-MSE selection lands on classic
+  Croston at α=0.1 (as it did at the wrapper-layer 3-check
+  fixture: best_method=CROSTON, alpha=0.1), the validated path
+  matches. When the min-MSE selection picks SBA or a different
+  alpha, the engine output uses the (math-layer-unvalidated but
+  trivially-derivable for SBA) variant. The classic Croston
+  recursion underlying all selections is the math-validated one.
+- **Disclosure scope:** SBA + TSB variants NOT separately math-
+  layer validated (SBA = classic Croston × (1-β/2) derivable; TSB
+  no R reference). Alpha-grid optimization NOT validated (harness
+  pins α=0.1). fitted-vector NOT validated (R-croston-convention
+  BLOCK). Alternative demand patterns NOT validated.
+
+**ENG-EXT institutional-rates intermittent_demand workflow scan
+outcome (S74 Step 1; standard workflow + Syntetos-Boylan
+classification; no NEW ENG-EXT-FORECASTING-001 candidate
+surfaced):**
+
+(a) **Flat demand-rate forecast:** PRESENT ✓ — `Forecast` table.
+(b) **Method comparison (variant × alpha):** PRESENT ✓ — `Method
+    Comparison` table with MSE/RMSE per variant+alpha.
+(c) **Demand characteristics + Syntetos-Boylan classification:**
+    PRESENT ✓ **(stronger than minimum)** — `Demand
+    Characteristics` table with ADI + CV² + Smooth/Intermittent/
+    Erratic/Lumpy pattern classification (institutionally useful
+    for demand-pattern-appropriate method selection).
+(d) **Multi-variant support:** PRESENT ✓ — all three Croston-
+    family variants (classic + SBA + TSB) implemented + selectable.
+(e) **Baseline comparison:** PRESENT ✓ — mean-demand baseline
+    (appropriate for intermittent series where last-value naive is
+    misleading).
+
+**Verdict: COVERED at standard workflow elements + stronger-than-
+minimum Syntetos-Boylan classification + multi-variant support.**
+No new ENG-EXT-FORECASTING-001 commission surfaced. (Intermittent
+demand is a niche tool for institutional rates — relevant for
+sparse-event modeling — but the engine's coverage is complete for
+standard use.)
+
+**Audit-hygiene cross-reference (S74 / no engine-IMPROVEMENT +
+fitted-convention BLOCK + structural break from ARIMA arc):**
+
+S74 intermittent_demand is BESPOKE Croston-family (closed-form;
+NOT statsmodels-backed) — a structural break from the ARIMA arc's
+uniform SARIMAX backbone. NO engine-IMPROVEMENT candidate (SBA bias
+correction IS implemented + all three variants present/selectable;
+the classic-without-SBA deficiency concern was checked + ruled out
+at Step 1). Forecast Tier II.bit-exact at machine precision
+(3.77e-15) via bespoke-vs-R-croston cross-package check. fitted-
+vector Secondary BLOCK is a documented R-croston-fitted-convention
+difference, NOT a forecast/math finding (analogous to S68 aic-scale
++ S69 rmse-extraction Secondary-tier convention divergences).
+Engine-improvement queue stays n=1 (ets_hw) at Forecasting
+Classical block close.
+
+**Forecasting Classical BLOCK CLOSE documentation (S74 final
+entry; ELEVENTH catalog block fully Q1-amended at 11 of 13 =
+85% completion):**
+
+Block 2 Forecasting Classical closes at S74 intermittent_demand
+per ratified ascending-complexity dispatch ordering. **Post-S74:
+Forecasting Classical block 8/8 §2.5-validated** (SC7
+transfer_function [Cat 3 remediation cycle] + S68 ets_hw + S69
+theta_forecast + S70 arima + S71 sarima + S72 arimax_sarimax +
+S73 auto_arima + S74 intermittent_demand). **Block 2 FULLY Q1-
+AMENDED — ELEVENTH catalog block to complete per Q1 work program
+scope at S74 close = 11 of 13 catalog blocks fully Q1-amended
+(85% catalog block-level completion).**
+
+**Block 2 methodology elements surfaced across SC7 + S68-S74 arc:**
+
+- **API-positioning pattern (n=6 data points S68-S73):** S68
+  ets_hw is the LONE classical-API exception (statsmodels classical
+  holtwinters SSE-minimization); S69 theta_forecast + S70 arima +
+  S71 sarima + S72 arimax_sarimax + S73 auto_arima all use the
+  MODERN statsmodels/pmdarima state-space API. Modern-API is the
+  engine norm within the block; ets_hw the lone classical
+  exception.
+- **Engine-IMPROVEMENT queue first entry (S68 ets_hw):** migrate
+  classical holtwinters → statespace ETS for likelihood-based
+  inference + exact PIs + Kalman diagnostics; β/γ corner-solution
+  landing pathology confirmed. Queue stayed n=1 across the entire
+  block (S69-S74 all NO engine-IMPROVEMENT). NBEATS interpretability
+  gap (SC16) remains banked pending user disposition on formal
+  queue inclusion.
+- **Tier V Pattern D IC-CAVEAT technique-specificity DISCONFIRMED
+  across the block:** S68 ets_hw carried the pre-existing aic/bic
+  Tier V Pattern D CAVEAT (classical SSE-based AIC vs R state-space
+  likelihood-based AIC; ~1070 abs). But S70/S71/S72/S73 ARIMA-arc
+  entries showed NO IC CAVEAT (all use full-Gaussian-likelihood
+  AIC; clean PASS at 4.4e-8 to 1.2e-7). **This confirms the IC
+  formula-family divergence is OBJECTIVE-FUNCTION-DIVERGENCE-
+  SPECIFIC (arises only when implementations differ on the
+  objective: S64 VAR Lütkepohl small-sample form, S68 ets_hw
+  classical SSE) — NOT cross-package-systematic.** A significant
+  methodological refinement of the e72d6f5-era constant-offset
+  mischaracterization.
+- **Net-new harness construction (S73 auto_arima Disposition B):**
+  auto_arima was the lone ARIMA-family path uncovered by a
+  dedicated harness pre-S73; user ratified building full validation
+  (new p3_auto_arima.py + tolerances entry + R-bridge reference +
+  runtime selected-order path determination). Selected-order
+  PATH (a) agreement [(1,1,1) both arms].
+- **ARIMA arc uniform profile (S70-S73):** four entries on the
+  uniform modern SARIMAX backbone (single → seasonal → exogenous
+  → automatic order selection); no engine-IMPROVEMENT, no IC
+  CAVEAT across the arc.
+- **Cross-reference trust-inheritance pattern (n=7 by S73):** the
+  ARIMA arc contributed 4 instances (S70=4th through S73=7th) all
+  cross-referencing the S62 conformal_intervals SARIMAX backbone +
+  State Space block S48-S51 Kalman backbone.
+- **Bespoke return (S74 intermittent_demand):** structural break
+  from the ARIMA arc — bespoke Croston-family closed-form
+  recursion, machine-precision bespoke-vs-R-croston parity.
+
+**Engine-improvement queue status at Block 2 close: n=1 (ets_hw
+classical-holtwinters → statespace-ETS migration).** No S74
+addition (SBA bias correction present; no classic-without-SBA
+deficiency). NBEATS interpretability gap (SC16) remains banked
+pending user disposition on formal queue inclusion (would bring
+queue to n=2 if dispositioned in).
+
+**ENG-EXT-FORECASTING-001 status at Block 2 close: NOT
+COMMISSIONED.** The Forecasting Classical block came back COVERED
+across ALL eight entries — no institutional-fixed-income workflow
+gap surfaced. Classical forecasting is mature + well-bounded (as
+predicted at the S67-close block-selection rationale: "bounded
+ENG-EXT candidate scope; mature techniques; unlikely to expand Q2
+sprint scope"). Minor USER-CONVENIENCE candidates noted (theta-
+line decomposition diagnostics S69; SARIMA seasonal decomposition
+S71; auto_arima stepwise-search-trajectory S73; intermittent
+fitted-vector convention S74) but none rise to an engine-extension
+commission. **Q2 engine-extension sprint scope remains ENG-EXT-
+CONFORMAL-001 + ENG-EXT-MULTIVARIATE-001 EXTENDED (no Forecasting-
+Classical addition).**
+
+**Forward state post-S74 (Forecasting Classical block close):**
+
+- **Catalog block-level completion: 11 of 13 (85%).**
+- **Remaining unvalidated inventory: 11 entries across 2 catalog
+  blocks:**
+  - **Block 9 Change Points / Anomalies** (5 unvalidated; unopened
+    in Q1 cycle; techniques: bocpd, cusum_page_hinkley,
+    intervention_analysis, pelt_change_points, stl_esd_anomaly).
+    Per ratified end-to-end ordering: opens at S75; spans S75-S79.
+  - **Block 11 Regimes / Nonlinear** (6 unvalidated; unopened in
+    Q1 cycle; techniques: critical_slowing_down, hmm,
+    markov_switching, nar_narx, star, tar_setar). Per ratified
+    ordering: spans S80-S85; closes Q1.
+- **~11 sessions to Q1 close at resumed cadence (S75-S85).**
+- **Next block: Change Points / Anomalies (S75-S79)** per ratified
+  end-to-end ordering; intra-block ascending-complexity ordering
+  to be ratified at block open.
+- **Q2+ work queue:** ENG-EXT-CONFORMAL-001 (CQR + EnbPI/SPCI) +
+  ENG-EXT-MULTIVARIATE-001 EXTENDED (IRF bands + VECM IRF/FEVD +
+  advanced SVAR identification) + engine-improvement queue n=1
+  (ets_hw statespace migration) + low-priority harness/USER-
+  CONVENIENCE items (p3_pca standardize=True re-execution; p3_dfm
+  engine-Balanced re-execution; bvar marginal likelihood; DFM
+  historical decomposition; theta-line + SARIMA-seasonal +
+  auto_arima-trajectory + intermittent-fitted-vector diagnostics).
+
+## §3 Unvalidated catalog techniques (11 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -33876,8 +34316,8 @@ descriptions, summaries).
 ### Evaluation / Uncertainty (0 unvalidated; **Block 4 FULLY Q1-AMENDED** — NINTH catalog block to complete per Q1 work program scope at S62 close = 9 of 13 catalog blocks fully Q1-amended (69% catalog block-level completion); robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61; conformal_intervals moved to §2.5 per Phase 7+ S62 — FIFTH-AND-FINAL block entry; Q1 cadence resumption entry post-Cat-3-cycle close at SC17 a54b430; cascade-resolution entry — p3_conformal was the original Cat 3 finding at S62 Step 1 that triggered the inventory verification cascade + 17-session Cat 3 remediation cycle, now closed at S62 §2.5 entry against the corrected harness; MANDATORY Path B forward observation embedded: ENG-EXT-CONFORMAL-001 commissions CQR + EnbPI/SPCI Q2+ engine extension for institutional-fixed-income-use-case scope)
 (all 5 techniques moved to §2.5)
 
-### Forecasting (Classical) (4 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE path; FIRST engine-IMPROVEMENT candidate within Q1 cycle (migrate to statespace ETS); engine-improvement queue n=1; pre-existing aic/bic Tier V Pattern D CAVEAT; β/γ corner-solution landing; theta_forecast moved to §2.5 per Phase 7+ S69 — THIRD Block 2 entry; SECOND dispatch-set entry; engine uses `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API); NO engine-IMPROVEMENT candidate; cross-API-paradigm Pattern A.1 vs R `forecast::thetaf`; forecast PASS at mle-band 3 orders tighter; rmse Secondary BLOCK is HARNESS metric-extraction artifact NOT math-layer divergence — overall PASS; arima moved to §2.5 per Phase 7+ S70 — FOURTH Block 2 entry; THIRD dispatch-set entry; opens ARIMA arc S70-S73; engine uses MODERN `statsmodels.tsa.arima.model.ARIMA` (state-space/Kalman MLE; wraps SARIMAX — NOT deprecated legacy wrapper); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (both statsmodels + R forecast::Arima(method="ML") use full-Gaussian-likelihood AIC; clean PASS at 4.5e-8 — distinct from S64 VAR + S68 ets_hw IC formula-family divergence); S62 conformal_intervals SARIMAX backbone cross-reference (FOURTH cross-reference trust-inheritance instance in Q1 cadence) + State Space block S48-S51 Kalman backbone cross-reference BOTH APPLY; API-positioning pattern n=3 [S68 classical + S69 modern + S70 modern; modern-API engine norm, ets_hw lone classical exception]; richest block output [4 tables incl Residual Diagnostics]; sarima moved to §2.5 per Phase 7+ S71 — FIFTH Block 2 entry; FOURTH dispatch-set entry; ARIMA arc midpoint; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=1.16e-7; confirms S70 disconfirmation of universal-CAVEAT hypothesis — IC divergence technique-specific not cross-package-systematic); seasonal-component convergence as tight as non-seasonal (no seasonal weak-identification at T=240); S62 SARIMAX + State Space S48-S51 + S70 arima sibling cross-references ALL APPLY — FIFTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=4 [S68 classical + S69/S70/S71 modern]; arimax_sarimax moved to §2.5 per Phase 7+ S72 — SIXTH Block 2 entry; FIFTH dispatch-set entry; ARIMA arc 3-of-4; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` with exog (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=7.7e-8); exogenous beta convergence machine-precision (recovers DGP true β=1.5); future xreg handling verified consistent across arms (harness deterministic future_x to both; engine production last-value-carry-forward is separate modeling-policy default not a parity concern); S62 SARIMAX + State Space S48-S51 + S70/S71 ARIMA-arc siblings cross-references ALL APPLY — SIXTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=5 [S68 classical + S69/S70/S71/S72 modern]; most institutionally-complete block entry [exogenous-coefficient P-Value significance + residual diagnostics + baseline native]; auto_arima moved to §2.5 per Phase 7+ S73 — SEVENTH Block 2 entry; SIXTH dispatch-set entry; CLOSES ARIMA arc S70-S73; **Disposition B NET-NEW HARNESS CONSTRUCTION** [no prior p3_auto_arima harness existed — lone ARIMA-family path uncovered pre-S73; user ratified build-full-validation over cross-reference-only/defer; NEW p3_auto_arima.py + tolerances entry constructed]; selected-order PATH (a) AGREEMENT [pmdarima AND R forecast::auto.arima both select (1,1,1) on ARIMA(1,1,1) DGP → coef-by-coef parity; reproduces S70 manual ARIMA exactly]; NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=4.4e-8); PARTIAL cross-reference scope [S62 SARIMAX backbone covers fit-at-selected-order layer — SEVENTH cross-reference trust-inheritance instance; order-selection-algorithm-cross-implementation layer NOVEL to S73]; State Space S48-S51 + S70/S71/S72 ARIMA-arc siblings APPLY; API-positioning pattern n=6 [S68 classical + S69-S73 modern])
-`intermittent_demand`
+### Forecasting (Classical) (0 unvalidated; **Block 2 FULLY Q1-AMENDED** — ELEVENTH catalog block to complete per Q1 work program scope at S74 close = 11 of 13 catalog blocks fully Q1-amended (85% catalog block-level completion); transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE path; FIRST engine-IMPROVEMENT candidate within Q1 cycle (migrate to statespace ETS); engine-improvement queue n=1; pre-existing aic/bic Tier V Pattern D CAVEAT; β/γ corner-solution landing; theta_forecast moved to §2.5 per Phase 7+ S69 — THIRD Block 2 entry; SECOND dispatch-set entry; engine uses `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API); NO engine-IMPROVEMENT candidate; cross-API-paradigm Pattern A.1 vs R `forecast::thetaf`; forecast PASS at mle-band 3 orders tighter; rmse Secondary BLOCK is HARNESS metric-extraction artifact NOT math-layer divergence — overall PASS; arima moved to §2.5 per Phase 7+ S70 — FOURTH Block 2 entry; THIRD dispatch-set entry; opens ARIMA arc S70-S73; engine uses MODERN `statsmodels.tsa.arima.model.ARIMA` (state-space/Kalman MLE; wraps SARIMAX — NOT deprecated legacy wrapper); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (both statsmodels + R forecast::Arima(method="ML") use full-Gaussian-likelihood AIC; clean PASS at 4.5e-8 — distinct from S64 VAR + S68 ets_hw IC formula-family divergence); S62 conformal_intervals SARIMAX backbone cross-reference (FOURTH cross-reference trust-inheritance instance in Q1 cadence) + State Space block S48-S51 Kalman backbone cross-reference BOTH APPLY; API-positioning pattern n=3 [S68 classical + S69 modern + S70 modern; modern-API engine norm, ets_hw lone classical exception]; richest block output [4 tables incl Residual Diagnostics]; sarima moved to §2.5 per Phase 7+ S71 — FIFTH Block 2 entry; FOURTH dispatch-set entry; ARIMA arc midpoint; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=1.16e-7; confirms S70 disconfirmation of universal-CAVEAT hypothesis — IC divergence technique-specific not cross-package-systematic); seasonal-component convergence as tight as non-seasonal (no seasonal weak-identification at T=240); S62 SARIMAX + State Space S48-S51 + S70 arima sibling cross-references ALL APPLY — FIFTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=4 [S68 classical + S69/S70/S71 modern]; arimax_sarimax moved to §2.5 per Phase 7+ S72 — SIXTH Block 2 entry; FIFTH dispatch-set entry; ARIMA arc 3-of-4; engine uses DIRECT `statsmodels.tsa.statespace.sarimax.SARIMAX` with exog (modern state-space Kalman MLE); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=7.7e-8); exogenous beta convergence machine-precision (recovers DGP true β=1.5); future xreg handling verified consistent across arms (harness deterministic future_x to both; engine production last-value-carry-forward is separate modeling-policy default not a parity concern); S62 SARIMAX + State Space S48-S51 + S70/S71 ARIMA-arc siblings cross-references ALL APPLY — SIXTH cross-reference trust-inheritance instance in Q1 cadence; API-positioning pattern n=5 [S68 classical + S69/S70/S71/S72 modern]; most institutionally-complete block entry [exogenous-coefficient P-Value significance + residual diagnostics + baseline native]; auto_arima moved to §2.5 per Phase 7+ S73 — SEVENTH Block 2 entry; SIXTH dispatch-set entry; CLOSES ARIMA arc S70-S73; **Disposition B NET-NEW HARNESS CONSTRUCTION** [no prior p3_auto_arima harness existed — lone ARIMA-family path uncovered pre-S73; user ratified build-full-validation over cross-reference-only/defer; NEW p3_auto_arima.py + tolerances entry constructed]; selected-order PATH (a) AGREEMENT [pmdarima AND R forecast::auto.arima both select (1,1,1) on ARIMA(1,1,1) DGP → coef-by-coef parity; reproduces S70 manual ARIMA exactly]; NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (aic abs_diff=4.4e-8); PARTIAL cross-reference scope [S62 SARIMAX backbone covers fit-at-selected-order layer — SEVENTH cross-reference trust-inheritance instance; order-selection-algorithm-cross-implementation layer NOVEL to S73]; State Space S48-S51 + S70/S71/S72 ARIMA-arc siblings APPLY; API-positioning pattern n=6 [S68 classical + S69-S73 modern]; intermittent_demand moved to §2.5 per Phase 7+ S74 — EIGHTH-AND-FINAL Block 2 entry; **BLOCK CLOSE at S74**; structural break from ARIMA arc — BESPOKE Croston-family closed-form recursion (NOT statsmodels-backed); forecast Tier II.bit-exact at machine precision (abs_diff=3.77e-15) via bespoke-vs-R-forecast::croston cross-package; classic Croston validated; SBA bias correction + TSB present (SBA derivable, TSB no R reference); NO engine-IMPROVEMENT candidate (SBA present; queue stays n=1); fitted-vector Secondary BLOCK is documented R-croston-fitted-CONVENTION difference NOT forecast/math divergence — overall PASS; zero-demand-vs-missing semantics validated [NaN→0 valid data]; ENG-EXT-FORECASTING-001 NOT COMMISSIONED [block COVERED across all 8 entries; classical forecasting mature/well-bounded as predicted])
+(all 8 techniques moved to §2.5 across SC7 + S68-S74)
 
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
