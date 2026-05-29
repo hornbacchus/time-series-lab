@@ -1,18 +1,21 @@
 """Phase 3 Batch 1 — ETS / Holt-Winters parity check.
 
-Compares TSL's ``engine/techniques/ets_hw.py`` (statsmodels
-``ExponentialSmoothing`` backbone) against R ``forecast::ets``
-on a synthetic Holt-Winters additive trend + additive seasonal
-DGP-recovery fixture.
+Compares TSL's ``engine/techniques/ets_hw.py`` against R
+``forecast::ets`` on a synthetic Holt-Winters additive trend +
+additive seasonal DGP-recovery fixture.
 
-Reference selection note: R ``forecast::ets`` is the canonical
-state-space-formulated ETS implementation (Hyndman, Koehler,
-Snyder, Grose 2002). statsmodels' ``ExponentialSmoothing``
-implements the "classical" Holt-Winters smoothing recursion,
-which is mathematically equivalent for the deterministic-state
-case but parameterizes the initial state and noise differently.
-Tolerance band per master plan §7.1 MLE-fit class accommodates
-the optimizer-convergence-criterion difference.
+B1 migration update (Q2 engine-improvement): the engine was migrated
+from CLASSICAL ``statsmodels.tsa.holtwinters.ExponentialSmoothing``
+(SSE) to the modern STATE-SPACE
+``statsmodels.tsa.exponential_smoothing.ets.ETSModel`` (likelihood).
+``run_tsl`` was correspondingly rewritten from the prior INLINED
+classical bypass to **invoke the migrated engine wrapper via
+RunContext** — so the harness now exercises the real engine code path
+(closing the prior bypass methodology gap) AND measures the
+post-migration state-space-vs-state-space parity (both arms now
+state-space ETS, per Hyndman-Koehler-Snyder-Grose 2008). The
+cross-API-paradigm gap that drove the pre-migration mle-band should
+narrow.
 
 Output-tier discipline:
 
@@ -149,49 +152,82 @@ class EtsParity(P3ParityCheck):
         return {"y": y, "m": self.DGP_M, "horizon": self.HORIZON}
 
     def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
+        # B1 migration: invoke the migrated engine wrapper (state-space
+        # ETSModel) via RunContext rather than inlining statsmodels. This
+        # exercises the real engine code path and measures the post-
+        # migration parity. frequency="M" -> the engine infers
+        # seasonal_periods=12; explicit params pin ETS AAA to match the R
+        # forecast::ets model="AAA" reference.
         _ensure_engine_on_path()
-        from statsmodels.tsa.holtwinters import ExponentialSmoothing  # type: ignore
-        import warnings as _w
-        with _w.catch_warnings():
-            _w.simplefilter("ignore")
-            y = np.asarray(fixture["y"], dtype=np.float64)
-            m = int(fixture["m"])
-            horizon = int(fixture["horizon"])
+        from techniques.base import RunContext  # type: ignore
+        import techniques.ets_hw as ets_mod  # type: ignore
 
-            fit = ExponentialSmoothing(
-                y,
-                trend="add",
-                seasonal="add",
-                seasonal_periods=m,
-                damped_trend=False,
-                initialization_method="estimated",
-            ).fit(optimized=True)
+        y = np.asarray(fixture["y"], dtype=np.float64)
+        m = int(fixture["m"])
+        horizon = int(fixture["horizon"])
 
-        params = fit.params
-        alpha = float(params.get("smoothing_level", np.nan))
-        beta = float(params.get("smoothing_trend", np.nan))
-        gamma = float(params.get("smoothing_seasonal", np.nan))
-        # AIC / BIC: statsmodels exposes these on the ETS fit object
-        try:
-            aic = float(fit.aic)
-        except Exception:
-            aic = float("nan")
-        try:
-            bic = float(fit.bic)
-        except Exception:
-            bic = float("nan")
-        sse = float(fit.sse) if hasattr(fit, "sse") else float("nan")
-        sigma2 = sse / max(len(y) - 3, 1)  # rough estimate; not exact MLE
-        rmse = float(np.sqrt(np.nanmean((y - fit.fittedvalues) ** 2)))
+        ctx = RunContext({
+            "run_id": "p3_ets_parity",
+            "technique_id": "ets",
+            "preset": "Balanced",
+            "seed": 42,
+            "frequency": "M",
+            "time": list(range(len(y))),
+            "series": [{"name": "y", "values": y.tolist()}],
+            "params": {
+                "trend": "add", "seasonal": "add",
+                "seasonal_periods": m, "horizon": horizon,
+            },
+        })
+        resp = ets_mod.run(ctx, lambda *a, **kw: None)
+        if resp.get("status") != "success":
+            raise RuntimeError(
+                f"TSL ETS run failed: {resp.get('error_message')}"
+            )
+        af = resp.get("audit_fields", {})
 
-        forecast = np.asarray(fit.forecast(horizon), dtype=np.float64)
+        # Forecast vector from the Forecast table (column 1).
+        fc_table = next(
+            (t for t in resp["tables"] if "Forecast" in t.get("name", "")),
+            None,
+        )
+        if fc_table is None:
+            raise RuntimeError("TSL ETS forecast table not found")
+        forecast = np.array(
+            [float(row[1]) for row in fc_table["rows"]], dtype=np.float64,
+        )
+
+        # Residuals from the Fitted Values table (column 3, full
+        # precision) -> sigma2/rmse secondary metrics (original
+        # convention: sse/(n-3)).
+        fv_table = next(
+            (t for t in resp["tables"] if "Fitted" in t.get("name", "")),
+            None,
+        )
+        if fv_table is not None:
+            resid = np.array(
+                [float(row[3]) for row in fv_table["rows"]], dtype=np.float64,
+            )
+            resid = resid[~np.isnan(resid)]
+        else:
+            resid = np.array([])
+        if resid.size:
+            sse = float(np.sum(resid ** 2))
+            sigma2 = sse / max(len(y) - 3, 1)
+            rmse = float(np.sqrt(np.mean(resid ** 2)))
+        else:
+            sigma2 = float("nan")
+            rmse = float(af.get("rmse") or "nan")
+
+        def _f(v):
+            return float(v) if v is not None else float("nan")
 
         return {
-            "alpha": alpha,
-            "beta": beta,
-            "gamma": gamma,
-            "aic": aic,
-            "bic": bic,
+            "alpha": _f(af.get("alpha")),
+            "beta": _f(af.get("beta")),
+            "gamma": _f(af.get("gamma")),
+            "aic": _f(af.get("aic")),
+            "bic": _f(af.get("bic")),
             "sigma2": sigma2,
             "rmse": rmse,
             "forecast": forecast,

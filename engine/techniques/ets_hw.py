@@ -1,13 +1,28 @@
 """
 ETS / Holt-Winters Exponential Smoothing for Time Series Lab.
 
-Fits an Exponential Smoothing model (Simple, Holt, or Holt-Winters) using
-statsmodels ExponentialSmoothing and produces forecasts with prediction intervals.
+Fits an Exponential Smoothing model (Simple, Holt, or Holt-Winters) using the
+modern STATE-SPACE ETS formulation (statsmodels
+``exponential_smoothing.ets.ETSModel``, Hyndman-Koehler-Snyder-Grose 2008) and
+produces forecasts with analytic state-space prediction intervals.
+
+B1 migration (Q2 engine-improvement, item 1 of 2): this module was migrated
+from the CLASSICAL Holt-Winters path
+(``statsmodels.tsa.holtwinters.ExponentialSmoothing``, SSE-minimization) to the
+state-space ``ETSModel`` (likelihood-based MLE). This is a BREAKING output
+change — the classical path is removed, not flag-gated. Rationale: the classical
+path produced (1) SSE-proxy AIC/BIC (not likelihood-based information criteria)
+and (2) a corner-solution pathology where smoothing parameters stuck at 0.
+ETSModel fixes both: native likelihood AIC/BIC, and bounded MLE
+([1e-4, 1-1e-4]) that structurally prevents the corner solution. Prediction
+intervals are now analytic (deterministic) state-space intervals, replacing the
+prior non-deterministic (unseeded) simulation path.
 """
 
 import numpy as np
+import pandas as pd
 import warnings as _warnings
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from statsmodels.tsa.exponential_smoothing.ets import ETSModel
 
 from techniques.base import (
     RunContext,
@@ -80,8 +95,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
         Whether to use damped trend. Default False.
     horizon : int, optional
         Forecast steps. Default 10.
-    use_boxcox : bool or float, optional
-        Apply Box-Cox transform. Default False.
+
+    Note: the classical ``use_boxcox`` parameter is no longer supported after
+    the B1 state-space ETSModel migration (ETSModel has no Box-Cox option;
+    pre-transform the series externally if a Box-Cox transform is required).
     """
     try:
         progress_callback("Validating inputs", 5)
@@ -219,42 +236,58 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 ],
             )
 
-        use_boxcox = ctx.get_param("use_boxcox", False)
-        if use_boxcox and np.any(clean <= 0):
-            warn_list.append("Box-Cox requires positive values. Disabling.")
-            use_boxcox = False
-
         progress_callback("Fitting ETS model", 20)
 
-        # Preset: optimize vs fixed
-        optimized = True  # always optimize
+        # State-space ETS error-term mapping (B1 migration). ETSModel
+        # requires an explicit error term that the classical Holt-Winters
+        # formulation lacks. Use multiplicative error only when a
+        # multiplicative component is present AND the data is strictly
+        # positive (multiplicative error requires y > 0); otherwise additive.
+        # For the canonical additive (AAA) case this yields error="add",
+        # matching R forecast::ets model="AAA".
+        error_param = (
+            "mul"
+            if (seasonal_param == "mul" or trend_param == "mul")
+            and np.all(clean > 0)
+            else "add"
+        )
+
+        # Fit on a pandas Series with an explicit RangeIndex. ETSModel's
+        # get_prediction (analytic state-space intervals, used below)
+        # requires an indexed endog; a plain ndarray raises on the
+        # out-of-sample index. The fit is numerically identical to fitting
+        # the ndarray.
+        clean_series = pd.Series(np.asarray(clean, dtype=float),
+                                 index=pd.RangeIndex(start=0, stop=len(clean)))
 
         with _warnings.catch_warnings():
             _warnings.simplefilter("ignore")
             try:
-                model = ExponentialSmoothing(
-                    clean,
+                model = ETSModel(
+                    clean_series,
+                    error=error_param,
                     trend=trend_param,
                     seasonal=seasonal_param,
                     seasonal_periods=period if seasonal_param else None,
                     damped_trend=damped if trend_param else False,
-                    use_boxcox=use_boxcox,
                     initialization_method="estimated",
                 )
-                fit = model.fit(optimized=optimized)
+                fit = model.fit(disp=False)
             except Exception as e1:
                 # Fallback: simpler model
                 warn_list.append(
                     f"Full model failed ({e1}). Falling back to simpler specification."
                 )
-                model = ExponentialSmoothing(
-                    clean,
+                model = ETSModel(
+                    clean_series,
+                    error="add",
                     trend="add",
                     seasonal=None,
                     damped_trend=False,
                     initialization_method="estimated",
                 )
-                fit = model.fit(optimized=True)
+                fit = model.fit(disp=False)
+                error_param = "add"
                 trend_param = "add"
                 seasonal_param = None
                 damped = False
@@ -264,36 +297,41 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Forecast
         fc = fit.forecast(horizon)
 
-        # Simulation-based prediction intervals (if preset allows)
-        n_sim = {"Fast": 100, "Balanced": 500, "Thorough": 1000}.get(ctx.preset, 500)
+        # Analytic state-space prediction intervals (B1 migration).
+        # ETSModel.get_prediction yields exact state-space variance-based
+        # intervals — DETERMINISTIC, unlike the prior classical path's
+        # unseeded fit.simulate() Monte-Carlo intervals. The scipy-t
+        # residual-std fallback is retained (also deterministic) in case
+        # get_prediction raises (e.g. an index edge case on Index-less
+        # input arrays).
         try:
-            sim = fit.simulate(horizon, repetitions=n_sim, error="mul" if seasonal_param == "mul" else "add")
-            lower = np.percentile(sim, 2.5, axis=1)
-            upper = np.percentile(sim, 97.5, axis=1)
+            _pred = fit.get_prediction(start=n, end=n + horizon - 1)
+            _sf = _pred.summary_frame(alpha=0.05)
+            lower = np.asarray(_sf["pi_lower"], dtype=float)
+            upper = np.asarray(_sf["pi_upper"], dtype=float)
+            interval_method = "analytic_state_space"
         except Exception:
             # Fallback: t-distribution interval from residual std.
-            # 1.96 (standard normal 97.5 percentile) assumes known
-            # variance and infinite DoF — wrong on small samples and
-            # on skewed/heavy-tailed residuals. Use t-critical with
-            # T − n_params degrees of freedom and horizon-scaled σ
-            # (variance grows approximately √h for ETS random-walk
-            # additive errors; multiplicative errors grow differently
-            # but the simulation path above handles that case when
-            # it's available).
+            # t-critical with T − n_params degrees of freedom and
+            # horizon-scaled σ (variance grows approximately √h for ETS
+            # additive errors). Deterministic.
             from scipy.stats import t as _t_dist
-            resid = clean - fit.fittedvalues
-            resid_std = float(np.std(resid, ddof=1))
-            n_params = int(getattr(fit, "k_params", len(getattr(fit, "params", [])) or 3))
+            _fc_arr = np.asarray(fc, dtype=float)
+            resid = np.asarray(clean, dtype=float) - np.asarray(fit.fittedvalues, dtype=float)
+            resid = resid[~np.isnan(resid)]
+            resid_std = float(np.std(resid, ddof=1)) if len(resid) > 1 else 0.0
+            n_params = int(getattr(fit, "k_params", len(np.atleast_1d(getattr(fit, "params", []))) or 3))
             dof = max(1, len(clean) - n_params)
             t_crit = float(_t_dist.ppf(0.975, dof))
             horizon_scale = np.sqrt(np.arange(1, horizon + 1))
             half_width = t_crit * resid_std * horizon_scale
-            lower = fc - half_width
-            upper = fc + half_width
+            lower = _fc_arr - half_width
+            upper = _fc_arr + half_width
+            interval_method = "t_fallback"
             warn_list.append(
                 f"Prediction intervals estimated from residual std with "
-                f"t-critical ({t_crit:.2f}, dof={dof}) — simulation path "
-                f"failed. Intervals may under-cover if residuals are "
+                f"t-critical ({t_crit:.2f}, dof={dof}) — analytic state-space "
+                f"path failed. Intervals may under-cover if residuals are "
                 f"non-iid or heavily skewed."
             )
 
@@ -354,12 +392,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
             ["Forecast Horizon", horizon],
         ]
 
-        # Smoothing parameters
-        params_dict = fit.params_formatted if hasattr(fit, 'params_formatted') else {}
-        if hasattr(fit, 'params'):
-            p = fit.params
-            for k, v in p.items():
-                summary_rows.append([f"Param: {k}", round(float(v), 6) if isinstance(v, (int, float, np.floating)) else v])
+        # Smoothing parameters. State-space ETSResults exposes these as
+        # direct attributes (its ``.params`` is an ndarray, not a dict).
+        for _label, _attr in (
+            ("smoothing_level", "smoothing_level"),
+            ("smoothing_trend", "smoothing_trend"),
+            ("smoothing_seasonal", "smoothing_seasonal"),
+            ("damping_trend", "damping_trend"),
+        ):
+            _v = getattr(fit, _attr, None)
+            if _v is not None:
+                try:
+                    _vf = float(_v)
+                except (TypeError, ValueError):
+                    continue
+                if np.isfinite(_vf):
+                    summary_rows.append([f"Param: {_label}", round(_vf, 6)])
 
         summary_table = make_table("Model Summary", ["Metric", "Value"], summary_rows)
 
@@ -406,12 +454,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 return None
             return fv
         try:
-            _p = fit.params
-            if hasattr(_p, "get"):
-                _alpha = _coerce(_p.get("smoothing_level"))
-                _beta  = _coerce(_p.get("smoothing_trend"))
-                _gamma = _coerce(_p.get("smoothing_seasonal"))
-                _phi   = _coerce(_p.get("damping_trend"))
+            # State-space ETSResults exposes smoothing params as direct
+            # attributes (.params is an ndarray, not a dict). _coerce maps
+            # nan (e.g. gamma when seasonal disabled) -> None.
+            _alpha = _coerce(getattr(fit, "smoothing_level", None))
+            _beta  = _coerce(getattr(fit, "smoothing_trend", None))
+            _gamma = _coerce(getattr(fit, "smoothing_seasonal", None))
+            _phi   = _coerce(getattr(fit, "damping_trend", None))
         except Exception:
             pass
 
@@ -471,6 +520,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "bic": round(bic, 2),
                 "rmse": round(rmse, 4) if rmse else None,
                 "horizon": horizon,
+                "error_term": error_param,
+                "interval_method": interval_method,
                 "alpha": round(_alpha, 6) if _alpha is not None else None,
                 "beta": round(_beta, 6) if _beta is not None else None,
                 "gamma": round(_gamma, 6) if _gamma is not None else None,
@@ -481,13 +532,17 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "baseline_label": baseline["label"],
                 **format_significance_disclosure(
                     test_name=(
-                        "ETS prediction interval (t-critical on residual std)"
+                        f"ETS prediction interval ({interval_method})"
                     ),
                     critical_value_formula=(
-                        "forecast ± t(1-α/2, T - n_params) · resid_std · "
-                        "sqrt(h). DoF-aware; NOT autocorrelation-aware — "
-                        "if residuals retain serial correlation, coverage is "
-                        "optimistic. Consider a rolling-origin bootstrap re-fit."
+                        "Analytic state-space prediction interval from the "
+                        "ETSModel forecast-error variance "
+                        "(get_prediction().summary_frame pi_lower/pi_upper, "
+                        "alpha=0.05); deterministic. Fallback path "
+                        "('t_fallback'): forecast ± t(1-α/2, T - n_params) · "
+                        "resid_std · sqrt(h) if the analytic path is "
+                        "unavailable. Gaussian-error assumption; coverage "
+                        "optimistic if residuals retain serial correlation."
                     ),
                     ac_corrected=False,
                 ),

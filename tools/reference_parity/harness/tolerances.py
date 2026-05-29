@@ -783,14 +783,24 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
     "p3_ets": {
         "type": "tiered_outputs",
         "primary": {
-            # ETS state-space representation in R `forecast::ets`
-            # vs Holt-Winters smoothing recursion in statsmodels
-            # `ExponentialSmoothing`. Mathematically equivalent for
-            # deterministic-state case but optimizers (R's BFGS on
-            # likelihood vs statsmodels' L-BFGS-B on SSE) converge
-            # to numerically nearby smoothing parameters with
-            # tolerance-class divergence in the 1e-2 range.
-            "abs_tol": 5e-2,
+            # B1 migration (Q2): the engine now uses STATE-SPACE
+            # ETSModel (likelihood MLE), same paradigm as R
+            # forecast::ets — so this is now a state-space-vs-state-space
+            # comparison. The well-identified parameters tightened
+            # markedly (beta abs ~2.7e-5, gamma abs ~4.8e-5, forecast
+            # rel ~0.089%), hence abs_tol tightened 5e-2 -> 2e-2. The
+            # band is NOT tightened further because the LEVEL smoothing
+            # parameter alpha is WEAKLY IDENTIFIED (flat likelihood
+            # ridge — statsmodels reports an identical log-likelihood at
+            # its own alpha=0.344 and at R's alpha=0.450; the level
+            # smoothing trades off against the estimated initial level).
+            # alpha lands at abs ~0.107 / rel ~0.24 and is RETAINED at
+            # CAVEAT (block band) — honestly documented as weak
+            # identification, NOT widened to PASS (S84 STAR
+            # weakly-identified-gamma precedent: triage like cases
+            # alike; tolerances report the measurement, not the
+            # explanation).
+            "abs_tol": 2e-2,
             "rel_tol": 1e-1,
             "block_abs_tol": 2e-1,
             "block_rel_tol": 5e-1,
@@ -802,19 +812,26 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "block_rel_tol": 5e-1,
         },
         "justification": (
-            "Master plan §7.1 MLE-fit band, widened from the strict "
-            "1e-3 / 1e-2 baseline because R `forecast::ets` and "
-            "statsmodels `ExponentialSmoothing` parameterize the "
-            "state-space form differently (state-space innovation "
-            "vs SSE-minimizing classical recursion). Hyndman-Khandakar "
-            "2008 §6.4 documents the equivalence is mathematical, "
-            "not implementational. Smoothing-parameter tolerance "
-            "5e-2 absolute / 1e-1 relative; AIC tolerance 5.0 abs "
-            "(state-space likelihood vs SSE-based AIC differ by an "
-            "additive constant of -n*log(2*pi)/2 in the standard "
-            "form). DOCUMENTED-DIVERGENCE candidate if observed "
-            "divergence exceeds these widened thresholds; CAVEAT if "
-            "in the block band; PASS otherwise."
+            "Master plan §7.1 MLE-fit band. POST-B1-MIGRATION: both "
+            "arms are now state-space ETS (engine ETSModel vs R "
+            "forecast::ets) — the prior cross-API-paradigm divergence "
+            "(classical SSE vs state-space likelihood) is gone; the "
+            "well-identified params (beta/gamma/forecast) tightened to "
+            "the 1e-5 / sub-0.1%-rel range (abs_tol 2e-2). The level "
+            "smoothing alpha is WEAKLY IDENTIFIED (flat likelihood "
+            "ridge; identical statsmodels llf at its alpha 0.344 and "
+            "R's 0.450) -> retained at CAVEAT (block band rel 5e-1), "
+            "documented as intrinsic weak identification, NOT widened "
+            "to mask (S84 precedent). SECONDARY aic/bic: the engine is "
+            "now likelihood-based, but statsmodels-ETS vs R-ets use "
+            "different likelihood-NORMALIZATION constants -> a residual "
+            "~505-abs gap remains (NARROWED from the classical ~1070 "
+            "gap, ~53%). This is a Tier V Pattern D documented-"
+            "divergence (likelihood-normalization, within-paradigm) — "
+            "Secondary tier, NON-BLOCKING; argmin-preserving for model "
+            "selection. The aic/bic absolute values are NOT cross-"
+            "referenceable against R without accounting for the "
+            "normalization constant."
         ),
     },
 
