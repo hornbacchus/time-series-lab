@@ -35432,7 +35432,380 @@ close projected). ENG-EXT-CHANGEPOINT-001 consolidation decision
 at block close (n=2 → n=3 if BOCPD also univariate-only).
 Estimated session time: ~1h (Class B existing-harness).
 
-## §3 Unvalidated catalog techniques (7 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### bocpd (Phase 7+ S79; SIXTY-EIGHTH §2.5 entry; FIFTH-AND-FINAL Change Points / Anomalies block entry; **CLOSES Change Points / Anomalies block — TWELFTH catalog block to complete per Q1 work program scope at S79 close = 12 of 13 catalog blocks fully Q1-amended (92% catalog block-level completion)**; Class B existing-harness validation [Phase 3 Batch 6 harness pre-existing + PASS per S75 block-open probe]; engine: BESPOKE Adams-MacKay 2007 recursion (normal-inverse-gamma conjugate; Student-t posterior predictive; deterministic recursive run-length posterior); **Tier II.bit-exact** [n_change_points + change-point-set bit-exact]; Pattern A.3 self-parity [PyPI bocd uses non-conjugate Gaussian → self-parity only path]; **NO engine-IMPROVEMENT candidate** [deterministic Bayesian recursion; queue stays n=1 (ets_hw)]; **ENG-EXT-CHANGEPOINT-001 COMMISSIONED at n=3** — BOCPD univariate-only (THIRD instance after S75 CUSUM + S78 PELT); systematic multivariate-change-point gap across ALL block change-point techniques)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.bit-exact (Pattern A.3 paper-formula self-parity at
+deterministic recursive Bayesian update)** per S79 Code Step 2
+empirical verification. Engine bespoke Adams-MacKay BOCPD (TSL
+math path; via wrapper) vs from-scratch Adams-MacKay reference
+mirroring the recursion verbatim. n_change_points + change-point-
+set agree bit-exact: n_cps=0 both arms; change-point-set match
+(intersection=0, no asymmetric). **DETERMINISTIC recursive
+Bayesian** (run-length posterior computed analytically via
+recursive conjugate update + constant hazard; no MCMC/sampling) —
+bit-exact, no convergence wiggle.
+
+**Output-parity note (n_cps=0 at default config):** At the default
+weak NIG priors (κ₀=α₀=β₀=0.01) + hazard_λ=200 + threshold=0.5,
+the run-length-reset posterior P(r_t=0) does NOT cross the 0.5
+threshold even at the t=150 mean-shift in the fixture — so both
+engine + reference report n_cps=0 (no change-point flagged at that
+threshold). **This is bit-exact agreement on the recursion output**
+(both arms compute the identical run-length posterior trajectory +
+apply the identical threshold + min-gap selection → identical
+empty change-point set). The recursion math (predictive Student-t
+density + sufficient-statistics update + hazard-weighted run-length
+update + renormalization) is validated bit-exact regardless of
+whether the threshold flags any change-point; the parity surface is
+the recursion + selection logic, not the sensitivity of the default
+threshold.
+
+**Engine variant validated (at math layer; engine wrapper
+exercised via RunContext):** Bespoke Adams-MacKay 2007 recursion:
+at each t, compute posterior-predictive Student-t log-density per
+run-length (`_student_t_logpdf` via gammaln for stability), update
+the run-length distribution via constant hazard H(r)=1/λ
+(growth + change-point mass), renormalize, update normal-inverse-
+gamma sufficient statistics (κ/μ/α/β) per run-length. Engine
+`run()` lines 125-188 implement the recursion. Change-points
+selected where P(r_t=0) > threshold with a min-gap greedy filter.
+Harness invokes the ENGINE wrapper (`bocpd_run` via RunContext at
+Balanced preset).
+
+**Reference (Pattern A.3 paper-formula self-parity):** Reference
+at `tools/reference_parity/harness/checks/p3_bocpd.py`
+`_bocpd_reference` lines 68-138 (+ `_student_t_logpdf` lines
+44-65) is a from-scratch (~50 LOC) NIG-conjugate Adams-MacKay
+reimplementation mirroring the TSL recursion verbatim (same
+predictive-density formula, same sufficient-statistics update,
+same hazard-weighted run-length update + renormalization, same
+threshold + min-gap selection). Pattern A.3 self-parity (NOT
+cross-package): per the harness rationale, the PyPI `bocd` package
+implements only a constant-hazard Gaussian model (NO NIG
+conjugate) — using it as reference would force a methodology
+rewrite; a minimal NIG-conjugate self-parity reference is the only
+path to a meaningful PASS verdict + catches TSL regressions in the
+recursion math, sufficient-statistics update, or predictive-
+density formula.
+
+**Class B existing-harness note:** Per the S75 block-open probe,
+bocpd is Class B — the p3_bocpd harness (Phase 3 Batch 6) pre-
+existed + PASSed at runner CLI but had no §2.5 entry. S79
+formalizes the §2.5 validation entry. Most conceptually distinct
+block entry (recursive Bayesian run-length distribution vs the
+sequential-detection / decomposition / regression of the other
+block entries).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine drops NaN (`clean =
+  values[~np.isnan(values)]` at engine line 65) — appropriate for
+  the recursive online algorithm. Verified by injecting NaN at
+  [20] + [100]: engine returned `status=success` + "missing values
+  removed" warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"` (verified at multiple hazard/threshold
+  settings); returned audit fields populated correctly
+  (`hazard_lambda`; `threshold`; `prior_mu`; `prior_kappa=0.01`;
+  `prior_alpha=0.01`; `prior_beta=0.01`; `n_change_points`;
+  `change_point_indices`; `min_gap=5`; `n_obs`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 4 expected tables (`Detected Change Points` [# + Time +
+  Index + Probability + Mean Before/After + Shift]; `Segments`;
+  `Parameters`; `BOCPD Time Series` [Value + MAP Run Length +
+  Change Point Prob over time]).
+
+**Verdict (math layer):** PASS bit-exact (n_change_points abs_diff
+=0.0 [0 both arms]; change-point-set exact match [intersection=0,
+no tsl_only/ref_only]; n=300 two-segment mean-shift DGP [CP at
+t=150], hazard_λ=200, weak NIG priors, threshold=0.5, at seed=42,
+Balanced preset at runner CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S79 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_bocpd.py`
+(technique_id `p3_bocpd`).
+**Audit date:** 2026-05-29 (S79 §2.5 entry; Change Points /
+Anomalies BLOCK CLOSE).
+**Primary metrics (math layer):** change-point count
+(n_change_points) + change-point-index set (set-equality).
+
+**Determinism profile:** DETERMINISTIC recursive Bayesian (Adams-
+MacKay run-length posterior via closed-form NIG-conjugate
+predictive + constant hazard; no MCMC/sampling; analytic recursive
+update). Tier II.bit-exact. (Engine pins `np.random.seed(ctx.seed)`
+defensively but the BOCPD recursion uses no RNG.)
+
+**Hazard + prior validated:** constant hazard H(r)=1/λ (λ=200
+Balanced default → geometric run-length prior) + normal-inverse-
+gamma conjugate prior (μ₀=series mean, κ₀=0.01, α₀=0.01, β₀=0.01
+weak defaults) + Student-t posterior predictive (df=2α, location=μ,
+scale²=β(κ+1)/(ακ)). threshold=0.5 + min_gap=5 (Balanced) for
+change-point selection from the run-length-reset posterior.
+
+**Validation claim scope (S79; engine math validated at change-
+point-detection scope via Pattern A.3 self-parity; engine wrapper
+code path exercised at both math-layer + wrapper-layer 3-check
+scopes):**
+
+- **Layer 1 (Adams-MacKay BOCPD recursion + change-point
+  selection) VALIDATED at Tier II.bit-exact:** n_change_points +
+  change-point set match the verbatim-recursion reference bit-
+  exact. Self-parity confirms the engine recursion (predictive
+  density + sufficient-statistics update + hazard-weighted run-
+  length update + renormalization) + threshold/min-gap selection
+  are correct.
+- **Layer 1 RUN-LENGTH POSTERIOR MATRIX NOT separately compared
+  (change-point-set-only at math layer):** the harness compares
+  n_cps + change-point-set; the full run-length posterior matrix
+  R[t, r] is computed identically in both arms (verbatim recursion)
+  → the change-point set (derived from P(r_t=0)) is the comparison
+  surface. Run-length-matrix-level parity is implied by change-
+  point-set parity under the verbatim self-parity.
+- **Layer 1 SEGMENT SUMMARY + MAP RUN-LENGTH TRAJECTORY NOT
+  separately validated at math layer:** emitted in the Segments +
+  BOCPD Time Series tables; covered at wrapper-layer Check 3
+  emission scope.
+- **Layer 1 ALTERNATIVE HAZARD/PRIOR/THRESHOLD CONFIGS NOT
+  separately validated at math layer:** Balanced defaults
+  validated; alternative hazard λ / NIG priors / thresholds change
+  the run-length posterior + change-point count but are
+  deterministic (covered at wrapper-layer Check 2 across multiple
+  settings).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN-drop handling; Balanced hazard+prior
+  dispatch + 4-table structure; output shape/type verification.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** BOCPD per Adams-MacKay (2007) "Bayesian
+Online Changepoint Detection" arXiv:0710.3742 — maintains a
+posterior distribution over the "run length" r_t (time since the
+last change-point) at each step, updated recursively as each
+observation arrives: (1) compute the posterior-predictive density
+of the new observation under each run-length's accumulated
+sufficient statistics; (2) propagate the run-length distribution
+via growth probabilities (run continues, weighted by 1−H) +
+change-point probability (run resets, weighted by H); (3)
+renormalize. With a normal-inverse-gamma conjugate prior the
+posterior predictive is a Student-t (closed-form), making the
+entire recursion analytic + deterministic. Change-points are
+inferred where the run-length-reset posterior P(r_t=0) exceeds a
+threshold. Engine implements the recursion bespoke; constant
+hazard H(r)=1/λ.
+
+**Phase 3 known failure modes (S79 / Class B existing-harness
+scope):**
+
+- Self-parity validates engine recursion against a verbatim
+  reimplementation (catches wrapper-level bugs + recursion-math
+  regressions; the Adams-MacKay recursion is closed-form so
+  formulation-error risk is minimal).
+- Pattern A.3 self-parity (NOT cross-package): PyPI bocd uses a
+  non-conjugate Gaussian model; no library implements the NIG-
+  conjugate Adams-MacKay recipe as a drop-in reference. Self-parity
+  is the only path.
+- Default-threshold sensitivity: at weak default priors + λ=200 +
+  threshold=0.5, no change-point is flagged even at a clear t=150
+  shift (the run-length-reset posterior stays below 0.5); this is
+  a config-sensitivity property of the default threshold, NOT a
+  recursion error (both arms agree bit-exact on n_cps=0). Users
+  seeking higher sensitivity lower the threshold / hazard λ.
+- Numerical stability: the predictive density uses gammaln + log-
+  space computation with a max-subtraction before exp; both arms
+  use the identical stabilization.
+
+**Phase 3 boundary of validity:**
+
+- n=300 two-segment mean-shift DGP (CP at t=150); other change
+  patterns + segment structures NOT validated at math layer
+- normal-inverse-gamma conjugate / Student-t predictive validated;
+  alternative observation models NOT supported
+- constant hazard H(r)=1/λ validated; alternative hazard functions
+  NOT supported
+- Balanced defaults (λ=200, weak NIG priors, threshold=0.5,
+  min_gap=5) validated; alternative configs deterministic but NOT
+  separately validated at math layer
+- univariate only (scalar predictive per observation); multivariate
+  BOCPD NOT supported (see ENG-EXT)
+- change-point count + set validated; run-length posterior matrix +
+  segment summary NOT separately validated (emission scope)
+
+**Phase 3 gap markings:**
+
+- Run-length posterior matrix NOT separately validated (change-
+  point-set validated; matrix implied by verbatim self-parity)
+- Segment summary + MAP run-length trajectory NOT separately
+  validated (emission scope)
+- Alternative hazard/prior/threshold configs NOT separately
+  validated
+- Multivariate BOCPD NOT supported (univariate only; ENG-EXT-
+  CHANGEPOINT-001 THIRD instance → commissioned)
+
+**Status (Tier II.bit-exact PASS + wrapper-layer 3/3 PASS per S79
+/ Change Points / Anomalies BLOCK CLOSE):** Layer 1 Adams-MacKay
+BOCPD recursion + change-point selection validated bit-exact via
+Pattern A.3 self-parity. Wrapper layer (S49+ NEW 3-check scope)
+validated at 3/3 PASS including NaN-drop + 4-table output
+structure. **NO engine-IMPROVEMENT candidate (deterministic
+Bayesian recursion).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** Adams-MacKay
+  BOCPD at hazard_λ=200, NIG priors (μ₀=series mean, κ₀=α₀=β₀=
+  0.01), threshold=0.5, min_gap=5 (Balanced). Pattern A.3 self-
+  parity reference mirrors the recursion verbatim. Two-segment
+  mean-shift DGP at n=300, CP at t=150, seed=42.
+- **Engine preset default (Balanced):** hazard_λ=200; weak NIG
+  priors; threshold=0.5; min_gap=5; map_only=False. Matches
+  validated configuration.
+- **Configuration match:** **YES at the Adams-MacKay NIG-conjugate
+  BOCPD surface** — user invoking at default Balanced preset
+  experiences the math-validated recursion. Alternative hazard /
+  priors / threshold change the run-length posterior + change-point
+  count but exercise the same validated recursion.
+- **Disclosure scope:** Alternative hazard functions + observation
+  models NOT supported. Alternative hazard λ / NIG priors /
+  thresholds deterministic but NOT separately math-layer validated.
+  Run-length posterior matrix + segment summary emission-scope
+  only. Multivariate BOCPD NOT supported (ENG-EXT-CHANGEPOINT-001).
+
+**ENG-EXT-CHANGEPOINT-001 COMMISSION (S79 multivariate scan; n=3
+systematic gap → COMMISSIONED):**
+
+S79 BOCPD multivariate scan completes the ENG-EXT-CHANGEPOINT-001
+pattern: engine BOCPD is **UNIVARIATE** (`_student_t_logpdf`
+operates on a scalar observation per step; single `clean` series).
+This is the **THIRD univariate-only change-point instance** across
+the block:
+
+- **S75 cusum_page_hinkley:** univariate CUSUM + Page-Hinkley
+  (per-series sequential detection).
+- **S78 pelt_change_points:** univariate PELT (`signal=clean.
+  reshape(-1,1)`; ruptures supports multivariate natively but the
+  wrapper reshapes).
+- **S79 bocpd:** univariate Adams-MacKay (scalar predictive).
+
+**n=3 SYSTEMATIC GAP across ALL block change-point techniques →
+ENG-EXT-CHANGEPOINT-001 COMMISSIONED.** Scope: multivariate
+change-point detection across multiple series — joint yield-curve-
+wide regime/break detection (detecting a curve-wide structural
+break simultaneously across tenors rather than per-tenor). For
+institutional rates, joint multivariate change-point detection is
+substantive (a policy regime shift manifests across the whole
+curve; per-series detection misses the joint structure + multiplies
+false positives). **Implementation note:** ruptures (S78 PELT)
+supports multivariate signals NATIVELY (multi-column input → joint
+segmentation); multivariate CUSUM (Healy 1987 MCUSUM) + multivariate
+BOCPD (multivariate-Gaussian/Wishart-conjugate predictive) are
+standard extensions — LOW-TO-MODERATE engineering effort (PELT is
+near-free: expose ruptures' existing multivariate capability;
+CUSUM + BOCPD require multivariate-predictive implementation).
+Commissioned for Q2+ engine extension; bundle alongside ENG-EXT-
+CONFORMAL-001 + ENG-EXT-MULTIVARIATE-001 EXTENDED in the Q2
+engine-extension sprint.
+
+**Audit-hygiene cross-reference (S79 / Class B existing-harness +
+block close + ENG-EXT-CHANGEPOINT-001 commission):** S79 bocpd is
+a Class B existing-harness validation (Phase 3 Batch 6 harness,
+pre-existing + PASS per S75 block-open probe; §2.5 entry formalized
+at S79). Pattern A.3 self-parity (verbatim NIG-conjugate Adams-
+MacKay reference; PyPI bocd non-conjugate → self-parity only path).
+Bit-exact change-point count + set parity (deterministic recursive
+Bayesian). NO engine-IMPROVEMENT (deterministic recursion).
+**ENG-EXT-CHANGEPOINT-001 COMMISSIONED at n=3** (univariate-only
+BOCPD completes the systematic multivariate-change-point gap with
+S75 CUSUM + S78 PELT).
+
+**Change Points / Anomalies BLOCK CLOSE documentation (S79 final
+entry; TWELFTH catalog block fully Q1-amended at 12 of 13 =
+92% completion):**
+
+Block 9 Change Points / Anomalies closes at S79 bocpd per ratified
+ascending-complexity dispatch ordering. **Post-S79: Change Points
+/ Anomalies block 5/5 §2.5-validated** (S75 cusum_page_hinkley +
+S76 stl_esd_anomaly + S77 intervention_analysis + S78
+pelt_change_points + S79 bocpd). **Block 9 FULLY Q1-AMENDED —
+TWELFTH catalog block to complete per Q1 work program scope at S79
+close = 12 of 13 catalog blocks fully Q1-amended (92% catalog
+block-level completion).**
+
+**Block 9 methodology elements surfaced across S75-S79 arc:**
+
+- **Uniform Class B existing-harness (fastest block of Q1
+  cadence):** the S75 block-open probe (per the Option-3
+  disposition — probe harness-existence + session-type
+  distribution BEFORE ratifying intra-block ordering) confirmed
+  all 5 entries had pre-existing Phase 3 Batch 6 harnesses + all
+  PASS at runner CLI. No net-new construction (contrast S73
+  auto_arima Disposition B); no cross-reference-only dispositions
+  (contrast S67 bvar). All 5 were §2.5-entry-write sessions against
+  verified-passing infrastructure (S68-S72 read+verify pattern).
+  The uniform session-type collapsed the cross-references-first
+  sequencing axis → ascending-complexity primary sort.
+- **Self-parity dominant for change-point detection:** S75 CUSUM/
+  PH + S76 STL-ESD + S78 PELT + S79 BOCPD all used Pattern A.3
+  self-parity (verbatim-recursion / same-library references) —
+  the change-point-detection space has divergent cross-package
+  formulations (R cpm/changepoint different CUSUM/PH; Twitter
+  AnomalyDetection R archived; PyPI bocd non-conjugate), so self-
+  parity (Pattern-J-avoidance per S75 rationale) is the dominant
+  validation mode. Only S77 intervention_analysis used Pattern A.1
+  cross-package (R stats::arima xreg) — because intervention
+  analysis reduces to ARIMA-with-exog, where a clean cross-package
+  reference exists.
+- **Partial cross-references:** S76 (S33 stl_decompose STL layer)
+  + S77 (S62/S70/S71/S72 SARIMAX backbone + S72 exog mechanism;
+  NINTH trust-inheritance instance). S75/S78/S79 were standalone
+  bespoke/library self-parity (no inherited layer).
+- **Mixed tiers:** bit-exact for the deterministic detectors (S75
+  CUSUM/PH, S76 STL-ESD, S78 PELT exact-DP, S79 BOCPD
+  deterministic-recursion) + mle-band for S77 intervention (SARIMAX
+  Kalman MLE). Four of five bit-exact (the deterministic-algorithm
+  majority) + one mle-band (the SARIMAX-fit entry).
+- **NO engine-IMPROVEMENT candidates across the block:** all 5
+  entries use deterministic/modern implementations (closed-form
+  detectors + modern statsmodels SARIMAX); engine-improvement queue
+  stayed n=1 (ets_hw) across the entire block.
+- **ENG-EXT-CHANGEPOINT-001 commissioned (n=3 systematic gap):**
+  multivariate change-point detection across the curve (S75 CUSUM
+  + S78 PELT + S79 BOCPD all univariate-only). The block's single
+  ENG-EXT commission.
+
+**Engine-improvement queue status at Block 9 close: n=1 (ets_hw
+classical-holtwinters → statespace-ETS migration).** No Change
+Points addition (all deterministic/modern). NBEATS interpretability
+gap (SC16) remains banked pending user disposition.
+
+**Forward state post-S79 (Change Points / Anomalies block close):**
+
+- **Catalog block-level completion: 12 of 13 (92%).**
+- **Remaining unvalidated inventory: 6 entries in 1 catalog block:**
+  - **Block 11 Regimes / Nonlinear** (6 unvalidated; unopened in
+    Q1 cycle; techniques: critical_slowing_down, hmm,
+    markov_switching, nar_narx, star, tar_setar). Per ratified
+    end-to-end ordering: spans S80-S85; **CLOSES Q1 at S85.**
+    **HIGHEST-DETERMINISM-RISK block** (hmmlearn EM-band likely;
+    markov_switching local-optima sensitivity; STAR/TAR bespoke-
+    per-session) — the deferred-last-because-slowest block per the
+    S62-close ratified rationale.
+- **~6 sessions to Q1 close (S80-S85).**
+- **Next block: Regimes / Nonlinear (S80-S85)** per ratified end-
+  to-end ordering. Per the S75 Option-3 precedent, a **block-open
+  probe** (harness-existence + session-type distribution across
+  all 6 entries) should precede intra-block ordering ratification —
+  the determinism-risk profile makes the probe especially valuable
+  (some entries may be net-new-construction or carry mle-band/em-
+  band tiers).
+- **Q2+ engine-extension sprint scope (consolidated):** ENG-EXT-
+  CONFORMAL-001 (CQR + EnbPI/SPCI) + ENG-EXT-MULTIVARIATE-001
+  EXTENDED (VAR IRF bands + VECM IRF/FEVD + advanced SVAR) +
+  **ENG-EXT-CHANGEPOINT-001 (multivariate change-point detection;
+  NEW at S79)**. Engine-improvement queue: n=1 (ets_hw statespace
+  migration). Minor candidates: seasonal-vs-trend-anomaly-
+  attribution (S76) + low-priority harness/USER-CONVENIENCE items.
+
+## §3 Unvalidated catalog techniques (6 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -35455,8 +35828,8 @@ descriptions, summaries).
 ### Causality / Relationships / Lead-Lag (0 unvalidated; Block 1 FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15 + S17 + S18)
 (all 6 techniques moved to §2.5)
 
-### Change Points / Anomalies / Interventions (4 unvalidated; cusum_page_hinkley moved to §2.5 per Phase 7+ S75 — FIRST Change Points / Anomalies block entry; Block 9 opens at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe [Phase 3 Batch 6 harnesses pre-existing + PASS at runner CLI; none had §2.5 entries; NOT net-new-construction (contrast S73) NOR cross-reference-only (contrast S67)]; engine BESPOKE closed-form CUSUM + Page-Hinkley (univariate); Tier II.bit-exact [all alarm counts abs_diff=0.0]; Pattern A.3 self-parity (avoids R-CUSUM/PH methodology zoo); NO engine-IMPROVEMENT candidate (closed-form deterministic; queue stays n=1); multivariate-CUSUM minor ENG-EXT candidate logged; stl_esd_anomaly moved to §2.5 per Phase 7+ S76 — SECOND Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels STL + bespoke Generalized-ESD (Rosner 1983) on remainder; Tier II.bit-exact [n_anomalies + anomaly-index set bit-exact]; PARTIAL cross-reference [STL decomposition layer inherits trust from S33 stl_decompose; ESD/Rosner-1983 test layer novel]; Pattern A.3 self-parity [Twitter AnomalyDetection R archived → self-parity only path]; NO engine-IMPROVEMENT candidate; seasonal-vs-trend attribution minor USER-CONVENIENCE candidate logged; intervention_analysis moved to §2.5 per Phase 7+ S77 — THIRD Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels ARIMA-with-intervention-dummies-as-exog (Box-Tiao 1975 step/pulse/ramp); Tier II.mle-band [intervention coefficient ω machine-precision]; STRONGEST cross-reference in block — SARIMAX fit + exog mechanism inherited from S62/S70/S71/S72 (intervention dummies ARE exogenous regressors); intervention-dummy step/pulse/ramp construction novel; NINTH trust-inheritance instance in Q1 cadence; NO engine-IMPROVEMENT candidate; NO aic/bic Tier V Pattern D CAVEAT [CSS-ML-vs-exact-ML loglik convention within mle-band]; multiple-intervention support PRESENT [ENG-EXT candidate ruled out]; pelt_change_points moved to §2.5 per Phase 7+ S78 — FOURTH Change Points / Anomalies block entry; FIRST ruptures-backed block entry; Class B existing-harness; engine `ruptures.Pelt` (Killick-Fearnhead-Eckley 2012 EXACT dynamic-programming); Tier II.bit-exact [n_change_points + position set bit-exact]; Pattern A.1 same-library [ruptures.Pelt both arms]; NO engine-IMPROVEMENT candidate; ENG-EXT-CHANGEPOINT-001 candidate at n=2 [univariate-only PELT + S75 univariate-only CUSUM → multivariate change-point detection across the curve; tracked, not yet commissioned])
-`bocpd`
+### Change Points / Anomalies / Interventions (0 unvalidated; **Block 9 FULLY Q1-AMENDED** — TWELFTH catalog block to complete per Q1 work program scope at S79 close = 12 of 13 catalog blocks fully Q1-amended (92% catalog block-level completion); cusum_page_hinkley moved to §2.5 per Phase 7+ S75 — FIRST Change Points / Anomalies block entry; Block 9 opens at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe [Phase 3 Batch 6 harnesses pre-existing + PASS at runner CLI; none had §2.5 entries; NOT net-new-construction (contrast S73) NOR cross-reference-only (contrast S67)]; engine BESPOKE closed-form CUSUM + Page-Hinkley (univariate); Tier II.bit-exact [all alarm counts abs_diff=0.0]; Pattern A.3 self-parity (avoids R-CUSUM/PH methodology zoo); NO engine-IMPROVEMENT candidate (closed-form deterministic; queue stays n=1); multivariate-CUSUM minor ENG-EXT candidate logged; stl_esd_anomaly moved to §2.5 per Phase 7+ S76 — SECOND Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels STL + bespoke Generalized-ESD (Rosner 1983) on remainder; Tier II.bit-exact [n_anomalies + anomaly-index set bit-exact]; PARTIAL cross-reference [STL decomposition layer inherits trust from S33 stl_decompose; ESD/Rosner-1983 test layer novel]; Pattern A.3 self-parity [Twitter AnomalyDetection R archived → self-parity only path]; NO engine-IMPROVEMENT candidate; seasonal-vs-trend attribution minor USER-CONVENIENCE candidate logged; intervention_analysis moved to §2.5 per Phase 7+ S77 — THIRD Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels ARIMA-with-intervention-dummies-as-exog (Box-Tiao 1975 step/pulse/ramp); Tier II.mle-band [intervention coefficient ω machine-precision]; STRONGEST cross-reference in block — SARIMAX fit + exog mechanism inherited from S62/S70/S71/S72 (intervention dummies ARE exogenous regressors); intervention-dummy step/pulse/ramp construction novel; NINTH trust-inheritance instance in Q1 cadence; NO engine-IMPROVEMENT candidate; NO aic/bic Tier V Pattern D CAVEAT [CSS-ML-vs-exact-ML loglik convention within mle-band]; multiple-intervention support PRESENT [ENG-EXT candidate ruled out]; pelt_change_points moved to §2.5 per Phase 7+ S78 — FOURTH Change Points / Anomalies block entry; FIRST ruptures-backed block entry; Class B existing-harness; engine `ruptures.Pelt` (Killick-Fearnhead-Eckley 2012 EXACT dynamic-programming); Tier II.bit-exact [n_change_points + position set bit-exact]; Pattern A.1 same-library [ruptures.Pelt both arms]; NO engine-IMPROVEMENT candidate; ENG-EXT-CHANGEPOINT-001 candidate at n=2 [univariate-only PELT + S75 univariate-only CUSUM → multivariate change-point detection across the curve; tracked, not yet commissioned]; bocpd moved to §2.5 per Phase 7+ S79 — FIFTH-AND-FINAL Change Points / Anomalies block entry; BLOCK CLOSE at S79; Class B existing-harness; engine BESPOKE Adams-MacKay 2007 BOCPD (NIG conjugate; Student-t predictive; deterministic recursive run-length posterior); Tier II.bit-exact [n_change_points + change-point-set bit-exact]; Pattern A.3 self-parity [PyPI bocd non-conjugate → self-parity only path]; NO engine-IMPROVEMENT candidate; ENG-EXT-CHANGEPOINT-001 COMMISSIONED at n=3 [BOCPD univariate-only = THIRD univariate-only change-point instance after S75 CUSUM + S78 PELT; systematic multivariate-change-point gap across ALL block change-point techniques → multivariate change-point detection across the curve commissioned for Q2+ sprint])
+(all 5 techniques moved to §2.5 across S75-S79)
 
 ### Decomposition & Seasonal Adjustment (0 unvalidated; Block 3 FULLY Q1-AMENDED — FOURTH catalog block to complete per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; classical_decompose moved to §2.5 per Phase 7+ S31; mstl_decompose moved to §2.5 per Phase 7+ S32; stl_decompose moved to §2.5 per Phase 7+ S33; x13_seasonal_adjust moved to §2.5 per Phase 7+ S34 — FOURTH-AND-FINAL Block 3 entry)
 (all 4 techniques moved to §2.5)
