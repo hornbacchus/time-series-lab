@@ -34424,6 +34424,92 @@ Classical addition).**
 
 ### cusum_page_hinkley (Phase 7+ S75; SIXTY-FOURTH §2.5 entry; FIRST Change Points / Anomalies block entry; Block 9 OPENS at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); **all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe** [harness + technique_id + tolerance-ladder all pre-existing from Phase 3 batch work; NO §2.5 entries previously; NOT net-new construction (contrast S73 auto_arima Disposition B) NOR cross-reference-only (contrast S67 bvar Disposition A)]; engine API: BESPOKE closed-form CUSUM + Page-Hinkley (no library wrap; univariate); **Tier II.bit-exact** [all alarm counts abs_diff=0.0]; **NO engine-IMPROVEMENT candidate** [closed-form deterministic; queue stays n=1 (ets_hw)]; Pattern A.3 self-parity)
 
+═══════════════════════════════════════════════════════════════════
+**ENG-EXT-CHANGEPOINT-001 A1b AMENDMENT (Q2 Workstream A, commission 1
+of 3, sub-build 2 of 3; commit `581175a`; ADDITIVE — not breaking;
+FIRST self-parity A-build):** cusum_page_hinkley now supports
+MULTIVARIATE (joint-across-curve-points) change monitoring. The S75
+univariate validation below STANDS unchanged (univariate path
+byte-identical). ENG-EXT-CHANGEPOINT-001 PARTIALLY delivered: A1a PELT
++ A1b CUSUM done; A1c BOCPD pending.
+═══════════════════════════════════════════════════════════════════
+
+**Multivariate capability (A1b):** AUTO-DETECT from input dimensionality
+(`ctx.get_all_series()`): **1 series → the existing univariate
+two-sided CUSUM/PH path, UNCHANGED/byte-identical** (S75-validated;
+branch skipped for k=1); **≥2 series → a new JOINT multivariate path**
+(stack to `(n, k)`; NaN handled by ROW-DROP, matching S75's strip
+semantics adapted to the joint signal — a row missing any tenor cannot
+contribute to the joint Mahalanobis distance).
+
+**Formulation — proper Crosier (1988) MCUSUM + joint Page-Hinkley.**
+MCUSUM: a shrinking VECTOR accumulator on Σ⁻¹-standardized deviations
+(`C_t=√((Sv+Z_t)ᵀΣ⁻¹(Sv+Z_t))`; `Sv=(Sv+Z_t)(1−k_m/C_t)` if `C_t>k_m`
+else 0; statistic `y_t=√(SvᵀΣ⁻¹Sv)`), allowance `k_m=0.5`. Σ = sample
+covariance over the series; **Σ⁻¹ via UNCONDITIONAL `np.linalg.pinv`**
+(no conditional guard branch — deterministic + identical across the
+self-parity arms; care-point #1). Joint Page-Hinkley on the
+running-mean-centered Mahalanobis distance. **Non-reduction is
+INHERENT** (the Mahalanobis norm is directionless → MCUSUM is
+one-sided "joint deviation magnitude" and CANNOT reduce to S75's
+two-sided SIGNED univariate CUSUM; no standard norm-based MCUSUM does)
+and **moot for code** (disjoint paths: k=1 → univariate two-sided;
+k≥2 → MCUSUM; nothing routes k=1 through MCUSUM). Methodology
+correction banked: the A1a reduce-to-univariate-at-k=1 property is
+valid for a scalar PENALTY (genuinely reduces) but INVALID for a
+norm-based statistic — dropped for A1b.
+
+**Thresholds — bootstrap-CALIBRATED (two corrections to function).**
+The heuristic allowance/threshold (`k_m`/`h_m`) VASTLY over-fire for
+k>1 (the in-control Mahalanobis statistic scales with √k; an empirical
+no-change control fired 200/300). So alarms use a **bootstrap-
+calibrated threshold** — the permutation null-max distribution's 95th
+percentile (no-reset null runs, so the null-max is meaningful) — run
+ALWAYS on the multivariate path (n per preset: Fast 200 / Balanced 500
+/ Thorough 2000). This is care-point #2's "bootstrap is the calibrated
+path," empirically confirmed (calibrated → 0 no-change false alarms).
+Seeded (`np.random.seed(ctx.seed)`) → deterministic → self-parity
+bit-exact. (Two build corrections from the literal execute-spec, both
+WITHIN the ratified Crosier-MCUSUM + bootstrap-calibrated-path design:
+proper Crosier vector-accumulator + bootstrap-calibrated alarms.)
+
+**SEMANTIC (honest disclosure — the B-option's legitimate point,
+addressed by documentation).** Like S75, multivariate CUSUM/PH is an
+ONLINE-MONITORING deviation-alarm detector (flags where the curve
+deviates from its established baseline relative to the global-mean
+target), NOT a PELT-style segmentation. For a single coordinated shift
+it flags BOTH regimes as differing from the between-regimes mean
+(retrospective-CUSUM semantic, identical to S75's univariate behavior).
+It is COMPLEMENTARY to A1a PELT (joint segmentation — boundary dates)
+and A1c BOCPD (joint run-length posterior): three DISTINCT joint
+curve-monitoring capabilities, which is why the n=3 commission made all
+three multivariate.
+
+**Multivariate validation (new `p3_cusum_page_hinkley_multivariate`;
+SELF-PARITY, Tier II.bit-exact).** No library exists for multivariate
+CUSUM → the reference is a FROM-SCRATCH reimplementation of the
+IDENTICAL formulation (same Σ via np.cov+pinv, same k_m, same seeded
+permutation-bootstrap null-max thresholds, same detection/reset, same
+NaN row-drop — the identical-formulation discipline, the A1a
+identical-penalty analog in self-parity form). **Result: BIT-EXACT
+joint change-point set match** (n_change_points 99==99; joint position
+set intersection=99, no tsl-only/ref-only); no-change control 0 false
+alarms; deterministic across 3 runs (incl. seeded bootstrap).
+Wrapper-layer 3/3 PASS (NaN row-drop; multivariate dispatch; joint
+output). **Backward-compat GATE (firm):** existing univariate
+`p3_cusum_page_hinkley` PASSES UNCHANGED.
+
+**ADDITIVE-not-breaking + threshold-calibration scope.** Univariate
+path byte-identical. The self-parity validates IMPLEMENTATION (engine ==
+from-scratch reference) bit-exact; the bootstrap is the calibrated
+threshold path (the heuristic k_m/√k defaults are unusable per the
+200/300 finding). Multi-series input was previously silently reduced to
+series-1 (univariate); under auto-detect it now does joint multivariate
+(intended). Per-tenor componentwise attribution DEFERRED (minor
+candidate; A-open boundary discipline). No new technique_id / catalog
+entry (same technique gaining capability). No new precision-tier
+(joint change-point SET comparison + bit-exact extends S75/S78/S79).
+
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
 **Tier II.bit-exact (Pattern A.3 paper-formula self-parity at
 deterministic closed-form recursion)** per S75 Code Step 2
@@ -38135,9 +38221,10 @@ catalog completion).** §3 unvalidated → 0.
       instances). **Q2 Workstream A commission 1 of 3 — PARTIALLY
       DELIVERED: A1a PELT multivariate joint detection done (commit
       `253bcad`; ADDITIVE auto-detect, bit-exact vs direct ruptures;
-      see the S78 pelt_change_points A1a amendment); A1b CUSUM
-      (Crosier-MCUSUM self-parity) + A1c BOCPD (multivariate-NIW
-      self-parity) pending.**
+      S78 amendment) + A1b CUSUM multivariate Crosier-MCUSUM joint
+      detection done (commit `581175a`; ADDITIVE auto-detect,
+      bootstrap-calibrated thresholds, SELF-PARITY bit-exact; S75
+      amendment); A1c BOCPD (multivariate-NIW self-parity) pending.**
 - **Engine-improvement queue (n=2 at Q1 close → n=1 post-B1 → n=0
   post-B2; WORKSTREAM B COMPLETE):** ~~ets_hw statespace migration
   (S68)~~ **RESOLVED at B1 (commit `6281e2e`; classical→state-space
