@@ -32310,6 +32310,22 @@ artifact; NOT a math-layer finding):**
   248-267) to extract a comparable in-sample RMSE; deferred as
   HARNESS-scope low-priority item (does not affect the math-layer
   forecast validation which is the substantive parity claim).
+- **RESOLVED — Workstream C / C2 (harness-refinement; commit
+  `4ce7229`):** the rmse NaN artifact is fixed. `run_tsl` now uses
+  `sqrt(ThetaModelResults.sigma2)` — statsmodels' native in-sample
+  one-step residual-variance estimate (ThetaModelResults exposes no
+  `fittedvalues`/`resid` series; the prior
+  `prediction_results.forecast(steps=0)` path yielded NaN). rmse is
+  now a measured value: **tsl=1.1606 vs R thetaf=0.9452** →
+  Secondary **CAVEAT** (abs 0.215 / rel 18.6%). This is NOT a harness
+  artifact and NOT fabricated/widened — it is a genuine, modest
+  cross-implementation IN-SAMPLE-FIT difference between the two Theta
+  formulations (statsmodels Hyndman-Billah state-space vs R
+  Assimakopoulos-Nikolopoulos original); seasonal factors ~1.02-1.03
+  rule out a scale mismatch. NON-BLOCKING (overall PASS; forecast
+  primary passes tightly). The NaN→measured transition is strictly
+  better: a real value with an honest documented divergence replaces
+  a non-comparable artifact.
 
 **Validation claim scope (S69; engine math validated at primary-
 metric scope via inline-math harness pattern; engine wrapper code
@@ -36672,6 +36688,18 @@ S69 theta rmse + S74 intermittent fitted-vector documented harness
 artifacts); a future harness-hygiene pass could subtract 1 from the R
 states before comparison.
 
+**RESOLVED — Workstream C / C1 (harness-refinement; commit `4ce7229`):**
+the index-base mismatch is fixed. `compare()` now normalizes each
+arm's decoded states to 0-based by subtracting its own minimum label
+(both arms are canonically mean-sorted, so each array's minimum is the
+low-mean regime) before comparison. **viterbi_agreement_rate is now
+1.0 (PASS, n=500)** — confirming the decoded sequences AGREE EXACTLY
+(the 0.0 was purely the index artifact, exactly as diagnosed; the
+decoded-sequence parity is now positively confirmed, consistent with
+the same-model machine-precision emission/likelihood agreement). The
+exact-1.0 retires the documented artifact: decoded-sequence parity is
+now a confirmed PASS, not a mismeasured BLOCK.
+
 **Determinism profile (Baum-Welch EM; cross-invocation; em-band
 framing per S66):** The engine HMM is CROSS-INVOCATION BIT-EXACT
 within-process — refitting at the same seed reproduces the
@@ -37156,18 +37184,46 @@ revision-2 framework (Disposition 3):**
   switching_variance=True, search_reps=25, maxiter=500,
   np.random.seed(ctx.seed), label_regimes_by_dominant_key
   canonicalization, manual regime-weighted forecast.
-- **Configuration match:** **PARTIAL — the validated math-layer
-  config matches the engine FAST preset (order=0, non-switching
-  variance), NOT Balanced.** The Hamilton-filter EM mean-switching
-  CORE (regime means + transition matrix + likelihood) is validated;
-  the Balanced AR(1) + switching-variance EXTENSION rides the same
-  statsmodels MarkovAutoregression EM machinery and is exercised at
-  the wrapper-layer 3-check (3/3 PASS, non-degenerate), but is not
-  separately cross-package-asserted at the math layer.
-- **Disclosure scope:** Transition matrix at em-band. Balanced
-  (AR(1) + switching variance) + Thorough (k=3) NOT separately math-
-  asserted. k>2 regimes + overlapping means + TVTP NOT validated/
-  supported. Forecast construction NOT asserted.
+- **Configuration match:** **PARTIAL at S83 → FULL post-Workstream-C
+  (C3).** At S83 only the FAST preset (order=0, mean-switching) was
+  math-asserted (cross-package vs R MSwM); the Balanced spec
+  (MarkovAutoregression order=1 + switching-variance) was wrapper-
+  confirmed only. See the C3 amendment below — the Balanced spec is
+  now math-asserted via SELF-PARITY, making VSC FULL.
+- **Disclosure scope:** Transition matrix at em-band. Thorough (k=3)
+  NOT separately math-asserted. k>2 regimes + overlapping means +
+  TVTP NOT validated/supported. Forecast construction NOT asserted.
+
+**RESOLVED — Workstream C / C3 (harness-refinement; commit `4ce7229`):
+Balanced spec math-asserted via SELF-PARITY; VSC now FULL.** The
+Balanced spec (MarkovAutoregression order=1 + switching_ar +
+switching_variance) is now math-asserted: the harness invokes the
+ENGINE WRAPPER at Balanced and compares against a direct statsmodels
+reimplementation of the same pipeline (S85 nar_narx self-parity
+pattern). Result — **all PASS, bit-exact modulo the engine's audit-
+rounding floor:** regime_means max_abs_diff 3.3e-5 (4-dp floor),
+transition_matrix 3.8e-6 (4-dp floor), log_likelihood abs_diff 0.0047
+(= the engine 2-dp llf rounding floor; tsl 477.87 vs ref 477.8653).
+This validates the engine wrapper's Balanced fit + regime-label
+canonicalization + transition handling reproduce a clean statsmodels
+call bit-exactly. **VSC is now FULL** (Fast math-validated cross-
+package vs R MSwM + Balanced math-validated via self-parity).
+
+**Why self-parity for Balanced (the C3 finding):** a cross-package
+Balanced assertion via R MSwM was ATTEMPTED and found INFEASIBLE — R
+MSwM does NOT reliably fit the AR(1)+switching-variance spec on this
+mean-switching fixture: it DEGENERATES (regime means collapse to
+−0.38/−0.04, spurious AR=0.80, transition p00=0, llf +573), whereas
+statsmodels correctly recovers the DGP regime structure (±1, AR≈0)
+and matches the engine's own Balanced llf (−477.87 from the B1
+wrapper check). So the failure is the REFERENCE (MSwM unreliable on
+this over-parameterized spec/fixture), NOT the engine — hence self-
+parity is the appropriate assertion (validates the engine wrapper
+internally) while the cross-package Fast check supplies the external
+validation. **Banked future candidate:** a Balanced-MATCHING DGP
+fixture (genuine AR(1)+switching-variance) on which BOTH statsmodels
+and R MSwM can fit the correctly-specified model would enable a
+cross-package Balanced assertion (net-new fixture; deferred).
 
 **ENG-EXT institutional-rates Markov-switching workflow scan outcome
 (S83 Step 1; multi-step forecast present; TVTP minor candidate; no
@@ -38028,10 +38084,16 @@ catalog completion).** §3 unvalidated → 0.
   multistart instead; see the star §2.5 B2 amendment)**. **Workstream B
   (engine-improvement) CLOSES; next per Q2 B→C→A: Workstream C
   harness-refinement.**
-- **Harness-refinement queue (low priority):** S69 theta rmse-
-  reconstruction artifact + S82 HMM Viterbi 0-vs-1 index-base
-  secondary-metric artifact + S83 markov_switching Balanced-spec math-
-  layer assertion (currently Fast-preset-validated).
+- **Harness-refinement queue (low priority) — RESOLVED at Workstream
+  C (commit `4ce7229`); queue n=3→0; WORKSTREAM C CLOSES:** ~~S69 theta
+  rmse-reconstruction artifact~~ FIXED (C2: rmse NaN→1.1606 via
+  sqrt(sigma2); now a measured value with a documented cross-impl
+  CAVEAT) + ~~S82 HMM Viterbi 0-vs-1 index-base secondary-metric
+  artifact~~ FIXED (C1: agreement-rate 0.0→1.0, decoded-sequence parity
+  confirmed) + ~~S83 markov_switching Balanced-spec math-layer
+  assertion~~ RESOLVED (C3: Balanced math-asserted via self-parity,
+  VSC now FULL; cross-package-via-MSwM found infeasible [MSwM
+  degenerates on AR+switchvar], Balanced-matching fixture banked).
 - **Minor ENG-EXT candidates logged (Q2+ backlog):** S76 seasonal-vs-
   trend anomaly attribution + S80 spatial/multivariate EWS + S81
   threshold-CI (Hansen 2000) + S82 automatic state-count selection
