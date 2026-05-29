@@ -33,6 +33,255 @@ _PRESET_CONFIG = {
 }
 
 
+def _run_multivariate(ctx, progress_callback, all_series):
+    """Multivariate (joint-across-curve-points) BOCPD — ENG-EXT-CHANGEPOINT-001
+    A1c. Detects a SINGLE JOINT change-point set (curve-wide regime-shift
+    dates) via Adams-MacKay (2007) with a multivariate Normal-Inverse-Wishart
+    (NIW) conjugate prior -> multivariate-Student-t predictive (the matrix
+    generalization of S79's scalar Normal-Inverse-Gamma -> Student-t).
+
+    FAITHFUL GENERALIZATION: the NIW->multivariate-t predictive reduces EXACTLY
+    to S79's scalar NIG->Student-t at k=1 (ν₀=(k-1)+2α -> dof 2α; Ψ₀=2β·I ->
+    2β). The Adams-MacKay recursion (run-length posterior + hazard + change-
+    point derivation) mirrors S79 unchanged; only the predictive + sufficient-
+    statistics update go matrix-valued. Invoked for >=2 series; univariate
+    (1 series) path unchanged.
+    """
+    from scipy.linalg import solve_triangular  # local: leave univariate imports intact
+    np.random.seed(ctx.seed)
+    warnings = []
+    names = [s[0] for s in all_series]
+    arrays = [np.asarray(s[1], dtype=float) for s in all_series]
+    k = len(names)
+
+    min_len = min(len(a) for a in arrays)
+    if any(len(a) != min_len for a in arrays):
+        warnings.append(f"Series aligned to common length {min_len}.")
+    Mraw = np.column_stack([a[:min_len] for a in arrays])
+    # NaN: DROP rows with any NaN (match S79 strip, adapted to the joint signal).
+    row_ok = ~np.isnan(Mraw).any(axis=1)
+    n_dropped = int((~row_ok).sum())
+    if n_dropped > 0:
+        warnings.append(f"{n_dropped} rows with missing values removed.")
+    X = Mraw[row_ok]
+    n = X.shape[0]
+    if n < 20:
+        return make_error_response(
+            ctx,
+            f"Only {n} complete aligned observations across {k} series. "
+            "Multivariate BOCPD needs at least 20.",
+            error_fixes=["Provide longer time series."],
+        )
+
+    cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
+    hazard_lambda = float(ctx.get_param("hazard_lambda", 200))
+    hazard = 1.0 / hazard_lambda
+    prior_kappa = float(ctx.get_param("prior_kappa", 0.01))
+    prior_alpha = float(ctx.get_param("prior_alpha", 0.01))
+    prior_beta = float(ctx.get_param("prior_beta", 0.01))
+    threshold = float(ctx.get_param("threshold", 0.5))
+    min_gap = cfg["min_gap"]
+
+    pm = ctx.get_param("prior_mu")
+    prior_mu = (np.full(k, float(pm)) if np.isscalar(pm) and pm is not None
+                else X.mean(axis=0))
+    # NIW hyperparameters generalizing S79's NIG (reduction-preserving):
+    #   ν₀ = (k-1) + 2α  -> predictive dof = ν₀-k+1 = 2α  (S79 df at k=1; proper IW)
+    #   Ψ₀ = 2β · I_k    (= 2β at k=1)
+    nu0 = (k - 1) + 2.0 * prior_alpha
+    Psi0 = (2.0 * prior_beta) * np.eye(k)
+
+    def _mvt_logpdf(x, mu_r, kap, nuu, Psi_r):
+        """Multivariate-Student-t log-density (NIW posterior predictive).
+        Unconditional Cholesky: Σ_t PD-by-construction (Ψ₀ regularizes;
+        d=ν-k+1 >= 2α > 0), so no guard branch. Reduces to S79's
+        _student_t_logpdf at k=1.
+        """
+        d = nuu - k + 1
+        Sigma_t = Psi_r * (kap + 1.0) / (kap * d)
+        L = np.linalg.cholesky(Sigma_t)
+        diff = x - mu_r
+        yv = solve_triangular(L, diff, lower=True)
+        q = float(yv @ yv)
+        logdet = 2.0 * float(np.sum(np.log(np.diag(L))))
+        return (gammaln((d + k) / 2.0) - gammaln(d / 2.0)
+                - (k / 2.0) * np.log(d * np.pi)
+                - 0.5 * logdet
+                - ((d + k) / 2.0) * np.log(1.0 + q / d))
+
+    progress_callback("Running multivariate Adams-MacKay algorithm", 15)
+    max_rl = n + 1
+    kappa = np.zeros(max_rl)
+    nu = np.zeros(max_rl)
+    mu = np.zeros((max_rl, k))
+    Psi = np.zeros((max_rl, k, k))
+    kappa[0] = prior_kappa
+    nu[0] = nu0
+    mu[0] = prior_mu
+    Psi[0] = Psi0
+
+    R = np.zeros((n + 1, n + 1))
+    R[0, 0] = 1.0
+    map_rl = np.zeros(n, dtype=int)
+    cp_prob = np.zeros(n)
+
+    for t in range(n):
+        if t % max(1, n // 20) == 0:
+            progress_callback(f"Processing observation {t + 1}/{n}", 15 + int(65 * t / n))
+        x = X[t]
+        pred_logp = np.array([
+            _mvt_logpdf(x, mu[r], kappa[r], nu[r], Psi[r]) for r in range(t + 1)
+        ])
+        pred = np.exp(pred_logp - np.max(pred_logp))
+        growth = R[t, :t + 1] * pred * (1 - hazard)
+        cp = np.sum(R[t, :t + 1] * pred * hazard)
+        R[t + 1, 1:t + 2] = growth
+        R[t + 1, 0] = cp
+        evidence = np.sum(R[t + 1, :t + 2])
+        if evidence > 0:
+            R[t + 1, :t + 2] /= evidence
+        map_rl[t] = int(np.argmax(R[t + 1, :t + 2]))
+        cp_prob[t] = float(R[t + 1, 0])
+
+        # NIW sufficient-statistics update (rank-1; generalizes scalar β update)
+        kappa_new = np.zeros(max_rl)
+        nu_new = np.zeros(max_rl)
+        mu_new = np.zeros((max_rl, k))
+        Psi_new = np.zeros((max_rl, k, k))
+        kappa_new[0] = prior_kappa
+        nu_new[0] = nu0
+        mu_new[0] = prior_mu
+        Psi_new[0] = Psi0
+        for r in range(t + 1):
+            kap = kappa[r]
+            kp = kap + 1.0
+            kappa_new[r + 1] = kp
+            mu_new[r + 1] = (kap * mu[r] + x) / kp
+            nu_new[r + 1] = nu[r] + 1.0
+            diff = x - mu[r]
+            Psi_new[r + 1] = Psi[r] + (kap / kp) * np.outer(diff, diff)
+        kappa, nu, mu, Psi = kappa_new, nu_new, mu_new, Psi_new
+
+    progress_callback("Detecting change points", 82)
+    # Detection via MAP run-length RESET — the STANDARD correct BOCPD signal.
+    # NOTE: S79's univariate criterion (change point where cp_prob=R[t+1,0] >
+    # threshold) is NON-FUNCTIONAL: R[t+1,0] == hazard EXACTLY (data-
+    # independent — the Adams-MacKay split normalizes to P(r=0)=hazard
+    # regardless of the data), so it can never cross a 0.5 threshold (this is
+    # why S79 reported n_cps=0). The correct signal is the MAP run-length
+    # COLLAPSING to a fresh run: a change point is a time t where the MAP run
+    # length drops sharply (> min_gap), i.e. the posterior mass resets. (The
+    # univariate S79 path keeps its original criterion for byte-identical
+    # backward-compat; the S79 cp_prob-criterion bug is documented + banked as
+    # a separate univariate-fix candidate.)
+    reset_idx = [t for t in range(1, n) if (map_rl[t - 1] - map_rl[t]) > min_gap]
+    filtered_cps = []
+    for t in reset_idx:
+        if not filtered_cps or (t - filtered_cps[-1]) >= min_gap:
+            filtered_cps.append(int(t))
+    n_cps = len(filtered_cps)
+
+    progress_callback("Building output", 90)
+    time_col = ctx.time if ctx.time and len(ctx.time) >= n else None
+
+    cp_rows = []
+    for i, cp_idx in enumerate(filtered_cps):
+        t_label = time_col[cp_idx] if time_col else int(cp_idx + 1)
+        cp_rows.append([
+            i + 1, t_label, cp_idx + 1,
+            int(map_rl[cp_idx - 1]), int(map_rl[cp_idx]),
+        ])
+    cp_table = make_table(
+        "Change Points (joint, curve-wide)",
+        ["#", "Time", "Position", "MAP RL before", "MAP RL after"], cp_rows,
+    )
+
+    seg_boundaries = [0] + filtered_cps + [n]
+    seg_rows = []
+    for i in range(len(seg_boundaries) - 1):
+        a, b = seg_boundaries[i], seg_boundaries[i + 1]
+        row = [i + 1, a + 1, b, b - a]
+        for j in range(k):
+            row.append(round(float(np.mean(X[a:b, j])), 4))
+        seg_rows.append(row)
+    seg_table = make_table(
+        "Segments (per-series means)",
+        ["Segment", "Start", "End", "Length"] + [f"Mean({names[j]})" for j in range(k)],
+        seg_rows,
+    )
+
+    params_table = make_table(
+        "Parameters", ["Parameter", "Value"],
+        [
+            ["Mode", "multivariate (joint NIW-BOCPD)"],
+            ["Series (features)", ", ".join(names)],
+            ["n_features", k],
+            ["Detection", "MAP run-length reset (drop > min_gap)"],
+            ["Hazard lambda", hazard_lambda],
+            ["NIW prior_kappa", prior_kappa],
+            ["NIW nu0 = (k-1)+2*alpha", round(nu0, 6)],
+            ["NIW Psi0 diag = 2*beta", round(2.0 * prior_beta, 6)],
+            ["Min gap", min_gap],
+            ["N change points detected", n_cps],
+            ["N observations", n],
+        ],
+    )
+
+    max_display = 500
+    step = max(1, n // max_display)
+    ts_rows = []
+    for i in range(0, n, step):
+        t_label = time_col[i] if time_col else int(i + 1)
+        ts_rows.append([t_label, int(map_rl[i]), round(float(cp_prob[i]), 6)])
+    ts_table = make_table(
+        "BOCPD Time Series", ["Time", "MAP Run Length", "Change Point Prob"], ts_rows,
+    )
+
+    if n_cps == 0:
+        plain = (
+            f"Multivariate BOCPD across {k} series ({', '.join(names)}; {n} "
+            f"aligned observations) detected no joint change points at threshold "
+            f"{threshold}. The curve appears jointly regime-stable."
+        )
+    else:
+        positions = ", ".join(str(i + 1) for i in filtered_cps)
+        plain = (
+            f"Multivariate BOCPD across {k} series ({', '.join(names)}; {n} "
+            f"observations) detected {n_cps} joint (curve-wide) change point(s) "
+            f"at position(s) {positions}. Each is a date where the curve jointly "
+            "shifts regime (Bayesian run-length posterior over a multivariate-"
+            "NIW observation model; covariance-aware)."
+        )
+
+    charting = (
+        "Multi-panel: each series with shared vertical lines at the joint change "
+        "points; a panel for the joint change-point probability with threshold."
+    )
+    progress_callback("Done", 100)
+    return make_response(
+        ctx,
+        tables=[cp_table, seg_table, params_table, ts_table],
+        plain_english_summary=plain,
+        warnings=warnings,
+        charting_suggestions=charting,
+        interpretation=None,
+        audit_fields={
+            "mode": "multivariate",
+            "n_features": k,
+            "features": names,
+            "detection": "map_run_length_reset",
+            "hazard_lambda": hazard_lambda,
+            "prior_kappa": prior_kappa,
+            "niw_nu0": round(nu0, 6),
+            "niw_psi0_diag": round(2.0 * prior_beta, 6),
+            "n_change_points": n_cps,
+            "change_point_indices": filtered_cps,
+            "min_gap": min_gap,
+            "n_obs": n,
+        },
+    )
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
     Run Bayesian Online Change Point Detection.
@@ -57,6 +306,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
     try:
         progress_callback("Validating inputs", 5)
         np.random.seed(ctx.seed)
+
+        # Multivariate joint-detection auto-detect (ENG-EXT-CHANGEPOINT-001
+        # A1c): >=2 input series -> joint multivariate NIW-BOCPD across the
+        # curve. Exactly 1 series -> the univariate NIG path below,
+        # UNCHANGED / backward-compatible.
+        _all_series = ctx.get_all_series()
+        if len(_all_series) >= 2:
+            return _run_multivariate(ctx, progress_callback, _all_series)
 
         name, values = ctx.get_primary_series()
         warnings = []

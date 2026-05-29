@@ -1821,6 +1821,35 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_bocpd_multivariate": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "ENG-EXT-CHANGEPOINT-001 A1c multivariate joint BOCPD. "
+            "SELF-PARITY (no library for multivariate BOCPD): TSL's "
+            "multivariate path (Adams-MacKay with a multivariate "
+            "Normal-Inverse-Wishart conjugate -> multivariate-Student-t "
+            "predictive, Cholesky-based, log-space; MAP-run-length-reset "
+            "detection) vs a from-scratch reimplementation of the "
+            "IDENTICAL formulation (same NIW hyperparams, rank-1 Ψ "
+            "update, Cholesky logdet+solve, log-mv-t, recursion, "
+            "MAP-reset detection). Both deterministic -> bit-exact joint "
+            "change-point set on a NON-ZERO detection fixture (stronger "
+            "than S79's bit-exact-on-empty). Failure indicates an "
+            "NIW-hyperparameter / rank-1-update / Cholesky / log-mv-t / "
+            "detection convention divergence between the arms, not a "
+            "methodology question. (S79's univariate cp_prob criterion "
+            "is non-functional [R[t+1,0]==hazard]; the multivariate path "
+            "uses the correct MAP-reset signal — the S79 univariate-"
+            "criterion bug is documented + banked separately.)"
+        ),
+    },
+
     "p3_stl_esd": {
         "type": "tiered_outputs",
         "primary": {
