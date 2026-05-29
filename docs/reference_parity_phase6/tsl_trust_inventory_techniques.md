@@ -37473,7 +37473,388 @@ session → block close → 13/13 catalog blocks 100% Q1-amended.
 Estimated session time: ~1h (Class B-CAVEAT existing-harness;
 NO-REFERENCE disposition).
 
-## §3 Unvalidated catalog techniques (1 entry; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### nar_narx (Phase 7+ S85; SEVENTY-FOURTH §2.5 entry; SIXTH-AND-FINAL Regimes / Nonlinear block entry; **BLOCK CLOSE at S85** = THIRTEENTH-AND-FINAL catalog block fully Q1-amended (13 of 13 = 100%); **FINAL Q1 SESSION — Q1 CLOSE**; SECOND Class B-CAVEAT entry [NO-REFERENCE origin → self-parity resolution per Disposition X]; engine: BESPOKE Nonlinear AutoRegressive (sklearn `MLPRegressor`; `nar_narx.py`; NAR endogenous / NARX with exogenous; Fast preset ar_lags=3, hidden=(10,), relu, random_state=42, early_stopping; StandardScaler X+y; iterative multi-step forecast); **Tier II.bit-exact (modulo engine B8 output-rounding floor)** [self-parity; underlying MLP fit bit-identical, residual = engine 6-dp forecast / 4-dp r² audit rounding]; verdict_class `dl_seed_pinned`; **SELF-PARITY (S85 Disposition X — R tsDyn::nlar fails to produce finite forecasts = genuine NO-REFERENCE; converted to bit-exact PASS via self-parity rewrite)**; **NO engine-IMPROVEMENT candidate** [sklearn MLP legitimate per probe; queue stays n=2 (ets_hw + star γ-reparameterization)]; neural-forecast prediction-interval minor ENG-EXT candidate logged [aligns with ENG-EXT-CONFORMAL-001])
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.bit-exact (modulo engine B8 output-rounding floor)** per S85
+Code Step 2 empirical verification (post self-parity rewrite). The
+underlying sklearn-MLP NAR fit is BIT-IDENTICAL between engine and the
+self-parity reference; the only residual is the engine's documented
+output-rounding floor (Phase 1 finding B8). Engine bespoke sklearn
+MLPRegressor NAR (TSL math path) vs a self-parity reimplementation of
+the same deterministic pipeline (reference) on a synthetic nonlinear-
+AR fixture (n=500, y_t = 0.7·y_{t−1} − 0.3·tanh(y_{t−1}) + ε,
+train_frac=0.8, NAR Fast preset).
+
+**Math-layer metrics (self-parity; PASS at B8-rounding-floor band):**
+
+| Metric | Status | abs_diff | rel_diff | floor |
+|---|---|---|---|---|
+| forecast path (100-step) | PASS | 4.977e-7 | 6.487e-6 | engine 6-dp forecast rounding |
+| in-sample R² | PASS | 3.861e-5 | 1.343e-4 | engine 4-dp r_squared rounding |
+
+**Bit-identical-modulo-rounding interpretation (load-bearing):** the
+self-parity reference's FULL-PRECISION values round EXACTLY to the
+engine's emitted values — forecast ref=−0.8247186066 → engine
+6-dp=−0.824719 (abs 4.98e-7 = the 6-dp floor); r² ref=0.2875386 →
+engine 4-dp=0.2875 (abs 3.86e-5 = the 4-dp floor). The engine's NAR
+recursion (feature construction + StandardScaler + MLPRegressor fit +
+iterative forecast) is therefore reproduced BIT-FOR-BIT; the harness
+sees only the engine's rounded outputs (run_tsl reads the 6-dp
+forecast table + 4-dp r_squared audit). Same characterization as S81
+tar_setar (tsl-rounded vs ref-full-precision; the diff IS the rounding
+floor) — a STRONGER result than a generic mle-band PASS.
+
+**SELF-PARITY DISPOSITION (S85 Disposition X — ratified):** The
+original cross-package reference (R `tsDyn::nlar`) FAILS to produce
+finite forecasts on this fixture — a genuine NO-REFERENCE condition
+(Pattern K; confirmed at S85 Step 1: CLI CAVEAT "R tsDyn::nlar did not
+produce finite forecasts"). Two dispositions were surfaced via
+AskUserQuestion: (X) self-parity rewrite → clean bit-exact PASS, vs
+(Y) document NO-REFERENCE Tier VI. **Disposition X ratified** — the
+decisive factor: the engine MLP is confirmed CROSS-INVOCATION
+BIT-EXACT at a fixed seed, retiring the only risk in X (MLP
+nondeterminism), so a self-parity reference invoking sklearn
+MLPRegressor identically validates clean bit-exact. The harness
+`run_reference` was rewritten (separate audit-hygiene commit
+`a338cfd`) to independently reproduce the engine's NAR pipeline; the R
+non-convergence finding is PRESERVED (in the harness docstring + this
+entry) as the recorded rationale for the self-parity choice. Block
+precedent: Change Points S75/S76/S78/S79 self-parity for cross-
+package-unavailable; nar_narx is the STRONGEST case (the reference
+FAILS rather than merely diverges). S73 auto_arima precedent on the
+disposition logic: when the default approach doesn't deliver clean
+validation, do the construction work rather than concede the gap.
+
+**Engine variant validated (at math layer; engine wrapper exercised
+via RunContext):** Bespoke NAR via sklearn MLPRegressor — feature
+matrix of AR lags 1..ar_lags (Fast ar_lags=3; the harness `ar_order=1`
+param is a no-op since the engine reads `ar_lags`), StandardScaler on
+X + y, MLPRegressor(hidden=(10,), relu, lr=1e-3, alpha=1e-4,
+max_iter=200, random_state=ctx.seed, early_stopping, validation_
+fraction=0.1), iterative multi-step forecast. Engine `run()` in
+`nar_narx.py`. Harness invokes the ENGINE wrapper DIRECTLY
+(`nn_mod.run` via RunContext at preset="Fast") — the engine code path
+IS the math-layer path; the self-parity reference is an independent
+reimplementation of the same pipeline.
+
+**Reference (self-parity reimplementation):** Reference at
+`tools/reference_parity/harness/checks/p3_nar_narx.py` `run_reference`
+(post-S85-rewrite) independently reproduces the engine's Fast-preset
+NAR pipeline (AR-lag features + StandardScaler + MLPRegressor at
+random_state=42 + iterative forecast) and computes the forecast +
+in-sample R² at full precision. Because sklearn MLPRegressor with an
+integer `random_state` is self-contained-deterministic (weight init +
+early-stopping validation split both driven by the dedicated
+RandomState), the reference reproduces the engine fit bit-for-bit.
+This validates the engine wrapper's feature construction, scaling, and
+iterated-forecast recursion (catches preprocessing + recursion
+regressions). NOT a cross-package check (R reference unavailable);
+self-parity per Disposition X.
+
+**Class B-CAVEAT note (SECOND Regimes-block CAVEAT entry; NO-REFERENCE
+origin RESOLVED to PASS):** Per the block-open probe, nar_narx was
+Class B-CAVEAT due to a NO-REFERENCE condition (R tsDyn::nlar fails).
+UNLIKE S84 star (a CAVEAT documenting an intrinsic statistical
+property — weakly-identified γ — that cannot be resolved), the S85
+NO-REFERENCE CAVEAT WAS RESOLVED to a clean bit-exact PASS via the
+self-parity rewrite (Disposition X). So the block's 2 Class B-CAVEAT
+entries resolve differently: S84 star = CAVEAT-documented (intrinsic
+pathology, no fix possible); S85 nar_narx = CAVEAT-RESOLVED-to-PASS
+(NO-REFERENCE addressed by self-parity, like the S83 fixable-condition
+spirit but via reference construction rather than a determinism fix).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS (graceful). Engine accepted
+  injected interior NaN (2 points) + ran to `status=success`,
+  emitting "2 NaN values in target linearly interpolated" (the
+  `run()` NaN branch lines 116-126).
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Fast"` (the harness preset); returned `model="NAR"`,
+  `ar_lags=3`, `hidden_layers=[10]`, `activation="relu"`, a finite
+  `r_squared`, `n_params=51`, `training_iters`.
+- **Check 3 — Output shape/type verification:** PASS. Engine emitted
+  6 tables (Forecast / Fitted Values / Feature Importance / Network
+  Architecture / Model Summary / Residual Diagnostics) + a multi-
+  field audit; types correct (`model` str, `r_squared` float,
+  `ar_lags` int) + plain-English summary.
+
+**Verdict (math layer):** PASS at Tier II.bit-exact (modulo B8) —
+forecast abs_diff=4.98e-7 (6-dp floor), in-sample R² abs_diff=3.86e-5
+(4-dp floor); self-parity; n=500 NAR at seed=42, Fast preset, runner
+CLI; deterministic across 3 runs.
+**Verdict (wrapper layer):** PASS 3/3 checks per S85 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/
+p3_nar_narx.py` (technique_id `p3_nar_narx`; self-parity-rewritten at
+S85 commit `a338cfd`).
+**Audit date:** 2026-05-29 (S85 §2.5 entry; Regimes / Nonlinear BLOCK
+CLOSE; Q1 CLOSE).
+**Primary metrics (math layer):** forecast path + in-sample R²
+(self-parity, bit-identical modulo B8 rounding).
+
+**Determinism profile:** The engine NAR fit is CROSS-INVOCATION
+BIT-EXACT within-process — refitting at the same seed reproduces the
+forecast + R² identically (confirmed at S85 Step 1) because sklearn
+MLPRegressor with `random_state=ctx.seed` is self-contained-
+deterministic (weight init + early-stopping validation split). The
+self-parity reference reproduces this bit-for-bit (same seed + same
+pipeline). The forecast POINT path is fully deterministic; the
+bootstrap CI bands use `np.random` (seeded at ctx.seed), off the
+parity surface. Tier II.bit-exact (modulo B8 output rounding). This is
+the verdict_class `dl_seed_pinned` ideal: a DL model made fully
+reproducible by seed-pinning.
+
+**Validation claim scope (S85; engine math validated at NAR-forecast
+scope via self-parity; engine wrapper code path exercised at both
+math-layer + wrapper-layer 3-check scopes):**
+
+- **Layer 1 (forecast path + in-sample R²) VALIDATED at Tier
+  II.bit-exact (modulo B8):** the engine's NAR feature construction +
+  scaling + MLP fit + iterative forecast reproduce bit-for-bit; the
+  only residual is the engine's 6-dp/4-dp output rounding.
+- **Layer 1 SELF-PARITY scope:** validates internal consistency of
+  the engine recursion (catches wrapper / preprocessing / recursion
+  regressions), NOT cross-implementation agreement (R reference
+  unavailable). The sklearn MLPRegressor primitive itself is trusted
+  as the upstream library.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** graceful NaN interpolation; Fast NAR
+  dispatch (ar_lags=3, hidden=(10,)) + multi-field audit; output
+  shape/type verification (6 tables).
+
+**Phase 3 algorithmic basis (extracted from engine module + harness
+reference):** Nonlinear AutoRegressive (with eXogenous inputs) neural
+model per Lin-Horne-Tino-Giles (1996) "Learning long-term
+dependencies in NARX recurrent neural networks" + Billings (2013)
+"Nonlinear System Identification". A multilayer perceptron approximates
+the nonlinear autoregressive map y_t = f(y_{t−1}, …, y_{t−p} [,
+x_{t}, …]) + ε. Implementation `sklearn.neural_network.MLPRegressor`
+(deterministic at fixed `random_state`). Institutionally relevant for
+rates: flexible nonlinear-AR / nonlinear-exogenous modelling of yield
+dynamics. Engine implements via sklearn MLP; the cross-package R
+reference (tsDyn::nlar) fails on the fixture → self-parity validation.
+**sklearn MLP is a LEGITIMATE nonlinear-AR choice (per block-open
+probe), NOT an engine-IMPROVEMENT candidate** — a PyTorch/TF backend
+would add dependency weight without benefit for this nonlinear-AR use.
+
+**Phase 3 known failure modes (S85 / Class B-CAVEAT → self-parity-
+resolved scope):**
+
+- NO-REFERENCE origin: R tsDyn::nlar fails to produce finite forecasts
+  → no cross-package reference. Resolved via self-parity (validates
+  engine internal consistency, not cross-implementation agreement).
+- Self-parity bit-identical modulo B8 output-rounding floor (forecast
+  6-dp, r² 4-dp); the underlying MLP fit is exact.
+- sklearn-version / BLAS dependence: MLP determinism holds within a
+  fixed environment (run_tsl + run_reference share the process); a
+  different sklearn version could shift the absolute fit (but engine +
+  reference would still match each other).
+- Forecast CI bands seeded-stochastic (bootstrap), off parity surface.
+
+**Phase 3 boundary of validity:**
+
+- NAR (endogenous-only) Fast preset (ar_lags=3, hidden=(10,)) on a
+  mild-nonlinearity tanh fixture (n=500); NARX (exogenous) + Balanced/
+  Thorough presets (deeper nets, more lags, CV) NOT separately
+  validated at math layer
+- forecast path + in-sample R² validated (self-parity, bit-identical
+  modulo B8); feature importance + network architecture + residual
+  diagnostics emitted but NOT asserted
+- self-parity scope: internal-consistency validation, NOT cross-
+  implementation agreement (R reference unavailable)
+- forecast CI bands NOT asserted (seeded bootstrap)
+
+**Phase 3 gap markings:**
+
+- self-parity (NOT cross-package) — internal-consistency validation;
+  R tsDyn::nlar unavailable (documented NO-REFERENCE origin)
+- NARX (exogenous) + Balanced/Thorough presets NOT separately
+  validated
+- feature importance + residual diagnostics NOT asserted
+- forecast CI bands NOT asserted (seeded bootstrap)
+- neural-forecast prediction-intervals minor ENG-EXT candidate
+
+**Status (Tier II.bit-exact [modulo B8] PASS + wrapper-layer 3/3 PASS
+per S85 / Regimes / Nonlinear BLOCK CLOSE + Q1 CLOSE):** Layer 1 NAR
+forecast + R² validated via self-parity bit-identical (modulo the
+engine's 6-dp/4-dp output rounding). Wrapper layer (S49+ 3-check
+scope) validated at 3/3 PASS. Engine CROSS-INVOCATION BIT-EXACT
+(seed-pinned MLP). NO-REFERENCE origin RESOLVED to clean PASS via
+self-parity (Disposition X). **NO engine-IMPROVEMENT candidate
+(sklearn MLP legitimate; queue stays n=2).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** NAR via sklearn
+  MLPRegressor at ar_lags=3, hidden=(10,), relu, random_state=42,
+  early_stopping (Fast preset). Self-parity reference (identical
+  pipeline). NAR (no exog), n=500.
+- **Engine preset default (Balanced):** hidden=(20, 10), max_iter=500,
+  ar_lags=5, cv_folds=3. (The harness validates the FAST preset,
+  which the harness explicitly selects.)
+- **Configuration match:** **YES at the Fast-preset NAR surface** —
+  the harness validates the engine Fast preset exactly (the harness
+  sets preset="Fast"). The Balanced default (deeper net, more lags,
+  CV) is NOT separately math-asserted, but rides the same sklearn-MLP
+  pipeline (same feature construction + scaling + iterative forecast,
+  differing only in hyperparameters) — the validated recursion
+  transfers; the deeper-net fit is exercised at the wrapper-layer
+  3-check scope.
+- **Disclosure scope:** self-parity (not cross-package). NARX
+  (exogenous) + Balanced/Thorough presets NOT separately validated.
+  forecast CI bands + feature importance NOT asserted.
+
+**ENG-EXT institutional-rates NAR/NARX workflow scan outcome (S85
+Step 1; forecast + architecture + importance present; neural-PI minor
+candidate; no NEW commission):**
+
+(a) **Nonlinear-AR forecast (point + iterative multi-step):** PRESENT
+    ✓ — Forecast table.
+(b) **NARX exogenous-input support:** PRESENT ✓ — engine handles
+    exogenous series (NARX mode) with exog-lag features.
+(c) **Feature importance + network architecture:** PRESENT ✓ —
+    permutation Feature Importance + Network Architecture tables.
+(d) **Forecast uncertainty (prediction intervals):** PARTIAL —
+    engine emits bootstrap-residual CI bands (Lower/Upper 90%), but
+    these are seeded-stochastic + not conformal/calibrated-coverage.
+    Minor ENG-EXT candidate: calibrated neural-forecast prediction
+    intervals (conformal or MC-dropout) — ALIGNS with ENG-EXT-
+    CONFORMAL-001 (the conformal extension would cover the neural
+    forecaster too). Logged as a minor candidate; not separately
+    commissioned (folds into ENG-EXT-CONFORMAL-001 scope).
+
+**Verdict: COVERED at standard NAR/NARX workflow elements.** No new
+ENG-EXT-REGIMES-001 commission surfaced at S85. Neural-forecast
+calibrated-PI minor candidate folds into ENG-EXT-CONFORMAL-001.
+
+**Audit-hygiene cross-reference (S85 / Class B-CAVEAT → self-parity-
+resolved):** S85 nar_narx required a self-parity harness rewrite
+(commit `a338cfd`: run_reference NO-REFERENCE-R → self-parity sklearn-
+MLP reimplementation + tolerances retuned to the B8 rounding floor)
+before the §2.5 entry — Disposition X ratified. The engine itself was
+sound + deterministic (no engine change). Self-parity validates the
+engine NAR recursion bit-identical (modulo B8 rounding). NO engine-
+IMPROVEMENT (sklearn MLP legitimate; queue stays n=2). Neural-PI minor
+candidate folds into ENG-EXT-CONFORMAL-001.
+
+**Cross-reference (S81 SETAR / S84 STAR — nonlinear-AR family;
+self-parity disposition lineage):** S85 nar_narx completes the
+nonlinear-AR arc of the block: S81 SETAR (abrupt-threshold piecewise-
+linear AR) → S84 STAR (smooth-transition AR) → S85 NAR (neural
+nonlinear AR — the fully-flexible nonlinear-AR generalization). The
+self-parity disposition follows the block's cross-package-unavailable
+pattern (Change Points S75/S76/S78/S79) and the S73 auto_arima
+construction-over-concession disposition logic.
+
+═══════════════════════════════════════════════════════════════════
+**REGIMES / NONLINEAR BLOCK CLOSE (S85; analogous to S67 Multivariate
++ S74 Forecasting Classical + S79 Change Points block closes):**
+═══════════════════════════════════════════════════════════════════
+
+S85 nar_narx CLOSES Block 11 Regimes / Nonlinear — the
+**THIRTEENTH-AND-FINAL catalog block fully Q1-amended (13 of 13 =
+100%)**.
+
+- **Block scope (6 entries, all §2.5-validated post-S85):** S80
+  critical_slowing_down + S81 tar_setar + S82 hmm + S83
+  markov_switching + S84 star + S85 nar_narx.
+- **Block tier distribution (highest-determinism-risk block, as
+  predicted at the block-open probe):** 1 Tier II.bit-exact (S80 CSD,
+  Pattern A.1 cross-package vs ewstools) + 1 Tier II.mle-band/bit-
+  identical (S81 tar_setar, threshold-selection agreement modulo B8) +
+  2 Tier II.em-band (S82 hmm + S83 markov_switching, Baum-Welch /
+  Hamilton-filter EM) + 1 Tier V CAVEAT (S84 star, weakly-identified
+  γ) + 1 Tier II.bit-exact-modulo-B8 (S85 nar_narx, self-parity).
+- **Reference-approach distribution:** cross-package Python (S80
+  ewstools) + cross-package R (S81 tsDyn::setar, S82 depmixS4, S83
+  MSwM, S84 tsDyn::star) + self-parity (S85, NO-REFERENCE-resolved).
+- **Session-type distribution (per block-open probe, confirmed):** 4
+  Class B PASS (S80-S83) + 2 Class B-CAVEAT (S84 star CAVEAT-
+  documented + S85 nar_narx CAVEAT-resolved-to-PASS); no Class A, no
+  Class C.
+- **Block methodology firsts/instances:** block-open probe (S75
+  Option-3 precedent); em-band tier instances 2-3 (S82+S83, after S66
+  DFM); canonicalization-lineage instances 3-4 (S82 HMM state-mean +
+  S83 regime-label, after S65 VECM β/α + S66 DFM rotation); FIRST
+  harness-fix-within-a-Class-B-session (S83 determinism micro-fix
+  `3c5f3b6`); FIRST weakly-identified-parameter CAVEAT (S84 star);
+  FIRST NO-REFERENCE→self-parity resolution at block scope (S85);
+  engine-improvement queue advanced to n=2 (S84 star γ-
+  reparameterization joined ets_hw).
+- **Engine-improvement queue status:** n=2 (ets_hw statespace
+  migration + star γ-reparameterization).
+
+═══════════════════════════════════════════════════════════════════
+**Q1 CLOSE CAPSTONE (S85; Q1 trust-documentation cadence complete):**
+═══════════════════════════════════════════════════════════════════
+
+**Q1 CLOSES at S85: 13 of 13 catalog blocks fully Q1-amended (100%
+catalog completion).** §3 unvalidated → 0.
+
+- **Catalog-block completion ledger (13/13, in completion order):**
+  Block 1 Causality (S18) → Block 12 Stationarity (S23) → Block 8
+  Missing Data (S28) → Block 3 Decomposition (S34) → Block 5 Frequency
+  Domain (S43) → Block 6 State Space (S51) → Block 13 Volatility (S57)
+  → Block 4 Evaluation/Uncertainty (S62) → Block 7 ML/Deep Learning
+  (SC17) → Block 10 Multivariate (S67) → Block 2 Forecasting Classical
+  (S74) → Block 9 Change Points (S79) → **Block 11 Regimes / Nonlinear
+  (S85 — FINAL).**
+- **Cadence span:** S62-S85 routine Q1 cadence (post-Cat-3-remediation-
+  cycle close at SC17) + the earlier S12-S61 + SC1-SC17 program.
+- **Tier taxonomy (precision-tier framework, the core Q1 methodology
+  artifact):** II.bit-exact / II.mle-band / II.em-band / IV Pattern
+  A.3 / V Pattern D + Pattern H CAVEAT / VI CAVEAT — a graded
+  precision ladder distinguishing closed-form bit-exactness from MLE-
+  fit / EM-stochastic convergence bands from documented-divergence
+  CAVEATs.
+- **Reference-approach taxonomy:** cross-package (R + Python) /
+  self-parity (Pattern A.1/A.3) / NO-REFERENCE (Pattern J/K) — with
+  self-parity the established fallback for cross-package-unavailable.
+- **THREE engine-extension commissions for the Q2 sprint:**
+  (1) **ENG-EXT-CONFORMAL-001** (CQR + EnbPI/SPCI calibrated
+      prediction intervals; commissioned S62; now ALSO covers the
+      S85 neural-forecast-PI minor candidate).
+  (2) **ENG-EXT-MULTIVARIATE-001 EXTENDED** (VAR IRF confidence bands
+      + VECM IRF/FEVD + advanced SVAR identification; commissioned
+      S64, extended S65).
+  (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
+      across the curve; commissioned S79 at n=3 univariate-only
+      instances).
+- **Engine-improvement queue (n=2):** ets_hw statespace migration
+  (S68) + star γ-reparameterization (standardized γ/σ_s per Teräsvirta
+  1994; S84).
+- **Harness-refinement queue (low priority):** S69 theta rmse-
+  reconstruction artifact + S82 HMM Viterbi 0-vs-1 index-base
+  secondary-metric artifact + S83 markov_switching Balanced-spec math-
+  layer assertion (currently Fast-preset-validated).
+- **Minor ENG-EXT candidates logged (Q2+ backlog):** S76 seasonal-vs-
+  trend anomaly attribution + S80 spatial/multivariate EWS + S81
+  threshold-CI (Hansen 2000) + S82 automatic state-count selection
+  (BIC-sweep/HDP-HMM) + S83 TVTP (Filardo 1994 time-varying transition
+  probabilities) + S84 MRSTAR multiple-transition + S84 Teräsvirta-LM
+  linearity test + S85 neural-forecast calibrated-PI (folds into
+  ENG-EXT-CONFORMAL-001).
+- **Methodology-artifact pointers (Q1 institutional outputs):**
+  precision-tier taxonomy (bit-exact/mle-band/em-band) + identification-
+  ambiguity canonicalization framework (4 instances: S65 VECM β/α, S66
+  DFM rotation, S82 HMM state-mean, S83 regime-label) + cross-reference
+  trust-inheritance pattern (n=9 instances) + CAVEAT-triage discipline
+  (S83 fixable-condition vs S84 intrinsic-statistical-property vs S85
+  NO-REFERENCE-resolvable) + Cat 1d VSC (Validation-Surface Coverage)
+  framework + NO-REFERENCE / Pattern-J / Pattern-K disposition
+  framework + the wrapper-layer 3-check protocol (S49+) + the engine
+  output-rounding floor (Phase 1 finding B8).
+
+**Forward state: Q1 CLOSED (13/13 = 100%).** The next inflection is
+**Q2 engine-development sprint scoping** — the three ENG-EXT
+commissions + the n=2 engine-improvement queue + the harness-
+refinement queue consolidate for Q2 planning. The trust inventory now
+has §2.5 validation entries for all catalog techniques (§3 unvalidated
+= 0).
+
+## §3 Unvalidated catalog techniques (0 entries — ALL catalog techniques §2.5-validated as of S85 Q1 CLOSE; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -37520,8 +37901,8 @@ descriptions, summaries).
 ### Multivariate Systems (0 unvalidated; **Block 10 FULLY Q1-AMENDED** — TENTH catalog block to complete per Q1 work program scope at S67 close = 10 of 13 catalog blocks fully Q1-amended (77% catalog block-level completion); johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome; bvar moved to §2.5 per Phase 7+ S67 — FIFTH-AND-FINAL Multivariate Systems block entry; **BLOCK CLOSE at S67**; Disposition A (cross-reference existing validations) — bvar is DISTINCT catalog entry from bond_yield_forecast (analytical Normal-Inverse-Wishart posterior vs CCM-2019 Gibbs sampler with stochastic volatility); already validated at Phase 1 `1c_bvar_irf_fevd` IRF/FEVD parity (machine precision; re-confirmed at S67 runner CLI) + Phase 4 S5 BVAR coefficient parity vs R BVAR::bvar (PASS-A.2 DOCUMENTED-DIVERGENCE per prior-parameterization differences per master plan §7.1 Pattern H); ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at Bayesian level for users invoking bvar — engine emits posterior IRF + FEVD with credible bands as native output (Bayesian analog of bootstrap CI bands per Sims-Zha 1999); cross-reference trust-inheritance pattern A3 SECOND-OBSERVATION TIGHTENING at n=3 within-block observations S65+S66+S67)
 (all 5 techniques moved to §2.5 across S63-S67 cycle)
 
-### Regimes / Nonlinear (1 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; tar_setar moved to §2.5 per Phase 7+ S81 — SECOND Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE Threshold/Self-Exciting TAR (numpy+scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); Tier II.mle-band [threshold scalar at abs_tol=1e-2/rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL; both arms picked same observed data point]; cross-package vs R tsDyn::setar (m=2, thDelay=0, nthresh=1); regime-assignment boundary rule (≤-into-low / strict->-into-high) verified matches DGP + tsDyn convention; per-regime AR coefficients NOT independently asserted (threshold-only; deterministic given threshold); NO engine-IMPROVEMENT candidate (bespoke scipy; queue stays n=1); multiple-threshold/3-regime ENG-EXT candidate RULED OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000 threshold inference) minor candidate logged; hmm moved to §2.5 per Phase 7+ S82 — THIRD Regimes / Nonlinear block entry; FIRST em_stochastic / Tier II.em-band entry of block; Class B existing-harness; engine `hmmlearn.GaussianHMM` (Gaussian-emission HMM; Baum-Welch EM, 5 restarts at Balanced, label_regimes_by_dominant_key canonicalization); Tier II.em-band [emission means/covariances + log-likelihood machine-precision (same optimum); transition matrix within widened DSCD-EM band 0.3 abs/1.0 rel, divergence dominated by depmixS4 multinomial-logit extraction]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R depmixS4 (independent Baum-Welch EM); label-switching canonicalization (state mean-sort ascending both arms — lineage S65 VECM β/α + S66 DFM rotation); engine cross-invocation BIT-EXACT (seeded EM restarts) → em-band purely cross-package per S66 DFM precedent; Viterbi Secondary BLOCK = documented harness 0-vs-1-index artifact (Python {0,1} vs R {1,2}; overall PASS); NO engine-IMPROVEMENT candidate (hmmlearn standalone; queue stays n=1); multivariate-emission-HMM ENG-EXT candidate RULED OUT (engine treats all series as observation dimensions → multivariate native); automatic state-count-selection (BIC-sweep/HDP-HMM) minor candidate logged; covariance_type full(engine)≡diag(harness) no-op at n_features=1; markov_switching moved to §2.5 per Phase 7+ S83 — FOURTH Regimes / Nonlinear block entry; SECOND em_stochastic / Tier II.em-band entry; CLOSES the block's Class B PASS tier (S80-S83); engine statsmodels MarkovRegression(order=0)/MarkovAutoregression(order≥1; Hamilton 1989; Balanced k=2/order=1/switching_variance=True; Hamilton-filter EM, search_reps=25, label_regimes_by_dominant_key canonicalization, manual regime-weighted forecast); Tier II.em-band [regime means + log-likelihood machine-precision (same optimum); transition matrix within em-band 0.055 abs vs R MSwM — tighter than S82 HMM 0.237]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R MSwM::msmFit; regime-label canonicalization (mean-sort ascending both arms — FOURTH lineage instance S65 VECM β/α → S66 DFM → S82 HMM → S83); engine cross-invocation BIT-EXACT (seeded EM search_reps=25) → em-band purely cross-package per S66/S82; REQUIRED S83 audit-hygiene determinism micro-fix (commit 3c5f3b6: seed-pin + search_reps 3→25 in flaky bypass run_tsl; 2 BLOCK/3 PASS → uniform PASS across 5 runs; engine itself sound — fix-don't-caveat per Cat 3 precedent); VSC PARTIAL [math layer validates engine FAST preset order=0 mean-switching; Balanced AR(1)+switching-variance exercised at wrapper-layer only]; NO engine-IMPROVEMENT candidate (modern statsmodels API; multi-step-forecast NotImplementedError is statsmodels limitation handled by engine manual construction; queue stays n=1); multi-step-regime-forecast ENG-EXT candidate RULED OUT (engine native manual construction); TVTP (Filardo 1994 time-varying transition probabilities) minor candidate logged; only 2 Class B-CAVEAT entries remain (S84 star + S85 nar_narx); star moved to §2.5 per Phase 7+ S84 — FIFTH Regimes / Nonlinear block entry; FIRST Class B-CAVEAT entry; weakly-identified-γ CAVEAT DOCUMENTATION (statistical property, NOT a fixable bug — contrast S83 flaky-harness); engine BESPOKE Smooth Transition AutoRegression (scipy.optimize NLS; star_model.py; LSTAR/ESTAR; Balanced LSTAR, transition var s(t)=y(t−d) d=1; raw γ NOT standardized γ/σ_s); Tier V CAVEAT (Pattern H DSCD; weakly-identified-γ) — transition location c VALIDATED at Tier II.mle-band quality (abs 0.0021/rel 0.5% vs R tsDyn::star — load-bearing), transition speed γ documented-CAVEAT (tsl 1024.8 vs ref 100.0, rel 0.90; flat likelihood ridge for large γ → identifiability not convergence; both far above DGP γ=5.0); verdict_class mle_fit; cross-package vs R tsDyn::star (LSTAR m=1,d=1); engine cross-invocation BIT-EXACT (seeded L-BFGS-B) → γ-divergence is cross-package statistical identifiability NOT engine flakiness (contrast S83 fixable bug); ENGINE-IMPROVEMENT candidate γ-reparameterization (standardized γ/σ_s per Teräsvirta 1994 — the documented-CAVEAT's standard remedy; queue → n=2: ets_hw + star γ-reparameterization); c-validation parallels S81 SETAR threshold-c (STAR γ is exactly the smooth-transition-speed parameter SETAR's abrupt threshold lacks — and it carries the CAVEAT); MRSTAR multiple-transition + Teräsvirta-LM linearity-test minor ENG-EXT candidates logged; 1 Class B-CAVEAT remains (S85 nar_narx NO-REFERENCE — FINAL Q1 session); Q1 closes at S85)
-`nar_narx`
+### Regimes / Nonlinear (0 unvalidated; **Block 11 FULLY Q1-AMENDED** — THIRTEENTH-AND-FINAL catalog block to complete per Q1 work program scope at S85 close = 13 of 13 catalog blocks fully Q1-amended (100% catalog completion; **Q1 CLOSES at S85**); **Block 11 OPENED at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; tar_setar moved to §2.5 per Phase 7+ S81 — SECOND Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE Threshold/Self-Exciting TAR (numpy+scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); Tier II.mle-band [threshold scalar at abs_tol=1e-2/rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL; both arms picked same observed data point]; cross-package vs R tsDyn::setar (m=2, thDelay=0, nthresh=1); regime-assignment boundary rule (≤-into-low / strict->-into-high) verified matches DGP + tsDyn convention; per-regime AR coefficients NOT independently asserted (threshold-only; deterministic given threshold); NO engine-IMPROVEMENT candidate (bespoke scipy; queue stays n=1); multiple-threshold/3-regime ENG-EXT candidate RULED OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000 threshold inference) minor candidate logged; hmm moved to §2.5 per Phase 7+ S82 — THIRD Regimes / Nonlinear block entry; FIRST em_stochastic / Tier II.em-band entry of block; Class B existing-harness; engine `hmmlearn.GaussianHMM` (Gaussian-emission HMM; Baum-Welch EM, 5 restarts at Balanced, label_regimes_by_dominant_key canonicalization); Tier II.em-band [emission means/covariances + log-likelihood machine-precision (same optimum); transition matrix within widened DSCD-EM band 0.3 abs/1.0 rel, divergence dominated by depmixS4 multinomial-logit extraction]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R depmixS4 (independent Baum-Welch EM); label-switching canonicalization (state mean-sort ascending both arms — lineage S65 VECM β/α + S66 DFM rotation); engine cross-invocation BIT-EXACT (seeded EM restarts) → em-band purely cross-package per S66 DFM precedent; Viterbi Secondary BLOCK = documented harness 0-vs-1-index artifact (Python {0,1} vs R {1,2}; overall PASS); NO engine-IMPROVEMENT candidate (hmmlearn standalone; queue stays n=1); multivariate-emission-HMM ENG-EXT candidate RULED OUT (engine treats all series as observation dimensions → multivariate native); automatic state-count-selection (BIC-sweep/HDP-HMM) minor candidate logged; covariance_type full(engine)≡diag(harness) no-op at n_features=1; markov_switching moved to §2.5 per Phase 7+ S83 — FOURTH Regimes / Nonlinear block entry; SECOND em_stochastic / Tier II.em-band entry; CLOSES the block's Class B PASS tier (S80-S83); engine statsmodels MarkovRegression(order=0)/MarkovAutoregression(order≥1; Hamilton 1989; Balanced k=2/order=1/switching_variance=True; Hamilton-filter EM, search_reps=25, label_regimes_by_dominant_key canonicalization, manual regime-weighted forecast); Tier II.em-band [regime means + log-likelihood machine-precision (same optimum); transition matrix within em-band 0.055 abs vs R MSwM — tighter than S82 HMM 0.237]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R MSwM::msmFit; regime-label canonicalization (mean-sort ascending both arms — FOURTH lineage instance S65 VECM β/α → S66 DFM → S82 HMM → S83); engine cross-invocation BIT-EXACT (seeded EM search_reps=25) → em-band purely cross-package per S66/S82; REQUIRED S83 audit-hygiene determinism micro-fix (commit 3c5f3b6: seed-pin + search_reps 3→25 in flaky bypass run_tsl; 2 BLOCK/3 PASS → uniform PASS across 5 runs; engine itself sound — fix-don't-caveat per Cat 3 precedent); VSC PARTIAL [math layer validates engine FAST preset order=0 mean-switching; Balanced AR(1)+switching-variance exercised at wrapper-layer only]; NO engine-IMPROVEMENT candidate (modern statsmodels API; multi-step-forecast NotImplementedError is statsmodels limitation handled by engine manual construction; queue stays n=1); multi-step-regime-forecast ENG-EXT candidate RULED OUT (engine native manual construction); TVTP (Filardo 1994 time-varying transition probabilities) minor candidate logged; only 2 Class B-CAVEAT entries remain (S84 star + S85 nar_narx); star moved to §2.5 per Phase 7+ S84 — FIFTH Regimes / Nonlinear block entry; FIRST Class B-CAVEAT entry; weakly-identified-γ CAVEAT DOCUMENTATION (statistical property, NOT a fixable bug — contrast S83 flaky-harness); engine BESPOKE Smooth Transition AutoRegression (scipy.optimize NLS; star_model.py; LSTAR/ESTAR; Balanced LSTAR, transition var s(t)=y(t−d) d=1; raw γ NOT standardized γ/σ_s); Tier V CAVEAT (Pattern H DSCD; weakly-identified-γ) — transition location c VALIDATED at Tier II.mle-band quality (abs 0.0021/rel 0.5% vs R tsDyn::star — load-bearing), transition speed γ documented-CAVEAT (tsl 1024.8 vs ref 100.0, rel 0.90; flat likelihood ridge for large γ → identifiability not convergence; both far above DGP γ=5.0); verdict_class mle_fit; cross-package vs R tsDyn::star (LSTAR m=1,d=1); engine cross-invocation BIT-EXACT (seeded L-BFGS-B) → γ-divergence is cross-package statistical identifiability NOT engine flakiness (contrast S83 fixable bug); ENGINE-IMPROVEMENT candidate γ-reparameterization (standardized γ/σ_s per Teräsvirta 1994 — the documented-CAVEAT's standard remedy; queue → n=2: ets_hw + star γ-reparameterization); c-validation parallels S81 SETAR threshold-c (STAR γ is exactly the smooth-transition-speed parameter SETAR's abrupt threshold lacks — and it carries the CAVEAT); MRSTAR multiple-transition + Teräsvirta-LM linearity-test minor ENG-EXT candidates logged; 1 Class B-CAVEAT remains (S85 nar_narx NO-REFERENCE — FINAL Q1 session); Q1 closes at S85; nar_narx moved to §2.5 per Phase 7+ S85 — SIXTH-AND-FINAL Regimes / Nonlinear block entry; **BLOCK CLOSE at S85 = 13/13 catalog blocks 100% Q1-amended; Q1 CLOSES**; SECOND Class B-CAVEAT entry (NO-REFERENCE origin → self-parity resolution per Disposition X); engine BESPOKE Nonlinear AutoRegressive (sklearn MLPRegressor; nar_narx.py; NAR/NARX; Fast preset ar_lags=3 hidden=(10,) random_state=42 early_stopping; StandardScaler; iterative forecast); Tier II.bit-exact (modulo engine B8 output-rounding floor) [self-parity; underlying MLP fit bit-identical, residual = engine 6-dp forecast / 4-dp r² audit rounding; forecast abs 4.98e-7, r² abs 3.86e-5]; verdict_class dl_seed_pinned; SELF-PARITY (Disposition X — R tsDyn::nlar fails to produce finite forecasts = genuine NO-REFERENCE; converted to bit-exact PASS via self-parity rewrite, commit a338cfd; engine MLP confirmed cross-invocation bit-exact at fixed seed; block precedent Change Points S75/S76/S78/S79 + S73 construction-over-concession disposition logic); engine cross-invocation BIT-EXACT (seed-pinned sklearn MLP); NO engine-IMPROVEMENT candidate (sklearn MLP legitimate; queue stays n=2: ets_hw + star γ-reparameterization); nonlinear-AR-family arc S81 SETAR → S84 STAR → S85 NAR; neural-forecast calibrated-PI minor ENG-EXT candidate folds into ENG-EXT-CONFORMAL-001)
+(all 6 techniques moved to §2.5 across S80-S85)
 
 ### State Space / Filtering (0 unvalidated; Block 6 FULLY Q1-AMENDED — SIXTH catalog block to complete per Q1 work program scope at S51 close = 6 of 13 catalog blocks fully Q1-amended (46% catalog block-level completion); kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension; particle_filter moved to §2.5 per Phase 7+ S50 — THIRD State Space / Filtering block entry; FIRST Tier IV Pattern A.3 entry via approach (c) degenerate linear-Gaussian Kalman-exact-reference framing with documented abs-tolerance plateau caveat; structural_ts moved to §2.5 per Phase 7+ S51 — FOURTH-AND-FINAL State Space / Filtering block entry; multi-component 4-variance Kalman MLE)
 (all 4 techniques moved to §2.5)
