@@ -36,6 +36,255 @@ _PRESET_CONFIG = {
 }
 
 
+def _run_multivariate(ctx, progress_callback, all_series):
+    """Multivariate (joint-across-curve-points) CUSUM / Page-Hinkley —
+    ENG-EXT-CHANGEPOINT-001 A1b. Detects a SINGLE JOINT change-point set
+    (curve-wide COORDINATED regime-shift dates), using a Crosier-style
+    multivariate CUSUM (MCUSUM) on the Mahalanobis distance + a joint
+    Page-Hinkley (MPH). Invoked when >=2 series are supplied; the
+    univariate path (1 series) is unchanged.
+
+    Formulation (ratified A1b): per-t Mahalanobis distance
+    ``D_t = sqrt((X_t - mu)' Σ⁻¹ (X_t - mu))`` (mu = mean vector, Σ =
+    sample covariance over the series, Σ⁻¹ via UNCONDITIONAL pinv);
+    MCUSUM ``S_t = max(0, S_{t-1} + D_t - k_m)``, alarm ``S_t > h_m``
+    then reset; MPH ``m_t = m_{t-1} + (D_t - δ_m)``, ``PH_t = m_t -
+    min``, alarm ``PH_t > λ_m``. The Mahalanobis norm is DIRECTIONLESS,
+    so MCUSUM is one-sided "joint deviation magnitude" — it does NOT
+    reduce to S75's two-sided signed univariate CUSUM (inherent to any
+    norm-based MCUSUM; the univariate path is preserved for k=1, disjoint
+    from this path). Thresholds k_m=0.5*√k / h_m=5*√k / δ_m=0.005*√k /
+    λ_m=50 are HEURISTIC (Fast-preset scaling to the Mahalanobis scale,
+    E[D]≈√k in-control); the permutation bootstrap (Balanced/Thorough)
+    is the CALIBRATED threshold path.
+    """
+    np.random.seed(ctx.seed)
+    warnings = []
+    names = [s[0] for s in all_series]
+    arrays = [np.asarray(s[1], dtype=float) for s in all_series]
+    k = len(names)
+
+    min_len = min(len(a) for a in arrays)
+    if any(len(a) != min_len for a in arrays):
+        warnings.append(f"Series aligned to common length {min_len}.")
+    M = np.column_stack([a[:min_len] for a in arrays])  # (min_len, k)
+
+    # NaN: DROP rows containing any NaN (match S75's strip semantics,
+    # adapted to the joint signal — a row missing any tenor cannot
+    # contribute to the joint Mahalanobis distance). Deterministic.
+    row_ok = ~np.isnan(M).any(axis=1)
+    n_dropped = int((~row_ok).sum())
+    if n_dropped > 0:
+        warnings.append(f"{n_dropped} rows with missing values removed.")
+    X = M[row_ok]
+    n = X.shape[0]
+    if n < 20:
+        return make_error_response(
+            ctx,
+            f"Only {n} complete aligned observations across {k} series. "
+            "Multivariate CUSUM/PH needs at least 20.",
+            error_fixes=["Provide longer time series."],
+        )
+
+    cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
+    significance = float(ctx.get_param("significance_level", 0.05))
+    # Proper Crosier MCUSUM operates on Σ⁻¹-standardized statistics, so the
+    # allowance/threshold are in standard-deviation units — NO √k scaling
+    # (Σ⁻¹ normalizes dimensionality). Defaults parallel the univariate
+    # 0.5σ/5σ. HEURISTIC (Fast preset); the permutation bootstrap
+    # (Balanced/Thorough) is the calibrated threshold path.
+    k_m = float(ctx.get_param("cusum_k", 0.5))
+    h_m = float(ctx.get_param("cusum_h", 5.0))
+    ph_delta = float(ctx.get_param("ph_delta", 0.005))
+    ph_lambda = float(ctx.get_param("ph_lambda", 5.0))
+
+    # Reference mean vector + covariance (UNCONDITIONAL pinv — no
+    # conditional guard branch; pinv handles rank-deficiency
+    # deterministically + identically across self-parity arms).
+    target = X.mean(axis=0)
+    Sigma = np.cov(X, rowvar=False)
+    Sigma = np.atleast_2d(Sigma)
+    Sigma_inv = np.linalg.pinv(Sigma)
+
+    def _maha(row):
+        z = row - target
+        q = float(z @ Sigma_inv @ z)
+        return float(np.sqrt(q)) if q > 0 else 0.0
+
+    def _crosier_mcusum(Zmat, reset_h):
+        """Proper Crosier (1988) MCUSUM: shrinking VECTOR accumulator on
+        Σ⁻¹-standardized deviations, statistic y_t = √(SvᵀΣ⁻¹Sv). Under
+        no-change Sv shrinks toward 0 (statistic small); a sustained
+        directional shift accumulates Sv -> y_t grows. ``reset_h=None``
+        returns the RAW statistic (no reset/alarms — for the null-max
+        bootstrap); a numeric ``reset_h`` resets + records an alarm when
+        y_t exceeds it. Returns (statistic_series, alarm_idx).
+        """
+        Sv = np.zeros(Zmat.shape[1])
+        yv = np.zeros(len(Zmat))
+        alarms = []
+        for t in range(len(Zmat)):
+            cand = Sv + Zmat[t]
+            C = float(np.sqrt(cand @ Sigma_inv @ cand))
+            Sv = np.zeros(Zmat.shape[1]) if C <= k_m else cand * (1.0 - k_m / C)
+            yv[t] = float(np.sqrt(Sv @ Sigma_inv @ Sv))
+            if reset_h is not None and yv[t] > reset_h:
+                alarms.append(t)
+                Sv = np.zeros(Zmat.shape[1])
+                yv[t] = 0.0  # reflect reset in the reported statistic
+        return yv, alarms
+
+    def _mph(Dvec, lam):
+        """Joint Page-Hinkley on the Mahalanobis distance, centered by its
+        RUNNING MEAN (parallels the univariate PH running-mean centering,
+        so the cumulative statistic stays near 0 under no-change despite D
+        being strictly positive). ``lam=None`` returns the RAW PH series
+        (for the null-max bootstrap); a numeric ``lam`` records alarms.
+        Returns (PH_series, alarm_idx).
+        """
+        PHv = np.zeros(len(Dvec))
+        alarms = []
+        acc = 0.0
+        run_min = 0.0
+        rm = 0.0
+        for t in range(len(Dvec)):
+            rm = (rm * t + Dvec[t]) / (t + 1)
+            acc += (Dvec[t] - rm - ph_delta)
+            run_min = min(run_min, acc)
+            PHv[t] = acc - run_min
+            if lam is not None and PHv[t] > lam and t > 10:
+                alarms.append(t)
+        return PHv, alarms
+
+    Z = X - target  # (n, k) centered deviations
+    D = np.array([_maha(X[t]) for t in range(n)], dtype=float)
+
+    # Threshold CALIBRATION via permutation bootstrap (ALWAYS on the
+    # multivariate path — the heuristic k_m/h_m vastly over-fire for k>1
+    # because the in-control Mahalanobis statistic scales with √k; the
+    # bootstrap null-max distribution is the calibrated threshold path,
+    # per care-point #2). The null re-runs use the RAW statistic (NO
+    # reset) so the null-max is meaningful (a reset would cap it at the
+    # threshold). Seeded -> deterministic -> self-parity bit-exact.
+    progress_callback("Bootstrap threshold calibration", 40)
+    mv_nboot = {"Fast": 200, "Balanced": 500, "Thorough": 2000}.get(ctx.preset, 500)
+    cusum_maxes = np.zeros(mv_nboot)
+    ph_maxes = np.zeros(mv_nboot)
+    for b in range(mv_nboot):
+        perm = np.random.permutation(n)  # permute rows (joint, no-change null)
+        yv_b, _ = _crosier_mcusum(Z[perm], reset_h=None)
+        cusum_maxes[b] = float(np.max(yv_b)) if len(yv_b) else 0.0
+        PHv_b, _ = _mph(D[perm], lam=None)
+        ph_maxes[b] = float(np.max(PHv_b)) if len(PHv_b) else 0.0
+    h_cal = float(np.percentile(cusum_maxes, (1 - significance) * 100))
+    lambda_cal = float(np.percentile(ph_maxes, (1 - significance) * 100))
+
+    # Detection with the calibrated thresholds.
+    progress_callback("Computing multivariate CUSUM/PH statistics", 70)
+    S, mcusum_alarms = _crosier_mcusum(Z, reset_h=h_cal)
+    PH, mph_alarms = _mph(D, lam=lambda_cal)
+
+    progress_callback("Building output", 85)
+
+    # Joint change-point set (union of MCUSUM + MPH alarm indices).
+    joint_idx = sorted(set(mcusum_alarms) | set(mph_alarms))
+    time_col = ctx.time if ctx.time and len(ctx.time) >= n else None
+
+    cp_rows = []
+    for idx in joint_idx:
+        methods = []
+        if idx in set(mcusum_alarms):
+            methods.append("MCUSUM")
+        if idx in set(mph_alarms):
+            methods.append("MPH")
+        t_label = time_col[idx] if time_col else int(idx + 1)
+        cp_rows.append([", ".join(methods), t_label, idx + 1, round(float(D[idx]), 4)])
+    cp_table = make_table(
+        "Change Points (joint, curve-wide)",
+        ["Method", "Time", "Position", "Mahalanobis D"],
+        cp_rows,
+    )
+
+    params_rows = [
+        ["Mode", "multivariate (joint MCUSUM/MPH)"],
+        ["Series (features)", ", ".join(names)],
+        ["n_features", k],
+        ["Mean vector", ", ".join(f"{v:.4f}" for v in target)],
+        ["MCUSUM k_m (allowance)", round(k_m, 6)],
+        [f"MCUSUM h (bootstrap-calibrated, alpha={significance})", round(h_cal, 4)],
+        ["MPH delta", round(ph_delta, 6)],
+        [f"MPH lambda (bootstrap-calibrated, alpha={significance})", round(lambda_cal, 4)],
+        ["Bootstrap permutations", mv_nboot],
+        ["N observations", n],
+        ["MCUSUM alarms", len(mcusum_alarms)],
+        ["MPH alarms", len(mph_alarms)],
+        ["Joint change points", len(joint_idx)],
+    ]
+    params_table = make_table("Parameters & Summary", ["Parameter", "Value"], params_rows)
+
+    max_display = 500
+    step = max(1, n // max_display)
+    ts_rows = []
+    for i in range(0, n, step):
+        t_label = time_col[i] if time_col else int(i + 1)
+        ts_rows.append([
+            t_label, round(float(D[i]), 4), round(float(S[i]), 4), round(float(PH[i]), 4),
+        ])
+    ts_table = make_table(
+        "Multivariate CUSUM/PH Statistics",
+        ["Time", "Mahalanobis D", "MCUSUM S", "MPH"],
+        ts_rows,
+    )
+
+    if not joint_idx:
+        plain = (
+            f"No joint change points detected across {k} series "
+            f"({', '.join(names)}; {n} aligned observations). The curve "
+            "appears regime-stable (no coordinated multivariate shift)."
+        )
+    else:
+        positions = ", ".join(str(i + 1) for i in joint_idx)
+        plain = (
+            f"{len(joint_idx)} joint (curve-wide) change point(s) detected "
+            f"across {k} series ({', '.join(names)}; {n} observations) at "
+            f"position(s) {positions}. Each is a date where the curve shifts "
+            "regime jointly (multivariate Mahalanobis CUSUM/Page-Hinkley; "
+            "covariance-aware — catches coordinated shifts no single tenor "
+            "would flag)."
+        )
+
+    charting = (
+        "Multi-panel: each series with shared vertical lines at the joint "
+        "change points; a panel for the joint Mahalanobis MCUSUM S_t + MPH "
+        "with threshold lines."
+    )
+    progress_callback("Done", 100)
+    return make_response(
+        ctx,
+        tables=[cp_table, params_table, ts_table],
+        plain_english_summary=plain,
+        warnings=warnings,
+        charting_suggestions=charting,
+        interpretation=None,
+        audit_fields={
+            "mode": "multivariate",
+            "n_features": k,
+            "features": names,
+            "cusum_k": round(k_m, 6),
+            "cusum_h_calibrated": round(h_cal, 6),
+            "ph_delta": round(ph_delta, 6),
+            "ph_lambda_calibrated": round(lambda_cal, 6),
+            "threshold_calibration": "permutation_bootstrap_null_max",
+            "n_bootstrap": mv_nboot,
+            "n_mcusum_alarms": len(mcusum_alarms),
+            "n_mph_alarms": len(mph_alarms),
+            "n_change_points": len(joint_idx),
+            "change_point_positions": [i + 1 for i in joint_idx],
+            "n_obs": n,
+        },
+    )
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
     Run CUSUM and Page-Hinkley change detection tests.
@@ -58,6 +307,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
     try:
         progress_callback("Validating inputs", 5)
         np.random.seed(ctx.seed)
+
+        # Multivariate joint-detection auto-detect (ENG-EXT-CHANGEPOINT-001
+        # A1b): >=2 input series -> joint multivariate MCUSUM/MPH across the
+        # curve. Exactly 1 series -> the univariate two-sided path below,
+        # UNCHANGED / backward-compatible.
+        _all_series = ctx.get_all_series()
+        if len(_all_series) >= 2:
+            return _run_multivariate(ctx, progress_callback, _all_series)
 
         name, values = ctx.get_primary_series()
         warnings = []

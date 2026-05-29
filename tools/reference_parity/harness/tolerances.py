@@ -1796,6 +1796,31 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_cusum_page_hinkley_multivariate": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "ENG-EXT-CHANGEPOINT-001 A1b multivariate joint CUSUM/"
+            "Page-Hinkley. SELF-PARITY (no library for multivariate "
+            "CUSUM): TSL's multivariate path (proper Crosier 1988 MCUSUM "
+            "shrinking vector accumulator + joint Page-Hinkley, "
+            "bootstrap-calibrated thresholds) vs a from-scratch "
+            "reimplementation of the IDENTICAL formulation (same Σ via "
+            "np.cov+pinv, same k_m allowance, same seeded permutation "
+            "bootstrap null-max thresholds, same detection/reset, same "
+            "NaN row-drop). Both deterministic given the seed -> "
+            "bit-exact joint change-point set. Bit-exact target on "
+            "n_change_points + the joint position set. Failure indicates "
+            "a formulation/Σ/threshold/NaN convention divergence between "
+            "the arms, not a methodology question."
+        ),
+    },
+
     "p3_stl_esd": {
         "type": "tiered_outputs",
         "primary": {
