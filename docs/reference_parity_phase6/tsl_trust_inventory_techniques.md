@@ -32407,7 +32407,316 @@ Pattern D analog to S64 VAR (statsmodels vs R IC formula
 convention); document if surfaced. Estimated session time:
 ~1-1.5h.
 
-## §3 Unvalidated catalog techniques (16 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### arima (Phase 7+ S70; FIFTY-NINTH §2.5 entry; FOURTH Forecasting Classical block entry; THIRD DISPATCH-SET entry per ascending-complexity ordering; opens the ARIMA arc S70-S73 [arima → sarima → arimax_sarimax → auto_arima]; engine API path: `statsmodels.tsa.arima.model.ARIMA` (MODERN state-space/Kalman MLE API; wraps SARIMAX backbone internally — NOT the deprecated `statsmodels.tsa.arima_model.ARIMA` legacy wrapper); **NO engine-IMPROVEMENT candidate** [engine on modern API, same positioning as S69 theta_forecast; engine-improvement queue stays n=1 (ets_hw only)]; **NO aic/bic Tier V Pattern D CAVEAT** [both statsmodels ARIMA + R forecast::Arima(method="ML") use full-Gaussian-likelihood AIC; clean PASS at aic abs_diff=4.5e-8 — distinct from S64 VAR + S68 ets_hw IC formula-family divergence]; **S62 conformal_intervals SARIMAX backbone cross-reference + State Space block S48-S51 Kalman backbone cross-reference BOTH APPLY**)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.mle-band (Pattern A.1 same-library cross-package self-
+parity at `mle_fit` verdict_class tolerance 1e-3 abs / 1e-2 rel
+per master plan §7.1)** per S70 Code Step 2 empirical verification.
+Python statsmodels `tsa.arima.model.ARIMA` (TSL math path; state-
+space Kalman MLE via L-BFGS-B) vs R `forecast::Arima(method="ML")`
+(reference; CSS-then-ML, here forced ML-only for apples-to-apples
+optimizer comparison). All primary metrics agree at **far tighter
+than the mle-band tolerance** (ar/ma coefs ~5e-6, loglik ~2e-8,
+forecast ~1e-4); deterministic-optimizer convergence-criterion
+divergence only. **SECONDARY metrics aic/bic: clean PASS at
+~4.5e-8 — NO Tier V Pattern D CAVEAT** (both implementations use
+the same full-Gaussian-likelihood-based AIC = −2·log L + 2·k; no
+formula-family divergence, distinguishing ARIMA from S64 VAR
+[statsmodels Lütkepohl small-sample form vs R likelihood] and S68
+ets_hw [classical SSE-based vs state-space likelihood]).
+
+**Engine variant validated (at math layer; direct + wrapper
+exercised):** statsmodels `ARIMA(clean, order=(p,d,q),
+seasonal_order=(0,0,0,0)).fit()` (modern state-space ARIMA) then
+`get_forecast(steps=horizon)`. Engine `_run_manual_arima` at engine
+lines 237-299 invokes this path. Harness exercises BOTH the direct
+statsmodels fit (for AR/MA coefficient extraction) AND the public
+wrapper (`arima_mod.run` for AIC cross-check + wrapper-consistency
+regression sanity); wrapper AIC=1134.07 matches direct-fit AIC.
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via R forecast::Arima):** Reference reimplementation at
+`tools/reference_parity/harness/checks/p3_arima.py` `run_reference`
+lines 244-331 invokes R `forecast::Arima(y, order=c(p,d,q),
+method="ML", include.constant=FALSE)` via RBridge. method="ML"
+forces MLE-only (vs default CSS-ML) for closer apples-to-apples
+optimizer comparison against statsmodels' L-BFGS-B ML path. Both
+fit Gaussian-innovation maximum likelihood on identical fixtures.
+
+**API path positioning note (third data point in API-positioning
+pattern S68-S70):**
+
+- **S68 ets_hw:** engine on CLASSICAL side (statsmodels classical
+  holtwinters SSE) vs R state-space `forecast::ets` →
+  engine-IMPROVEMENT flag.
+- **S69 theta_forecast:** engine on MODERN/state-space side
+  (statsmodels ThetaModel Hyndman-Billah 2003) vs R original
+  `forecast::thetaf` → NO engine-IMPROVEMENT flag.
+- **S70 arima:** engine on MODERN side (statsmodels
+  `tsa.arima.model.ARIMA` = state-space/Kalman, wraps SARIMAX)
+  vs R `forecast::Arima` ML → **NO engine-IMPROVEMENT flag.**
+- **Pattern observation (n=3):** Forecasting Classical engine
+  modules use the MODERN statsmodels API in 2 of 3 cases
+  (theta_forecast + arima); only ets_hw uses the legacy classical
+  API. Engine-improvement queue remains n=1 (ets_hw isolated
+  case); the modern-API convention is the engine norm within the
+  block, with ets_hw the lone exception.
+
+**Cross-reference to S62 conformal_intervals SARIMAX backbone:**
+S62 conformal_intervals exercised pmdarima `auto_arima` which
+wraps `statsmodels.tsa.statespace.SARIMAX` as its base forecaster.
+Engine S70 arima uses `statsmodels.tsa.arima.model.ARIMA` which
+**shares the same statespace SARIMAX backbone** (modern
+`tsa.arima.model.ARIMA` is a thin convenience wrapper over SARIMAX
+state-space machinery). **S70 ARIMA math-layer parity corroborates
+the SARIMAX backbone correctness already exercised at S62.** This
+is the FOURTH cross-reference trust-inheritance instance in the
+Q1 cadence (S65 johansen → VECM; S66 State Space → DFM; S67 Phase
+1+4 → bvar; S70 S62-SARIMAX → ARIMA).
+
+**Cross-reference to State Space block (S48-S51 validated
+separately):** Modern statsmodels ARIMA uses Kalman-filter MLE —
+**same Kalman machinery as separately-validated State Space
+techniques** (kalman_filter + kalman_smoother + local_level S48 +
+local_linear_trend S49 + particle_filter S50 + structural_ts S51).
+**ARIMA Kalman MLE backbone inherits trust from State Space block
+validation scope.**
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine `_prepare_series` at
+  engine lines 518+ strips edge NaN + linearly interpolates
+  interior NaN. Verified by injecting interior NaN at [10] + [50]
+  in a 400-observation fixture: engine returned `status=success`
+  + emitted NaN-interpolation warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `order=[1,1,1]`; returned audit fields
+  populated correctly (`method="manual"`; `order=(1,1,1)`;
+  `seasonal_order`; `aic=1134.07` matching direct-fit AIC;
+  `bic=1146.03`; `rmse`; `mae`; `horizon`; `baseline_rmse` +
+  `baseline_label` + `baseline_period`; `ljung_box_lag10_pvalue`
+  + `jarque_bera_pvalue` residual-diagnostic fields;
+  `last_observed_value`; `forecast_end_value`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted **4 expected tables** (`Forecast` 5 × 4 [Step + Forecast
+  + Lower 95% + Upper 95%]; `Fitted Values`; `Model Summary`;
+  `Residual Diagnostics` [Ljung-Box + Jarque-Bera]) — **richest
+  output of the Forecasting Classical block so far**, including
+  formal residual-diagnostic tests.
+
+**Verdict (math layer — primary):** PASS at mle-band tolerance
+(far tighter: `max_abs_diff` per metric: ar_coefs 5.24e-6, ma_coefs
+5.86e-6, loglik 2.26e-8, forecast 1.02e-4; n=400 ARIMA(1,1,1) DGP
+φ=0.6 θ=0.4 σ=1.0 at seed=42, fit order (1,1,1), horizon=5 at
+runner CLI execution).
+**Verdict (math layer — secondary):** clean PASS — sigma2 abs_diff=
+4.98e-3 (0.5% rel); aic abs_diff=4.53e-8; bic abs_diff=4.53e-8
+(NO Tier V Pattern D CAVEAT — both use likelihood-based AIC).
+**Verdict (wrapper layer):** PASS 3/3 checks per S70 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_arima.py`
+(technique_id `p3_arima_manual`).
+**Audit date:** 2026-05-28 (S70 §2.5 entry; Forecasting Classical
+block third dispatch-set entry; ARIMA arc opens).
+**Primary metrics (math layer):** AR coefficient vector + MA
+coefficient vector + log-likelihood + h-step point forecast (h=5).
+**Secondary metrics:** AIC + BIC + sigma² (innovation variance) —
+all clean PASS, no IC CAVEAT.
+**Diagnostic metric:** fitted in-sample series correlation
+(INFO status).
+
+**Validation claim scope (S70; engine math validated at primary-
+metric scope; wrapper code path exercised at wrapper-layer 3-check
+scope + direct fit cross-check; math-layer comparison crosses
+Python statsmodels modern ARIMA and R forecast::Arima ML
+implementations):**
+
+- **Layer 1 (statsmodels modern ARIMA state-space Kalman MLE
+  primary metrics) VALIDATED at Tier II.mle-band:** AR coefs +
+  MA coefs + log-likelihood + h-step forecast all agree at
+  far-tighter-than-mle-band tolerance. Cross-library agreement
+  (statsmodels Python state-space ARIMA vs R forecast::Arima ML)
+  confirms both implementations correctly implement Gaussian-
+  innovation ARIMA MLE.
+- **Layer 1 SECONDARY METRICS aic/bic/sigma² clean PASS:** No IC
+  formula-family divergence (both likelihood-based AIC); distinct
+  from S64 VAR + S68 ets_hw Tier V Pattern D.
+- **Layer 1 FORECAST PREDICTION INTERVALS NOT separately
+  validated at math layer:** Engine emits 95% prediction interval
+  columns via statsmodels `get_forecast().conf_int()`
+  (state-space-derived); cross-implementation PI comparison NOT
+  in current parity scope.
+- **Layer 1 RESIDUAL DIAGNOSTICS (Ljung-Box + Jarque-Bera) NOT
+  separately validated at math layer:** Engine emits these in
+  `Residual Diagnostics` table + audit fields; covered at
+  wrapper-layer 3-check Check 2 emission scope only.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via strip + interp; preset
+  config dispatch returns expected 4-table structure (richest in
+  block) + comprehensive audit-field population including residual
+  diagnostics + baseline comparison; output shape/type
+  verification confirms Forecast table PI columns.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** ARIMA per Box-Jenkins (1976) "Time Series
+Analysis: Forecasting and Control" Holden-Day — autoregressive
+integrated moving average; differencing to achieve stationarity
++ ARMA(p,q) on the differenced series. Estimation theory per
+Hamilton (1994) "Time Series Analysis" Princeton Ch. 5 (MLE for
+ARMA via state-space + Kalman filter likelihood evaluation).
+Engine uses `statsmodels.tsa.arima.model.ARIMA` (modern API;
+state-space representation + Kalman-filter Gaussian likelihood
+maximized via L-BFGS-B) — distinct from the deprecated
+`statsmodels.tsa.arima_model.ARIMA` legacy CSS/CSS-ML wrapper.
+The modern API wraps the same SARIMAX state-space machinery
+exercised by pmdarima auto_arima at S62 conformal_intervals.
+
+**Phase 3 known failure modes (S70 / engine-variant scope):**
+
+- Math-layer harness exercises both direct statsmodels ARIMA fit
+  (coefficient extraction) + public wrapper (AIC cross-check);
+  wrapper AIC matches direct-fit AIC (wrapper-consistency
+  confirmed).
+- **NO IC CAVEAT** (unlike S64 VAR + S68 ets_hw): statsmodels
+  modern ARIMA + R forecast::Arima(method="ML") both compute
+  full-Gaussian-likelihood-based AIC; clean PASS at ~4.5e-8.
+- **NO engine-IMPROVEMENT** (unlike S68 ets_hw): engine uses the
+  modern state-space ARIMA API, not the deprecated legacy wrapper.
+- Deterministic-optimizer convergence-criterion divergence
+  (statsmodels L-BFGS-B vs R CSS-then-ML / BFGS): produces ~1e-5
+  to 1e-4 abs divergence on coefficients; well within mle-band.
+- CSS-vs-ML start-value sensitivity: harness forces R method="ML"
+  to match statsmodels ML-only path; default R CSS-ML would
+  introduce additional start-value divergence (avoided).
+
+**Phase 3 boundary of validity:**
+
+- T=400 ARIMA(1,1,1) fixture (φ=0.6, θ=0.4, σ=1.0, d=1); other
+  orders + DGP regimes NOT validated at math layer
+- order=(1,1,1) fitted; alternative (p,d,q) orders NOT separately
+  validated though same state-space Kalman MLE applies
+- non-seasonal (seasonal_order=(0,0,0,0)) validated; seasonal
+  ARIMA covered at S71 sarima
+- non-exogenous validated; exogenous ARIMAX covered at S72
+  arimax_sarimax
+- manual-order path validated; automatic order selection covered
+  at S73 auto_arima (pmdarima; cross-reference S62)
+- horizon=5 forecast validated; longer horizons NOT separately
+  exercised
+- prediction intervals NOT validated at math layer
+- residual diagnostics (Ljung-Box + Jarque-Bera) NOT validated
+  at math layer
+
+**Phase 3 gap markings:**
+
+- Prediction intervals NOT validated at math layer
+- Residual diagnostics NOT validated at math layer
+- Alternative (p,d,q) orders NOT validated
+- Seasonal / exogenous / automatic-selection paths deferred to
+  S71/S72/S73 respectively
+
+**Status (PRIMARY Tier II.mle-band PASS at mle_fit verdict_class
+tolerance [far tighter] + SECONDARY clean PASS with NO IC CAVEAT
++ wrapper-layer 3/3 PASS per S70 / Forecasting Classical block
+third dispatch-set entry, ARIMA arc opens):** Layer 1 statsmodels
+modern ARIMA state-space Kalman MLE math validated at mle-band
+tolerance via cross-library check (statsmodels Python vs R
+forecast::Arima ML). S62 SARIMAX backbone + State Space block
+Kalman backbone cross-references both inherit trust. Wrapper
+layer (S49+ NEW 3-check scope) validated at 3/3 PASS including
+4-table output structure (richest in block: Forecast + Fitted +
+Summary + Residual Diagnostics).
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** statsmodels
+  `ARIMA(y, order=(1,1,1), seasonal_order=(0,0,0,0)).fit()` then
+  `get_forecast(steps=5)`. Pattern A.1 cross-library reference:
+  R `forecast::Arima(y, order=c(1,1,1), method="ML",
+  include.constant=FALSE)`. ARIMA(1,1,1) DGP at n=400, seed=42.
+- **Engine preset default (Balanced):** manual-order path requires
+  user-specified `order` parameter (engine lines 241-259; error
+  if omitted); seasonal_order defaults to (0,0,0,0). No automatic
+  order selection on the manual path (auto_arima is the separate
+  technique_id covered at S73).
+- **Configuration match:** **YES at primary metrics math layer**
+  — user invoking manual ARIMA at order=(1,1,1) non-seasonal
+  matches validated configuration. Alternative orders accepted
+  via user `order` param; math-layer validation exercises (1,1,1)
+  specifically.
+- **Disclosure scope:** Alternative (p,d,q) orders NOT separately
+  validated at math layer (same state-space Kalman MLE algorithm
+  applies). Seasonal ARIMA deferred to S71 sarima. Exogenous
+  ARIMAX deferred to S72 arimax_sarimax. Automatic order selection
+  deferred to S73 auto_arima. Prediction intervals + residual
+  diagnostics covered at wrapper-layer emission scope only.
+
+**ENG-EXT institutional-rates ARIMA workflow scan outcome (S70
+Step 1; standard tight workflow + stronger-than-minimum residual
+diagnostics; no NEW ENG-EXT-FORECASTING-001 candidate surfaced):**
+
+(a) **Point forecast:** PRESENT ✓ — `Forecast` table h-step point
+    forecasts.
+(b) **Prediction intervals:** PRESENT ✓ — Lower/Upper 95% columns
+    via state-space `get_forecast().conf_int()`.
+(c) **Fitted values + residuals:** PRESENT ✓ — `Fitted Values`
+    table (original + fitted + residual).
+(d) **Residual diagnostics:** PRESENT ✓ **(stronger than minimum)**
+    — `Residual Diagnostics` table + audit `ljung_box_lag10_pvalue`
+    (autocorrelation test) + `jarque_bera_pvalue` (normality test).
+    Institutionally useful for ARIMA adequacy assessment.
+(e) **Baseline comparison:** PRESENT ✓ — audit `baseline_rmse` +
+    `baseline_label` + `baseline_period` (fit-vs-naive benchmark).
+
+**Verdict: COVERED at standard workflow elements + stronger-than-
+minimum residual diagnostics + baseline benchmark.** No new
+ENG-EXT-FORECASTING-001 commission surfaced at S70. Engine ARIMA
+has the most complete institutional workflow of the Forecasting
+Classical block entries so far (residual adequacy tests +
+baseline comparison both native).
+
+**Audit-hygiene cross-reference (S70 / no engine-IMPROVEMENT + no
+IC CAVEAT + dual backbone cross-reference):**
+
+S70 arima engine uses the modern statsmodels `tsa.arima.model.
+ARIMA` API (state-space/Kalman MLE; wraps SARIMAX) — NO engine-
+IMPROVEMENT candidate (engine-improvement queue stays n=1
+[ets_hw]). NO aic/bic Tier V Pattern D CAVEAT (both statsmodels +
+R use full-Gaussian-likelihood AIC; clean PASS at 4.5e-8 —
+distinct from S64 VAR + S68 ets_hw formula-family divergence).
+Dual cross-reference: S62 conformal_intervals SARIMAX backbone
+(FOURTH cross-reference trust-inheritance instance in Q1 cadence)
++ State Space block S48-S51 Kalman backbone. API-positioning
+pattern third data point (n=3: S68 classical + S69 modern + S70
+modern; modern-API is engine norm with ets_hw the lone classical
+exception).
+
+**Forecasting Classical block progress note (S70 third dispatch-
+set entry; ARIMA arc opens):** Block 2 Forecasting Classical
+advances at S70 arima per ratified ascending-complexity dispatch
+ordering. **Post-S70: Forecasting Classical block 4/8 §2.5-
+validated** (SC7 transfer_function + S68 ets_hw + S69
+theta_forecast + S70 arima). **4 remaining in dispatch-set via
+S71-S74.** ARIMA arc (S70-S73: arima → sarima → arimax_sarimax →
+auto_arima) opens at S70. Block close projected at S74
+intermittent_demand.
+
+**S71 sarima projection (next Forecasting Classical block session
+per ascending-complexity dispatch ordering; SECOND ARIMA arc
+entry):** Engine `engine/techniques/sarima.py` (verify exact
+module name; may share `arima.py` with seasonal_order activated)
+is Seasonal ARIMA — ARIMA with seasonal (P,D,Q,m) terms.
+Expected Pattern A.1 same-library cross-package self-parity vs R
+`forecast::Arima` with seasonal order. Same modern statsmodels
+state-space API expected (NO engine-IMPROVEMENT); same likelihood-
+based AIC (NO IC CAVEAT expected); same SARIMAX backbone + State
+Space cross-references. Pre-existing risk: seasonal differencing
++ longer seasonal lags may surface optimizer convergence
+sensitivity; verify mle-band holds. Estimated session time:
+~1-1.5h.
+
+## §3 Unvalidated catalog techniques (15 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -32439,8 +32748,8 @@ descriptions, summaries).
 ### Evaluation / Uncertainty (0 unvalidated; **Block 4 FULLY Q1-AMENDED** — NINTH catalog block to complete per Q1 work program scope at S62 close = 9 of 13 catalog blocks fully Q1-amended (69% catalog block-level completion); robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61; conformal_intervals moved to §2.5 per Phase 7+ S62 — FIFTH-AND-FINAL block entry; Q1 cadence resumption entry post-Cat-3-cycle close at SC17 a54b430; cascade-resolution entry — p3_conformal was the original Cat 3 finding at S62 Step 1 that triggered the inventory verification cascade + 17-session Cat 3 remediation cycle, now closed at S62 §2.5 entry against the corrected harness; MANDATORY Path B forward observation embedded: ENG-EXT-CONFORMAL-001 commissions CQR + EnbPI/SPCI Q2+ engine extension for institutional-fixed-income-use-case scope)
 (all 5 techniques moved to §2.5)
 
-### Forecasting (Classical) (5 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE-minimization path (NOT likelihood-based); FIRST engine-IMPROVEMENT candidate within Q1 cycle — migrate to statespace ETS for likelihood-based inference; engine-improvement queue at S68 close: n=1; pre-existing aic/bic Tier V Pattern D CAVEAT; β/γ corner-solution landing confirms classical SSE optimizer boundary-sticking pathology; theta_forecast moved to §2.5 per Phase 7+ S69 — THIRD Block 2 entry; SECOND dispatch-set entry; engine uses `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API; engine on state-space side, OPPOSITE positioning from S68 ets_hw classical-API); NO engine-IMPROVEMENT candidate — engine already uses appropriate modern API (engine-improvement queue stays n=1); cross-API-paradigm Pattern A.1 vs R `forecast::thetaf` Assimakopoulos-Nikolopoulos 2000 original; forecast PASS at mle-band 3 orders tighter than band; rmse Secondary BLOCK is HARNESS metric-extraction artifact [statsmodels ThetaModel lacks fittedvalues] NOT math-layer divergence — overall PASS)
-`arima`, `arimax_sarimax`, `auto_arima`, `intermittent_demand`, `sarima`
+### Forecasting (Classical) (4 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE path; FIRST engine-IMPROVEMENT candidate within Q1 cycle (migrate to statespace ETS); engine-improvement queue n=1; pre-existing aic/bic Tier V Pattern D CAVEAT; β/γ corner-solution landing; theta_forecast moved to §2.5 per Phase 7+ S69 — THIRD Block 2 entry; SECOND dispatch-set entry; engine uses `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API); NO engine-IMPROVEMENT candidate; cross-API-paradigm Pattern A.1 vs R `forecast::thetaf`; forecast PASS at mle-band 3 orders tighter; rmse Secondary BLOCK is HARNESS metric-extraction artifact NOT math-layer divergence — overall PASS; arima moved to §2.5 per Phase 7+ S70 — FOURTH Block 2 entry; THIRD dispatch-set entry; opens ARIMA arc S70-S73; engine uses MODERN `statsmodels.tsa.arima.model.ARIMA` (state-space/Kalman MLE; wraps SARIMAX — NOT deprecated legacy wrapper); NO engine-IMPROVEMENT candidate (queue stays n=1); NO aic/bic Tier V Pattern D CAVEAT (both statsmodels + R forecast::Arima(method="ML") use full-Gaussian-likelihood AIC; clean PASS at 4.5e-8 — distinct from S64 VAR + S68 ets_hw IC formula-family divergence); S62 conformal_intervals SARIMAX backbone cross-reference (FOURTH cross-reference trust-inheritance instance in Q1 cadence) + State Space block S48-S51 Kalman backbone cross-reference BOTH APPLY; API-positioning pattern n=3 [S68 classical + S69 modern + S70 modern; modern-API engine norm, ets_hw lone classical exception]; richest block output [4 tables incl Residual Diagnostics])
+`arimax_sarimax`, `auto_arima`, `intermittent_demand`, `sarima`
 
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
