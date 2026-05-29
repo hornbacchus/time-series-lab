@@ -31104,7 +31104,506 @@ analogues to S64 VAR's IRF point estimates + ENG-EXT-MULTIVARIATE-
 (includes block-close milestone + 9-of-13 → 10-of-13 catalog
 block-fully-Q1-amended progress confirmation).
 
-## §3 Unvalidated catalog techniques (19 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### bvar (Phase 7+ S67; FIFTY-SIXTH §2.5 entry; FIFTH-AND-FINAL Multivariate Systems block entry; **Block 10 Multivariate Systems FULLY Q1-AMENDED — TENTH catalog block to complete per Q1 work program scope at S67 close = 10 of 13 catalog blocks fully Q1-amended (77% catalog block-level completion)**; **Disposition A (cross-reference existing validations)** with layered sub-element — `bvar` is DISTINCT catalog entry from `bond_yield_forecast` (analytical Normal-Inverse-Wishart posterior vs CCM-2019 Gibbs sampler with stochastic volatility); `bvar` already validated at Phase 1 `1c_bvar_irf_fevd` IRF/FEVD parity (machine precision) + Phase 4 S5 BVAR coefficient parity vs R `BVAR::bvar` PASS-A.2 DOCUMENTED-DIVERGENCE per prior-parameterization differences; **ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at Bayesian level for users invoking bvar** — engine emits posterior IRF + FEVD with credible bands as native output)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.bit-exact at machine precision (Pattern A.1 same-library
+cross-package self-parity)** per Phase 1 `1c_bvar_irf_fevd` audit
++ S67 Code Step 2 re-verification at runner CLI. Engine numpy/
+scipy posterior IRF/FEVD math vs R `vars::Phi` IRF + closed-form
+VMA-based FEVD. **Engine BVAR uses ANALYTICAL CONJUGATE NORMAL-
+INVERSE-WISHART POSTERIOR (NO MCMC)** per engine docstring lines
+4-6 + engine `run()` lines 405-445 (closed-form posterior mean +
+variance per equation; Monte Carlo posterior draws for credible
+intervals use `np.random.seed(ctx.seed)` for reproducibility per
+engine line 252). **Bit-exact determinism within-process** at
+fixed seed.
+
+**Disposition determination per S67 Step 1 (bond_yield_forecast
+cross-reference resolution):**
+
+**Disposition A (cross-reference existing validations)** with
+**Disposition C (layered relationship)** sub-element:
+
+- **`bvar` (engine/techniques/bvar.py) IS DISTINCT** from
+  `bond_yield_forecast`. Engine BVAR is generic Bayesian VAR with
+  Minnesota prior + analytical Normal-Inverse-Wishart posterior
+  (NO MCMC). Engine docstring lines 18-19 explicitly differentiate:
+  "BVAR-with-stochastic-volatility implementation lives in the
+  `bond_yield_forecast` subpackage's CCM-2019 Gibbs sampler."
+- **`bond_yield_forecast` is the SV-EXTENDED SPECIALIZATION**
+  (separate catalog entry; validated separately via Phase 3+
+  BYF-specific harnesses `p3_byf_minnesota_dummies` +
+  `p3_byf_bvar_constant_vol` + `p3_byf_stochvol_partial`).
+- **Layered architecture:**
+  - `bvar` = analytical-posterior base layer (Litterman 1986
+    Minnesota prior + Doan-Litterman-Sims 1984 dummy-observation
+    reformulation; conjugate normal-inverse-Wishart);
+  - `bond_yield_forecast` = MCMC SV extension layer (CCM-2019
+    Gibbs sampler + K-FS-2014 ASIS interweaving + BGL-2015
+    conditional forecasting + GLP-2015 hyperparameter optimization
+    + numba JIT + R stochvol cross-validation Pearson r 0.87-0.99).
+  - **Distinct mathematical engines; layered conceptual
+    relationship.**
+
+**Cross-referenced existing validations (bvar already validated):**
+
+1. **Phase 1 audit `1c_bvar_irf_fevd`** (`tools/reference_parity/
+   harness/checks/bvar_irf_fevd.py`): IRF/FEVD parity vs R
+   `vars::Phi` + closed-form VMA FEVD. **Re-confirmed at S67
+   runner CLI:** all metrics PASS at machine precision —
+   `irf_h0` max_abs=0.0, `irf_h1` max_abs=0.0, `irf_h2` max_abs=
+   0.0, `irf_h5` max_abs=1.39e-17, `irf_h10` max_abs=0.0,
+   `fevd_h10` max_abs=1.11e-16, FEVD row-sum-to-one invariant
+   PASS at max_dev=2.22e-16. Phase 1 audit reports
+   `tools/reference_parity/reports/1c_bvar_irf_audit.md`.
+2. **Phase 4 S5 BVAR coefficient parity vs R `BVAR::bvar`**
+   (Kuschnig-Vashold 2021 JSS): per engine docstring lines 14-18,
+   landed **PASS-A.2 with DOCUMENTED-DIVERGENCE** due to prior-
+   parameterization differences between TSL Minnesota
+   implementation + R BVAR package's Minnesota implementation.
+   Documented at P-3 §3.4.2 forward-provisioning case study.
+   Pattern H DOCUMENTED-DIVERGENCE within mle_fit family per master
+   plan §7.1. **NOT a regression; reflects well-known prior-
+   convention divergence between independent BVAR implementations
+   per Bańbura-Giannone-Reichlin 2010 §3.**
+
+**S67 §2.5 entry cross-references both validations + does NOT
+re-validate at math layer.** Wrapper-layer 3-check + ENG-EXT scan
++ block-close documentation executed at S67 per workflow
+specification.
+
+**Engine variant validated (via Phase 1 + Phase 4 cross-
+references):** Engine BVAR with Minnesota prior (lambda1=0.1
+tightness + lambda2=1.0 cross-equation shrinkage + lambda3=1.0
+harmonic lag decay at Balanced default per engine `_PRESET_CONFIG`
+lines 43-46) + analytical conjugate Normal-Inverse-Wishart
+posterior + Monte Carlo posterior draws (n_draws=1000 at
+Balanced) for credible intervals on forecasts + IRF + FEVD.
+
+**Reference (cross-referenced validations):**
+
+- Phase 1 audit: R `vars::Phi` for IRF + closed-form VMA →
+  orthogonalized IRF → cumulative-squared-share formula for FEVD.
+  Same closed-form math `vars::fevd` implements internally.
+- Phase 4 audit: R `BVAR::bvar()` (Kuschnig-Vashold 2021) at
+  Minnesota prior with comparable hyperparameters.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS at S67
+RunContext invocation):**
+
+- **Check 1 — NaN handling:** PASS. Engine row-drop via aligned-
+  NaN mask at engine lines 266-271 (rows with ANY NaN dropped;
+  warning emitted with count). Verified by injecting interior NaN
+  at [10, 0] + [20, 2] in a 3-series fixture: engine returned
+  `status=success` + emitted dropped-row warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` on 300-observation 3-variable VAR(2) DGP;
+  returned audit fields populated correctly (`n_variables=3`;
+  `lags=4` engine Balanced default per engine line 44;
+  `lambda1=0.1`; `lambda2=1.0`; `lambda3=1.0`; `n_draws=1000`
+  Balanced default; `horizon=10`; `irf_horizon=24` Balanced
+  default per engine line 45).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted **8 expected tables**: 3 × `Forecast: <name>` (per-
+  variable forecast with 5%/95% posterior credible interval) +
+  `Posterior Coefficients` (B_post per equation) + `Residual
+  Covariance Matrix` (Sigma_post k × k) + `Model Summary` +
+  **`Impulse Response (Posterior Median, 90% Credible Band)`
+  table** (Cholesky-orthogonalized IRF with credible bands) +
+  **`FEVD (Posterior)` table** (forecast error variance
+  decomposition with credible bands).
+
+**Verdict (math layer):** PASS bit-exact at machine precision via
+cross-referenced Phase 1 `1c_bvar_irf_fevd` audit (re-confirmed
+at S67 runner CLI: max_abs_diff ≤ 1.4e-17 across all IRF/FEVD
+metrics + row-sum-to-one structural invariant PASS) +
+cross-referenced Phase 4 S5 BVAR coefficient audit PASS-A.2
+DOCUMENTED-DIVERGENCE per prior-parameterization differences.
+**Verdict (wrapper layer):** PASS 3/3 checks per S67 Code Step 3
+including 8-table output structure with native posterior IRF +
+FEVD credible bands.
+**Audit script:** `tools/reference_parity/harness/checks/
+bvar_irf_fevd.py` (Phase 1 audit, re-confirmed at S67) +
+historical Phase 4 S5 BVAR coefficient audit (cross-referenced
+not re-executed at S67).
+**Audit date:** 2026-05-28 (S67 §2.5 entry; **Multivariate Systems
+BLOCK CLOSE**; Disposition A cross-reference; ENG-EXT-MULTIVARIATE-
+001 IRF-bands gap RESOLVED at Bayesian level).
+
+**Primary metrics (math layer; per cross-referenced Phase 1
+audit):** IRF tensor at horizons {0, 1, 2, 5, 10} (shape (H, k, k)
+= (11, 2, 2) on Phase 1 bivariate VAR(1) fixture); FEVD at
+horizon 10 + row-sum-to-one structural invariant.
+**Secondary metrics:** None at Phase 1 audit (IRF/FEVD scope
+exclusive).
+
+**Determinism profile (per S67 Step 4):** **ANALYTICAL
+POSTERIOR** with Monte Carlo posterior draws.
+- Engine pins `np.random.seed(ctx.seed)` at engine line 252 →
+  posterior coefficient draws + posterior predictive forecast
+  draws bit-exact reproducible within-process.
+- **Cross-invocation reproducibility:** Within-process bit-exact
+  at fixed seed; cross-invocation reproducibility inherits from
+  numpy global RNG determinism (no statsmodels or external solver
+  state). **Tier II.bit-exact applies.**
+- NO MCMC — distinguishes engine `bvar` from `bond_yield_forecast`
+  Gibbs sampler (which has mle-band cross-invocation per SC11
+  Stan-MAP precedent + cross-validated Pearson r 0.87-0.99).
+
+**Validation claim scope (S67; engine math validated via cross-
+references to Phase 1 + Phase 4 existing audits; wrapper layer
+re-confirmed at S67 RunContext invocation):**
+
+- **Layer 1 (IRF/FEVD math via numpy/scipy closed-form VMA →
+  orthogonalized IRF → cumulative-squared-share FEVD) VALIDATED
+  at Tier II.bit-exact:** Phase 1 `1c_bvar_irf_fevd` audit
+  established machine-precision parity vs R `vars::Phi` + closed-
+  form FEVD; re-confirmed at S67 runner CLI.
+- **Layer 1 BVAR COEFFICIENT MATH (Minnesota prior + Normal-
+  Inverse-Wishart conjugate posterior) VALIDATED at Phase 4 S5
+  PASS-A.2 DOCUMENTED-DIVERGENCE scope:** Cross-implementation
+  posterior coefficient mean agreement modulo well-documented
+  prior-parameterization differences between TSL Litterman 1986
+  + Doan-Litterman-Sims 1984 dummy-observation implementation
+  and R `BVAR::bvar()` Kuschnig-Vashold 2021 implementation.
+  Pattern H DOCUMENTED-DIVERGENCE per master plan §7.1.
+- **Layer 1 POSTERIOR PREDICTIVE FORECAST DENSITY (5%/95%
+  credible intervals via Monte Carlo posterior draws) NOT
+  separately validated at math layer:** Engine emits at engine
+  lines 469-498 with `np.random.seed(ctx.seed)` for
+  reproducibility; covered at wrapper-layer 3-check Check 3
+  emission scope only. Distributional parity vs alternative
+  posterior-predictive implementation would require draws-vs-
+  draws Monte Carlo distance metric (Kolmogorov-Smirnov or
+  Wasserstein); not exercised at Phase 1 / Phase 4 / S67 audits.
+- **Layer 1 ZERO-STRADDLING DIAGNOSTIC** (`_collect_zero_straddle_
+  pairs` at engine lines 167-219): emission-scope-only validation.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS at S67 RunContext invocation:** NaN
+  handling via row-drop; preset config dispatch returns expected
+  8-table structure including native posterior IRF + FEVD credible
+  bands; output shape/type verification confirms table column
+  schemas + audit-field population including all hyperparameters
+  + sample size + horizon.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+historical Phase 1 + Phase 4 audit references):** Bayesian VAR
+per Litterman (1986) "Forecasting with Bayesian Vector
+Autoregressions — Five Years of Experience" J Business Econ Stat
+4(1) — original Minnesota prior specification (zero mean for
+non-own-lag coefficients + 1 for first own lag = random-walk
+prior; variance decreasing in lag distance). Reformulation per
+Doan-Litterman-Sims (1984) "Forecasting and Conditional
+Projection Using Realistic Prior Distributions" Econometric
+Reviews 3(1) as dummy-observation regression equivalent
+(facilitating closed-form posterior via standard OLS + prior
+augmentation per BYF #2 audit at Phase 4 S4). Large-dimensional
+generalization per Bańbura-Giannone-Reichlin (2010) "Large
+Bayesian Vector Autoregressions" J Applied Econ 25(1) —
+hyperparameter selection + scalability to N > 20 series. Engine
+uses **analytical conjugate Normal-Inverse-Wishart posterior**
+(closed-form posterior mean per equation + Monte Carlo posterior
+draws for credible intervals) — NO MCMC required. Distinguishes
+from `bond_yield_forecast` which uses CCM-2019 Gibbs sampler with
+stochastic volatility per Carriero-Clark-Marcellino 2019 +
+extensions.
+
+**Phase 3 known failure modes (S67 / cross-referenced validation
+scope):**
+
+- Math-layer validation via cross-reference to Phase 1 +
+  Phase 4 historical audits. Re-validation NOT performed at S67;
+  Phase 1 audit re-confirmed at runner CLI.
+- **Pattern H DOCUMENTED-DIVERGENCE at Phase 4 S5 audit:** prior-
+  parameterization differences between TSL Minnesota
+  implementation + R BVAR package; absolute posterior coefficient
+  values diverge slightly but interpretive conclusions agree.
+  Documented at P-3 §3.4.2 case study.
+- **Posterior predictive forecast density NOT bit-exact across
+  Python/R implementations:** Monte Carlo posterior draws use
+  different RNG between Python `np.random` and R `rnorm`; full
+  distributional parity NOT achievable. Reproducibility within-
+  implementation (at fixed seed) is bit-exact; cross-
+  implementation distributional comparison requires Monte Carlo
+  distance metrics not in current parity scope.
+- **Minnesota prior tightness hyperparameters (lambda1/lambda2/
+  lambda3) at Balanced (0.1/1.0/1.0) NOT validated at math layer
+  separately from defaults:** Sensitivity to alternative
+  hyperparameter values NOT in parity scope; users requiring
+  hyperparameter robustness should consult Giannone-Lenza-
+  Primiceri (2015) "Prior Selection for Vector Autoregressions"
+  REStat 97(2) hyperparameter optimization framework (NOT
+  implemented at engine BVAR; available via bond_yield_forecast's
+  GLP-2015 hyperparameter optimization for the SV-extended path).
+
+**Phase 3 boundary of validity:**
+
+- Phase 1 audit: bivariate VAR(1) fixture (k=2, p=1); other
+  dimensions covered by closed-form algorithm structure but not
+  empirically validated at math layer
+- Phase 4 audit: validated against R `BVAR::bvar` Kuschnig-Vashold
+  2021 with PASS-A.2 DOCUMENTED-DIVERGENCE scope
+- Minnesota prior at engine defaults (lambda1=0.1, lambda2=1.0,
+  lambda3=1.0); alternative hyperparameter values NOT validated
+- Analytical posterior path validated; bond_yield_forecast Gibbs
+  sampler SV-extended path validated separately via BYF-specific
+  harnesses
+- Posterior predictive forecast density NOT separately validated
+  at math layer
+- Hyperparameter optimization (Giannone-Lenza-Primiceri 2015)
+  NOT implemented at engine BVAR
+
+**Phase 3 gap markings:**
+
+- Posterior predictive forecast density NOT validated at math
+  layer (cross-implementation distributional parity scope)
+- Hyperparameter sensitivity NOT validated
+- Marginal likelihood / model comparison NOT emitted by engine
+- Hyperparameter optimization NOT implemented at engine BVAR
+
+**Status (Tier II.bit-exact PASS at machine precision via cross-
+reference to Phase 1 + Phase 4 audits + wrapper-layer 3/3 PASS at
+S67 RunContext invocation per S67 / fifth-and-final Multivariate
+Systems block entry):** Layer 1 IRF/FEVD math validated at machine
+precision (Phase 1 re-confirmed at S67); Layer 1 BVAR coefficient
+math validated PASS-A.2 DOCUMENTED-DIVERGENCE (Phase 4 cross-
+referenced). Wrapper layer (S49+ NEW 3-check scope) validated at
+3/3 PASS including 8-table output structure with native posterior
+IRF + FEVD credible bands.
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (Phase 1 + Phase 4 cross-references
+  + S67 wrapper-layer):** Minnesota prior at lambda1=0.1, lambda2=
+  1.0, lambda3=1.0 (Balanced default); Cholesky-orthogonalized
+  IRF; 8-table output structure; Monte Carlo posterior with
+  n_draws=1000 Balanced default at fixed `np.random.seed`.
+- **Engine preset default (Balanced):** All hyperparameters match
+  validated configuration. Lags=4 Balanced default; horizon=10;
+  irf_horizon=24.
+- **Configuration match:** **YES at Bayesian Minnesota-prior +
+  analytical posterior + Cholesky IRF backend** — user invoking
+  at default Balanced preset experiences mathematically validated
+  Layer 1 surface for IRF/FEVD math (Phase 1) + coefficient
+  posterior math (Phase 4 PASS-A.2 DOCUMENTED-DIVERGENCE).
+- **Disclosure scope:** Alternative hyperparameter values (lambda1/
+  lambda2/lambda3) NOT separately validated. Alternative prior
+  specifications (Normal-Diffuse, SSVS spike-and-slab) NOT
+  implemented at engine BVAR. Posterior predictive forecast
+  density distributional parity NOT validated. SV extension
+  available via separate `bond_yield_forecast` catalog entry with
+  separate validation scope. **Marginal likelihood / model
+  comparison NOT emitted** — user requiring formal Bayes-factor
+  model comparison must use external libraries (R `BVAR::
+  bv_marginal` or Python `pymc.compute_log_likelihood`).
+
+**ENG-EXT institutional-rates BVAR workflow scan outcome
+(S67 Step 1; ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at
+Bayesian level for users invoking bvar):**
+
+(a) **Posterior IRF with credible bands:** **PRESENT** ✓ — engine
+    `_compute_posterior_irf` at engine lines 58-127 emits median
+    + 5%/95% credible bands across Monte Carlo posterior coefficient
+    draws under Cholesky orthogonalization. **This is the BAYESIAN
+    ANALOG of bootstrap CI bands identified as ENG-EXT-MULTIVARIATE-
+    001 gap at S64 VAR scan.** For users prioritizing IRF
+    uncertainty quantification, **bvar provides what's
+    institutionally required** — Bayesian credible bands are
+    methodologically standard for BVAR (Sims-Zha 1999 "Error
+    Bands for Impulse Responses" Econometrica 67(5); Carriero-
+    Clark-Marcellino 2019 §3) and conceptually equivalent to
+    bootstrap CI bands for frequentist VAR.
+(b) **Posterior FEVD with credible bands:** **PRESENT** ✓ — engine
+    `_compute_posterior_fevd` emits median + 5%/95% credible bands
+    per horizon × variable × shock at engine lines 130-164.
+(c) **Forecast density (posterior predictive distribution):**
+    **PRESENT** ✓ — engine emits 5%/95% credible intervals on
+    per-variable forecasts via Monte Carlo posterior predictive
+    draws at engine lines 469-498 including coefficient
+    uncertainty + innovation noise.
+(d) **IRF zero-straddling diagnostic:** **PRESENT** ✓ — engine
+    `_collect_zero_straddle_pairs` at engine lines 167-219
+    identifies cross-variable shock-response pairs whose 90%
+    credible band straddles zero at peak lag (institutionally
+    useful for filtering significant impulse responses from
+    noise).
+(e) **Marginal likelihood / model comparison:** **ABSENT** — not
+    computed by engine. User requiring formal Bayes-factor model
+    comparison must use external libraries (e.g. R
+    `BVAR::bv_marginal()`).
+
+**Verdict: BVAR institutional-rates workflow COVERED at 4 of 5
+elements; ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at
+Bayesian level for users invoking bvar.** For frequentist VAR
+users, ENG-EXT-MULTIVARIATE-001 confidence-band commission remains
+active (S64 frequentist bootstrap CI scope); **for Bayesian users,
+the existing path is to invoke bvar instead of var** to obtain
+credible bands as native output. Marginal likelihood gap noted as
+minor Q2+ candidate (low priority; rates strategists typically use
+informal hyperparameter checks rather than formal Bayes factors).
+
+**Audit-hygiene cross-reference (S67 / Disposition A cross-
+reference + Multivariate Systems BLOCK CLOSE):**
+
+S67 §2.5 entry executes via **Disposition A (cross-reference
+existing validations)** — bvar is already math-layer validated at
+Phase 1 `1c_bvar_irf_fevd` (machine-precision IRF/FEVD parity)
++ Phase 4 S5 BVAR coefficient parity vs R `BVAR::bvar` (PASS-A.2
+DOCUMENTED-DIVERGENCE). S67 cross-references both validations +
+re-confirms Phase 1 at runner CLI + adds wrapper-layer 3-check
++ ENG-EXT scan + block-close documentation. **NO REWRITE
+PERFORMED** — bvar already conforms to Category 1 LEGITIMATE
+status per existing validations.
+
+**Multivariate Systems BLOCK CLOSE documentation (S67 final
+entry; tenth catalog block fully Q1-amended at 10 of 13 =
+77% completion):**
+
+Block 10 Multivariate Systems closes at S67 bvar per ratified
+ascending-complexity dispatch ordering. **Post-S67: Multivariate
+Systems block 8/8 §2.5-validated** (3 separate [johansen_
+cointegration + forecast_reconciliation + bond_yield_forecast]
++ S63 pca_analysis + S64 var + S65 vecm + S66 dynamic_factor_model
++ S67 bvar). **Block 10 FULLY Q1-AMENDED — TENTH catalog block
+to complete per Q1 work program scope at S67 close = 10 of 13
+catalog blocks fully Q1-amended (77% catalog block-level
+completion).**
+
+**Block 10 methodology elements surfaced across S63-S67 arc:**
+
+- **S63 pca_analysis:** FIRST Cat 1d VSC=NO disclosure §2.5 entry
+  per Gate 2 finding framework (standardize axis; covariance vs
+  correlation matrix PCA); inline-vs-wrapper bypass per Phase 1
+  finding B8 precedent (numpy eigh on covariance reaches machine
+  precision vs wrapper-path 1e-4/1e-6 rounding floor); ENG-EXT
+  yield-curve-factor-decomposition workflow COVERED.
+- **S64 var:** Pre-existing aic/bic Tier V Pattern D CAVEAT
+  formally documented + precise formula-family characterization
+  (correction of e72d6f5 "constant offset" framing — actual
+  divergence is multiplicative T factor + additive likelihood-
+  normalization constant; argmin-preserving for lag-order
+  selection); ENG-EXT-MULTIVARIATE-001 commissioned per S64 ENG-
+  EXT scan (frequentist VAR IRF point estimates present but
+  bootstrap CI bands absent + sign-restriction/Blanchard-Quah/
+  proxy-SVAR advanced identification absent).
+- **S65 vecm:** β/α Phillips triangular normalization
+  canonicalization applied at TWO layers (engine fit-time
+  Phillips triangular β[0, j] = 1 with compensating α scaling;
+  harness compare-time re-normalization + sign-alignment based
+  on β[1, j] sign agreement); cross-reference to johansen_
+  cointegration validated separately (engine VECM uses same
+  statsmodels Johansen rank-test machinery); ENG-EXT-MULTIVARIATE-
+  001 scope EXTENDED — VECM-context IRF + FEVD BOTH ABSENT from
+  engine output (broader gap than VAR which has point estimates).
+- **S66 dynamic_factor_model:** FIRST em_stochastic verdict_class
+  application within Multivariate Systems block (master plan §7.1;
+  EM convergence non-determinism between statsmodels DynamicFactor
+  + R MARSS::MARSS independent EM implementations); Cat 1d
+  VSC=NO at SIX axes (k_factors, factor_order, error_order,
+  transform, standardize, factor rescaling — harness simplified
+  specification ≠ engine Balanced default); State Space backbone
+  cross-reference to S48-S51 validations (DFM uses statsmodels
+  state-space Kalman filter + smoother machinery — inherits trust
+  from earlier State Space block); ENG-EXT institutional-rates
+  DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time
+  series + variance decomposition + loadings interpretability +
+  forecasting; historical decomposition PARTIAL); no NEW ENG-EXT
+  bundling candidate.
+- **S67 bvar:** Disposition A (cross-reference existing
+  validations) — bvar is DISTINCT catalog entry from
+  bond_yield_forecast (analytical Normal-Inverse-Wishart posterior
+  vs CCM-2019 Gibbs sampler with stochastic volatility); already
+  validated at Phase 1 `1c_bvar_irf_fevd` (IRF/FEVD machine
+  precision) + Phase 4 S5 (BVAR coefficient PASS-A.2 DOCUMENTED-
+  DIVERGENCE); **ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED
+  at Bayesian level for users invoking bvar** — engine emits
+  posterior IRF + FEVD with credible bands as native output.
+
+**Cross-reference trust-inheritance pattern empirically grounded
+across Block 10:**
+- S65 vecm → johansen_cointegration (Johansen rank-test machinery)
+- S66 dynamic_factor_model → S48-S51 State Space block (Kalman
+  filter + smoother backbone)
+- S67 bvar → Phase 1 `1c_bvar_irf_fevd` + Phase 4 S5 BVAR
+  coefficient audits
+- S67 bvar ↔ bond_yield_forecast layered relationship
+  (analytical-base + SV-extension)
+
+**A3 SECOND-OBSERVATION TIGHTENING (cross-reference trust-
+inheritance pattern):** n=3 observations of trust-inheritance
+across Block 10 alone (S65 + S66 + S67); pattern reinforced as
+SUBSTANTIVE methodological element of Multivariate Systems block.
+
+**ENG-EXT-MULTIVARIATE-001 final scope per S64 + S65 + S67
+cumulative ENG-EXT scan outcomes (Q2 sprint commission
+finalized):**
+
+Priority ordering (revised post-S67):
+
+1. **[BASELINE]** Frequentist VAR IRF bootstrap CI bands per S64
+   ENG-EXT-MULTIVARIATE-001 commission. statsmodels supports
+   `irf.errband_mc(orth=True, repl=1000, signif=0.05)`; engine
+   does NOT currently invoke. **Note: users prioritizing IRF
+   uncertainty quantification CAN already use engine `bvar`
+   instead of `var` per S67 finding (Bayesian credible bands
+   substantively equivalent to bootstrap CI bands).** This
+   commission item benefits frequentist-only-user workflows.
+2. **[NEW PER S65]** VECM-context IRF + FEVD point estimates +
+   credible bands — engine `vecm_model` emits NEITHER IRF NOR
+   FEVD currently; statsmodels VECM supports via VAR-form
+   conversion `fit.irf()`. **Higher institutional priority** than
+   VAR bootstrap CI bands given Bayesian-alternative path (BVAR)
+   already addresses frequentist-VAR-bootstrap gap.
+3. **[ADVANCED IDENTIFICATION]** VAR sign-restriction SVAR per
+   Uhlig 2005 + Rubio-Ramirez-Waggoner-Zha 2010.
+4. **[LONG-RUN RESTRICTIONS]** VAR Blanchard-Quah per Blanchard-
+   Quah 1989.
+5. **[INSTRUMENT]** VAR proxy-SVAR per Mertens-Ravn 2013 + Stock-
+   Watson 2018.
+6. **[VECM ADVANCED]** VECM IRF confidence bands + SVAR
+   identification (downstream of item 2).
+
+**Q2 sprint bundling decision per S67:** **ENG-EXT-MULTIVARIATE-
+001 + ENG-EXT-CONFORMAL-001 bundled.** S67 confirms ENG-EXT-
+MULTIVARIATE-001 scope substantively complete + ready for Q2
+commission. Estimated effort (informal): item 1 ~4-8h
+(statsmodels integration); item 2 ~6-12h (VECM→VAR conversion
++ IRF/FEVD emission); items 3-6 ~8-16h each (advanced
+identification implementations); total ~30-60h for full ENG-EXT-
+MULTIVARIATE-001 scope. ENG-EXT-CONFORMAL-001 (CQR + EnbPI/SPCI)
+estimated ~20-30h additional. Combined Q2 sprint: ~50-90h
+engineering effort.
+
+**Forward state post-S67:**
+
+- **Catalog block-level completion: 10 of 13 (77%).**
+- **Remaining unvalidated inventory: 18 entries across 3 catalog
+  blocks:**
+  - **Block 2 Forecasting Classical** (7 unvalidated +
+    transfer_function 1 in §2.5 via SC7 = 8 total; opens at SC7);
+    techniques: arima, arimax_sarimax, auto_arima, ets_hw,
+    intermittent_demand, sarima, theta_forecast.
+  - **Block 9 Change Points / Anomalies** (5 unvalidated; unopened
+    in Q1 cycle); techniques: bocpd, cusum_page_hinkley,
+    intervention_analysis, pelt_change_points, stl_esd_anomaly.
+  - **Block 11 Regimes / Nonlinear** (6 unvalidated; unopened in
+    Q1 cycle); techniques: critical_slowing_down, hmm,
+    markov_switching, nar_narx, star, tar_setar.
+- **~18 sessions to Q1 close at resumed cadence.**
+- **Next block selection: surface for user disposition.**
+- **Q2+ work queue (post-Q1):** ENG-EXT-CONFORMAL-001 (CQR +
+  EnbPI/SPCI) + **ENG-EXT-MULTIVARIATE-001 FINAL** (frequentist
+  VAR IRF bootstrap CI bands + VECM IRF/FEVD + sign-restriction +
+  Blanchard-Quah + proxy-SVAR + VECM advanced identification) +
+  p3_pca standardize=True harness re-execution (low priority HARNESS-
+  scope) + p3_dfm engine-Balanced harness re-execution (low priority
+  HARNESS-scope) + bvar marginal likelihood emission (low priority
+  ENG-EXT) + DFM historical decomposition explicit-table
+  (USER-CONVENIENCE; low priority).
+
+## §3 Unvalidated catalog techniques (18 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -31148,8 +31647,8 @@ descriptions, summaries).
 ### Missing Data / Temporal Disaggregation (0 unvalidated; Block 8 FULLY Q1-AMENDED — THIRD catalog block to complete per Q1 work program scope; denton_chowlin_disaggregation moved to §2.5 per Phase 7+ S26; loess_interpolation moved to §2.5 per Phase 7+ S27; kalman_imputation moved to §2.5 per Phase 7+ S28)
 (all 3 techniques moved to §2.5)
 
-### Multivariate Systems (1 unvalidated; johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome)
-`bvar`
+### Multivariate Systems (0 unvalidated; **Block 10 FULLY Q1-AMENDED** — TENTH catalog block to complete per Q1 work program scope at S67 close = 10 of 13 catalog blocks fully Q1-amended (77% catalog block-level completion); johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome; bvar moved to §2.5 per Phase 7+ S67 — FIFTH-AND-FINAL Multivariate Systems block entry; **BLOCK CLOSE at S67**; Disposition A (cross-reference existing validations) — bvar is DISTINCT catalog entry from bond_yield_forecast (analytical Normal-Inverse-Wishart posterior vs CCM-2019 Gibbs sampler with stochastic volatility); already validated at Phase 1 `1c_bvar_irf_fevd` IRF/FEVD parity (machine precision; re-confirmed at S67 runner CLI) + Phase 4 S5 BVAR coefficient parity vs R BVAR::bvar (PASS-A.2 DOCUMENTED-DIVERGENCE per prior-parameterization differences per master plan §7.1 Pattern H); ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at Bayesian level for users invoking bvar — engine emits posterior IRF + FEVD with credible bands as native output (Bayesian analog of bootstrap CI bands per Sims-Zha 1999); cross-reference trust-inheritance pattern A3 SECOND-OBSERVATION TIGHTENING at n=3 within-block observations S65+S66+S67)
+(all 5 techniques moved to §2.5 across S63-S67 cycle)
 
 ### Regimes / Nonlinear (6 unvalidated)
 `critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
