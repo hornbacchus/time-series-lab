@@ -35166,7 +35166,273 @@ per ruptures. Change-point-set parity (detected breakpoint indices).
 Estimated session time: ~1h (Class B existing-harness; p3_pelt was
 the slowest probe at 4.06s — ruptures DP).
 
-## §3 Unvalidated catalog techniques (8 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### pelt_change_points (Phase 7+ S78; SIXTY-SEVENTH §2.5 entry; FOURTH Change Points / Anomalies block entry; FIRST ruptures-backed block entry [cusum/stl_esd/intervention were bespoke/statsmodels]; Class B existing-harness validation [Phase 3 Batch 6 harness pre-existing + PASS per S75 block-open probe]; engine: `ruptures.Pelt` (Killick-Fearnhead-Eckley 2012; EXACT dynamic-programming change-point detection); **Tier II.bit-exact** [n_change_points + change-point-position set bit-exact]; Pattern A.1 same-library [ruptures.Pelt both arms]; **NO engine-IMPROVEMENT candidate** [exact deterministic algorithm via mature ruptures; queue stays n=1 (ets_hw)]; **ENG-EXT-CHANGEPOINT-001 candidate at n=2** — engine PELT is UNIVARIATE, second univariate-only change-point instance after S75 CUSUM → multivariate change-point detection across the curve consolidated as a tracked candidate)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.bit-exact (Pattern A.1 same-library cross-package self-
+parity at EXACT deterministic dynamic-programming algorithm)** per
+S78 Code Step 2 empirical verification. Engine `ruptures.Pelt`
+(TSL math path; via wrapper) vs direct `ruptures.Pelt` invocation
+(reference) with identical model/cost/penalty/min_size. n_change_
+points + change-point-position set agree bit-exact: n_change_
+points=2 both arms; position set match (intersection=2, no
+asymmetric positions). **PELT is an EXACT algorithm** (provably-
+optimal change-point set for the additive cost + penalty objective
+via linear-time pruning) — bit-exact, no convergence-precision
+wiggle (unlike the SARIMAX MLE sessions).
+
+**Engine variant validated (at math layer; engine wrapper
+exercised via RunContext):** `ruptures.Pelt(model="l2",
+min_size=5, jump=1).fit(signal).predict(pen=...)` where signal =
+`clean.reshape(-1, 1)` (univariate) + penalty = BIC heuristic
+`pen = log(n)·σ²` (Balanced default). Engine `run()` invokes
+ruptures.Pelt at lines 156-173. Harness invokes the ENGINE wrapper
+(`pelt_run` via RunContext at Balanced preset with a pinned numeric
+BIC penalty to match exactly + bypass the string-penalty branch).
+
+**Reference (Pattern A.1 same-library cross-package self-parity):**
+Reference at `tools/reference_parity/harness/checks/p3_pelt.py`
+`_pelt_predict` lines 72-83 invokes `ruptures.Pelt(model="l2",
+min_size=5, jump=1).fit(signal).predict(pen=pen)` directly with
+the SAME arguments the engine wrapper uses. Pattern A.1 same-
+library (NOT cross-package vs R changepoint): per the harness
+rationale, both arms call ruptures.Pelt with identical arguments
+→ bitwise-identical output; divergence would indicate a TSL
+preprocessing or argument-handling bug, not a methodology
+difference. (R `changepoint::cpt.mean(method="PELT")` uses
+different default cost/penalty parameterizations; same-library
+self-test is the cleaner parity check per the Pattern-J-avoidance
+rationale established at S75.)
+
+**Class B existing-harness note:** Per the S75 block-open probe,
+pelt_change_points is Class B — the p3_pelt harness (Phase 3 Batch
+6) pre-existed + PASSed at runner CLI but had no §2.5 entry. S78
+formalizes the §2.5 validation entry. FIRST ruptures-backed entry
+in the Change Points block (S75 cusum + S76 stl_esd + S77
+intervention were bespoke/statsmodels).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine linearly interpolates
+  interior NaN (engine `_prepare_series`). Verified by injecting
+  NaN at [20] + [100]: engine returned `status=success` +
+  interpolation warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"`; returned audit fields populated correctly
+  (`cost_model="l2"`; `penalty="bic"`; `min_size=5`;
+  `n_change_points=2`; `change_point_positions=[151, 301]`
+  [1-indexed]; `n_observations`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 4 expected tables (`Change Points`; `Segments`;
+  `Detection Parameters`; `Series with Segment Labels`).
+
+**Verdict (math layer):** PASS bit-exact (n_change_points abs_diff
+=0.0 [2 both arms]; change-point-position set exact match
+[intersection=2, no tsl_only/ref_only]; n=600 mean-shift DGP with
+4 segments, L2 cost, BIC penalty, at seed=42, Balanced preset at
+runner CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S78 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_pelt.py`
+(technique_id `p3_pelt`).
+**Audit date:** 2026-05-29 (S78 §2.5 entry; Change Points /
+Anomalies block fourth entry; first ruptures-backed block entry).
+**Primary metrics (math layer):** change-point count
+(n_change_points) + change-point-position set (detected breakpoint
+indices set-equality).
+
+**Determinism profile:** EXACT dynamic-programming algorithm
+(ruptures.Pelt; provably-optimal segmentation for the additive
+cost + penalty objective with linear-time pruning). Fully
+deterministic — bit-exact change-point set; no MLE/sampling/
+convergence-precision wiggle. Tier II.bit-exact. (Engine pins
+`np.random.seed(ctx.seed)` defensively but PELT uses no RNG.)
+
+**Validation claim scope (S78; engine math validated at change-
+point-detection scope via Pattern A.1 same-library self-parity;
+engine wrapper code path exercised at both math-layer + wrapper-
+layer 3-check scopes):**
+
+- **Layer 1 (PELT exact dynamic-programming change-point
+  detection) VALIDATED at Tier II.bit-exact:** n_change_points +
+  position set match the direct-ruptures reference bit-exact. Same-
+  library self-test confirms the engine preprocessing + argument-
+  forwarding + penalty-resolution + change-point-position
+  extraction (1-indexed ↔ 0-indexed conversion) are correct.
+- **Layer 1 COST-MODEL VARIANTS (l1/rbf/cosine) NOT separately
+  validated at math layer:** L2 (mean-shift) cost validated;
+  alternative cost models covered at wrapper-layer scope (engine
+  accepts them via the `model` param).
+- **Layer 1 PENALTY-METHOD VARIANTS (aic/mbic/manual) NOT
+  separately validated at math layer:** BIC penalty validated
+  (numeric pinned to match); aic/mbic string methods covered at
+  wrapper-layer emission scope.
+- **Layer 1 SEGMENT SUMMARY + SERIES-WITH-LABELS NOT separately
+  validated at math layer:** emitted in the Segments + Series with
+  Segment Labels tables; covered at wrapper-layer Check 3 emission
+  scope.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN-interpolation; Balanced cost+penalty
+  dispatch + 4-table structure; output shape/type verification.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** PELT (Pruned Exact Linear Time) per Killick-
+Fearnhead-Eckley (2012) "Optimal Detection of Changepoints with a
+Linear Computational Cost" J American Statistical Association
+107(500) — dynamic-programming change-point detection that finds
+the EXACT optimal change-point set minimizing a segment-cost sum +
+penalty (penalty governs the count: higher penalty → fewer change-
+points), with a pruning step achieving O(T) expected (O(T log T)
+typical) cost while retaining exactness. Engine uses the `ruptures`
+library (Truong-Oudre-Vayatis 2020 "Selective review of offline
+change point detection methods" Signal Processing 167) `Pelt`
+class with L2 cost (mean-shift) + BIC-heuristic penalty at
+Balanced.
+
+**Phase 3 known failure modes (S78 / Class B existing-harness
+scope):**
+
+- Same-library self-parity validates engine preprocessing +
+  argument-forwarding against direct ruptures invocation (catches
+  wrapper-level bugs; the underlying PELT algorithm is the same
+  ruptures code in both arms).
+- Pattern A.1 same-library (NOT cross-package): R
+  changepoint::cpt.mean(method="PELT") uses different default
+  cost/penalty parameterizations; same-library self-test avoids
+  the methodology zoo + isolates wrapper bugs.
+- 1-indexed ↔ 0-indexed conversion: TSL stores change-point
+  positions 1-indexed; the harness converts to 0-indexed for set
+  comparison against ruptures' 0-indexed output; bit-exact after
+  conversion.
+- Penalty sensitivity: the BIC heuristic `pen = log(n)·σ²` governs
+  the change-point count; both arms use the identical pinned
+  numeric penalty (validated config). Alternative penalties
+  (aic/mbic/manual) change the count but are deterministic.
+
+**Phase 3 boundary of validity:**
+
+- n=600 mean-shift DGP with 4 segments (L2 cost, BIC penalty);
+  other change patterns + segment structures NOT validated at math
+  layer
+- L2 cost model validated; l1/rbf/cosine NOT separately validated
+- BIC penalty validated; aic/mbic/manual NOT separately validated
+- min_size=5, jump=1 validated; alternative values NOT separately
+  validated
+- univariate only (signal reshaped to single column); multivariate
+  PELT NOT supported (see ENG-EXT)
+- n_bkps-fixed mode (Binseg/BottomUp dispatch) NOT validated (PELT-
+  with-penalty mode validated)
+- change-point count + position set validated; segment summary NOT
+  separately validated (emission scope)
+
+**Phase 3 gap markings:**
+
+- Cost-model variants (l1/rbf/cosine) NOT validated (L2 validated)
+- Penalty-method variants (aic/mbic/manual) NOT validated (BIC
+  validated)
+- n_bkps-fixed mode (Binseg) NOT validated
+- Multivariate PELT NOT supported (univariate only; ENG-EXT-
+  CHANGEPOINT-001 candidate at n=2 with S75 CUSUM)
+- Segment summary NOT separately validated (emission scope)
+
+**Status (Tier II.bit-exact PASS + wrapper-layer 3/3 PASS per S78
+/ Change Points / Anomalies block fourth entry):** Layer 1 PELT
+exact dynamic-programming change-point detection validated bit-
+exact via Pattern A.1 same-library self-parity. Wrapper layer
+(S49+ NEW 3-check scope) validated at 3/3 PASS including NaN-
+interpolation + 4-table output structure. **NO engine-IMPROVEMENT
+candidate (exact deterministic ruptures.Pelt).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** ruptures.Pelt
+  at model="l2", min_size=5, jump=1, BIC penalty (numeric pinned
+  pen=log(n)·σ²) at Balanced preset. Pattern A.1 same-library
+  reference: direct ruptures.Pelt identical args. Mean-shift DGP
+  at n=600, 4 segments, seed=42.
+- **Engine preset default (Balanced):** model="l2" default;
+  penalty="bic" (heuristic log(n)·σ²); min_size=5; jump=1.
+  Matches validated configuration.
+- **Configuration match:** **YES at the L2-cost-BIC-penalty PELT
+  surface** — user invoking at default Balanced preset experiences
+  the math-validated path. Alternative cost models / penalty
+  methods / n_bkps-fixed mode NOT separately validated.
+- **Disclosure scope:** Cost-model variants (l1/rbf/cosine) NOT
+  validated. Penalty-method variants (aic/mbic/manual) NOT
+  validated. n_bkps-fixed (Binseg) mode NOT validated. Multivariate
+  PELT NOT supported. Segment summary emission-scope only.
+
+**ENG-EXT institutional-rates change-point workflow scan outcome
+(S78 Step 1; standard workflow; ENG-EXT-CHANGEPOINT-001 candidate
+at n=2):**
+
+(a) **Detected change-point indices + count:** PRESENT ✓ —
+    `Change Points` table + audit `change_point_positions` +
+    `n_change_points`.
+(b) **Segment summary:** PRESENT ✓ — `Segments` table +
+    `Series with Segment Labels`.
+(c) **Cost/penalty diagnostic:** PRESENT ✓ — `Detection
+    Parameters` table + audit `cost_model` + `penalty`.
+(d) **Multivariate PELT (joint change detection across series):**
+    ABSENT — engine PELT is UNIVARIATE (signal reshaped to single
+    column). ruptures.Pelt natively supports multivariate signals
+    (multi-column input → joint segmentation), but the engine
+    wrapper reshapes to univariate. **This is the SECOND
+    univariate-only change-point instance** (after S75 multivariate-
+    CUSUM candidate). **ENG-EXT-CHANGEPOINT-001 candidate at n=2:**
+    multivariate change-point detection across the curve (joint
+    yield-curve-wide regime/break detection) consolidating the
+    S75 multivariate-CUSUM + S78 multivariate-PELT candidates.
+
+**Verdict: COVERED at standard univariate change-point workflow
+elements + segment summary + detection diagnostics.** **ENG-EXT-
+CHANGEPOINT-001 candidate now at n=2** (multivariate-CUSUM S75 +
+multivariate-PELT S78) — the multivariate-change-point-detection
+gap recurs across the block; logged as a tracked candidate for
+potential Q2+ commission (institutional rates: joint yield-curve-
+wide regime/break detection). Not yet formally commissioned;
+evaluated at block close (S79) whether the n=2 pattern + BOCPD
+(S79) warrant an ENG-EXT-CHANGEPOINT-001 commission. NO engine-
+IMPROVEMENT candidate (exact deterministic algorithm).
+
+**Audit-hygiene cross-reference (S78 / Class B existing-harness +
+ENG-EXT consolidation):** S78 pelt_change_points is a Class B
+existing-harness validation (Phase 3 Batch 6 harness, pre-existing
++ PASS per S75 block-open probe; §2.5 entry formalized at S78).
+Pattern A.1 same-library self-parity (direct-ruptures reference;
+avoids R-changepoint methodology zoo). Bit-exact change-point
+count + position-set parity (EXACT algorithm). FIRST ruptures-
+backed entry in the block. NO engine-IMPROVEMENT (exact
+deterministic ruptures.Pelt). **ENG-EXT-CHANGEPOINT-001 candidate
+consolidated at n=2** (univariate-only PELT + univariate-only CUSUM
+→ multivariate change-point detection across the curve).
+
+**Change Points / Anomalies block progress note (S78 fourth
+entry):** Block 9 Change Points / Anomalies advances at S78
+pelt_change_points per ratified ascending-complexity dispatch
+ordering. **Post-S78: Change Points / Anomalies block 4/5 §2.5-
+validated** (S75 cusum_page_hinkley + S76 stl_esd_anomaly + S77
+intervention_analysis + S78 pelt_change_points). **1 remaining in
+dispatch-set via S79 bocpd (BLOCK CLOSE session).** Block close
+projected at S79 bocpd → Block 9 fully Q1-amended (TWELFTH catalog
+block; 12 of 13) at S79 close.
+
+**S79 bocpd projection (FINAL Change Points / Anomalies block
+session + BLOCK CLOSE per ascending-complexity dispatch
+ordering):** Engine `engine/techniques/bocpd.py` (verify exact
+module name) is BOCPD (Bayesian Online Change-Point Detection;
+Adams-MacKay 2007) — recursive run-length posterior updating with
+a hazard function + predictive model. Class B (existing p3_bocpd
+harness + PASS per probe). Most conceptually complex block entry
+(recursive Bayesian run-length distribution). Expected Tier
+II.bit-exact (deterministic recursive posterior given fixed hazard
++ predictive params) OR self-parity. CLOSES the Change Points /
+Anomalies block (TWELFTH catalog block fully Q1-amended at S79
+close projected). ENG-EXT-CHANGEPOINT-001 consolidation decision
+at block close (n=2 → n=3 if BOCPD also univariate-only).
+Estimated session time: ~1h (Class B existing-harness).
+
+## §3 Unvalidated catalog techniques (7 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -35189,8 +35455,8 @@ descriptions, summaries).
 ### Causality / Relationships / Lead-Lag (0 unvalidated; Block 1 FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15 + S17 + S18)
 (all 6 techniques moved to §2.5)
 
-### Change Points / Anomalies / Interventions (4 unvalidated; cusum_page_hinkley moved to §2.5 per Phase 7+ S75 — FIRST Change Points / Anomalies block entry; Block 9 opens at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe [Phase 3 Batch 6 harnesses pre-existing + PASS at runner CLI; none had §2.5 entries; NOT net-new-construction (contrast S73) NOR cross-reference-only (contrast S67)]; engine BESPOKE closed-form CUSUM + Page-Hinkley (univariate); Tier II.bit-exact [all alarm counts abs_diff=0.0]; Pattern A.3 self-parity (avoids R-CUSUM/PH methodology zoo); NO engine-IMPROVEMENT candidate (closed-form deterministic; queue stays n=1); multivariate-CUSUM minor ENG-EXT candidate logged; stl_esd_anomaly moved to §2.5 per Phase 7+ S76 — SECOND Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels STL + bespoke Generalized-ESD (Rosner 1983) on remainder; Tier II.bit-exact [n_anomalies + anomaly-index set bit-exact]; PARTIAL cross-reference [STL decomposition layer inherits trust from S33 stl_decompose; ESD/Rosner-1983 test layer novel]; Pattern A.3 self-parity [Twitter AnomalyDetection R archived → self-parity only path]; NO engine-IMPROVEMENT candidate; seasonal-vs-trend attribution minor USER-CONVENIENCE candidate logged; intervention_analysis moved to §2.5 per Phase 7+ S77 — THIRD Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels ARIMA-with-intervention-dummies-as-exog (Box-Tiao 1975 step/pulse/ramp); Tier II.mle-band [intervention coefficient ω machine-precision]; STRONGEST cross-reference in block — SARIMAX fit + exog mechanism inherited from S62/S70/S71/S72 (intervention dummies ARE exogenous regressors); intervention-dummy step/pulse/ramp construction novel; NINTH trust-inheritance instance in Q1 cadence; NO engine-IMPROVEMENT candidate; NO aic/bic Tier V Pattern D CAVEAT [CSS-ML-vs-exact-ML loglik convention within mle-band]; multiple-intervention support PRESENT [ENG-EXT candidate ruled out])
-`bocpd`, `pelt_change_points`
+### Change Points / Anomalies / Interventions (4 unvalidated; cusum_page_hinkley moved to §2.5 per Phase 7+ S75 — FIRST Change Points / Anomalies block entry; Block 9 opens at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe [Phase 3 Batch 6 harnesses pre-existing + PASS at runner CLI; none had §2.5 entries; NOT net-new-construction (contrast S73) NOR cross-reference-only (contrast S67)]; engine BESPOKE closed-form CUSUM + Page-Hinkley (univariate); Tier II.bit-exact [all alarm counts abs_diff=0.0]; Pattern A.3 self-parity (avoids R-CUSUM/PH methodology zoo); NO engine-IMPROVEMENT candidate (closed-form deterministic; queue stays n=1); multivariate-CUSUM minor ENG-EXT candidate logged; stl_esd_anomaly moved to §2.5 per Phase 7+ S76 — SECOND Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels STL + bespoke Generalized-ESD (Rosner 1983) on remainder; Tier II.bit-exact [n_anomalies + anomaly-index set bit-exact]; PARTIAL cross-reference [STL decomposition layer inherits trust from S33 stl_decompose; ESD/Rosner-1983 test layer novel]; Pattern A.3 self-parity [Twitter AnomalyDetection R archived → self-parity only path]; NO engine-IMPROVEMENT candidate; seasonal-vs-trend attribution minor USER-CONVENIENCE candidate logged; intervention_analysis moved to §2.5 per Phase 7+ S77 — THIRD Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels ARIMA-with-intervention-dummies-as-exog (Box-Tiao 1975 step/pulse/ramp); Tier II.mle-band [intervention coefficient ω machine-precision]; STRONGEST cross-reference in block — SARIMAX fit + exog mechanism inherited from S62/S70/S71/S72 (intervention dummies ARE exogenous regressors); intervention-dummy step/pulse/ramp construction novel; NINTH trust-inheritance instance in Q1 cadence; NO engine-IMPROVEMENT candidate; NO aic/bic Tier V Pattern D CAVEAT [CSS-ML-vs-exact-ML loglik convention within mle-band]; multiple-intervention support PRESENT [ENG-EXT candidate ruled out]; pelt_change_points moved to §2.5 per Phase 7+ S78 — FOURTH Change Points / Anomalies block entry; FIRST ruptures-backed block entry; Class B existing-harness; engine `ruptures.Pelt` (Killick-Fearnhead-Eckley 2012 EXACT dynamic-programming); Tier II.bit-exact [n_change_points + position set bit-exact]; Pattern A.1 same-library [ruptures.Pelt both arms]; NO engine-IMPROVEMENT candidate; ENG-EXT-CHANGEPOINT-001 candidate at n=2 [univariate-only PELT + S75 univariate-only CUSUM → multivariate change-point detection across the curve; tracked, not yet commissioned])
+`bocpd`
 
 ### Decomposition & Seasonal Adjustment (0 unvalidated; Block 3 FULLY Q1-AMENDED — FOURTH catalog block to complete per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; classical_decompose moved to §2.5 per Phase 7+ S31; mstl_decompose moved to §2.5 per Phase 7+ S32; stl_decompose moved to §2.5 per Phase 7+ S33; x13_seasonal_adjust moved to §2.5 per Phase 7+ S34 — FOURTH-AND-FINAL Block 3 entry)
 (all 4 techniques moved to §2.5)
