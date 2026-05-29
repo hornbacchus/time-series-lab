@@ -35805,7 +35805,306 @@ gap (SC16) remains banked pending user disposition.
   migration). Minor candidates: seasonal-vs-trend-anomaly-
   attribution (S76) + low-priority harness/USER-CONVENIENCE items.
 
-## §3 Unvalidated catalog techniques (6 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### critical_slowing_down (Phase 7+ S80; SIXTY-NINTH §2.5 entry; FIRST Regimes / Nonlinear block entry; **Block 11 Regimes / Nonlinear OPENS — FINAL Q1 block**; Class B existing-harness validation [Phase 4.5 harness pre-existing + PASS per block-open probe]; engine: BESPOKE early-warning-signal (EWS) statistics (numpy + scipy.stats + `_csd_helpers`; Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skewness/kurtosis/return-rate/density-ratio indicators → Kendall-tau trend → composite EWS score); **Tier II.bit-exact** [rolling AR(1) + variance + Kendall-tau on each at abs_tol=1e-8 vs ewstools]; Pattern A.1 cross-package vs Python `ewstools` 2.1.2 (Bury 2023); **NO engine-IMPROVEMENT candidate** [bespoke closed-form + seeded surrogates; queue stays n=1 (ets_hw)]; composite-EWS-index ENG-EXT candidate RULED OUT [engine emits composite score natively]; spatial/multivariate-EWS minor candidate logged [univariate; aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme])
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.bit-exact (Pattern A.1 same-library cross-package self-
+parity at deterministic rolling EWS statistics)** per S80 Code
+Step 2 empirical verification. Engine bespoke CSD pipeline (TSL
+math path) vs Python `ewstools` 2.1.2 (reference) on a saddle-node-
+fold SDE fixture. **Tier-1 STRICT (bitwise, abs_tol=1e-8) metrics
+all PASS at machine precision:** rolling AR(1) series max_abs_diff
+=2.22e-16; rolling variance series max_abs_diff=1.21e-17; Kendall
+tau on AR(1) abs_diff=0.0 [0.7171 both arms]; Kendall tau on
+variance abs_diff=0.0 [0.7279 both arms]. Tier-2 (composite EWS
+score + empirical p-values) informational-only per the harness
+Refinement-A discipline (recorded, NOT asserted — see scope below).
+
+**Engine variant validated (at math layer; engine wrapper
+exercised via RunContext):** Bespoke CSD pipeline — Stage A detrend
+(Gaussian-kernel via scipy gaussian_filter1d / first-diff / linear)
+→ Stage B rolling indicators (AR(1), variance, skewness, kurtosis,
+return-rate, density-ratio via `_csd_helpers`) → Stage C Kendall-
+tau trend per indicator (+ optional AR(1)-bootstrap-surrogate
+empirical p-values, seeded at ctx.seed) → Stage D composite EWS
+z-score + state classification (normal / elevated / critical).
+Engine `run()` lines 417-496 implement the pipeline. Harness
+invokes the ENGINE wrapper (`csd_mod.run` via RunContext at
+Balanced preset, compute_pvalues=False for the deterministic
+Tier-1 primitives).
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via Python ewstools):** Reference at
+`tools/reference_parity/harness/checks/critical_slowing_down.py`
+`run_reference` lines 171-228 invokes `ewstools.TimeSeries.
+detrend(method="Gaussian") + compute_var() + compute_auto(lag=1)`
+(Bury 2023, ewstools 2.1.2) then Kendall tau via scipy. Cross-
+package alignment resolved: (1) ewstools bandwidth↔sigma
+conversion — ewstools applies σ=(0.25/0.675)·bandwidth, so the
+harness passes ewstools_bandwidth=σ_tsl·(0.675/0.25)≈2.7·σ so
+the internal kernel sigmas match; (2) rolling-window right-
+alignment — ewstools pandas right-aligned with leading NaNs
+dropped to align with TSL's length-(T-W+1) array; (3) Kendall-
+lookback trailing-slice alignment (T-W trailing points both arms).
+This is a genuine CROSS-PACKAGE bit-exact (vs an independent
+Python EWS library), not self-parity.
+
+**Class B existing-harness note:** Per the block-open probe,
+critical_slowing_down is Class B — the Phase 4.5 harness pre-
+existed + PASSed at runner CLI but had no §2.5 entry. S80
+formalizes the §2.5 validation entry. (Distinct from the Change
+Points block's uniform Phase-3-Batch-6 Class B: CSD is a Phase 4.5
+harness with a richer cross-package alignment + two-tier
+assertion structure.)
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS (graceful). Engine accepted
+  injected interior NaN at [50] + [200] + ran to `status=success`;
+  the Gaussian-detrend + rolling-statistics pipeline propagates
+  through the `_csd_helpers` without crash. NOTE: unlike most
+  techniques, the CSD path does NOT emit an explicit NaN-strip/
+  interpolate warning (the EWS pipeline tolerates NaN via the
+  detrend + rolling ops); honest disclosure — NaN-bearing CSD
+  inputs run but the indicator series at NaN-affected windows may
+  be degraded. The harness fixture (saddle-node SDE) is NaN-free.
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"`; returned the 33-field audit populated
+  correctly (`ews_composite_score`; `ews_state`;
+  `composite_method="equal_weight_zscore"`;
+  `detrending_method="gaussian"`; `rolling_window`;
+  `kendall_lookback`; `tau_ar1`; `tau_variance` + 4 other indicator
+  taus; `series_length`; surrogate-cap transparency fields).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted the `CSD Indicator Summary` table + the comprehensive
+  33-field audit (composite score + state + per-indicator taus +
+  p-values + detrending diagnostics + optional rolling-indicator
+  series).
+
+**Verdict (math layer):** PASS bit-exact at Tier-1 strict tolerance
+(rolling AR(1) 2.22e-16; rolling variance 1.21e-17; Kendall tau on
+AR(1) 0.0; Kendall tau on variance 0.0; 1501 indicator points;
+saddle-node-fold SDE fixture, Gaussian detrend σ=200, rolling
+window=500, at seed=42, Balanced preset at runner CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S80 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/
+critical_slowing_down.py` (technique_id `critical_slowing_down`).
+**Audit date:** 2026-05-29 (S80 §2.5 entry; Regimes / Nonlinear
+BLOCK OPENS — FINAL Q1 block).
+**Primary metrics (math layer; Tier-1 strict):** rolling AR(1)
+series + rolling variance series + Kendall-tau-on-AR(1) + Kendall-
+tau-on-variance (the four deterministic EWS primitives).
+**Secondary metrics (Tier-2 informational; recorded NOT asserted):**
+composite EWS score + empirical p-values.
+
+**Determinism profile:** Closed-form deterministic — rolling
+indicators + Kendall-tau are exact; the empirical-p-value path uses
+AR(1)-bootstrap surrogates seeded at ctx.seed (deterministic at
+fixed seed within-process; the harness Tier-1 path uses
+compute_pvalues=False to validate the deterministic primitives
+directly). Tier II.bit-exact.
+
+**Validation claim scope (S80; engine math validated at EWS-
+primitive scope via Pattern A.1 cross-package check vs ewstools;
+engine wrapper code path exercised at both math-layer + wrapper-
+layer 3-check scopes):**
+
+- **Layer 1 (rolling AR(1) + rolling variance + Kendall-tau trend
+  primitives) VALIDATED at Tier II.bit-exact:** the four
+  deterministic EWS primitives match ewstools at abs_tol=1e-8
+  (machine precision). Cross-package agreement confirms the
+  detrending + rolling-window statistics + Kendall-tau math are
+  correct against an independent Python EWS library.
+- **Layer 1 COMPOSITE EWS SCORE + EMPIRICAL P-VALUES (Tier-2)
+  NOT asserted at math layer (informational-only per Refinement
+  A):** the composite-z-score aggregation + AR(1)-surrogate
+  empirical p-values are recorded but not bit-exact-asserted in
+  v1 (the composite weighting + surrogate sampling are TSL-
+  specific design choices not mirrored by ewstools' default
+  composite). Covered at wrapper-layer Check 2 emission scope.
+- **Layer 1 ADDITIONAL INDICATORS (skewness/kurtosis/return-rate/
+  density-ratio) NOT separately asserted at math layer:** the
+  harness Tier-1 asserts AR(1) + variance (the two canonical CSD
+  indicators); the other four indicators are computed + emitted
+  but not cross-package-asserted (ewstools' indicator set differs).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** graceful NaN handling; Balanced detrend
+  + rolling + composite dispatch + 33-field audit; output shape/
+  type verification.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Critical Slowing Down early-warning signals
+per Scheffer et al. (2009) "Early-warning signals for critical
+transitions" Nature 461 + Dakos et al. (2012) "Methods for
+Detecting Early Warnings of Critical Transitions in Time Series
+Illustrated Using Simulated Ecological Data" PLoS ONE 7(7) +
+Diks-Hommes-Wang (2018). As a dynamical system approaches a
+critical transition (fold/bifurcation), its recovery from
+perturbations slows — manifesting as rising lag-1 autocorrelation
+(AR(1) → 1) + rising variance in the detrended residuals. The CSD
+pipeline detrends (to isolate residual dynamics), computes rolling
+indicators, + applies the Kendall-tau trend statistic to test
+whether each indicator is rising over time (positive tau →
+approaching transition). Engine implements bespoke; reference is
+Python ewstools (Bury 2023). **Honest disclosure (per engine
+docstring):** CSD signals are descriptive in dynamical-systems
+theory; their out-of-sample predictive value on financial-market
+data is contested in the empirical literature; detrending-
+bandwidth choice materially affects results; rising variance can
+signal volatility clustering without a phase transition.
+
+**Phase 3 known failure modes (S80 / Class B existing-harness
+scope):**
+
+- Cross-package bit-exact validates the EWS primitives against
+  ewstools (independent Python library); catches detrending /
+  rolling-window / Kendall-tau math regressions.
+- Cross-package alignment required: ewstools bandwidth↔sigma
+  conversion (×2.7) + rolling-window right-alignment (drop leading
+  NaNs) + Kendall-lookback trailing-slice — all resolved at the
+  harness comparison step; bit-exact after alignment.
+- Composite EWS score + p-values Tier-2 informational (not
+  asserted): TSL composite weighting + AR(1)-surrogate sampling
+  are design choices not mirrored by ewstools default.
+- NaN handling: the CSD path tolerates NaN (runs to success) but
+  does not explicitly strip/interpolate (distinct from most
+  techniques); NaN-affected windows may degrade indicator series.
+- Detrending-bandwidth sensitivity: per the engine's honest
+  disclosure, bandwidth choice materially affects the indicators;
+  the validated config pins Gaussian σ=200; alternative bandwidths
+  produce different (valid) results.
+
+**Phase 3 boundary of validity:**
+
+- saddle-node-fold SDE fixture (T~2000); other transition types +
+  series lengths NOT validated at math layer
+- Gaussian detrend at σ=200, rolling window=500 validated;
+  first-diff / linear detrend + alternative windows NOT separately
+  validated
+- AR(1) + variance indicators asserted; skewness/kurtosis/return-
+  rate/density-ratio computed but NOT cross-package-asserted
+- composite EWS score + empirical p-values NOT asserted (Tier-2
+  informational)
+- compute_pvalues=False path validated (deterministic primitives);
+  the seeded-surrogate p-value path NOT cross-package-asserted
+- univariate only (single primary series, v1); spatial/multivariate
+  EWS NOT supported
+
+**Phase 3 gap markings:**
+
+- Composite EWS score + empirical p-values NOT asserted (Tier-2
+  informational per Refinement A)
+- skewness/kurtosis/return-rate/density-ratio indicators NOT
+  cross-package-asserted (AR(1)+variance asserted)
+- first-diff / linear detrend + alternative bandwidths/windows NOT
+  validated
+- spatial/multivariate EWS NOT supported (univariate only; minor
+  ENG-EXT candidate aligned with ENG-EXT-CHANGEPOINT-001 theme)
+
+**Status (Tier II.bit-exact PASS at Tier-1 strict tolerance +
+wrapper-layer 3/3 PASS per S80 / Regimes / Nonlinear BLOCK OPENS):**
+Layer 1 EWS primitives (rolling AR(1) + variance + Kendall-tau on
+each) validated bit-exact vs ewstools at abs_tol=1e-8. Wrapper
+layer (S49+ NEW 3-check scope) validated at 3/3 PASS including
+graceful NaN handling + 33-field audit + CSD Indicator Summary
+table. **NO engine-IMPROVEMENT candidate (bespoke closed-form +
+seeded surrogates).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** bespoke CSD at
+  Gaussian detrend (σ=200), rolling_window=500, kendall_lookback=
+  T-W, compute_pvalues=False, composite_method=equal_weight_zscore
+  (Balanced). Pattern A.1 cross-library reference: Python ewstools
+  2.1.2 (Gaussian detrend bandwidth-converted + compute_var +
+  compute_auto). Saddle-node-fold SDE fixture.
+- **Engine preset default (Balanced):** window_fraction=0.5,
+  kendall_lookback_fraction=0.5, n_surrogates=1000 (auto-capped by
+  T//10 with floor 100), compute_pvalues=True, detrending=gaussian
+  (σ=T/10 default), composite_method=equal_weight_zscore.
+- **Configuration match:** **YES at the deterministic-EWS-
+  primitive surface** — user invoking at default Balanced preset
+  experiences the math-validated rolling-indicator + Kendall-tau
+  primitives (the bit-exact-validated core). The composite EWS
+  score + empirical p-values (Tier-2, default compute_pvalues=
+  True) are NOT bit-exact-asserted but are deterministic at fixed
+  seed.
+- **Disclosure scope:** Composite EWS score + empirical p-values
+  NOT asserted (Tier-2 informational). skewness/kurtosis/return-
+  rate/density-ratio NOT cross-package-asserted. first-diff/linear
+  detrend + alternative bandwidths/windows NOT validated.
+  spatial/multivariate EWS NOT supported. Detrending-bandwidth
+  choice materially affects results (engine honest disclosure).
+
+**ENG-EXT institutional-rates CSD workflow scan outcome (S80
+Step 1; composite-index present; spatial-EWS minor candidate; no
+NEW ENG-EXT-REGIMES-001 commission):**
+
+(a) **EWS indicator time series (rolling AR(1)/variance/etc.):**
+    PRESENT ✓ — audit rolling-indicator series (optional
+    expose_rolling_series).
+(b) **Trend statistics (Kendall tau per indicator + p-values):**
+    PRESENT ✓ — audit tau_* + tau_*_pvalue per indicator.
+(c) **Composite EWS index (single early-warning score):**
+    PRESENT ✓ — `ews_composite_score` + `ews_state` (normal/
+    elevated/critical) + composite_method (equal_weight_zscore /
+    fisher_combined). **The composite-EWS-index ENG-EXT candidate
+    is RULED OUT** — engine emits a composite score natively.
+(d) **Detrended series + stationarity diagnostics:** PRESENT ✓ —
+    detrending diagnostics + ADF p-value in audit.
+(e) **Spatial / multivariate EWS (cross-series early-warning):**
+    ABSENT — engine CSD is univariate (single primary series,
+    v1 per engine docstring). Minor ENG-EXT candidate (cross-
+    series / spatial early-warning, e.g. detecting a curve-wide
+    approaching regime shift from joint rising covariance) —
+    aligns with the ENG-EXT-CHANGEPOINT-001 multivariate theme.
+    Logged as a minor candidate; not commissioned.
+
+**Verdict: COVERED at standard EWS workflow elements + composite
+index + detrending diagnostics.** No new ENG-EXT-REGIMES-001
+commission surfaced at S80. Spatial/multivariate-EWS noted as a
+minor candidate (aligns with ENG-EXT-CHANGEPOINT-001).
+
+**Audit-hygiene cross-reference (S80 / Class B existing-harness +
+block open):** S80 critical_slowing_down is a Class B existing-
+harness validation (Phase 4.5 harness, pre-existing + PASS per
+block-open probe; §2.5 entry formalized at S80). Pattern A.1
+cross-package bit-exact vs Python ewstools 2.1.2 (Bury 2023) at
+abs_tol=1e-8 on the four deterministic EWS primitives. NO engine-
+IMPROVEMENT (bespoke closed-form + seeded surrogates). Composite-
+EWS-index ENG-EXT candidate RULED OUT (native composite score);
+spatial/multivariate-EWS minor candidate logged.
+
+**Regimes / Nonlinear BLOCK OPENING note (S80 first entry; FINAL
+Q1 block):** Block 11 Regimes / Nonlinear opens at S80
+critical_slowing_down per ratified ascending-complexity intra-
+block ordering (critical_slowing_down → tar_setar → hmm →
+markov_switching → star → nar_narx), established at the block-open
+probe per the S75 Option-3 precedent. **Session-type distribution
+(per probe): 4 Class B PASS (critical_slowing_down + tar_setar +
+hmm + markov_switching) + 2 Class B-CAVEAT (star [weakly-
+identified-γ] + nar_narx [NO-REFERENCE]); no Class A, no Class C.**
+**Post-S80: Regimes / Nonlinear block 1/6 §2.5-validated.** 5
+remaining in dispatch-set via S81-S85. **This is the FINAL Q1
+block; Q1 closes at S85 (nar_narx).** Block close → THIRTEENTH-AND-
+FINAL catalog block fully Q1-amended (13 of 13 = 100% catalog
+completion) at S85.
+
+**S81 tar_setar projection (next Regimes / Nonlinear block session
+per ascending-complexity dispatch ordering):** Engine
+`engine/techniques/tar_setar.py` is TAR/SETAR (Threshold
+Autoregression / Self-Exciting TAR; Tong 1990) — piecewise-linear
+AR with regime-switching governed by a threshold on a lagged value
+of the series itself. Class B (existing p3_tar_setar harness +
+PASS per probe). Bespoke scipy (statsmodels lacks first-class
+TAR/SETAR). Expected Tier II.mle-band (threshold + regime AR
+coefficients via grid-search-over-threshold + conditional OLS).
+Pre-existing risk: threshold-grid search determinism + regime-
+assignment boundary handling. Estimated session time: ~1h (Class B
+existing-harness).
+
+## §3 Unvalidated catalog techniques (5 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -35852,8 +36151,8 @@ descriptions, summaries).
 ### Multivariate Systems (0 unvalidated; **Block 10 FULLY Q1-AMENDED** — TENTH catalog block to complete per Q1 work program scope at S67 close = 10 of 13 catalog blocks fully Q1-amended (77% catalog block-level completion); johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome; bvar moved to §2.5 per Phase 7+ S67 — FIFTH-AND-FINAL Multivariate Systems block entry; **BLOCK CLOSE at S67**; Disposition A (cross-reference existing validations) — bvar is DISTINCT catalog entry from bond_yield_forecast (analytical Normal-Inverse-Wishart posterior vs CCM-2019 Gibbs sampler with stochastic volatility); already validated at Phase 1 `1c_bvar_irf_fevd` IRF/FEVD parity (machine precision; re-confirmed at S67 runner CLI) + Phase 4 S5 BVAR coefficient parity vs R BVAR::bvar (PASS-A.2 DOCUMENTED-DIVERGENCE per prior-parameterization differences per master plan §7.1 Pattern H); ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at Bayesian level for users invoking bvar — engine emits posterior IRF + FEVD with credible bands as native output (Bayesian analog of bootstrap CI bands per Sims-Zha 1999); cross-reference trust-inheritance pattern A3 SECOND-OBSERVATION TIGHTENING at n=3 within-block observations S65+S66+S67)
 (all 5 techniques moved to §2.5 across S63-S67 cycle)
 
-### Regimes / Nonlinear (6 unvalidated)
-`critical_slowing_down`, `hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
+### Regimes / Nonlinear (5 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; Q1 closes at S85)
+`hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
 
 ### State Space / Filtering (0 unvalidated; Block 6 FULLY Q1-AMENDED — SIXTH catalog block to complete per Q1 work program scope at S51 close = 6 of 13 catalog blocks fully Q1-amended (46% catalog block-level completion); kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension; particle_filter moved to §2.5 per Phase 7+ S50 — THIRD State Space / Filtering block entry; FIRST Tier IV Pattern A.3 entry via approach (c) degenerate linear-Gaussian Kalman-exact-reference framing with documented abs-tolerance plateau caveat; structural_ts moved to §2.5 per Phase 7+ S51 — FOURTH-AND-FINAL State Space / Filtering block entry; multi-component 4-variance Kalman MLE)
 (all 4 techniques moved to §2.5)
