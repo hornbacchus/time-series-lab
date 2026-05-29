@@ -34569,7 +34569,286 @@ decomposition shares machinery with the Decomposition block
 (stl_decompose S33, validated separately). Estimated session time:
 ~1h (Class B existing-harness).
 
-## §3 Unvalidated catalog techniques (10 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### stl_esd_anomaly (Phase 7+ S76; SIXTY-FIFTH §2.5 entry; SECOND Change Points / Anomalies block entry; Class B existing-harness validation [Phase 3 Batch 6 harness pre-existing + PASS per S75 block-open probe]; engine: `statsmodels.tsa.seasonal.STL` decomposition + BESPOKE Generalized-ESD (Rosner 1983) on the remainder; **Tier II.bit-exact** [n_anomalies + anomaly-index set bit-exact]; **PARTIAL cross-reference** — STL decomposition layer shares statsmodels STL machinery with S33 stl_decompose (Decomposition block); ESD/Rosner-1983 test layer is the NOVEL S76 element; Pattern A.3 self-parity [Twitter AnomalyDetection R archived → self-parity only path]; **NO engine-IMPROVEMENT candidate** [closed-form STL + deterministic ESD; queue stays n=1 (ets_hw)])
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.bit-exact (Pattern A.3 paper-formula self-parity at
+deterministic STL + closed-form ESD)** per S76 Code Step 2
+empirical verification. Engine two-stage pipeline (statsmodels STL
+decomposition → bespoke Generalized-ESD on remainder) vs from-
+scratch reference mirroring the pipeline verbatim (same statsmodels
+STL config → bitwise-identical remainder; same Rosner 1983
+sequential ESD recursion). Anomaly count + anomaly-index set agree
+bit-exact: n_anomalies=6 both arms; index set match
+(intersection=union=6, no asymmetric indices).
+
+**Engine variant validated (at math layer; engine wrapper
+exercised via RunContext):** STL decomposition via
+`statsmodels.tsa.seasonal.STL(y, period, seasonal=window,
+robust=True).fit(inner_iter=5, outer_iter=2)` (Balanced config)
+to extract the remainder, then `_generalized_esd` (engine lines
+385+; Rosner 1983 sequential extreme-studentized-deviate test on
+the remainder with Bonferroni-adjusted critical values + max-
+anomalies cap). Engine `run()` invokes statsmodels STL at lines
+135-152 + the bespoke ESD at lines 177+. Harness invokes the
+ENGINE wrapper (`stl_run` via RunContext at Balanced preset).
+
+**Reference (Pattern A.3 paper-formula self-parity):** Reference
+reimplementation at `tools/reference_parity/harness/checks/
+p3_stl_esd.py` `_stl_decompose` (lines 53-59; statsmodels STL with
+identical Balanced config) + `_generalized_esd` (lines 62-121;
+Rosner 1983 sequential test mirroring the engine recursion
+verbatim). **Both arms use statsmodels STL identically → the
+remainder is bitwise-identical; the only varying logic is the ESD
+sequential test.** Pattern A.3 self-parity (NOT cross-package):
+per the harness rationale, the historical canonical reference
+(Twitter AnomalyDetection R package) was ARCHIVED from CRAN + no
+actively-maintained CRAN package implements the STL+ESD pipeline
+as a single recipe — self-parity is the only path; it catches
+wrapper-level bugs (preprocessing, param forwarding, ESD stopping-
+rule, anomaly filtering) against the verbatim-recursion reference.
+
+**PARTIAL cross-reference (STL layer S33 + ESD layer novel):** The
+STL decomposition layer uses `statsmodels.tsa.seasonal.STL` — the
+SAME machinery as the separately-validated `stl_decompose` (S33,
+Decomposition block). **The STL decomposition layer inherits trust
+from S33; the Generalized-ESD (Rosner 1983) test layer is the
+NOVEL S76 element** (validated here for the first time). This is
+the partial-cross-reference pattern (analogous to S73 auto_arima:
+S62 SARIMAX backbone covers the fit layer, order-selection layer
+novel). Disclosed explicitly: S33 covers STL decomposition; S76
+adds the ESD-test-on-remainder layer.
+
+**Class B existing-harness note:** Per the S75 block-open probe,
+stl_esd_anomaly is Class B — the p3_stl_esd harness (Phase 3 Batch
+6) pre-existed + PASSed at runner CLI but had no §2.5 entry. S76
+formalizes the §2.5 validation entry against the verified-passing
+infrastructure (S68-S72 read+verify pattern).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine linearly interpolates
+  interior NaN before STL (engine line 77; STL requires gap-free
+  input; ≥70% valid observations required per engine line 70).
+  Verified by injecting NaN at [30] + [60]: engine returned
+  `status=success` + "missing values linearly interpolated for
+  STL" warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"` (stl_robust=True, inner_iter=5, outer_iter=2);
+  returned audit fields populated correctly (`n_anomalies=6`;
+  `anomaly_indices=[103, 37, 91, 36, 210, 139]`; `period=12`;
+  `alpha=0.05`; `max_anomalies_pct=0.1`; `direction="both"`;
+  `anomaly_rate`; `median_remainder`; `mad_remainder`;
+  `stl_robust=True`; `n_obs`; `ac_corrected`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 4 expected tables (`Detected Anomalies`; `Summary`;
+  `Generalized ESD Test Results`; `Decomposition & Anomaly Scores`
+  [STL trend/seasonal/remainder components + anomaly scores]).
+
+**Verdict (math layer):** PASS bit-exact (n_anomalies abs_diff=0.0
+[6 both arms]; anomaly-index set exact match [intersection=union=6,
+no tsl_only/ref_only]; n=240 seasonal+trend+noise DGP with 5
+injected outliers, period=12, at seed=42, Balanced preset at runner
+CLI execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S76 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/
+p3_stl_esd.py` (technique_id `p3_stl_esd`).
+**Audit date:** 2026-05-29 (S76 §2.5 entry; Change Points /
+Anomalies block second entry).
+**Primary metrics (math layer):** anomaly count (n_anomalies) +
+anomaly-index set (flagged-outlier indices set-equality).
+
+**Determinism profile:** Closed-form deterministic — statsmodels
+STL (deterministic loess-based decomposition at fixed inner/outer
+iterations) + Rosner 1983 Generalized-ESD (deterministic
+sequential extreme-deviate test with closed-form t-critical
+values). No MLE/sampling. Tier II.bit-exact. (Engine pins
+`np.random.seed(ctx.seed)` at engine line 60 defensively but
+neither STL nor ESD uses RNG in the validated path.)
+
+**Validation claim scope (S76; engine math validated at anomaly-
+detection scope via Pattern A.3 self-parity; STL layer cross-
+references S33; ESD layer novel; engine wrapper code path
+exercised at both math-layer + wrapper-layer 3-check scopes):**
+
+- **Layer 1 (STL decomposition) VALIDATED via S33 cross-reference
+  + identical-config self-parity:** statsmodels STL at the Balanced
+  config; both arms produce bitwise-identical remainder. STL
+  decomposition trust inherited from S33 stl_decompose.
+- **Layer 1 (Generalized-ESD Rosner 1983 sequential test) VALIDATED
+  at Tier II.bit-exact (NOVEL S76 layer):** anomaly count + index
+  set match the verbatim-recursion reference bit-exact. Self-parity
+  confirms the engine ESD recursion (extreme-deviate computation +
+  Bonferroni critical values + max-anomalies stopping + masking) is
+  correct.
+- **Layer 1 ANOMALY SCORES NOT separately validated at math
+  layer:** emitted in the Decomposition & Anomaly Scores table;
+  covered at wrapper-layer Check 3 emission scope.
+- **Layer 1 STL COMPONENTS (trend/seasonal) NOT separately
+  validated at math layer at S76:** the remainder is validated
+  (drives anomaly detection); trend/seasonal components inherit
+  from S33 + are emitted at wrapper-layer Check 3 scope.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN-interpolation handling; Balanced
+  STL config + ESD dispatch + 4-table structure; output shape/type
+  verification.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** STL per Cleveland-Cleveland-McRae-Terpenning
+(1990) "STL: A Seasonal-Trend Decomposition Procedure Based on
+Loess" J Official Statistics 6(1) — iterative loess-based
+decomposition into trend + seasonal + remainder. Generalized ESD
+per Rosner (1983) "Percentage Points for a Generalized ESD Many-
+Outlier Procedure" Technometrics 25(2) — sequential test computing
+the extreme studentized deviate (max |x - median| / std), comparing
+against a Bonferroni-adjusted t-critical value, removing the most-
+extreme point, repeating up to a max-outliers cap. The STL+ESD
+pipeline (STL-decompose, then ESD on the remainder) is the Twitter-
+anomaly-detection recipe shape; engine implements STL via
+statsmodels + ESD bespoke.
+
+**Phase 3 known failure modes (S76 / Class B existing-harness
+scope):**
+
+- Self-parity validates engine recursion against verbatim
+  reimplementation (catches wrapper-level bugs; STL+ESD are
+  textbook closed-form so formulation-error risk minimal).
+- Pattern A.3 self-parity (NOT cross-package): Twitter
+  AnomalyDetection R archived; no CRAN STL+ESD successor. Self-
+  parity is the only path; cross-implementation ESD-variant
+  differences are a known characteristic of the anomaly-detection
+  space, not a TSL deficiency.
+- ESD sequential stopping rule: Rosner's test is technically
+  sequential (continue past first non-rejection); both engine +
+  reference mirror the same stopping/masking convention (per
+  harness reference comment lines 114-120).
+- STL config sensitivity: seasonal-window + robust + iteration
+  counts affect the remainder; both arms use identical Balanced
+  config (validated config); alternative configs not separately
+  validated.
+
+**Phase 3 boundary of validity:**
+
+- n=240 seasonal+trend+noise DGP with 5 injected outliers
+  (period=12, outlier_magnitude=5σ); other anomaly patterns +
+  magnitudes NOT validated at math layer
+- Balanced STL config (robust=True, inner_iter=5, outer_iter=2,
+  seasonal-window=period+adjustment); Fast/Thorough configs NOT
+  separately validated
+- ESD at alpha=0.05, max_anomalies_pct=0.10, direction="both";
+  alternative alpha/cap/direction NOT separately validated
+- anomaly count + index set validated; anomaly scores + STL
+  components NOT separately validated (emission scope; components
+  inherit from S33)
+
+**Phase 3 gap markings:**
+
+- Anomaly scores NOT separately validated (emission scope)
+- STL trend/seasonal components NOT separately validated at S76
+  (remainder validated; components inherit S33 trust)
+- Alternative ESD parameters (alpha/cap/direction) NOT validated
+- Seasonal-vs-trend anomaly attribution NOT separately emitted
+  (anomalies flagged on remainder; minor ENG-EXT candidate)
+
+**Status (Tier II.bit-exact PASS + wrapper-layer 3/3 PASS per S76
+/ Change Points / Anomalies block second entry):** Layer 1 STL
+decomposition (S33 cross-reference + identical-config self-parity)
++ Generalized-ESD (novel; bit-exact self-parity) validated.
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS
+including NaN-interpolation + 4-table output structure. **NO
+engine-IMPROVEMENT candidate (closed-form deterministic).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** statsmodels
+  STL (robust=True, inner_iter=5, outer_iter=2, seasonal-window=
+  period-adjusted) + Generalized-ESD (alpha=0.05, max_anomalies_
+  pct=0.10, direction="both") at Balanced preset. Pattern A.3
+  self-parity reference mirrors the pipeline verbatim. Seasonal+
+  outlier DGP at n=240, period=12, seed=42.
+- **Engine preset default (Balanced):** matches validated
+  configuration (stl_robust=True, inner_iter=5, outer_iter=2;
+  alpha=0.05 + max_anomalies_pct=0.10 + direction="both"
+  defaults).
+- **Configuration match:** **YES at the Balanced STL+ESD surface**
+  — user invoking at default Balanced preset experiences the
+  math-validated pipeline. Fast (non-robust STL, fewer iterations)
+  + Thorough (more iterations) + alternative ESD parameters NOT
+  separately validated.
+- **Disclosure scope:** Fast/Thorough STL configs NOT validated.
+  Alternative ESD alpha/cap/direction NOT validated. Anomaly scores
+  + STL component attribution NOT separately validated (emission
+  scope; STL components inherit S33 trust). Seasonal-vs-trend
+  anomaly attribution NOT emitted (minor ENG-EXT candidate).
+
+**ENG-EXT institutional-rates anomaly-detection workflow scan
+outcome (S76 Step 1; standard workflow + STL component exposure;
+no NEW ENG-EXT-CHANGEPOINT-001 commission):**
+
+(a) **Flagged anomaly indices + count:** PRESENT ✓ — `Detected
+    Anomalies` table + audit `anomaly_indices` + `n_anomalies`.
+(b) **Anomaly scores:** PRESENT ✓ — `Decomposition & Anomaly
+    Scores` table.
+(c) **ESD test diagnostics (critical values per iteration):**
+    PRESENT ✓ — `Generalized ESD Test Results` table.
+(d) **STL component exposure (trend/seasonal/remainder):**
+    PRESENT ✓ — `Decomposition & Anomaly Scores` table exposes
+    components.
+(e) **Seasonal-vs-trend anomaly attribution (which component an
+    anomaly originates in):** PARTIAL — anomalies are flagged on
+    the REMAINDER (post-decomposition); the engine exposes STL
+    components but does not separately ATTRIBUTE each anomaly to
+    a seasonal-break vs trend-break vs remainder-spike origin.
+    Minor USER-CONVENIENCE candidate (anomalies are remainder-
+    spikes by construction; component-origin attribution would be
+    a nice-to-have for distinguishing genuine spikes from
+    decomposition-leakage).
+
+**Verdict: COVERED at standard anomaly-detection workflow elements
++ STL component exposure + ESD diagnostics.** No new ENG-EXT-
+CHANGEPOINT-001 commission surfaced at S76. Seasonal-vs-trend
+anomaly attribution noted as minor USER-CONVENIENCE candidate
+(logged; not commissioned).
+
+**Audit-hygiene cross-reference (S76 / Class B existing-harness +
+partial S33 cross-reference):** S76 stl_esd_anomaly is a Class B
+existing-harness validation (Phase 3 Batch 6 harness, pre-existing
++ PASS per S75 block-open probe; §2.5 entry formalized at S76).
+Pattern A.3 self-parity (verbatim-pipeline reference; Twitter
+AnomalyDetection R archived → self-parity only path). Bit-exact
+anomaly count + index-set parity. PARTIAL cross-reference: STL
+decomposition layer inherits trust from S33 stl_decompose
+(Decomposition block); ESD/Rosner-1983 test layer is the novel S76
+element. NO engine-IMPROVEMENT (closed-form deterministic).
+Seasonal-vs-trend attribution minor USER-CONVENIENCE candidate
+logged.
+
+**Change Points / Anomalies block progress note (S76 second
+entry):** Block 9 Change Points / Anomalies advances at S76
+stl_esd_anomaly per ratified ascending-complexity dispatch
+ordering. **Post-S76: Change Points / Anomalies block 2/5 §2.5-
+validated** (S75 cusum_page_hinkley + S76 stl_esd_anomaly). **3
+remaining in dispatch-set via S77-S79.** Block close projected at
+S79 bocpd → Block 9 fully Q1-amended (TWELFTH catalog block; 12
+of 13) at S79 close.
+
+**S77 intervention_analysis projection (next Change Points /
+Anomalies block session per ascending-complexity dispatch
+ordering):** Engine `engine/techniques/intervention_analysis.py`
+is intervention analysis — ARIMA model with intervention dummy
+variables (step/pulse) to estimate the effect of a known
+intervention at a specified time. Class B (existing
+p3_intervention_analysis harness + PASS per probe). **DIRECT
+cross-reference to the ARIMA arc (S70-S73) + S62 SARIMAX backbone**
+— intervention analysis is ARIMA-with-intervention-regressors
+(analogous to ARIMAX exogenous regressors at S72); the SARIMAX
+backbone fit layer inherits trust from S70/S71/S72/S73 + S62. The
+novel layer is the intervention-dummy specification (step vs pulse
+transfer function). Expected Tier II.mle-band per the ARIMA arc.
+Estimated session time: ~1h (Class B existing-harness).
+
+## §3 Unvalidated catalog techniques (9 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -34592,8 +34871,8 @@ descriptions, summaries).
 ### Causality / Relationships / Lead-Lag (0 unvalidated; Block 1 FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15 + S17 + S18)
 (all 6 techniques moved to §2.5)
 
-### Change Points / Anomalies / Interventions (4 unvalidated; cusum_page_hinkley moved to §2.5 per Phase 7+ S75 — FIRST Change Points / Anomalies block entry; Block 9 opens at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe [Phase 3 Batch 6 harnesses pre-existing + PASS at runner CLI; none had §2.5 entries; NOT net-new-construction (contrast S73) NOR cross-reference-only (contrast S67)]; engine BESPOKE closed-form CUSUM + Page-Hinkley (univariate); Tier II.bit-exact [all alarm counts abs_diff=0.0]; Pattern A.3 self-parity (avoids R-CUSUM/PH methodology zoo); NO engine-IMPROVEMENT candidate (closed-form deterministic; queue stays n=1); multivariate-CUSUM minor ENG-EXT candidate logged)
-`bocpd`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
+### Change Points / Anomalies / Interventions (4 unvalidated; cusum_page_hinkley moved to §2.5 per Phase 7+ S75 — FIRST Change Points / Anomalies block entry; Block 9 opens at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe [Phase 3 Batch 6 harnesses pre-existing + PASS at runner CLI; none had §2.5 entries; NOT net-new-construction (contrast S73) NOR cross-reference-only (contrast S67)]; engine BESPOKE closed-form CUSUM + Page-Hinkley (univariate); Tier II.bit-exact [all alarm counts abs_diff=0.0]; Pattern A.3 self-parity (avoids R-CUSUM/PH methodology zoo); NO engine-IMPROVEMENT candidate (closed-form deterministic; queue stays n=1); multivariate-CUSUM minor ENG-EXT candidate logged; stl_esd_anomaly moved to §2.5 per Phase 7+ S76 — SECOND Change Points / Anomalies block entry; Class B existing-harness; engine statsmodels STL + bespoke Generalized-ESD (Rosner 1983) on remainder; Tier II.bit-exact [n_anomalies + anomaly-index set bit-exact]; PARTIAL cross-reference [STL decomposition layer inherits trust from S33 stl_decompose; ESD/Rosner-1983 test layer novel]; Pattern A.3 self-parity [Twitter AnomalyDetection R archived → self-parity only path]; NO engine-IMPROVEMENT candidate; seasonal-vs-trend attribution minor USER-CONVENIENCE candidate logged)
+`bocpd`, `intervention_analysis`, `pelt_change_points`
 
 ### Decomposition & Seasonal Adjustment (0 unvalidated; Block 3 FULLY Q1-AMENDED — FOURTH catalog block to complete per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; classical_decompose moved to §2.5 per Phase 7+ S31; mstl_decompose moved to §2.5 per Phase 7+ S32; stl_decompose moved to §2.5 per Phase 7+ S33; x13_seasonal_adjust moved to §2.5 per Phase 7+ S34 — FOURTH-AND-FINAL Block 3 entry)
 (all 4 techniques moved to §2.5)
