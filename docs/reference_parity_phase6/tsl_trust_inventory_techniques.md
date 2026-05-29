@@ -31603,7 +31603,461 @@ engineering effort.
   ENG-EXT) + DFM historical decomposition explicit-table
   (USER-CONVENIENCE; low priority).
 
-## §3 Unvalidated catalog techniques (18 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### ets_hw (Phase 7+ S68; FIFTY-SEVENTH §2.5 entry; FIRST Forecasting Classical block DISPATCH-SET entry post-Cat-3-cycle [SC7 transfer_function pre-exists in §2.5 via Cat 3 remediation cycle but does NOT count toward S68-S74 dispatch-set]; Block 2 opens at S68 per ratified ascending-complexity intra-block ordering (ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand); **engine API path: CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` (SSE-minimization; NOT likelihood-based)**; **ENGINE-IMPROVEMENT candidate FIRST-INSTANCE** — migrate engine to `statsmodels.tsa.statespace.exponential_smoothing.ExponentialSmoothing` for likelihood-based inference + exact prediction intervals + Kalman diagnostics + State Space block backbone cross-reference; **pre-existing aic/bic Tier V Pattern D CAVEAT** per harness `state_space_reform` verdict_class_rationale (statsmodels SSE-based AIC vs R `forecast::ets` state-space likelihood-based AIC; formula-family divergence absorbed by Secondary tier non-blocking status); **β/γ corner-solution landing** at S68 audit DGP confirms classical SSE optimizer boundary-sticking pathology — additional engine-improvement signal)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**PRIMARY metrics: Tier II.mle-band (Pattern A.1 same-library
+cross-package self-parity at `state_space_reform` verdict_class
+tolerance per master plan §7.1 MLE-fit class)** per S68 Code
+Step 2 empirical verification. Python statsmodels classical
+`holtwinters.ExponentialSmoothing` (TSL math path) vs R
+`forecast::ets` model="AAA" (reference; state-space ETS
+reformulation per Hyndman-Khandakar 2008). Both implementations
+optimize over smoothing-parameter space but on different
+objective surfaces (classical: in-sample SSE; state-space: full
+likelihood). Mathematically equivalent for deterministic-state
+case; optimizer-convergence-criterion divergence absorbed by
+mle-band tolerance. **SECONDARY metrics aic/bic: Tier V Pattern
+D CAVEAT** (formula-family divergence; pre-existing per harness
+verdict_class_rationale — see disclosure below).
+
+**Engine variant validated (at math layer, indirectly via
+inlining):** statsmodels `ExponentialSmoothing(y, trend="add",
+seasonal="add", seasonal_periods=m, damped_trend=False,
+initialization_method="estimated").fit(optimized=True)` —
+**CLASSICAL HOLT-WINTERS SSE-MINIMIZATION PATH**. Harness
+`run_tsl` inlines this math (engine wrapper at engine line 10
+imports `from statsmodels.tsa.holtwinters import
+ExponentialSmoothing` — same API path).
+
+**Reference (Pattern A.1 same-library cross-package self-parity
+via R forecast::ets state-space ETS):** Reference reimplementation
+at `tools/reference_parity/harness/checks/p3_ets.py`
+`run_reference` lines 200-256 invokes R `forecast::ets(y, model
+="AAA", damped=FALSE, opt.crit="lik")` via RBridge. R `forecast::
+ets` is the **canonical state-space-formulated ETS implementation**
+per Hyndman-Koehler-Snyder-Grose (2002, 2008) unified ETS
+state-space framework — maximizes likelihood via Kalman filter +
+EM. **CROSS-API-PARADIGM COMPARISON:** statsmodels CLASSICAL
+(SSE-minimization) vs R STATE-SPACE (likelihood-based MLE) —
+this is the critical methodological consideration at S68. See
+API path + inferential implications disclosure below.
+
+**API PATH + INFERENTIAL IMPLICATIONS DISCLOSURE (per S68 trigger
+ratified framing; CRITICAL institutional consideration):**
+
+The two parallel statsmodels APIs implement **fundamentally
+different statistical models**, not just different determinism
+profiles:
+
+- **classical `holtwinters.ExponentialSmoothing` (engine current
+  path):** implements original Holt-Winters recursive formulation.
+  Smoothing parameters (α, β, γ) estimated by minimizing in-sample
+  SSE via `scipy.optimize.minimize`. **NOT a likelihood-based
+  model** — prediction intervals require separate variance
+  assumption (typically empirical residual SD scaled by horizon
+  per ad-hoc convention). AIC/BIC NOT formal likelihood-based
+  information criteria. Smoothing parameters can land at corner
+  solutions (β=0/γ=0 boundary) due to optimizer instability on
+  SSE surface.
+- **statespace `statespace.exponential_smoothing.
+  ExponentialSmoothing` (NOT currently used by engine):** implements
+  Hyndman-Koehler-Snyder-Grose 2008 unified ETS state-space
+  framework. Parameters estimated by MLE via Kalman filter. **IS
+  a likelihood-based model** — prediction intervals come from
+  state-space variance equations (correct for ETS specification).
+  Produces proper likelihood-based AIC/BIC for model selection.
+  Kalman filter / smoother diagnostics available.
+
+**For institutional use, state-space ETS is the more defensible
+choice** (likelihood-based inference; exact prediction intervals;
+Kalman diagnostics; formal AIC/BIC for model comparison; smoother
+optimization surface less prone to corner-solution landing).
+**Engine currently uses classical holtwinters** — flag for Q2+
+engine-IMPROVEMENT queue.
+
+**ENGINE-IMPROVEMENT FIRST-INSTANCE (distinct from engine-extension
+queue):**
+
+- **Engine-IMPROVEMENT** = migrate existing capability to a
+  better existing API (upgrade within engine; no net-new
+  capability surface).
+- **Engine-EXTENSION** = add net-new capability not currently in
+  engine scope (e.g., ENG-EXT-CONFORMAL-001 CQR + EnbPI/SPCI;
+  ENG-EXT-MULTIVARIATE-001 EXTENDED IRF bootstrap CI bands + VECM
+  IRF/FEVD + advanced SVAR identification).
+- **S68 surfaces FIRST engine-IMPROVEMENT candidate within Q1
+  cycle:** migrate engine `ets_hw` from classical
+  `holtwinters.ExponentialSmoothing` to statespace
+  `statespace.exponential_smoothing.ExponentialSmoothing` for
+  likelihood-based inference, exact prediction intervals, Kalman
+  diagnostics availability, smoother optimizer surface, and State
+  Space block backbone cross-reference inheritance.
+- **Engine-improvement queue at S68: n=1 (ets_hw).** If a second
+  engine-IMPROVEMENT candidate surfaces in subsequent Q1 sessions,
+  the queue may justify a separate Q2+ engine-correctness sprint
+  workstream parallel to the engine-extension sprint (ENG-EXT-
+  CONFORMAL-001 + ENG-EXT-MULTIVARIATE-001 EXTENDED). At n=1 the
+  candidate is logged for tracking but not formally commissioned.
+- **Estimated effort for ets_hw engine-improvement** (informal):
+  ~4-8h engineering (API substitution + audit-field
+  reconciliation + prediction interval format update + statespace
+  ETS spec selection algorithm if engine adds auto-select; minimal
+  user-facing migration since spec parameters [trend / seasonal /
+  damped_trend / seasonal_periods] map 1:1 between APIs).
+
+**Pre-existing aic/bic Tier V Pattern D CAVEAT disclosure (per
+harness `state_space_reform` verdict_class_rationale; NOT a new
+finding at S68):**
+
+- **Manifestation at S68 audit:** runner CLI reports
+  `aic: tsl=-270.45 vs ref=799.56` (abs_diff=1070.02) and
+  `bic: tsl=-217.68 vs ref=855.63` (abs_diff=1073.31). NOT a
+  constant offset — formula-family divergence (~1070 absolute
+  units; harness verdict_class_rationale at line 126-128: "AIC
+  scale offset (~1070 abs) is methodology-equivalent (Secondary
+  tier; non-blocking)").
+- **Formula divergence (Tier V Pattern D — Documented Sub-Class
+  Divergence within mle_fit information-criterion scope):**
+    - **statsmodels classical ETS AIC**: based on SSE per
+      Hyndman-Koehler-Snyder-Grose (2008) §17.7 classical
+      formulation: AIC = T·log(SSE/T) + 2·k (where k = # parameters
+      + initial states); approximate to true ETS likelihood under
+      Gaussian assumption but uses SSE as proxy for log-likelihood.
+    - **R forecast::ets AIC**: full likelihood-based AIC via state-
+      space Kalman likelihood evaluation per Hyndman-Khandakar 2008
+      §3: AIC = -2·log L + 2·k (formal information criterion;
+      requires state-space likelihood, NOT SSE proxy).
+    - Two formulas differ by additive likelihood-normalization
+      constant (specifically the difference between SSE-based
+      approximation and full Gaussian state-space likelihood
+      including initial-state variance contribution + per-period
+      normalization). Convention mismatch absorbed by Secondary
+      tier non-blocking status per master plan §7.1.
+- **Argmin-preserving (model selection UNCHANGED):** Both formulas
+  monotonically depend on in-sample fit (SSE or log-likelihood
+  proportional to SSE under Gaussian assumption); argmin over
+  candidate ETS specifications (additive vs multiplicative ×
+  damped vs not) preserved.
+- **User-facing implication:** Absolute AIC/BIC values reported in
+  TSL `Model Summary` table are correct on **statsmodels
+  classical scale**. **Do NOT cross-reference TSL AIC/BIC against
+  R `forecast::ets` AIC/BIC without accounting for the formula
+  divergence**. Within-TSL nested model comparison internally
+  consistent; cross-implementation comparison against literature-
+  reported R `forecast::ets` AIC requires explicit conversion.
+- **Tier V Pattern D classification (cross-package IC scale
+  divergence; pre-existing, well-understood):** Documented at
+  harness verdict_class_rationale + acknowledged at master plan
+  §7.1. NOT a regression; reflects API-paradigm divergence
+  between classical and state-space ETS implementations.
+
+**β/γ corner-solution landing (S68 audit observation; additional
+engine-improvement signal):**
+
+S68 runner CLI confirms TSL `beta=0.0` + `gamma=0.0` (corner
+solutions at smoothing parameter boundary) while R reference
+reports `beta=0.0205` + `gamma=0.000114`. This is a **known
+pathology of statsmodels classical holtwinters SSE-minimization**:
+the SSE optimizer can stick at parameter boundaries (β=0 ⇒ no
+trend updating; γ=0 ⇒ no seasonal updating) when local SSE
+gradient near zero is small + optimizer convergence tolerance
+permits. **State-space ETS via Kalman likelihood produces smoother
+optimization surface** and typically avoids boundary sticking.
+**Additional motivation for engine-IMPROVEMENT to statespace
+ETS.** Mle-band tolerance absorbs the parameter divergence at
+S68 audit (forecast still PASS at max_abs_diff=0.80 ≈ 0.4% rel
+for a 200-unit-scale forecast).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine `_prepare_series` at
+  engine lines 43-64 strips edge NaN + linearly interpolates
+  interior NaN. Verified by injecting interior NaN at [5] + [18]
+  in a 200-observation fixture: engine returned `status=success`
+  + emitted NaN-interpolation warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `frequency="M"`; returned audit fields
+  populated correctly (`model="Holt-Winters (add. trend, add.
+  seasonal, period=12)"`; `trend="add"`; `seasonal="add"`;
+  `seasonal_periods=12` auto-inferred from frequency="M";
+  `damped_trend=False`; `aic=-270.45`; `bic=-217.68`;
+  `rmse=0.4695`; `horizon=10`; `alpha=0.4766`; `beta=0.0` (corner
+  solution); `gamma=0.0` (corner solution); `phi=None`;
+  `last_observed_value=201.80`; `forecast_end_value=208.80`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 3 expected tables (`Forecast` 10 × N [Step + Forecast
+  + lower + upper prediction interval columns]; `Fitted Values`
+  [time-series of in-sample fitted values]; `Model Summary`).
+
+**Verdict (math layer — primary):** PASS at mle-band tolerance
+(`max_abs_diff` per metric: alpha 0.026 [5.5% rel], beta 0.021
+[corner solution at TSL=0.0], gamma 0.0001 [corner solution at
+TSL=0.0], forecast 0.80 [~0.4% rel for 200-unit-scale forecast];
+n=200 Holt-Winters AAA DGP + seed=42 at runner CLI execution).
+**Verdict (math layer — secondary):** Pre-existing Tier V Pattern
+D CAVEAT for aic/bic (formula-family divergence absorbed by
+Secondary tier non-blocking status; argmin-preserving); sigma2
+PASS at 10.4% rel; rmse PASS at 2.1% rel.
+**Verdict (wrapper layer):** PASS 3/3 checks per S68 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_ets.py`.
+**Audit date:** 2026-05-28 (S68 §2.5 entry; Forecasting Classical
+block opens; FIRST engine-IMPROVEMENT candidate within Q1 cycle).
+**Primary metrics (math layer):** smoothing parameters α + β + γ
++ h-step forecast (h=12).
+**Secondary metrics:** AIC + BIC (Tier V Pattern D CAVEAT;
+pre-existing) + sigma² + RMSE.
+
+**Validation claim scope (S68; engine math validated indirectly
+at primary-metric scope via inline-math harness pattern; engine
+wrapper code path exercised at wrapper-layer 3-check scope; math-
+layer comparison crosses Python statsmodels classical and R
+forecast::ets state-space library implementations of ETS
+estimation):**
+
+- **Layer 1 (statsmodels classical ETS smoothing parameter
+  optimization + h-step forecast) VALIDATED at Tier II.mle-band:**
+  Smoothing parameters + forecast values agree at mle-band
+  tolerance (state_space_reform verdict_class per master plan
+  §7.1). Cross-API-paradigm agreement (statsmodels classical vs
+  R state-space) confirms both implementations target the same
+  underlying ETS model modulo optimizer-convergence-criterion
+  divergence.
+- **Layer 1 SECONDARY METRICS aic/bic Tier V Pattern D pre-
+  existing CAVEAT:** Documented at harness verdict_class_rationale
+  + acknowledged at master plan §7.1.
+- **Layer 1 PREDICTION INTERVALS NOT separately validated at
+  math layer:** Engine emits prediction interval columns in
+  Forecast table via statsmodels classical holtwinters
+  `forecast.simulate` or analytical approximation (depending on
+  statsmodels version); reference R `forecast::ets` produces
+  state-space-derived prediction intervals. Cross-API
+  distributional comparison NOT in current parity scope.
+  **Engine-improvement to statespace ETS would produce exact
+  state-space prediction intervals.**
+- **Layer 1 SPEC SELECTION ALGORITHM NOT separately validated at
+  math layer:** Harness pins `trend="add"`, `seasonal="add"`,
+  `damped=FALSE`; engine accepts user-specified trend/seasonal
+  parameters but does NOT implement automatic spec selection
+  (additive vs multiplicative × damped vs not). Engine therefore
+  delegates spec choice to user input; no AIC-argmin spec grid
+  search.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via strip + interp;
+  preset config dispatch returns expected 3-table structure
+  including audit-field population; output shape/type
+  verification confirms table column schemas.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Exponential Smoothing per Holt (1957)
+"Forecasting Trends and Seasonals by Exponentially Weighted
+Moving Averages" ONR research memo + Winters (1960) "Forecasting
+Sales by Exponentially Weighted Moving Averages" Management
+Science 6(3) — original classical Holt-Winters recursive
+smoothing formulation. Unified state-space framework per
+Hyndman-Koehler-Snyder-Grose (2002, 2008) "A State Space
+Framework for Automatic Forecasting Using Exponential Smoothing
+Methods" Intl J Forecasting + "Forecasting with Exponential
+Smoothing: The State Space Approach" Springer — embeds Holt-
+Winters family in formal state-space + Gaussian-likelihood
+framework enabling MLE, formal AIC/BIC, prediction intervals.
+Engine currently uses **classical formulation** via statsmodels
+classical holtwinters API; reference R `forecast::ets` uses
+state-space formulation. Both target same parameter space modulo
+optimizer differences; state-space formulation strictly preferred
+for institutional inference (engine-IMPROVEMENT candidate).
+
+**Phase 3 known failure modes (S68 / engine-variant scope):**
+
+- Math-layer harness inlines statsmodels classical
+  `ExponentialSmoothing.fit(optimized=True)` per Phase 1 finding
+  B8 — engine wrapper rounds forecast to 6 decimals at engine
+  output line not shown but standard convention; inline path
+  achieves mle-band parity vs wrapper-path 1e-6 floor.
+- **aic/bic Tier V Pattern D CAVEAT (pre-existing per harness
+  verdict_class_rationale):** statsmodels classical SSE-based
+  AIC vs R state-space likelihood-based AIC formula-family
+  divergence (~1070 absolute units). Argmin-preserving for spec
+  selection; absolute values NOT cross-reference-safe.
+- **β/γ corner-solution landing pathology:** Classical SSE
+  optimizer can stick at smoothing-parameter boundaries (β=0,
+  γ=0) when local SSE gradient is small + convergence tolerance
+  permits. Symptom-of underlying classical-API optimization
+  surface roughness vs state-space likelihood surface smoothness.
+  **State-space ETS engine-improvement would resolve.**
+- **No automatic spec selection** at engine ets_hw — user must
+  specify trend / seasonal / damped parameters explicitly (engine
+  defaults: trend="add", seasonal=auto-detect-from-frequency,
+  damped=False). Reference R `forecast::ets` model="AAA" pin
+  matches engine defaults.
+
+**Phase 3 boundary of validity:**
+
+- T=200 Holt-Winters AAA fixture (additive trend + additive
+  seasonal, α=0.3, β=0.1, γ=0.2, m=12, σ=0.5); other model specs
+  (multiplicative trend / multiplicative seasonal / damped trend
+  / Box-Cox transform) NOT validated at math layer
+- trend="add" + seasonal="add" + damped=False validated; other
+  combinations NOT validated though same statsmodels classical
+  optimizer applies
+- m=12 (monthly frequency) validated; other seasonal periods NOT
+  validated at math layer
+- horizon=12 forecast validated; longer horizons NOT separately
+  exercised
+- AIC/BIC: Tier V Pattern D pre-existing CAVEAT (cross-reference
+  scope excluded; argmin-preserving for spec selection within-TSL)
+
+**Phase 3 gap markings:**
+
+- Engine uses CLASSICAL holtwinters API (SSE-minimization; not
+  likelihood-based); engine-IMPROVEMENT candidate to migrate to
+  statespace ETS API for likelihood-based inference + exact PIs
+  + Kalman diagnostics + State Space block backbone cross-
+  reference
+- aic/bic cross-package absolute parity NOT achievable per Tier V
+  Pattern D pre-existing CAVEAT
+- Prediction intervals NOT validated at math layer
+- Spec selection algorithm NOT implemented at engine (user-
+  delegated)
+- Components decomposition (level/trend/seasonal trajectories
+  over time) NOT emitted as standalone table — minor user-
+  convenience gap; level/trend/seasonal accessible via
+  statsmodels fit object but not surfaced in engine output
+- β/γ corner-solution landing at SSE optimizer boundaries —
+  engine-improvement to statespace API would resolve
+
+**Status (PRIMARY Tier II.mle-band PASS at state_space_reform
+verdict_class tolerance + SECONDARY Tier V Pattern D pre-existing
+CAVEAT absorbed + wrapper-layer 3/3 PASS per S68 / Forecasting
+Classical block opens at S68):** Layer 1 statsmodels classical
+ETS math validated at mle-band tolerance via cross-library check
+(statsmodels classical vs R state-space forecast::ets). Wrapper
+layer (S49+ NEW 3-check scope) validated at 3/3 PASS including
+3-table output structure (Forecast + Fitted Values + Model
+Summary). **Engine-IMPROVEMENT candidate logged (first-instance
+within Q1 cycle; n=1 in engine-improvement queue).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** statsmodels
+  `ExponentialSmoothing(y, trend="add", seasonal="add",
+  seasonal_periods=12, damped_trend=False,
+  initialization_method="estimated").fit(optimized=True)`.
+  Pattern A.1 cross-library reference: R `forecast::ets(y,
+  model="AAA", damped=FALSE, opt.crit="lik")`. Holt-Winters AAA
+  DGP at n=200, seed=42, m=12.
+- **Engine preset default (Balanced):** trend="add" (engine
+  default at line 119); seasonal=auto-detect (engine line 21-40
+  infers m from frequency); damped_trend=False (engine default).
+  At ctx.frequency="M" engine sets seasonal_periods=12 +
+  seasonal="add" (engine default seasonal-component-detection).
+- **Configuration match:** **YES at primary metrics math layer
+  modulo seasonal-component-auto-detection convention** — user
+  invoking at default Balanced preset with monthly-frequency
+  data matches validated configuration. For non-monthly
+  frequencies or non-AAA model specs (e.g., multiplicative
+  components, damped trend), engine accepts user parameters but
+  math-layer validation does NOT exercise alternative
+  specifications.
+- **Disclosure scope:** Multiplicative trend (trend="mul") NOT
+  validated. Multiplicative seasonal (seasonal="mul") NOT
+  validated. Damped trend (damped_trend=True) NOT validated.
+  Box-Cox transform (use_boxcox=True) NOT validated. Alternative
+  seasonal periods NOT validated at math layer (engine accepts
+  user input via seasonal_periods param). Prediction interval
+  emission NOT separately validated at math layer (statsmodels
+  classical PI ≠ state-space PI; engine-improvement to statespace
+  ETS would resolve). **CLASSICAL-API DISCLOSURE per S68
+  engine-IMPROVEMENT framing:** engine uses statsmodels classical
+  holtwinters (SSE-minimization, not likelihood); for users
+  requiring likelihood-based inference + exact prediction
+  intervals + formal AIC/BIC + Kalman diagnostics, engine ETS
+  is currently inadequate — await Q2+ engine-improvement
+  migration to statespace ETS API. **AIC/BIC CONVENTION
+  DISCLOSURE per Tier V Pattern D pre-existing CAVEAT:** absolute
+  AIC/BIC values reported on statsmodels classical SSE-based
+  scale; do NOT cross-reference against R `forecast::ets`
+  state-space likelihood-based AIC without formula conversion.
+
+**ENG-EXT institutional-rates ETS workflow scan outcome (S68
+Step 1; standard tight workflow; no NEW ENG-EXT-FORECASTING-001
+candidate surfaced):**
+
+The institutional-rates ETS workflow (baseline/benchmark
+forecasting; not primary tool for sophisticated rates strategy)
+requires modest workflow elements:
+
+(a) **Point forecast:** PRESENT ✓ — `Forecast` table emits
+    h-step point forecasts with prediction interval columns.
+(b) **Prediction intervals:** PRESENT (parametric) — engine emits
+    via statsmodels classical PI computation. **NOT exact state-
+    space PIs** (engine-improvement candidate).
+(c) **Fitted values:** PRESENT ✓ — `Fitted Values` table emits
+    in-sample fitted series.
+(d) **Smoothing parameter audit:** PRESENT ✓ — audit fields
+    `alpha`, `beta`, `gamma`, `phi` (if damped).
+(e) **Components decomposition** (level + trend + seasonal
+    trajectories over time): **PARTIAL — not packaged as
+    standalone table** but accessible via statsmodels fit object
+    `fit.level / fit.trend / fit.season`. Minor user-convenience
+    candidate.
+
+**Verdict: COVERED at standard workflow elements** modulo (b)
+prediction interval quality (parametric, not state-space; tied
+to engine-improvement candidate) + (e) components decomposition
+user-convenience gap. **No new ENG-EXT-FORECASTING-001 commission
+surfaced at S68.** Components decomposition gap noted as minor
+USER-CONVENIENCE candidate (low priority).
+
+**Audit-hygiene cross-reference (S68 / engine-IMPROVEMENT first-
+instance + pre-existing Tier V Pattern D CAVEAT):**
+
+S68 surfaces FIRST engine-IMPROVEMENT candidate within Q1 cycle:
+migrate engine `ets_hw` from classical
+`statsmodels.tsa.holtwinters.ExponentialSmoothing` (SSE-
+minimization) to statespace
+`statsmodels.tsa.statespace.exponential_smoothing.
+ExponentialSmoothing` (likelihood-based MLE via Kalman). Pre-
+existing Tier V Pattern D CAVEAT on aic/bic formula-family
+divergence (~1070 abs) documented at harness verdict_class_
+rationale + acknowledged at master plan §7.1. β/γ corner-solution
+landing pathology confirmed at S68 audit (additional engine-
+improvement signal). **Engine-improvement queue at S68 close:
+n=1 (ets_hw); if n≥2 reached in subsequent Q1 sessions, queue may
+justify separate Q2+ engine-correctness sprint workstream
+parallel to engine-extension sprint (ENG-EXT-CONFORMAL-001 +
+ENG-EXT-MULTIVARIATE-001 EXTENDED).** Engine-improvement vs
+engine-extension distinction: engine-improvement = upgrade
+existing capability to better existing API; engine-extension =
+add net-new capability not currently in scope.
+
+**Forecasting Classical block opening note (S68 FIRST dispatch-
+set entry):** Block 2 Forecasting Classical opens at S68 ets_hw
+per ratified ascending-complexity intra-block ordering
+(ets_hw → theta_forecast → arima → sarima → arimax_sarimax →
+auto_arima → intermittent_demand). **Post-S68: Forecasting
+Classical block 2/8 §2.5-validated** (SC7 transfer_function from
+Cat 3 remediation cycle pre-exists in §2.5; S68 ets_hw adds
+second entry). **6 remaining in dispatch-set via S69-S74.**
+Block close projected at S74 intermittent_demand. Per ratified
+end-to-end ordering (Forecasting Classical → Change Points/
+Anomalies → Regimes/Nonlinear), Forecasting Classical close at
+S74 → Change Points/Anomalies opens at S75.
+
+**S69 theta_forecast projection (next Forecasting Classical
+block session per ascending-complexity dispatch ordering):**
+Engine `engine/techniques/theta_forecast.py` (verify exact module
+name) is Theta method (Assimakopoulos-Nikolopoulos 2000 "The
+theta model: a decomposition approach to forecasting" Intl J
+Forecasting 16(4)) — simple hybrid simple-exponential-smoothing
++ linear-trend decomposition. M3-Competition winner; widely-used
+forecasting baseline. Expected Pattern A.1 same-library cross-
+package self-parity vs R `forecast::thetaf`. Bit-exact-prone
+(closed-form regression for trend + SES recursion both
+deterministic). Estimated session time: ~1-1.5h.
+
+## §3 Unvalidated catalog techniques (17 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -31635,8 +32089,8 @@ descriptions, summaries).
 ### Evaluation / Uncertainty (0 unvalidated; **Block 4 FULLY Q1-AMENDED** — NINTH catalog block to complete per Q1 work program scope at S62 close = 9 of 13 catalog blocks fully Q1-amended (69% catalog block-level completion); robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61; conformal_intervals moved to §2.5 per Phase 7+ S62 — FIFTH-AND-FINAL block entry; Q1 cadence resumption entry post-Cat-3-cycle close at SC17 a54b430; cascade-resolution entry — p3_conformal was the original Cat 3 finding at S62 Step 1 that triggered the inventory verification cascade + 17-session Cat 3 remediation cycle, now closed at S62 §2.5 entry against the corrected harness; MANDATORY Path B forward observation embedded: ENG-EXT-CONFORMAL-001 commissions CQR + EnbPI/SPCI Q2+ engine extension for institutional-fixed-income-use-case scope)
 (all 5 techniques moved to §2.5)
 
-### Forecasting (Classical) (7 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening)
-`arima`, `arimax_sarimax`, `auto_arima`, `ets_hw`, `intermittent_demand`, `sarima`, `theta_forecast`
+### Forecasting (Classical) (6 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE-minimization path (NOT likelihood-based); FIRST engine-IMPROVEMENT candidate within Q1 cycle — migrate to `statsmodels.tsa.statespace.exponential_smoothing.ExponentialSmoothing` for likelihood-based inference + exact PIs + Kalman diagnostics + State Space block backbone cross-reference; engine-improvement queue at S68 close: n=1; pre-existing aic/bic Tier V Pattern D CAVEAT per harness `state_space_reform` verdict_class_rationale; β/γ corner-solution landing confirms classical SSE optimizer boundary-sticking pathology)
+`arima`, `arimax_sarimax`, `auto_arima`, `intermittent_demand`, `sarima`, `theta_forecast`
 
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
