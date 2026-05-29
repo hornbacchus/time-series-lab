@@ -31605,6 +31605,128 @@ engineering effort.
 
 ### ets_hw (Phase 7+ S68; FIFTY-SEVENTH §2.5 entry; FIRST Forecasting Classical block DISPATCH-SET entry post-Cat-3-cycle [SC7 transfer_function pre-exists in §2.5 via Cat 3 remediation cycle but does NOT count toward S68-S74 dispatch-set]; Block 2 opens at S68 per ratified ascending-complexity intra-block ordering (ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand); **engine API path: CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` (SSE-minimization; NOT likelihood-based)**; **ENGINE-IMPROVEMENT candidate FIRST-INSTANCE** — migrate engine to `statsmodels.tsa.statespace.exponential_smoothing.ExponentialSmoothing` for likelihood-based inference + exact prediction intervals + Kalman diagnostics + State Space block backbone cross-reference; **pre-existing aic/bic Tier V Pattern D CAVEAT** per harness `state_space_reform` verdict_class_rationale (statsmodels SSE-based AIC vs R `forecast::ets` state-space likelihood-based AIC; formula-family divergence absorbed by Secondary tier non-blocking status); **β/γ corner-solution landing** at S68 audit DGP confirms classical SSE optimizer boundary-sticking pathology — additional engine-improvement signal)
 
+═══════════════════════════════════════════════════════════════════
+**B1 MIGRATION AMENDMENT (Q2 engine-improvement workstream, item 1 of
+2; commit `6281e2e`; engine: BREAKING output change):** The engine was
+MIGRATED from the classical `statsmodels.tsa.holtwinters.
+ExponentialSmoothing` (SSE) to the modern state-space
+`statsmodels.tsa.exponential_smoothing.ets.ETSModel` (likelihood MLE).
+This RESOLVES the S68-flagged engine-IMPROVEMENT candidate. The S68
+content below documents the PRE-MIGRATION classical state (preserved
+for audit trail); this amendment records the post-migration outcome.
+═══════════════════════════════════════════════════════════════════
+
+**Migration disposition (S85+ Q2; Disposition A ratified):** Path (a)
+drop-in + API adaptations (presets carried no model structure — only
+the simulation count `n_sim`, removed). **BREAKING:** classical path
+removed (not flag-gated); `use_boxcox` dropped (ETSModel has no Box-Cox
+option — pre-transform externally if needed). Prior classical numeric
+results are SUPERSEDED; the state-space results are better-grounded
+(likelihood-based + corner-solution-bounded). Rationale per S68: the
+classical path was the lone classical-API exception with (1) SSE-proxy
+(non-likelihood) AIC/BIC and (2) a β/γ corner-solution pathology.
+
+**Before→after parity delta vs R `forecast::ets` AAA (S68 X →
+post-migration Y; commit `6281e2e`):**
+
+| metric | S68 X (classical-vs-R) | Y (statespace-vs-R) | outcome |
+|---|---|---|---|
+| forecast (h=12) | abs 0.80 / rel 0.4% | abs 0.187 / rel 0.089% | **~4× TIGHTER** (PASS) |
+| beta | abs 0.021 (corner TSL=0.0) | abs 2.7e-5 (tsl 0.0206 ≈ ref 0.0205) | **CORNER RESOLVED** (PASS) |
+| gamma | abs 0.0001 (corner TSL=0.0) | abs 4.8e-5 (both ~0) | tighter (PASS) |
+| alpha | abs 0.026 / rel 5.5% (PASS) | abs 0.107 / rel 23.7% | **WEAKLY-IDENTIFIED CAVEAT** |
+| aic/bic | abs ~1070 (Tier V Pattern D) | abs ~505 | **NARROWED ~53%** (persists) |
+| rmse | rel 2.1% | rel 3.6% | ~same (PASS) |
+
+**Post-migration tier: CAVEAT** (overall) — driven by the weakly-
+identified `alpha`. Note the verdict moved S68-PASS → CAVEAT, but the
+cause is an HONEST statistical characterization, not a regression (see
+below). The well-identified core (forecast + β + γ) is TIGHTER than
+S68.
+
+**(1) Corner-solution RESOLUTION (β) — genuine optimizer-failure fix:**
+The classical SSE optimizer stuck β at exactly 0.0 (S68 corner); R's
+own β was 0.0205. Post-migration ETSModel β = 0.0206 — matching R to
+abs 2.7e-5. The DGP true β = 0.1, but BOTH state-space implementations
+land at ~0.0205 (the trend is largely absorbed by the estimated
+initial states), so the joint near-0.02 optimum is the honest fit and
+the classical exact-0.0 was an OPTIMIZER FAILURE. ETSModel's bounded
+MLE ([1e-4, 1−1e-4] on transformed params) + likelihood objective
+fixes it. **The corner pathology is genuinely resolved.**
+
+**(2) aic/bic Tier V Pattern D CAVEAT — NARROWED but PERSISTS
+(reclassified):** S68 gap ~1070 (classical-SSE-AIC vs R-state-space-
+likelihood-AIC; cross-API-paradigm). Post-migration gap ~505 (tsl aic
+294.95 vs ref 799.56) — the engine AIC is now LIKELIHOOD-based
+(the no-likelihood deficiency is FIXED), halving the gap. The RESIDUAL
+~505 is a statsmodels-ETSModel vs R-forecast::ets likelihood-
+NORMALIZATION-constant difference (statsmodels llf=−129.47 vs R's
+implied −381.78 — different concentration/normalization of the same
+Gaussian ETS likelihood). So the CAVEAT is RECLASSIFIED: from cross-
+API-paradigm (classical-vs-statespace) → within-paradigm likelihood-
+normalization (statespace-vs-statespace). Still Secondary-tier
+non-blocking, argmin-preserving. **The deficiency S68 flagged (no
+likelihood) is fixed; a smaller, better-grounded normalization CAVEAT
+remains.**
+
+**(3) `alpha` WEAKLY-IDENTIFIED CAVEAT (intrinsic; NOT a regression;
+S84-consistent):** Post-migration alpha = 0.3438 vs R 0.4504 (abs
+0.107). This is NOT a worse fit — the LEVEL-smoothing likelihood
+surface is FLAT in alpha: statsmodels reports an IDENTICAL log-
+likelihood (llf = −129.473) at its own alpha (0.3438) AND at R's alpha
+(0.4504). Both implementations find the SAME likelihood optimum; alpha
+is simply not point-identified (the level smoothing trades off against
+the estimated initial level). This is precisely WHY the forecast
+agrees to 0.089% despite the 0.107 alpha gap (a flat ridge produces
+near-identical fits). Characterized as WEAK IDENTIFICATION (intrinsic
+statistical property), directly analogous to the S84 STAR weakly-
+identified-γ CAVEAT — and RETAINED at CAVEAT (NOT widened to PASS;
+tolerances report the measured difference, the flat-ridge proof is
+documented as the benign explanation). Triage consistency: like S84,
+weak-identification → CAVEAT, not widened-PASS.
+
+**(4) DETERMINISM + analytic intervals (new secondary benefit):** the
+classical path's prediction intervals used an UNSEEDED `fit.simulate()`
+Monte-Carlo path (non-deterministic across runs — only the point
+forecast was reproducible). The migrated engine uses ANALYTIC state-
+space intervals (`get_prediction().summary_frame()` — the
+`analytic_state_space` path RAN, confirmed; deterministic) with a
+deterministic scipy-t fallback. The migrated engine is now CROSS-
+INVOCATION BIT-EXACT (forecast AND intervals reproducible; verified
+stable across 3 runner-CLI runs).
+
+**Wrapper-layer 3-check (post-migration; 3/3 PASS):** (i) NaN —
+graceful ("interior missing values linearly interpolated"); (ii)
+preset invocation — Fast/Balanced/Thorough all dispatch (presets no
+longer affect the fit numerically post-migration — n_sim removed —
+acceptable; they only ever scaled the obsolete interval simulation);
+(iii) output shape/type — 3 tables intact, AIC/BIC now likelihood-
+based; audit gains `error_term` + `interval_method`.
+
+**Harness amendment:** `tools/reference_parity/harness/checks/
+p3_ets.py` `run_tsl` rewritten from the prior INLINED classical bypass
+to INVOKE THE MIGRATED ENGINE WRAPPER via RunContext — the harness now
+exercises the real engine code path (closing the prior bypass
+methodology gap) and measures the post-migration state-space-vs-state-
+space parity. `tolerances.py` `p3_ets` re-tuned to the state-space
+reality (abs_tol 5e-2→2e-2; alpha retained at CAVEAT band).
+
+**engine-IMPROVEMENT status: RESOLVED** — the S68-flagged ets_hw
+classical→state-space migration is implemented. **Engine-improvement
+queue n=2 → n=1** (only B2 star γ-reparameterization remains).
+**API-positioning RESOLVED:** ets_hw was the LONE classical-API
+exception (n=6 at S72: S68 classical vs S69-S73 modern); post-migration
+ets_hw is state-space too → the **Forecasting Classical block is now
+uniformly modern-API** (the block's one institutional surprise
+eliminated).
+
+**Discovered during B1 (banked, OUT OF SCOPE):**
+`engine/techniques/forecast_combination.py` also uses classical
+`statsmodels.tsa.holtwinters.ExponentialSmoothing` (its `_fit_ets_model`
+helper) — a candidate for the same state-space migration in future
+engine-improvement consideration. Banked, NOT added to the active
+queue (Workstream B is scoped to the two ratified items).
+
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
 **PRIMARY metrics: Tier II.mle-band (Pattern A.1 same-library
 cross-package self-parity at `state_space_reform` verdict_class
@@ -37822,9 +37944,11 @@ catalog completion).** §3 unvalidated → 0.
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
       instances).
-- **Engine-improvement queue (n=2):** ets_hw statespace migration
-  (S68) + star γ-reparameterization (standardized γ/σ_s per Teräsvirta
-  1994; S84).
+- **Engine-improvement queue (n=2 at Q1 close → n=1 post-B1):** ~~ets_hw
+  statespace migration (S68)~~ **RESOLVED at B1 (commit `6281e2e`;
+  classical→state-space ETSModel migration; see the ets_hw §2.5 B1
+  amendment)** + star γ-reparameterization (standardized γ/σ_s per
+  Teräsvirta 1994; S84) **[remaining: B2]**.
 - **Harness-refinement queue (low priority):** S69 theta rmse-
   reconstruction artifact + S82 HMM Viterbi 0-vs-1 index-base
   secondary-metric artifact + S83 markov_switching Balanced-spec math-
