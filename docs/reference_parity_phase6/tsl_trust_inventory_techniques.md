@@ -36104,7 +36104,312 @@ Pre-existing risk: threshold-grid search determinism + regime-
 assignment boundary handling. Estimated session time: ~1h (Class B
 existing-harness).
 
-## §3 Unvalidated catalog techniques (5 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### tar_setar (Phase 7+ S81; SEVENTIETH §2.5 entry; SECOND Regimes / Nonlinear block entry; Class B existing-harness validation [Phase 3 Batch 4 harness pre-existing + PASS per block-open probe]; engine: BESPOKE Threshold / Self-Exciting Threshold AutoRegression (numpy + scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); **Tier II.mle-band** [threshold scalar at abs_tol=1e-2 / rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely attributable to the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL]; Pattern (cross-package) vs R `tsDyn::setar` (m=2, thDelay=0, nthresh=1); **NO engine-IMPROVEMENT candidate** [bespoke scipy; queue stays n=1 (ets_hw)]; multiple-threshold/3-regime ENG-EXT candidate RULED OUT [engine Thorough preset supports n_regimes=3]; threshold-confidence-interval (Hansen 2000 threshold inference) minor candidate logged [engine emits point threshold + approximate F-linearity test, no Hansen CI])
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.mle-band (verdict_class `mle_fit`; threshold-grid-search +
+per-regime conditional OLS)** per S81 Code Step 2 empirical
+verification. Engine bespoke SETAR pipeline (TSL math path) vs R
+`tsDyn::setar` (reference) on a synthetic 2-regime SETAR(1, d=1)
+realization (n=500, threshold=0, φ_low=0.7, φ_high=−0.3). **Primary
+metric `threshold` PASS at abs_diff=3.938e-7, rel_diff=1.019e-6**
+(tsl=0.386639, ref=0.386639393810426) — far inside the mle-band
+ladder (abs_tol=1e-2, rel_tol=5e-2). **Threshold-selection
+AGREEMENT note:** the entire 3.94e-7 discrepancy equals
+ref−tsl = 0.386639393810426 − 0.386639 = 3.938e-7, i.e. it is
+ENTIRELY the engine's 6-decimal audit-field rounding floor (Phase 1
+finding B8); both arms selected the EXACT SAME observed data point
+as the sample-optimal threshold. The grid-search threshold selection
+is therefore BIT-IDENTICAL modulo the engine output-rounding floor —
+the mle-band classification is a conservative ladder assignment, not
+an observed divergence. Given identical thresholds + identical
+regime-assignment boundary rule, the per-regime conditional OLS is
+deterministic (closed-form) and bit-exact.
+
+**Engine variant validated (at math layer; engine wrapper exercised
+via RunContext):** Bespoke SETAR pipeline — (1) threshold variable
+y(t−d) with delay d=1; (2) grid-search over candidate thresholds
+(`_search_thresholds`: sort the threshold variable, trim `trim`=0.15
+fraction at each end, build a `grid_fine` linspace of up to
+min(200, hi−lo) sorted-observed values, `np.unique`); for each
+candidate split observations into regimes + fit conditional OLS +
+sum SSE, select the threshold minimizing total SSE (strict `<` tie-
+break → first-candidate-wins); (3) per-regime AR fit via
+`np.linalg.lstsq` (intercept + AR lags); (4) information criteria +
+RMSE; (5) simulation forecast (n_sims=500, `np.random.seed(ctx.seed)`-
+pinned); (6) approximate F-linearity test (SETAR vs linear AR).
+Engine `run()` lines 39-417 implement the pipeline; the parity-
+critical helpers are `_search_thresholds` (424-480), `_assign_regimes`
+(515-521), `_compute_setar_sse` (483-512). Harness invokes the
+ENGINE wrapper (`ts_mod.run` via RunContext at Balanced preset,
+n_regimes=2, ar_order=1, thDelay=1).
+
+**Regime-assignment boundary rule (verified matches DGP +
+reference):** `_assign_regimes` increments regime via
+`(thresh_var > th)` — so regime 0 = {y(t−d) ≤ th} (low regime),
+regime 1 = {y(t−d) > th} (high regime). This `≤`-into-low / strict-
+`>`-into-high rule matches the fixture DGP convention
+(`y[t−1] <= threshold → φ_low`) and R `tsDyn::setar`'s convention.
+No boundary-rule divergence; a single boundary observation cannot be
+flipped between regimes across arms.
+
+**Reference (cross-package vs R tsDyn::setar):** Reference at
+`tools/reference_parity/harness/checks/p3_tar_setar.py`
+`run_reference` lines 120-175 calls R `tsDyn::setar(y, m=2,
+thDelay=0, nthresh=1)`. Cross-package convention alignment: TSL's
+SETAR(d=1) uses y(t−1) as the self-exciting threshold variable; the
+harness maps this to `tsDyn::setar` with m=2 + thDelay=0 (tsDyn's
+thDelay indexes lags within the embedding, so m=2/thDelay=0 selects
+y(t−1) as the threshold variable to match TSL's d=1). The threshold
+is read from `coef(fit)["th"]` (tsDyn 11.x stores it there, not in
+`fit$model.specific$th`). This is a GENUINE CROSS-PACKAGE check (TSL
+bespoke numpy/scipy vs an independent R TAR library), NOT self-
+parity — statsmodels lacks a first-class TAR/SETAR estimator (per
+the block-open probe), so the bespoke engine is validated against
+the canonical R implementation.
+
+**Class B existing-harness note:** Per the block-open probe,
+tar_setar is Class B — the Phase 3 Batch 4 harness pre-existed +
+PASSed at runner CLI but had no §2.5 entry. S81 formalizes the §2.5
+validation entry. (Same Class B disposition as S80
+critical_slowing_down; distinct in that tar_setar is a cross-package
+R reference, whereas S80 was a cross-package Python reference.)
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS (graceful). Engine accepted
+  injected interior NaN (3 points) + ran to `status=success`,
+  emitting the warning "3 NaN values linearly interpolated." The
+  `run()` NaN-handling branch (lines 72-82) linearly interpolates
+  interior NaN when nan_count < n−10; only an all-but-≤10-NaN series
+  errors out gracefully.
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"` (n_regimes=2, ar_order=1, thDelay=1 per
+  harness); returned `model="SETAR(2)"`, `n_regimes=2`, `delay=1`,
+  `ar_orders=[1,1]`, a populated `thresholds` list, and
+  `regime_counts` summing to `n_effective` (e.g. [266,133]→399). The
+  Balanced threshold-search criterion is `grid_fine`
+  (max_ar=4 default, n_regimes=2 default).
+- **Check 3 — Output shape/type verification:** PASS. Engine emitted
+  6 tables (Forecast / Regime Coefficients / Threshold Parameters /
+  Regime Assignment / Model Summary / Linearity Test) + a 10-field
+  audit; types correct (`model` str, `thresholds` list, `aic` float,
+  `n_regimes` int) + plain-English summary present.
+
+**Verdict (math layer):** PASS at Tier II.mle-band ladder
+(threshold abs_diff=3.938e-7, rel_diff=1.019e-6; tsl=0.386639,
+ref=0.386639393810426; n=500 SETAR(1,d=1) fixture at seed=42,
+Balanced preset, runner CLI execution 2.39s) — with threshold-
+selection AGREEMENT (discrepancy = engine 6-dp audit-rounding floor;
+underlying selection bit-identical).
+**Verdict (wrapper layer):** PASS 3/3 checks per S81 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/
+p3_tar_setar.py` (technique_id `p3_tar_setar`).
+**Audit date:** 2026-05-29 (S81 §2.5 entry; Regimes / Nonlinear
+block SECOND entry).
+**Primary metric (math layer):** `threshold` scalar (the grid-search-
+selected self-exciting threshold). NOTE — the harness asserts the
+threshold ONLY (the per-regime AR coefficients are extracted but not
+separately compared); given threshold-selection agreement + the
+verified shared boundary rule, the per-regime conditional OLS
+coefficients are deterministic/bit-exact, but they are NOT
+independently asserted in v1 (honest disclosure; gap marked below).
+
+**Determinism profile:** Threshold-grid search + per-regime
+conditional OLS are FULLY DETERMINISTIC (the grid is a deterministic
+linspace over sorted observed values; the SSE argmin uses a strict-
+`<` first-wins tie-break; OLS via `np.linalg.lstsq` is closed-form).
+The multi-step forecast uses a 500-path simulation seeded at
+`np.random.seed(ctx.seed)` at the top of `run()` — deterministic at
+fixed seed within-process, but OFF the parity surface (the harness
+asserts the threshold, not the forecast band). Tier II.mle-band
+(ladder) with empirical threshold-selection agreement.
+
+**Validation claim scope (S81; engine math validated at threshold-
+selection scope via cross-package check vs R tsDyn::setar; engine
+wrapper code path exercised at both math-layer + wrapper-layer
+3-check scopes):**
+
+- **Layer 1 (grid-search threshold selection) VALIDATED at Tier
+  II.mle-band:** the self-exciting threshold matches R tsDyn::setar
+  to within the engine 6-dp rounding floor (abs_diff=3.94e-7);
+  underlying selection bit-identical. Cross-package agreement
+  confirms the trimmed-grid construction + SSE-minimization +
+  boundary rule are correct against the canonical R TAR library.
+- **Layer 1 PER-REGIME AR COEFFICIENTS NOT independently asserted
+  (deterministic given threshold):** the harness compares the
+  threshold scalar; the per-regime conditional OLS coefficients are
+  extracted/emitted but not cross-package-asserted in v1. Given
+  threshold agreement + the verified shared boundary rule, they are
+  deterministic closed-form OLS (bit-exact in principle); marked as
+  a gap pending a coefficient-level assertion.
+- **Layer 1 INFORMATION CRITERIA + F-LINEARITY TEST NOT asserted:**
+  AIC/BIC + the approximate SETAR-vs-AR F-test are emitted but not
+  cross-package-asserted (no Tier V Pattern D IC-CAVEAT applies —
+  the threshold is the asserted quantity, not an IC).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** graceful NaN handling (linear
+  interpolation); Balanced 2-regime SETAR dispatch + 10-field audit;
+  output shape/type verification (6 tables).
+
+**Phase 3 algorithmic basis (extracted from engine module + harness
+reference):** Threshold AutoRegressive / Self-Exciting Threshold
+AutoRegressive models per Tong (1990) "Non-linear Time Series: A
+Dynamical System Approach" (Oxford) + Tong-Lim (1980) "Threshold
+autoregression, limit cycles and cyclical data" JRSS-B 42(3). A
+SETAR model is piecewise-linear: the series follows one AR process
+below a threshold and another above, with the regime determined
+ENDOGENOUSLY by a lagged value of the series itself (y(t−d), the
+"self-exciting" threshold variable). Estimation: grid-search the
+threshold to minimize total within-regime SSE (conditional least
+squares), then fit per-regime AR coefficients by OLS given the
+selected threshold. Institutionally relevant for rates: nonlinear
+dynamics that differ across high-rate/low-rate or trending/mean-
+reverting regimes, with the regime governed by the level itself.
+Engine implements bespoke numpy/scipy; reference is R `tsDyn::setar`.
+
+**Phase 3 known failure modes (S81 / Class B existing-harness
+scope):**
+
+- Cross-package threshold parity validates the trimmed-grid
+  construction + SSE-minimization + boundary rule against R
+  tsDyn::setar (independent TAR library); catches grid-construction
+  / boundary-rule / conditional-OLS-SSE regressions.
+- Grid-construction sensitivity: if the engine + reference
+  constructed candidate-threshold grids over different supports
+  (percentiles vs evenly-spaced vs observed-values), they could
+  select different thresholds. Verified BOTH search over trimmed
+  observed-value supports → same selected observation (abs_diff at
+  the engine rounding floor). At a fixture where the SSE surface had
+  near-ties, the discrete argmin could pick adjacent observations
+  across arms → mle-band widening absorbs this (not observed here).
+- Boundary-rule match: `≤`-into-low / strict-`>`-into-high verified
+  to match the DGP + tsDyn convention; a mismatch would flip a
+  boundary observation between regimes + diverge coefficients (not
+  observed).
+- Per-regime coefficients not independently asserted (threshold-only
+  assertion in v1).
+- Forecast band is seeded-stochastic (500-path simulation), off the
+  parity surface.
+
+**Phase 3 boundary of validity:**
+
+- 2-regime SETAR(1, d=1) fixture (n=500, threshold=0, φ_low=0.7,
+  φ_high=−0.3); 3-regime + higher AR orders + alternative delays NOT
+  validated at math layer
+- threshold asserted; per-regime AR coefficients + AIC/BIC +
+  F-linearity test NOT separately asserted
+- Balanced preset (n_regimes=2, grid_fine, max_ar=4 default; harness
+  ar_order=1 override) validated; Fast (grid_coarse) + Thorough
+  (n_regimes=3) NOT separately validated
+- delay d=1 validated; d>1 NOT separately validated
+- forecast simulation band NOT asserted (seeded-stochastic, off
+  parity surface)
+
+**Phase 3 gap markings:**
+
+- Per-regime AR coefficients NOT independently asserted (threshold-
+  only; deterministic given threshold)
+- AIC/BIC + F-linearity test NOT cross-package-asserted
+- 3-regime (Thorough) + higher AR orders + delay d>1 NOT validated
+- forecast simulation band NOT asserted (seeded-stochastic)
+
+**Status (Tier II.mle-band PASS with threshold-selection agreement +
+wrapper-layer 3/3 PASS per S81 / Regimes / Nonlinear block SECOND
+entry):** Layer 1 grid-search threshold validated vs R tsDyn::setar
+at abs_diff=3.94e-7 (engine 6-dp rounding floor; underlying
+selection bit-identical). Wrapper layer (S49+ 3-check scope)
+validated at 3/3 PASS including graceful NaN handling +
+10-field audit + 6 output tables. **NO engine-IMPROVEMENT candidate
+(bespoke scipy; queue stays n=1 (ets_hw)).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** bespoke SETAR at
+  n_regimes=2, ar_order=1, delay d=1, trim=0.15, grid_fine threshold
+  search (Balanced preset with ar_order=1 override). Cross-package
+  reference: R tsDyn::setar (m=2, thDelay=0, nthresh=1). 2-regime
+  SETAR(1, d=1) fixture, n=500.
+- **Engine preset default (Balanced):** max_ar=4, n_regimes=2,
+  threshold_search=grid_fine; delay default d=1; trim default 0.15;
+  AR order data-adaptive (min(max_ar, max(1, n//10)) when ar_order
+  unspecified).
+- **Configuration match:** **YES at the threshold-selection + 2-
+  regime structural surface** — a user invoking at default Balanced
+  experiences the math-validated grid-search threshold selection +
+  2-regime boundary rule (the bit-exact-validated core). The
+  validated AR order (1, harness override) is TIGHTER than the
+  Balanced default ceiling (max_ar=4, data-adaptive); the threshold-
+  selection machinery is AR-order-independent so the validation
+  transfers, but per-regime coefficients at AR>1 are not separately
+  asserted.
+- **Disclosure scope:** Per-regime AR coefficients NOT independently
+  asserted (threshold-only). AIC/BIC + F-linearity test NOT asserted.
+  3-regime (Thorough) + AR>1 + delay d>1 NOT validated. Forecast
+  band seeded-stochastic, NOT asserted.
+
+**ENG-EXT institutional-rates SETAR workflow scan outcome (S81
+Step 1; 3-regime present; threshold-CI minor candidate; no NEW
+ENG-EXT-REGIMES-001 commission):**
+
+(a) **Threshold point estimate(s):** PRESENT ✓ — audit `thresholds`
+    list + Threshold Parameters table.
+(b) **Per-regime AR coefficients:** PRESENT ✓ — Regime Coefficients
+    table (intercept + AR lags + sigma + obs count per regime).
+(c) **Regime classification series:** PRESENT ✓ — Regime Assignment
+    table (per-observation regime label + fitted + residual).
+(d) **Forecast (regime-aware multi-step):** PRESENT ✓ — Forecast
+    table (simulation mean + 90% band).
+(e) **Multiple-threshold / 3-regime support:** PRESENT ✓ — engine
+    Thorough preset sets n_regimes=3 (2-threshold grid search via
+    the `_search_thresholds` n_thresholds==2 branch). **The
+    multiple-threshold/3-regime ENG-EXT candidate is RULED OUT** —
+    engine supports 3-regime natively.
+(f) **Threshold confidence interval (Hansen 2000 threshold
+    inference):** ABSENT — engine emits a POINT threshold + an
+    approximate F-linearity test (SETAR vs linear AR), but no Hansen
+    (2000) threshold-parameter confidence interval / bootstrap
+    threshold-test p-value. Minor ENG-EXT candidate (threshold-CI /
+    Hansen sup-LR threshold inference for institutional rate-regime
+    boundary uncertainty). Logged as a minor candidate; not
+    commissioned.
+
+**Verdict: COVERED at standard SETAR workflow elements + 3-regime
+support.** No new ENG-EXT-REGIMES-001 commission surfaced at S81.
+Threshold-CI (Hansen 2000) noted as a minor candidate.
+
+**Audit-hygiene cross-reference (S81 / Class B existing-harness):**
+S81 tar_setar is a Class B existing-harness validation (Phase 3
+Batch 4 harness, pre-existing + PASS per block-open probe; §2.5
+entry formalized at S81). Cross-package vs R tsDyn::setar at the
+mle-band ladder (threshold abs_diff=3.94e-7 = engine 6-dp rounding
+floor; underlying selection bit-identical). NO engine-IMPROVEMENT
+(bespoke scipy). Multiple-threshold/3-regime ENG-EXT candidate RULED
+OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000) minor
+candidate logged.
+
+**Regimes / Nonlinear block progress note (S81 SECOND entry; FINAL
+Q1 block):** Block 11 Regimes / Nonlinear advances at S81 tar_setar
+per ratified ascending-complexity intra-block ordering
+(critical_slowing_down → tar_setar → hmm → markov_switching → star →
+nar_narx). **Post-S81: Regimes / Nonlinear block 2/6 §2.5-
+validated.** 4 remaining in dispatch-set via S82-S85. **This is the
+FINAL Q1 block; Q1 closes at S85 (nar_narx) → THIRTEENTH-AND-FINAL
+catalog block fully Q1-amended (13 of 13 = 100% catalog completion).**
+
+**S82 hmm projection (next Regimes / Nonlinear block session per
+ascending-complexity dispatch ordering):** Engine
+`engine/techniques/hmm.py` is a Hidden Markov Model (Gaussian
+emission) via `hmmlearn.GaussianHMM`. Class B (existing harness +
+PASS per probe). Expected Tier II.em-band (verdict_class
+`em_stochastic` — Baum-Welch/EM convergence non-determinism between
+hmmlearn + reference EM, per the S66 dynamic_factor_model em-band
+precedent within Q1). Pre-existing risk: EM initialization +
+state-label permutation (label-switching) canonicalization. Estimated
+session time: ~1h (Class B existing-harness).
+
+## §3 Unvalidated catalog techniques (4 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -36151,8 +36456,8 @@ descriptions, summaries).
 ### Multivariate Systems (0 unvalidated; **Block 10 FULLY Q1-AMENDED** — TENTH catalog block to complete per Q1 work program scope at S67 close = 10 of 13 catalog blocks fully Q1-amended (77% catalog block-level completion); johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome; bvar moved to §2.5 per Phase 7+ S67 — FIFTH-AND-FINAL Multivariate Systems block entry; **BLOCK CLOSE at S67**; Disposition A (cross-reference existing validations) — bvar is DISTINCT catalog entry from bond_yield_forecast (analytical Normal-Inverse-Wishart posterior vs CCM-2019 Gibbs sampler with stochastic volatility); already validated at Phase 1 `1c_bvar_irf_fevd` IRF/FEVD parity (machine precision; re-confirmed at S67 runner CLI) + Phase 4 S5 BVAR coefficient parity vs R BVAR::bvar (PASS-A.2 DOCUMENTED-DIVERGENCE per prior-parameterization differences per master plan §7.1 Pattern H); ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at Bayesian level for users invoking bvar — engine emits posterior IRF + FEVD with credible bands as native output (Bayesian analog of bootstrap CI bands per Sims-Zha 1999); cross-reference trust-inheritance pattern A3 SECOND-OBSERVATION TIGHTENING at n=3 within-block observations S65+S66+S67)
 (all 5 techniques moved to §2.5 across S63-S67 cycle)
 
-### Regimes / Nonlinear (5 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; Q1 closes at S85)
-`hmm`, `markov_switching`, `nar_narx`, `star`, `tar_setar`
+### Regimes / Nonlinear (4 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; tar_setar moved to §2.5 per Phase 7+ S81 — SECOND Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE Threshold/Self-Exciting TAR (numpy+scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); Tier II.mle-band [threshold scalar at abs_tol=1e-2/rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL; both arms picked same observed data point]; cross-package vs R tsDyn::setar (m=2, thDelay=0, nthresh=1); regime-assignment boundary rule (≤-into-low / strict->-into-high) verified matches DGP + tsDyn convention; per-regime AR coefficients NOT independently asserted (threshold-only; deterministic given threshold); NO engine-IMPROVEMENT candidate (bespoke scipy; queue stays n=1); multiple-threshold/3-regime ENG-EXT candidate RULED OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000 threshold inference) minor candidate logged; Q1 closes at S85)
+`hmm`, `markov_switching`, `nar_narx`, `star`
 
 ### State Space / Filtering (0 unvalidated; Block 6 FULLY Q1-AMENDED — SIXTH catalog block to complete per Q1 work program scope at S51 close = 6 of 13 catalog blocks fully Q1-amended (46% catalog block-level completion); kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension; particle_filter moved to §2.5 per Phase 7+ S50 — THIRD State Space / Filtering block entry; FIRST Tier IV Pattern A.3 entry via approach (c) degenerate linear-Gaussian Kalman-exact-reference framing with documented abs-tolerance plateau caveat; structural_ts moved to §2.5 per Phase 7+ S51 — FOURTH-AND-FINAL State Space / Filtering block entry; multi-component 4-variance Kalman MLE)
 (all 4 techniques moved to §2.5)
