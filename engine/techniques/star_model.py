@@ -440,21 +440,39 @@ def _fit_star(y, lag_matrix, s_t, s_mean, s_std, ar_order, star_type, maxiter, s
         resid = y - y_hat
         return np.sum(resid ** 2)
 
-    # Try multiple starting points
+    # Try multiple starting points. The transition LOCATION c is the
+    # parameter most prone to landing in a worse local optimum when all
+    # starts cluster at a single c-init (the legacy c_init=s_mean): the
+    # STAR SSE surface is non-convex in c, and a single-region init can
+    # miss the global basin entirely when s_mean sits far from the true
+    # transition location (e.g. a skewed transition variable). Seed the
+    # c-starts DETERMINISTICALLY across QUANTILES of the transition
+    # variable so the optimizer reliably reaches the global basin
+    # regardless of where s_mean sits. (B2 robustness fix: surfaced when
+    # an s_mean-clustered init landed a worse local optimum.)
     best_result = None
     best_obj = np.inf
     rng = np.random.RandomState(seed)
 
-    for attempt in range(5):
-        try:
-            if attempt > 0:
-                # Perturb starting values
-                theta_start = theta0 + rng.randn(len(theta0)) * 0.1
-                theta_start[-2] = np.abs(theta_start[-2]) + 0.1
-                theta_start[-1] = s_mean + rng.randn() * s_std * 0.5
-            else:
-                theta_start = theta0.copy()
+    start_thetas = []
+    # Deterministic c-quantile starts spanning the transition variable.
+    for q in (5, 20, 35, 50, 65, 80, 95):
+        th = theta0.copy()
+        th[-1] = float(np.percentile(s_t, q))
+        start_thetas.append(th)
+    # Legacy s_mean start (continuity).
+    th_mean = theta0.copy()
+    th_mean[-1] = float(s_mean)
+    start_thetas.append(th_mean)
+    # Seeded random perturbation starts (phi / gamma diversity).
+    for _ in range(5):
+        th = theta0 + rng.randn(len(theta0)) * 0.1
+        th[-2] = np.abs(th[-2]) + 0.1
+        th[-1] = s_mean + rng.randn() * s_std * 0.5
+        start_thetas.append(th)
 
+    for theta_start in start_thetas:
+        try:
             result = minimize(
                 objective, theta_start,
                 method="L-BFGS-B",
