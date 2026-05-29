@@ -30034,11 +30034,13 @@ engine lines 203-209 emphasizing the structural assumption.
 - Lag selection algorithm math-layer parity NOT validated
 - aic/bic cross-package absolute parity NOT achievable per Tier V
   Pattern D pre-existing CAVEAT
-- **IRF confidence bands NOT EMITTED by engine** — see ENG-EXT-
-  MULTIVARIATE-001 commission below
-- **Sign-restriction / Blanchard-Quah / proxy-SVAR identification
-  NOT IMPLEMENTED** — see ENG-EXT-MULTIVARIATE-001 commission
+- ~~**IRF confidence bands NOT EMITTED by engine**~~ **DELIVERED at
+  M1 (commit `7ec4605`; preset-gated bootstrap MC bands; bootstrap_
+  distributional three-arm validation PASS)** — see the M1 amendment
   below
+- **Sign-restriction / Blanchard-Quah / proxy-SVAR identification
+  NOT IMPLEMENTED** — pending M3 (advanced SVAR); see ENG-EXT-
+  MULTIVARIATE-001 commission + M1 amendment below
 
 **Status (PRIMARY Tier II.bit-exact PASS at machine precision +
 SECONDARY aic/bic Tier V Pattern D pre-existing CAVEAT documented
@@ -30176,6 +30178,95 @@ gap (IRF + FEVD + Cholesky-SVAR point estimates present; IRF
 confidence bands + sign-restriction + Blanchard-Quah + proxy-SVAR
 advanced identification absent). Bundle with ENG-EXT-CONFORMAL-001
 for Q2 sprint.
+
+---
+
+**ENG-EXT-MULTIVARIATE-001 EXTENDED — M1 DELIVERED (VAR IRF confidence
+bands; commit `7ec4605`; ADDITIVE; Q2 Workstream A commission 2 of 3,
+sub-build M1 of [M1 VAR-IRF-bands → M2 VECM-IRF/FEVD → M3 advanced-SVAR,
+M3 split at its open]):**
+
+M1 closes commission candidate #1 (IRF CONFIDENCE BANDS). Engine
+`var_model.py` now emits bootstrap Monte-Carlo confidence bands around the
+orthogonalized point IRF, preset-gated (Balanced 500 / Thorough 2000
+replications; Fast skips) and deterministic in `ctx.seed`. Output: a new
+`Impulse Response Function — Confidence Bands` table (Period, Shock,
+Response, IRF, Lower, Upper) alongside the UNCHANGED point-IRF table; new
+audit fields `irf_band_computed / irf_band_signif / irf_band_repl /
+irf_band_method / irf_band_seed`.
+
+- **ADDITIVE / backward-compat (FIRM GATE — PASSED):** the existing point
+  IRF / FEVD / Cholesky-SVAR / coefficients / forecast / Model-Summary /
+  Granger tables are BYTE-IDENTICAL with vs without the change (verified by
+  a git before/after diff of the wrapper output: existing tables identical;
+  existing audit fields identical modulo `timestamp_utc`). The band block
+  runs LAST and uses a LOCAL `RandomState` (no global-RNG mutation), so no
+  existing output can be perturbed. The S64 PRIMARY Tier II.bit-exact PASS
+  + SECONDARY aic/bic Tier V Pattern D CAVEAT stand unchanged.
+
+- **Upstream finding worked around (BANKED):** statsmodels
+  `IRAnalysis.errband_mc` / `irf_resim` pass the SAME fixed seed to
+  `util.varsim` on every replication (`RandomState(seed=seed)` per-rep) →
+  all replications are identical → a ZERO-WIDTH degenerate band
+  (lower==upper, verified); `seed=None` restores variance but is
+  non-deterministic (ignores any global seed). The defective wrap is
+  structurally incapable of BOTH variance AND determinism. The engine
+  therefore uses its own `_mc_irf_bands` (distinct per-replication seeds
+  derived from `ctx.seed` via a master `RandomState` → child seeds) — the
+  textbook seeded-bootstrap pattern, giving proper variance AND
+  reproducibility (run-to-run band diff 0.0). The statsmodels seed bug is
+  banked as an upstream finding (not our bug to fix upstream — just don't
+  use the broken wrap).
+
+- **NEW VALIDATION PATTERN — the audit's FIRST interval/band validation
+  (`bootstrap_distributional` verdict_class, FIRST instantiation of the
+  reserved class; check `p3_var_irf_bands`):** bands are bootstrap
+  percentile ENVELOPES, not points, so a THREE-ARM pattern replaces
+  point-parity — each arm validates a DIFFERENT thing (the A1c lesson
+  designed in):
+  - **ARM 1 — SELF-PARITY (tight, in-engine; band MACHINERY /
+    implementation-correctness):** engine `_mc_irf_bands` vs a from-scratch
+    reimplementation of the IDENTICAL MC formulation (same distinct-per-
+    replication-seed scheme + percentile indices) → **BIT-EXACT band
+    endpoints (max_abs_diff 0.0)**.
+  - **ARM 2 — CROSS-PACKAGE (LOAD-BEARING, distributional; FORMULATION-
+    correctness):** vs R `vars::irf(boot=TRUE)`. The engine band is
+    PARAMETRIC Gaussian-MC; R is RESIDUAL-RESAMPLING — different bootstrap
+    METHODS, so endpoints can never match → compared on band GEOMETRY
+    (width-ratio + containment), NOT endpoints. **median width-ratio 0.991
+    (PASS band [0.85,1.18]); containment 1.0 (PASS ≥0.95).** This arm
+    GATES — a width-ratio or containment failure is a finding, NOT a shrug
+    (without a load-bearing cross-package arm M1 would be the S79
+    self-parity trap with cosmetic garnish: self-parity validates
+    match-not-correctness). The Gaussian-innovation DGP makes the two
+    bootstrap methods converge, so the width-ratio tolerance is meaningful;
+    it is calibrated UNDER THE GAUSSIAN-INNOVATION ASSUMPTION (a
+    non-Gaussian DGP would legitimately diverge and require widening).
+  - **ARM 3 — POINT ANCHOR (existing pattern):** band center
+    (orthogonalized point IRF) vs R `vars::irf` point IRF → **4.66e-15**
+    (the bands wrap the already-1c/S64-validated point estimate).
+  Overall **PASS** (all three arms PASS; deterministic across re-runs).
+
+- **Wrapper-layer 3/3 PASS:** NaN handling (interior NaNs interpolated,
+  band finite, 0 lower≤point≤upper ordering violations); preset-gating
+  dispatch (Fast skips → `irf_band_computed=False`; Balanced/Thorough
+  compute); band table shape/type (6 columns, finite, ordered).
+
+- **Taxonomy note (general for CONFORMAL-001):** `bootstrap_distributional`
+  is the interval-validation family — tight=self-parity (endpoint),
+  cross-package=inherently distributional (width/coverage; do NOT force
+  cross-package endpoint match, and do NOT widen to mask a real formulation
+  difference — the cross-package arm is load-bearing). The reserved sibling
+  `conformal_coverage` carries this to ENG-EXT-CONFORMAL-001's
+  prediction-interval coverage (the existing `p3_conformal` /
+  `conformal_intervals.py` extension).
+
+**M1 remaining MULTIVARIATE-001 scope (pending):** M2 VECM IRF + FEVD
+(point-estimate; cross-package R `urca::ca.jo`→`vars::vec2var`→`irf`/`fevd`
+— engine VECM emits NEITHER today per the S65 entry, the broadest gap),
+then M3 advanced SVAR identification (Blanchard-Quah cross-package
+`vars::BQ`; sign-restriction + proxy-SVAR self-parity since `svars` is not
+pinned — split confirmed at M3's open).
 
 **Multivariate Systems block progress note (S64 second entry):**
 Block 10 Multivariate Systems advances at S64 var per ratified
@@ -38306,7 +38397,21 @@ catalog completion).** §3 unvalidated → 0.
       S85 neural-forecast-PI minor candidate).
   (2) **ENG-EXT-MULTIVARIATE-001 EXTENDED** (VAR IRF confidence bands
       + VECM IRF/FEVD + advanced SVAR identification; commissioned
-      S64, extended S65).
+      S64, extended S65). **Q2 Workstream A commission 2 of 3 — M1
+      DELIVERED (VAR IRF confidence bands; commit `7ec4605`; ADDITIVE,
+      existing VAR point outputs byte-identical; FIRST instantiation of
+      the reserved `bootstrap_distributional` verdict_class = the audit's
+      first interval/band validation — three-arm PASS [self-parity
+      bit-exact 0.0 + cross-package R vars::irf width-ratio 0.991 /
+      containment 1.0, load-bearing + point anchor 4.66e-15]; statsmodels
+      errband_mc zero-width seed bug worked around via in-engine
+      distinct-per-replication-seed MC; S64 amendment).** Remaining: M2
+      VECM IRF/FEVD (point; cross-package R urca+vars; broadest gap —
+      VECM emits neither today) → M3 advanced SVAR (Blanchard-Quah
+      cross-package vars::BQ + sign-restriction/proxy-SVAR self-parity;
+      split at M3's open). The `bootstrap_distributional` interval-pattern
+      carries to commission (1) CONFORMAL-001 (the `conformal_coverage`
+      sibling).
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
       instances). **Q2 Workstream A commission 1 of 3 — FULLY DELIVERED
