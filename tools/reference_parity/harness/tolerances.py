@@ -1772,6 +1772,30 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_pelt_multivariate": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.0,
+            "rel_tol": 0.0,
+            "block_abs_tol": 1.0,
+            "block_rel_tol": 0.5,
+        },
+        "justification": (
+            "ENG-EXT-CHANGEPOINT-001 A1a multivariate joint detection. "
+            "Same-library self-parity (Pattern A.1): TSL "
+            "pelt_change_points.py multivariate path and the reference "
+            "both invoke ruptures.Pelt on the SAME (n,k) signal with "
+            "model='l2' / min_size=5 / jump=1 / IDENTICAL numeric "
+            "penalty (pen=log(n)*sum_j(var_j), the dimensionally-correct "
+            "multivariate BIC). ruptures returns a single JOINT "
+            "breakpoint set; output is bitwise-identical given identical "
+            "input + arguments. Bit-exact target on n_change_points + "
+            "the joint breakpoint position set. Failure indicates a TSL "
+            "multivariate-stacking or penalty-convention bug, not a "
+            "methodology question."
+        ),
+    },
+
     "p3_stl_esd": {
         "type": "tiered_outputs",
         "primary": {

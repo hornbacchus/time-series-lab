@@ -64,6 +64,195 @@ def _prepare_series(values):
     return trimmed, nan_count
 
 
+def _multivariate_penalty(penalty_method, n, X):
+    """Dimensionally-correct multivariate BIC-family penalty for the
+    ruptures l2 cost.
+
+    The l2 segment cost sums squared deviations ACROSS features, so the
+    penalty must scale with the summed per-feature noise variance. This
+    reduces EXACTLY to the univariate ``log(n)*sigma2`` at k=1 (a single
+    column), and generalizes it to ``log(n)*sum_j(var_j)`` for k columns
+    — the standard multivariate-BIC scaling (each change point adds a
+    k-dim mean = k parameters, normalized by the per-feature noise).
+    """
+    sum_var = float(np.sum(np.var(X, axis=0)))
+    if penalty_method == "aic":
+        return 2 * sum_var
+    if penalty_method == "mbic":
+        return 3 * np.log(n) * sum_var
+    return np.log(n) * sum_var  # bic
+
+
+def _run_multivariate(ctx, progress_callback, all_series):
+    """Multivariate (joint-across-curve-points) PELT — ENG-EXT-CHANGEPOINT-001
+    A1a. Detects a SINGLE JOINT change-point set common across all input
+    series (the curve-wide regime-shift dates), using ruptures' native
+    multivariate cost support. Invoked when >=2 series are supplied; the
+    univariate path (1 series) is unchanged.
+    """
+    warn_list = []
+    names = [s[0] for s in all_series]
+    arrays = [np.asarray(s[1], dtype=float) for s in all_series]
+    k = len(names)
+
+    # Align to common length (mirror vecm_model / hmm_model stacking).
+    min_len = min(len(a) for a in arrays)
+    if any(len(a) != min_len for a in arrays):
+        warn_list.append(f"Series aligned to common length {min_len}.")
+    # Per-column interior+edge NaN interpolation, length-preserving (so
+    # all columns stay aligned for the joint (n,k) signal).
+    cols = []
+    total_interp = 0
+    for a in arrays:
+        col = a[:min_len].copy()
+        nans = np.where(np.isnan(col))[0]
+        valid = np.where(~np.isnan(col))[0]
+        if len(nans) > 0 and len(valid) >= 2:
+            col[nans] = np.interp(nans, valid, col[valid])
+            total_interp += len(nans)
+        cols.append(col)
+    if total_interp > 0:
+        warn_list.append(f"{total_interp} missing values linearly interpolated (per series).")
+
+    X = np.column_stack(cols)  # (n, k)
+    n = X.shape[0]
+    if n < 15:
+        return make_error_response(
+            ctx,
+            f"Only {n} aligned observations across {k} series. Need at least 15.",
+            error_fixes=["Provide longer time series."],
+        )
+
+    cost_model = ctx.get_param("model", "l2")
+    min_size = int(ctx.get_param("min_size", 5))
+    jump = int(ctx.get_param("jump", 1))
+    n_bkps = ctx.get_param("n_bkps")
+
+    penalty_param = ctx.get_param("penalty")
+    if penalty_param is None:
+        penalty_method = {"Fast": "bic", "Balanced": "bic",
+                          "Thorough": "mbic"}.get(ctx.preset, "bic")
+    elif isinstance(penalty_param, (int, float)):
+        penalty_method = float(penalty_param)
+    else:
+        penalty_method = str(penalty_param).lower()
+
+    _PENALTY_METHOD_OPTS = ("bic", "aic", "mbic")
+    if isinstance(penalty_method, str) and penalty_method not in _PENALTY_METHOD_OPTS:
+        return make_error_response(
+            ctx,
+            f"Unknown penalty method '{penalty_method}'. Must be one of: "
+            f"{', '.join(_PENALTY_METHOD_OPTS)} (or a numeric value).",
+            error_fixes=["Use 'bic', 'aic', 'mbic', or a numeric penalty."],
+        )
+
+    progress_callback("Running multivariate change point detection", 20)
+
+    # Joint multivariate PELT — pass the (n,k) signal directly (no reshape).
+    if n_bkps is not None:
+        n_bkps = int(n_bkps)
+        algo = rpt.Binseg(model=cost_model, min_size=min_size, jump=jump).fit(X)
+        bkps = algo.predict(n_bkps=n_bkps)
+        penalty_value = None
+    else:
+        algo = rpt.Pelt(model=cost_model, min_size=min_size, jump=jump).fit(X)
+        if isinstance(penalty_method, float):
+            penalty_value = float(penalty_method)
+        else:
+            penalty_value = float(_multivariate_penalty(penalty_method, n, X))
+        bkps = algo.predict(pen=penalty_value)
+
+    change_points = bkps[:-1] if (bkps and bkps[-1] == n) else bkps
+    n_cp = len(change_points)
+
+    progress_callback("Analyzing segments", 60)
+    boundaries = [0] + list(change_points) + [n]
+
+    # Joint Change Points table (curve-wide regime dates).
+    cp_rows = []
+    for i, cp in enumerate(change_points):
+        time_label = ctx.time[cp] if ctx.time and cp < len(ctx.time) else cp + 1
+        cp_rows.append([i + 1, cp + 1, time_label])
+    cp_table = make_table(
+        "Change Points (joint, curve-wide)",
+        ["#", "Position", "Time"], cp_rows,
+    )
+
+    # Multivariate Segments table: per-segment per-series mean (wide).
+    seg_rows = []
+    for i in range(len(boundaries) - 1):
+        start, end = boundaries[i], boundaries[i + 1]
+        row = [i + 1, start + 1, end, end - start]
+        for j in range(k):
+            row.append(round(float(np.mean(X[start:end, j])), 4))
+        seg_rows.append(row)
+    seg_table = make_table(
+        "Segments (per-series means)",
+        ["Segment", "Start", "End", "Length"] + [f"Mean({names[j]})" for j in range(k)],
+        seg_rows,
+    )
+
+    diag_table = make_table(
+        "Detection Parameters",
+        ["Metric", "Value"],
+        [
+            ["Mode", "multivariate (joint)"],
+            ["Series (features)", ", ".join(names)],
+            ["n_features", k],
+            ["Cost Model", cost_model],
+            ["Penalty", str(penalty_method)],
+            ["Penalty Value", round(penalty_value, 6) if penalty_value is not None else "n_bkps"],
+            ["Min Segment Size", min_size],
+            ["Change Points Detected", n_cp],
+            ["Number of Segments", n_cp + 1],
+            ["Observations", n],
+            ["Preset", ctx.preset],
+        ],
+    )
+
+    if n_cp == 0:
+        plain = (
+            f"No joint change points detected across {k} series "
+            f"({', '.join(names)}; {n} aligned observations) using the "
+            f"{cost_model.upper()} cost model — the curve appears regime-stable."
+        )
+    else:
+        positions = ", ".join(str(cp + 1) for cp in change_points)
+        plain = (
+            f"{n_cp} joint (curve-wide) change point(s) detected across {k} "
+            f"series ({', '.join(names)}; {n} observations) at position(s) "
+            f"{positions}, dividing the curve into {n_cp + 1} joint regimes. "
+            "Each change point is a date where the WHOLE curve shifts regime "
+            "simultaneously (joint multivariate detection)."
+        )
+
+    charting = (
+        "Multi-panel: each series stacked, with shared vertical dashed lines at "
+        "the joint change points (curve-wide regime dates). Shade joint segments."
+    )
+
+    progress_callback("Done", 100)
+    return make_response(
+        ctx,
+        tables=[cp_table, seg_table, diag_table],
+        plain_english_summary=plain,
+        warnings=warn_list,
+        charting_suggestions=charting,
+        interpretation=None,
+        audit_fields={
+            "mode": "multivariate",
+            "n_features": k,
+            "features": names,
+            "cost_model": cost_model,
+            "penalty": str(penalty_method),
+            "penalty_value": round(penalty_value, 6) if penalty_value is not None else None,
+            "min_size": min_size,
+            "n_change_points": n_cp,
+            "change_point_positions": [cp + 1 for cp in change_points],
+        },
+    )
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
     Detect change points using the PELT algorithm.
@@ -85,6 +274,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
     """
     try:
         progress_callback("Validating inputs", 5)
+
+        # Multivariate joint-detection auto-detect (ENG-EXT-CHANGEPOINT-001
+        # A1a): >=2 input series -> joint multivariate PELT across the curve
+        # (the curve-wide regime-shift dates). Exactly 1 series -> the
+        # univariate path below, UNCHANGED / backward-compatible.
+        _all_series = ctx.get_all_series()
+        if len(_all_series) >= 2:
+            return _run_multivariate(ctx, progress_callback, _all_series)
 
         name, values = ctx.get_primary_series()
         warn_list = []
