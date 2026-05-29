@@ -37252,6 +37252,80 @@ STAR estimation, not an engine defect). Estimated session time: ~1h
 
 ### star (Phase 7+ S84; SEVENTY-THIRD §2.5 entry; FIFTH Regimes / Nonlinear block entry; **FIRST Class B-CAVEAT entry of the block**; weakly-identified-γ CAVEAT DOCUMENTATION [statistical property, NOT a fixable bug — contrast S83 flaky-harness]; engine: BESPOKE Smooth Transition AutoRegression (scipy.optimize NLS; `star_model.py`; LSTAR/ESTAR; logistic/exponential smooth transition; Balanced LSTAR, transition variable s(t)=y(t−d) d=1; **raw γ — NOT standardized γ/σ_s**); **Tier V CAVEAT (Pattern H DSCD; weakly-identified-γ)** — **transition location c VALIDATED at Tier II.mle-band quality (abs_diff=0.0021, rel=0.5% vs R tsDyn::star — load-bearing), transition speed γ carries a documented weak-identification CAVEAT (tsl=1024.8 vs ref=100.0, rel=0.90; both far above DGP γ=5.0)**; verdict_class `mle_fit`; cross-package vs R `tsDyn::star` (LSTAR m=1,d=1); **ENGINE-IMPROVEMENT candidate: γ-reparameterization (standardized γ/σ_s per Teräsvirta 1994) — the documented-CAVEAT's standard remedy; queue → n=2 (ets_hw + star γ-reparameterization)**; MRSTAR multiple-transition + Teräsvirta LM linearity-test minor ENG-EXT candidates logged)
 
+═══════════════════════════════════════════════════════════════════
+**B2 AMENDMENT (Q2 engine-improvement workstream, item 2 of 2 — FINAL;
+commits `<engine>` + `<§2.5>`):** The S84-flagged γ-reparameterization
+engine-improvement candidate was INVESTIGATED and found
+**NON-ACTIONABLE**; a latent c-init fragility surfaced by the
+investigation was FIXED instead. **WORKSTREAM B (engine-improvement)
+CLOSES** (queue n=1 → n=0; B1 ets_hw RESOLVED + B2 star resolved-as-
+robustness). The S84 Tier V γ-CAVEAT below STANDS as correctly
+characterized.
+═══════════════════════════════════════════════════════════════════
+
+**γ-standardization INVESTIGATED → NON-ACTIONABLE (premise disproven):**
+B2 hypothesized that S84's weakly-identified γ was a RAW-SCALE artifact
+fixable by Teräsvirta (1994) standardization (γ → γ/σ_s). The
+investigation DISPROVED this: at the correct global optimum (c≈0.40,
+SSE≈484.88), the standardized γ is still ≈1273 (raw-equivalent slope
+≈1029) — i.e. γ is **huge on EITHER parameterization** because the
+transition at the global optimum is genuinely near-step (sharp), placing
+γ on a **flat likelihood ridge** where any sufficiently-large value
+yields the same SSE (the reported magnitude is arbitrary). So the γ
+weak-identification is **INTRINSIC** (sharp-transition flat ridge), NOT
+a scale artifact — standardization merely RELABELS γ on the ridge
+without taming it or removing the exp-overflow. **Contrast B1 ets_hw**
+(whose classical-vs-statespace deficiency genuinely WAS addressable):
+B2's candidate is the opposite verdict — a reparameterization that does
+not change the identification geometry. The σ_s standardization was
+therefore NOT shipped (it would relabel γ misleadingly — implying a fix
+that did not occur — and, as-prototyped, it perturbed the optimizer
+trajectory into a WORSE local optimum). The S84 γ-CAVEAT is confirmed as
+an irreducible intrinsic property (same category as the B1 ets_hw alpha
+weak-identification: both intrinsic flat-ridge, neither
+reparameterization-addressable).
+
+**Latent c-init fragility SURFACED + FIXED (the shipped change —
+robustness, not γ):** the investigation surfaced a pre-existing
+fragility: `_fit_star` initialized the transition-location starts by
+clustering at `c_init = s_mean` (here s_mean=−0.7068), which can MISS
+the global-c basin when s_mean sits far from the true transition
+location (the STAR SSE surface is non-convex in c). On the S84 fixture
+the raw engine reached the global c≈0.40 only via the γ-blowup
+optimizer wandering; perturbing that trajectory exposed that a cleaner
+optimizer falls into a worse local optimum (c≈−0.30, SSE 503.76 vs
+global 484.88). **Fix (shipped):** `_fit_star` now seeds c-starts
+DETERMINISTICALLY across transition-variable quantiles
+([5,20,35,50,65,80,95]th percentiles + s_mean + 5 seeded random starts),
+taking the best-SSE fit — so global-c recovery no longer depends on the
+init landing near s_mean. **Verified:** recovers the global optimum
+c=0.399293 (matching S84's 0.3993; SSE-equivalent rmse 0.9858 ⇔ SSE
+484.88), deterministic (math fields bit-identical across runs), robust
+across seeds (no worse-local landings).
+
+**Post-B2 parity (runner CLI; S84 verdict UNCHANGED):** c PASS
+(abs_diff 0.00211 / rel 0.526%, tsl 0.399293 vs ref 0.4014 — matches
+S84's 0.00215/0.535%); γ CAVEAT (raw, tsl 1051.7 vs ref 100.0, rel
+0.905 — a different but equivalent point on the flat ridge vs S84's
+1024.8; intrinsic weak-id unchanged); overall CAVEAT. The c-multistart
+preserves the validated c at the global optimum AND hardens it against
+the s_mean-clustering fragility. **This is NOT a BREAKING γ change**
+(raw γ restored = S84 behavior); it is a c-init robustness change that
+may shift c toward the global optimum on fixtures where the old single-
+init landed a worse local. p3_star tolerance band UNCHANGED (S84 stands;
+γ-CAVEAT not widened — B1/S84 discipline).
+
+**Wrapper-layer 3-check (post-B2; 3/3 PASS):** NaN graceful; Balanced
+LSTAR(1) dispatch (c=0.399293, raw γ, raw speed-bucket descriptor);
+output shape/type (5 tables; no `gamma_scale` field — σ_s reverted).
+
+**engine-IMPROVEMENT status: RESOLVED-as-robustness.** The γ candidate
+is CLOSED as investigated-not-actionable (intrinsic weak-id); the
+c-init fragility it surfaced is FIXED (quantile multistart).
+**Engine-improvement queue n=1 → n=0; WORKSTREAM B (engine-improvement)
+COMPLETE.** Forward (per ratified Q2 B→C→A): Workstream C (harness-
+refinement) next.
+
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
 **Tier V CAVEAT (Pattern H DSCD; weakly-identified-γ parameter-
 identifiability)** per S84 Code Step 2 empirical verification. The
@@ -37944,11 +38018,16 @@ catalog completion).** §3 unvalidated → 0.
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
       instances).
-- **Engine-improvement queue (n=2 at Q1 close → n=1 post-B1):** ~~ets_hw
-  statespace migration (S68)~~ **RESOLVED at B1 (commit `6281e2e`;
-  classical→state-space ETSModel migration; see the ets_hw §2.5 B1
-  amendment)** + star γ-reparameterization (standardized γ/σ_s per
-  Teräsvirta 1994; S84) **[remaining: B2]**.
+- **Engine-improvement queue (n=2 at Q1 close → n=1 post-B1 → n=0
+  post-B2; WORKSTREAM B COMPLETE):** ~~ets_hw statespace migration
+  (S68)~~ **RESOLVED at B1 (commit `6281e2e`; classical→state-space
+  ETSModel migration; see the ets_hw §2.5 B1 amendment)** + ~~star
+  γ-reparameterization (S84)~~ **RESOLVED-as-robustness at B2 (σ_s
+  standardization investigated → NON-ACTIONABLE [γ weak-id intrinsic,
+  not scale-addressable]; latent c-init fragility fixed via quantile
+  multistart instead; see the star §2.5 B2 amendment)**. **Workstream B
+  (engine-improvement) CLOSES; next per Q2 B→C→A: Workstream C
+  harness-refinement.**
 - **Harness-refinement queue (low priority):** S69 theta rmse-
   reconstruction artifact + S82 HMM Viterbi 0-vs-1 index-base
   secondary-metric artifact + S83 markov_switching Balanced-spec math-
