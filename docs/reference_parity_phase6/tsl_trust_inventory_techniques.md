@@ -36771,7 +36771,364 @@ regimes by canonical criterion both arms); modern statsmodels API
 confirmed → NO engine-IMPROVEMENT. Estimated session time: ~1h
 (Class B existing-harness).
 
-## §3 Unvalidated catalog techniques (3 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### markov_switching (Phase 7+ S83; SEVENTY-SECOND §2.5 entry; FOURTH Regimes / Nonlinear block entry; **SECOND em_stochastic / Tier II.em-band entry of the block**; **CLOSES the block's Class B PASS tier (S80-S83); only the 2 Class B-CAVEAT entries remain (S84 star + S85 nar_narx)**; Class B existing-harness validation [Phase 3 Batch 4 harness pre-existing per block-open probe — BUT required an S83 audit-hygiene determinism micro-fix before the §2.5 entry, see below]; engine: `statsmodels.tsa.regime_switching` MarkovRegression (order=0) / MarkovAutoregression (order≥1; Hamilton 1989 regime-switching; Balanced k=2/order=1/switching_variance=True; Hamilton-filter EM, search_reps=25, label_regimes_by_dominant_key canonicalization, manual regime-weighted forecast construction); **Tier II.em-band** [regime means + log-likelihood machine-precision (same optimum); transition matrix within em-band vs R MSwM]; verdict_class `em_stochastic` (Pattern H DSCD); cross-package vs R `MSwM::msmFit`; **NO engine-IMPROVEMENT candidate** [modern statsmodels API; multi-step-forecast NotImplementedError is a statsmodels library limitation handled by the engine's manual construction, not an engine API choice; queue stays n=1 (ets_hw)]; multi-step-regime-forecast ENG-EXT candidate RULED OUT [engine constructs it manually from fitted quantities]; time-varying-transition-probabilities (TVTP, Filardo 1994) minor candidate logged [engine constant-transition-only])
+
+**S83 audit-hygiene determinism micro-fix (harness; committed
+SEPARATELY at `3c5f3b6` BEFORE this §2.5 entry; Option A ratified):**
+The harness `run_tsl` bypass called `MarkovRegression.fit(search_reps=
+3)` with no pinned `random_state`. statsmodels' `search_reps` random
+EM starts draw from `np.random` global state; with only 3 unseeded
+restarts the EM intermittently collapsed to a degenerate single-
+regime optimum (both regime means → the overall sample mean −0.343;
+spurious positive log-likelihood +737), producing a NONDETERMINISTIC
+BLOCK across process invocations (observed 2 BLOCK / 3 PASS at
+seed=42 at S83 Step 2). Root cause isolated as a HARNESS bypass-path
+fragility (NOT an engine defect: the engine wrapper is deterministic +
+sound — cross-invocation bit-exact, wrapper-layer 3/3 PASS — because
+it already uses `np.random.seed(ctx.seed)` + search_reps=25 + a
+fallback). Fix mirrors the engine's discipline: `np.random.seed(42)`
+before `model.fit` + raise search_reps 3→25. **Post-fix verified
+UNIFORM deterministic PASS across 5 consecutive runs.** Fix-don't-
+caveat per the Cat 3 remediation-cycle precedent (small harness-
+hygiene fixes committed separately within the cadence, cf. SC17 stub
+cleanup a54b430).
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.em-band (verdict_class `em_stochastic`; Hamilton-filter EM
+convergence variance between independent implementations)** per S83
+Code Step 2 empirical verification (post determinism-fix), per the
+S66 dynamic_factor_model + S82 hmm em-band precedents. Engine
+`statsmodels` MarkovRegression/MarkovAutoregression (TSL math path)
+vs R `MSwM::msmFit` (reference) on a synthetic 2-regime mean-switching
+realization (n=500, means=(−1, 1), σ=0.5, P=((0.95, 0.05),
+(0.10, 0.90))).
+
+**Math-layer metrics (post regime-mean-sort canonicalization;
+deterministic post-fix; all PASS):**
+
+| Metric | Status | max_abs_diff | max_rel_diff |
+|---|---|---|---|
+| regime_means | PASS | 5.914e-5 | 6.084e-5 |
+| transition_matrix | PASS | 0.05463 | 0.5044 |
+| log_likelihood (\|·\|) | PASS | 0.3480 | 7.263e-4 |
+
+**Same-optimum interpretation:** regime means match R MSwM to
+5.9e-5 (both recover the DGP means ≈ ±1.005) and the absolute log-
+likelihoods match to rel_diff=7.3e-4 (|tsl|=479.14, |ref|=478.79) —
+both independent EM implementations converge to the SAME optimum. The
+transition matrix matches to 0.055 abs (tsl [0,0]=0.9471 ≈ ref
+0.9463 ≈ DGP 0.95) — within the em-band and MUCH tighter than the S82
+HMM transition divergence (0.237), because the statsmodels↔MSwM
+transition-parameter extraction aligns more directly than the S82
+hmmlearn↔depmixS4 multinomial-logit reconstruction.
+
+**Engine variant validated (at math layer):** Markov-switching mean
+model. **Harness math-layer path uses the direct-statsmodels bypass**
+(`run_tsl` instantiates `MarkovRegression(k_regimes=2,
+switching_variance=False)`, order=0, mean-switching — to bypass the
+engine's 6-decimal audit rounding, Phase 1 finding B8; same accepted
+bypass pattern as p3_arima / p3_hmm / p3_pca / p3_var). Per the S83
+fix the bypass now pins `np.random.seed(42)` + search_reps=25. The
+engine wrapper code path itself (Balanced: MarkovAutoregression,
+order=1, switching_ar=True, switching_variance=True) is exercised at
+the wrapper-layer 3-check scope below.
+
+**Regime-label canonicalization (FOURTH canonicalization-lineage
+instance: S65 VECM β/α → S66 DFM rotation → S82 HMM state-mean → S83
+regime-label):** Markov-switching regimes are identified only up to
+permutation (the likelihood is invariant to regime relabeling). BOTH
+arms sort regimes by ascending mean before comparison (harness
+`np.argsort(means)`; R `order(means)`); the engine wrapper uses the
+richer `label_regimes_by_dominant_key` (mean-sort default, std-sort
+under variance dominance — the SAME helper as the S82 HMM wrapper).
+With well-separated means (±1) the mean-sort is unambiguous and both
+arms land on the same canonical ordering. This is the direct sibling
+of the S82 HMM state-mean sorting (both latent-regime EM models using
+the same canonicalization helper).
+
+**Reference (cross-package vs R MSwM):** Reference at
+`tools/reference_parity/harness/checks/p3_markov_switching.py`
+`run_reference` lines 117-196 calls R `MSwM::msmFit(lm(y~1), k=2,
+sw=c(TRUE, FALSE))` (set.seed(20260429); switching intercept, non-
+switching variance — matching the harness tsl mean-switching spec).
+statsmodels MarkovRegression and R MSwM are INDEPENDENT EM
+implementations of Hamilton (1989) — the canonical Pattern H DSCD
+setup. The harness includes an explicit degenerate/non-convergence
+CAVEAT path (MSwM has documented Hessian-singularity / regime-mean-
+collapse sensitivity on synthetic data); on this fixture MSwM
+converged to a non-degenerate fit (ref means ≈ ±1.005). MSwM's
+`@Fit@logLikel` uses the opposite sign convention from statsmodels'
+`fit.llf`, so the comparison aligns via `|log-likelihood|`. GENUINE
+cross-package check (Python statsmodels vs R MSwM), not self-parity.
+
+**Class B existing-harness note:** Per the block-open probe,
+markov_switching is Class B — the Phase 3 Batch 4 harness pre-existed
+but had no §2.5 entry. UNLIKE S80-S82, the harness did not cleanly
+PASS at S83 Step 2 (it was flaky — see the determinism micro-fix
+above); S83 fixed the harness bypass determinism (separate audit-
+hygiene commit) THEN formalized the §2.5 validation entry. This is
+the first Regimes-block Class B entry to require a harness fix before
+the §2.5 write.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS — engine
+wrapper code path exercised via RunContext at Balanced
+MarkovAutoregression order=1 + switching_variance=True):**
+
+- **Check 1 — NaN handling:** PASS (graceful). Engine accepted
+  injected interior NaN (2 points) + ran to `status=success`,
+  emitting "2 missing values linearly interpolated" — the `run()`
+  NaN branch (lines 355-367) linearly interpolates the primary series
+  + any exog.
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"`; returned `k_regimes=2`, `order=1`,
+  `switching_variance=True`, a finite `log_likelihood` (−477.87),
+  `forecast_method="iterated_regime_weighted"`, expected durations,
+  + a non-degenerate regime separation (Regime 0 mean ≈ −0.906).
+- **Check 3 — Output shape/type verification:** PASS. Engine emitted
+  6 tables (Regime Probabilities / Transition Matrix / Model
+  Parameters / Regime Summary / Forecast / Model Summary) + a
+  multi-field audit; types correct (`k_regimes` int, `order` int,
+  `log_likelihood` float) + plain-English summary.
+
+**Verdict (math layer):** PASS at Tier II.em-band (regime means
+5.914e-5 at machine precision = same optimum; transition matrix
+0.0546 abs within em-band; |log-likelihood| rel_diff=7.26e-4; n=500
+2-regime mean-switching at seed=42, runner CLI 2.32s; deterministic
+post-fix across 5 runs).
+**Verdict (wrapper layer):** PASS 3/3 checks per S83 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/
+p3_markov_switching.py` (technique_id `p3_markov_switching`;
+determinism-fixed at S83 commit `3c5f3b6`).
+**Audit date:** 2026-05-29 (S83 §2.5 entry; Regimes / Nonlinear
+block FOURTH entry; second em-band; Class B PASS tier closes).
+**Primary metrics (math layer):** regime means + transition matrix +
+|log-likelihood| (post mean-sort canonicalization).
+
+**Determinism profile (Hamilton-filter EM; cross-invocation; em-band
+framing per S66/S82):** The engine markov_switching wrapper is
+CROSS-INVOCATION BIT-EXACT within-process — refitting at the same
+seed reproduces the log-likelihood identically (run2 = run3 =
+−477.87 in the verification probe) because the EM is seeded
+(`np.random.seed(ctx.seed)`) with search_reps=25 + a fallback. The
+harness bypass was NOT deterministic pre-S83 (search_reps=3 unseeded
+→ intermittent degenerate collapse); the S83 audit-hygiene fix
+(seed-pin + search_reps=25) made it deterministic, mirroring the
+engine. The Tier II.em-band is therefore driven PURELY by the cross-
+package comparison (statsmodels vs R MSwM — two independent Hamilton-
+filter EM implementations), matching the S66 DFM + S82 HMM em-band
+framing (convergence + parameterization variance, not algorithmic
+divergence). The forecast path is a manual regime-weighted
+construction (statsmodels' .predict/.forecast raise
+NotImplementedError), deterministic and off the parity surface.
+
+**Validation claim scope (S83; engine math validated at Markov-
+switching mean-model scope via cross-package check vs R MSwM; engine
+wrapper code path exercised at wrapper-layer 3-check scope):**
+
+- **Layer 1 (regime means + log-likelihood) VALIDATED at machine
+  precision (same optimum):** regime means + likelihood match MSwM to
+  ~5.9e-5 / 7.3e-4 — both independent EM implementations converge to
+  the same optimum; statsmodels recovers the DGP regime means.
+- **Layer 1 (transition matrix) VALIDATED at Tier II.em-band:**
+  within the em-band (0.055 abs; tsl [0,0]=0.9471 ≈ ref 0.9463 ≈ DGP
+  0.95); tighter than the S82 HMM transition divergence.
+- **Layer 1 SCOPE = mean-switching (order=0, non-switching
+  variance):** the harness math-layer validates the MarkovRegression
+  mean-switching specification — which is the engine FAST preset
+  (k=2, order=0, switching_variance=False). The engine BALANCED
+  specification (MarkovAutoregression order=1 + switching_variance=
+  True) rides the SAME statsmodels regime-switching EM machinery but
+  the AR(1) + switching-variance extension is NOT separately math-
+  asserted at the parity layer (it IS exercised at the wrapper-layer
+  3-check). Disclosed as a VSC partial-match below.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** graceful NaN interpolation; Balanced
+  MarkovAutoregression order=1 + switching-variance dispatch +
+  manual forecast construction + multi-field audit; output shape/type
+  verification (6 tables).
+
+**Phase 3 algorithmic basis (extracted from engine module + harness
+reference):** Markov-switching regression per Hamilton (1989) "A new
+approach to the economic analysis of nonstationary time series and
+the business cycle" Econometrica 57(2); the latent regime follows an
+unobserved Markov chain and the observation model is a regression
+(mean — and optionally variance and AR coefficients — switch across
+regimes). Fit via the Hamilton filter + EM. Implementation
+`statsmodels.tsa.regime_switching.MarkovRegression` (order=0) /
+`MarkovAutoregression` (order≥1). Institutionally central for rates:
+the canonical macro regime-switching model (Hamilton's GNP expansion/
+recession regimes; rates applications: yield dynamics across
+monetary-policy regimes). Engine implements via statsmodels;
+reference is R MSwM (independent EM). Distinct from the S82 HMM (HMM
+emission distribution vs Markov-switching regression observation
+model; sibling latent-regime EM models).
+
+**Phase 3 known failure modes (S83 / Class B existing-harness +
+determinism-fix scope):**
+
+- Cross-package parity validates the regime means + likelihood
+  against MSwM (independent EM); catches regime-mean / likelihood
+  regressions at machine precision.
+- Label-switching: regimes are permutation-invariant; both arms MUST
+  sort by mean ascending before comparison — applied.
+- HARNESS EM-restart fragility (FIXED at S83): the bypass
+  search_reps=3-unseeded EM intermittently collapsed to a degenerate
+  optimum → nondeterministic BLOCK; fixed via seed-pin + search_reps=
+  25; verified uniform PASS across 5 runs. The ENGINE was never
+  affected (search_reps=25 + seeded).
+- MSwM reference sensitivity: MSwM has documented Hessian-singularity
+  / regime-collapse sensitivity on synthetic data; the harness has an
+  explicit degenerate-fit CAVEAT path (not triggered on this fixture).
+- Transition matrix em-band: statsmodels vs MSwM transition
+  parameterization differs slightly (0.055 abs); within band.
+- Sign convention: MSwM `@Fit@logLikel` vs statsmodels `fit.llf`
+  differ in sign; harness aligns via |log-likelihood|.
+
+**Phase 3 boundary of validity:**
+
+- 2-regime mean-switching (order=0, non-switching variance), n=500,
+  well-separated means ±1; k>2 regimes + AR>0 + switching-variance +
+  overlapping means NOT validated at math layer
+- regime means + |log-likelihood| asserted at machine precision;
+  transition matrix at em-band
+- harness validates the engine FAST preset spec (order=0, non-
+  switching variance); Balanced (order=1 AR + switching variance) +
+  Thorough (k=3, order=2) NOT separately math-asserted (Balanced
+  exercised at wrapper layer only)
+- forecast construction (manual iterated-regime-weighted) NOT
+  asserted at math layer
+
+**Phase 3 gap markings:**
+
+- Balanced (AR(1) + switching variance) + Thorough (k=3, order=2)
+  specs NOT separately math-asserted (math layer = order=0 mean-
+  switching; engine Fast preset)
+- transition matrix validated at em-band only (parameterization-
+  difference-dominated)
+- k>2 regimes + overlapping-mean regimes + AR>0 NOT validated
+- TVTP (time-varying transition probabilities) NOT supported
+- forecast construction NOT asserted (manual; off parity surface)
+
+**Status (Tier II.em-band PASS [regime means + loglik machine-
+precision; transition matrix within em-band] + wrapper-layer 3/3 PASS
+per S83 / Regimes / Nonlinear block FOURTH entry; SECOND em-band;
+Class B PASS tier CLOSES; post harness determinism-fix):** Layer 1
+regime means + likelihood validated vs R MSwM at machine precision
+(same optimum); transition matrix at em-band. Wrapper layer (S49+
+3-check scope) validated at 3/3 PASS including graceful NaN handling +
+Balanced AR(1)+switching-variance dispatch + 6 output tables. Engine
+CROSS-INVOCATION BIT-EXACT (seeded EM, search_reps=25); harness
+determinism restored at S83 (commit `3c5f3b6`). **NO engine-
+IMPROVEMENT candidate (modern statsmodels API; queue stays n=1
+(ets_hw)).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** Markov-switching
+  mean model at k_regimes=2, order=0, switching_variance=False,
+  search_reps=25 (post-fix), mean-sort canonicalization. Cross-
+  package reference: R MSwM::msmFit (k=2, sw=c(TRUE, FALSE)). 2-regime
+  mean-switching, n=500.
+- **Engine preset default (Balanced):** k_regimes=2, order=1,
+  switching_variance=True, search_reps=25, maxiter=500,
+  np.random.seed(ctx.seed), label_regimes_by_dominant_key
+  canonicalization, manual regime-weighted forecast.
+- **Configuration match:** **PARTIAL — the validated math-layer
+  config matches the engine FAST preset (order=0, non-switching
+  variance), NOT Balanced.** The Hamilton-filter EM mean-switching
+  CORE (regime means + transition matrix + likelihood) is validated;
+  the Balanced AR(1) + switching-variance EXTENSION rides the same
+  statsmodels MarkovAutoregression EM machinery and is exercised at
+  the wrapper-layer 3-check (3/3 PASS, non-degenerate), but is not
+  separately cross-package-asserted at the math layer.
+- **Disclosure scope:** Transition matrix at em-band. Balanced
+  (AR(1) + switching variance) + Thorough (k=3) NOT separately math-
+  asserted. k>2 regimes + overlapping means + TVTP NOT validated/
+  supported. Forecast construction NOT asserted.
+
+**ENG-EXT institutional-rates Markov-switching workflow scan outcome
+(S83 Step 1; multi-step forecast present; TVTP minor candidate; no
+NEW ENG-EXT-REGIMES-001 commission):**
+
+(a) **Transition matrix + expected durations:** PRESENT ✓ —
+    Transition Matrix table + Expected Duration rows.
+(b) **Per-regime parameters (means / variance / AR):** PRESENT ✓ —
+    Model Parameters + Regime Summary tables.
+(c) **Smoothed / filtered regime probabilities + classification:**
+    PRESENT ✓ — Regime Probabilities table (smoothed P(Regime r) +
+    Most Likely Regime per time).
+(d) **Multi-step regime forecast:** PRESENT ✓ — engine constructs an
+    iterated-regime-weighted forecast (mean + variance + per-regime
+    probability path) MANUALLY from fitted quantities, working around
+    statsmodels' .predict/.forecast NotImplementedError. **The multi-
+    step-regime-forecast ENG-EXT candidate is RULED OUT** — engine
+    delivers it natively (the NotImplementedError is a statsmodels
+    library limitation, not an engine gap).
+(e) **Time-varying transition probabilities (TVTP, Filardo 1994 —
+    transition probabilities depend on covariates):** ABSENT —
+    engine uses constant (time-invariant) transition probabilities.
+    Minor ENG-EXT candidate (TVTP for institutional rates where the
+    regime-switching probability depends on the macro state).
+    Logged as a minor candidate; not commissioned.
+
+**Verdict: COVERED at standard Markov-switching workflow elements +
+manual multi-step forecast.** No new ENG-EXT-REGIMES-001 commission
+surfaced at S83. TVTP noted as a minor candidate.
+
+**Audit-hygiene cross-reference (S83 / Class B existing-harness +
+harness determinism-fix):** S83 markov_switching is a Class B
+existing-harness validation that REQUIRED an audit-hygiene
+determinism micro-fix (commit `3c5f3b6`: seed-pin + search_reps 3→25
+in the bypass run_tsl) before the §2.5 entry — the harness was flaky
+(intermittent degenerate-EM BLOCK), the engine was sound. Fix-don't-
+caveat per the Cat 3 remediation-cycle precedent. Cross-package vs R
+MSwM at Tier II.em-band (regime means + loglik machine-precision;
+transition matrix within em-band). Engine cross-invocation BIT-EXACT.
+NO engine-IMPROVEMENT (modern statsmodels API). Multi-step-forecast
+ENG-EXT candidate RULED OUT (native manual construction); TVTP minor
+candidate logged.
+
+**Cross-reference (S82 HMM sibling + S66 DFM em-band + S65/S66/S82
+canonicalization lineage):** S83 markov_switching is the SECOND em-
+band entry of the Regimes / Nonlinear block + the THIRD em_stochastic
+verdict_class application in the Q1 cadence (after S66 DFM + S82 HMM).
+It is the DIRECT SIBLING of S82 HMM — both are latent-regime EM models
+using the SAME `label_regimes_by_dominant_key` canonicalization helper
++ the SAME em-band framing (independent-EM convergence variance, not
+algorithmic divergence); they differ in observation model (HMM
+emission distribution vs Markov-switching regression). The
+canonicalization lineage reaches its FOURTH instance: S65 VECM
+Phillips β/α → S66 DFM factor rotation → S82 HMM state-mean → S83
+regime-label (THIRD-OBSERVATION TIGHTENING of the canonicalization
+pattern within the em-band-adjacent technique family).
+
+**Regimes / Nonlinear block progress note (S83 FOURTH entry; FINAL Q1
+block; Class B PASS tier CLOSES):** Block 11 Regimes / Nonlinear
+advances at S83 markov_switching per ratified ascending-complexity
+intra-block ordering (critical_slowing_down → tar_setar → hmm →
+markov_switching → star → nar_narx). **Post-S83: Regimes / Nonlinear
+block 4/6 §2.5-validated.** **The block's Class B PASS tier (S80
+critical_slowing_down + S81 tar_setar + S82 hmm + S83 markov_
+switching) is now COMPLETE; only the 2 Class B-CAVEAT entries remain
+(S84 star [weakly-identified-γ] + S85 nar_narx [NO-REFERENCE]).** 2
+remaining in dispatch-set via S84-S85. **This is the FINAL Q1 block;
+Q1 closes at S85 (nar_narx) → THIRTEENTH-AND-FINAL catalog block fully
+Q1-amended (13 of 13 = 100% catalog completion).**
+
+**S84 star projection (next Regimes / Nonlinear block session per
+ascending-complexity dispatch ordering; FIRST Class B-CAVEAT entry):**
+Engine `engine/techniques/star.py` is a Smooth Transition
+AutoRegressive model (Teräsvirta 1994; logistic/exponential smooth
+regime transition vs SETAR's abrupt threshold). Class B-CAVEAT per
+the block-open probe — the smoothness parameter γ is WEAKLY IDENTIFIED
+(bespoke scipy.optimize; γ diverges tsl=1024 vs ref=100 across
+optimizers while the transition center c PASSES). Expected to document
+the STAR γ-pathology CAVEAT (a documented statistical property of
+STAR estimation, not an engine defect). Estimated session time: ~1h
+(Class B-CAVEAT existing-harness).
+
+## §3 Unvalidated catalog techniques (2 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -36818,8 +37175,8 @@ descriptions, summaries).
 ### Multivariate Systems (0 unvalidated; **Block 10 FULLY Q1-AMENDED** — TENTH catalog block to complete per Q1 work program scope at S67 close = 10 of 13 catalog blocks fully Q1-amended (77% catalog block-level completion); johansen_cointegration + forecast_reconciliation + bond_yield_forecast validated separately; pca_analysis moved to §2.5 per Phase 7+ S63 — FIRST Multivariate Systems block entry; Block 10 opens at S63 per ratified ascending-complexity dispatch ordering (pca_analysis → var → vecm → dynamic_factor_model → bvar); FIRST Q1 cadence routine §2.5 entry post-Cat-3-cycle close + Evaluation/Uncertainty block close; FIRST Cat 1d VSC=NO disclosure §2.5 entry per Gate 2 finding framework — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: COVERED — no engine gap; var moved to §2.5 per Phase 7+ S64 — SECOND Multivariate Systems block entry; pre-existing aic/bic Tier V Pattern D CAVEAT formally documented per e72d6f5 CI investigation finding (argmin-preserving lag-order selection NOT invalidated); ENG-EXT-MULTIVARIATE-001 commissioned for Q2 sprint per S64 ENG-EXT scan — IRF/FEVD/Cholesky-SVAR point estimates PRESENT but IRF confidence bands ABSENT + sign-restriction/Blanchard-Quah/proxy-SVAR advanced identification ABSENT; vecm moved to §2.5 per Phase 7+ S65 — THIRD Multivariate Systems block entry; β/α Phillips triangular normalization canonicalization applied identically on both arms (engine-level fit-time + harness-level compare-time); cross-reference to johansen_cointegration validated separately — VECM rank-test inherits trust from statsmodels Johansen implementation; ENG-EXT-MULTIVARIATE-001 scope EXTENDED at S65 — VECM-context IRF + FEVD BOTH ABSENT from engine (broader gap than VAR; VAR has point estimates + CI-band gap, VECM has full IRF/FEVD absence); bundle with ENG-EXT-CONFORMAL-001 for Q2 sprint at revised priority ordering; dynamic_factor_model moved to §2.5 per Phase 7+ S66 — FOURTH Multivariate Systems block entry; FIRST em_stochastic verdict_class application within block per master plan §7.1 (EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; em-band 1e-2 abs / 5e-2 rel tolerance); Cat 1d VSC=NO at MULTIPLE axes (k_factors, factor_order, error_order, transform, standardize, factor rescaling) — harness simplified specification ≠ engine Balanced default; State Space backbone cross-reference to S48-S51 validations (DFM uses statsmodels state-space Kalman filter + smoother machinery); ENG-EXT institutional-rates DFM workflow scan: 4 of 5 elements PRESENT (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting); historical decomposition PARTIAL — derivable from emitted outputs; no NEW ENG-EXT bundling candidate surfaced; analogous to S63 PCA COVERED outcome; bvar moved to §2.5 per Phase 7+ S67 — FIFTH-AND-FINAL Multivariate Systems block entry; **BLOCK CLOSE at S67**; Disposition A (cross-reference existing validations) — bvar is DISTINCT catalog entry from bond_yield_forecast (analytical Normal-Inverse-Wishart posterior vs CCM-2019 Gibbs sampler with stochastic volatility); already validated at Phase 1 `1c_bvar_irf_fevd` IRF/FEVD parity (machine precision; re-confirmed at S67 runner CLI) + Phase 4 S5 BVAR coefficient parity vs R BVAR::bvar (PASS-A.2 DOCUMENTED-DIVERGENCE per prior-parameterization differences per master plan §7.1 Pattern H); ENG-EXT-MULTIVARIATE-001 IRF-bands gap RESOLVED at Bayesian level for users invoking bvar — engine emits posterior IRF + FEVD with credible bands as native output (Bayesian analog of bootstrap CI bands per Sims-Zha 1999); cross-reference trust-inheritance pattern A3 SECOND-OBSERVATION TIGHTENING at n=3 within-block observations S65+S66+S67)
 (all 5 techniques moved to §2.5 across S63-S67 cycle)
 
-### Regimes / Nonlinear (3 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; tar_setar moved to §2.5 per Phase 7+ S81 — SECOND Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE Threshold/Self-Exciting TAR (numpy+scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); Tier II.mle-band [threshold scalar at abs_tol=1e-2/rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL; both arms picked same observed data point]; cross-package vs R tsDyn::setar (m=2, thDelay=0, nthresh=1); regime-assignment boundary rule (≤-into-low / strict->-into-high) verified matches DGP + tsDyn convention; per-regime AR coefficients NOT independently asserted (threshold-only; deterministic given threshold); NO engine-IMPROVEMENT candidate (bespoke scipy; queue stays n=1); multiple-threshold/3-regime ENG-EXT candidate RULED OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000 threshold inference) minor candidate logged; hmm moved to §2.5 per Phase 7+ S82 — THIRD Regimes / Nonlinear block entry; FIRST em_stochastic / Tier II.em-band entry of block; Class B existing-harness; engine `hmmlearn.GaussianHMM` (Gaussian-emission HMM; Baum-Welch EM, 5 restarts at Balanced, label_regimes_by_dominant_key canonicalization); Tier II.em-band [emission means/covariances + log-likelihood machine-precision (same optimum); transition matrix within widened DSCD-EM band 0.3 abs/1.0 rel, divergence dominated by depmixS4 multinomial-logit extraction]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R depmixS4 (independent Baum-Welch EM); label-switching canonicalization (state mean-sort ascending both arms — lineage S65 VECM β/α + S66 DFM rotation); engine cross-invocation BIT-EXACT (seeded EM restarts) → em-band purely cross-package per S66 DFM precedent; Viterbi Secondary BLOCK = documented harness 0-vs-1-index artifact (Python {0,1} vs R {1,2}; overall PASS); NO engine-IMPROVEMENT candidate (hmmlearn standalone; queue stays n=1); multivariate-emission-HMM ENG-EXT candidate RULED OUT (engine treats all series as observation dimensions → multivariate native); automatic state-count-selection (BIC-sweep/HDP-HMM) minor candidate logged; covariance_type full(engine)≡diag(harness) no-op at n_features=1; Q1 closes at S85)
-`markov_switching`, `nar_narx`, `star`
+### Regimes / Nonlinear (2 unvalidated; **Block 11 OPENS at S80 — FINAL Q1 block**; ascending-complexity intra-block ordering ratified at block-open probe (critical_slowing_down → tar_setar → hmm → markov_switching → star → nar_narx); session-type distribution per probe: 4 Class B PASS + 2 Class B-CAVEAT [star weakly-identified-γ + nar_narx NO-REFERENCE]; critical_slowing_down moved to §2.5 per Phase 7+ S80 — FIRST Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE EWS statistics (Gaussian/first-diff/linear detrend → rolling AR(1)/variance/skew/kurt/return-rate/density-ratio → Kendall-tau trend → composite EWS score); Tier II.bit-exact [rolling AR(1)+variance + Kendall-tau on each at abs_tol=1e-8 vs Python ewstools 2.1.2]; Pattern A.1 cross-package; NO engine-IMPROVEMENT candidate; composite-EWS-index ENG-EXT candidate RULED OUT; spatial/multivariate-EWS minor candidate logged [aligns with ENG-EXT-CHANGEPOINT-001 multivariate theme]; tar_setar moved to §2.5 per Phase 7+ S81 — SECOND Regimes / Nonlinear block entry; Class B existing-harness; engine BESPOKE Threshold/Self-Exciting TAR (numpy+scipy; NO external TAR library; grid-search-over-threshold minimizing total SSE → per-regime conditional OLS; self-exciting threshold variable y(t−d)); Tier II.mle-band [threshold scalar at abs_tol=1e-2/rel_tol=5e-2 vs R tsDyn::setar — but EMPIRICAL threshold-selection AGREEMENT, abs_diff=3.94e-7 entirely the engine 6-dp audit-rounding floor (Phase 1 finding B8); underlying selection BIT-IDENTICAL; both arms picked same observed data point]; cross-package vs R tsDyn::setar (m=2, thDelay=0, nthresh=1); regime-assignment boundary rule (≤-into-low / strict->-into-high) verified matches DGP + tsDyn convention; per-regime AR coefficients NOT independently asserted (threshold-only; deterministic given threshold); NO engine-IMPROVEMENT candidate (bespoke scipy; queue stays n=1); multiple-threshold/3-regime ENG-EXT candidate RULED OUT (engine Thorough n_regimes=3); threshold-CI (Hansen 2000 threshold inference) minor candidate logged; hmm moved to §2.5 per Phase 7+ S82 — THIRD Regimes / Nonlinear block entry; FIRST em_stochastic / Tier II.em-band entry of block; Class B existing-harness; engine `hmmlearn.GaussianHMM` (Gaussian-emission HMM; Baum-Welch EM, 5 restarts at Balanced, label_regimes_by_dominant_key canonicalization); Tier II.em-band [emission means/covariances + log-likelihood machine-precision (same optimum); transition matrix within widened DSCD-EM band 0.3 abs/1.0 rel, divergence dominated by depmixS4 multinomial-logit extraction]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R depmixS4 (independent Baum-Welch EM); label-switching canonicalization (state mean-sort ascending both arms — lineage S65 VECM β/α + S66 DFM rotation); engine cross-invocation BIT-EXACT (seeded EM restarts) → em-band purely cross-package per S66 DFM precedent; Viterbi Secondary BLOCK = documented harness 0-vs-1-index artifact (Python {0,1} vs R {1,2}; overall PASS); NO engine-IMPROVEMENT candidate (hmmlearn standalone; queue stays n=1); multivariate-emission-HMM ENG-EXT candidate RULED OUT (engine treats all series as observation dimensions → multivariate native); automatic state-count-selection (BIC-sweep/HDP-HMM) minor candidate logged; covariance_type full(engine)≡diag(harness) no-op at n_features=1; markov_switching moved to §2.5 per Phase 7+ S83 — FOURTH Regimes / Nonlinear block entry; SECOND em_stochastic / Tier II.em-band entry; CLOSES the block's Class B PASS tier (S80-S83); engine statsmodels MarkovRegression(order=0)/MarkovAutoregression(order≥1; Hamilton 1989; Balanced k=2/order=1/switching_variance=True; Hamilton-filter EM, search_reps=25, label_regimes_by_dominant_key canonicalization, manual regime-weighted forecast); Tier II.em-band [regime means + log-likelihood machine-precision (same optimum); transition matrix within em-band 0.055 abs vs R MSwM — tighter than S82 HMM 0.237]; verdict_class em_stochastic (Pattern H DSCD); cross-package vs R MSwM::msmFit; regime-label canonicalization (mean-sort ascending both arms — FOURTH lineage instance S65 VECM β/α → S66 DFM → S82 HMM → S83); engine cross-invocation BIT-EXACT (seeded EM search_reps=25) → em-band purely cross-package per S66/S82; REQUIRED S83 audit-hygiene determinism micro-fix (commit 3c5f3b6: seed-pin + search_reps 3→25 in flaky bypass run_tsl; 2 BLOCK/3 PASS → uniform PASS across 5 runs; engine itself sound — fix-don't-caveat per Cat 3 precedent); VSC PARTIAL [math layer validates engine FAST preset order=0 mean-switching; Balanced AR(1)+switching-variance exercised at wrapper-layer only]; NO engine-IMPROVEMENT candidate (modern statsmodels API; multi-step-forecast NotImplementedError is statsmodels limitation handled by engine manual construction; queue stays n=1); multi-step-regime-forecast ENG-EXT candidate RULED OUT (engine native manual construction); TVTP (Filardo 1994 time-varying transition probabilities) minor candidate logged; only 2 Class B-CAVEAT entries remain (S84 star + S85 nar_narx); Q1 closes at S85)
+`nar_narx`, `star`
 
 ### State Space / Filtering (0 unvalidated; Block 6 FULLY Q1-AMENDED — SIXTH catalog block to complete per Q1 work program scope at S51 close = 6 of 13 catalog blocks fully Q1-amended (46% catalog block-level completion); kalman_filter + kalman_smoother validated separately + local_level moved to §2.5 per Phase 7+ S48 — FIRST State Space / Filtering block entry; Block 6 opens; local_linear_trend moved to §2.5 per Phase 7+ S49 — SECOND State Space / Filtering block entry; FIRST entry under NEW wrapper-layer validation scope extension; particle_filter moved to §2.5 per Phase 7+ S50 — THIRD State Space / Filtering block entry; FIRST Tier IV Pattern A.3 entry via approach (c) degenerate linear-Gaussian Kalman-exact-reference framing with documented abs-tolerance plateau caveat; structural_ts moved to §2.5 per Phase 7+ S51 — FOURTH-AND-FINAL State Space / Filtering block entry; multi-component 4-variance Kalman MLE)
 (all 4 techniques moved to §2.5)
