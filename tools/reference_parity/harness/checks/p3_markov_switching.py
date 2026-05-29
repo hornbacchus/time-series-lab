@@ -119,10 +119,58 @@ class MarkovSwitchingParity(P3ParityCheck):
         sort_order = np.argsort(means)
         means_sorted = means[sort_order]
         transmat_sorted = transmat[sort_order][:, sort_order]
+
+        # ---- Balanced-spec self-parity arm (Workstream C / C3) ----
+        # The Fast arm above (MarkovRegression order=0 mean-switching)
+        # is the cross-package check vs R MSwM. The engine's BALANCED
+        # preset uses MarkovAutoregression(order=1, switching_ar +
+        # switching_variance), which R MSwM cannot reliably fit on this
+        # mean-switching fixture (it degenerates). So the Balanced spec
+        # is math-asserted by SELF-PARITY: invoke the ENGINE WRAPPER at
+        # Balanced and compare against a direct statsmodels
+        # reimplementation of the same pipeline (S85 nar_narx pattern) —
+        # validating the engine wrapper's Balanced fit + regime-label
+        # canonicalization + transition handling reproduce a clean
+        # statsmodels call bit-exactly (modulo the engine's audit
+        # rounding).
+        bal = {"available": False}
+        try:
+            from techniques.base import RunContext  # type: ignore
+            import techniques.markov_switching as ms_mod  # type: ignore
+            ctx = RunContext({
+                "run_id": "p3_ms_balanced_selfparity",
+                "technique_id": "markov_switching",
+                "preset": "Balanced", "seed": 42, "frequency": "",
+                "time": list(range(len(y))),
+                "series": [{"name": "y", "values": y.tolist()}],
+                "params": {},
+            })
+            resp = ms_mod.run(ctx, lambda *a, **kw: None)
+            if resp.get("status") == "success":
+                af = resp.get("audit_fields", {})
+                tbls = resp.get("tables", [])
+                # Regime Summary "Mean" column (index 3); rows already
+                # in the engine's canonical (mean-sorted) regime order.
+                rs = next((t for t in tbls if t.get("name") == "Regime Summary"), None)
+                tm_t = next((t for t in tbls if t.get("name") == "Transition Matrix"), None)
+                if rs is not None and tm_t is not None:
+                    b_means = np.array([float(r[3]) for r in rs["rows"]], dtype=np.float64)
+                    # Transition Matrix rows: [from-label, P(->0), P(->1)]
+                    b_tm = np.array([[float(v) for v in r[1:]] for r in tm_t["rows"]], dtype=np.float64)
+                    bal = {
+                        "available": True,
+                        "regime_means": b_means,
+                        "transition_matrix": b_tm,
+                        "log_likelihood": float(af.get("log_likelihood", np.nan)),
+                    }
+        except Exception as e:
+            bal = {"available": False, "error": f"{type(e).__name__}: {e}"}
+
         return {
             "regime_means": means_sorted,
             "transition_matrix": transmat_sorted,
             "log_likelihood": float(fit.llf),
+            "balanced": bal,
         }
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -204,7 +252,75 @@ class MarkovSwitchingParity(P3ParityCheck):
             "transition_matrix": transmat,
             "log_likelihood": float(np.atleast_1d(outputs["loglik"]).reshape(-1)[0]),
             "mswm_version": versions.get("MSwM", "unknown"),
+            "balanced": self._balanced_selfparity_reference(y),
         }
+
+    def _balanced_selfparity_reference(self, y: np.ndarray) -> dict[str, Any]:
+        """Self-parity reference for the engine BALANCED spec (Workstream
+        C / C3): directly reimplement the engine's MarkovAutoregression
+        Balanced pipeline (order=1, switching_ar + switching_trend +
+        switching_variance; np.random.seed(42); search_reps=25), mirroring
+        the engine's decode -> empirical-mean -> dominant-key relabel
+        post-processing. Both this and the engine wrapper call the same
+        deterministic statsmodels fit, so they reproduce the same
+        llf / transition / regime means bit-exactly (modulo the engine's
+        audit rounding). Validates the engine wrapper's Balanced path.
+        """
+        try:
+            _ensure_engine_on_path()
+            from statsmodels.tsa.regime_switching.markov_autoregression import (  # type: ignore
+                MarkovAutoregression,
+            )
+            from techniques.base import label_regimes_by_dominant_key  # type: ignore
+            import warnings as _w
+            y = np.asarray(y, dtype=np.float64)
+            with _w.catch_warnings():
+                _w.simplefilter("ignore")
+                np.random.seed(42)  # mirror engine np.random.seed(ctx.seed)
+                model = MarkovAutoregression(
+                    y, k_regimes=2, order=1, trend="c",
+                    switching_ar=True, switching_trend=True,
+                    switching_variance=True, exog=None,
+                )
+                fit = model.fit(maxiter=500, search_reps=25)
+            sm = fit.smoothed_marginal_probabilities
+            sm = sm.values if hasattr(sm, "values") else np.asarray(sm)
+            if sm.ndim == 1:
+                sm = sm.reshape(-1, 1)
+            n_probs = sm.shape[0]
+            mlr = np.argmax(sm, axis=1)
+            tp = fit.regime_transition
+            tp = tp.values if hasattr(tp, "values") else np.asarray(tp)
+            transmat = (tp[:, :, 0].T if tp.ndim == 3 else np.asarray(tp))
+            k = 2
+            means_emp = np.zeros(k)
+            stds_emp = np.zeros(k)
+            for r in range(k):
+                mask = mlr == r
+                cnt = int(mask.sum())
+                means_emp[r] = np.mean(y[:n_probs][mask]) if cnt > 0 else np.nan
+                stds_emp[r] = float(np.std(y[:n_probs][mask], ddof=1)) if cnt > 1 else 0.0
+            sr = label_regimes_by_dominant_key(
+                means_emp, stds_emp, transmat=transmat,
+                labels=mlr, probs=sm,
+            )
+            mlr_s = sr["labels"]
+            transmat_s = sr["transmat"]
+            # Regime Summary means recomputed on the relabeled regimes
+            # (engine convention), in sorted regime order.
+            means_sorted = np.array([
+                float(np.mean(y[:n_probs][mlr_s == r])) if int((mlr_s == r).sum()) > 0
+                else 0.0
+                for r in range(k)
+            ], dtype=np.float64)
+            return {
+                "available": True,
+                "regime_means": means_sorted,
+                "transition_matrix": np.asarray(transmat_s, dtype=np.float64),
+                "log_likelihood": float(fit.llf),
+            }
+        except Exception as e:
+            return {"available": False, "error": f"{type(e).__name__}: {e}"}
 
     def compare(
         self, tsl: dict[str, Any], ref: dict[str, Any],
@@ -269,6 +385,39 @@ class MarkovSwitchingParity(P3ParityCheck):
         )
         statuses.append(primary["log_likelihood"]["status"])
 
+        # ---- Balanced-spec self-parity (Workstream C / C3) ----
+        # Engine-wrapper Balanced (MarkovAutoregression order=1 +
+        # switching_variance) vs a direct statsmodels reimplementation.
+        # Both call the identical deterministic fit, so they reproduce
+        # llf / transition / regime means bit-exactly modulo the engine's
+        # audit-rounding floor (llf 2-dp, means/transition 4-dp) — band
+        # set just above that floor.
+        balanced: dict[str, Any] = {}
+        bt = tsl.get("balanced", {})
+        br = ref.get("balanced", {})
+        if bt.get("available") and br.get("available"):
+            _bal_tol = {"abs_tol": 1e-2, "rel_tol": 1e-2,
+                        "block_abs_tol": 1e-1, "block_rel_tol": 1e-1}
+            balanced["regime_means"] = _compare_vector(
+                np.asarray(bt["regime_means"]).reshape(-1),
+                np.asarray(br["regime_means"]).reshape(-1), _bal_tol,
+            )
+            balanced["transition_matrix"] = _compare_vector(
+                np.asarray(bt["transition_matrix"]).reshape(-1),
+                np.asarray(br["transition_matrix"]).reshape(-1), _bal_tol,
+            )
+            balanced["log_likelihood"] = _compare_scalar(
+                abs(float(bt["log_likelihood"])),
+                abs(float(br["log_likelihood"])), _bal_tol,
+            )
+            statuses.extend(balanced[k]["status"] for k in balanced)
+        else:
+            balanced["status"] = {
+                "status": "INFO",
+                "note": "Balanced self-parity unavailable",
+                "tsl_error": bt.get("error"), "ref_error": br.get("error"),
+            }
+
         any_block = any(s == "BLOCK" for s in statuses)
         any_caveat = any(s == "CAVEAT" for s in statuses)
         outcome = ("BLOCK" if any_block else
@@ -276,11 +425,13 @@ class MarkovSwitchingParity(P3ParityCheck):
         return ParityResult(
             technique_id=self.technique_id,
             outcome=outcome,
-            metrics={"primary": primary},
+            metrics={"primary": primary, "balanced_selfparity": balanced},
             diagnostics={
                 "mswm_version": ref.get("mswm_version", "unknown"),
                 "n_obs": int(self.DGP_N),
                 "k_regimes": int(self.K_REGIMES),
+                "tsl_balanced_llf": tsl.get("balanced", {}).get("log_likelihood"),
+                "ref_balanced_llf": ref.get("balanced", {}).get("log_likelihood"),
             },
         )
 

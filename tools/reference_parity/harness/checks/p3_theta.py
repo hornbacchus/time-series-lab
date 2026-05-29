@@ -132,19 +132,24 @@ class ThetaParity(P3ParityCheck):
 
             forecast = np.asarray(fit.forecast(horizon), dtype=np.float64)
 
-            # Derived diagnostics
+            # In-sample one-step RMSE (Workstream C / C2 fix). statsmodels
+            # ThetaModelResults exposes NO fittedvalues/resid series (the
+            # prior `prediction_results.forecast(steps=0)` path yielded NaN
+            # — S69 harness artifact). It DOES expose `sigma2`, its native
+            # estimate of the in-sample one-step forecast-error variance,
+            # so rmse = sqrt(sigma2) is the faithful statsmodels-native
+            # in-sample RMSE (matching what R forecast::thetaf accuracy()
+            # reports on the training set). Not fabricated — statsmodels'
+            # own residual-variance estimate.
             try:
-                fitted = fit.prediction_results.forecast(steps=0).predicted_mean
-                rmse = float(np.sqrt(np.mean((y - fitted[:len(y)]) ** 2))) if hasattr(fitted, "__len__") else float("nan")
+                _s2 = fit.sigma2
+                rmse = float(np.sqrt(_s2)) if _s2 is not None else float("nan")
             except Exception:
                 rmse = float("nan")
 
-            # In-sample fit residual RMSE: ThetaModel doesn't
-            # expose a clean fittedvalues; reconstruct via h=0
-            # forecast or skip. Use simple SSE on linear+SES fit
-            # estimate.
+            # Diagnostic: SES smoothing level (where exposed).
             try:
-                alpha = float(fit.params.get("smoothing_level", np.nan))
+                alpha = float(getattr(fit, "_alpha", np.nan))
             except Exception:
                 alpha = float("nan")
 

@@ -393,6 +393,16 @@ class HmmParity(P3ParityCheck):
         try:
             tsl_states = np.asarray(tsl["states_viterbi"], dtype=int)
             ref_states = np.asarray(ref["states_viterbi"], dtype=int)
+            # Index-base alignment (Workstream C / C1 fix): run_tsl returns
+            # Python 0-indexed states {0,1}; run_reference returns R
+            # 1-indexed states {1,2}. Without alignment, tsl==ref is always
+            # False -> agreement exactly 0.0 (a measurement artifact, not a
+            # real disagreement). Both arms are canonically mean-sorted
+            # (low-mean regime = each array's minimum label), so normalizing
+            # each to 0-based by subtracting its own minimum aligns the
+            # regime labels before comparison.
+            tsl_states = tsl_states - tsl_states.min()
+            ref_states = ref_states - ref_states.min()
             n_common = min(len(tsl_states), len(ref_states))
             agreement = float(np.mean(
                 tsl_states[:n_common] == ref_states[:n_common],
