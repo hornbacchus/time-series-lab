@@ -34284,7 +34284,292 @@ Classical addition).**
   historical decomposition; theta-line + SARIMA-seasonal +
   auto_arima-trajectory + intermittent-fitted-vector diagnostics).
 
-## §3 Unvalidated catalog techniques (11 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### cusum_page_hinkley (Phase 7+ S75; SIXTY-FOURTH §2.5 entry; FIRST Change Points / Anomalies block entry; Block 9 OPENS at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); **all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe** [harness + technique_id + tolerance-ladder all pre-existing from Phase 3 batch work; NO §2.5 entries previously; NOT net-new construction (contrast S73 auto_arima Disposition B) NOR cross-reference-only (contrast S67 bvar Disposition A)]; engine API: BESPOKE closed-form CUSUM + Page-Hinkley (no library wrap; univariate); **Tier II.bit-exact** [all alarm counts abs_diff=0.0]; **NO engine-IMPROVEMENT candidate** [closed-form deterministic; queue stays n=1 (ets_hw)]; Pattern A.3 self-parity)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**Tier II.bit-exact (Pattern A.3 paper-formula self-parity at
+deterministic closed-form recursion)** per S75 Code Step 2
+empirical verification. Engine bespoke CUSUM + Page-Hinkley
+recursion (TSL math path) vs from-scratch reference mirroring the
+TSL recursion verbatim. All four alarm-count metrics agree
+bit-exact (abs_diff=0.0): n_cusum_up=11, n_cusum_down=12,
+n_ph_up=190, n_ph_down=0 at Fast preset on the step-shift DGP.
+
+**Engine variant validated (at math layer; engine wrapper
+exercised via RunContext):** Bespoke closed-form CUSUM (cumulative-
+sum control chart; upper + lower accumulators `S_up`/`S_down` with
+allowance `k` + decision threshold `h` + reset-after-alarm) +
+Page-Hinkley (cumulative deviation from running mean tracked
+against running min/max with threshold `λ` + drift allowance `δ` +
+warmup-of-10). Engine `run()` lines 99-157 implement both
+recursions directly in numpy. Harness invokes the ENGINE wrapper
+(`cph_run` via RunContext at Fast preset to skip the bootstrap
+threshold → fully deterministic).
+
+**Reference (Pattern A.3 paper-formula self-parity):** Reference
+reimplementation at `tools/reference_parity/harness/checks/
+p3_cusum_page_hinkley.py` `_cusum_ph_reference` lines 40-104
+mirrors the TSL recursion verbatim (same standardization `z = y -
+target`; same upper/lower CUSUM accumulation + reset; same Page-
+Hinkley cumulative-deviation + running-min/max + warmup-of-10
+alarm logic). Pattern A.3 self-parity (NOT cross-package vs R) —
+per the harness rationale, R `cpm` / `changepoint` use DIFFERENT
+CUSUM/PH formulations (CPM tests; PELT-style cost functions), so a
+self-parity reference avoids a Pattern J methodology zoo; the
+self-parity catches wrapper-level bugs (preprocessing, param
+forwarding, audit-field rounding, alarm filtering) against a
+verbatim-recursion reference.
+
+**Class B existing-harness note (S75 block-open probe):** Per the
+S75 block-open probe, all 5 Change Points / Anomalies entries
+(cusum_page_hinkley, stl_esd_anomaly, intervention_analysis,
+pelt_change_points, bocpd) are uniform **Class B**: harness +
+technique_id + tolerance-ladder entry all pre-existing (Phase 3
+Batch 6 work) + all PASS at runner CLI, but NONE had §2.5 entries.
+The earlier-phase "p3_pelt / p3_bocpd existing" references are
+these Phase 3 HARNESSES (never given §2.5 entries), NOT separate-
+phase validations to cross-reference. S75 (+ S76-S79) formalize
+the §2.5 validation entries against the verified-passing
+infrastructure — the S68-S72 "read + verify existing harness +
+write §2.5 entry" pattern.
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine drops NaN (`clean =
+  values[~np.isnan(values)]` at engine line 66) — appropriate for
+  sequential change detection (no interpolation; missing
+  observations removed). Verified by injecting NaN at [10] + [50]:
+  engine returned `status=success` + "missing values removed"
+  warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked at
+  `preset="Balanced"` (bootstrap-threshold path); returned audit
+  fields populated correctly (`target=0.7448`; `cusum_k=0.6142`;
+  `cusum_h=6.1418` [5σ default]; `ph_lambda=50.0`; alarm counts
+  cusum_up/down=7/7, ph_up/down=171/0; `bootstrap_cusum_h=8.4508`;
+  `bootstrap_ph_lambda=51.5396`; `n_obs=400`). **Bootstrap-
+  threshold determinism confirmed:** 2 Balanced runs → identical
+  bootstrap_cusum_h=8.4508 (seed-pinned permutation bootstrap via
+  `np.random.seed(ctx.seed)` at engine line 60).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 3 expected tables (`Detected Change Points` [Method +
+  Time + Index + Mean Before/After + Shift]; `Parameters &
+  Summary`; `CUSUM & Page-Hinkley Statistics` [time-series of
+  CUSUM Up/Down + PH Up/Down]).
+
+**Verdict (math layer):** PASS bit-exact (all 4 alarm-count
+metrics abs_diff=0.0; n=400 step-shift DGP [pre_mean=0, post_mean=
+1.5, σ=1, shift_at=200] at seed=42, Fast preset at runner CLI
+execution).
+**Verdict (wrapper layer):** PASS 3/3 checks per S75 Code Step 3
+including Balanced bootstrap-threshold determinism.
+**Audit script:** `tools/reference_parity/harness/checks/
+p3_cusum_page_hinkley.py` (technique_id `p3_cusum_page_hinkley`).
+**Audit date:** 2026-05-29 (S75 §2.5 entry; Change Points /
+Anomalies block opens).
+**Primary metrics (math layer):** CUSUM upward alarm count + CUSUM
+downward alarm count + Page-Hinkley upward alarm count + Page-
+Hinkley downward alarm count.
+
+**Determinism profile:** Closed-form deterministic sequential
+detection (no MLE/optimization in the CUSUM/PH recursions
+themselves). At Fast preset (harness math-layer path) fully
+deterministic → bit-exact. At Balanced/Thorough the bootstrap-
+threshold estimation uses a permutation bootstrap which is
+seed-deterministic (`np.random.seed(ctx.seed)`); the bootstrap
+affects only the displayed significance threshold, NOT the alarm-
+count recursion. Tier II.bit-exact.
+
+**Validation claim scope (S75; engine math validated at alarm-
+count scope via Pattern A.3 self-parity; engine wrapper code path
+exercised at both math-layer (Fast) + wrapper-layer 3-check
+(Balanced) scopes):**
+
+- **Layer 1 (CUSUM + Page-Hinkley closed-form recursion alarm
+  detection) VALIDATED at Tier II.bit-exact:** all four alarm
+  counts match the verbatim-recursion reference bit-exact. Self-
+  parity confirms the engine recursion + alarm + reset logic is
+  correct.
+- **Layer 1 ALARM INDICES NOT separately compared (count-only at
+  math layer):** the harness compares alarm COUNTS; the reference
+  also computes alarm indices (`cusum_up_alarms` etc.) but
+  compare() asserts counts. Index-level parity is implied by
+  count parity under the verbatim-recursion self-parity (same
+  recursion → same indices → same counts).
+- **Layer 1 BOOTSTRAP THRESHOLD NOT separately validated at math
+  layer:** Balanced/Thorough bootstrap-threshold estimation
+  covered at wrapper-layer 3-check Check 2 (determinism +
+  emission); the math-layer harness uses Fast preset (no
+  bootstrap).
+- **Layer 1 LOCAL CHANGE STATISTICS (mean-before/after/shift)
+  NOT separately validated at math layer:** emitted in the
+  Detected Change Points table; covered at wrapper-layer Check 3
+  emission scope.
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN-drop handling; Balanced bootstrap-
+  threshold dispatch (deterministic) + 3-table structure; output
+  shape/type verification.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** CUSUM per Page (1954) "Continuous Inspection
+Schemes" Biometrika 41 — cumulative-sum control chart accumulating
+deviations from a target; signals when the cumulative sum exceeds
+a decision threshold (two-sided via separate upper/lower
+accumulators with allowance `k`). Page-Hinkley per Hinkley (1971)
+"Inference about the change-point from cumulative sum tests"
+Biometrika 58(3) — tracks cumulative deviation from the running
+mean against its running minimum (upward) / maximum (downward),
+signaling when the gap exceeds threshold `λ` net of drift
+allowance `δ`. Both are deterministic sequential-detection
+recursions; the engine implements them bespoke with a permutation-
+bootstrap significance threshold (Balanced/Thorough) for
+distribution-free alarm calibration.
+
+**Phase 3 known failure modes (S75 / Class B existing-harness
+scope):**
+
+- Self-parity validates the engine recursion against a verbatim
+  reimplementation (catches wrapper-level bugs, not formulation
+  errors common to both — but CUSUM/PH are textbook closed-form,
+  formulation-error risk minimal).
+- Pattern A.3 self-parity (NOT cross-package): R cpm/changepoint
+  use different CUSUM/PH formulations; self-parity avoids the
+  methodology zoo. Cross-implementation formulation differences
+  are a KNOWN characteristic of the change-point-detection space,
+  not a TSL deficiency.
+- Bootstrap-threshold (Balanced/Thorough) is seed-deterministic
+  but the threshold VALUE depends on the permutation bootstrap;
+  not math-layer validated (Fast preset used for parity).
+- Alarm reset-after-detection (CUSUM resets accumulator to 0 after
+  an alarm) is a design choice affecting alarm-count semantics;
+  both engine + reference implement identically.
+
+**Phase 3 boundary of validity:**
+
+- n=400 single-step-shift DGP (pre=0, post=1.5, σ=1, shift_at=200);
+  other change patterns (multiple shifts, gradual drift, variance
+  changes) NOT validated at math layer
+- Fast preset (no bootstrap) validated at math layer; Balanced/
+  Thorough bootstrap-threshold path covered at wrapper-layer
+  emission scope only
+- univariate only (per-series CUSUM/PH); multivariate joint
+  detection NOT supported (see ENG-EXT)
+- alarm COUNTS validated; alarm-index-level + local-change-
+  statistic parity NOT separately asserted (implied by count
+  parity under verbatim self-parity)
+
+**Phase 3 gap markings:**
+
+- Bootstrap-threshold value NOT math-layer validated (Fast preset
+  parity)
+- Multivariate CUSUM NOT supported (univariate only; minor
+  ENG-EXT candidate)
+- Alarm indices + local change statistics NOT separately validated
+  (emission scope)
+
+**Status (Tier II.bit-exact PASS + wrapper-layer 3/3 PASS per S75
+/ Change Points / Anomalies block opens):** Layer 1 CUSUM + Page-
+Hinkley closed-form recursion alarm detection validated bit-exact
+via Pattern A.3 self-parity. Wrapper layer (S49+ NEW 3-check
+scope) validated at 3/3 PASS including Balanced bootstrap-threshold
+determinism + 3-table output structure. **NO engine-IMPROVEMENT
+candidate (closed-form deterministic).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** engine bespoke
+  CUSUM + Page-Hinkley at Fast preset (no bootstrap), with harness-
+  supplied params (target=mean, cusum_k=0.5σ, cusum_h=3σ,
+  ph_delta=0.005σ, ph_lambda=20). Pattern A.3 self-parity
+  reference mirrors the recursion verbatim. Step-shift DGP at
+  n=400, seed=42.
+- **Engine preset default (Balanced):** bootstrap-threshold path
+  (n_bootstrap=500); default params (cusum_h=5σ, ph_lambda=50)
+  when not user-overridden.
+- **Configuration match:** **YES at the closed-form-recursion
+  alarm-detection surface** — the CUSUM/PH recursion (the math
+  validated at Fast) is IDENTICAL across presets; Balanced adds
+  the bootstrap significance threshold on top (which calibrates
+  alarm significance but does not change the recursion). User
+  invoking at default Balanced experiences the same validated
+  recursion + a bootstrap-calibrated threshold.
+- **Disclosure scope:** Bootstrap-threshold value NOT math-layer
+  validated (Fast preset parity; bootstrap covered at wrapper-
+  layer determinism + emission). Multiple-shift / gradual-drift /
+  variance-change patterns NOT validated. Multivariate joint
+  detection NOT supported. Default-parameter alarm sensitivity
+  (cusum_h=5σ vs harness 3σ) NOT separately validated (same
+  recursion; threshold is a user-tunable sensitivity knob).
+
+**ENG-EXT institutional-rates change-detection workflow scan
+outcome (S75 Step 1; standard workflow; minor multivariate-CUSUM
+candidate noted):**
+
+(a) **Detected change-point indices + method:** PRESENT ✓ —
+    `Detected Change Points` table (Method + Time + Index).
+(b) **Test-statistic trajectory:** PRESENT ✓ — `CUSUM & Page-
+    Hinkley Statistics` table (CUSUM Up/Down + PH Up/Down over
+    time).
+(c) **Segment summary (mean before/after + shift):** PRESENT ✓ —
+    Detected Change Points table includes Mean Before/After +
+    Shift per detected point.
+(d) **Significance calibration:** PRESENT ✓ — Balanced/Thorough
+    bootstrap threshold (distribution-free alarm calibration).
+(e) **Multivariate CUSUM (joint change detection across series):**
+    ABSENT — engine is UNIVARIATE only (per-series). For
+    institutional rates, joint change detection across the yield
+    curve (detecting a curve-wide regime shift simultaneously
+    rather than per-tenor) is a substantive workflow — multivariate
+    CUSUM (e.g. Healy 1987 multivariate CUSUM; or MCUSUM)
+    **minor ENG-EXT candidate**.
+
+**Verdict: COVERED at standard univariate change-detection
+workflow elements + bootstrap significance calibration.**
+Multivariate CUSUM noted as a minor ENG-EXT candidate for
+institutional yield-curve-wide regime detection (logged for
+tracking; not commissioned — most change-detection use is per-
+series; would be evaluated for an ENG-EXT-CHANGEPOINT-001
+commission only if the multivariate need recurs across the block).
+
+**Audit-hygiene cross-reference (S75 / Class B existing-harness +
+block open):** S75 cusum_page_hinkley is a Class B existing-harness
+validation (Phase 3 Batch 6 harness, pre-existing + PASS per S75
+block-open probe; §2.5 entry formalized at S75). Pattern A.3 self-
+parity (verbatim-recursion reference; avoids R-CUSUM/PH methodology
+zoo). Bit-exact alarm-count parity. NO engine-IMPROVEMENT (closed-
+form deterministic). Multivariate-CUSUM minor ENG-EXT candidate
+logged.
+
+**Change Points / Anomalies BLOCK OPENING note (S75 first entry):**
+Block 9 Change Points / Anomalies opens at S75 cusum_page_hinkley
+per ratified ascending-complexity intra-block dispatch ordering
+(cusum_page_hinkley → stl_esd_anomaly → intervention_analysis →
+pelt_change_points → bocpd). **All 5 block entries are uniform
+Class B** (existing harness + tolerance-ladder + all PASS at
+runner CLI per the S75 block-open probe; none had §2.5 entries;
+none are net-new-construction [contrast S73] or cross-reference-
+only [contrast S67]). The block-open probe established the uniform
+session-type distribution, which collapsed the cross-references-
+first sequencing axis → algorithmic-complexity primary sort
+(ratified). **Post-S75: Change Points / Anomalies block 1/5 §2.5-
+validated; 4 remaining in dispatch-set via S76-S79.** Block close
+projected at S79 bocpd → Block 9 fully Q1-amended (TWELFTH catalog
+block; 12 of 13) at S79 close.
+
+**S76 stl_esd_anomaly projection (next Change Points / Anomalies
+block session per ascending-complexity dispatch ordering):**
+Engine `engine/techniques/stl_esd_anomaly.py` (verify exact module
+name) is STL decomposition + ESD (Extreme Studentized Deviate)
+outlier test — STL-decompose the series, then apply the
+generalized ESD test (Rosner 1983) to the residual to flag
+anomalies. Class B (existing p3_stl_esd harness + PASS per probe).
+Expected Tier II.bit-exact or self-parity. STL decomposition +
+ESD test both deterministic. Cross-reference candidate: STL
+decomposition shares machinery with the Decomposition block
+(stl_decompose S33, validated separately). Estimated session time:
+~1h (Class B existing-harness).
+
+## §3 Unvalidated catalog techniques (10 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -34307,8 +34592,8 @@ descriptions, summaries).
 ### Causality / Relationships / Lead-Lag (0 unvalidated; Block 1 FULLY Q1-AMENDED — first catalog block to complete per Q1 work program scope; granger_causality + cross_correlation_lag + prewhitened_ccf_lag + rolling_ccf_lag + dtw_alignment_lag + gcc_phat_delay moved to §2.5 per Phase 7+ S12 + S13 + S14c + S15 + S17 + S18)
 (all 6 techniques moved to §2.5)
 
-### Change Points / Anomalies / Interventions (5 unvalidated)
-`bocpd`, `cusum_page_hinkley`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
+### Change Points / Anomalies / Interventions (4 unvalidated; cusum_page_hinkley moved to §2.5 per Phase 7+ S75 — FIRST Change Points / Anomalies block entry; Block 9 opens at S75 per ratified ascending-complexity intra-block ordering (cusum_page_hinkley → stl_esd_anomaly → intervention_analysis → pelt_change_points → bocpd); all 5 block entries uniform Class B existing-harness all-PASS per S75 block-open probe [Phase 3 Batch 6 harnesses pre-existing + PASS at runner CLI; none had §2.5 entries; NOT net-new-construction (contrast S73) NOR cross-reference-only (contrast S67)]; engine BESPOKE closed-form CUSUM + Page-Hinkley (univariate); Tier II.bit-exact [all alarm counts abs_diff=0.0]; Pattern A.3 self-parity (avoids R-CUSUM/PH methodology zoo); NO engine-IMPROVEMENT candidate (closed-form deterministic; queue stays n=1); multivariate-CUSUM minor ENG-EXT candidate logged)
+`bocpd`, `intervention_analysis`, `pelt_change_points`, `stl_esd_anomaly`
 
 ### Decomposition & Seasonal Adjustment (0 unvalidated; Block 3 FULLY Q1-AMENDED — FOURTH catalog block to complete per Q1 work program scope after Block 1 Causality at S18 + Block 12 Stationarity Tests at S23 + Block 8 Missing Data at S28; classical_decompose moved to §2.5 per Phase 7+ S31; mstl_decompose moved to §2.5 per Phase 7+ S32; stl_decompose moved to §2.5 per Phase 7+ S33; x13_seasonal_adjust moved to §2.5 per Phase 7+ S34 — FOURTH-AND-FINAL Block 3 entry)
 (all 4 techniques moved to §2.5)
