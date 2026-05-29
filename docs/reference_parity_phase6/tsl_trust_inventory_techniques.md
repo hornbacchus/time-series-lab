@@ -32057,7 +32057,357 @@ package self-parity vs R `forecast::thetaf`. Bit-exact-prone
 (closed-form regression for trend + SES recursion both
 deterministic). Estimated session time: ~1-1.5h.
 
-## §3 Unvalidated catalog techniques (17 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
+### theta_forecast (Phase 7+ S69; FIFTY-EIGHTH §2.5 entry; SECOND Forecasting Classical block DISPATCH-SET entry per ascending-complexity ordering; engine API path: `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API; engine on state-space-reformulation side, OPPOSITE positioning from S68 ets_hw classical-API); **NO engine-IMPROVEMENT candidate** — engine already uses appropriate modern API (engine-improvement queue stays n=1 [ets_hw only]); cross-API-paradigm Pattern A.1 vs R `forecast::thetaf` Assimakopoulos-Nikolopoulos 2000 original; **rmse Secondary BLOCK is HARNESS metric-extraction artifact** [statsmodels ThetaModel lacks `fittedvalues`; harness `fit.prediction_results.forecast(steps=0)` returns NaN], NOT a math-layer divergence — overall PASS since primary forecast passes; engine's own audit `fit_rmse` via expanding-window one-step-ahead reconstruction works + beats seasonal-naive baseline)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):**
+**PRIMARY metric: Tier II.mle-band (Pattern A.1 same-library
+cross-package CROSS-API-PARADIGM self-parity at `state_space_
+reform` verdict_class per master plan §7.1)** per S69 Code Step 2
+empirical verification. Python statsmodels `ThetaModel` (Hyndman-
+Billah 2003 state-space reformulation; TSL math path) vs R
+`forecast::thetaf` (Assimakopoulos-Nikolopoulos 2000 original;
+reference). Forecast PASS at `max_abs_diff=6.76e-4 +
+max_rel_diff=1.10e-5` — **3 orders of magnitude tighter than the
+widened mle-band tolerance** (per harness verdict_class_rationale
+line 92-96). Hyndman-Billah Theorem 1 establishes the two
+formulations are equivalent for theta=2 SES applied to differenced
+series; small-sample deviations absorbed by mle-band. **SECONDARY
+metric rmse: HARNESS metric-extraction artifact BLOCK (NaN), NOT
+a math-layer finding — see disclosure below.**
+
+**Engine variant validated (at math layer, indirectly via
+inlining):** statsmodels `ThetaModel(series, period=m,
+deseasonalize=True).fit()` then `.forecast(horizon)`. Harness
+`run_tsl` inlines this math (engine wrapper at engine line 11
+imports `from statsmodels.tsa.forecasting.theta import ThetaModel`
+— same API path). Standard theta=2 variant with multiplicative
+deseasonalization when seasonal period detected.
+
+**Reference (Pattern A.1 same-library cross-package CROSS-API-
+PARADIGM self-parity via R forecast::thetaf):** Reference
+reimplementation at `tools/reference_parity/harness/checks/
+p3_theta.py` `run_reference` lines 157-195 invokes R
+`forecast::thetaf(y, h=horizon)` via RBridge on `ts(y, frequency=
+m)`. R `forecast::thetaf` implements the **Assimakopoulos-
+Nikolopoulos (2000) ORIGINAL algorithm** (theta-line decomposition
++ SES on θ=2 line + linear extrapolation of θ=0 line + recombine).
+statsmodels `ThetaModel` implements the **Hyndman-Billah (2003)
+STATE-SPACE REFORMULATION** (SES-with-drift equivalent). Cross-
+API-paradigm comparison; Hyndman-Billah Theorem 1 equivalence for
+theta=2.
+
+**API PATH positioning note (cross-reference to S68 ets_hw
+framing):** At S68 ets_hw, the engine was on the CLASSICAL side
+(statsmodels classical holtwinters) vs R state-space `forecast::
+ets` — triggering an engine-IMPROVEMENT flag to migrate to the
+state-space API. **At S69 theta_forecast, the positioning is
+REVERSED:** the engine is on the STATE-SPACE-REFORMULATION side
+(statsmodels ThetaModel = Hyndman-Billah 2003) and the reference
+R `forecast::thetaf` is the ORIGINAL formulation. **Engine
+already uses the appropriate modern API for theta_forecast — NO
+engine-IMPROVEMENT candidate surfaced.** Engine-improvement queue
+remains at n=1 (ets_hw only) post-S69.
+
+**Engine-improvement queue status (post-S69):** **n=1 (ets_hw
+classical-holtwinters → statespace-ETS migration).** No new entry
+from S69 theta_forecast. NBEATS interpretability gap from SC16
+remains banked as "engine-correctness observation" pending user
+disposition on whether to classify it as an engine-improvement
+queue entry (would bring queue to n=2 if dispositioned in;
+queue-formalization-into-separate-Q2+-sprint threshold not yet
+met at n=1).
+
+**Wrapper-layer validation results (S49+ scope; 3/3 PASS):**
+
+- **Check 1 — NaN handling:** PASS. Engine `_prepare_series` at
+  engine lines 22-43 strips edge NaN + linearly interpolates
+  interior NaN. Verified by injecting interior NaN at [5] + [18]
+  in a 120-observation fixture: engine returned `status=success`
+  + emitted NaN-interpolation warning.
+- **Check 2 — Preset config invocation:** PASS. Invoked with
+  `preset="Balanced"` + `frequency="M"`; returned audit fields
+  populated correctly (`method="theta"`; `deseasonalized=True`;
+  `period=12` auto-inferred from frequency="M"; `horizon=10`;
+  `n_obs=120`; `fit_rmse=1.1324` via expanding-window one-step-
+  ahead reconstruction; `baseline_rmse=1.9032`; `baseline_label=
+  "seasonal-naive"` — theta beats seasonal-naive baseline;
+  `last_observed_value=59.71`; `forecast_end_value=58.02`).
+- **Check 3 — Output shape/type verification:** PASS. Engine
+  emitted 2 expected tables (`Theta Forecast` 10 × 4 [Step +
+  Forecast + Lower 95% + Upper 95%]; `Model Summary`).
+
+**Verdict (math layer — primary):** PASS at mle-band tolerance
+(forecast `max_abs_diff=6.76e-4`, `max_rel_diff=1.10e-5`; n=120
+seasonal AR(1) + trend + sin-seasonality DGP at seed=42, m=12,
+horizon=12 at runner CLI execution).
+**Verdict (math layer — secondary):** rmse BLOCK is a HARNESS
+metric-extraction artifact (NaN), NOT a math-layer divergence —
+see disclosure below. Overall runner CLI outcome PASS (primary
+forecast passes; BLOCK confined to non-extractable secondary
+diagnostic).
+**Verdict (wrapper layer):** PASS 3/3 checks per S69 Code Step 3.
+**Audit script:** `tools/reference_parity/harness/checks/p3_theta.py`.
+**Audit date:** 2026-05-28 (S69 §2.5 entry; Forecasting Classical
+block second dispatch-set entry).
+**Primary metric (math layer):** h-step point forecast vector
+(h=12).
+**Secondary metric:** in-sample RMSE (HARNESS-extraction artifact;
+see below).
+**Diagnostic:** α drift/smoothing coefficient (where exposed).
+
+**rmse Secondary BLOCK disclosure (HARNESS metric-extraction
+artifact; NOT a math-layer finding):**
+
+- **Manifestation at S69 audit:** runner CLI reports
+  `rmse: tsl=nan vs ref=0.945` (BLOCK on NaN comparison).
+- **Root cause:** statsmodels `ThetaModel` results object does
+  NOT expose a clean `fittedvalues` attribute. The harness
+  `run_tsl` RMSE reconstruction at p3_theta.py lines 136-141
+  attempts `fit.prediction_results.forecast(steps=0).predicted_
+  mean` which returns NaN/empty for the in-sample period. The
+  harness therefore returns `tsl rmse = nan`, producing a BLOCK
+  on the NaN comparison.
+- **NOT a math-layer divergence:** The engine itself computes a
+  working in-sample fit RMSE via expanding-window one-step-ahead
+  reconstruction at engine lines 237-275 (`fit_rmse=1.1324` at
+  S69 wrapper-layer invocation, `fit_rmse_source="one_step_ahead"`)
+  — confirming the engine has correct fit-quality diagnostics.
+  The BLOCK is confined to the harness's metric-extraction
+  shortcut (which does not use the engine's reconstruction path);
+  it does NOT indicate a forecast or fit divergence between
+  statsmodels ThetaModel and R thetaf.
+- **Overall outcome PASS:** rmse is a Secondary-tier diagnostic;
+  the primary forecast metric passes cleanly at mle-band; runner
+  CLI overall verdict is PASS. The Secondary rmse BLOCK is a
+  documented harness limitation (statsmodels ThetaModel
+  fittedvalues unavailability), NOT a regression or math-layer
+  finding.
+- **Optional harness refinement (low priority):** the harness
+  `run_tsl` rmse reconstruction could be upgraded to mirror the
+  engine's expanding-window one-step-ahead approach (engine lines
+  248-267) to extract a comparable in-sample RMSE; deferred as
+  HARNESS-scope low-priority item (does not affect the math-layer
+  forecast validation which is the substantive parity claim).
+
+**Validation claim scope (S69; engine math validated at primary-
+metric scope via inline-math harness pattern; engine wrapper code
+path exercised at wrapper-layer 3-check scope; math-layer
+comparison crosses Python statsmodels ThetaModel state-space
+reformulation and R forecast::thetaf original-algorithm
+implementations):**
+
+- **Layer 1 (statsmodels ThetaModel theta=2 forecast with
+  multiplicative deseasonalization) VALIDATED at Tier II.mle-
+  band:** h-step forecast agrees at mle-band tolerance (3 orders
+  tighter than band). Cross-API-paradigm agreement (statsmodels
+  Hyndman-Billah 2003 state-space reformulation vs R
+  Assimakopoulos-Nikolopoulos 2000 original) confirms both
+  implementations target the equivalent theta=2 model per
+  Hyndman-Billah Theorem 1.
+- **Layer 1 SECONDARY rmse: HARNESS metric-extraction artifact
+  (statsmodels ThetaModel fittedvalues unavailability):** NOT
+  math-layer validated due to harness extraction limitation;
+  engine's own expanding-window fit_rmse reconstruction works
+  (emitted in audit).
+- **Layer 1 PREDICTION INTERVALS NOT separately validated at
+  math layer:** Engine emits prediction interval columns via
+  statsmodels `fit.prediction_intervals(horizon, alpha=0.05)`
+  with documented fallback to t-distribution interval from in-
+  sample residuals (engine lines 138-175). Cross-implementation
+  PI comparison NOT in current parity scope.
+- **Layer 1 DESEASONALIZATION (decompose-then-recompose) NOT
+  separately validated:** Engine applies multiplicative
+  deseasonalization when period detected + ≥ 2 full seasonal
+  cycles available; reference R thetaf applies its own
+  deseasonalization. Both produce equivalent forecast at S69
+  audit DGP (within mle-band).
+- **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
+  VALIDATED at 3/3 PASS:** NaN handling via strip + interp;
+  preset config dispatch returns expected 2-table structure +
+  audit-field population including fit_rmse via reconstruction +
+  baseline comparison; output shape/type verification confirms
+  Forecast table column schema with prediction interval columns.
+
+**Phase 3 algorithmic basis (extracted from engine module +
+harness reference):** Theta method per Assimakopoulos-Nikolopoulos
+(2000) "The theta model: a decomposition approach to forecasting"
+Intl J Forecasting 16(4) — M3-Competition winner. Decomposes the
+series into "theta lines" (the series with its local curvatures
+amplified/dampened by coefficient θ applied to second
+differences); standard variant uses θ=0 line (linear trend
+extrapolation) + θ=2 line (SES, doubling local curvature) +
+recombine via average. State-space reformulation per Hyndman-
+Billah (2003) "Unmasking the Theta method" Intl J Forecasting
+19(2) — shows the standard Theta(0,2) forecast is equivalent to
+SES-with-drift, embedding the method in the exponential-smoothing
+state-space family. Engine uses statsmodels `ThetaModel` which
+implements the Hyndman-Billah formulation (SES-with-drift via
+`smoothing_level` α + drift `b0`), with optional multiplicative
+deseasonalization preprocessing.
+
+**Phase 3 known failure modes (S69 / engine-variant scope):**
+
+- Math-layer harness inlines statsmodels `ThetaModel.fit()` per
+  Phase 1 finding B8 — engine wrapper rounds forecast to 6
+  decimals at engine line 184; inline path achieves mle-band
+  parity vs wrapper-path 1e-6 floor.
+- **rmse Secondary metric HARNESS-extraction artifact:**
+  statsmodels ThetaModel lacks `fittedvalues`; harness
+  reconstruction returns NaN; engine's own expanding-window fit
+  RMSE reconstruction works (emitted in audit). Documented as
+  harness limitation, not a math-layer finding.
+- **Cross-API-paradigm small-sample deviations:** Hyndman-Billah
+  2003 state-space reformulation (statsmodels) vs Assimakopoulos-
+  Nikolopoulos 2000 original (R) are equivalent for theta=2 per
+  Hyndman-Billah Theorem 1 but small-sample deviations possible;
+  absorbed by mle-band tolerance (S69 achieved 3 orders tighter
+  than band).
+- **Deseasonalization edge cases:** Engine deseasonalizes only
+  when period ≥ 2 + n ≥ 2·period + deseasonalize flag set; short
+  series proceed without deseasonalization (warning emitted).
+  Reference R thetaf has its own deseasonalization logic; at S69
+  DGP (n=120, m=12 = 10 full cycles) both deseasonalize
+  consistently.
+
+**Phase 3 boundary of validity:**
+
+- T=120 seasonal AR(1) + trend + sin-seasonality fixture (φ=0.7,
+  σ=1.0, m=12); other DGP regimes + seasonal periods NOT
+  validated at math layer
+- theta=2 standard variant validated; generalized theta with
+  alternative θ values or extended multi-line decomposition NOT
+  validated (engine default theta=2.0 per engine docstring)
+- multiplicative deseasonalization validated at m=12; alternative
+  deseasonalization modes NOT separately validated
+- horizon=12 forecast validated; longer horizons NOT separately
+  exercised
+- in-sample RMSE: harness-extraction artifact (NaN); engine's own
+  reconstruction works but not cross-validated against R
+- prediction intervals NOT validated at math layer
+
+**Phase 3 gap markings:**
+
+- rmse cross-package parity NOT achievable per harness extraction
+  limitation (statsmodels ThetaModel fittedvalues unavailability);
+  HARNESS-scope low-priority refinement candidate (mirror engine's
+  expanding-window reconstruction)
+- prediction intervals NOT validated at math layer
+- generalized theta (θ ≠ 2) NOT validated
+- alternative deseasonalization modes NOT validated
+- theta-line decomposition diagnostics NOT emitted as standalone
+  output (minor user-convenience; theta lines accessible via
+  ThetaModel internals but not surfaced)
+
+**Status (PRIMARY Tier II.mle-band PASS at state_space_reform
+verdict_class tolerance + SECONDARY rmse HARNESS-extraction
+artifact + wrapper-layer 3/3 PASS per S69 / Forecasting Classical
+block second dispatch-set entry):** Layer 1 statsmodels ThetaModel
+forecast math validated at mle-band tolerance (3 orders tighter
+than band) via cross-API-paradigm cross-library check (statsmodels
+Hyndman-Billah 2003 vs R Assimakopoulos-Nikolopoulos 2000).
+Wrapper layer (S49+ NEW 3-check scope) validated at 3/3 PASS
+including 2-table output structure (Theta Forecast with PI columns
++ Model Summary). **NO engine-IMPROVEMENT candidate (engine uses
+appropriate modern statsmodels ThetaModel API).**
+
+**Validation-Surface Coverage (VSC) — embedded per Cat 1d
+revision-2 framework (Disposition 3):**
+
+- **Validated configuration (harness math layer):** statsmodels
+  `ThetaModel(series, period=12, deseasonalize=True).fit()` then
+  `.forecast(12)`. Pattern A.1 cross-library CROSS-API-PARADIGM
+  reference: R `forecast::thetaf(ts(y, frequency=12), h=12)`.
+  Seasonal AR(1) + trend DGP at n=120, seed=42, m=12.
+- **Engine preset default (Balanced):** theta=2.0 (engine default
+  per engine line 72 docstring); deseasonalize=True when period
+  detected (engine lines 97-105); period auto-inferred from
+  frequency (engine lines 46-56). At ctx.frequency="M" engine
+  sets period=12 + deseasonalize=True (n=120 ≥ 2·12).
+- **Configuration match:** **YES at primary metric math layer
+  modulo seasonal-period-auto-detection convention** — user
+  invoking at default Balanced preset with monthly-frequency data
+  ≥ 2 full seasonal cycles matches validated configuration. For
+  non-monthly frequencies, short series (< 2 cycles), or
+  generalized theta values, math-layer validation does NOT
+  exercise alternative configurations.
+- **Disclosure scope:** Generalized theta (θ ≠ 2) NOT validated.
+  Non-seasonal / deseasonalize=False path NOT separately
+  validated at math layer. Alternative seasonal periods NOT
+  validated. Prediction interval emission NOT separately
+  validated (statsmodels native PI with documented t-distribution
+  fallback). in-sample RMSE harness-extraction artifact (NaN;
+  engine's own reconstruction works). theta-line decomposition
+  diagnostics NOT emitted as standalone output (minor user-
+  convenience gap).
+
+**ENG-EXT institutional-rates theta workflow scan outcome (S69
+Step 1; standard tight workflow; no NEW ENG-EXT-FORECASTING-001
+candidate surfaced):**
+
+The institutional-rates theta workflow (M3-benchmark forecasting;
+baseline tool) requires modest workflow elements:
+
+(a) **Point forecast:** PRESENT ✓ — `Theta Forecast` table emits
+    h-step point forecasts.
+(b) **Prediction intervals:** PRESENT ✓ — Lower/Upper 95% columns
+    via statsmodels native PI with documented t-distribution
+    fallback.
+(c) **Fit quality + baseline comparison:** PRESENT ✓ — engine
+    emits `fit_rmse` (via expanding-window reconstruction) +
+    `baseline_rmse` + `baseline_label` (theta beats seasonal-
+    naive at S69 audit DGP). **Stronger than minimum** —
+    institutional fit-vs-baseline benchmarking surfaced natively.
+(d) **theta-line decomposition diagnostics** (θ=0 trend line +
+    θ=2 SES line trajectories): **PARTIAL — not emitted as
+    standalone output**; theta lines accessible via ThetaModel
+    internals but not surfaced. Minor user-convenience candidate.
+
+**Verdict: COVERED at standard workflow elements** modulo (d)
+theta-line decomposition diagnostics user-convenience gap. **No
+new ENG-EXT-FORECASTING-001 commission surfaced at S69.** Engine
+emits a stronger-than-minimum fit-vs-baseline benchmark which is
+institutionally useful.
+
+**Audit-hygiene cross-reference (S69 / no engine-IMPROVEMENT +
+rmse harness-artifact disclosure):**
+
+S69 theta_forecast engine uses the appropriate modern statsmodels
+ThetaModel API (Hyndman-Billah 2003 state-space reformulation) —
+OPPOSITE positioning from S68 ets_hw (which used the classical
+holtwinters API on the wrong side, triggering an engine-IMPROVEMENT
+flag). **NO engine-IMPROVEMENT candidate from S69; engine-
+improvement queue remains n=1 (ets_hw only).** The rmse Secondary
+BLOCK is a documented HARNESS metric-extraction artifact
+(statsmodels ThetaModel fittedvalues unavailability), NOT a math-
+layer divergence; the engine's own expanding-window fit RMSE
+reconstruction works correctly. Forecast primary metric PASS at
+mle-band (3 orders tighter than band).
+
+**Forecasting Classical block progress note (S69 second dispatch-
+set entry):** Block 2 Forecasting Classical advances at S69
+theta_forecast per ratified ascending-complexity dispatch ordering
+(ets_hw → theta_forecast → arima → sarima → arimax_sarimax →
+auto_arima → intermittent_demand). **Post-S69: Forecasting
+Classical block 3/8 §2.5-validated** (SC7 transfer_function +
+S68 ets_hw + S69 theta_forecast). **5 remaining in dispatch-set
+via S70-S74.** Block close projected at S74 intermittent_demand.
+
+**S70 arima projection (next Forecasting Classical block session
+per ascending-complexity dispatch ordering):** Engine
+`engine/techniques/arima.py` (verify exact module name) is single
+ARIMA (non-seasonal, non-exogenous). Expected Pattern A.1 same-
+library cross-package self-parity vs R `forecast::Arima` or
+`stats::arima`. Bit-exact-prone for the OLS/CSS estimation path;
+mle-band possible for exact-MLE path depending on engine
+configuration. Cross-reference: S62 conformal_intervals validated
+auto_arima (pmdarima) base forecaster — if engine arima shares
+pmdarima or statsmodels SARIMAX backbone, note infrastructure
+relationship. Pre-existing risk: ARIMA AIC/BIC may carry Tier V
+Pattern D analog to S64 VAR (statsmodels vs R IC formula
+convention); document if surfaced. Estimated session time:
+~1-1.5h.
+
+## §3 Unvalidated catalog techniques (16 entries; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
 `TSL_RUN_THR("<technique_id>", …)`; **no reference parity
@@ -32089,8 +32439,8 @@ descriptions, summaries).
 ### Evaluation / Uncertainty (0 unvalidated; **Block 4 FULLY Q1-AMENDED** — NINTH catalog block to complete per Q1 work program scope at S62 close = 9 of 13 catalog blocks fully Q1-amended (69% catalog block-level completion); robust_estimators moved to §2.5 per Phase 7+ S58 — FIRST Evaluation / Uncertainty block entry; Block 4 opens; rolling_origin_cv moved to §2.5 per Phase 7+ S59 — SECOND block entry; FIRST §2.5 entry following audit-hygiene remediation cycle per hygiene commits e72d6f5 + 2f46381; forecast_combination moved to §2.5 per Phase 7+ S60 — THIRD block entry; FIRST §2.5 entry applying §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy; block_bootstrap moved to §2.5 per Phase 7+ S61 — FOURTH block entry; SECOND application of Sub-variant 3.D framing; Category 2 DEGENERATE-COHERENT inventory exhausted at 2/2 post-S61; conformal_intervals moved to §2.5 per Phase 7+ S62 — FIFTH-AND-FINAL block entry; Q1 cadence resumption entry post-Cat-3-cycle close at SC17 a54b430; cascade-resolution entry — p3_conformal was the original Cat 3 finding at S62 Step 1 that triggered the inventory verification cascade + 17-session Cat 3 remediation cycle, now closed at S62 §2.5 entry against the corrected harness; MANDATORY Path B forward observation embedded: ENG-EXT-CONFORMAL-001 commissions CQR + EnbPI/SPCI Q2+ engine extension for institutional-fixed-income-use-case scope)
 (all 5 techniques moved to §2.5)
 
-### Forecasting (Classical) (6 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE-minimization path (NOT likelihood-based); FIRST engine-IMPROVEMENT candidate within Q1 cycle — migrate to `statsmodels.tsa.statespace.exponential_smoothing.ExponentialSmoothing` for likelihood-based inference + exact PIs + Kalman diagnostics + State Space block backbone cross-reference; engine-improvement queue at S68 close: n=1; pre-existing aic/bic Tier V Pattern D CAVEAT per harness `state_space_reform` verdict_class_rationale; β/γ corner-solution landing confirms classical SSE optimizer boundary-sticking pathology)
-`arima`, `arimax_sarimax`, `auto_arima`, `intermittent_demand`, `sarima`, `theta_forecast`
+### Forecasting (Classical) (5 unvalidated; transfer_function moved to §2.5 per Phase 7+ SC7 Cat 3 remediation cycle session 7/17 — FIRST Block 2 entry; Tier B opening; ets_hw moved to §2.5 per Phase 7+ S68 — SECOND Block 2 entry; FIRST DISPATCH-SET entry post-Cat-3-cycle (Block 2 ascending-complexity ordering ets_hw → theta_forecast → arima → sarima → arimax_sarimax → auto_arima → intermittent_demand ratified at S67 close); engine uses CLASSICAL `statsmodels.tsa.holtwinters.ExponentialSmoothing` SSE-minimization path (NOT likelihood-based); FIRST engine-IMPROVEMENT candidate within Q1 cycle — migrate to statespace ETS for likelihood-based inference; engine-improvement queue at S68 close: n=1; pre-existing aic/bic Tier V Pattern D CAVEAT; β/γ corner-solution landing confirms classical SSE optimizer boundary-sticking pathology; theta_forecast moved to §2.5 per Phase 7+ S69 — THIRD Block 2 entry; SECOND dispatch-set entry; engine uses `statsmodels.tsa.forecasting.theta.ThetaModel` (Hyndman-Billah 2003 state-space reformulation — MODERN API; engine on state-space side, OPPOSITE positioning from S68 ets_hw classical-API); NO engine-IMPROVEMENT candidate — engine already uses appropriate modern API (engine-improvement queue stays n=1); cross-API-paradigm Pattern A.1 vs R `forecast::thetaf` Assimakopoulos-Nikolopoulos 2000 original; forecast PASS at mle-band 3 orders tighter than band; rmse Secondary BLOCK is HARNESS metric-extraction artifact [statsmodels ThetaModel lacks fittedvalues] NOT math-layer divergence — overall PASS)
+`arima`, `arimax_sarimax`, `auto_arima`, `intermittent_demand`, `sarima`
 
 ### Frequency Domain / Signal (0 unvalidated; Block 5 FULLY Q1-AMENDED — FIFTH catalog block to complete per Q1 work program scope; periodogram_spectral_density moved to §2.5 per Phase 7+ S37; fft_spectrum moved to §2.5 per Phase 7+ S38; lomb_scargle moved to §2.5 per Phase 7+ S39; ssa moved to §2.5 per Phase 7+ S40; wavelet_transform moved to §2.5 per Phase 7+ S41; wavelet_coherence_phase_lag moved to §2.5 per Phase 7+ S42; emd_hht moved to §2.5 per Phase 7+ S43 — SEVENTH-AND-FINAL Block 5 entry; heterogeneous Tier-surface variant observation A3 FOURTH-OBSERVATION TIGHTENING MANIFESTED at S43 with n=5 distinct Tiers across 7 sub-sessions S37-S43 (Tier III Pattern A.1 at S37 + S41 REPEAT + Tier II.bit-exact Pattern A.2 at S38 + Tier V Pattern J B.3 at S39 + Tier IV Pattern A.3 at S40 + S42 REPEAT + Tier VI CAVEAT at S43 NEW))
 (all 7 techniques moved to §2.5)
