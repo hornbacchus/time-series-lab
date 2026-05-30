@@ -140,6 +140,82 @@ def _proxy_svar(fit, instrument, normalize_var=0):
     return b1, eps_hat, relevance
 
 
+def _sign_restriction_svar(fit, R, n_draws, seed, steps):
+    """Sign-restriction SVAR identification via rotation sampling
+    (ENG-EXT-MULTIVARIATE-001 M3b net-new — statsmodels SVAR is A/B/AB
+    short-run only; no sign-restriction).
+
+    SET-identified: draw random orthogonal (Haar) rotations Q, form candidate
+    structural impact matrices ``B0 = chol(Σ)·Q``, diagonal-normalize (flip
+    each column so its own-variable impact is ≥0), and KEEP those whose impact
+    responses satisfy the sign restrictions ``R`` (k×k of {−1,0,+1} at impact:
+    +1 ⇒ response of var i to shock j ≥0, −1 ⇒ ≤0, 0 ⇒ free). The admissible
+    SET is summarized by the median-target + 16th/84th percentile bands over
+    retained rotations. Deterministic in ``seed`` (local RandomState).
+
+    Returns a dict: ``median_b0`` (k,k), ``median_irf`` / ``lo16`` / ``hi84``
+    (steps+1, k, k) structural-IRF set summary, ``n_retained``, ``n_draws``,
+    ``sign_satisfaction`` (fraction of retained satisfying R — == 1.0 when
+    correct), ``cholesky_admissible`` (the diagonal-normalized Cholesky
+    satisfies R — the Cholesky-in-set invariant), and ``kept`` (the retained
+    B0 list, for the harness).
+    """
+    Sigma = np.asarray(fit.sigma_u, dtype=np.float64)
+    P = np.linalg.cholesky(Sigma)
+    k = P.shape[0]
+    R = np.asarray(R, dtype=np.float64)
+    Phi = np.asarray(fit.ma_rep(maxn=steps), dtype=np.float64)  # (steps+1, k, k)
+
+    def _diag_normalize(B0):
+        for j in range(k):
+            if B0[j, j] < 0:
+                B0[:, j] = -B0[:, j]
+        return B0
+
+    def _satisfies(B0):
+        for i in range(k):
+            for j in range(k):
+                if R[i, j] > 0 and B0[i, j] < -1e-12:
+                    return False
+                if R[i, j] < 0 and B0[i, j] > 1e-12:
+                    return False
+        return True
+
+    rs = np.random.RandomState(seed)
+    kept = []
+    for _ in range(n_draws):
+        Z = rs.standard_normal((k, k))
+        Q, Rqr = np.linalg.qr(Z)
+        Q = Q @ np.diag(np.sign(np.diag(Rqr)))  # Haar-uniform sign normalization
+        B0 = _diag_normalize((P @ Q).copy())
+        if _satisfies(B0):
+            kept.append(B0)
+
+    cholesky_admissible = bool(_satisfies(_diag_normalize(P.copy())))
+    if kept:
+        K = np.array(kept)  # (m, k, k)
+        median_b0 = np.median(K, axis=0)
+        # structural IRF set: Θ_h = Φ_h @ B0 for each retained B0
+        Theta = np.array([np.einsum("hrs,sc->hrc", Phi, B0) for B0 in kept])
+        median_irf = np.median(Theta, axis=0)
+        lo16 = np.percentile(Theta, 16, axis=0)
+        hi84 = np.percentile(Theta, 84, axis=0)
+        sign_satisfaction = float(np.mean([_satisfies(B0) for B0 in kept]))
+    else:
+        median_b0 = np.full((k, k), np.nan)
+        median_irf = lo16 = hi84 = np.full((steps + 1, k, k), np.nan)
+        sign_satisfaction = 0.0
+
+    return {
+        "median_b0": median_b0,
+        "median_irf": median_irf, "lo16": lo16, "hi84": hi84,
+        "n_retained": len(kept), "n_draws": int(n_draws),
+        "sign_satisfaction": sign_satisfaction,
+        "cholesky_admissible": cholesky_admissible,
+        "kept": kept,
+    }
+
+
 def _mc_irf_bands(fit, steps, repl, signif, seed, orth=True, burn=100):
     """Monte-Carlo confidence bands for the (orthogonalized) IRF.
 
@@ -654,11 +730,102 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     warn_list.append(f"Proxy/IV-SVAR identification failed: {e}")
                     proxy_computed = False
 
+        # ENG-EXT-MULTIVARIATE-001 M3b — Sign-restriction SVAR set-identification
+        # (ADDITIVE; reuses the M3a scheme-selector pattern). SET-identified:
+        # draw Haar rotations, keep those whose impact responses satisfy the
+        # sign restrictions, summarize the admissible set (median + 16/84 bands).
+        # No usable cross-package library → validated by self-parity (matched
+        # rotation sampling) + load-bearing functional checks (sign-satisfaction
+        # + Cholesky-in-set + economic sensibility).
+        sr_tables = []
+        sign_restriction_computed = False
+        sr_n_retained = None
+        sr_sign_satisfaction = None
+        sr_cholesky_admissible = None
+        if svar_identification == "sign_restriction":
+            progress_callback("Sign-restriction set-identification", 88)
+            sr_n_draws = int(ctx.get_param(
+                "sr_n_draws",
+                {"Fast": 500, "Balanced": 2000, "Thorough": 5000}.get(ctx.preset, 2000),
+            ))
+            R_param = ctx.get_param("sign_restrictions")
+            if R_param is None:
+                # Default: recursive-consistent diagonal-positive + a
+                # discriminating off-diagonal (shock 1's impact on var 0 ≤ 0).
+                R_default = np.zeros((k, k))
+                np.fill_diagonal(R_default, 1.0)
+                if k >= 2:
+                    R_default[0, 1] = -1.0
+                R_param = R_default
+            try:
+                R_mat = np.asarray(R_param, dtype=np.float64).reshape(k, k)
+                sr = _sign_restriction_svar(
+                    fit, R_mat, sr_n_draws, int(ctx.seed), irf_periods,
+                )
+                if sr["n_retained"] == 0:
+                    warn_list.append(
+                        "Sign-restriction identification retained no rotations "
+                        "(the restrictions may be inconsistent); skipping."
+                    )
+                else:
+                    sr_n_retained = int(sr["n_retained"])
+                    sr_sign_satisfaction = round(float(sr["sign_satisfaction"]), 6)
+                    sr_cholesky_admissible = bool(sr["cholesky_admissible"])
+                    mb = sr["median_b0"]
+                    sr_tables.append(make_table(
+                        "Sign-Restriction Set — Median Impact (B0)",
+                        ["Variable"] + [f"Shock {j + 1}" for j in range(k)],
+                        [[names[i]] + [round(float(mb[i, j]), 6) for j in range(k)]
+                         for i in range(k)],
+                    ))
+                    med, lo, hi = sr["median_irf"], sr["lo16"], sr["hi84"]
+                    sirf_rows = []
+                    for t in range(med.shape[0]):
+                        for shock_idx in range(k):
+                            for resp_idx in range(k):
+                                sirf_rows.append([
+                                    t, f"Shock {shock_idx + 1}", names[resp_idx],
+                                    round(float(med[t, resp_idx, shock_idx]), 6),
+                                    round(float(lo[t, resp_idx, shock_idx]), 6),
+                                    round(float(hi[t, resp_idx, shock_idx]), 6),
+                                ])
+                    sr_tables.append(make_table(
+                        "Structural IRF (Sign-Restriction) — Median/Lower16/Upper84",
+                        ["Period", "Shock", "Response", "Median", "Lower16", "Upper84"],
+                        sirf_rows,
+                    ))
+                    sr_tables.append(make_table(
+                        "Sign-Restriction Diagnostics",
+                        ["Metric", "Value"],
+                        [
+                            ["Rotations drawn", sr["n_draws"]],
+                            ["Rotations retained", sr["n_retained"]],
+                            ["Retention fraction",
+                             round(sr["n_retained"] / sr["n_draws"], 4)],
+                            ["Sign-satisfaction (retained)",
+                             round(float(sr["sign_satisfaction"]), 6)],
+                            ["Cholesky admissible (in set)",
+                             "Yes" if sr["cholesky_admissible"] else "No"],
+                        ],
+                    ))
+                    sign_restriction_computed = True
+                    warn_list.append(
+                        "Sign-restriction SVAR set-identification applied: the "
+                        f"structural shocks are SET-identified ({sr['n_retained']} "
+                        f"of {sr['n_draws']} rotations admissible); the impulse "
+                        "responses are summarized by the median-target + 16/84 "
+                        "percentile bands over the admissible set."
+                    )
+            except Exception as e:
+                warn_list.append(f"Sign-restriction identification failed: {e}")
+                sign_restriction_computed = False
+
         tables = [fc_table, summary_table, coef_table, irf_table, fevd_table]
         if irf_band_table is not None:
             tables.append(irf_band_table)
         tables.extend(bq_tables)
         tables.extend(proxy_tables)
+        tables.extend(sr_tables)
         if gc_rows:
             gc_table = make_table(
                 "Granger Causality (from VAR)",
@@ -739,6 +906,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 # ENG-EXT-MULTIVARIATE-001 M3c — proxy/IV-SVAR.
                 "proxy_computed": bool(proxy_computed),
                 "proxy_instrument_corr": proxy_instrument_corr,
+                # ENG-EXT-MULTIVARIATE-001 M3b — sign-restriction set-ID.
+                "sign_restriction_computed": bool(sign_restriction_computed),
+                "sr_n_retained": sr_n_retained,
+                "sr_sign_satisfaction": sr_sign_satisfaction,
+                "sr_cholesky_admissible": sr_cholesky_admissible,
             },
         )
 

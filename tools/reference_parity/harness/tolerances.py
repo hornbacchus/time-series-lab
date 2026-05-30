@@ -1238,6 +1238,51 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ENG-EXT-MULTIVARIATE-001 M3b — sign-restriction SVAR set-identification
+    # (the third validation kind). Self-parity matched-rotation-sampling →
+    # bit-exact set summary (median impact + median/lo16/hi84 IRF bands);
+    # plus the LOAD-BEARING functional checks (sign-satisfaction == 1.0;
+    # Cholesky-in-set admissibility; economic sign) as the
+    # formulation-correctness substitute for the absent cross-package arm.
+    "p3_var_sign_restriction": {
+        "type": "tiered_outputs",
+        "set_summary_selfparity": {
+            "abs_tol": 1e-12, "rel_tol": 1e-12,
+            "block_abs_tol": 1e-9, "block_rel_tol": 1e-9,
+        },
+        "sign_satisfaction": {
+            "min_frac": 1.0,
+        },
+        "cholesky_in_set": {
+            "required": True,
+        },
+        "economic_sign": {
+            "required": True,
+        },
+        "justification": (
+            "ENG-EXT-MULTIVARIATE-001 M3b — sign-restriction SVAR, the A-phase's "
+            "THIRD validation kind (SET-identification). Net-new (statsmodels "
+            "SVAR is A/B/AB short-run only); NO usable cross-package R package "
+            "(svars wrong family; VARsignR CRAN-archived). The admissible set "
+            "(Haar rotations satisfying the signs) is summarized by median-target "
+            "+ 16/84 bands — the same percentile-band structure as M1's "
+            "bootstrap_distributional (rotation sampling ≈ bootstrap resampling), "
+            "so the verdict_class is reused. set_summary_selfparity 1e-12: engine "
+            "_sign_restriction_svar vs a from-scratch reimplementation of the "
+            "IDENTICAL rotation sampling (same seed/draws/QR-normalization/diag-"
+            "normalization/retention) → bit-exact set summary (deterministic). "
+            "The functional checks are LOAD-BEARING (the A1c formulation-"
+            "correctness substitute): sign_satisfaction == 1.0 (every retained "
+            "rotation satisfies the signs); cholesky_in_set (the diagonal-"
+            "normalized Cholesky is admissible — the strongest invariant, a "
+            "set-construction bug excluding it fails); economic_sign (median "
+            "impact's restricted entries have the correct sign). Verified "
+            "discriminating against deliberate bugs (retain-all → 0.58 caught; "
+            "Cholesky-excluding pattern → admissible False caught). Do NOT relax "
+            "these to mask a set-construction bug."
+        ),
+    },
+
     "p3_vecm": {
         # Phase 3.5 Session 3 (Item 1): tightened from canonical
         # mle_fit band (1e-3 abs / 1e-2 rel) to single_impl_mle
