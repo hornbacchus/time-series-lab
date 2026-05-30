@@ -30039,10 +30039,10 @@ engine lines 203-209 emphasizing the structural assumption.
   distributional three-arm validation PASS)** — see the M1 amendment
   below
 - **Blanchard-Quah ~~NOT IMPLEMENTED~~ DELIVERED at M3a** (commit
-  `d8fceb8`; long-run-restriction B0, cross-package vars::BQ machine
-  precision, closed_form); **sign-restriction + proxy-SVAR still pending
-  M3b/M3c** — see ENG-EXT-MULTIVARIATE-001 commission + M1/M3a amendments
-  below
+  `d8fceb8`; cross-package vars::BQ machine precision); **proxy-SVAR
+  ~~NOT IMPLEMENTED~~ DELIVERED at M3c** (commit `29baaf5`; self-parity
+  bit-exact + load-bearing instrument-relevance functional check); **only
+  sign-restriction still pending M3b** — see the M1/M3a/M3c amendments below
 
 **Status (PRIMARY Tier II.bit-exact PASS at machine precision +
 SECONDARY aic/bic Tier V Pattern D pre-existing CAVEAT documented
@@ -30330,6 +30330,63 @@ reuses this scheme-selector pattern) + **M3b** (sign-restriction — self-parity
 + set-identification + Cholesky-in-set/sign-satisfaction load-bearing
 functional checks, `bootstrap_distributional`, the commission's hardest)
 pending.
+
+---
+
+**ENG-EXT-MULTIVARIATE-001 EXTENDED — M3c DELIVERED (proxy / IV-SVAR
+identification; commit `29baaf5`; ADDITIVE; the FIRST self-parity SVAR;
+sub-build M3c of [M3a done → M3c → M3b, ascending-risk]):**
+
+M3c adds proxy / external-instrument (Stock-Watson / Mertens-Ravn) SVAR
+identification — one structural shock identified via an external instrument.
+NET-NEW (statsmodels SVAR is A/B/AB short-run only); the FIRST self-parity
+SVAR (M3a was cross-package). Reuses M3a's `svar_identification` scheme
+selector (adds `"proxy"` + `proxy_instrument` / `proxy_normalize_var` params).
+
+- **Proxy estimator:** `_proxy_svar` — `b1 ∝ Cov(residuals u, instrument z)`
+  (since `E[u z] = B·E[ε z] = b₁·α`, only the target shock correlates with z),
+  normalized to unit impact on the reference variable (point-identified up to
+  scale+sign); GLS-projected identified shock `ε₁_hat = (u Σ⁻¹ b1)/(b1ᵀΣ⁻¹b1)`;
+  structural IRF (target shock) = `ma_rep(h) @ b1`. Verified: recovers the true
+  relative impact column ([1.0, 0.506] vs true [1.0, 0.5]). 3 tables (Structural
+  Impact Vector / Structural IRF / Proxy Instrument Relevance) when proxy
+  selected + instrument provided. Audit `proxy_computed / proxy_instrument_corr`.
+
+- **VALIDATION — SELF-PARITY + a LOAD-BEARING functional check (check
+  `p3_var_proxy_svar`, verdict_class `closed_form`):** no usable cross-package
+  R package exists (the svars finding: svars covers heteroskedasticity ID, not
+  proxy-SVAR), so two complementary arms (the A1c lesson):
+  - **Self-parity (machinery / implementation-correctness):** engine
+    `_proxy_svar` vs a from-scratch reimplementation of the IDENTICAL
+    formulation (same Cov(u,z), normalize-to-reference-variable, GLS
+    projection) → **BIT-EXACT** (b1 0.0, struct_irf 0.0).
+  - **Instrument-relevance functional check (LOAD-BEARING /
+    formulation-correctness — the substitute for the absent cross-package
+    arm):** the scheme-DEFINING property is that the identified shock
+    CORRELATES with the instrument (instrument relevance / first stage).
+    `corr(ε₁_hat, z) ≥ 0.2` (at n≈600, corr 0.2 ≈ first-stage F > 10). VERIFIED
+    DISCRIMINATING — relevant instrument **0.881 PASS**, irrelevant control
+    **−0.018 BLOCK**. A formulation bug producing a non-correlated shock FAILS
+    this — NOT a soft diagnostic (the A1c self-parity-validates-match-not-
+    correctness mitigation operationalized). Scale/sign normalization identical
+    across the two self-parity arms (the identical-parameterization discipline).
+  Overall **PASS**, deterministic (×2).
+
+- **ADDITIVE / backward-compat (FIRM GATE — PASSED):** default
+  `svar_identification="cholesky"` (or proxy-not-selected / no-instrument) →
+  the entire existing VAR output (Cholesky IRF + M1 bands + FEVD + M3a BQ-when-
+  selected + coefficients/forecast/summary/Granger) BYTE-IDENTICAL (nan-aware
+  git before/after diff); `p3_var` + `p3_var_irf_bands` + `p3_var_bq` sentinels
+  PASS unchanged. Wrapper-3/3 PASS (NaN; scheme dispatch; missing-instrument
+  graceful skip).
+
+- **The self-parity-SVAR pattern + load-bearing-functional-check discipline
+  carry to M3b** (sign-restriction: self-parity + set-identification + a
+  load-bearing sign-satisfaction / Cholesky-in-set functional check).
+
+**MULTIVARIATE-001 EXTENDED status (updated):** M1 + M2 + M3a + M3c DONE; only
+**M3b** (sign-restriction, set-identified, `bootstrap_distributional`, the
+commission's hardest) remains — then the commission COMPLETES.
 
 **Multivariate Systems block progress note (S64 second entry):**
 Block 10 Multivariate Systems advances at S64 var per ratified
@@ -38560,11 +38617,18 @@ catalog completion).** §3 unvalidated → 0.
       point-parity vs R vars::BQ at MACHINE PRECISION [b0 4.44e-16, lrim
       4.88e-15, struct_irf 1.22e-15, closed_form]; ESTABLISHES the
       SVAR-identification build pattern [scheme selector + structural outputs]
-      that M3c/M3b reuse; S64 amendment).** Remaining: M3c (proxy-SVAR —
-      self-parity + instrument-correlation functional check, point) + M3b
-      (sign-restriction — self-parity + set-identification + load-bearing
-      functional checks, `bootstrap_distributional`, hardest), ascending-risk.
-      The `bootstrap_distributional` interval-pattern (from M1) carries to
+      that M3c/M3b reuse; S64 amendment).** **M3c DELIVERED (proxy/IV-SVAR;
+      commit `29baaf5`; the FIRST self-parity SVAR; NET-NEW b1 ∝
+      Cov(residuals, instrument) normalized; self-parity bit-exact [b1 0.0,
+      struct_irf 0.0] + a LOAD-BEARING instrument-relevance functional check
+      [corr ≥ 0.2 — the formulation-correctness substitute for the absent
+      cross-package arm; discriminating: relevant 0.881 PASS vs irrelevant
+      control −0.018 BLOCK]; closed_form; reuses M3a's scheme selector;
+      S64 amendment).** Remaining: only **M3b** (sign-restriction —
+      self-parity + set-identification + load-bearing sign-satisfaction/
+      Cholesky-in-set functional checks, `bootstrap_distributional`, the
+      commission's hardest) → then MULTIVARIATE-001 EXTENDED COMPLETE. The
+      `bootstrap_distributional` interval-pattern (from M1) carries to
       commission (1) CONFORMAL-001 (the `conformal_coverage` sibling).
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
