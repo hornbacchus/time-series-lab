@@ -30038,9 +30038,11 @@ engine lines 203-209 emphasizing the structural assumption.
   M1 (commit `7ec4605`; preset-gated bootstrap MC bands; bootstrap_
   distributional three-arm validation PASS)** — see the M1 amendment
   below
-- **Sign-restriction / Blanchard-Quah / proxy-SVAR identification
-  NOT IMPLEMENTED** — pending M3 (advanced SVAR); see ENG-EXT-
-  MULTIVARIATE-001 commission + M1 amendment below
+- **Blanchard-Quah ~~NOT IMPLEMENTED~~ DELIVERED at M3a** (commit
+  `d8fceb8`; long-run-restriction B0, cross-package vars::BQ machine
+  precision, closed_form); **sign-restriction + proxy-SVAR still pending
+  M3b/M3c** — see ENG-EXT-MULTIVARIATE-001 commission + M1/M3a amendments
+  below
 
 **Status (PRIMARY Tier II.bit-exact PASS at machine precision +
 SECONDARY aic/bic Tier V Pattern D pre-existing CAVEAT documented
@@ -30267,6 +30269,67 @@ irf_band_method / irf_band_seed`.
 then M3 advanced SVAR identification (Blanchard-Quah cross-package
 `vars::BQ`; sign-restriction + proxy-SVAR self-parity since `svars` is not
 pinned — split confirmed at M3's open).
+
+---
+
+**ENG-EXT-MULTIVARIATE-001 EXTENDED — M3a DELIVERED (Blanchard–Quah SVAR
+identification; commit `d8fceb8`; ADDITIVE; Q2 Workstream A commission 2 of
+3, sub-build M3a of [M1 done → M2 done → M3a → M3c → M3b, ascending-risk]):**
+
+M3a is the FIRST of the three advanced-SVAR-identification schemes and
+ESTABLISHES the SVAR-identification build pattern. It closes commission
+candidate #2 part 1 (Blanchard–Quah long-run restrictions). Engine
+`var_model.py` now identifies structural shocks via long-run restrictions
+when `svar_identification="blanchard_quah"`.
+
+- **BQ build (net-new — statsmodels SVAR is A/B/AB short-run only):** the
+  `_blanchard_quah_b0` helper computes `B0 = C(1)⁻¹·cholesky_lower(C(1)·Σ·C(1)ᵀ)`
+  from `VARResults.long_run_effects()` (C(1) = (I−ΣAᵢ)⁻¹); structural IRF =
+  `ma_rep(h) @ B0`. Invariants confirmed at build: `B0·B0ᵀ == Σ`; `C(1)·B0`
+  lower-triangular (the long-run restriction — shock j has no permanent effect
+  on variable i for i<j). Unconditional Cholesky (PD by construction).
+
+- **The SVAR-identification BUILD PATTERN (carries to M3c + M3b):** a scheme
+  selector `svar_identification` (default `"cholesky"`) + per-scheme structural
+  outputs. `"blanchard_quah"` ADDS 4 tables — Structural Impact Matrix (B0),
+  Long-Run Impact Matrix, Structural IRF, Structural FEVD — alongside the
+  UNCHANGED Cholesky IRF + M1 bands + FEVD. New audit fields
+  `svar_identification / bq_computed`. M3c (`"proxy"`) and M3b
+  (`"sign_restriction"`) extend this same selector + structural-output
+  structure with their scheme-specific params.
+
+- **ADDITIVE / backward-compat (FIRM GATE — PASSED):** default
+  `svar_identification="cholesky"` → the entire existing VAR output (Cholesky
+  IRF + M1 confidence bands + FEVD + coefficients/forecast/summary/Granger
+  tables + existing audit) is BYTE-IDENTICAL with vs without the change
+  (nan-aware git before/after diff). `p3_var` AND `p3_var_irf_bands` sentinels
+  PASS unchanged (the S64 point path + the M1 bands path both preserved). The
+  BQ branch is not entered and the helper not called at the default.
+
+- **VALIDATION — cross-package POINT-PARITY (the familiar Q1 mode; check
+  `p3_var_bq`, verdict_class `closed_form`):** vs R `vars::BQ` (`$B` /
+  `$LRIM` / structural `irf`) on `p3_var`'s bivariate VAR(2) DGP (n=500,
+  seed=42) — the SAME fit S64 validated, so the comparison ISOLATES the BQ
+  identification. The probe PRE-VERIFIED bit-for-bit agreement; MEASURED:
+  `b0_vs_vars` **4.44e-16**, `lrim_vs_vars` **4.88e-15**, `struct_irf_vs_vars`
+  **1.22e-15** — MACHINE PRECISION. Sign convention MATCHES (both
+  positive-diagonal long-run Cholesky; a defensive per-shock-column sign
+  alignment is retained for other fixtures). Overall **PASS**, deterministic
+  (×2). `closed_form` because VAR estimation is OLS (closed-form, not iterative
+  MLE — cf. p3_var) and BQ is closed-form matrix algebra on top; band 1e-8 /
+  block 1e-4 (matching p3_var / 1c_bvar_irf_fevd).
+
+- **Wrapper-layer 3/3 PASS:** NaN handling (BQ tables finite); scheme dispatch
+  (default emits 0 BQ tables; `"blanchard_quah"` emits 4); BQ table shapes +
+  B0/lrim invariants.
+
+**MULTIVARIATE-001 EXTENDED status:** M1 (VAR IRF bands) + M2 (VECM IRF/FEVD)
++ M3a (Blanchard–Quah SVAR) DONE; **M3c** (proxy-SVAR — self-parity +
+instrument-correlation load-bearing functional check, point-identified,
+reuses this scheme-selector pattern) + **M3b** (sign-restriction — self-parity
++ set-identification + Cholesky-in-set/sign-satisfaction load-bearing
+functional checks, `bootstrap_distributional`, the commission's hardest)
+pending.
 
 **Multivariate Systems block progress note (S64 second entry):**
 Block 10 Multivariate Systems advances at S64 var per ratified
@@ -38490,12 +38553,19 @@ catalog completion).** §3 unvalidated → 0.
       package point-parity vs R urca::ca.jo→vec2var→irf/fevd at MACHINE
       PRECISION [irf 5.63e-14, fevd 3.59e-14, single_impl_mle]; the
       familiar Q1 point-parity mode, NO new methodology; S65 amendment;
-      banked a pre-existing S65 half_life guard bug).** Remaining: M3
-      advanced SVAR (Blanchard-Quah cross-package vars::BQ + sign-
-      restriction/proxy-SVAR self-parity since svars unpinned; split at
-      M3's open). The `bootstrap_distributional` interval-pattern (from M1)
-      carries to commission (1) CONFORMAL-001 (the `conformal_coverage`
-      sibling).
+      banked a pre-existing S65 half_life guard bug).** **M3a DELIVERED
+      (Blanchard–Quah SVAR; commit `d8fceb8`; ADDITIVE via a scheme selector
+      `svar_identification`, default cholesky byte-identical; NET-NEW
+      long-run-restriction B0 = C(1)⁻¹·chol(C(1)·Σ·C(1)ᵀ); cross-package
+      point-parity vs R vars::BQ at MACHINE PRECISION [b0 4.44e-16, lrim
+      4.88e-15, struct_irf 1.22e-15, closed_form]; ESTABLISHES the
+      SVAR-identification build pattern [scheme selector + structural outputs]
+      that M3c/M3b reuse; S64 amendment).** Remaining: M3c (proxy-SVAR —
+      self-parity + instrument-correlation functional check, point) + M3b
+      (sign-restriction — self-parity + set-identification + load-bearing
+      functional checks, `bootstrap_distributional`, hardest), ascending-risk.
+      The `bootstrap_distributional` interval-pattern (from M1) carries to
+      commission (1) CONFORMAL-001 (the `conformal_coverage` sibling).
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
       instances). **Q2 Workstream A commission 1 of 3 — FULLY DELIVERED
