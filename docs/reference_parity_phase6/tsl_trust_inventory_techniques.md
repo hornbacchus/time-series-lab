@@ -30457,8 +30457,10 @@ via johansen_cointegration validation):**
   VECM→VAR form conversion which may diverge at machine precision
   due to recursion accumulation but is well-understood
   algorithmically).
-- **Layer 1 IRF + FEVD NOT EMITTED by engine VECM** — see
-  ENG-EXT-MULTIVARIATE-001 scope extension below.
+- ~~**Layer 1 IRF + FEVD NOT EMITTED by engine VECM**~~ **DELIVERED at
+  M2 (commit `c00edc1`; IRF native-wrap + FEVD net-new from orth_ma_rep;
+  cross-package point-parity vs R urca+vars at machine precision,
+  single_impl_mle)** — see the M2 amendment below.
 - **Wrapper layer (Layer 2 sample paths via S49+ 3-check scope)
   VALIDATED at 3/3 PASS:** NaN handling via per-column linear
   interpolation; preset config dispatch returns expected 4-table
@@ -30537,8 +30539,9 @@ case where r linear combinations are stationary.
 - Short-run AR coefficients (Γ) NOT separately validated at math
   layer
 - Forecasts NOT separately validated at math layer
-- IRF + FEVD: NOT EMITTED by engine — see ENG-EXT-MULTIVARIATE-001
-  scope extension below
+- ~~IRF + FEVD: NOT EMITTED by engine~~ DELIVERED at M2 (commit
+  `c00edc1`; cross-package point-parity vs R urca+vars, machine precision)
+  — see the M2 amendment below
 
 **Phase 3 gap markings:**
 
@@ -30679,6 +30682,80 @@ context IRF + FEVD point estimates (broader gap than VAR
 identified at S64; VAR has point estimates + CI-band gap; VECM
 has full IRF/FEVD absence). Bundle with ENG-EXT-CONFORMAL-001 for
 Q2 sprint at revised priority ordering.
+
+---
+
+**ENG-EXT-MULTIVARIATE-001 EXTENDED — M2 DELIVERED (VECM IRF + FEVD;
+commit `c00edc1`; ADDITIVE; Q2 Workstream A commission 2 of 3, sub-build
+M2 of [M1 VAR-IRF-bands done → M2 VECM-IRF/FEVD → M3 advanced-SVAR, M3
+split at its open]):**
+
+M2 closes the BROADEST gap in the commission — S65 VECM emitted NEITHER IRF
+NOR FEVD (a complete absence, broader than VAR's bands-only gap). Engine
+`vecm_model.py` now emits both, on ALL presets (point estimates, no bands —
+cheap + deterministic, no M1-style preset gating). New tables `Impulse
+Response Function (Orthogonalized)` (Period, Shock, Response, IRF) + `Forecast
+Error Variance Decomposition (%)` (Variable, Period, Due to each), mirroring
+the S64 VAR table structure; new audit fields `irf_periods /
+vecm_irf_computed / vecm_fevd_computed`.
+
+- **IRF native-wrap + FEVD net-new:** VECM IRF wraps
+  `VECMResults.irf(periods).orth_irfs` (Cholesky-orthogonalized on input-
+  series order). VECM FEVD is NET-NEW — statsmodels `VECMResults` has no
+  `fevd()`; the module-level `_vecm_fevd` helper computes the standard
+  cumulative-squared-orthogonalized-MA share from `orth_ma_rep`. Internal
+  consistency confirmed: `orth_ma_rep == orth_irfs` EXACTLY (max diff 0.0),
+  so the wrapped IRF and the net-new FEVD share one orthogonalized MA rep.
+  Cholesky ordering = input-series order, surfaced as an identifying-
+  assumption warning (mirrors the S64 VAR warning).
+
+- **ADDITIVE / backward-compat (FIRM GATE — PASSED):** the existing VECM
+  forecast / β / α / Residual-Summary / Model-Summary tables + existing audit
+  fields are BYTE-IDENTICAL with vs without the change (nan-aware git
+  before/after diff — the `half_life_periods` `nan!=nan` and `timestamp_utc`
+  are comparison artifacts, the underlying values identical; α byte-stable).
+  IRF/FEVD are appended after the existing tables; the helper is not called
+  by any existing path; no global-RNG use. `p3_vecm` point sentinel PASS
+  unchanged. The S65 PRIMARY Tier II.bit-exact PASS (β/α single_impl_mle)
+  stands.
+
+- **VALIDATION — cross-package POINT-PARITY (the familiar Q1 mode; NO new
+  methodology — contrast M1's interval pattern; check `p3_vecm_irf_fevd`,
+  verdict_class `single_impl_mle`):** vs R `urca::ca.jo` → `vars::vec2var` →
+  `vars::irf(ortho=TRUE)` / `vars::fevd` on `p3_vecm`'s bivariate
+  cointegrated rank=1 DGP (n=500, seed=42) — the SAME fit S65 validated, so
+  the comparison ISOLATES the IRF/FEVD computation. Formulation-correctness
+  via the independent R Johansen fit (the A1c-preferred cross-package mode).
+  Sub-metrics + MEASURED:
+  - `irf_vs_vars`: **max_abs 5.63e-14 / max_rel 1.34e-13** — MACHINE
+    PRECISION. The anticipated σ-divisor (T−k) IRF sensitivity (Pattern H
+    DSCD risk) did NOT materialize: statsmodels VECM `sigma_u` and R
+    `vec2var` agree on the divisor here.
+  - `fevd_vs_vars`: **max_abs 3.59e-14** — machine precision (FEVD is also
+    ratio-invariant to uniform σ scaling).
+  - `fevd_sum_to_one`: tsl dev 1.11e-16 / ref 0.0 — structural per-variable
+    per-horizon normalization PASS.
+  Overall **PASS**, deterministic (×3). Per the measure-then-classify
+  discipline (p3_vecm precedent), the verdict_class is `single_impl_mle`
+  (same Johansen fit as p3_vecm; IRF/FEVD are closed-form matrix algebra on
+  top); the `irf_vs_vars` band is set to single_impl_mle (1e-5 abs / 1e-4
+  rel), 9+ orders of headroom over the measured 5.63e-14.
+
+- **Wrapper-layer 3/3 PASS:** NaN handling (interior NaNs interpolated; IRF +
+  FEVD finite); IRF/FEVD dispatch on all presets; table shapes + FEVD
+  row-sum 100%.
+
+- **Banked (separate, out of M2 scope — a pre-existing S65 finding):** the
+  `half_life_periods` guard `−2.0 < a0 < 0.0` is too loose — for
+  α[0,0] ∈ (−2, −1), `1 + a0 < 0` → `log` of a negative number → `nan`
+  (surfaced on this M2 backward-compat fixture, α[0,0]=−1.005). A
+  pre-existing univariate-fix candidate (correct guard is roughly
+  `−1 < a0 < 0`), NOT introduced by M2 and NOT in M2's scope.
+
+**MULTIVARIATE-001 EXTENDED status:** M1 (VAR IRF bands) + M2 (VECM IRF/FEVD)
+DONE; **M3 advanced SVAR** pending (Blanchard-Quah cross-package `vars::BQ`;
+sign-restriction + proxy-SVAR self-parity since `svars` is not pinned — the
+a/b/c split confirmed at M3's open).
 
 **Multivariate Systems block progress note (S65 third entry):**
 Block 10 Multivariate Systems advances at S65 vecm per ratified
@@ -38405,11 +38482,18 @@ catalog completion).** §3 unvalidated → 0.
       bit-exact 0.0 + cross-package R vars::irf width-ratio 0.991 /
       containment 1.0, load-bearing + point anchor 4.66e-15]; statsmodels
       errband_mc zero-width seed bug worked around via in-engine
-      distinct-per-replication-seed MC; S64 amendment).** Remaining: M2
-      VECM IRF/FEVD (point; cross-package R urca+vars; broadest gap —
-      VECM emits neither today) → M3 advanced SVAR (Blanchard-Quah
-      cross-package vars::BQ + sign-restriction/proxy-SVAR self-parity;
-      split at M3's open). The `bootstrap_distributional` interval-pattern
+      distinct-per-replication-seed MC; S64 amendment).** **M2 DELIVERED
+      (VECM IRF + FEVD; commit `c00edc1`; ADDITIVE, existing VECM outputs
+      byte-identical; the broadest gap — S65 VECM emitted NEITHER; IRF
+      native-wrap of VECMResults.irf().orth_irfs + FEVD net-new from
+      orth_ma_rep [`_vecm_fevd`, orth_ma_rep==orth_irfs exactly]; cross-
+      package point-parity vs R urca::ca.jo→vec2var→irf/fevd at MACHINE
+      PRECISION [irf 5.63e-14, fevd 3.59e-14, single_impl_mle]; the
+      familiar Q1 point-parity mode, NO new methodology; S65 amendment;
+      banked a pre-existing S65 half_life guard bug).** Remaining: M3
+      advanced SVAR (Blanchard-Quah cross-package vars::BQ + sign-
+      restriction/proxy-SVAR self-parity since svars unpinned; split at
+      M3's open). The `bootstrap_distributional` interval-pattern (from M1)
       carries to commission (1) CONFORMAL-001 (the `conformal_coverage`
       sibling).
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
