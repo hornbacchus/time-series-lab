@@ -25,6 +25,38 @@ except Exception:
         return None
 
 
+def _vecm_fevd(orth_ma, irf_periods):
+    """Forecast Error Variance Decomposition from the orthogonalized MA
+    representation (ENG-EXT-MULTIVARIATE-001 M2 net-new — statsmodels
+    VECMResults has no ``fevd()``).
+
+    Standard closed-form: the share of variable ``i``'s h-step
+    forecast-error variance attributable to shock ``j`` is the cumulative
+    sum of squared orthogonalized-MA coefficients over horizons 0..h-1,
+    normalized across shocks::
+
+        FEVD[i, j, h] = Σ_{t<h} Θ_t[i,j]²  /  Σ_{j'} Σ_{t<h} Θ_t[i,j']²
+
+    where ``Θ_t = orth_ma[t]`` (== ``VECMResults.irf().orth_irfs`` exactly,
+    so the wrapped IRF and this FEVD share one orthogonalized MA rep).
+    Returns an array shape (irf_periods, k, k) indexed [horizon-1, var,
+    shock]; each (var, horizon) row sums to 1.
+
+    Identical to the ``vars::fevd`` / 1c BVAR-IRF/FEVD reference formula
+    (cumulative-squared-orthogonalized-IRF share, normalized per variable).
+    """
+    orth_ma = np.asarray(orth_ma, dtype=np.float64)
+    k = orth_ma.shape[1]
+    fevd = np.zeros((irf_periods, k, k))
+    contrib = np.zeros((k, k))
+    for h in range(irf_periods):
+        contrib = contrib + orth_ma[h] ** 2  # cumulative through horizon h
+        row_total = contrib.sum(axis=1, keepdims=True)
+        row_total = np.where(row_total < 1e-300, 1.0, row_total)
+        fevd[h] = contrib / row_total
+    return fevd
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
     Fit a VECM to 2+ series.
@@ -320,11 +352,89 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "Separate panel showing the error correction term(s) over time."
         )
 
+        # ENG-EXT-MULTIVARIATE-001 M2 — VECM IRF + FEVD (ADDITIVE).
+        # IRF is a native wrap of VECMResults.irf().orth_irfs (Cholesky-
+        # orthogonalized on input-series order); FEVD is net-new (statsmodels
+        # VECMResults has no fevd()) computed from orth_ma_rep via _vecm_fevd
+        # (orth_ma_rep == orth_irfs exactly, so the two are internally
+        # consistent). Point estimates only (no bands) — cheap + deterministic,
+        # all presets. Both are orthogonalized via a Cholesky ordering = the
+        # input-series order, an identifying assumption surfaced as a warning.
+        progress_callback("Computing impulse responses + FEVD", 90)
+        irf_periods = int(ctx.get_param("irf_periods", 20))
+        vecm_irf_computed = False
+        vecm_fevd_computed = False
+        irf_table = None
+        fevd_table = None
+        warn_list.append(
+            "VECM impulse responses and FEVD are orthogonalized using a "
+            f"Cholesky decomposition with ordering = {list(names)}. This is "
+            "an identifying assumption: the first-listed variable can "
+            "contemporaneously affect all others, but not vice versa. "
+            "Re-running with a different series order will give different "
+            "IRF and FEVD numbers."
+        )
+        try:
+            irf = fit.irf(irf_periods)
+            orth = getattr(irf, "orth_irfs", None)
+            if orth is None:
+                orth = irf.irfs
+            orth = np.asarray(orth, dtype=np.float64)
+            irf_rows = []
+            for t in range(min(irf_periods + 1, orth.shape[0])):
+                for shock_idx in range(k):
+                    for resp_idx in range(k):
+                        irf_rows.append([
+                            t,
+                            names[shock_idx],
+                            names[resp_idx],
+                            round(float(orth[t, resp_idx, shock_idx]), 6),
+                        ])
+            irf_table = make_table(
+                "Impulse Response Function (Orthogonalized)",
+                ["Period", "Shock", "Response", "IRF"],
+                irf_rows,
+            )
+            vecm_irf_computed = True
+        except Exception as e:
+            irf_table = make_table(
+                "Impulse Response Function (Orthogonalized)",
+                ["Note"], [["IRF computation failed: " + str(e)]],
+            )
+            warn_list.append(f"VECM IRF computation failed: {e}")
+
+        try:
+            orth_ma = np.asarray(fit.orth_ma_rep(maxn=irf_periods), dtype=np.float64)
+            fevd_arr = _vecm_fevd(orth_ma, irf_periods)  # (irf_periods, k, k)
+            fevd_rows = []
+            for var_idx in range(k):
+                for h in range(irf_periods):
+                    row = [names[var_idx], h + 1]
+                    for src_idx in range(k):
+                        row.append(round(float(fevd_arr[h, var_idx, src_idx]) * 100, 2))
+                    fevd_rows.append(row)
+            fevd_table = make_table(
+                "Forecast Error Variance Decomposition (%)",
+                ["Variable", "Period"] + [f"Due to {nm}" for nm in names],
+                fevd_rows,
+            )
+            vecm_fevd_computed = True
+        except Exception as e:
+            fevd_table = make_table(
+                "Forecast Error Variance Decomposition (%)",
+                ["Note"], [["FEVD computation failed: " + str(e)]],
+            )
+            warn_list.append(f"VECM FEVD computation failed: {e}")
+
         progress_callback("Done", 100)
 
         tables = [fc_table, summary_table, coint_table, alpha_table]
         if ec_table:
             tables.append(ec_table)
+        if irf_table is not None:
+            tables.append(irf_table)
+        if fevd_table is not None:
+            tables.append(fevd_table)
 
         # Half-life of adjustment on the first cointegrating relationship:
         # half_life = −ln(2) / ln(1 + α[0, 0]) when α[0, 0] ∈ (−2, 0) and the
@@ -396,6 +506,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
                                       if half_life_periods is not None else None),
                 "trace_stat": round(_trace0, 4),
                 "trace_cv_5pct": round(_cv0, 4),
+                # ENG-EXT-MULTIVARIATE-001 M2 — IRF + FEVD metadata.
+                "irf_periods": irf_periods,
+                "vecm_irf_computed": bool(vecm_irf_computed),
+                "vecm_fevd_computed": bool(vecm_fevd_computed),
             },
         )
 

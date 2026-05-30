@@ -1202,6 +1202,53 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ENG-EXT-MULTIVARIATE-001 M2 — VECM IRF + FEVD cross-package
+    # point-parity vs R urca::ca.jo + vars::vec2var -> vars::irf / fevd.
+    # Sub-metric ladder (like 1c_bvar_irf_fevd): the orthogonalized IRF
+    # carries a sigma-divisor sensitivity (mle-band); FEVD is ratio-
+    # invariant to uniform sigma scaling (near-bit-exact); row-sum-to-one
+    # is a structural invariant on both arms.
+    "p3_vecm_irf_fevd": {
+        "type": "tiered_outputs",
+        "irf_vs_vars": {
+            "abs_tol": 1e-5,
+            "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-2,
+        },
+        "fevd_vs_vars": {
+            "abs_tol": 1e-6,
+            "rel_tol": 1e-6,
+            "block_abs_tol": 1e-3,
+            "block_rel_tol": 1e-3,
+        },
+        "fevd_sum_to_one": {
+            "abs_tol": 1e-8,
+        },
+        "justification": (
+            "ENG-EXT-MULTIVARIATE-001 M2 — VECM IRF (native wrap of "
+            "statsmodels VECMResults.irf().orth_irfs) + FEVD (net-new "
+            "cumulative-squared-orthogonalized-MA from orth_ma_rep; "
+            "orth_ma_rep == orth_irfs exactly). Cross-package vs R "
+            "urca::ca.jo -> vars::vec2var -> vars::irf(ortho=TRUE) / "
+            "vars::fevd on p3_vecm's bivariate cointegrated rank=1 DGP "
+            "(n=500, seed=42) — the same fit S65 validated at "
+            "single_impl_mle, so the comparison isolates the IRF/FEVD "
+            "computation. MEASURED (S-this): irf max_abs 5.63e-14 / max_rel "
+            "1.34e-13; fevd max_abs 3.59e-14; row-sum dev 1.11e-16 — MACHINE "
+            "PRECISION. The anticipated sigma-divisor IRF sensitivity "
+            "(statsmodels sigma_u T-k_total vs R vec2var) did NOT materialize "
+            "(the arms agree on the divisor here). irf_vs_vars set at the "
+            "single_impl_mle band (1e-5 abs / 1e-4 rel; block 1e-3/1e-2) — 9+ "
+            "orders of headroom over the measured 5.63e-14; matches p3_vecm's "
+            "primary band (same Johansen fit). fevd_vs_vars 1e-6 (FEVD is "
+            "ratio-invariant to uniform sigma scaling -> bit-exact). "
+            "fevd_sum_to_one 1e-8: structural per-variable per-horizon "
+            "normalization invariant on both arms. Do NOT widen to mask a "
+            "real divergence should one ever appear (Pattern H DSCD discipline)."
+        ),
+    },
+
     "p3_dfm": {
         "type": "tiered_outputs",
         "primary": {
