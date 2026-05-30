@@ -29381,6 +29381,73 @@ block (BLOCK COMPLETE 5/5 entries; NINTH catalog block fully Q1-
 amended at 9/13 = 69%), and resumes Q1 audit cadence post-cascade.
 Forward state: next block selection for Q1 cadence continuation.
 
+---
+
+**ENG-EXT-CONFORMAL-001 — C1 DELIVERED (CQR conformalized quantile
+regression; commit `1de1583`; ADDITIVE; the FINAL Q2 commission, sub-build
+C1 of [C1 CQR → C2 EnbPI; SPCI deferred]):**
+
+C1 extends `conformal_intervals.py` with **CQR** (Romano-Patterson-Candès
+2019) — adaptive-width calibrated prediction intervals by conformalizing the
+gradient-boosting quantile-regression base. **FIRST instantiation of the
+reserved `conformal_coverage` verdict_class** (registered since Batch 10,
+held for exactly this commission) — the interval-validation family's COVERAGE
+sibling (held-out empirical coverage + width, vs M1 `bootstrap_distributional`'s
+width/containment-around-a-point).
+
+- **MAPIE re-check OVERTURNS the banked "ruled out":** MAPIE was recorded
+  ruled-out at Batch 9 (Python 3.14 / pmdarima-mismatch). Re-verified at the
+  C1 probe: **MAPIE 1.3.0 is installed and usable under Python 3.14** via the
+  NEW v1.x API (`mapie.regression.ConformalizedQuantileRegressor` for CQR,
+  `TimeSeriesRegressor`/EnbPI for C2). The Batch-9 note was API-stale. So C1
+  gains a **cross-package** arm (the A1c-preferred mode) — re-verifying at the
+  probe rather than trusting recall is what caught it.
+
+- **CQR build (net-new):** `_cqr_intervals` fits GBR quantile regressors at
+  α/2 and 1−α/2; nonconformity `E_i = max(q̂_lo(x_i)−y_i, y_i−q̂_hi(x_i))`;
+  conformal adjustment `Q = ⌈(n_cal+1)(1−α)⌉/n_cal` empirical quantile of {E_i}
+  (same finite-sample index as the split path); interval `[q̂_lo−Q, q̂_hi+Q]`.
+  ADDITIVE via a **`conformal_method` selector** (mirrors
+  `var_model.svar_identification`): `"split"` (default = EXISTING method,
+  BYTE-IDENTICAL) / `"cqr"`. The cqr path emits a held-out empirical-coverage
+  diagnostic.
+
+- **VALIDATION — `conformal_coverage` (check `p3_conformal_cqr`), four arms:**
+  - **Self-parity (machinery):** engine `_cqr_intervals` vs a from-scratch
+    identical Romano reimpl → **bit-exact bounds + Q (max_abs 0.0)**.
+  - **Empirical-coverage functional check (LOAD-BEARING, scheme-defining):**
+    held-out coverage ≥ (1−α) − slack — **measured 0.896 ≥ floor 0.83 PASS**;
+    interval-containment 0 violations. **Reuses the dormant
+    `conformal_nominal_coverage` + `conformal_interval_containment` invariant
+    functions IN PLACE** (called from `compare()` — closing the gap that the
+    2026-04-29 audit's "Pattern F invariant PASS" was not reflected in the
+    then-current `p3_conformal`).
+  - **Cross-package (MAPIE, matched-calibration, DISTRIBUTIONAL):** width-ratio
+    **1.021** + coverage-agreement **0.041** (both PASS). MAPIE's internal
+    conformal-quantile / quantile-crossing handling shifts the bounds (~0.2),
+    so the cross-package check is band GEOMETRY, NOT bit-exact endpoints (that
+    is the self-parity arm) — the M1 distributional pattern.
+  - **Discrimination guard:** a mis-scaled (×0.3 width) interval covers only
+    **0.283 < floor 0.83** → the load-bearing coverage check provably gates
+    against gross miscalibration.
+  Overall **PASS**, deterministic.
+
+- **Slack EARNED, not provisioned (§5.3 applied to the tolerance):** CQR
+  held-out coverage measured across 8 seeds = **mean 0.905 (≈ nominal 0.90) /
+  std 0.034 → slack = 2·std = 0.07**. The PASS floor is the load-bearing
+  coverage floor for the `conformal_coverage` class's first instantiation; C2
+  inherits this ladder shape.
+
+- **ADDITIVE / backward-compat (FIRM GATE — PASSED):** `conformal_method="split"`
+  (default) → existing split-conformal output BYTE-IDENTICAL (nan-aware git
+  before/after diff); `p3_conformal` sentinel PASS unchanged. Wrapper-3/3 PASS
+  (NaN; method dispatch; cqr table + coverage field).
+
+**CONFORMAL-001 status:** C1 (CQR) DONE; **C2 (EnbPI)** pending — cross-package
+MAPIE `TimeSeriesRegressor`/EnbPI; the **S85 neural-forecast-PI fold-in lands
+in C2** (conformal intervals around the neural base forecaster). After C2 →
+CONFORMAL-001 COMPLETE → **Q2 COMPLETE** (all three Workstream-A commissions).
+
 ### pca_analysis (Phase 7+ S63; FIFTY-SECOND §2.5 entry; FIRST Multivariate Systems block entry; Block 10 opens; **Cat 1d VSC=NO disclosure embedded per Gate 2 finding** — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: **COVERED — no engine gap** per S63 Step 1; first Q1 cadence routine §2.5 entry post-S62 Evaluation/Uncertainty block close)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
@@ -38667,7 +38734,19 @@ catalog completion).** §3 unvalidated → 0.
 - **THREE engine-extension commissions for the Q2 sprint:**
   (1) **ENG-EXT-CONFORMAL-001** (CQR + EnbPI/SPCI calibrated
       prediction intervals; commissioned S62; now ALSO covers the
-      S85 neural-forecast-PI minor candidate).
+      S85 neural-forecast-PI minor candidate). **Ratified C1 (CQR) +
+      C2 (EnbPI); SPCI deferred (no cross-package ref, sequential, optional).
+      C1 DELIVERED (commit `1de1583`; CQR Romano-Patterson-Candès; FIRST
+      instantiation of the reserved `conformal_coverage` verdict_class — the
+      interval family's coverage sibling; ADDITIVE via a `conformal_method`
+      selector, existing split byte-identical; four-arm validation [self-parity
+      bit-exact + LOAD-BEARING empirical-coverage functional check reusing the
+      dormant invariants + cross-package MAPIE distributional width-ratio 1.021
+      + mis-scaled discrimination guard]; slack EARNED 0.07 = 2·std of measured
+      coverage; MAPIE re-verified usable under Python 3.14, overturning the
+      banked Batch-9 "ruled out").** Remaining: **C2 EnbPI** (cross-package
+      MAPIE TimeSeriesRegressor/EnbPI; the S85 neural-PI fold-in) → then
+      CONFORMAL-001 COMPLETE → Q2 COMPLETE (all 3 A-commissions).
   (2) **ENG-EXT-MULTIVARIATE-001 EXTENDED** (VAR IRF confidence bands
       + VECM IRF/FEVD + advanced SVAR identification; commissioned
       S64, extended S65). **Q2 Workstream A commission 2 of 3 — M1
