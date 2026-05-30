@@ -29448,6 +29448,80 @@ MAPIE `TimeSeriesRegressor`/EnbPI; the **S85 neural-forecast-PI fold-in lands
 in C2** (conformal intervals around the neural base forecaster). After C2 →
 CONFORMAL-001 COMPLETE → **Q2 COMPLETE** (all three Workstream-A commissions).
 
+---
+
+**ENG-EXT-CONFORMAL-001 — C2 DELIVERED (EnbPI + S85 neural-PI fold-in; commit
+`5ef1ed9`; ADDITIVE) → ENG-EXT-CONFORMAL-001 COMPLETE → Q2 COMPLETE:**
+
+C2 extends `conformal_intervals.py` with **EnbPI** (Xu-Xie 2021 ensemble batch
+prediction intervals) — block-bootstrap an ensemble of base models,
+conformalize out-of-bag |residuals| to a width `w`, interval
+`ensemble_pred ± w`. **SECOND instantiation of `conformal_coverage`** (inherits
+C1's ladder). ADDITIVE via the `conformal_method` selector: `"split"` (default)
+/ `"cqr"` (C1) / **`"enbpi"`** (new).
+
+- **S85 neural-forecast-PI fold-in — BUILT IN + VALIDATED:** `_enbpi_intervals`
+  is BASE-PLUGGABLE — `enbpi_base="gbr"` (gradient boosting) / `"neural"`
+  (sklearn `MLPRegressor`, the same family `nar_narx` uses). The neural base is
+  the S85 candidate — calibrated EnbPI replacing nar_narx's bootstrap CIs. Its
+  self-parity arm is **BIT-EXACT in the committed check (max_abs 0.0)**
+  (MLPRegressor is deterministic given `random_state`) — VALIDATED, not merely
+  built. **The S85 banked ledger item is RESOLVED (folded into C2).**
+
+- **VALIDATION — `conformal_coverage` (check `p3_conformal_enbpi`), four arms on
+  TWO bases:**
+  - **Self-parity (machinery) — BOTH bases bit-exact:** engine `_enbpi_intervals`
+    vs a from-scratch identical EnbPI → **standard 0.0, neural 0.0**.
+  - **Empirical-coverage functional check (LOAD-BEARING):** held-out coverage
+    **0.898 ≥ floor 0.83**; containment 0 violations. Reuses the
+    `conformal_nominal_coverage` + `interval_containment` invariants in place.
+  - **Cross-package (MAPIE `TimeSeriesRegressor(method="enbpi")`, matched,
+    DISTRIBUTIONAL):** width-ratio **0.896** + coverage-agreement **0.011** —
+    the matched-distributional cross-package posture transposes from C1
+    (PRIMARY, not the independent fallback).
+  - **Discrimination guard:** mis-scaled (×0.3) covers **0.557 < floor 0.83** →
+    the coverage check provably gates.
+  Overall **PASS**, deterministic.
+
+- **Measure-then-classify (§5.3):** `coverage_gap.slack` 0.07 INHERITED (earned
+  at C1). The EnbPI `crosspkg_width_ratio` band **[0.78,1.35]** is
+  EnbPI-SPECIFIC and EARNED — across-seed width-ratio measured **0.845–1.297**
+  (mean 1.01), WIDER than C1 CQR's [0.85,1.18] because the ensemble-bootstrap
+  mechanism is genuinely noisier than CQR's quantile-regression
+  conformalization. The load-bearing gate is coverage_gap + self-parity;
+  width-ratio is a distributional sanity (still catches a 2×/0.5× formulation
+  bug). NOT a mask-widening — an honest mechanism property.
+
+- **ADDITIVE / backward-compat (FIRM GATE — PASSED):** `"split"` AND `"cqr"`
+  default/prior paths BYTE-IDENTICAL (nan-aware git diff); `p3_conformal` AND
+  `p3_conformal_cqr` sentinels PASS unchanged. Wrapper-3/3 PASS.
+
+### ENG-EXT-CONFORMAL-001 — COMPLETE (the FINAL Q2 commission)
+
+CONFORMAL-001 is **fully delivered**: **C1** CQR (commit `1de1583`) + **C2**
+EnbPI + S85 neural-PI fold-in (commit `5ef1ed9`). SPCI deferred (post-Q2
+stretch — no cross-package ref, sequential, optional). The `conformal_coverage`
+verdict_class (reserved since Batch 10) is now instantiated twice (CQR + EnbPI)
+— the interval-validation family's COVERAGE member, completing the arc
+point-parity → bootstrap-band (M1) → set-identification (M3b) → empirical
+coverage (CONFORMAL). The MAPIE-usable re-verification (overturning the banked
+Batch-9 "ruled out") gave both sub-builds cross-package arms.
+
+### ★ Q2 COMPLETE — all THREE Workstream-A commissions delivered
+
+- **ENG-EXT-CHANGEPOINT-001** (`0ecbd35`) — multivariate change-point detection
+  (PELT + CUSUM + BOCPD).
+- **ENG-EXT-MULTIVARIATE-001 EXTENDED** (`4b03282`) — VAR IRF bands + VECM
+  IRF/FEVD + advanced SVAR (BQ + proxy + sign-restriction).
+- **ENG-EXT-CONFORMAL-001** (`5ef1ed9`) — CQR + EnbPI calibrated prediction
+  intervals (+ S85 neural-PI fold-in).
+
+Q2 program (Workstreams B engine-improvement + C harness-refinement + A
+engine-extension) **COMPLETE**. Forward: BVAR three-part build-out (engine +
+validation + Pattern-A UX) → TSL use-case walkthroughs. Banked ledger (S79
+cp_prob criterion, S65 half_life guard, statsmodels errband_mc) + the SPCI
+stretch remain for post-Q2.
+
 ### pca_analysis (Phase 7+ S63; FIFTY-SECOND §2.5 entry; FIRST Multivariate Systems block entry; Block 10 opens; **Cat 1d VSC=NO disclosure embedded per Gate 2 finding** — engine default `standardize=True` (correlation-matrix PCA) ≠ validated configuration `standardize=False` (covariance-matrix PCA); ENG-EXT yield-curve-factor-decomposition workflow scan: **COVERED — no engine gap** per S63 Step 1; first Q1 cadence routine §2.5 entry post-S62 Evaluation/Uncertainty block close)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
@@ -38744,9 +38818,18 @@ catalog completion).** §3 unvalidated → 0.
       dormant invariants + cross-package MAPIE distributional width-ratio 1.021
       + mis-scaled discrimination guard]; slack EARNED 0.07 = 2·std of measured
       coverage; MAPIE re-verified usable under Python 3.14, overturning the
-      banked Batch-9 "ruled out").** Remaining: **C2 EnbPI** (cross-package
-      MAPIE TimeSeriesRegressor/EnbPI; the S85 neural-PI fold-in) → then
-      CONFORMAL-001 COMPLETE → Q2 COMPLETE (all 3 A-commissions).
+      banked Batch-9 "ruled out").** **C2 DELIVERED (EnbPI + S85 neural-PI
+      fold-in; commit `5ef1ed9`; conformal_coverage 2nd instantiation;
+      base-pluggable gbr/neural; the S85 neural fold-in self-parity BIT-EXACT
+      0.0 — RESOLVED + folded in; cross-package MAPIE EnbPI matched width-ratio
+      0.896/coverage-agreement 0.011; empirical-coverage 0.898≥floor;
+      width-ratio band [0.78,1.35] EnbPI-specific-measured; split+cqr
+      byte-identical).** **→ ENG-EXT-CONFORMAL-001 COMPLETE (C1 CQR + C2 EnbPI;
+      SPCI deferred) → ★ Q2 COMPLETE: all THREE Workstream-A commissions
+      delivered (CHANGEPOINT-001 + MULTIVARIATE-001 EXTENDED + CONFORMAL-001).
+      The conformal_coverage class instantiated; the validation-kind arc
+      complete (point-parity → bootstrap-band M1 → set-identification M3b →
+      empirical coverage CONFORMAL). Forward: BVAR three-part build-out.**
   (2) **ENG-EXT-MULTIVARIATE-001 EXTENDED** (VAR IRF confidence bands
       + VECM IRF/FEVD + advanced SVAR identification; commissioned
       S64, extended S65). **Q2 Workstream A commission 2 of 3 — M1
