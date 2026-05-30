@@ -134,6 +134,69 @@ def _cqr_intervals(X_train, y_train, X_cal, y_cal, X_eval, *, alpha, seed):
     }
 
 
+def _enbpi_base_estimator(base_kind, seed):
+    """Construct the EnbPI base estimator. ``"gbr"`` → gradient-boosting
+    point regressor (deterministic, the default); ``"neural"`` → sklearn
+    MLPRegressor (the S85 neural-forecast-PI fold-in — the same estimator
+    family `nar_narx` uses; deterministic given random_state)."""
+    if base_kind == "neural":
+        from sklearn.neural_network import MLPRegressor
+        return MLPRegressor(hidden_layer_sizes=(20, 10), random_state=seed,
+                            max_iter=300, early_stopping=False)
+    from sklearn.ensemble import GradientBoostingRegressor
+    return GradientBoostingRegressor(random_state=seed)
+
+
+def _enbpi_intervals(X_train, y_train, X_eval, *, alpha, base_kind,
+                     n_resamplings, block_length, seed):
+    """Ensemble Batch Prediction Intervals (Xu-Xie 2021) —
+    ENG-EXT-CONFORMAL-001 C2.
+
+    Block-bootstrap an ensemble of ``n_resamplings`` base models on the
+    training rows (blocks of ``block_length`` preserve time dependence);
+    for each training point i the leave-one-out / out-of-bag aggregate
+    ``f^{−i}(x_i)`` is the mean of the models for which i is out-of-bag;
+    residual ``ε_i = |y_i − f^{−i}(x_i)|``; the conformal width is the
+    ``⌈(n+1)(1−α)⌉/n`` empirical quantile of {ε_i}; the test interval is
+    ``ensemble_pred(x) ± w``. Deterministic in ``seed`` (a local
+    ``RandomState`` drives the block bootstrap; the base estimator is
+    seeded). Returns lo/hi/w/ensemble_pred.
+    """
+    X_train = np.asarray(X_train, dtype=np.float64)
+    y_train = np.asarray(y_train, dtype=np.float64)
+    X_eval = np.atleast_2d(np.asarray(X_eval, dtype=np.float64))
+    n = len(y_train)
+    rs = np.random.RandomState(seed)
+    n_blocks = int(np.ceil(n / block_length))
+
+    oob_pred = np.full((n, n_resamplings), np.nan)
+    eval_pred = np.zeros((X_eval.shape[0], n_resamplings))
+    models = []
+    for b in range(n_resamplings):
+        starts = rs.randint(0, max(1, n - block_length + 1), size=n_blocks)
+        idx = np.concatenate([np.arange(s, s + block_length) for s in starts])[:n]
+        model = _enbpi_base_estimator(base_kind, seed)
+        model.fit(X_train[idx], y_train[idx])
+        models.append(model)
+        in_bag = np.zeros(n, dtype=bool)
+        in_bag[np.unique(idx)] = True
+        if np.any(~in_bag):
+            oob_pred[~in_bag, b] = model.predict(X_train[~in_bag])
+        eval_pred[:, b] = model.predict(X_eval)
+
+    # leave-one-out aggregate (mean over models where i is OOB)
+    fhat = np.array([
+        np.nanmean(oob_pred[i]) if np.any(~np.isnan(oob_pred[i])) else y_train[i]
+        for i in range(n)
+    ])
+    resid = np.abs(y_train - fhat)
+    q_level = np.ceil((n + 1) * (1.0 - alpha)) / n
+    q_level = min(q_level, 1.0)
+    w = float(np.quantile(resid, q_level))
+    pred = eval_pred.mean(axis=1)
+    return {"lo": pred - w, "hi": pred + w, "w": w, "pred": pred, "models": models}
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
     Split conformal prediction intervals.
@@ -216,6 +279,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
             return _run_cqr(
                 ctx, progress_callback, name, clean, n, horizon, alpha,
                 conf_level, cal_frac, warn_list,
+            )
+        if conformal_method == "enbpi":
+            return _run_enbpi(
+                ctx, progress_callback, name, clean, n, horizon, alpha,
+                conf_level, warn_list,
             )
 
         # Split data: training | calibration | (future)
@@ -580,6 +648,156 @@ def _run_cqr(ctx, progress_callback, name, clean, n, horizon, alpha,
         return make_error_response(
             ctx,
             f"CQR conformal intervals failed: {e}",
+            error_fixes=[
+                "Ensure the series is numeric with enough observations.",
+                "Check that scikit-learn is installed.",
+            ],
+        )
+
+
+def _run_enbpi(ctx, progress_callback, name, clean, n, horizon, alpha,
+               conf_level, warn_list):
+    """ENG-EXT-CONFORMAL-001 C2 — Ensemble Batch Prediction Intervals path.
+
+    EnbPI (Xu-Xie 2021) via `_enbpi_intervals` on the gradient-boosting (or
+    neural, the S85 fold-in) base over lag features (reuses
+    `quantile_regression_model._create_features`). Holds out a test slice for
+    the empirical-coverage diagnostic; forecasts the horizon by ensemble-mean
+    recursion ± the conformal width. ADDITIVE — only reached when
+    `conformal_method="enbpi"`.
+    """
+    try:
+        from techniques.quantile_regression_model import (
+            _create_features, _build_forecast_features,
+        )
+        progress_callback("Building features for EnbPI", 15)
+        n_lags = int(ctx.get_param("n_lags", min(12, max(3, n // 10))))
+        rolling_windows = [3, 6]
+        seed = int(ctx.seed)
+        base_kind = str(ctx.get_param("enbpi_base", "gbr"))
+        n_resamplings = int(ctx.get_param("n_resamplings", 30))
+        block_length = int(ctx.get_param("block_length", 10))
+
+        X, y, _ = _create_features(clean, n_lags, rolling_windows)
+        if len(y) < 40:
+            return make_error_response(
+                ctx, f"Too few usable rows ({len(y)}) for EnbPI.",
+                error_fixes=["Provide a longer time series."],
+            )
+        m = len(y)
+        n_test = max(10, int(0.2 * m))
+        n_train = m - n_test
+        if n_train < 30:
+            return make_error_response(
+                ctx, f"Too few training rows ({n_train}) for EnbPI.",
+                error_fixes=["Provide a longer series."],
+            )
+        X_train, y_train = X[:n_train], y[:n_train]
+        X_test, y_test = X[n_train:], y[n_train:]
+        block_length = max(2, min(block_length, n_train // 3))
+
+        progress_callback(f"Fitting EnbPI ensemble (base={base_kind})", 45)
+        import warnings as _w
+        with _w.catch_warnings():
+            _w.simplefilter("ignore")
+            res = _enbpi_intervals(
+                X_train, y_train, X_test, alpha=alpha, base_kind=base_kind,
+                n_resamplings=n_resamplings, block_length=block_length, seed=seed)
+        lo_test, hi_test, w = res["lo"], res["hi"], res["w"]
+        empirical_coverage = float(np.mean((y_test >= lo_test) & (y_test <= hi_test)))
+        mean_width = float(np.mean(hi_test - lo_test))
+
+        progress_callback("Generating EnbPI forecast intervals", 78)
+        # Fit the forward-forecast ensemble ONCE on the full data, then iterate
+        # the ensemble-mean ± w over the horizon (reuse the fitted models — no
+        # per-step refit).
+        with _w.catch_warnings():
+            _w.simplefilter("ignore")
+            fc_fit = _enbpi_intervals(
+                X, y, X[-1:], alpha=alpha, base_kind=base_kind,
+                n_resamplings=n_resamplings,
+                block_length=max(2, min(block_length, len(y) // 3)), seed=seed)
+            fc_models, fc_w = fc_fit["models"], fc_fit["w"]
+            series_ext = clean.copy()
+            fc_rows = []
+            for step in range(horizon):
+                fx = _build_forecast_features(series_ext, n_lags, rolling_windows).reshape(1, -1)
+                point = float(np.mean([mdl.predict(fx)[0] for mdl in fc_models]))
+                fc_rows.append([
+                    step + 1, round(point, 6),
+                    round(point - fc_w, 6), round(point + fc_w, 6),
+                ])
+                series_ext = np.append(series_ext, point)
+
+        ci_label = f"{conf_level * 100:.0f}%"
+        fc_table = make_table(
+            "EnbPI Forecast with Conformal Intervals",
+            ["Step", "Point Forecast (ensemble)",
+             f"EnbPI Lower {ci_label}", f"EnbPI Upper {ci_label}"],
+            fc_rows,
+        )
+        diag_table = make_table(
+            "EnbPI Coverage Diagnostics",
+            ["Metric", "Value"],
+            [
+                ["Method", "EnbPI (ensemble batch prediction intervals)"],
+                ["Base Estimator", "neural (MLP)" if base_kind == "neural" else "gradient boosting"],
+                ["Target Coverage", ci_label],
+                ["Held-out Empirical Coverage", round(empirical_coverage, 4)],
+                ["Held-out Test Size", n_test],
+                ["Mean Interval Width", round(mean_width, 6)],
+                ["Conformal Width (w)", round(w, 6)],
+                ["Ensemble Size / Block Length", f"{n_resamplings} / {block_length}"],
+                ["Lag Features", n_lags],
+            ],
+        )
+        if empirical_coverage < conf_level - 0.10:
+            warn_list.append(
+                f"EnbPI held-out coverage ({empirical_coverage:.3f}) is below the "
+                f"target ({conf_level:.2f}) — the ensemble may be miscalibrated "
+                "on this series."
+            )
+        base_label = "neural (MLP)" if base_kind == "neural" else "gradient-boosting"
+        plain = (
+            f"Ensemble batch prediction intervals (EnbPI) for '{name}' at "
+            f"{ci_label} target coverage, on a {base_label} base. A "
+            f"{n_resamplings}-model block-bootstrap ensemble produces "
+            f"out-of-bag residuals conformalized to a width w={w:.4f}. Held-out "
+            f"empirical coverage on {n_test} test points was "
+            f"{empirical_coverage:.3f}; mean interval width {mean_width:.4f}."
+        )
+        charting = (
+            "Line chart of the series with the EnbPI ensemble forecast and a "
+            "shaded conformal interval. Secondary panel: held-out coverage vs "
+            "nominal."
+        )
+        progress_callback("Done", 100)
+        return make_response(
+            ctx,
+            tables=[fc_table, diag_table],
+            plain_english_summary=plain,
+            warnings=warn_list,
+            charting_suggestions=charting,
+            interpretation=None,
+            audit_fields={
+                "conformal_method": "enbpi",
+                "enbpi_base": base_kind,
+                "confidence_level": conf_level,
+                "horizon": horizon,
+                "enbpi_coverage": round(empirical_coverage, 6),
+                "enbpi_mean_width": round(mean_width, 6),
+                "enbpi_w": round(w, 6),
+                "n_train": n_train,
+                "n_test": n_test,
+                "n_resamplings": n_resamplings,
+                "block_length": block_length,
+                "n_lags": n_lags,
+            },
+        )
+    except Exception as e:
+        return make_error_response(
+            ctx,
+            f"EnbPI conformal intervals failed: {e}",
             error_fixes=[
                 "Ensure the series is numeric with enough observations.",
                 "Check that scikit-learn is installed.",

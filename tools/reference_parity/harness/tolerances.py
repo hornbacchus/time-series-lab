@@ -1326,6 +1326,53 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ENG-EXT-CONFORMAL-001 C2 — EnbPI; the SECOND conformal_coverage ladder
+    # (inherits C1's shape). coverage_gap.slack 0.07 INHERITED (earned at C1,
+    # finite-sample-variability-anchored). crosspkg_width_ratio MEASURED for
+    # EnbPI (pre-verified ≈ 0.98 vs MAPIE EnbPI — the matched-distributional
+    # posture transposes from C1). selfparity_bounds bit-exact for BOTH the
+    # standard (gbr) and neural (MLP, the S85 fold-in) bases.
+    "p3_conformal_enbpi": {
+        "type": "conformal_coverage",
+        "selfparity_bounds": {
+            "abs_tol": 1e-8, "rel_tol": 1e-8,
+            "block_abs_tol": 1e-6, "block_rel_tol": 1e-6,
+        },
+        "coverage_gap": {"slack": 0.07, "caveat_mult": 3},
+        "crosspkg_width_ratio": {
+            "pass_lo": 0.78, "pass_hi": 1.35, "block_lo": 0.65, "block_hi": 1.55,
+        },
+        "crosspkg_coverage_agreement": {"pass_abs": 0.06, "block_abs": 0.15},
+        "justification": (
+            "ENG-EXT-CONFORMAL-001 C2 — EnbPI (Xu-Xie 2021 ensemble batch "
+            "prediction intervals); SECOND instantiation of conformal_coverage. "
+            "selfparity_bounds 1e-8: engine _enbpi_intervals vs a from-scratch "
+            "reimplementation of the IDENTICAL block-bootstrap-ensemble + OOB "
+            "conformal-width formulation (same RandomState block bootstrap, "
+            "same base, same OOB aggregation, same quantile index) → bit-exact "
+            "bounds for BOTH the standard gradient-boosting base AND the neural "
+            "MLP base (the S85 fold-in; MLPRegressor is deterministic given "
+            "random_state — pre-verified 0.00). coverage_gap (LOAD-BEARING): "
+            "slack 0.07 INHERITED from C1 (earned = 2·std of held-out coverage). "
+            "crosspkg_* (distributional vs MAPIE TimeSeriesRegressor "
+            "method='enbpi', matched base+block+ensemble+seed): MAPIE's "
+            "independent block-bootstrap draws differ → width_ratio + "
+            "coverage_agreement, NOT bit-exact endpoints. The width-ratio band "
+            "[0.78,1.35] (block [0.65,1.55]) is EnbPI-SPECIFIC and EARNED by "
+            "measurement: across-seed width-ratio measured 0.845-1.297 (mean "
+            "1.01) — WIDER than C1 CQR's [0.85,1.18] because the ensemble-"
+            "bootstrap mechanism is genuinely noisier than CQR's quantile-"
+            "regression conformalization (it tightens to 0.87-1.17 at larger "
+            "ensembles, but the harness uses a modest ensemble for runtime). "
+            "The band still catches a formulation bug (wrong OOB aggregation / "
+            "width → 2x or 0.5x, outside block); the LOAD-BEARING gate is "
+            "coverage_gap + self-parity, with width-ratio a distributional "
+            "sanity. The mis-scaled (×0.3) discrimination guard confirms the "
+            "coverage floor catches gross miscalibration. Do NOT widen "
+            "coverage_gap to mask under-coverage."
+        ),
+    },
+
     "p3_vecm": {
         # Phase 3.5 Session 3 (Item 1): tightened from canonical
         # mle_fit band (1e-3 abs / 1e-2 rel) to single_impl_mle
