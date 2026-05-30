@@ -96,6 +96,50 @@ def _blanchard_quah_b0(fit):
     return B0, lrim
 
 
+def _proxy_svar(fit, instrument, normalize_var=0):
+    """Proxy / external-instrument (IV) SVAR identification of ONE structural
+    shock (ENG-EXT-MULTIVARIATE-001 M3c net-new — statsmodels SVAR is A/B/AB
+    short-run only; no proxy-SVAR).
+
+    Stock-Watson / Mertens-Ravn: given the reduced-form VAR residuals u_t and
+    an external instrument z_t correlated with the target structural shock ε₁
+    and uncorrelated with the others, ``E[u z] = B·E[ε z] = b₁·α`` — so the
+    sample covariance ``Cov(u, z)`` is proportional to the target shock's
+    impact column b₁. Normalize to unit impact on ``normalize_var`` (the
+    column is identified only up to scale and sign). The identified shock
+    series is the GLS projection ``ε₁_hat = (u Σ⁻¹ b1)/(b1ᵀ Σ⁻¹ b1)``; its
+    correlation with z is the instrument-relevance (first-stage) diagnostic —
+    the scheme-DEFINING property.
+
+    Returns ``(b1, eps_hat, relevance)``: b1 the (relative) impact column
+    (b1[normalize_var]=1), eps_hat the identified shock series (nobs,),
+    relevance = corr(eps_hat, z). Structural IRF (target shock) =
+    ``ma_rep(h)[h] @ b1``. Point-identified (relative IRF unique given z).
+    """
+    u = np.asarray(fit.resid, dtype=np.float64)  # (nobs, k)
+    nobs = u.shape[0]
+    z = np.asarray(instrument, dtype=np.float64).reshape(-1)
+    z = z[-nobs:]  # align to the residual sample (drop the first p observations)
+    z = z - z.mean()
+    cov_uz = (u * z[:, None]).mean(axis=0)  # E[u z], shape (k,)
+    if abs(float(cov_uz[normalize_var])) < 1e-300:
+        raise ValueError(
+            "Proxy instrument has ~zero covariance with the normalization "
+            "variable; choose a different proxy_normalize_var or a relevant "
+            "instrument."
+        )
+    b1 = cov_uz / cov_uz[normalize_var]  # relative impact column
+    Sigma = np.asarray(fit.sigma_u, dtype=np.float64)
+    Sinv = np.linalg.inv(Sigma)
+    denom = float(b1 @ Sinv @ b1)
+    eps_hat = (u @ Sinv @ b1) / denom  # identified target shock series (nobs,)
+    zs = np.std(z)
+    es = np.std(eps_hat)
+    relevance = (float(np.corrcoef(eps_hat, z)[0, 1])
+                 if zs > 0 and es > 0 else 0.0)
+    return b1, eps_hat, relevance
+
+
 def _mc_irf_bands(fit, steps, repl, signif, seed, orth=True, burn=100):
     """Monte-Carlo confidence bands for the (orthogonalized) IRF.
 
@@ -541,10 +585,80 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 warn_list.append(f"Blanchard-Quah identification failed: {e}")
                 bq_computed = False
 
+        # ENG-EXT-MULTIVARIATE-001 M3c — Proxy / IV-SVAR identification
+        # (ADDITIVE; reuses the M3a scheme-selector pattern). Identifies ONE
+        # structural shock via an external instrument (proxy) correlated with
+        # the target shock + uncorrelated with the others. No usable
+        # cross-package library exists → validated by self-parity + a
+        # load-bearing instrument-relevance functional check.
+        proxy_tables = []
+        proxy_computed = False
+        proxy_instrument_corr = None
+        if svar_identification == "proxy":
+            progress_callback("Proxy/IV-SVAR identification", 88)
+            instrument = ctx.get_param("proxy_instrument")
+            normalize_var = int(ctx.get_param("proxy_normalize_var", 0))
+            if instrument is None:
+                warn_list.append(
+                    "Proxy/IV-SVAR identification requested but no "
+                    "'proxy_instrument' provided; skipping."
+                )
+            else:
+                try:
+                    b1, eps_hat, relevance = _proxy_svar(
+                        fit, instrument, normalize_var=normalize_var,
+                    )
+                    proxy_instrument_corr = round(float(relevance), 6)
+                    proxy_tables.append(make_table(
+                        "Structural Impact Vector (Proxy-SVAR)",
+                        ["Variable", "Impact"],
+                        [[names[i], round(float(b1[i]), 6)] for i in range(k)],
+                    ))
+                    Phi = np.asarray(fit.ma_rep(maxn=irf_periods), dtype=np.float64)
+                    sirf_rows = []
+                    for t in range(Phi.shape[0]):
+                        theta_t = Phi[t] @ b1  # (k,) response to the target shock
+                        for resp_idx in range(k):
+                            sirf_rows.append([
+                                t, names[resp_idx], round(float(theta_t[resp_idx]), 6),
+                            ])
+                    proxy_tables.append(make_table(
+                        "Structural IRF (Proxy-SVAR)",
+                        ["Period", "Response", "IRF"], sirf_rows,
+                    ))
+                    relevant = abs(float(relevance)) >= 0.2
+                    proxy_tables.append(make_table(
+                        "Proxy Instrument Relevance",
+                        ["Metric", "Value"],
+                        [
+                            ["Corr(identified shock, instrument)",
+                             round(float(relevance), 6)],
+                            ["Relevant (|corr| >= 0.2)", "Yes" if relevant else "No"],
+                        ],
+                    ))
+                    proxy_computed = True
+                    warn_list.append(
+                        "Proxy/IV-SVAR identification applied: the target "
+                        "structural shock is identified via the external "
+                        "instrument (impact column ∝ Cov(residuals, "
+                        "instrument), normalized to unit impact on "
+                        f"'{names[normalize_var]}'). Instrument-relevance "
+                        f"corr = {round(float(relevance), 4)}."
+                    )
+                    if not relevant:
+                        warn_list.append(
+                            "WARNING: weak instrument — |corr| < 0.2; the "
+                            "proxy identification may be unreliable."
+                        )
+                except Exception as e:
+                    warn_list.append(f"Proxy/IV-SVAR identification failed: {e}")
+                    proxy_computed = False
+
         tables = [fc_table, summary_table, coef_table, irf_table, fevd_table]
         if irf_band_table is not None:
             tables.append(irf_band_table)
         tables.extend(bq_tables)
+        tables.extend(proxy_tables)
         if gc_rows:
             gc_table = make_table(
                 "Granger Causality (from VAR)",
@@ -622,6 +736,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 # ENG-EXT-MULTIVARIATE-001 M3a — SVAR identification scheme.
                 "svar_identification": svar_identification,
                 "bq_computed": bool(bq_computed),
+                # ENG-EXT-MULTIVARIATE-001 M3c — proxy/IV-SVAR.
+                "proxy_computed": bool(proxy_computed),
+                "proxy_instrument_corr": proxy_instrument_corr,
             },
         )
 

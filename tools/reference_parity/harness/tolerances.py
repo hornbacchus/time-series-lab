@@ -1201,6 +1201,43 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ENG-EXT-MULTIVARIATE-001 M3c — proxy/IV-SVAR self-parity + the
+    # LOAD-BEARING instrument-relevance functional check. Deterministic
+    # closed-form covariance algebra → bit-exact self-parity; the relevance
+    # check (corr of the identified shock with the instrument) is the
+    # formulation-correctness substitute for the absent cross-package arm.
+    "p3_var_proxy_svar": {
+        "type": "tiered_outputs",
+        "b1_selfparity": {
+            "abs_tol": 1e-12, "rel_tol": 1e-12,
+            "block_abs_tol": 1e-9, "block_rel_tol": 1e-9,
+        },
+        "struct_irf_selfparity": {
+            "abs_tol": 1e-12, "rel_tol": 1e-12,
+            "block_abs_tol": 1e-9, "block_rel_tol": 1e-9,
+        },
+        "instrument_relevance": {
+            "min_corr": 0.2,
+        },
+        "justification": (
+            "ENG-EXT-MULTIVARIATE-001 M3c — proxy / external-instrument SVAR. "
+            "Net-new (statsmodels SVAR is A/B/AB short-run only); NO usable "
+            "cross-package R package (svars is the wrong family — "
+            "heteroskedasticity ID). Self-parity: engine _proxy_svar vs a "
+            "from-scratch reimplementation of the IDENTICAL formulation "
+            "(b1 ∝ Cov(u,z) normalized to unit impact on the reference "
+            "variable; GLS-projected shock; structural IRF = ma_rep @ b1) → "
+            "bit-exact (1e-12; covariance algebra is deterministic). The "
+            "instrument_relevance check (min_corr 0.2) is LOAD-BEARING — the "
+            "scheme-DEFINING property is that the identified shock correlates "
+            "with the instrument (first-stage relevance; at n≈600 corr 0.2 ≈ "
+            "F > 10). It is the formulation-correctness substitute for the "
+            "absent cross-package arm (A1c lesson). Verified discriminating: "
+            "relevant instrument corr ≈ 0.87 PASS, irrelevant control ≈ 0.09 "
+            "BLOCK. Do NOT relax the threshold to mask a non-correlated shock."
+        ),
+    },
+
     "p3_vecm": {
         # Phase 3.5 Session 3 (Item 1): tightened from canonical
         # mle_fit band (1e-3 abs / 1e-2 rel) to single_impl_mle
