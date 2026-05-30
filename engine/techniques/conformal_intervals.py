@@ -93,6 +93,47 @@ def _infer_m(frequency):
     return freq_map.get(f, 1)
 
 
+def _cqr_intervals(X_train, y_train, X_cal, y_cal, X_eval, *, alpha, seed):
+    """Conformalized Quantile Regression (Romano-Patterson-Candès 2019) —
+    ENG-EXT-CONFORMAL-001 C1.
+
+    Fit gradient-boosting quantile regressors at the lower (α/2) and upper
+    (1−α/2) quantiles on the training set; conformalize against the
+    calibration set via the CQR nonconformity score
+    ``E_i = max(q̂_lo(x_i) − y_i, y_i − q̂_hi(x_i))``; the conformal
+    adjustment is the ``⌈(n_cal+1)(1−α)⌉/n_cal`` empirical quantile of {E_i}
+    (the same finite-sample index the split-conformal path uses); the
+    interval is ``[q̂_lo(x) − Q, q̂_hi(x) + Q]``. Deterministic in ``seed``
+    (the GBR ``random_state``).
+
+    Returns a dict: ``lo``/``hi`` (eval intervals), ``Q`` (conformal
+    adjustment), ``qlo_eval``/``qhi_eval`` (raw quantile predictions),
+    ``glo``/``ghi`` (the fitted quantile regressors, for horizon recursion).
+    """
+    from sklearn.ensemble import GradientBoostingRegressor
+
+    q_lo_level = alpha / 2.0
+    q_hi_level = 1.0 - alpha / 2.0
+    glo = GradientBoostingRegressor(
+        loss="quantile", alpha=q_lo_level, random_state=seed).fit(X_train, y_train)
+    ghi = GradientBoostingRegressor(
+        loss="quantile", alpha=q_hi_level, random_state=seed).fit(X_train, y_train)
+    qlo_cal = glo.predict(X_cal)
+    qhi_cal = ghi.predict(X_cal)
+    E = np.maximum(qlo_cal - y_cal, y_cal - qhi_cal)
+    n_cal = len(y_cal)
+    q_level = np.ceil((n_cal + 1) * (1.0 - alpha)) / n_cal
+    q_level = min(q_level, 1.0)
+    Q = float(np.quantile(E, q_level))
+    X_eval = np.atleast_2d(X_eval)
+    qlo_eval = glo.predict(X_eval)
+    qhi_eval = ghi.predict(X_eval)
+    return {
+        "lo": qlo_eval - Q, "hi": qhi_eval + Q, "Q": Q,
+        "qlo_eval": qlo_eval, "qhi_eval": qhi_eval, "glo": glo, "ghi": ghi,
+    }
+
+
 def run(ctx: RunContext, progress_callback) -> dict:
     """
     Split conformal prediction intervals.
@@ -165,6 +206,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     "Use a value strictly between 0 and 1; typical "
                     "choices are 0.90, 0.95 (default), 0.99.",
                 ],
+            )
+
+        # ENG-EXT-CONFORMAL-001 C1 — method selector (ADDITIVE). Default
+        # "split" = the existing split-conformal path (byte-identical; this
+        # branch not taken). "cqr" = conformalized quantile regression.
+        conformal_method = str(ctx.get_param("conformal_method", "split"))
+        if conformal_method == "cqr":
+            return _run_cqr(
+                ctx, progress_callback, name, clean, n, horizon, alpha,
+                conf_level, cal_frac, warn_list,
             )
 
         # Split data: training | calibration | (future)
@@ -382,5 +433,155 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "Ensure your data is numeric with sufficient observations (>=30).",
                 "Try a smaller calibration fraction.",
                 "Check that pmdarima is installed.",
+            ],
+        )
+
+
+def _run_cqr(ctx, progress_callback, name, clean, n, horizon, alpha,
+             conf_level, cal_frac, warn_list):
+    """ENG-EXT-CONFORMAL-001 C1 — Conformalized Quantile Regression path.
+
+    Conformalizes the gradient-boosting quantile-regression base (reuses
+    `quantile_regression_model._create_features` / `_build_forecast_features`)
+    via `_cqr_intervals`. Splits the supervised lag-feature rows into
+    train | calibration | test; reports a held-out empirical-coverage
+    diagnostic on the test slice; produces horizon intervals by median
+    recursion. ADDITIVE — only reached when `conformal_method="cqr"`.
+    """
+    try:
+        from techniques.quantile_regression_model import (
+            _create_features, _build_forecast_features,
+        )
+        from sklearn.ensemble import GradientBoostingRegressor
+
+        progress_callback("Building quantile-regression features", 15)
+        n_lags = int(ctx.get_param("n_lags", min(12, max(3, n // 10))))
+        rolling_windows = [3, 6]
+        seed = int(ctx.seed)
+
+        X, y, _ = _create_features(clean, n_lags, rolling_windows)
+        if len(y) < 40:
+            return make_error_response(
+                ctx,
+                f"Too few usable rows ({len(y)}) after building lag features "
+                f"for CQR. Provide a longer series or reduce n_lags.",
+                error_fixes=["Provide a longer time series."],
+            )
+
+        # train | calibration | test (test = held-out coverage diagnostic)
+        m = len(y)
+        n_test = max(10, int(0.2 * m))
+        n_rem = m - n_test
+        n_cal = max(10, int(cal_frac * n_rem))
+        n_train = n_rem - n_cal
+        if n_train < 20:
+            return make_error_response(
+                ctx, f"Too few training rows ({n_train}) for CQR.",
+                error_fixes=["Provide a longer series or reduce cal_fraction."],
+            )
+        X_train, y_train = X[:n_train], y[:n_train]
+        X_cal, y_cal = X[n_train:n_train + n_cal], y[n_train:n_train + n_cal]
+        X_test, y_test = X[n_train + n_cal:], y[n_train + n_cal:]
+
+        progress_callback("Fitting conformalized quantile regression", 45)
+        import warnings as _w
+        with _w.catch_warnings():
+            _w.simplefilter("ignore")
+            res = _cqr_intervals(
+                X_train, y_train, X_cal, y_cal, X_test, alpha=alpha, seed=seed)
+            # median regressor for the horizon point recursion
+            gmed = GradientBoostingRegressor(
+                loss="quantile", alpha=0.5, random_state=seed).fit(X_train, y_train)
+
+        lo_test, hi_test, Q = res["lo"], res["hi"], res["Q"]
+        empirical_coverage = float(np.mean((y_test >= lo_test) & (y_test <= hi_test)))
+        mean_width = float(np.mean(hi_test - lo_test))
+
+        progress_callback("Generating CQR forecast intervals", 75)
+        glo, ghi = res["glo"], res["ghi"]
+        series_ext = clean.copy()
+        fc_rows = []
+        with _w.catch_warnings():
+            _w.simplefilter("ignore")
+            for step in range(horizon):
+                fx = _build_forecast_features(series_ext, n_lags, rolling_windows).reshape(1, -1)
+                point = float(gmed.predict(fx)[0])
+                lo = float(glo.predict(fx)[0] - Q)
+                hi = float(ghi.predict(fx)[0] + Q)
+                fc_rows.append([
+                    step + 1, round(point, 6), round(lo, 6), round(hi, 6),
+                ])
+                series_ext = np.append(series_ext, point)
+
+        ci_label = f"{conf_level * 100:.0f}%"
+        fc_table = make_table(
+            "CQR Forecast with Conformal Intervals",
+            ["Step", "Point Forecast (median)",
+             f"CQR Lower {ci_label}", f"CQR Upper {ci_label}"],
+            fc_rows,
+        )
+        diag_table = make_table(
+            "CQR Coverage Diagnostics",
+            ["Metric", "Value"],
+            [
+                ["Method", "CQR (conformalized quantile regression)"],
+                ["Target Coverage", ci_label],
+                ["Held-out Empirical Coverage", round(empirical_coverage, 4)],
+                ["Held-out Test Size", n_test],
+                ["Mean Interval Width", round(mean_width, 6)],
+                ["Conformal Adjustment (Q)", round(Q, 6)],
+                ["Train / Calibration Size", f"{n_train} / {n_cal}"],
+                ["Lag Features", n_lags],
+            ],
+        )
+
+        if empirical_coverage < conf_level - 0.10:
+            warn_list.append(
+                f"CQR held-out coverage ({empirical_coverage:.3f}) is below the "
+                f"target ({conf_level:.2f}) — the quantile model may be "
+                "miscalibrated on this series (non-exchangeable residuals)."
+            )
+
+        plain = (
+            f"Conformalized quantile regression (CQR) intervals for '{name}' at "
+            f"{ci_label} target coverage. The quantile-regression base produces "
+            f"adaptive-width intervals; conformalization adds Q={Q:.4f} to "
+            f"guarantee finite-sample validity. Held-out empirical coverage on "
+            f"{n_test} test points was {empirical_coverage:.3f}; mean interval "
+            f"width {mean_width:.4f}."
+        )
+        charting = (
+            "Line chart of the series with the CQR point forecast and an "
+            "ADAPTIVE-width shaded interval (wider where the quantile spread is "
+            "larger). Secondary panel: held-out coverage vs nominal."
+        )
+        progress_callback("Done", 100)
+        return make_response(
+            ctx,
+            tables=[fc_table, diag_table],
+            plain_english_summary=plain,
+            warnings=warn_list,
+            charting_suggestions=charting,
+            interpretation=None,
+            audit_fields={
+                "conformal_method": "cqr",
+                "confidence_level": conf_level,
+                "horizon": horizon,
+                "cqr_coverage": round(empirical_coverage, 6),
+                "cqr_mean_width": round(mean_width, 6),
+                "cqr_Q": round(Q, 6),
+                "n_train": n_train,
+                "n_cal": n_cal,
+                "n_test": n_test,
+                "n_lags": n_lags,
+            },
+        )
+    except Exception as e:
+        return make_error_response(
+            ctx,
+            f"CQR conformal intervals failed: {e}",
+            error_fixes=[
+                "Ensure the series is numeric with enough observations.",
+                "Check that scikit-learn is installed.",
             ],
         )

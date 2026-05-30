@@ -1283,6 +1283,49 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ENG-EXT-CONFORMAL-001 C1 — CQR; the FIRST conformal_coverage ladder
+    # (the interval family's coverage sibling). selfparity_bounds tight
+    # (bit-exact); coverage_gap = the LOAD-BEARING empirical-coverage floor
+    # (slack EARNED = 2·std of held-out coverage across 8 seeds = 0.07;
+    # mean 0.905 ≈ nominal 0.90); crosspkg_* = distributional vs MAPIE
+    # (matched calibration, but MAPIE's internal conformal-quantile shifts
+    # bounds → width-ratio + coverage-agreement, not endpoints).
+    "p3_conformal_cqr": {
+        "type": "conformal_coverage",
+        "selfparity_bounds": {
+            "abs_tol": 1e-8, "rel_tol": 1e-8,
+            "block_abs_tol": 1e-6, "block_rel_tol": 1e-6,
+        },
+        "coverage_gap": {"slack": 0.07, "caveat_mult": 3},
+        "crosspkg_width_ratio": {
+            "pass_lo": 0.85, "pass_hi": 1.18, "block_lo": 0.70, "block_hi": 1.43,
+        },
+        "crosspkg_coverage_agreement": {"pass_abs": 0.05, "block_abs": 0.12},
+        "justification": (
+            "ENG-EXT-CONFORMAL-001 C1 — Conformalized Quantile Regression "
+            "(Romano-Patterson-Candès 2019); FIRST instantiation of the "
+            "reserved conformal_coverage verdict_class. selfparity_bounds "
+            "1e-8: engine _cqr_intervals vs a from-scratch reimplementation of "
+            "the IDENTICAL Romano formulation (same seeded GBR base, same "
+            "calibration split, same conformal-quantile index) → bit-exact "
+            "bounds + Q. coverage_gap (LOAD-BEARING, the scheme-defining "
+            "property): held-out empirical coverage ≥ (1−α) − slack; slack "
+            "EARNED = 2·std of CQR held-out coverage measured across 8 seeds "
+            "(mean 0.905 ≈ nominal 0.90, std 0.034 → slack 0.07; do NOT widen "
+            "to mask under-coverage). caveat_mult 3 (CAVEAT band ≥ nominal − "
+            "3·slack). crosspkg_* (distributional vs MAPIE "
+            "ConformalizedQuantileRegressor, matched calibration): MAPIE's "
+            "internal conformal-quantile / quantile-crossing handling shifts "
+            "the bounds (~0.2), so the cross-package check is band GEOMETRY — "
+            "width_ratio (pre-verified ≈ 0.99) + coverage_agreement (Δ ≈ 0.00) "
+            "— NOT bit-exact endpoints (that is the self-parity arm). The "
+            "mis-scaled (×0.3 width) discrimination guard confirms the "
+            "coverage floor catches gross miscalibration. Pattern reusable for "
+            "C2 (EnbPI). Reuses the conformal_nominal_coverage / "
+            "interval_containment invariant functions in place."
+        ),
+    },
+
     "p3_vecm": {
         # Phase 3.5 Session 3 (Item 1): tightened from canonical
         # mle_fit band (1e-3 abs / 1e-2 rel) to single_impl_mle
