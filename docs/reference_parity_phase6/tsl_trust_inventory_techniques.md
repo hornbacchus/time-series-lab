@@ -30038,11 +30038,12 @@ engine lines 203-209 emphasizing the structural assumption.
   M1 (commit `7ec4605`; preset-gated bootstrap MC bands; bootstrap_
   distributional three-arm validation PASS)** — see the M1 amendment
   below
-- **Blanchard-Quah ~~NOT IMPLEMENTED~~ DELIVERED at M3a** (commit
-  `d8fceb8`; cross-package vars::BQ machine precision); **proxy-SVAR
-  ~~NOT IMPLEMENTED~~ DELIVERED at M3c** (commit `29baaf5`; self-parity
-  bit-exact + load-bearing instrument-relevance functional check); **only
-  sign-restriction still pending M3b** — see the M1/M3a/M3c amendments below
+- **Advanced SVAR identification ~~NOT IMPLEMENTED~~ FULLY DELIVERED:**
+  Blanchard-Quah (M3a, commit `d8fceb8`, cross-package vars::BQ machine
+  precision) + proxy-SVAR (M3c, commit `29baaf5`, self-parity + instrument-
+  relevance functional check) + sign-restriction (M3b, commit `2932ece`,
+  set-identification + load-bearing functional checks). ENG-EXT-MULTIVARIATE-001
+  EXTENDED COMPLETE — see the M1/M2/M3a/M3c/M3b amendments below
 
 **Status (PRIMARY Tier II.bit-exact PASS at machine precision +
 SECONDARY aic/bic Tier V Pattern D pre-existing CAVEAT documented
@@ -30387,6 +30388,81 @@ selector (adds `"proxy"` + `proxy_instrument` / `proxy_normalize_var` params).
 **MULTIVARIATE-001 EXTENDED status (updated):** M1 + M2 + M3a + M3c DONE; only
 **M3b** (sign-restriction, set-identified, `bootstrap_distributional`, the
 commission's hardest) remains — then the commission COMPLETES.
+
+---
+
+**ENG-EXT-MULTIVARIATE-001 EXTENDED — M3b DELIVERED (sign-restriction SVAR
+set-identification; commit `2932ece`; ADDITIVE; the commission's HARDEST + the
+A-phase's THIRD validation kind) → ENG-EXT-MULTIVARIATE-001 EXTENDED COMPLETE:**
+
+M3b adds sign-restriction SVAR identification — SET-identified (it admits a SET
+of structural impact matrices consistent with the sign constraints, not a
+point). NET-NEW (statsmodels SVAR is A/B/AB short-run only); no usable
+cross-package R package (svars wrong family; VARsignR CRAN-archived) → SELF-
+PARITY + LOAD-BEARING functional checks (the A1c blind-spot mitigation at its
+sharpest: set-identified + self-parity-only). Reuses M3a's scheme selector
+(adds `"sign_restriction"` + `sign_restrictions` / `sr_n_draws` params).
+
+- **Set-identification build:** `_sign_restriction_svar` draws Haar rotations
+  (seeded QR sign-normalized), forms `B0 = chol(Σ)·Q`, diagonal-normalizes
+  (own-variable impact ≥0), keeps those satisfying the impact sign restrictions
+  (R: k×k of {−1,0,+1}), and summarizes the admissible SET by the median-target
+  + 16/84 percentile bands over retained rotations. Verified: ~53% retention (a
+  proper discriminating set), correct median sign pattern, deterministic.
+  3 tables (Median Impact / Structural IRF Median+16/84 / Diagnostics). Audit
+  `sign_restriction_computed / sr_n_retained / sr_sign_satisfaction /
+  sr_cholesky_admissible`.
+
+- **VALIDATION — SET-IDENTIFICATION (the A-phase's THIRD validation kind, vs
+  point-parity M3a/M3c and M1's band-around-a-point; check
+  `p3_var_sign_restriction`, verdict_class `bootstrap_distributional` — the set
+  summary is median+16/84-band-over-rotations, M1's band structure; rotation
+  sampling ≈ bootstrap resampling):**
+  - **Self-parity (machinery):** engine `_sign_restriction_svar` vs a
+    from-scratch reimplementation of the IDENTICAL rotation sampling (same
+    seed/draws/QR-normalization/diagonal-normalization/retention) → the SAME
+    retained set → **BIT-EXACT set summary (0.0)**.
+  - **LOAD-BEARING functional checks (formulation-correctness — set-ID's
+    checkable invariants):** `sign_satisfaction` == 1.0 (every retained rotation
+    satisfies the signs); `cholesky_in_set` == True (the diagonal-normalized
+    Cholesky is ADMISSIBLE — the strongest invariant, NOT band-containment; a
+    set-construction bug excluding it fails); `economic_sign` (median impact's
+    restricted entries have the correct sign). VERIFIED DISCRIMINATING against
+    deliberate bugs (retain-all → sign-satisfaction 0.58 caught; a Cholesky-
+    excluding sign pattern → admissible False caught). Rotation-sampling
+    determinism matched across arms (the identical-parameterization discipline).
+  Overall **PASS**, deterministic (×2).
+
+- **ADDITIVE / backward-compat (FIRM GATE — PASSED):** default
+  `svar_identification="cholesky"` → the entire existing VAR output (Cholesky
+  IRF + M1 bands + FEVD + M3a BQ + M3c proxy-when-selected + coefficients/
+  forecast/summary/Granger) BYTE-IDENTICAL (nan-aware git before/after diff);
+  all FOUR VAR sentinels (`p3_var`, `p3_var_irf_bands`, `p3_var_bq`,
+  `p3_var_proxy_svar`) PASS unchanged. Wrapper-3/3 PASS (NaN; dispatch; set
+  tables + diagnostics).
+
+### ENG-EXT-MULTIVARIATE-001 EXTENDED — FULLY DELIVERED (SECOND A-commission COMPLETE)
+
+The commission (commissioned S64, extended S65) is **fully delivered**:
+- **M1** VAR IRF confidence bands (commit `7ec4605`; bootstrap_distributional —
+  the first interval-validation).
+- **M2** VECM IRF + FEVD (commit `c00edc1`; cross-package point-parity, machine
+  precision).
+- **M3** advanced SVAR identification: **M3a** Blanchard-Quah (commit `d8fceb8`;
+  cross-package `vars::BQ`, machine precision) + **M3c** proxy/IV-SVAR (commit
+  `29baaf5`; self-parity + instrument-relevance functional check) + **M3b**
+  sign-restriction (commit `2932ece`; set-identification + load-bearing
+  functional checks).
+
+**Three validation kinds delivered by the A-phase:** point-parity (Q1 baseline,
+extended) → **bootstrap-band / interval** (M1, `bootstrap_distributional`) →
+**set-identification** (M3b, reusing `bootstrap_distributional`). The interval
+family carries to ENG-EXT-CONFORMAL-001 (the `conformal_coverage` sibling). The
+SVAR-identification build pattern (M3a scheme selector) + the load-bearing-
+functional-check discipline (M3c/M3b) are reusable engine+audit infrastructure.
+
+**TWO of the THREE Workstream-A commissions COMPLETE** (CHANGEPOINT-001 +
+MULTIVARIATE-001 EXTENDED); **ENG-EXT-CONFORMAL-001** is the final Q2 commission.
 
 **Multivariate Systems block progress note (S64 second entry):**
 Block 10 Multivariate Systems advances at S64 var per ratified
@@ -38624,12 +38700,18 @@ catalog completion).** §3 unvalidated → 0.
       [corr ≥ 0.2 — the formulation-correctness substitute for the absent
       cross-package arm; discriminating: relevant 0.881 PASS vs irrelevant
       control −0.018 BLOCK]; closed_form; reuses M3a's scheme selector;
-      S64 amendment).** Remaining: only **M3b** (sign-restriction —
-      self-parity + set-identification + load-bearing sign-satisfaction/
-      Cholesky-in-set functional checks, `bootstrap_distributional`, the
-      commission's hardest) → then MULTIVARIATE-001 EXTENDED COMPLETE. The
-      `bootstrap_distributional` interval-pattern (from M1) carries to
-      commission (1) CONFORMAL-001 (the `conformal_coverage` sibling).
+      S64 amendment).** **M3b DELIVERED (sign-restriction SVAR; commit
+      `2932ece`; SET-identification — the A-phase's THIRD validation kind;
+      Haar rotation sampling + median/16/84 set summary; self-parity bit-exact
+      + LOAD-BEARING functional checks [sign-satisfaction 1.0, Cholesky-in-set
+      admissible, economic sign; verified discriminating]; `bootstrap_
+      distributional`; S64 amendment).** **→ ENG-EXT-MULTIVARIATE-001 EXTENDED
+      COMPLETE (commission 2 of 3 — M1 VAR IRF bands + M2 VECM IRF/FEVD + M3
+      advanced SVAR [BQ + proxy + sign-restriction]).** Three validation kinds
+      delivered: point-parity → bootstrap-band (M1) → set-identification (M3b).
+      **TWO of THREE Workstream-A commissions COMPLETE (CHANGEPOINT + MULTIVARIATE);
+      only ENG-EXT-CONFORMAL-001 remains** — it inherits the
+      `bootstrap_distributional` → `conformal_coverage` interval family.
   (3) **ENG-EXT-CHANGEPOINT-001** (multivariate change-point detection
       across the curve; commissioned S79 at n=3 univariate-only
       instances). **Q2 Workstream A commission 1 of 3 — FULLY DELIVERED
