@@ -60,6 +60,42 @@ def _prepare_series(values):
     return trimmed
 
 
+def _blanchard_quah_b0(fit):
+    """Blanchard–Quah (1989) structural identification via LONG-RUN
+    restrictions (ENG-EXT-MULTIVARIATE-001 M3a net-new — statsmodels SVAR
+    is A/B/AB short-run only).
+
+    The structural impact matrix ``B0`` (u_t = B0 ε_t, Σ = B0 B0ᵀ) is pinned
+    by requiring the LONG-RUN cumulative impact ``C(1)·B0`` to be lower-
+    triangular (shock j has no permanent effect on variable i for i<j),
+    where ``C(1) = (I − A₁ − … − Aₚ)⁻¹`` is the VAR long-run multiplier::
+
+        C(1)·B0 = cholesky_lower(C(1)·Σ·C(1)ᵀ)   (unique, +diagonal)
+        ⇒  B0 = C(1)⁻¹ · cholesky_lower(C(1)·Σ·C(1)ᵀ)
+
+    Returns ``(B0, lrim)`` where ``lrim = C(1)·B0`` is the (lower-triangular)
+    long-run impact matrix. Identical to R ``vars::BQ`` (``$B`` / ``$LRIM``);
+    sign convention matches (positive-diagonal long-run Cholesky). The
+    structural IRF at horizon h is ``ma_rep(h)[h] @ B0`` (impact = B0).
+    Unconditional Cholesky — PD by construction (Σ PD ⇒ C(1)ΣC(1)ᵀ PD).
+    """
+    C1 = np.asarray(fit.long_run_effects(), dtype=np.float64)
+    Sigma = np.asarray(fit.sigma_u, dtype=np.float64)
+    M = C1 @ Sigma @ C1.T
+    P = np.linalg.cholesky(M)  # lower-triangular, positive diagonal
+    B0 = np.linalg.solve(C1, P)
+    lrim = C1 @ B0
+    # Defensive column-sign canonicalization: enforce non-negative diagonal
+    # of the long-run impact matrix (already true from the +diagonal
+    # Cholesky, but guards against a future fixture flipping a column
+    # relative to the R reference convention).
+    for j in range(lrim.shape[1]):
+        if lrim[j, j] < 0:
+            B0[:, j] = -B0[:, j]
+            lrim[:, j] = -lrim[:, j]
+    return B0, lrim
+
+
 def _mc_irf_bands(fit, steps, repl, signif, seed, orth=True, burn=100):
     """Monte-Carlo confidence bands for the (orthogonalized) IRF.
 
@@ -432,9 +468,83 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 warn_list.append(f"IRF confidence-band computation failed: {e}")
                 irf_band_computed = False
 
+        # ENG-EXT-MULTIVARIATE-001 M3a — Blanchard–Quah SVAR identification
+        # (ADDITIVE; the scheme-selector pattern). Default
+        # svar_identification="cholesky" leaves the existing output
+        # byte-identical (this branch not entered); "blanchard_quah" ADDS
+        # structural-identification tables (B0 / long-run impact / structural
+        # IRF / structural FEVD) alongside the UNCHANGED Cholesky IRF + bands +
+        # FEVD. This scheme-selector + structural-output structure is the
+        # pattern M3c (proxy) + M3b (sign-restriction) reuse.
+        svar_identification = str(ctx.get_param("svar_identification", "cholesky"))
+        bq_tables = []
+        bq_computed = False
+        if svar_identification == "blanchard_quah":
+            progress_callback("Blanchard-Quah identification", 88)
+            try:
+                B0, lrim = _blanchard_quah_b0(fit)
+                shock_cols = [f"Shock {j + 1}" for j in range(k)]
+                bq_tables.append(make_table(
+                    "Structural Impact Matrix (Blanchard-Quah)",
+                    ["Variable"] + shock_cols,
+                    [[names[i]] + [round(float(B0[i, j]), 6) for j in range(k)]
+                     for i in range(k)],
+                ))
+                bq_tables.append(make_table(
+                    "Long-Run Impact Matrix (Blanchard-Quah)",
+                    ["Variable"] + shock_cols,
+                    [[names[i]] + [round(float(lrim[i, j]), 6) for j in range(k)]
+                     for i in range(k)],
+                ))
+                # Structural IRF: Θ_h = Φ_h @ B0 (Φ = reduced-form MA rep).
+                Phi = np.asarray(fit.ma_rep(maxn=irf_periods), dtype=np.float64)
+                Theta = np.einsum("hrs,sc->hrc", Phi, B0)  # [h, resp, struct-shock]
+                sirf_rows = []
+                for t in range(Theta.shape[0]):
+                    for shock_idx in range(k):
+                        for resp_idx in range(k):
+                            sirf_rows.append([
+                                t, f"Shock {shock_idx + 1}", names[resp_idx],
+                                round(float(Theta[t, resp_idx, shock_idx]), 6),
+                            ])
+                bq_tables.append(make_table(
+                    "Structural IRF (Blanchard-Quah)",
+                    ["Period", "Shock", "Response", "IRF"], sirf_rows,
+                ))
+                # Structural FEVD: cumulative squared structural IRF, normalized
+                # per response variable per horizon.
+                sfevd_rows = []
+                contrib = np.zeros((k, k))
+                for h in range(min(irf_periods, Theta.shape[0])):
+                    contrib = contrib + Theta[h] ** 2
+                    rt = contrib.sum(axis=1, keepdims=True)
+                    rt = np.where(rt < 1e-300, 1.0, rt)
+                    share = contrib / rt
+                    for var_idx in range(k):
+                        sfevd_rows.append(
+                            [names[var_idx], h + 1]
+                            + [round(float(share[var_idx, s]) * 100, 2) for s in range(k)]
+                        )
+                bq_tables.append(make_table(
+                    "Structural FEVD (Blanchard-Quah) (%)",
+                    ["Variable", "Period"] + [f"Due to Shock {j + 1}" for j in range(k)],
+                    sfevd_rows,
+                ))
+                bq_computed = True
+                warn_list.append(
+                    "Blanchard-Quah long-run-restriction SVAR identification "
+                    "applied: structural shocks are identified by restricting "
+                    "the long-run cumulative impact matrix to lower-triangular "
+                    "(shock j has no permanent effect on variable i for i<j)."
+                )
+            except Exception as e:
+                warn_list.append(f"Blanchard-Quah identification failed: {e}")
+                bq_computed = False
+
         tables = [fc_table, summary_table, coef_table, irf_table, fevd_table]
         if irf_band_table is not None:
             tables.append(irf_band_table)
+        tables.extend(bq_tables)
         if gc_rows:
             gc_table = make_table(
                 "Granger Causality (from VAR)",
@@ -509,6 +619,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "irf_band_repl": int(irf_band_repl),
                 "irf_band_method": "montecarlo_gaussian_distinct_seed",
                 "irf_band_seed": int(irf_band_seed),
+                # ENG-EXT-MULTIVARIATE-001 M3a — SVAR identification scheme.
+                "svar_identification": svar_identification,
+                "bq_computed": bool(bq_computed),
             },
         )
 

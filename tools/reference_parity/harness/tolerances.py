@@ -1164,6 +1164,43 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # ENG-EXT-MULTIVARIATE-001 M3a — Blanchard–Quah SVAR identification
+    # cross-package point-parity vs R vars::BQ. Closed-form matrix algebra
+    # on the VAR OLS fit (B0 = C1^-1 chol(C1 Σ C1^T); structural IRF =
+    # ma_rep @ B0) — the probe pre-verified bit-for-bit agreement. Machine
+    # precision at the p3_var / 1c_bvar_irf_fevd closed_form band.
+    "p3_var_bq": {
+        "type": "tiered_outputs",
+        "b0_vs_vars": {
+            "abs_tol": 1e-8, "rel_tol": 1e-8,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-4,
+        },
+        "lrim_vs_vars": {
+            "abs_tol": 1e-8, "rel_tol": 1e-8,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-4,
+        },
+        "struct_irf_vs_vars": {
+            "abs_tol": 1e-8, "rel_tol": 1e-8,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-4,
+        },
+        "justification": (
+            "ENG-EXT-MULTIVARIATE-001 M3a — Blanchard–Quah long-run-"
+            "restriction SVAR. Net-new (statsmodels SVAR is A/B/AB short-run "
+            "only); B0 = C(1)^-1 chol(C(1) Σ C(1)^T), structural IRF = "
+            "ma_rep @ B0. Cross-package vs R vars::BQ ($B / $LRIM / structural "
+            "irf) on p3_var's bivariate VAR(2) DGP (n=500, seed=42) — the same "
+            "fit S64 validated, so the comparison isolates the BQ "
+            "identification. The probe PRE-VERIFIED bit-for-bit agreement "
+            "(engine B0 == R $B exactly; engine C1·B0 == R $LRIM exactly; sign "
+            "convention matches — positive-diagonal long-run Cholesky). "
+            "closed_form 1e-8 (block 1e-4), matching p3_var / 1c_bvar_irf_fevd "
+            "— VAR is OLS (closed-form, not iterative MLE) and BQ is closed-"
+            "form algebra on top. A per-shock-column sign alignment is applied "
+            "defensively before comparison (structural shocks identified up to "
+            "sign). Do NOT widen to mask a real divergence."
+        ),
+    },
+
     "p3_vecm": {
         # Phase 3.5 Session 3 (Item 1): tightened from canonical
         # mle_fit band (1e-3 abs / 1e-2 rel) to single_impl_mle
