@@ -54,6 +54,162 @@ namespace TSL.AddIn
             OnRunRequested(techniqueId, AddIn.Settings?.GetGlobalPreset() ?? "Balanced");
         }
 
+        /// <summary>
+        /// One-shot run for a WORKBOOK-INPUT technique (e.g. Bond Yield
+        /// Forecast). Unlike <see cref="RunTechnique"/>, this does NOT extract
+        /// a cell selection — workbook-input techniques have no series
+        /// selection; the engine reads its input from a path passed in
+        /// <paramref name="injectedParams"/> (e.g. "input_workbook"). Dispatch
+        /// and result-rendering reuse the same technique-agnostic
+        /// engine + ExcelWriter path that the selection flow uses.
+        ///
+        /// Deliberately a SEPARATE method (not a refactor of OnRunRequested):
+        /// the selection path must stay byte-identical so every other ribbon
+        /// button is provably unaffected.
+        /// </summary>
+        public static void RunTechniqueWithParams(
+            string techniqueId, IDictionary<string, object> injectedParams)
+        {
+            if (string.IsNullOrEmpty(techniqueId)) return;
+
+            EnsureTaskPane();
+            _taskPane.Visible = true;
+
+            // Navigate to the Run view so progress + result-sheet links render.
+            _hostControl.ViewModel.NavigateToRun(techniqueId);
+            var runVm = _hostControl.ViewModel.CurrentView as RunViewModel;
+            if (runVm == null) return;
+
+            try
+            {
+                var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
+                if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
+                    runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueId = techniqueId;
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Could not resolve technique metadata for {techniqueId}: {ex.Message}");
+            }
+
+            runVm.IsRunning = true;
+
+            var preset = AddIn.Settings?.GetGlobalPreset() ?? "Balanced";
+            var request = new RunRequest
+            {
+                RunId = $"pane_{Guid.NewGuid():N}",
+                TechniqueId = techniqueId,
+                Preset = preset,
+                Seed = AddIn.Settings?.GetDefaultSeed() ?? 42,
+                Time = null,
+                Frequency = null,
+                // Workbook-input technique: no cell-selection series. The engine
+                // reads its data from the path(s) in Params.
+                Series = new List<SeriesData>(),
+                Params = injectedParams != null
+                    ? new Dictionary<string, object>(injectedParams)
+                    : new Dictionary<string, object>(),
+                FillConfig = new FillConfig(),
+            };
+
+            // Run async (mirrors the selection flow's dispatch tail; ExcelWriter
+            // renders the engine's tables to the Results/Audit sheets
+            // technique-agnostically).
+            Task.Run(async () =>
+            {
+                Action<ProgressEvent> progressHandler = (evt) =>
+                {
+                    _hostControl?.Invoke((System.Action)(() =>
+                    {
+                        runVm.ReportProgress(evt.Stage, evt.Pct, evt.Message ?? evt.Stage);
+                    }));
+                };
+
+                try
+                {
+                    AddIn.Engine.EnsureRunning();
+                    AddIn.Engine.ProgressReceived += progressHandler;
+
+                    var response = await AddIn.Engine.RunAsync(request);
+
+                    AddIn.Engine.ProgressReceived -= progressHandler;
+
+                    if (response.Status == "failure")
+                    {
+                        _hostControl?.Invoke((System.Action)(() =>
+                        {
+                            runVm.FailRun(response.ErrorMessage ?? "Unknown error from engine.");
+                        }));
+                    }
+                    else
+                    {
+                        ExcelAsyncUtil.QueueAsMacro(() =>
+                        {
+                            ExcelWriter.WriteResult writeResult = null;
+                            try
+                            {
+                                writeResult = ExcelWriter.WriteRunResult(request, response);
+                            }
+                            catch (Exception writeEx)
+                            {
+                                Logger.Error("ExcelWriter.WriteRunResult threw on main thread.", writeEx);
+                            }
+
+                            _hostControl?.Invoke((System.Action)(() =>
+                            {
+                                var sheets = new List<OutputSheetLink>();
+                                if (writeResult != null && writeResult.Success)
+                                {
+                                    if (!string.IsNullOrEmpty(writeResult.ResultSheetName))
+                                        sheets.Add(new OutputSheetLink
+                                        {
+                                            TableName = "Results",
+                                            SheetName = writeResult.ResultSheetName,
+                                        });
+                                    if (!string.IsNullOrEmpty(writeResult.AuditSheetName))
+                                        sheets.Add(new OutputSheetLink
+                                        {
+                                            TableName = "Audit",
+                                            SheetName = writeResult.AuditSheetName,
+                                        });
+                                }
+
+                                if (response.Tables != null)
+                                {
+                                    foreach (var t in response.Tables)
+                                    {
+                                        sheets.Add(new OutputSheetLink
+                                        {
+                                            TableName = t.Name,
+                                            SheetName = writeResult?.ResultSheetName,
+                                        });
+                                    }
+                                }
+
+                                var summary = response.PlainEnglishSummary ?? "Run completed.";
+                                if (writeResult != null && !writeResult.Success
+                                    && !string.IsNullOrEmpty(writeResult.ErrorMessage))
+                                {
+                                    summary += $"\n\nWarning: {writeResult.ErrorMessage}";
+                                }
+
+                                runVm.CompleteRun(summary, sheets);
+                            }));
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AddIn.Engine.ProgressReceived -= progressHandler;
+                    Logger.Error("Task pane run-with-params failed.", ex);
+                    _hostControl?.Invoke((System.Action)(() =>
+                    {
+                        runVm.FailRun($"Run failed: {ex.Message}");
+                    }));
+                }
+            });
+        }
+
         public static void ShowExplorer()
         {
             EnsureTaskPane();

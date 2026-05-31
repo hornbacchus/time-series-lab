@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -218,25 +219,84 @@ namespace TSL.AddIn
             // Bond Yield Forecast consumes a 3-sheet xlsx workbook
             // (BondYield_Macro / BondYield_Yields / BondYield_Projections)
             // referenced via ctx.params["input_workbook"], NOT the standard
-            // ctx.series cell-selection contract. Pass the active workbook's
-            // path through the Task Pane's RunRequest builder so the wrapper
-            // can read the workbook directly.
+            // ctx.series cell-selection contract.
             //
-            // The Task Pane builds a RunRequest from selection by default;
-            // for Bond Yield Forecast we need to inject the workbook path
-            // before dispatch. TaskPaneManager.RunTechniqueWithParams (a
-            // future extension banked for Session 5 Task Pane integration
-            // work) would handle this cleanly. For now we route through
-            // RunTechnique and surface a Task Pane warning if no workbook
-            // path is provided — the user then sets it via the parameter
-            // editor before clicking the explicit "Run" Ribbon button.
-            //
-            // Effective UX: clicking Bond Yield Forecast opens the Task
-            // Pane on the Bond Yield Forecast view; the user confirms the
-            // input_workbook path (auto-defaulted to the active workbook
-            // when present), then clicks the Task Pane's Run button to
-            // dispatch.
-            TaskPaneManager.RunTechnique("bond_yield_forecast");
+            // One-shot (GAP 1): auto-inject the ACTIVE workbook's saved path and
+            // dispatch directly via TaskPaneManager.RunTechniqueWithParams — the
+            // user clicks once and the forecast runs on the workbook they have
+            // open. The Task Pane (selection flow) is RETAINED as the graceful
+            // fallback for the cases where the active workbook can't be resolved
+            // to a saved file on disk (the engine reads the .xlsx from disk, so
+            // unsaved edits would not be seen).
+            try
+            {
+                var app = (Application)ExcelDnaUtil.Application;
+                var wb = app?.ActiveWorkbook;
+
+                // Edge 1: no workbook open → guide the user + fall back to the
+                // Task Pane so the Bond Yield Forecast view is still reachable.
+                if (wb == null)
+                {
+                    MessageBox.Show(
+                        "No workbook is open.\n\nUse 'Open Input Template' from the " +
+                        "Bond Yield Forecast dropdown to create a starter workbook, " +
+                        "edit the data sheets, save it, then click Run.",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    TaskPaneManager.RunTechnique("bond_yield_forecast");
+                    return;
+                }
+
+                // Edge 2: workbook never saved to disk → no path to read.
+                string wbPath = null;
+                try { wbPath = wb.Path; } catch { wbPath = null; }
+                if (string.IsNullOrEmpty(wbPath))
+                {
+                    MessageBox.Show(
+                        "Save this workbook to disk first (Ctrl+S), then click Run.\n\n" +
+                        "The Bond Yield Forecast reads the saved .xlsx file from disk.",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Edge 2b: unsaved edits → the on-disk file is stale relative to
+                // what the user sees. Avoid silently forecasting old data.
+                bool isSaved = true;
+                try { isSaved = wb.Saved; } catch { isSaved = true; }
+                if (!isSaved)
+                {
+                    MessageBox.Show(
+                        "This workbook has unsaved edits.\n\nSave it (Ctrl+S) first so " +
+                        "the forecast reads your edited data — the engine reads the " +
+                        "on-disk .xlsx file, not the in-memory edits.",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Edge 3: saved .xlsx present → one-shot dispatch. Malformed /
+                // wrong-sheet workbooks are rejected by the engine's pre-flight
+                // validation and surfaced as a clean failure in the Task Pane.
+                var fullName = wb.FullName;
+                var injected = new Dictionary<string, object>
+                {
+                    { "input_workbook", fullName },
+                    { "scenario", "baseline" },
+                };
+                TaskPaneManager.RunTechniqueWithParams("bond_yield_forecast", injected);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error launching Bond Yield Forecast: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         public void OnBondYieldForecastOpenTemplate(IRibbonControl control)
