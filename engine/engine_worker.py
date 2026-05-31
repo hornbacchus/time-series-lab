@@ -482,6 +482,18 @@ def serve(pipe_name: str):
     if os.environ.get("TSL_NO_NETWORK") == "1":
         log.info("TSL_NO_NETWORK=1: network access is disabled by policy.")
 
+    # Create the named pipe FIRST — before warming JIT — so the C# client's
+    # connect (NamedPipeClientStream.ConnectAsync, ~10s timeout) succeeds
+    # immediately on a cold engine instead of racing the ~10s JIT warm that
+    # used to delay pipe creation (the diagnosed cold-start connect race). A
+    # client may connect — and buffer its small request — while we warm below;
+    # the accept loop's ConnectNamedPipe then returns ERROR_PIPE_CONNECTED,
+    # which _connect_named_pipe already treats as success. This decouples
+    # connection establishment from warm-up time entirely.
+    pipe_handle = _create_named_pipe(pipe_name)
+    log.info(f"Named pipe created: \\\\.\\pipe\\{pipe_name}")
+    log.info("Pipe open; client may connect now while JIT caches warm.")
+
     # Bond Yield Forecast Session 5 (§5.3) — eager numba JIT warming.
     # The bond_yield_forecast subpackage uses @jit(cache=True) on FFBS
     # state sampling and conditional-forecast inner loops. First-call
@@ -515,9 +527,6 @@ def serve(pipe_name: str):
         log.warning(
             f"JIT warming skipped (non-fatal): {type(e).__name__}: {e}"
         )
-
-    pipe_handle = _create_named_pipe(pipe_name)
-    log.info(f"Named pipe created: \\\\.\\pipe\\{pipe_name}")
 
     try:
         while True:
