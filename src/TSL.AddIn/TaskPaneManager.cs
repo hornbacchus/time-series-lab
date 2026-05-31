@@ -22,6 +22,11 @@ namespace TSL.AddIn
         private static readonly SelectionService _selectionService = new SelectionService();
         private static readonly TimeIndexDetector _timeDetector = new TimeIndexDetector();
 
+        // Cancellation source for the in-flight run. Created per dispatch; its
+        // token is passed to Engine.RunAsync so the Run view's Cancel button can
+        // actually abort the run (in addition to the hard engine kill).
+        private static System.Threading.CancellationTokenSource _activeRunCts;
+
         /// <summary>
         /// Show the task pane (create if needed) and open the Technique
         /// Explorer pre-selected to <paramref name="techniqueId"/>. Used by
@@ -116,6 +121,8 @@ namespace TSL.AddIn
             // Run async (mirrors the selection flow's dispatch tail; ExcelWriter
             // renders the engine's tables to the Results/Audit sheets
             // technique-agnostically).
+            _activeRunCts = new System.Threading.CancellationTokenSource();
+            var runToken = _activeRunCts.Token;
             Task.Run(async () =>
             {
                 Action<ProgressEvent> progressHandler = (evt) =>
@@ -141,11 +148,16 @@ namespace TSL.AddIn
                     AddIn.Engine.EnsureRunning();
                     AddIn.Engine.ProgressReceived += progressHandler;
 
-                    var response = await AddIn.Engine.RunAsync(request);
+                    var response = await AddIn.Engine.RunAsync(request, runToken);
 
                     AddIn.Engine.ProgressReceived -= progressHandler;
 
-                    if (response.Status == "failure")
+                    if (runToken.IsCancellationRequested || response.Status == "canceled")
+                    {
+                        // User canceled — OnCancelRequested already reset the view
+                        // and hard-stopped the engine; don't write results.
+                    }
+                    else if (response.Status == "failure")
                     {
                         _hostControl?.Invoke((System.Action)(() =>
                         {
@@ -241,6 +253,151 @@ namespace TSL.AddIn
             });
         }
 
+        /// <summary>
+        /// Open the Run view for Bond Yield Forecast in CONFIGURE-then-run mode:
+        /// surface the curated parameters (pre-filled with catalog defaults),
+        /// enable Run without a cell selection, and route the Run button to the
+        /// workbook-input dispatch. Replaces the immediate one-shot so the user
+        /// can edit horizon / scenario / chain length / prior tightness first.
+        /// </summary>
+        public static void OpenBondYieldForecastConfig()
+        {
+            EnsureTaskPane();
+            _taskPane.Visible = true;
+
+            const string techniqueId = "bond_yield_forecast";
+            _hostControl.ViewModel.NavigateToRun(techniqueId);
+            var runVm = _hostControl.ViewModel.CurrentView as RunViewModel;
+            if (runVm == null) return;
+
+            try
+            {
+                var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
+                if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
+                    runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueId = techniqueId;
+
+                // Curated, forecasting-intent params only (README's named knobs):
+                // scenario, horizon, chain length (n_draws/n_burn), prior tightness
+                // (lambda_1/2/3). The 4 sampler internals (n_paths_per_draw,
+                // n_draws_subsample, projection_uncertainty, seed) stay at catalog
+                // defaults; input_workbook is auto-resolved at Run-click.
+                if (techEntry?.Parameters != null)
+                {
+                    var curated = new[]
+                    {
+                        "scenario", "horizon", "n_draws", "n_burn",
+                        "lambda_1", "lambda_2", "lambda_3",
+                    };
+                    var specs = techEntry.Parameters
+                        .Where(p => curated.Contains(p.Name))
+                        .OrderBy(p => Array.IndexOf(curated, p.Name))
+                        .Select(p =>
+                        (
+                            Name: p.Name,
+                            Label: p.Label,
+                            Type: p.Type,
+                            Description: p.Description,
+                            Options: p.Options?.ToList(),
+                            Default: p.Default
+                        )).ToList();
+                    runVm.SetParameters(specs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Could not load Bond Yield Forecast parameters: {ex.Message}");
+            }
+
+            // Workbook-input technique: no cell selection. Enable Run without a
+            // selection and route the Run button to OnWorkbookRunRequested.
+            runVm.SetSeriesPreviews(new List<SeriesPreviewItem>());
+            runVm.RequiresSelection = false;
+            runVm.WorkbookInputMode = true;
+            runVm.IsRunning = false;
+        }
+
+        /// <summary>
+        /// Handles the Run button for a WORKBOOK-INPUT technique. Resolves the
+        /// active workbook, writes a clean local %TEMP% copy (off OneDrive,
+        /// captures unsaved edits — the d923c6a mechanism), merges the user's
+        /// edited parameters, and dispatches via RunTechniqueWithParams.
+        /// </summary>
+        private static void OnWorkbookRunRequested(string techniqueId)
+        {
+            // Only Bond Yield Forecast uses workbook-input mode today.
+            if (!string.Equals(techniqueId, "bond_yield_forecast", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            try
+            {
+                var runVm = _hostControl?.ViewModel?.CurrentView as RunViewModel;
+
+                var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                var wb = app?.ActiveWorkbook;
+                if (wb == null)
+                {
+                    MessageBox.Show(
+                        "No workbook is open.\n\nOpen the Bond Yield Forecast input " +
+                        "workbook (or use 'Open Input Template'), then click Run.",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var tempPath = System.IO.Path.Combine(
+                    System.IO.Path.GetTempPath(), $"tsl_byf_{Guid.NewGuid():N}.xlsx");
+                wb.SaveCopyAs(tempPath);
+
+                var injected = runVm?.GetParametersDict()
+                               ?? new Dictionary<string, object>();
+                injected["input_workbook"] = tempPath;
+                if (!injected.ContainsKey("scenario"))
+                    injected["scenario"] = "baseline";
+
+                RunTechniqueWithParams(techniqueId, injected, tempPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error launching Bond Yield Forecast: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Run view's Cancel button: cancels the in-flight run token
+        /// AND hard-kills the engine process (so a mid-MCMC run actually stops;
+        /// the engine relaunches on the next run via EnsureRunning), then returns
+        /// the view to a ready state.
+        /// </summary>
+        private static void OnCancelRequested()
+        {
+            try
+            {
+                _activeRunCts?.Cancel();
+                AddIn.Engine?.CancelCurrentRun();
+
+                var runVm = _hostControl?.ViewModel?.CurrentView as RunViewModel;
+                if (runVm != null)
+                {
+                    _hostControl?.Invoke((System.Action)(() =>
+                    {
+                        runVm.ReportProgress("Canceled", runVm.ProgressPercent, "Run canceled by user.");
+                        runVm.IsRunning = false;
+                    }));
+                }
+                Logger.Info("Run canceled by user (engine hard-stopped).");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Error during run cancel.", ex);
+            }
+        }
+
         public static void ShowExplorer()
         {
             EnsureTaskPane();
@@ -310,6 +467,11 @@ namespace TSL.AddIn
 
                 // Wire the RunRequested event to extract selection and run the engine
                 _hostControl.ViewModel.RunRequested += OnRunRequested;
+
+                // Workbook-input dispatch (Bond Yield Forecast Run button) and the
+                // Run view's Cancel button.
+                _hostControl.ViewModel.WorkbookRunRequested += OnWorkbookRunRequested;
+                _hostControl.ViewModel.RunCancelRequested += OnCancelRequested;
 
                 // Wire the Data Readiness checks request
                 _hostControl.ViewModel.DataReadinessChecksRequested += OnDataReadinessChecksRequested;
@@ -579,6 +741,8 @@ namespace TSL.AddIn
             }
 
             // Run async on background thread
+            _activeRunCts = new System.Threading.CancellationTokenSource();
+            var runToken = _activeRunCts.Token;
             Task.Run(async () =>
             {
                 Action<ProgressEvent> progressHandler = (evt) =>
@@ -604,11 +768,16 @@ namespace TSL.AddIn
                     AddIn.Engine.EnsureRunning();
                     AddIn.Engine.ProgressReceived += progressHandler;
 
-                    var response = await AddIn.Engine.RunAsync(request);
+                    var response = await AddIn.Engine.RunAsync(request, runToken);
 
                     AddIn.Engine.ProgressReceived -= progressHandler;
 
-                    if (response.Status == "failure")
+                    if (runToken.IsCancellationRequested || response.Status == "canceled")
+                    {
+                        // User canceled — OnCancelRequested already reset the view
+                        // and hard-stopped the engine; don't write results.
+                    }
+                    else if (response.Status == "failure")
                     {
                         _hostControl?.Invoke((System.Action)(() =>
                         {

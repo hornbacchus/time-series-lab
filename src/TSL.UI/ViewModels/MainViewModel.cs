@@ -103,6 +103,19 @@ namespace TSL.UI.ViewModels
         public event Action<string, string> RunRequested; // techniqueId, preset
 
         /// <summary>
+        /// Raised when the user clicks Run in the Run view for a WORKBOOK-INPUT
+        /// technique (RunViewModel.WorkbookInputMode == true). The AddIn layer
+        /// dispatches the workbook-input flow rather than the selection flow.
+        /// </summary>
+        public event Action<string> WorkbookRunRequested; // techniqueId
+
+        /// <summary>
+        /// Raised when the user clicks Cancel in the Run view. The AddIn layer
+        /// hard-stops the engine and returns the view to ready.
+        /// </summary>
+        public event Action RunCancelRequested;
+
+        /// <summary>
         /// Raised when the user clicks "Insert =TSL.AUTO..." in the explorer.
         /// </summary>
         public event Action<string> InsertAutoFormulaRequested; // techniqueId
@@ -279,6 +292,15 @@ namespace TSL.UI.ViewModels
                     if (!string.IsNullOrEmpty(_runVm.TechniqueId))
                         RunRequested?.Invoke(_runVm.TechniqueId, Preset);
                 };
+                // Workbook-input techniques (e.g. Bond Yield Forecast) route the
+                // Run button here instead, so the AddIn layer resolves the active
+                // workbook rather than a cell selection.
+                _runVm.WorkbookRunRequested += () =>
+                {
+                    if (!string.IsNullOrEmpty(_runVm.TechniqueId))
+                        WorkbookRunRequested?.Invoke(_runVm.TechniqueId);
+                };
+                _runVm.CancelRequested += () => RunCancelRequested?.Invoke();
             }
             return _runVm;
         }

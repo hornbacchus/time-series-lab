@@ -156,6 +156,27 @@ namespace TSL.AddIn
             if (_engineProcess == null)
                 throw new InvalidOperationException("Failed to start engine process.");
 
+            // Drain the engine's stdout/stderr continuously. Two reasons:
+            //  1. CORRECTNESS: both streams are redirected (above); if we never
+            //     read them, the OS pipe buffer (~4 KB) fills and the engine
+            //     BLOCKS on its next write. A chatty run (e.g. BVAR's per-iter
+            //     MCMC logging on stderr) can therefore deadlock mid/late-run —
+            //     a second undrained-pipe deadlock distinct from the response
+            //     pipe. Draining removes it.
+            //  2. DIAGNOSTICS: the engine's own log lines now land in the TSL log
+            //     file, so a stalled run reveals the engine's last action (did it
+            //     reach "Run … completed"? did it start returning the response?).
+            _engineProcess.OutputDataReceived += (s, e) =>
+            {
+                if (e.Data != null) Logger.Info("[engine] " + e.Data);
+            };
+            _engineProcess.ErrorDataReceived += (s, e) =>
+            {
+                if (e.Data != null) Logger.Info("[engine] " + e.Data);
+            };
+            _engineProcess.BeginOutputReadLine();
+            _engineProcess.BeginErrorReadLine();
+
             _engineProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
 
             // Persist the PID so KillStaleEngineProcess() on a future
@@ -247,7 +268,25 @@ namespace TSL.AddIn
             EnsureRunning();
 
             var requestJson = JsonConvert.SerializeObject(request);
-            var responseJson = await SendAndReceiveAsync(requestJson, _currentRunCts.Token);
+
+            string responseJson;
+            try
+            {
+                responseJson = await SendAndReceiveAsync(requestJson, _currentRunCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // User cancel surfaced as a cancellation of the read — return a
+                // clean canceled response instead of throwing, so the dispatch
+                // tail can skip result-writing without an error banner.
+                return new RunResponse
+                {
+                    RunId = request.RunId,
+                    Status = "canceled",
+                    PlainEnglishSummary = "Run was canceled by user.",
+                    Warnings = new System.Collections.Generic.List<string> { "Run canceled." }
+                };
+            }
 
             if (_currentRunCts.Token.IsCancellationRequested)
             {
@@ -289,8 +328,16 @@ namespace TSL.AddIn
                 // Read responses (progress events followed by final response)
                 string finalResponse = null;
 
+                // [readloop] instrumentation: per-frame trace to the log file so a
+                // stalled run localizes the exact step that blocks — awaiting the
+                // length prefix (engine hasn't sent), mid-body, parse, dispatch, or
+                // final detection. (The Logger timestamps each line.)
+                int msgIndex = 0;
+
                 while (!ct.IsCancellationRequested)
                 {
+                    msgIndex++;
+                    Logger.Info($"[readloop] frame #{msgIndex}: awaiting length prefix...");
                     byte[] msgBuf = null;
                     try
                     {
@@ -306,12 +353,22 @@ namespace TSL.AddIn
 
                             var msgLenBuf = new byte[4];
                             var bytesRead = await ReadFullAsync(pipe, msgLenBuf, 0, 4, hbToken);
-                            if (bytesRead < 4) break;
+                            if (bytesRead < 4)
+                            {
+                                Logger.Info($"[readloop] frame #{msgIndex}: EOF/short length read ({bytesRead}/4) — engine closed pipe.");
+                                break;
+                            }
 
                             var msgLen = BitConverter.ToInt32(msgLenBuf, 0);
+                            Logger.Info($"[readloop] frame #{msgIndex}: length prefix = {msgLen} bytes; reading body...");
                             msgBuf = new byte[msgLen];
                             bytesRead = await ReadFullAsync(pipe, msgBuf, 0, msgLen, hbToken);
-                            if (bytesRead < msgLen) break;
+                            if (bytesRead < msgLen)
+                            {
+                                Logger.Info($"[readloop] frame #{msgIndex}: short body read ({bytesRead}/{msgLen}) — engine closed pipe mid-frame.");
+                                break;
+                            }
+                            Logger.Info($"[readloop] frame #{msgIndex}: body read {bytesRead} bytes.");
                         }
                     }
                     catch (OperationCanceledException) when (!ct.IsCancellationRequested)
@@ -355,7 +412,9 @@ namespace TSL.AddIn
                         try
                         {
                             var evt = parsed.ToObject<ProgressEvent>();
+                            Logger.Info($"[readloop] frame #{msgIndex}: progress \"{evt.Stage}\" {evt.Pct}% — dispatching to UI.");
                             ProgressReceived?.Invoke(evt);
+                            Logger.Info($"[readloop] frame #{msgIndex}: progress dispatched; looping for next frame.");
                         }
                         catch (Exception ex)
                         {
@@ -365,6 +424,7 @@ namespace TSL.AddIn
                     else
                     {
                         // Final RunResponse frame
+                        Logger.Info($"[readloop] frame #{msgIndex}: FINAL response received ({msgBuf.Length} bytes). Read loop complete.");
                         finalResponse = msg;
                         break;
                     }

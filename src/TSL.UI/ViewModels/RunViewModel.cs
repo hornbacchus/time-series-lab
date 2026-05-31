@@ -165,6 +165,38 @@ namespace TSL.UI.ViewModels
             set => SetProperty(ref _useTimeIndex, value);
         }
 
+        private bool _requiresSelection = true;
+        /// <summary>
+        /// Whether this technique needs a cell-selection (series) to run. True
+        /// for the standard selection-based techniques (unchanged behavior). Set
+        /// false for WORKBOOK-INPUT techniques (e.g. Bond Yield Forecast) whose
+        /// data comes from a workbook path, not a selection — so Run is enabled
+        /// without any SeriesPreviews.
+        /// </summary>
+        public bool RequiresSelection
+        {
+            get => _requiresSelection;
+            set
+            {
+                if (SetProperty(ref _requiresSelection, value))
+                    OnPropertyChanged(nameof(CanRun));
+            }
+        }
+
+        private bool _workbookInputMode;
+        /// <summary>
+        /// When true, the Run button raises <see cref="WorkbookRunRequested"/>
+        /// instead of <see cref="RunExecuteRequested"/>, so the AddIn layer runs
+        /// the workbook-input flow (resolve active workbook → engine) rather than
+        /// the cell-selection flow. Leaves the selection path byte-identical for
+        /// every other technique.
+        /// </summary>
+        public bool WorkbookInputMode
+        {
+            get => _workbookInputMode;
+            set => SetProperty(ref _workbookInputMode, value);
+        }
+
         private bool _isRunning;
         public bool IsRunning
         {
@@ -179,7 +211,7 @@ namespace TSL.UI.ViewModels
             }
         }
 
-        public bool CanRun => !_isRunning && SeriesPreviews.Count > 0;
+        public bool CanRun => !_isRunning && (SeriesPreviews.Count > 0 || !_requiresSelection);
         public bool ShowProgress => _isRunning || ProgressLog.Count > 0;
 
         private int _progressPercent;
@@ -237,6 +269,15 @@ namespace TSL.UI.ViewModels
         public event Action RunExecuteRequested;
 
         /// <summary>
+        /// Raised when the user clicks Run for a WORKBOOK-INPUT technique
+        /// (WorkbookInputMode == true). The AddIn layer subscribes and performs
+        /// the workbook-input dispatch (resolve active workbook → SaveCopyAs →
+        /// engine). Kept separate from RunExecuteRequested so the cell-selection
+        /// flow is byte-identical for every other technique.
+        /// </summary>
+        public event Action WorkbookRunRequested;
+
+        /// <summary>
         /// Raised when the user clicks Cancel.
         /// </summary>
         public event Action CancelRequested;
@@ -251,7 +292,13 @@ namespace TSL.UI.ViewModels
         public RunViewModel()
         {
             RunCommand = new RelayCommand(
-                () => RunExecuteRequested?.Invoke(),
+                () =>
+                {
+                    if (_workbookInputMode)
+                        WorkbookRunRequested?.Invoke();
+                    else
+                        RunExecuteRequested?.Invoke();
+                },
                 () => CanRun);
 
             CancelCommand = new RelayCommand(

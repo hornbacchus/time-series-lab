@@ -221,63 +221,22 @@ namespace TSL.AddIn
             // referenced via ctx.params["input_workbook"], NOT the standard
             // ctx.series cell-selection contract.
             //
-            // One-shot (GAP 1): the user clicks once and the forecast runs on the
-            // workbook they have open. The Task Pane (selection flow) is RETAINED
-            // as the graceful fallback only when no workbook can be resolved.
-            //
-            // The engine NEVER reads the live workbook. Instead we SaveCopyAs the
-            // active workbook to a LOCAL %TEMP% path and hand the engine THAT:
-            //   - The live file is open in Excel and (under OneDrive) can be held
-            //     by Files-On-Demand sync I/O, which blocks the engine's read for
-            //     minutes — the diagnosed pre-flight hang. %TEMP% is off OneDrive
-            //     (C:\Users\…\AppData\Local\Temp), so no sync I/O to block on.
-            //   - SaveCopyAs writes from Excel's IN-MEMORY state (no re-read of the
-            //     OneDrive source) and captures UNSAVED edits — so the workbook
-            //     need not be saved first (the old "save first" edge-cases are
-            //     dropped; the one-shot just works on the open workbook).
-            // The temp copy is deleted after the run (see RunTechniqueWithParams's
-            // cleanupTempFile), and uses a unique per-run name so copies can't
-            // collide or accumulate.
+            // CONFIGURE-then-run: open the Run view with the curated parameters
+            // (scenario / horizon / chain length / prior tightness) pre-filled
+            // and editable. The user reviews/edits, then clicks Run IN THE VIEW.
+            // The Run button routes to TaskPaneManager.OnWorkbookRunRequested,
+            // which resolves the active workbook, SaveCopyAs-es a local %TEMP%
+            // copy (off OneDrive, captures unsaved edits — the d923c6a fix), and
+            // dispatches. The "no workbook open" guard now lives at Run-click
+            // (where the workbook is actually needed), not at view-open.
             try
             {
-                var app = (Application)ExcelDnaUtil.Application;
-                var wb = app?.ActiveWorkbook;
-
-                // Edge 1: no workbook open → guide the user + fall back to the
-                // Task Pane so the Bond Yield Forecast view is still reachable.
-                if (wb == null)
-                {
-                    MessageBox.Show(
-                        "No workbook is open.\n\nUse 'Open Input Template' from the " +
-                        "Bond Yield Forecast dropdown to create a starter workbook, " +
-                        "edit the data sheets, then click Run.",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    TaskPaneManager.RunTechnique("bond_yield_forecast");
-                    return;
-                }
-
-                // Write a clean local copy of the active workbook (saved or not)
-                // and run the engine on that. Malformed / wrong-sheet workbooks are
-                // rejected by the engine's pre-flight validation and surfaced as a
-                // clean failure in the Task Pane.
-                var tempPath = Path.Combine(
-                    Path.GetTempPath(), $"tsl_byf_{Guid.NewGuid():N}.xlsx");
-                wb.SaveCopyAs(tempPath);
-
-                var injected = new Dictionary<string, object>
-                {
-                    { "input_workbook", tempPath },
-                    { "scenario", "baseline" },
-                };
-                TaskPaneManager.RunTechniqueWithParams(
-                    "bond_yield_forecast", injected, tempPath);
+                TaskPaneManager.OpenBondYieldForecastConfig();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Error launching Bond Yield Forecast: {ex.Message}",
+                    $"Error opening Bond Yield Forecast: {ex.Message}",
                     "Time Series Lab",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);

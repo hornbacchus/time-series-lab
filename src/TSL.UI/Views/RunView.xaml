@@ -263,9 +263,11 @@
                              Foreground="{StaticResource AccentBrush}" Background="#E0E0E0" />
 
                 <Border Background="{StaticResource CategoryBgBrush}" CornerRadius="4"
-                        Padding="6" MaxHeight="150" Margin="0,0,0,12">
-                    <ListBox ItemsSource="{Binding ProgressLog}" BorderThickness="0"
+                        Padding="6" MinHeight="160" MaxHeight="320" Margin="0,0,0,12">
+                    <ListBox x:Name="ProgressLogList" ItemsSource="{Binding ProgressLog}"
+                             BorderThickness="0"
                              Background="Transparent" FontSize="10" FontFamily="Consolas"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
