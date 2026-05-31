@@ -68,7 +68,8 @@ namespace TSL.AddIn
         /// button is provably unaffected.
         /// </summary>
         public static void RunTechniqueWithParams(
-            string techniqueId, IDictionary<string, object> injectedParams)
+            string techniqueId, IDictionary<string, object> injectedParams,
+            string cleanupTempFile = null)
         {
             if (string.IsNullOrEmpty(techniqueId)) return;
 
@@ -206,6 +207,26 @@ namespace TSL.AddIn
                     {
                         runVm.FailRun($"Run failed: {ex.Message}");
                     }));
+                }
+                finally
+                {
+                    // Delete the per-run temp workbook copy once the engine has
+                    // finished reading it. By the time RunAsync has returned (or
+                    // thrown), the engine is done with the input file and the
+                    // results are rendered from the in-memory response, so the
+                    // temp copy is no longer needed. Best-effort.
+                    if (!string.IsNullOrEmpty(cleanupTempFile))
+                    {
+                        try
+                        {
+                            if (System.IO.File.Exists(cleanupTempFile))
+                                System.IO.File.Delete(cleanupTempFile);
+                        }
+                        catch (Exception delEx)
+                        {
+                            Logger.Info($"Temp workbook cleanup failed for {cleanupTempFile}: {delEx.Message}");
+                        }
+                    }
                 }
             });
         }

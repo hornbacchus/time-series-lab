@@ -221,13 +221,23 @@ namespace TSL.AddIn
             // referenced via ctx.params["input_workbook"], NOT the standard
             // ctx.series cell-selection contract.
             //
-            // One-shot (GAP 1): auto-inject the ACTIVE workbook's saved path and
-            // dispatch directly via TaskPaneManager.RunTechniqueWithParams — the
-            // user clicks once and the forecast runs on the workbook they have
-            // open. The Task Pane (selection flow) is RETAINED as the graceful
-            // fallback for the cases where the active workbook can't be resolved
-            // to a saved file on disk (the engine reads the .xlsx from disk, so
-            // unsaved edits would not be seen).
+            // One-shot (GAP 1): the user clicks once and the forecast runs on the
+            // workbook they have open. The Task Pane (selection flow) is RETAINED
+            // as the graceful fallback only when no workbook can be resolved.
+            //
+            // The engine NEVER reads the live workbook. Instead we SaveCopyAs the
+            // active workbook to a LOCAL %TEMP% path and hand the engine THAT:
+            //   - The live file is open in Excel and (under OneDrive) can be held
+            //     by Files-On-Demand sync I/O, which blocks the engine's read for
+            //     minutes — the diagnosed pre-flight hang. %TEMP% is off OneDrive
+            //     (C:\Users\…\AppData\Local\Temp), so no sync I/O to block on.
+            //   - SaveCopyAs writes from Excel's IN-MEMORY state (no re-read of the
+            //     OneDrive source) and captures UNSAVED edits — so the workbook
+            //     need not be saved first (the old "save first" edge-cases are
+            //     dropped; the one-shot just works on the open workbook).
+            // The temp copy is deleted after the run (see RunTechniqueWithParams's
+            // cleanupTempFile), and uses a unique per-run name so copies can't
+            // collide or accumulate.
             try
             {
                 var app = (Application)ExcelDnaUtil.Application;
@@ -240,7 +250,7 @@ namespace TSL.AddIn
                     MessageBox.Show(
                         "No workbook is open.\n\nUse 'Open Input Template' from the " +
                         "Bond Yield Forecast dropdown to create a starter workbook, " +
-                        "edit the data sheets, save it, then click Run.",
+                        "edit the data sheets, then click Run.",
                         "Time Series Lab",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -248,46 +258,21 @@ namespace TSL.AddIn
                     return;
                 }
 
-                // Edge 2: workbook never saved to disk → no path to read.
-                string wbPath = null;
-                try { wbPath = wb.Path; } catch { wbPath = null; }
-                if (string.IsNullOrEmpty(wbPath))
-                {
-                    MessageBox.Show(
-                        "Save this workbook to disk first (Ctrl+S), then click Run.\n\n" +
-                        "The Bond Yield Forecast reads the saved .xlsx file from disk.",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
+                // Write a clean local copy of the active workbook (saved or not)
+                // and run the engine on that. Malformed / wrong-sheet workbooks are
+                // rejected by the engine's pre-flight validation and surfaced as a
+                // clean failure in the Task Pane.
+                var tempPath = Path.Combine(
+                    Path.GetTempPath(), $"tsl_byf_{Guid.NewGuid():N}.xlsx");
+                wb.SaveCopyAs(tempPath);
 
-                // Edge 2b: unsaved edits → the on-disk file is stale relative to
-                // what the user sees. Avoid silently forecasting old data.
-                bool isSaved = true;
-                try { isSaved = wb.Saved; } catch { isSaved = true; }
-                if (!isSaved)
-                {
-                    MessageBox.Show(
-                        "This workbook has unsaved edits.\n\nSave it (Ctrl+S) first so " +
-                        "the forecast reads your edited data — the engine reads the " +
-                        "on-disk .xlsx file, not the in-memory edits.",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // Edge 3: saved .xlsx present → one-shot dispatch. Malformed /
-                // wrong-sheet workbooks are rejected by the engine's pre-flight
-                // validation and surfaced as a clean failure in the Task Pane.
-                var fullName = wb.FullName;
                 var injected = new Dictionary<string, object>
                 {
-                    { "input_workbook", fullName },
+                    { "input_workbook", tempPath },
                     { "scenario", "baseline" },
                 };
-                TaskPaneManager.RunTechniqueWithParams("bond_yield_forecast", injected);
+                TaskPaneManager.RunTechniqueWithParams(
+                    "bond_yield_forecast", injected, tempPath);
             }
             catch (Exception ex)
             {
