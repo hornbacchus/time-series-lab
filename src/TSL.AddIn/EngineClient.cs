@@ -24,6 +24,18 @@ namespace TSL.AddIn
         private readonly object _lock = new object();
         private bool _disposed;
 
+        // Inter-message (heartbeat) timeout for the response read. It is RESET by
+        // EVERY message the engine sends (each progress event proves liveness),
+        // so total runtime is unbounded as long as progress keeps flowing — long
+        // MCMC / DL runs are fine. Only a SILENT engine (no progress AND no
+        // completion) for this whole window is treated as a stall: the engine is
+        // killed (so a wedged process is not reused by EnsureRunning) and the run
+        // fails cleanly instead of hanging Excel forever with a dead Cancel.
+        // This hardens the exact failure mode behind the BVAR 95% completion-
+        // handoff deadlock; the BeginInvoke progress-marshal fix removes the known
+        // cause, this watchdog bounds any future handoff stall.
+        private const int HeartbeatTimeoutMs = 300_000; // 5 minutes
+
         public event Action<ProgressEvent> ProgressReceived;
 
         public EngineClient()
@@ -279,14 +291,42 @@ namespace TSL.AddIn
 
                 while (!ct.IsCancellationRequested)
                 {
-                    var msgLenBuf = new byte[4];
-                    var bytesRead = await ReadFullAsync(pipe, msgLenBuf, 0, 4, ct);
-                    if (bytesRead < 4) break;
+                    byte[] msgBuf = null;
+                    try
+                    {
+                        // Heartbeat-bounded read: a FRESH timeout window per
+                        // message, so every progress event the engine sends resets
+                        // the watchdog and a legitimately long run (MCMC/DL) never
+                        // trips it. A silent engine — no message at all within
+                        // HeartbeatTimeoutMs — is treated as a stall (handled below).
+                        using (var hbCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
+                        {
+                            hbCts.CancelAfter(HeartbeatTimeoutMs);
+                            var hbToken = hbCts.Token;
 
-                    var msgLen = BitConverter.ToInt32(msgLenBuf, 0);
-                    var msgBuf = new byte[msgLen];
-                    bytesRead = await ReadFullAsync(pipe, msgBuf, 0, msgLen, ct);
-                    if (bytesRead < msgLen) break;
+                            var msgLenBuf = new byte[4];
+                            var bytesRead = await ReadFullAsync(pipe, msgLenBuf, 0, 4, hbToken);
+                            if (bytesRead < 4) break;
+
+                            var msgLen = BitConverter.ToInt32(msgLenBuf, 0);
+                            msgBuf = new byte[msgLen];
+                            bytesRead = await ReadFullAsync(pipe, msgBuf, 0, msgLen, hbToken);
+                            if (bytesRead < msgLen) break;
+                        }
+                    }
+                    catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+                    {
+                        // Heartbeat expired while the run's own token is NOT
+                        // cancelled => the engine went silent (wedged at the
+                        // handoff or mid-compute), this is NOT a user cancel. Kill
+                        // the wedged process so EnsureRunning relaunches a fresh
+                        // engine next run, and fail cleanly instead of hanging.
+                        Logger.Error(
+                            $"Engine response stalled: no message for {HeartbeatTimeoutMs / 1000}s. " +
+                            "Killing the engine so a wedged process is not reused.");
+                        KillEngineProcess("response heartbeat timeout");
+                        return BuildStallFailureJson();
+                    }
 
                     var msg = Encoding.UTF8.GetString(msgBuf);
 
@@ -369,6 +409,50 @@ namespace TSL.AddIn
                 }
                 _engineProcess = null;
             }
+        }
+
+        /// <summary>
+        /// Kill the engine process WITHOUT cancelling the current run token
+        /// (unlike <see cref="CancelCurrentRun"/>, which is a user-initiated
+        /// cancel). Used by the response heartbeat watchdog when the engine has
+        /// gone silent: clearing <c>_engineProcess</c> makes the next
+        /// <see cref="EnsureRunning"/> relaunch a fresh engine rather than reuse
+        /// the wedged one.
+        /// </summary>
+        private void KillEngineProcess(string reason)
+        {
+            lock (_lock)
+            {
+                if (_engineProcess != null && !_engineProcess.HasExited)
+                {
+                    try
+                    {
+                        _engineProcess.Kill();
+                        Logger.Info($"Engine process killed ({reason}).");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"Failed to kill engine process ({reason}).", ex);
+                    }
+                }
+                _engineProcess = null;
+            }
+        }
+
+        /// <summary>
+        /// The failure RunResponse (as JSON) returned when the response heartbeat
+        /// watchdog fires — surfaced in the Task Pane via the normal failure path
+        /// instead of hanging Excel indefinitely.
+        /// </summary>
+        private static string BuildStallFailureJson()
+        {
+            return
+                "{\"status\":\"failure\","
+                + "\"error_message\":\"The engine stopped responding while returning results "
+                + "(no progress for over " + (HeartbeatTimeoutMs / 1000) + " seconds) and was "
+                + "stopped. The run did not complete.\","
+                + "\"error_fixes\":[\"Run the technique again \\u2014 the engine relaunches "
+                + "automatically.\",\"If this keeps happening, restart Excel.\"]}";
         }
 
         public void Shutdown()

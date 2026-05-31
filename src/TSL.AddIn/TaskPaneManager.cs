@@ -120,7 +120,17 @@ namespace TSL.AddIn
             {
                 Action<ProgressEvent> progressHandler = (evt) =>
                 {
-                    _hostControl?.Invoke((System.Action)(() =>
+                    // Progress updates are fire-and-forget UI refreshes (no
+                    // return value, order/drop-tolerant). Post them with the
+                    // NON-BLOCKING BeginInvoke so the pipe-read thread — which
+                    // invokes this handler synchronously per progress event —
+                    // NEVER blocks on the Excel UI thread. A blocking Invoke
+                    // here can stall the read loop mid-run, starving the named
+                    // pipe; the engine then blocks in FlushFileBuffers waiting
+                    // for the client to drain, deadlocking the run at completion
+                    // (the "95%" hang) and orphaning the engine process.
+                    // BeginInvoke keeps the reader draining continuously.
+                    _hostControl?.BeginInvoke((System.Action)(() =>
                     {
                         runVm.ReportProgress(evt.Stage, evt.Pct, evt.Message ?? evt.Stage);
                     }));
@@ -573,7 +583,17 @@ namespace TSL.AddIn
             {
                 Action<ProgressEvent> progressHandler = (evt) =>
                 {
-                    _hostControl?.Invoke((System.Action)(() =>
+                    // Progress updates are fire-and-forget UI refreshes (no
+                    // return value, order/drop-tolerant). Post them with the
+                    // NON-BLOCKING BeginInvoke so the pipe-read thread — which
+                    // invokes this handler synchronously per progress event —
+                    // NEVER blocks on the Excel UI thread. A blocking Invoke
+                    // here can stall the read loop mid-run, starving the named
+                    // pipe; the engine then blocks in FlushFileBuffers waiting
+                    // for the client to drain, deadlocking the run at completion
+                    // (the "95%" hang) and orphaning the engine process.
+                    // BeginInvoke keeps the reader draining continuously.
+                    _hostControl?.BeginInvoke((System.Action)(() =>
                     {
                         runVm.ReportProgress(evt.Stage, evt.Pct, evt.Message ?? evt.Stage);
                     }));
