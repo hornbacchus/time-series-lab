@@ -676,6 +676,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
     elapsed = time.perf_counter() - t0
     audit_fields = {
         "scenario": scenario,
+        # True observation count for this workbook-input technique (number of
+        # quarters in the estimation panel). Set here because ctx has no
+        # cell-selection time axis, so base._count_obs(ctx) can only return its
+        # 0 fallback; this setdefault-keyed value reports the real count.
+        "n_observations": int(len(panel)),
         "n_lags": int(config["model"]["lags"]),
         "n_draws": int(config["estimation"]["n_draws"]),
         "n_burn": int(config["estimation"]["n_burn"]),

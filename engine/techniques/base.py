@@ -1370,12 +1370,20 @@ def make_response(
     if audit_fields is None:
         audit_fields = {}
 
-    # Stamp standard audit fields
-    audit_fields.setdefault("technique_id", ctx.technique_id)
-    audit_fields.setdefault("preset", ctx.preset)
-    audit_fields.setdefault("seed", ctx.seed)
-    audit_fields.setdefault("n_observations", _count_obs(ctx))
-    audit_fields.setdefault("timestamp_utc", datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z")
+    # Stamp standard audit fields. Wrapped defensively: a degenerate ctx must
+    # NEVER crash response assembly — otherwise the error path
+    # (make_error_response -> make_response) produces total silence instead of a
+    # clean error. Inert for normal techniques (no exception -> unchanged).
+    try:
+        audit_fields.setdefault("technique_id", ctx.technique_id)
+        audit_fields.setdefault("preset", ctx.preset)
+        audit_fields.setdefault("seed", ctx.seed)
+        audit_fields.setdefault("n_observations", _count_obs(ctx))
+        audit_fields.setdefault("timestamp_utc", datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z")
+    except Exception:
+        # Best-effort audit stamping; the response (especially an error
+        # response) must still be built and returned.
+        pass
 
     resp = {
         "run_id": ctx.run_id,
@@ -1467,7 +1475,13 @@ def _count_obs(ctx: RunContext) -> int:
     if ctx.series:
         vals = ctx.series[0].get("values", [])
         return len(vals)
-    return len(ctx.time)
+    if ctx.time is not None:
+        return len(ctx.time)
+    # Workbook-input techniques (e.g. Bond Yield Forecast) have no
+    # cell-selection time axis: ctx.series is empty AND ctx.time is None.
+    # They set n_observations in their own audit_fields; 0 is the safe
+    # fallback so this shared helper never crashes response assembly.
+    return 0
 
 
 def dropna_aligned(*arrays):
