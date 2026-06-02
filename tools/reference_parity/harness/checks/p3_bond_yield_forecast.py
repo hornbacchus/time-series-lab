@@ -133,8 +133,14 @@ _FIXTURES = (
 
 
 # Reduced chain config for fast-tier audit runtime. Two BVAR-SV cycles
-# per fixture x 2 fixtures = four cycles total; ~25-30s end-to-end.
-_AUDIT_N_DRAWS = 2000
+# per fixture x 2 fixtures = four cycles total.
+#
+# mcmc_convergence B' activation: n_draws bumped 2000 -> 3000 so the
+# B_* (VAR-coefficient) ESS>=500 gate clears with MARGIN on BOTH fixtures.
+# Measured B_* ess_min at 3000: 1089 (34mat) / 1068 (10mat) — ~570-590
+# over the 500 floor; at 2000 the 10mat was 498 (sub-floor). ~35-45s
+# end-to-end (still within the fast-tier ceiling).
+_AUDIT_N_DRAWS = 3000
 _AUDIT_N_BURN = 500
 _AUDIT_SEED = 20260427  # matches BVAR Session 0 fixture seed
 
@@ -195,23 +201,37 @@ class BondYieldForecastParity(P3ParityCheck):
     SV_PHI_ABS_MAX = 0.999
     PCA_EXPLAINED_VAR_MIN = 0.99
 
-    # Phase 4 Session 9 (P4-1.3 Category 1, 2026-05-02) — declare
-    # the mcmc_convergence omnibus invariant. BVAR-SV diagnostics
-    # elevation (Category 3 in S9; commit-this-session) surfaces
-    # ess_min, rhat_max (None for single-chain Gibbs),
-    # geweke_max_abs_z in audit_fields. Note: BYF runs a single
-    # Gibbs chain so rhat_max is None; the S7 omnibus checker
-    # treats None as PASS contribution (skip-the-check). This
-    # declaration is supplementary to the audit's existing
-    # Pattern A.1 + Pattern F compare() logic; the omnibus
-    # provides a third verdict surface focused on convergence
-    # rather than reproducibility or structural identity.
+    # mcmc_convergence B' gate threshold: B_* (VAR-coefficient) ESS_min.
+    # GATE SCOPE = VAR coefficients ONLY — the forecast-point dynamics that
+    # converge robustly at CI scale (measured B_* ess_min 1089/1068 at the
+    # bumped audit config). SV params are EXCLUDED from the gate, with a
+    # documented three-part rationale (see _compare_one_fixture + §2.5).
+    # This is a NARROWED activation of the dormant mcmc_convergence
+    # invariant: the full-system SV ESS-200 gate is NOT passable at the
+    # fast-tier draw count (the slow NCP-sampled SV `mu` group needs ~30k+
+    # draws; at production yield-PC mu[pc2]=198.6 marginal, macro mu 11-56),
+    # and band-stability (10k vs 50k: mean width -0.9%, max 3.0%) shows SV
+    # `mu` mixing does not compromise the forecast bands.
+    MCMC_B_COEF_ESS_MIN = 500.0
+
+    # Declarative mcmc_convergence invariant. enabled=False: the registry
+    # omnibus checker (_check_mcmc_convergence) gates on a FLAT GLOBAL
+    # ess_min with single-parameter exclusion, which cannot express the
+    # B_*-group-scoped gate + whole-SV-group exclusion this check requires
+    # (and BYF's run_tsl is multi-fixture, so a flat ess_min field is absent
+    # -> the registry path emits INFO anyway). The ACTIVE gate is enforced
+    # INLINE in compare()/_compare_one_fixture (B_* ESS >= MCMC_B_COEF_ESS_MIN
+    # per fixture, contributing to the outcome). The declaration is retained
+    # (disabled) as the registry cross-reference; tolerance records the B_*
+    # threshold. Full ess_min/geweke (incl. SV) remain in the production
+    # Audit (engine-side) and in this check's diagnostics for disclosure.
     structural_invariants = (
         StructuralInvariant(
-            name="mcmc_convergence",
+            name="mcmc_convergence_var_coef",
             invariant_type="mcmc_convergence",
-            tolerance=200.0,  # ESS_min PASS threshold
+            tolerance=500.0,  # B_* (VAR-coef) ESS_min PASS threshold
             tolerance_type="absolute",
+            enabled=False,
         ),
     )
 
@@ -282,6 +302,30 @@ class BondYieldForecastParity(P3ParityCheck):
         )
         results = bvar.estimate()
 
+        # mcmc_convergence (B' scope): per-group ESS from the BVAR-SV
+        # convergence diagnostics. The GATE uses the VAR-coefficient (B_*)
+        # ess_min; the full-system min + SV breakdown are returned for
+        # DISCLOSURE only (not gated — see _compare_one_fixture).
+        _diag = results.convergence_diagnostics()
+        _grp = _diag["parameter_group"]
+        _b_mask = _grp.str.startswith("B_")
+        b_coef_ess_min = float(_diag.loc[_b_mask, "ess"].min())
+        b_coef_ess_min_param = str(_diag.loc[_b_mask, "ess"].idxmin())
+        global_ess_min = float(_diag["ess"].min())
+        global_ess_min_param = str(_diag["ess"].idxmin())
+        geweke_max_abs_z = float(_diag["geweke_z"].abs().max())
+        _sv_mask = _grp.isin(["omega", "phi", "mu", "h_time_mean"])
+        _macro_names = ("real_gdp_growth", "headline_cpi", "fed_funds_rate")
+        _is_macro = _diag.index.to_series().apply(
+            lambda p: any(m in p for m in _macro_names)
+        )
+        sv_macro_ess_min = float(
+            _diag.loc[_sv_mask & _is_macro, "ess"].min()
+        )
+        sv_yield_pc_ess_min = float(
+            _diag.loc[_sv_mask & ~_is_macro, "ess"].min()
+        )
+
         # Pattern F input: posterior-mean companion eigenvalues.
         coef_post_mean = np.asarray(
             results.coefficients, dtype=np.float64,
@@ -337,6 +381,14 @@ class BondYieldForecastParity(P3ParityCheck):
             "phi_post_mean": phi_post_mean,
             "pca_explained_variance_total": pca_explained_variance_total,
             "pca_truncated_residual": pca_truncated_residual,
+            # mcmc_convergence (B' gate input + disclosure):
+            "b_coef_ess_min": b_coef_ess_min,
+            "b_coef_ess_min_param": b_coef_ess_min_param,
+            "global_ess_min": global_ess_min,
+            "global_ess_min_param": global_ess_min_param,
+            "geweke_max_abs_z": geweke_max_abs_z,
+            "sv_macro_ess_min": sv_macro_ess_min,
+            "sv_yield_pc_ess_min": sv_yield_pc_ess_min,
             # Bookkeeping
             "n_vars": int(n_vars),
             "n_lags": int(n_lags),
@@ -460,6 +512,50 @@ class BondYieldForecastParity(P3ParityCheck):
             "coef_shape": list(coef_post_mean.shape),
         }
         statuses.append(finite_status)
+
+        # Pattern F: mcmc_convergence (B' scope) — VAR-coefficient ESS gate.
+        # GATE: B_* (VAR-coefficient) ess_min >= MCMC_B_COEF_ESS_MIN (500).
+        # SV params are EXCLUDED from the gate, three-part rationale:
+        #   (1) the fast-tier audit draw count cannot reach SV ESS-200 — the
+        #       slow NCP-sampled SV `mu` group needs ~30k+ draws;
+        #   (2) the binder is SV `mu` (unconditional log-vol mean), slow for
+        #       ALL equations (at production: yield-PC mu[pc2_slope]=198.6
+        #       marginal; macro mu 11-56), not a macro-only effect;
+        #   (3) band-stability (10k vs 50k: mean width -0.9%, max 3.0%) shows
+        #       SV `mu` mixing does NOT compromise the forecast bands.
+        # The full-system ess_min/geweke (incl. SV) are recorded below for
+        # DISCLOSURE (scoped gate, complete disclosure — not a masked
+        # finding); the production Audit shows them too (engine-side).
+        b_ess = float(tsl["b_coef_ess_min"])
+        if b_ess >= self.MCMC_B_COEF_ESS_MIN:
+            mcmc_status = "PASS"
+        elif b_ess >= self.MCMC_B_COEF_ESS_MIN / 2.0:
+            mcmc_status = "CAVEAT"
+        else:
+            mcmc_status = "BLOCK"
+        primary[f"{fixture_name}::invariant::mcmc_convergence_var_coef"] = {
+            "status": mcmc_status,
+            "gate_scope": "VAR coefficients (B_*) only; SV params excluded",
+            "b_coef_ess_min": b_ess,
+            "b_coef_ess_min_param": tsl.get("b_coef_ess_min_param"),
+            "gate_threshold": self.MCMC_B_COEF_ESS_MIN,
+            # Disclosure (NOT gated):
+            "disclosure_global_ess_min": tsl.get("global_ess_min"),
+            "disclosure_global_ess_min_param": tsl.get(
+                "global_ess_min_param"
+            ),
+            "disclosure_geweke_max_abs_z": tsl.get("geweke_max_abs_z"),
+            "disclosure_sv_macro_ess_min": tsl.get("sv_macro_ess_min"),
+            "disclosure_sv_yield_pc_ess_min": tsl.get("sv_yield_pc_ess_min"),
+            "sv_exclusion_rationale": (
+                "fast-tier draw count cannot reach SV ESS-200 (slow NCP-mu "
+                "needs ~30k+ draws); binder is SV mu (slow for all "
+                "equations); band-stability (-0.9% mean / 3.0% max width at "
+                "10k-vs-50k) shows SV mu mixing does not compromise the "
+                "forecast bands"
+            ),
+        }
+        statuses.append(mcmc_status)
 
     def compare(
         self, tsl: dict[str, Any], ref: dict[str, Any],
