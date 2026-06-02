@@ -144,6 +144,33 @@ _AUDIT_N_DRAWS = 3000
 _AUDIT_N_BURN = 500
 _AUDIT_SEED = 20260427  # matches BVAR Session 0 fixture seed
 
+# I-B DECOUPLE (BVAR enrichment v2, 2026-06): FROZEN 3-var macro contract,
+# pinned INDEPENDENT of config/default.yaml. This check's purpose — bit-exact
+# self-parity + Pattern-F structural invariants (eigenvalue/SV stationarity,
+# PCA variance, B_* convergence) — holds regardless of macro count, so it must
+# NOT be coupled to production config evolution (the v2 enrichment took
+# default.yaml to 9-var). The two canonical fixtures stay 3-macro; the check
+# overrides default.yaml back to these values so it keeps exercising the SAME
+# 3-var system the structural-invariant + B_* convergence gates were validated
+# against. Production 9-var CI coverage is a SEPARATE concern (a future
+# config-integration smoke test), not a 9-var parity fixture.
+_FROZEN_MACRO_VARIABLES = {
+    "real_gdp_growth": {
+        "column": "Real GDP Growth (Q/Q SAAR)", "units": "percent",
+    },
+    "headline_cpi": {
+        "column": "Headline CPI Inflation (Q/Q annualized)", "units": "percent",
+    },
+    "fed_funds_rate": {
+        "column": "Fed Funds Rate (quarterly average)", "units": "percent",
+    },
+}
+_FROZEN_PERSISTENCE_PRIOR = {
+    "real_gdp_growth": 0.0, "headline_cpi": 0.0, "fed_funds_rate": 1.0,
+    "pc1_level": 1.0, "pc2_slope": 0.9, "pc3_curvature": 0.5,
+}
+_FROZEN_CONDITIONING_MACRO = ["real_gdp_growth", "headline_cpi", "fed_funds_rate"]
+
 
 class BondYieldForecastParity(P3ParityCheck):
     """Bond Yield Forecast parity audit (BYF-Mod-2: two-fixture coverage).
@@ -265,6 +292,14 @@ class BondYieldForecastParity(P3ParityCheck):
         )
 
         config = load_config(package_default_config())
+        # I-B decouple: override the macro contract back to the FROZEN 3-var set
+        # (see _FROZEN_* above) so production default.yaml evolution (v2 9-var
+        # enrichment) does not touch this reproducibility/structural check. The
+        # fixtures are 3-macro; this keeps the check on the same 3-var system the
+        # gates were validated against.
+        config["data"]["macro_variables"] = dict(_FROZEN_MACRO_VARIABLES)
+        config["model"]["persistence_prior"] = dict(_FROZEN_PERSISTENCE_PRIOR)
+        config["conditioning"]["macro_variables"] = list(_FROZEN_CONDITIONING_MACRO)
         config["estimation"]["n_draws"] = _AUDIT_N_DRAWS
         config["estimation"]["n_burn"] = _AUDIT_N_BURN
         config["estimation"]["seed"] = seed
