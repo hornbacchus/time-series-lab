@@ -12,6 +12,18 @@ data:
     fed_funds_rate:
       column: "Fed Funds Rate (quarterly average)"
       units: "percent"
+    # BVAR enrichment v2 (2026-06): 3 new state macro variables (6-macro +
+    # 3 yield-PCs = 9-var VAR). Order here = the panel/conditioning index
+    # order; must match the BondYield_Macro column order in the v2 template.
+    primary_balance:
+      column: "Primary Budget Balance (% GDP)"
+      units: "percent"
+    unemployment:
+      column: "Unemployment Rate (%)"
+      units: "percent"
+    ff_futures_6m:
+      column: "6m Fed Funds Futures (market-implied %)"
+      units: "percent"
   # BYF-Mod-1 (2026-05-01): expanded from 10 → 34 declarative maturity
   # grid (1M-30Y; monthly under 1Y plus annual at every integer year).
   # The full 34-maturity grid is the maximum surface; runtime usage is
@@ -139,6 +151,10 @@ model:
     real_gdp_growth: 0.0
     headline_cpi: 0.0
     fed_funds_rate: 1.0
+    # v2 enrichment (judgement leans; user-overridable):
+    primary_balance: 0.9      # persistent but mean-reverting over the cycle
+    unemployment: 1.0         # highly persistent (random-walk-like)
+    ff_futures_6m: 0.95       # policy-rate-like, near-unit-root persistent
     pc1_level: 1.0
     pc2_slope: 0.9
     pc3_curvature: 0.5
@@ -194,6 +210,12 @@ conditioning:
     - real_gdp_growth               # target = panel.columns minus this list.
     - headline_cpi
     - fed_funds_rate
+    - primary_balance               # v2: conditioned on its projection path
+    - unemployment                  # v2: conditioned on its projection path
+    # ff_futures_6m is deliberately NOT listed — it is a STATE variable the
+    # BVAR FREELY FORECASTS (the market-implied forward-policy view, inferred
+    # from history), so it stays in the forecast-target set (panel minus this
+    # list). 5 conditioned macro vars, NOT 6.
   enforce_strict_match: true        # default per Waggoner-Zha-1999.
                                     # False enables soft match using the
                                     # projection_uncertainty stds below.
@@ -201,6 +223,8 @@ conditioning:
     real_gdp_growth: 0.5            # std (in variable's own units)
     headline_cpi: 0.3
     fed_funds_rate: 0.1
+    primary_balance: 0.3           # v2 conditioned var
+    unemployment: 0.2              # v2 conditioned var
   workbook_sheet: "projections"     # sheet name in the projections workbook
 
 # Step 5: unified input-workbook architecture. A single workbook contains

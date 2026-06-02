@@ -193,6 +193,11 @@ _MACRO_BOUNDS = {
     "real_gdp_growth": (-20.0, 20.0),
     "headline_cpi": (-5.0, 25.0),
     "fed_funds_rate": (-2.0, 25.0),
+    # BVAR enrichment v2 — sanity ranges for the 3 new state macro vars
+    # (out-of-range emits a warning, not an error; absent => graceful skip).
+    "primary_balance": (-20.0, 10.0),
+    "unemployment": (0.0, 20.0),
+    "ff_futures_6m": (-1.0, 25.0),
 }
 _YIELD_BOUNDS = (-2.0, 25.0)
 _DECIMAL_FORM_THRESHOLD = 0.5

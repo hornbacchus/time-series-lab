@@ -380,14 +380,33 @@ def _build_yield_forecast_table(yield_forecast, scenario: str) -> dict:
     return make_table("Yield Forecast (5/25/50/75/95 percentiles)", columns, rows)
 
 
-def _build_macro_forecast_table(cond_forecast, scenario: str) -> dict:
+def _display_macro_name(internal: str, config: dict = None) -> str:
+    """Map an internal macro name (e.g. ``real_gdp_growth``) to its
+    human-readable column header from config (e.g. "Real GDP Growth
+    (Q/Q SAAR)"). Falls back to the internal name if config is unavailable."""
+    if config:
+        spec = (config.get("data", {}) or {}).get(
+            "macro_variables", {}
+        ).get(internal)
+        if isinstance(spec, dict) and spec.get("column"):
+            return str(spec["column"])
+    return str(internal)
+
+
+def _build_macro_forecast_table(cond_forecast, scenario: str, config: dict = None) -> dict:
     """Conditioning macro-path summary (median + 5/95 bands)."""
     paths = np.asarray(cond_forecast.macro_paths)
     horizon = int(paths.shape[1])
     n_mac = int(paths.shape[2])
-    macro_names = list(getattr(cond_forecast, "projections_columns", [])) or [
+    # Use the real conditioned-macro names (ConditionalForecast.macro_names),
+    # mapped to display headers via config. The previous code read a
+    # nonexistent ``projections_columns`` attr and fell back to generic
+    # ``Macro_0..N`` placeholders, masking the variable names in the
+    # user-facing table.
+    internal_names = list(getattr(cond_forecast, "macro_names", [])) or [
         f"Macro_{i}" for i in range(n_mac)
     ]
+    macro_names = [_display_macro_name(nm, config) for nm in internal_names]
     proj_idx = list(getattr(cond_forecast, "projections_index", [])) or [
         f"H+{i + 1}" for i in range(horizon)
     ]
@@ -405,6 +424,45 @@ def _build_macro_forecast_table(cond_forecast, scenario: str) -> dict:
                 round(float(p95), 4),
             ])
     return make_table("Macro Conditioning Paths (5/50/95 percentiles)", columns, rows)
+
+
+def _build_forecast_state_table(cond_forecast, scenario: str, pca_dict: dict,
+                                config: dict = None) -> dict | None:
+    """Forecast (5/50/95) for FREELY-FORECAST state variables — state vars in
+    the forecast-target set that are NOT yield PCs (e.g. ff_futures_6m, the
+    BVAR's projected market-implied forward-policy path, which is a state var
+    the model forecasts rather than conditions on).
+
+    Returns ``None`` when there are no such variables (e.g. the v1 3-var
+    system, where the target set is exactly the 3 yield PCs), so the table is
+    added only when an unconditioned-forecast state var is present — leaving
+    the v1 output structure unchanged.
+    """
+    target_names = list(getattr(cond_forecast, "target_names", []))
+    comp = set(pca_dict.get("component_names", []))
+    extra = [(j, nm) for j, nm in enumerate(target_names) if nm not in comp]
+    if not extra:
+        return None
+    paths = np.asarray(cond_forecast.target_paths)  # (P, H, n_target)
+    horizon = int(paths.shape[1])
+    proj_idx = list(getattr(cond_forecast, "projections_index", [])) or [
+        f"H+{i + 1}" for i in range(horizon)
+    ]
+    columns = ["Scenario", "Horizon", "Variable", "p05", "Median", "p95"]
+    rows = []
+    for h in range(horizon):
+        period_label = str(proj_idx[h]) if h < len(proj_idx) else f"H+{h + 1}"
+        for j, nm in extra:
+            slab = paths[:, h, j]
+            p05, med, p95 = np.percentile(slab, [5, 50, 95])
+            rows.append([
+                scenario, period_label, _display_macro_name(nm, config),
+                round(float(p05), 4), round(float(med), 4), round(float(p95), 4),
+            ])
+    return make_table(
+        "Forecast: Freely-Forecast State Variables (5/50/95 percentiles)",
+        columns, rows,
+    )
 
 
 def _build_diagnostics_table(results) -> dict:
@@ -602,7 +660,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
             progress_callback("Assembling output tables", 95)
             tables = [
                 _build_yield_forecast_table(ycf, scenario),
-                _build_macro_forecast_table(cf, scenario),
+                _build_macro_forecast_table(cf, scenario, config),
+            ]
+            # Freely-forecast (unconditioned, non-PC) state vars — e.g.
+            # ff_futures_6m. Added only when present (None for the v1 3-var
+            # system, so v1 output structure is unchanged).
+            _fc_state = _build_forecast_state_table(cf, scenario, pca_dict, config)
+            if _fc_state is not None:
+                tables.append(_fc_state)
+            tables += [
                 _build_diagnostics_table(results),
                 _build_run_metadata_table(results, config),
             ]

@@ -263,6 +263,18 @@ class EconomistProjections:
         df = df.set_index("Quarter")
 
         macro_specs = config["data"]["macro_variables"]
+        # Only CONDITIONED macros require a projection path. A state macro that
+        # is NOT in conditioning.macro_variables (e.g. ff_futures_6m, which the
+        # BVAR freely forecasts as a market-implied forward-policy view) has no
+        # projection column and must not be required here. Falls back to all
+        # data.macro_variables when conditioning is unset/empty, so v1 configs
+        # (where the two sets are identical) are byte-identical.
+        conditioned = config.get("conditioning", {}).get("macro_variables", None)
+        if conditioned:
+            conditioned_set = set(conditioned)
+            macro_specs = {
+                k: v for k, v in macro_specs.items() if k in conditioned_set
+            }
         canonical_keys = list(macro_specs.keys())
         col_to_key = {spec["column"]: key for key, spec in macro_specs.items()}
 
@@ -752,17 +764,27 @@ class ConditionalForecast:
         be silently incorrect.
         """
         comp = list(pca_dict.get("component_names", []))
-        if comp != self.target_names:
+        # The forecast-target set may include non-conditioned macro STATE
+        # variables (e.g. ff_futures_6m, which the BVAR freely forecasts)
+        # ALONGSIDE the yield PCs. Select ONLY the PC columns, in
+        # component_names order, for the loadings reconstruction; the other
+        # targets are forecast outputs but not part of the yield curve. When
+        # the target set IS exactly the PCs (v1 / the frozen parity check),
+        # pc_idx is the identity and the result is byte-identical.
+        missing = [c for c in comp if c not in self.target_names]
+        if missing:
             raise ValueError(
-                f"target_names {self.target_names} do not match "
-                f"pca_dict['component_names'] {comp}; ordering mismatch would "
-                "produce incorrect yield projections."
+                f"PCA components {missing} not found in target_names "
+                f"{self.target_names}; cannot reconstruct yields."
             )
+        pc_idx = [self.target_names.index(c) for c in comp]
+        pc_paths = self.target_paths[:, :, pc_idx]  # (P, H, n_pc), component order
+
         loadings = np.asarray(pca_dict["loadings"], dtype=float)  # (n_maturities, n_pc)
         mean = np.asarray(pca_dict["mean"], dtype=float)         # (n_maturities,)
 
-        # target_paths (P, H, n_pc) @ loadings.T (n_pc, n_maturities) -> (P, H, n_maturities)
-        yield_paths = self.target_paths @ loadings.T + mean
+        # pc_paths (P, H, n_pc) @ loadings.T (n_pc, n_maturities) -> (P, H, n_maturities)
+        yield_paths = pc_paths @ loadings.T + mean
         return YieldCurveForecast(
             yield_paths=yield_paths,
             maturity_names=list(pca_dict["yield_names"]),
