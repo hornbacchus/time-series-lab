@@ -344,6 +344,29 @@ specifications or non-stock asset classes.**
 - **Reference parity status:** **ACTIVE (B′ scope)** — Pattern A.1 self-parity (no external R reference; bvars unavailable for R 4.5.3) + Pattern F structural invariants + the mcmc_convergence **B′** gate (B_* VAR-coef ESS≥500; PASS at the bumped fast-tier config). The earlier "would BLOCK if allowlisted" disposition (Phase 4 S9 / Phase 6+ S6) referred to the FULL-SYSTEM ESS-200 gate, which remains un-passable at CI scale; the B′ activation gates ONLY the forecast-relevant VAR coefficients (see amendment)
 - **Source files:** `tools/reference_parity/harness/checks/p3_bond_yield_forecast.py`; engine `engine/techniques/bond_yield_forecast/` (multi-module: PCA + BVAR-SV + conditioning)
 
+**v2 9-VAR ENRICHMENT (2026-06; engine config + new capability):** The production model expanded from
+6-var (3 macro + 3 yield-PCs) to **9-var (6 macro + 3 yield-PCs)** via `config/default.yaml`. New state
+macros: `primary_balance`, `unemployment` (both CONDITIONED on projection paths), and **`ff_futures_6m`
+— the first UNCONDITIONED, FREELY-FORECAST state variable** (a market-implied forward-policy view the
+BVAR projects rather than conditions; omitted from `conditioning.macro_variables`, so it lands in the
+forecast-target set). Supporting this first non-conditioned state var required two small,
+backward-compatible `conditioning.py` forecast-code changes (NOT config-only): (a) `from_dataframe`
+scopes the required projection columns to the CONDITIONED set (a freely-forecast state var has no
+projection); (b) `to_yield_space` selects the PC columns from the target set for the loadings
+reconstruction (the target set now contains a non-PC var). Both are **byte-identical when target == the
+3 PCs / all macros are conditioned** (the v1 / frozen-parity path), so the parity check is unaffected.
+The futures forecast is surfaced in a new "Freely-Forecast State Variables" output table; the macro
+table's labels were fixed to real variable names. **Parity check DECOUPLED from `default.yaml`** (I-B):
+`p3_bond_yield_forecast` now pins a FROZEN 3-var macro contract (`_FROZEN_*`), so production-config
+evolution no longer forces fixture regeneration — the check's job (self-parity + structural invariants
++ the B_* convergence gate) holds regardless of macro count, and its two fixtures stay 3-macro. The
+9-var production system's own convergence is LOWER than the 6-var (more slow-mixing macro-SV `mu`
+params); the B_* gate (forecast-relevant) is validated on the frozen 3-var check, and the band-stability
+rationale (B′ amendment) carries over. v1 (3-col) workbooks hard-error against the 9-var config —
+acceptable (v2 config requires v2 template; the bundled template was regenerated to the 6-macro layout).
+Production CI coverage of the 9-var path is BANKED as a future config-integration smoke test (not a
+9-var parity fixture, per the I-B decision).
+
 **Phase 2 algorithmic basis (extracted):** Pattern A.1
 reproducibility self-parity (TSL invoked twice with identical
 seed → byte-identical output) + Pattern F structural invariants
