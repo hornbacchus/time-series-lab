@@ -336,12 +336,12 @@ licensing reasons); **non-SAV CAViaR variants (AS, IGARCH,
 adaptive) NOT validated; requires expert review for non-SAV
 specifications or non-stock asset classes.**
 
-### bond_yield_forecast (BYF; parity wrapper p3_bond_yield_forecast; DORMANT)
+### bond_yield_forecast (BYF; parity wrapper p3_bond_yield_forecast; mcmc_convergence ACTIVE — B′ VAR-coef gate)
 
 - **Catalog ID:** `bond_yield_forecast`
 - **Excel access:** `TSL_RUN_THR("bond_yield_forecast", …)`
-- **Invariant class:** MCMC stochastic (mcmc_convergence DECLARATION ONLY; declaration DORMANT — not allowlisted; not dispatched)
-- **Reference parity status:** **DORMANT** — Pattern A.1 self-parity (no external R reference; bvars unavailable for R 4.5.3) + Pattern F structural invariants only; **NOT in 8-wrapper allowlist**; **mcmc_convergence declaration would BLOCK if allowlisted** (chain length insufficient per Phase 4 S9 + Phase 6+ S6 keep-dormant disposition)
+- **Invariant class:** MCMC stochastic (mcmc_convergence ACTIVE as a NARROWED **B′ gate** — VAR-coefficient (B_*) ESS≥500 ONLY; SV params excluded with documented rationale; see the **B′ ACTIVATION** amendment below + harness `390de24`)
+- **Reference parity status:** **ACTIVE (B′ scope)** — Pattern A.1 self-parity (no external R reference; bvars unavailable for R 4.5.3) + Pattern F structural invariants + the mcmc_convergence **B′** gate (B_* VAR-coef ESS≥500; PASS at the bumped fast-tier config). The earlier "would BLOCK if allowlisted" disposition (Phase 4 S9 / Phase 6+ S6) referred to the FULL-SYSTEM ESS-200 gate, which remains un-passable at CI scale; the B′ activation gates ONLY the forecast-relevant VAR coefficients (see amendment)
 - **Source files:** `tools/reference_parity/harness/checks/p3_bond_yield_forecast.py`; engine `engine/techniques/bond_yield_forecast/` (multi-module: PCA + BVAR-SV + conditioning)
 
 **Phase 2 algorithmic basis (extracted):** Pattern A.1
@@ -396,6 +396,14 @@ banking):**
   validation; the strategist using BYF output should treat it
   as un-cross-validated regardless of TSL internal Pattern F
   invariants holding
+
+**B′ mcmc_convergence ACTIVATION (Phase 7+; harness `390de24` — SUPERSEDES the Phase 6+ S6 keep-dormant disposition for the B′-scoped gate):**
+The dormant mcmc_convergence invariant is now ACTIVATED as a NARROWED, honest, passable gate that gates ONLY the VAR-coefficient (B_*) group. **The full-system SV ESS-200 pass is explicitly NOT claimed.**
+- **GATE SCOPE — VAR-coefficient convergence, NOT full-system SV.** The gate asserts B_* (VAR-coefficient) `ess_min ≥ 500`, computed per fixture inline in `compare()` (the primary verdict path; the declarative `StructuralInvariant` is `enabled=False` because the registry omnibus cannot express a group-scoped gate with whole-SV-group exclusion). Measured at the bumped fast-tier config (`_AUDIT_N_DRAWS` 2000→3000): B_* `ess_min` = 1089 (34mat) / 1068 (10mat) — PASS with ~570–590 margin. Discrimination negative-control confirmed (B_* forced sub-floor → check outcome flips to BLOCK), so the gate is load-bearing, not a rubber stamp.
+- **DOCUMENTED SV EXCLUSION (a reader must NOT infer a blanket ESS-200 pass).** All SV log-vol params (`omega`/`phi`/`mu`/`h_time_mean`, macro AND yield-PC) are EXCLUDED from the gate. Three-part rationale (recorded in the gate code + here): (1) the fast-tier audit draw count cannot reach SV ESS-200 — the slow NCP-sampled SV `mu` (unconditional log-vol mean) group needs ~30k+ draws; (2) the binder is SV `mu`, slow for ALL equations — at production (n_draws=10000) yield-PC `mu[pc2_slope]` ESS = **198.6** (marginal), macro `mu` 11–56, while yield-PC `omega`/`phi`/`h_time_mean` converge (854/341/947) and B_* converge (2516+); (3) band-stability (production 10k vs 50k draws: mean yield-band width **−0.9%**, per-cell max **3.0%**) shows SV `mu` mixing does NOT compromise the forecast bands — the macro block is conditioned (pinned to the projection), so its SV nuisance barely propagates, and the bands are driven by the converged yield-PC + VAR params.
+- **DISCLOSURE — scoped gate, complete disclosure.** The check's diagnostics AND the production Audit sheet (engine-side, unchanged) BOTH still report the FULL global `ess_min` (including the SV `mu` binder, ~7–19) and `geweke_max_abs_z`; the gate is scoped but nothing is hidden.
+- **Production default UNCHANGED** (n_draws=10000, ~15s demo). The `_AUDIT_N_DRAWS` bump is harness-fixture-only; activation is harness + this trust-inventory note; **no engine change, no XLL rebuild.**
+- **Banked (future, only if ever output-relevant):** full-system SV convergence at production scale (Option A sampler reform — time-varying mu / regime-switching SV; or Option B″ production n_draws≈30k). The band-stability evidence shows neither is needed for forecast correctness.
 
 ## §2.5 — Phase 7+ Q1 trust documentation remediation entries
 
