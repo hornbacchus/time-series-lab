@@ -10,7 +10,7 @@ data:
       column: "Headline CPI Inflation (Q/Q annualized)"
       units: "percent"
     fed_funds_rate:
-      column: "Fed Funds Rate (quarterly average)"
+      column: "Fed Funds Rate (end-of-quarter, %)"
       units: "percent"
     # BVAR enrichment v2 (2026-06): 3 new state macro variables (6-macro +
     # 3 yield-PCs = 9-var VAR). Order here = the panel/conditioning index
