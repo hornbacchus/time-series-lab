@@ -92,8 +92,19 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// Write a complete run result to the active workbook.
-        /// Creates: results sheet, audit sheet, and embedded JSON record.
+        /// Write a complete run result to a SEPARATE, newly-created results
+        /// workbook saved next to the input workbook — the input workbook is
+        /// NEVER modified (no sheets added, never saved). This is the firm
+        /// no-mutation guarantee: because the add-in cannot prevent Excel
+        /// AutoSave from persisting in-book changes, the only way to leave the
+        /// input untouched is to not write to it at all.
+        ///
+        /// Mechanics: derive the output folder + base name from the input
+        /// workbook (READ-ONLY), create a new workbook, write the Results +
+        /// Audit + embedded JSON sheets there, save it as
+        /// "&lt;input&gt;_Results_&lt;timestamp&gt;.xlsx" in the input's folder
+        /// (or the user's Documents folder if the input was never saved), and
+        /// leave it open/active for the user.
         /// </summary>
         public static WriteResult WriteRunResult(RunRequest request, RunResponse response)
         {
@@ -102,50 +113,87 @@ namespace TSL.AddIn
             try
             {
                 var app = (Application)ExcelDnaUtil.Application;
-                var wb = app.ActiveWorkbook;
-                if (wb == null)
+                var inputWb = app.ActiveWorkbook;
+                if (inputWb == null)
                 {
                     writeResult.ErrorMessage = "No active workbook.";
                     return writeResult;
                 }
 
-                app.ScreenUpdating = false;
+                // Derive the output location from the INPUT workbook. These are
+                // READ-ONLY property reads — the input workbook is never written
+                // to, never has a sheet added, and is never saved by this method.
+                string inputName = "Workbook";
+                try { inputName = inputWb.Name; } catch { /* keep default */ }
 
-                // Capture the sheet the user was on when they kicked off the
-                // run. The results and audit sheets are inserted immediately
-                // BEFORE this sheet so they land near the source data in the
-                // tab strip (instead of being pushed to the far right at the
-                // end of a long workbook). If the active sheet can't be
-                // resolved, fall back to appending at the end.
-                Worksheet sourceSheet = null;
-                try { sourceSheet = app.ActiveSheet as Worksheet; }
-                catch (Exception sheetEx)
-                {
-                    Logger.Info($"Could not resolve source sheet for insertion: {sheetEx.Message}");
-                }
+                string inputDir = null;
+                try { inputDir = inputWb.Path; } catch { /* unsaved → no path */ }
 
+                var inputBaseName = "TSL_Run";
                 try
                 {
-                    // Order matters: insert Audit FIRST (Before source), then
-                    // Results FIRST (Before source). This leaves the tab
-                    // strip as: ... | Results | Audit | Source | ...
-                    writeResult.AuditSheetName = WriteAuditSheet(wb, request, response, sourceSheet);
-                    writeResult.ResultSheetName = WriteResultsSheet(wb, request, response, sourceSheet);
+                    var baseName = System.IO.Path.GetFileNameWithoutExtension(inputName);
+                    if (!string.IsNullOrEmpty(baseName)) inputBaseName = baseName;
+                }
+                catch { /* keep default */ }
 
-                    // 3) Embedded JSON
-                    EmbedJsonRunRecord(wb, request, response);
+                // Unsaved input workbook (never saved → no Path on disk). Fall
+                // back to the user's Documents folder so the results still land
+                // somewhere clean and reachable, and tell the user where.
+                bool usedFallbackFolder = false;
+                if (string.IsNullOrEmpty(inputDir))
+                {
+                    inputDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    usedFallbackFolder = true;
+                }
 
-                    // 4) Activate the Results sheet so the user lands on the
-                    // tables, not on the Audit sheet (which is the last one
-                    // created and would otherwise become active by default).
+                var targetPath = BuildOutputPath(inputDir, inputBaseName);
+
+                app.ScreenUpdating = false;
+                Workbook outWb = null;
+                try
+                {
+                    // Create the SEPARATE results workbook. Workbooks.Add() makes
+                    // it the active workbook, so it is auto-opened for the user.
+                    // The input workbook is left completely untouched.
+                    outWb = app.Workbooks.Add();
+
+                    // Remember the placeholder sheet(s) Excel created with the new
+                    // workbook (typically "Sheet1") so we can delete them once our
+                    // real sheets exist (Excel forbids deleting the last sheet).
+                    var placeholderSheets = new List<Worksheet>();
+                    foreach (Worksheet s in outWb.Worksheets) placeholderSheets.Add(s);
+
+                    // Write our sheets to the NEW workbook (sourceSheet = null →
+                    // append). Results first so it is the leftmost tab; Audit
+                    // records the INPUT workbook name for traceability.
+                    writeResult.ResultSheetName = WriteResultsSheet(outWb, request, response, null);
+                    writeResult.AuditSheetName = WriteAuditSheet(outWb, request, response, null, inputName);
+                    EmbedJsonRunRecord(outWb, request, response);
+
+                    // Remove the placeholder sheet(s). Safe now that the Results
+                    // and Audit sheets exist (and are visible).
+                    foreach (var ph in placeholderSheets)
+                    {
+                        try
+                        {
+                            app.DisplayAlerts = false;
+                            ph.Delete();
+                        }
+                        catch (Exception delEx)
+                        {
+                            Logger.Info($"Could not delete placeholder sheet: {delEx.Message}");
+                        }
+                        finally { app.DisplayAlerts = true; }
+                    }
+
+                    // Activate the Results sheet so the user lands on the tables.
                     if (!string.IsNullOrEmpty(writeResult.ResultSheetName))
                     {
                         try
                         {
-                            var resultsSheet = (Worksheet)wb.Worksheets[writeResult.ResultSheetName];
+                            var resultsSheet = (Worksheet)outWb.Worksheets[writeResult.ResultSheetName];
                             resultsSheet.Activate();
-                            // Park the cursor at A1 so the user sees the
-                            // Summary block first when the sheet opens.
                             ((Range)resultsSheet.Cells[1, 1]).Select();
                         }
                         catch (Exception activateEx)
@@ -153,6 +201,26 @@ namespace TSL.AddIn
                             Logger.Info($"Could not activate results sheet: {activateEx.Message}");
                         }
                     }
+
+                    // Save the NEW workbook to disk — no Save dialog. If this
+                    // fails (locked path, permissions), the results are still
+                    // open in front of the user; we surface a non-fatal warning.
+                    try
+                    {
+                        app.DisplayAlerts = false;
+                        outWb.SaveAs(targetPath, XlFileFormat.xlOpenXMLWorkbook);
+                        writeResult.OutputPath = targetPath;
+                        writeResult.UsedFallbackFolder = usedFallbackFolder;
+                    }
+                    catch (Exception saveEx)
+                    {
+                        Logger.Error($"Could not save results workbook to '{targetPath}'.", saveEx);
+                        writeResult.SaveWarning =
+                            "Results were written to a new workbook but could not be saved to disk " +
+                            $"({saveEx.Message}). The workbook is open — use File > Save As to keep it. " +
+                            "Your input workbook was not modified.";
+                    }
+                    finally { app.DisplayAlerts = true; }
 
                     writeResult.Success = true;
                 }
@@ -168,6 +236,26 @@ namespace TSL.AddIn
             }
 
             return writeResult;
+        }
+
+        /// <summary>
+        /// Build the results-file path "&lt;dir&gt;/&lt;base&gt;_Results_&lt;yyyyMMdd_HHmmss&gt;.xlsx",
+        /// appending "_1", "_2", … on collision so an existing file is never
+        /// overwritten.
+        /// </summary>
+        private static string BuildOutputPath(string dir, string baseName)
+        {
+            var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var fileName = $"{baseName}_Results_{stamp}.xlsx";
+            var path = System.IO.Path.Combine(dir, fileName);
+            int counter = 1;
+            while (System.IO.File.Exists(path))
+            {
+                fileName = $"{baseName}_Results_{stamp}_{counter}.xlsx";
+                path = System.IO.Path.Combine(dir, fileName);
+                counter++;
+            }
+            return path;
         }
 
         private static string WriteResultsSheet(Workbook wb, RunRequest request, RunResponse response,
@@ -364,7 +452,7 @@ namespace TSL.AddIn
         }
 
         private static string WriteAuditSheet(Workbook wb, RunRequest request, RunResponse response,
-            Worksheet sourceSheet = null)
+            Worksheet sourceSheet = null, string inputWorkbookName = null)
         {
             var techShortName = GetTechniqueShortName(request.TechniqueId);
             var sheetName = MakeUniqueSheetName(wb, TruncateSheetName($"{techShortName} Audit"));
@@ -399,7 +487,9 @@ namespace TSL.AddIn
             // Inputs
             WriteSection("Inputs", new Dictionary<string, string>
             {
-                { "Workbook", wb.Name },
+                // Record the INPUT workbook name (the data source), not the
+                // results workbook we are writing into.
+                { "Workbook", inputWorkbookName ?? wb.Name },
                 { "Run ID", request.RunId },
                 { "Technique", request.TechniqueId },
                 { "Preset", request.Preset },
@@ -645,6 +735,19 @@ namespace TSL.AddIn
             public string ResultSheetName { get; set; }
             public string AuditSheetName { get; set; }
             public string ErrorMessage { get; set; }
+
+            /// <summary>Full path of the separate results workbook saved to disk
+            /// (null if the save failed — see <see cref="SaveWarning"/>).</summary>
+            public string OutputPath { get; set; }
+
+            /// <summary>True when the input workbook had never been saved, so the
+            /// results were written to the user's Documents folder instead of
+            /// next to the input.</summary>
+            public bool UsedFallbackFolder { get; set; }
+
+            /// <summary>Non-fatal warning when the results workbook was created
+            /// but could not be saved to disk (it remains open for the user).</summary>
+            public string SaveWarning { get; set; }
         }
     }
 }

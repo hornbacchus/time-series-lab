@@ -215,6 +215,24 @@ namespace TSL.AddIn
                                 {
                                     summary += $"\n\nWarning: {writeResult.ErrorMessage}";
                                 }
+                                else if (writeResult != null && writeResult.Success)
+                                {
+                                    // Results go to a SEPARATE workbook — the input
+                                    // workbook is never modified. Tell the user where.
+                                    if (!string.IsNullOrEmpty(writeResult.OutputPath))
+                                    {
+                                        summary += "\n\nResults saved to a separate file "
+                                            + "(your input workbook was not modified):\n"
+                                            + writeResult.OutputPath;
+                                        if (writeResult.UsedFallbackFolder)
+                                            summary += "\n(Your input workbook had not been saved, "
+                                                + "so results went to your Documents folder.)";
+                                    }
+                                    else if (!string.IsNullOrEmpty(writeResult.SaveWarning))
+                                    {
+                                        summary += $"\n\n{writeResult.SaveWarning}";
+                                    }
+                                }
 
                                 runVm.CompleteRun(summary, sheets);
                             }));
@@ -840,6 +858,24 @@ namespace TSL.AddIn
                                     && !string.IsNullOrEmpty(writeResult.ErrorMessage))
                                 {
                                     summary += $"\n\nWarning: {writeResult.ErrorMessage}";
+                                }
+                                else if (writeResult != null && writeResult.Success)
+                                {
+                                    // Results go to a SEPARATE workbook — the input
+                                    // workbook is never modified. Tell the user where.
+                                    if (!string.IsNullOrEmpty(writeResult.OutputPath))
+                                    {
+                                        summary += "\n\nResults saved to a separate file "
+                                            + "(your input workbook was not modified):\n"
+                                            + writeResult.OutputPath;
+                                        if (writeResult.UsedFallbackFolder)
+                                            summary += "\n(Your input workbook had not been saved, "
+                                                + "so results went to your Documents folder.)";
+                                    }
+                                    else if (!string.IsNullOrEmpty(writeResult.SaveWarning))
+                                    {
+                                        summary += $"\n\n{writeResult.SaveWarning}";
+                                    }
                                 }
 
                                 runVm.CompleteRun(summary, sheets);
