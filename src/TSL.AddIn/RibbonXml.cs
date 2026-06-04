@@ -15,7 +15,7 @@ namespace TSL.AddIn
     <tabs>
       <tab idQ='tsl:tslTab' label='Time Series Lab'>
 
-        <group id='grpQuickActions' label='Quick Actions'>
+        <group id='grpQuickActions' label='Techniques'>
           <!-- Multivariate / system modeling (the core macro-strategist toolkit). -->
           <button id='btnVar'
                   label='VAR'
@@ -89,34 +89,6 @@ namespace TSL.AddIn
                   onAction='OnConformal'
                   screentip='Conformal Prediction Intervals'
                   supertip='Calibrated, distribution-free forecast intervals. Produces valid prediction bands that hold regardless of model misspecification — answers &quot;75% probability CPI prints between X and Y&quot; without parametric assumptions.' />
-          <!-- Bond Yield Forecast (GAP-1 routing fix): a MENU, not a split
-               button. The top portion opens the dropdown; the two items are
-               'Open Input Template' and 'Run Bond Yield Forecast' (the one-shot
-               OnBondYieldForecastRun, which auto-injects the active workbook
-               path). Dropped the former split-button primary action: it did not
-               fire reliably (top-portion click no-op) and duplicated the
-               dropdown Run — a single, obvious run path is clearer and aligns
-               with the documented 'Bond Yield Forecast -> Run Bond Yield
-               Forecast' trigger. Modeled on the menuRecommender pattern below. -->
-          <menu id='menuBondYieldForecast'
-                label='Bond Yield Forecast'
-                size='large'
-                imageMso='ChartTypeLineInsertGallery'
-                screentip='Bond Yield Forecast (BVAR-SV)'
-                supertip='Large Bayesian VAR with stochastic volatility for U.S. Treasury yield curve forecasting, conditioned on economist macro projections. Requires a 3-sheet bundled .xlsx workbook (BondYield_Macro / BondYield_Yields / BondYield_Projections). Use &apos;Open Input Template&apos; to generate a starter workbook, edit + save it, then &apos;Run Bond Yield Forecast&apos;.'>
-            <button id='btnBondYieldOpenTemplate'
-                    label='Open Input Template'
-                    imageMso='TableInsertExcel'
-                    onAction='OnBondYieldForecastOpenTemplate'
-                    screentip='Open the Bond Yield Forecast input template'
-                    supertip='Opens a pre-formatted .xlsx with example macro/yield/projection data. Edit the data sheets in place, save the workbook, then click &apos;Run Bond Yield Forecast&apos; to forecast.' />
-            <button id='btnBondYieldRun'
-                    label='Run Bond Yield Forecast'
-                    imageMso='MacroPlay'
-                    onAction='OnBondYieldForecastRun'
-                    screentip='Run the BVAR-SV forecast on the active workbook'
-                    supertip='Dispatches the BVAR-SV estimation + conditional forecast pipeline against the saved active workbook (one-shot: auto-injects the workbook path). Results render on a new &quot;Bond Yield Forecast Results&quot; sheet; diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet. Estimation typically takes 15-30 seconds on the canonical fixture.' />
-          </menu>
           <separator id='sepQA2' />
           <!-- Regime / volatility / state-space. -->
           <button id='btnMarkovSwitch'
@@ -147,6 +119,41 @@ namespace TSL.AddIn
                   onAction='OnStructuralTS'
                   screentip='Structural Time Series (UCM)'
                   supertip='Fit an Unobserved Components Model that decomposes the series into level, trend, seasonal, and cycle components via Kalman filtering. Used for signal extraction, nowcasting, and structural decomposition (output gap, NAIRU, neutral rate r*).' />
+        </group>
+
+        <!-- Bespoke: packaged, end-to-end bespoke analyses (vs the generic
+             statistical techniques in the Techniques group). Trails Techniques;
+             grows case-by-case as future packaged analyses are added. A single
+             member today (Bond Yield Forecast) is the intended state. -->
+        <group id='grpBespoke' label='Bespoke'>
+          <!-- Bond Yield Forecast (GAP-1 routing fix): a MENU, not a split
+               button. The top portion opens the dropdown; the two items are
+               'Open Input Template' and 'Run Bond Yield Forecast' (the one-shot
+               OnBondYieldForecastRun, which auto-injects the active workbook
+               path). Dropped the former split-button primary action: it did not
+               fire reliably (top-portion click no-op) and duplicated the
+               dropdown Run — a single, obvious run path is clearer and aligns
+               with the documented 'Bond Yield Forecast -> Run Bond Yield
+               Forecast' trigger. Modeled on the menuRecommender pattern below. -->
+          <menu id='menuBondYieldForecast'
+                label='Bond Yield Forecast'
+                size='large'
+                imageMso='ChartTypeLineInsertGallery'
+                screentip='Bond Yield Forecast (BVAR-SV)'
+                supertip='Large Bayesian VAR with stochastic volatility for U.S. Treasury yield curve forecasting, conditioned on economist macro projections. Requires a 3-sheet bundled .xlsx workbook (BondYield_Macro / BondYield_Yields / BondYield_Projections). Use &apos;Open Input Template&apos; to generate a starter workbook, edit + save it, then &apos;Run Bond Yield Forecast&apos;.'>
+            <button id='btnBondYieldOpenTemplate'
+                    label='Open Input Template'
+                    imageMso='TableInsertExcel'
+                    onAction='OnBondYieldForecastOpenTemplate'
+                    screentip='Open the Bond Yield Forecast input template'
+                    supertip='Opens a pre-formatted .xlsx with example macro/yield/projection data. Edit the data sheets in place, save the workbook, then click &apos;Run Bond Yield Forecast&apos; to forecast.' />
+            <button id='btnBondYieldRun'
+                    label='Run Bond Yield Forecast'
+                    imageMso='MacroPlay'
+                    onAction='OnBondYieldForecastRun'
+                    screentip='Run the BVAR-SV forecast on the active workbook'
+                    supertip='Dispatches the BVAR-SV estimation + conditional forecast pipeline against the saved active workbook (one-shot: auto-injects the workbook path). Results render on a new &quot;Bond Yield Forecast Results&quot; sheet; diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet. Estimation typically takes 15-30 seconds on the canonical fixture.' />
+          </menu>
         </group>
 
         <group id='grpExplore' label='Explore'>
