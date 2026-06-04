@@ -113,21 +113,30 @@ namespace TSL.AddIn
             try
             {
                 var app = (Application)ExcelDnaUtil.Application;
-                var inputWb = app.ActiveWorkbook;
-                if (inputWb == null)
+
+                // Anchor the output to the ORIGINAL INPUT source the run was
+                // launched against — captured on the request at launch, while
+                // the input workbook was genuinely active. Do NOT read the
+                // active workbook here: after a prior run the RESULTS workbook
+                // is the active one, so re-reading it would compound the file
+                // name (…_Results_<ts>_Results_<ts>). Fall back to the active
+                // workbook only when the request did not carry the source
+                // (older callers / safety). Either way these are READ-ONLY
+                // reads — the input workbook is never written to or saved.
+                string inputName = request?.SourceWorkbookName;
+                string inputDir = request?.SourceWorkbookPath;
+                if (string.IsNullOrEmpty(inputName))
                 {
-                    writeResult.ErrorMessage = "No active workbook.";
-                    return writeResult;
+                    var inputWb = app.ActiveWorkbook;
+                    if (inputWb == null)
+                    {
+                        writeResult.ErrorMessage = "No active workbook.";
+                        return writeResult;
+                    }
+                    try { inputName = inputWb.Name; } catch { /* keep null */ }
+                    if (inputDir == null) { try { inputDir = inputWb.Path; } catch { /* unsaved */ } }
                 }
-
-                // Derive the output location from the INPUT workbook. These are
-                // READ-ONLY property reads — the input workbook is never written
-                // to, never has a sheet added, and is never saved by this method.
-                string inputName = "Workbook";
-                try { inputName = inputWb.Name; } catch { /* keep default */ }
-
-                string inputDir = null;
-                try { inputDir = inputWb.Path; } catch { /* unsaved → no path */ }
+                if (string.IsNullOrEmpty(inputName)) inputName = "Workbook";
 
                 var inputBaseName = "TSL_Run";
                 try
@@ -238,13 +247,44 @@ namespace TSL.AddIn
             return writeResult;
         }
 
+        // Matches a trailing "_Results_<yyyyMMdd>_<HHmmss>" stamp, with an
+        // optional "_<n>" collision counter — i.e. a name THIS writer produced.
+        private static readonly System.Text.RegularExpressions.Regex ResultsSuffixRx =
+            new System.Text.RegularExpressions.Regex(
+                @"_Results_\d{8}_\d{6}(?:_\d+)?$",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                | System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        /// <summary>
+        /// Defensively strip any trailing "_Results_&lt;timestamp&gt;" suffix
+        /// (including a compounded chain of them) that this writer may have
+        /// previously appended, so consecutive runs can never produce
+        /// "&lt;input&gt;_Results_&lt;ts&gt;_Results_&lt;ts&gt;.xlsx". Belt-and-
+        /// suspenders alongside anchoring to the original input source: even if
+        /// the base name somehow arrives already stamped, the name stays clean.
+        /// Never strips the name down to empty.
+        /// </summary>
+        private static string StripResultsSuffix(string baseName)
+        {
+            if (string.IsNullOrEmpty(baseName)) return baseName;
+            while (true)
+            {
+                var stripped = ResultsSuffixRx.Replace(baseName, "");
+                if (stripped == baseName) return baseName;          // no (more) suffix
+                if (string.IsNullOrEmpty(stripped)) return baseName; // would empty it → keep
+                baseName = stripped;                                 // peel one layer; loop for chains
+            }
+        }
+
         /// <summary>
         /// Build the results-file path "&lt;dir&gt;/&lt;base&gt;_Results_&lt;yyyyMMdd_HHmmss&gt;.xlsx",
         /// appending "_1", "_2", … on collision so an existing file is never
-        /// overwritten.
+        /// overwritten. Strips any pre-existing "_Results_&lt;ts&gt;" suffix from
+        /// the base name first so names never compound.
         /// </summary>
         private static string BuildOutputPath(string dir, string baseName)
         {
+            baseName = StripResultsSuffix(baseName);
             var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var fileName = $"{baseName}_Results_{stamp}.xlsx";
             var path = System.IO.Path.Combine(dir, fileName);

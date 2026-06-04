@@ -74,7 +74,8 @@ namespace TSL.AddIn
         /// </summary>
         public static void RunTechniqueWithParams(
             string techniqueId, IDictionary<string, object> injectedParams,
-            string cleanupTempFile = null)
+            string cleanupTempFile = null,
+            string sourceWorkbookName = null, string sourceWorkbookPath = null)
         {
             if (string.IsNullOrEmpty(techniqueId)) return;
 
@@ -116,6 +117,10 @@ namespace TSL.AddIn
                     ? new Dictionary<string, object>(injectedParams)
                     : new Dictionary<string, object>(),
                 FillConfig = new FillConfig(),
+                // Anchor the results filename/folder to the ORIGINAL input
+                // workbook (passed by the launcher), not the active workbook.
+                SourceWorkbookName = sourceWorkbookName,
+                SourceWorkbookPath = sourceWorkbookPath,
             };
 
             // Run async (mirrors the selection flow's dispatch tail; ExcelWriter
@@ -364,6 +369,15 @@ namespace TSL.AddIn
                     return;
                 }
 
+                // Capture the ORIGINAL input workbook's identity NOW, while it
+                // is genuinely active (before any results file is created), so
+                // the results land next to THIS workbook with a name derived
+                // from it — even on a consecutive run when a prior results file
+                // would otherwise be the active workbook.
+                string srcName = null, srcDir = null;
+                try { srcName = wb.Name; } catch { /* best-effort */ }
+                try { srcDir = wb.Path; } catch { /* best-effort */ }
+
                 var tempPath = System.IO.Path.Combine(
                     System.IO.Path.GetTempPath(), $"tsl_byf_{Guid.NewGuid():N}.xlsx");
                 wb.SaveCopyAs(tempPath);
@@ -374,7 +388,7 @@ namespace TSL.AddIn
                 if (!injected.ContainsKey("scenario"))
                     injected["scenario"] = "baseline";
 
-                RunTechniqueWithParams(techniqueId, injected, tempPath);
+                RunTechniqueWithParams(techniqueId, injected, tempPath, srcName, srcDir);
             }
             catch (Exception ex)
             {
@@ -706,6 +720,23 @@ namespace TSL.AddIn
             // (e.g. covid_outliers checkbox, fit_window_obs text box) instead
             // of running with nothing but defaults.
             var paramsDict = runVm.GetParametersDict() ?? new Dictionary<string, object>();
+
+            // Capture the input workbook's identity NOW. The selection was just
+            // extracted from the active workbook (above), so the active workbook
+            // here IS the input — anchor the results filename/folder to it so
+            // results never derive their name from a prior run's results file.
+            string srcWbName = null, srcWbDir = null;
+            try
+            {
+                var srcApp = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                var srcWb = srcApp?.ActiveWorkbook;
+                if (srcWb != null) { srcWbName = srcWb.Name; srcWbDir = srcWb.Path; }
+            }
+            catch (Exception wbEx)
+            {
+                Logger.Info($"Could not capture source workbook identity: {wbEx.Message}");
+            }
+
             var request = new RunRequest
             {
                 RunId = $"pane_{Guid.NewGuid():N}",
@@ -713,6 +744,8 @@ namespace TSL.AddIn
                 Preset = preset ?? "Balanced",
                 Seed = AddIn.Settings?.GetDefaultSeed() ?? 42,
                 Time = timeArray,
+                SourceWorkbookName = srcWbName,
+                SourceWorkbookPath = srcWbDir,
                 // Pass detected frequency to the engine so techniques that
                 // consume it (seasonal adjust, ARIMA, etc.) get a sensible
                 // default without forcing the user to set it manually.

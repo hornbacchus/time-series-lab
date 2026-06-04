@@ -37,6 +37,26 @@ namespace TSL.AddIn.Models
 
         [JsonProperty("params")]
         public Dictionary<string, object> Params { get; set; }
+
+        /// <summary>
+        /// Name of the ORIGINAL INPUT workbook this run was launched against
+        /// (e.g. "BondYield_input.xlsx"), captured at launch when that workbook
+        /// is genuinely active. Used by ExcelWriter to name the separate results
+        /// file after the input source — NOT after whatever workbook is active
+        /// when results are written (after a prior run the results workbook is
+        /// active, which would compound the name). [JsonIgnore]: add-in only,
+        /// never sent to Python.
+        /// </summary>
+        [JsonIgnore]
+        public string SourceWorkbookName { get; set; }
+
+        /// <summary>
+        /// Directory of the original input workbook (Workbook.Path; "" if the
+        /// input was never saved). The results file is written here so
+        /// consecutive runs always land in the input's folder. [JsonIgnore].
+        /// </summary>
+        [JsonIgnore]
+        public string SourceWorkbookPath { get; set; }
     }
 
     public class SeriesData
