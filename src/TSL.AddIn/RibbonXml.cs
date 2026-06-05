@@ -163,7 +163,7 @@ namespace TSL.AddIn
           <menu id='menuBreakevenPayroll'
                 label='Breakeven Payrolls'
                 size='large'
-                imageMso='ChartColumnChart'
+                imageMso='ChartTypeColumnInsertGallery'
                 screentip='Breakeven Payrolls'
                 supertip='Breakeven (labor-force-neutral) nonfarm payrolls from CBO potential LFPR/u* and the CNP16OV-bridged population, with a net-migration scenario grid and a signal-vs-noise overlay. Workbook-input: use &apos;Open Input Template&apos; for a pinned, ready-to-run .xlsx, edit the scenario_inputs tab, then &apos;Run Breakeven Payrolls&apos;.'>
             <button id='btnBreakevenOpenTemplate'
