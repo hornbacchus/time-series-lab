@@ -49,6 +49,49 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Breakeven Payrolls (Bespoke technique port). CROSS-SOURCE
+    # reproduction: the TSL workbook-path output is asserted against
+    # the authoritative Breakeven Payrolls repo's reconciled fixture
+    # (tests/fixtures/fed_reference_path.csv @ 826d1d0) — analogous to
+    # the cross-package R checks, but the reference is the source
+    # repo's frozen output. Closed-form deterministic arithmetic.
+    "p3_breakeven_payroll": {
+        "type": "absolute",
+        # TIGHT full quarterly path, MA-stable region (1962Q1+; the
+        # 1960Q1-1961Q1 13-month-MA edge is excluded — the template
+        # bakes HPLFS from 1960, no anchor falls there).
+        "path": {"abs_tol": 5.0, "rel_tol": 1e-5},
+        # TIGHT scenario grid (10 rows, breakeven k/mo). Both the port
+        # and the source compute it from identical frozen literals (D1)
+        # + the same reconciled 2026 anchor, so they agree to ~1e-12.
+        "grid": {"abs_tol": 1e-3, "rel_tol": 1e-6},
+        # LOOSE round-target anchors (the repo's reconciliation
+        # sanity; intentionally generous, reported not gated).
+        "anchor_abs_tol": 15000.0,
+        "justification": (
+            "Cross-source reproduction of the Breakeven Payrolls repo "
+            "(826d1d0). The breakeven path is closed-form arithmetic "
+            "(population diff-splice + product-rule decomposition + "
+            "be = delta_lf*(1-u*) + 5q centered MA) over CBO-quarterly "
+            "potential-LFPR/u* and the CNP16OV-bridged population; the "
+            "scenario grid is a closed-form migration-surprise identity "
+            "over frozen literals. Session-3 standalone MEASURED: the "
+            "TSL workbook path reproduces the committed fed_reference_"
+            "path.csv to max abs diff 0.19 jobs/mo across all 256 "
+            "quarters of the MA-stable region (1962Q1-2026Q4), once the "
+            "CNP16OV append segment carries its May-2025 (HPLFS-handoff) "
+            "anchor as the diff-splice base; the scenario grid matches "
+            "the source sensitivity_grid to ~1e-12 (Brookings-mid/Fed "
+            "7.2386, MS-house 50.6638). The 5.0 jobs/mo path floor "
+            "leaves ~26x headroom over the measured 0.19 while a real "
+            "reader bug (a dropped population month shifts 2025Q1 by "
+            "~1,779; a perturbed CBO value shifts the path by hundreds-"
+            "to-thousands) BLOCKs decisively — verified by negative "
+            "control. The 1e-3 k/mo grid floor catches any frozen-"
+            "literal perturbation (which moves the grid by >> 1e-3)."
+        ),
+    },
+
     "3e_mint_family": {
         "type": "absolute",
         "abs_tol": 1e-8,
