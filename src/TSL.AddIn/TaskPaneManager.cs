@@ -41,22 +41,24 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// Show the task pane, navigate directly to the Run view for
-        /// <paramref name="techniqueId"/>, and immediately kick off the
-        /// analysis against the current Excel selection. This is the
-        /// "one-click" path used by the ribbon's Quick Action buttons —
-        /// users expect Seasonal Adjustment / PCA / Granger / etc. to
-        /// execute, not to land on a description page.
+        /// Show the task pane and navigate to the Run view for
+        /// <paramref name="techniqueId"/> with the selection + parameters
+        /// populated, then WAIT for the user to click Run. No technique
+        /// auto-runs on ribbon-click: the platform produces publishable output
+        /// under the user's name, so nothing executes before the user reviews
+        /// the pane and clicks Run (the same configure-then-run contract the
+        /// Bespoke workbook techniques use). The Run click raises RunRequested
+        /// → OnRunRequested → the engine.
         /// </summary>
         public static void RunTechnique(string techniqueId)
         {
             EnsureTaskPane();
             _taskPane.Visible = true;
-            // OnRunRequested does everything: extracts the Excel selection,
-            // populates the Run view, builds the RunRequest, and calls the
-            // engine. Going through the same event path that the Explorer's
-            // "Run on Selection" button uses keeps behavior consistent.
-            OnRunRequested(techniqueId, AddIn.Settings?.GetGlobalPreset() ?? "Balanced");
+            // execute:false — populate the Run view from the selection but do
+            // NOT dispatch; the user's Run click (RunRequested → OnRunRequested)
+            // runs it. Mirrors the Bespoke OpenXxxConfig open-pane-then-wait.
+            LaunchTechnique(techniqueId, AddIn.Settings?.GetGlobalPreset() ?? "Balanced",
+                execute: false);
         }
 
         /// <summary>
@@ -647,11 +649,22 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// Handles the RunRequested event from the Task Pane.
-        /// Extracts data from the current Excel selection (including non-adjacent ranges),
-        /// detects a time index, validates series lengths, and dispatches to the engine.
+        /// The RunRequested event handler (the user clicked Run in the pane).
+        /// Always executes — delegates to <see cref="LaunchTechnique"/> with
+        /// execute:true.
         /// </summary>
         private static void OnRunRequested(string techniqueId, string preset)
+            => LaunchTechnique(techniqueId, preset, execute: true);
+
+        /// <summary>
+        /// Extracts data from the current Excel selection (including non-adjacent
+        /// ranges), detects a time index, validates series lengths, populates the
+        /// Run view, and — only when <paramref name="execute"/> is true —
+        /// dispatches to the engine. The ribbon launch (RunTechnique) calls this
+        /// with execute:false to open the pane populated + wait for the user's
+        /// Run click; the Run click (OnRunRequested) calls it with execute:true.
+        /// </summary>
+        private static void LaunchTechnique(string techniqueId, string preset, bool execute)
         {
             if (string.IsNullOrEmpty(techniqueId)) return;
 
@@ -808,6 +821,17 @@ namespace TSL.AddIn
                 runVm.UseTimeIndex = false;
                 runVm.TimeIndexAddress = "";
                 runVm.DetectedFrequency = "Not detected";
+            }
+
+            // ── No-auto-run gate ──────────────────────────────────────────
+            // The pane is now fully populated (selection extracted, series
+            // previews, params, detected time index). On a ribbon LAUNCH
+            // (execute:false) we STOP here — the user reviews and clicks Run.
+            // Only the Run click (execute:true) proceeds to dispatch.
+            if (!execute)
+            {
+                runVm.IsRunning = false;
+                return;
             }
 
             runVm.IsRunning = true;
