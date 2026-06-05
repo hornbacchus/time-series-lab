@@ -553,7 +553,42 @@ namespace TSL.AddIn
 
         private static void EnsureTaskPane()
         {
-            if (_taskPane != null) return;
+            // A cached CustomTaskPane reference can become a DEAD COM object: Excel
+            // tears the pane down when its host window is destroyed (the separate-
+            // file results workbook opening, the working-copy Open, the input window
+            // closing during a run). Reusing it throws "The taskpane has been deleted
+            // or is otherwise no longer valid" at the next `.Visible` access. So
+            // validate the handle; if it's dead, fully tear down (UNWIRE events +
+            // dispose) BEFORE recreating, so the rebuilt pane wires its events exactly
+            // once — no leaked / double subscriptions. The valid-pane path is unchanged
+            // (one cheap property read, then return); the only new behavior is that a
+            // stale pane is recreated instead of throwing. Every technique launch
+            // (Bespoke, selection, Explorer/Recommender) goes through here.
+            if (_taskPane != null)
+            {
+                bool alive;
+                try { var _ = _taskPane.Visible; alive = true; }
+                catch { alive = false; }
+                if (alive) return;
+
+                Logger.Info("Task pane handle is stale (host window destroyed); recreating.");
+                try { _taskPane.VisibleStateChange -= OnVisibleStateChange; } catch { /* dead */ }
+                if (_hostControl?.ViewModel != null)
+                {
+                    try
+                    {
+                        _hostControl.ViewModel.RunRequested -= OnRunRequested;
+                        _hostControl.ViewModel.WorkbookRunRequested -= OnWorkbookRunRequested;
+                        _hostControl.ViewModel.RunCancelRequested -= OnCancelRequested;
+                        _hostControl.ViewModel.DataReadinessChecksRequested -= OnDataReadinessChecksRequested;
+                    }
+                    catch { /* best-effort unwire */ }
+                }
+                try { _taskPane.Delete(); } catch { /* already gone */ }
+                try { _hostControl?.Dispose(); } catch { /* already disposed */ }
+                _taskPane = null;
+                _hostControl = null;
+            }
 
             try
             {
