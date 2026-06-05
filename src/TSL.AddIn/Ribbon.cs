@@ -265,12 +265,12 @@ namespace TSL.AddIn
                 ExcelAsyncUtil.QueueAsMacro(() =>
                 {
                     var app = (Application)ExcelDnaUtil.Application;
-                    // Open as a NEW workbook (not Read-only) so the user can
-                    // edit the template and save-as their own workbook before
-                    // running the forecast. The unified-workbook reader doesn't
-                    // require write access; opening read-write here is a UX
-                    // affordance, not an engine requirement.
-                    app.Workbooks.Open(templatePath, ReadOnly: false);
+                    // Open a WORKING COPY, never the bundled template in place:
+                    // the user edits + Excel AutoSave must NOT write back into the
+                    // shipped template (which would ship a stale default to the
+                    // next user). The bundled file is only ever a File.Copy source.
+                    var workingPath = CreateTemplateWorkingCopy(templatePath, "BondYield_input");
+                    app.Workbooks.Open(workingPath, ReadOnly: false);
                 });
             }
             catch (Exception ex)
@@ -354,9 +354,11 @@ namespace TSL.AddIn
                 ExcelAsyncUtil.QueueAsMacro(() =>
                 {
                     var app = (Application)ExcelDnaUtil.Application;
-                    // Open read-write so the user can edit the scenario_inputs tab
-                    // and save-as their own workbook before running.
-                    app.Workbooks.Open(templatePath, ReadOnly: false);
+                    // Open a WORKING COPY, never the bundled template in place (so
+                    // editing the scenario_inputs knob + AutoSave can't contaminate
+                    // the shipped default). The bundled file is only a File.Copy source.
+                    var workingPath = CreateTemplateWorkingCopy(templatePath, "Breakeven_Payrolls_input");
+                    app.Workbooks.Open(workingPath, ReadOnly: false);
                 });
             }
             catch (Exception ex)
@@ -392,6 +394,32 @@ namespace TSL.AddIn
             if (File.Exists(installedPath)) return installedPath;
 
             return null;
+        }
+
+        /// <summary>
+        /// Copy a bundled input template to a fresh, user-reachable WORKING COPY
+        /// and return its path. Shared by both workbook-input techniques' "Open
+        /// Input Template" so the user always edits a COPY — the bundled template
+        /// is only ever a File.Copy source and can never be contaminated by an
+        /// edit + Excel AutoSave (the template-side analogue of the separate-file
+        /// output's input-never-mutated guarantee). Lands in a persistent,
+        /// findable location (Documents\Time Series Lab) suited to the
+        /// user-updatable operating model.
+        /// </summary>
+        private string CreateTemplateWorkingCopy(string bundledTemplatePath, string baseName)
+        {
+            var dir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "Time Series Lab");
+            Directory.CreateDirectory(dir);
+
+            var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var path = Path.Combine(dir, $"{baseName}_working_{stamp}.xlsx");
+            for (int n = 1; File.Exists(path); n++)
+                path = Path.Combine(dir, $"{baseName}_working_{stamp}_{n}.xlsx");
+
+            File.Copy(bundledTemplatePath, path);
+            return path;
         }
 
         // Regime / volatility / state-space
