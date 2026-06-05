@@ -200,6 +200,10 @@ TECHNIQUE_REGISTRY = {
     "byf": "techniques.bond_yield_forecast",
     "yield_forecast": "techniques.bond_yield_forecast",
 
+    # --- Breakeven Payrolls (Bespoke port; workbook-input) ---
+    "breakeven_payroll": "techniques.breakeven_payroll",
+    "breakeven": "techniques.breakeven_payroll",
+
     # --- Dynamic Factor Model (Batch 2) ---
     "dynamic_factor_model": "techniques.dynamic_factor_model",
     "dynamic_factor": "techniques.dynamic_factor_model",

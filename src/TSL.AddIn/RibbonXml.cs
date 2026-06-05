@@ -154,6 +154,31 @@ namespace TSL.AddIn
                     screentip='Run the BVAR-SV forecast on the active workbook'
                     supertip='Dispatches the BVAR-SV estimation + conditional forecast pipeline against the saved active workbook (one-shot: auto-injects the workbook path). Results render on a new &quot;Bond Yield Forecast Results&quot; sheet; diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet. Estimation typically takes 15-30 seconds on the canonical fixture.' />
           </menu>
+          <!-- Breakeven Payrolls (Bespoke member #2): a workbook-input technique
+               like Bond Yield Forecast. 'Open Input Template' drops a pinned,
+               ready-to-run .xlsx (baked CBO + population, the user-editable
+               scenario_inputs tab); 'Run' computes the breakeven payrolls path +
+               net-migration scenario grid + signal-vs-noise overlay into a SEPARATE
+               results file (the input workbook is never modified). -->
+          <menu id='menuBreakevenPayroll'
+                label='Breakeven Payrolls'
+                size='large'
+                imageMso='ChartColumnChart'
+                screentip='Breakeven Payrolls'
+                supertip='Breakeven (labor-force-neutral) nonfarm payrolls from CBO potential LFPR/u* and the CNP16OV-bridged population, with a net-migration scenario grid and a signal-vs-noise overlay. Workbook-input: use &apos;Open Input Template&apos; for a pinned, ready-to-run .xlsx, edit the scenario_inputs tab, then &apos;Run Breakeven Payrolls&apos;.'>
+            <button id='btnBreakevenOpenTemplate'
+                    label='Open Input Template'
+                    imageMso='TableInsertExcel'
+                    onAction='OnBreakevenPayrollOpenTemplate'
+                    screentip='Open the Breakeven Payrolls input template'
+                    supertip='Opens a pre-formatted, pinned .xlsx (baked CBO + population data; the yellow scenario_inputs tab is yours to set). Edit the net-migration scenario, save, then click &apos;Run Breakeven Payrolls&apos;.' />
+            <button id='btnBreakevenRun'
+                    label='Run Breakeven Payrolls'
+                    imageMso='MacroPlay'
+                    onAction='OnBreakevenPayrollRun'
+                    screentip='Run the breakeven payrolls computation on the active workbook'
+                    supertip='Computes the quarterly breakeven payrolls path (2026 flagged FORECAST), the 10-row net-migration scenario grid, the reconciliation anchors, and the signal-vs-noise overlay into a new &quot;Breakeven Payrolls Results&quot; sheet (the input workbook is never modified).' />
+          </menu>
         </group>
 
         <group id='grpExplore' label='Explore'>

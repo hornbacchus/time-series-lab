@@ -313,6 +313,87 @@ namespace TSL.AddIn
             return null;
         }
 
+        // ── Breakeven Payrolls (Bespoke member #2; workbook-input) ──────
+        public void OnBreakevenPayrollRun(IRibbonControl control)
+        {
+            // Workbook-input technique (mirrors Bond Yield Forecast): CONFIGURE-
+            // then-run. Open the Run view; the Run button routes to the shared
+            // TaskPaneManager.OnWorkbookRunRequested, which captures the active
+            // workbook, SaveCopyAs-es a %TEMP% copy, and dispatches. The scenario
+            // and data live in the workbook (scenario_inputs + baked tabs).
+            try
+            {
+                TaskPaneManager.OpenBreakevenPayrollConfig();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error opening Breakeven Payrolls: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        public void OnBreakevenPayrollOpenTemplate(IRibbonControl control)
+        {
+            try
+            {
+                var templatePath = LocateBreakevenPayrollTemplate();
+                if (templatePath == null)
+                {
+                    MessageBox.Show(
+                        "Breakeven Payrolls input template not found.\n\n" +
+                        "Reinstall Time Series Lab to restore the bundled template.",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    var app = (Application)ExcelDnaUtil.Application;
+                    // Open read-write so the user can edit the scenario_inputs tab
+                    // and save-as their own workbook before running.
+                    app.Workbooks.Open(templatePath, ReadOnly: false);
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error opening Breakeven Payrolls input template: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Resolve the bundled Breakeven Payrolls input template path (the pinned,
+        /// May-2025-anchored .xlsx). Mirrors LocateBondYieldForecastTemplate
+        /// (dev repo path → installed %LOCALAPPDATA% path).
+        /// </summary>
+        private string LocateBreakevenPayrollTemplate()
+        {
+            const string templateRel =
+                @"engine\techniques\breakeven_payroll\resources\templates\breakeven_payroll_input_template.xlsx";
+
+            var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            if (!string.IsNullOrEmpty(xllDir))
+            {
+                var projectRoot = Path.GetFullPath(
+                    Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
+                var devPath = Path.Combine(projectRoot, templateRel);
+                if (File.Exists(devPath)) return devPath;
+            }
+
+            var installedPath = Path.Combine(AddIn.AppDataPath, templateRel);
+            if (File.Exists(installedPath)) return installedPath;
+
+            return null;
+        }
+
         // Regime / volatility / state-space
         public void OnMarkovSwitching(IRibbonControl control)
         {

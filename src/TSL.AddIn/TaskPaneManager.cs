@@ -341,15 +341,73 @@ namespace TSL.AddIn
         }
 
         /// <summary>
+        /// Open the Run view for Breakeven Payrolls in CONFIGURE-then-run mode.
+        /// Workbook-input technique (mirrors OpenBondYieldForecastConfig): no cell
+        /// selection, Run enabled without a selection, the Run button routed to the
+        /// shared OnWorkbookRunRequested. The scenario (net migration) and all data
+        /// live IN the workbook (the scenario_inputs tab + the baked CBO/population
+        /// tabs), so there are NO curated pane params — the user edits the workbook,
+        /// then clicks Run.
+        /// </summary>
+        public static void OpenBreakevenPayrollConfig()
+        {
+            EnsureTaskPane();
+            _taskPane.Visible = true;
+
+            const string techniqueId = "breakeven_payroll";
+            _hostControl.ViewModel.NavigateToRun(techniqueId);
+            var runVm = _hostControl.ViewModel.CurrentView as RunViewModel;
+            if (runVm == null) return;
+
+            try
+            {
+                var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
+                if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
+                    runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueId = techniqueId;
+                // No curated pane params: the scenario is set in the workbook's
+                // scenario_inputs tab, not the pane. input_workbook is auto-resolved
+                // at Run-click. Surface an empty parameter list so the view renders
+                // the Run affordance without knobs.
+                runVm.SetParameters(new List<(string Name, string Label, string Type,
+                    string Description, List<string> Options, object Default)>());
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Could not load Breakeven Payrolls parameters: {ex.Message}");
+            }
+
+            runVm.SetSeriesPreviews(new List<SeriesPreviewItem>());
+            runVm.RequiresSelection = false;
+            runVm.WorkbookInputMode = true;
+            runVm.IsRunning = false;
+        }
+
+        /// <summary>
         /// Handles the Run button for a WORKBOOK-INPUT technique. Resolves the
         /// active workbook, writes a clean local %TEMP% copy (off OneDrive,
         /// captures unsaved edits — the d923c6a mechanism), merges the user's
         /// edited parameters, and dispatches via RunTechniqueWithParams.
         /// </summary>
+        // Registry of workbook-input technique ids — Bespoke techniques that
+        // consume a whole .xlsx workbook (via params["input_workbook"]) instead
+        // of a cell selection. The Run button routes through the shared
+        // OnWorkbookRunRequested for every id in this set; adding a new
+        // workbook-input member is one line here. (A catalog input_mode property
+        // is the cleaner long-term home; banked for a 3rd member.)
+        private static readonly HashSet<string> _workbookInputTechniques =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "bond_yield_forecast",
+                "breakeven_payroll",
+            };
+
         private static void OnWorkbookRunRequested(string techniqueId)
         {
-            // Only Bond Yield Forecast uses workbook-input mode today.
-            if (!string.Equals(techniqueId, "bond_yield_forecast", StringComparison.OrdinalIgnoreCase))
+            // Route only the registered workbook-input techniques. BVAR's path is
+            // unchanged below (the only behavioral specialization is the
+            // scenario="baseline" default, gated on its id).
+            if (!_workbookInputTechniques.Contains(techniqueId))
                 return;
 
             try
@@ -361,8 +419,8 @@ namespace TSL.AddIn
                 if (wb == null)
                 {
                     MessageBox.Show(
-                        "No workbook is open.\n\nOpen the Bond Yield Forecast input " +
-                        "workbook (or use 'Open Input Template'), then click Run.",
+                        "No workbook is open.\n\nOpen the technique's input workbook " +
+                        "(or use 'Open Input Template'), then click Run.",
                         "Time Series Lab",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -379,13 +437,17 @@ namespace TSL.AddIn
                 try { srcDir = wb.Path; } catch { /* best-effort */ }
 
                 var tempPath = System.IO.Path.Combine(
-                    System.IO.Path.GetTempPath(), $"tsl_byf_{Guid.NewGuid():N}.xlsx");
+                    System.IO.Path.GetTempPath(), $"tsl_wbk_{Guid.NewGuid():N}.xlsx");
                 wb.SaveCopyAs(tempPath);
 
                 var injected = runVm?.GetParametersDict()
                                ?? new Dictionary<string, object>();
                 injected["input_workbook"] = tempPath;
-                if (!injected.ContainsKey("scenario"))
+                // Bond Yield Forecast carries a scenario name (BondYield_Projections
+                // column); default it to "baseline". Breakeven Payrolls reads its
+                // scenario from the workbook's scenario_inputs tab — no injection.
+                if (string.Equals(techniqueId, "bond_yield_forecast", StringComparison.OrdinalIgnoreCase)
+                    && !injected.ContainsKey("scenario"))
                     injected["scenario"] = "baseline";
 
                 RunTechniqueWithParams(techniqueId, injected, tempPath, srcName, srcDir);
@@ -393,7 +455,7 @@ namespace TSL.AddIn
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Error launching Bond Yield Forecast: {ex.Message}",
+                    $"Error launching workbook technique: {ex.Message}",
                     "Time Series Lab",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);

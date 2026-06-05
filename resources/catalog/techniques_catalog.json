@@ -1165,6 +1165,48 @@
       ]
     },
     {
+      "id": "breakeven_payroll",
+      "name": "Breakeven Payrolls",
+      "category": "Multivariate Systems",
+      "summary": "Breakeven (labor-force-neutral) nonfarm payrolls path from CBO potential LFPR/u* and the CNP16OV-bridged population, with a net-migration scenario grid and a signal-vs-noise overlay.",
+      "description_file": "breakeven_payroll.md",
+      "min_series": 0,
+      "max_series": 0,
+      "supports_auto_udf": false,
+      "auto_udf_name": null,
+      "presets": [
+        "Fast",
+        "Balanced",
+        "Thorough"
+      ],
+      "parameters": [
+        {
+          "name": "input_workbook",
+          "label": "Input Workbook (.xlsx path)",
+          "type": "string",
+          "default": null,
+          "required": true,
+          "advanced": false,
+          "description": "Absolute path to the 12-tab Breakeven Payrolls workbook (baked CBO + population + scalars + the user-editable scenario_inputs tab). Use the 'Open Input Template' Ribbon menu item to create one. The scenario (net migration) is set in the workbook, not here.",
+          "options": null
+        }
+      ],
+      "output_tables": [
+        "breakeven_quarterly",
+        "scenario_grid",
+        "reconciliation_anchors",
+        "signal_vs_noise"
+      ],
+      "tags": [
+        "labor_market",
+        "payrolls",
+        "macro",
+        "scenario",
+        "population",
+        "bespoke"
+      ]
+    },
+    {
       "id": "dynamic_factor_model",
       "name": "Dynamic Factor Model",
       "category": "Multivariate Systems",
