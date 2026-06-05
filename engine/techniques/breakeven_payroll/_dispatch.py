@@ -24,7 +24,7 @@ from .breakeven import breakeven_from_inputs
 from .conventions import FROZEN_STITCH, LFPR26
 from .metrics import iter_targets, metric_value, scope
 from .population import build_population
-from .scenarios import active_2026_pace, sensitivity_grid
+from .scenarios import pace, sensitivity_grid
 
 logger = logging.getLogger(__name__)
 
@@ -44,23 +44,21 @@ FROZEN_USTAR_OPTIONS = {"noncyclical": 0.044, "cbo_actual": 0.0456}
 PROJECTION_START = "2026-01-01"
 
 
-def _resolve_active_name(active_migration: float) -> str:
-    """Map the user's net_migration_all_ages to a preset name (value match);
-    default to the Fed default (Brookings_mid) when it is not an exact preset."""
-    for name, val in FROZEN_PRESETS.items():
-        if abs(float(val) - float(active_migration)) < 1e-6:
-            return name
-    return "Brookings_mid"
+# The reconciled reference scenario. The committed fed_reference_path.csv (and its
+# 2026 anchor 7.24 k/mo) was reconciled at the Fed-default Brookings-mid. The
+# scenario GRID is always anchored here — it is the fixed reference comparison
+# (each preset's breakeven relative to the reconciled baseline), independent of
+# the user's active 2026 knob (which drives only the PATH's 2026 block).
+_GRID_REFERENCE_SCENARIO = "Brookings_mid"
 
 
 def _build_params(inp: dict) -> dict:
-    active_name = _resolve_active_name(inp["scenario"]["net_migration_all_ages"])
     share = inp["scalars"]["share_16plus"]
     return {
         "unemployment": {"u_star_options": dict(FROZEN_USTAR_OPTIONS)},
         "scenarios": {
             "presets": dict(FROZEN_PRESETS),
-            "active_2026": active_name,
+            "active_2026": _GRID_REFERENCE_SCENARIO,
             "defaults": {"lfpr": LFPR26 / 100.0, "u_star": FROZEN_USTAR_OPTIONS["noncyclical"],
                          "share_16plus": share},
         },
@@ -72,7 +70,16 @@ def compute(inp: dict) -> dict:
     params = _build_params(inp)
     base = inp["scalars"]["pop_base_v2025_dec2025"]
     base_pace = inp["scalars"]["census_base_pace"]
-    mc = active_2026_pace(params, base_pace_kmo=base_pace)  # 2026 block flow (k/mo)
+
+    # The active 2026 population flow comes from the USER's net-migration knob
+    # (scenario_inputs.net_migration_all_ages), via the same pace(M) identity the
+    # grid uses — NOT a preset-name snap. A blank cell defaults to -370000
+    # (Brookings-mid, the Fed default) in the reader, reproducing the reconciled
+    # 7.24 k/mo. Any value (e.g. 560000 -> 108.2 k/mo) now drives the 2026 block.
+    active_migration = float(inp["scenario"]["net_migration_all_ages"])
+    mc = pace(active_migration, base_pace_kmo=base_pace,
+              base_migration=inp["scalars"]["census_migration_ref"],
+              share_16plus=inp["scalars"]["share_16plus"])
 
     pop = build_population(inp["hplfs"], inp["cnp16ov"], monthly_change_thousands=mc,
                            base_thousands=base, through="2026-12")
@@ -81,7 +88,9 @@ def compute(inp: dict) -> dict:
     quarterly_persons = (res.quarterly["breakeven_smoothed"] * 1000.0).dropna()
     grid = sensitivity_grid(params)
     return {"quarterly_persons": quarterly_persons, "monthly": res.monthly,
-            "grid": grid, "pace_2026_kmo": mc, "params": params}
+            "grid": grid, "pace_2026_kmo": mc, "active_migration": active_migration,
+            "ustar_basis": inp["scenario"].get("ustar_basis", "noncyclical"),
+            "params": params}
 
 
 def _anchor_rows(qp: pd.Series) -> tuple[list, list]:
@@ -174,15 +183,21 @@ def run(ctx, progress_callback) -> dict:
         tables.append(make_table("Signal vs Noise (band vs measurement error)",
                                  ["Quantity", "Value", "Units"], snr_rows))
 
-        # Summary.
-        be26 = float(grid.loc[grid["preset"] == "Brookings_mid", "breakeven_kmo"].iloc[0]) \
-            if (grid["preset"] == "Brookings_mid").any() else float("nan")
+        # Summary. The "2026 breakeven" is the ACTIVE path's own 2026 average
+        # (it reflects the user's net-migration knob), NOT the fixed grid
+        # reference cell.
+        active_migration = out["active_migration"]
+        be26 = float(qp[qp.index.year == 2026].mean()) / 1000.0 if (qp.index.year == 2026).any() \
+            else float("nan")
+        is_default = abs(active_migration - (-370000.0)) < 1.0
+        scen_desc = ("Fed default: Brookings-mid -370,000" if is_default
+                     else f"user net migration: {active_migration:,.0f}")
         summary = (
             f"Breakeven payrolls reconstructed from the workbook ({len(qp)} quarters, "
             f"{qp.index.min()}..{qp.index.max()}). 2026 block projected at "
-            f"{out['pace_2026_kmo']:.1f}k/mo (Fed-default Brookings-mid). "
-            f"2026 breakeven ~ {be26:.1f}k/mo. Scenario grid spans "
-            f"{grid['breakeven_kmo'].min():.1f}..{grid['breakeven_kmo'].max():.1f} k/mo."
+            f"{out['pace_2026_kmo']:.1f}k/mo ({scen_desc}; u* basis {out['ustar_basis']}). "
+            f"2026 breakeven ~ {be26:.1f}k/mo. Reference scenario grid (vs the Fed-reconciled "
+            f"baseline) spans {grid['breakeven_kmo'].min():.1f}..{grid['breakeven_kmo'].max():.1f} k/mo."
         )
 
         return make_response(
@@ -191,8 +206,11 @@ def run(ctx, progress_callback) -> dict:
                 "n_quarters": int(len(qp)),
                 "path_start": str(qp.index.min()),
                 "path_end": str(qp.index.max()),
+                "active_net_migration": active_migration,
                 "pace_2026_kmo": round(float(out["pace_2026_kmo"]), 3),
-                "active_scenario": out["params"]["scenarios"]["active_2026"],
+                "breakeven_2026_kmo": round(be26, 2),
+                "ustar_basis": out["ustar_basis"],
+                "grid_reference_scenario": out["params"]["scenarios"]["active_2026"],
             },
             charting_suggestions=(
                 "Line chart of Breakeven (jobs/mo) by Quarter, 2026 dashed (FORECAST). "
