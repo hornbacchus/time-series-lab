@@ -38967,6 +38967,76 @@ refinement queue consolidate for Q2 planning. The trust inventory now
 has §2.5 validation entries for all catalog techniques (§3 unvalidated
 = 0).
 
+### breakeven_payroll (Bespoke port; parity wrapper p3_breakeven_payroll; CROSS-SOURCE REPRODUCTION — first instance)
+
+**Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
+II.bit-exact (effective) — closed-form deterministic reproduction of an
+authoritative external implementation at near-float precision. Added
+post-S85-Q1-CLOSE as a new Bespoke technique (the 2nd Bespoke member,
+after bond_yield_forecast); ported from the standalone Breakeven Payrolls
+research repo and validated against ITS reconciled output.
+
+- **Catalog ID:** `breakeven_payroll` (alias `breakeven`)
+- **Excel access:** Bespoke ribbon → Breakeven Payrolls (workbook-input; NOT a
+  `TSL_RUN_THR` cell-selection technique)
+- **verdict_class:** `closed_form`
+- **Validation pattern (NEW — cross-source reproduction):** no external
+  library implements this analysis, so the reference is the **authoritative
+  source repo's own frozen reconciled fixture** (`tests/fixtures/
+  fed_reference_path.csv` @ commit `826d1d0`). This is the analogue of the
+  cross-package R checks — the independent implementation is the original
+  standalone repo (the published methodology), and the TSL workbook-read port
+  must reproduce its reconciled path. The breakeven math (population
+  diff-splice + exact product-rule labor-force decomposition + the identity
+  `be = Δlf·(1−u*)` + 5-quarter centered MA) and the migration-scenario grid
+  are closed-form arithmetic over frozen conventions.
+
+**Reference:** Breakeven Payrolls repo @ `826d1d0` — reconciled
+`fed_reference_path.csv` (path) + source `sensitivity_grid` (scenario grid)
+**Verdict:** PASS — cross-source reproduction at near-float precision
+**Audit date:** 2026-06-05 (Bespoke-port S3)
+
+**Achieved parity (measured):**
+- TIGHT full-path: TSL workbook path vs `fed_reference_path.csv`, **max abs
+  diff 0.19 jobs/mo** over the 260-quarter MA-stable region (1962Q1→2026Q4);
+  the 1960Q1-1961Q1 13-month-MA truncation edge is excluded (the template
+  bakes HPLFS from 1960; no reconciliation anchor falls there).
+- TIGHT scenario grid: **0.0** vs the source `sensitivity_grid`
+  (Brookings-mid/Fed 7.2386 k/mo, MS-house 50.6638 k/mo).
+- LOOSE anchor overlay: all 6 reconciliation anchors PASS the repo round
+  targets (avg_1970s 189,377; avg_2010s 74,862; pt_late_2020 47,734;
+  avg_2023_24 152,835; avg_2025 87,095; avg_2026 7,239).
+
+**Discrimination (verified — a GREEN pass is meaningful):** the check BLOCKs on
+a deliberately-broken build — dropping the May-2025 (HPLFS-handoff) CNP16OV
+diff-splice anchor → path **7,960 jobs/mo** off; a +0.10pp CBO u* perturbation →
+**211 jobs/mo** off.
+
+**Source files:** `tools/reference_parity/harness/checks/p3_breakeven_payroll.py`
+(verdict_class + the tight-path/tight-grid/loose-anchor compare); tolerances
+entry `p3_breakeven_payroll` in `tools/reference_parity/harness/tolerances.py`;
+fixture `tools/reference_parity/fixtures/breakeven_payroll_input_v2026-06-03.xlsx`
+(pinned, vintage `realtime_end` 2026-05-30); engine
+`engine/techniques/breakeven_payroll/` (ported math + `workbook_input.py` reader
++ `_dispatch.py`); references `engine/techniques/breakeven_payroll/resources/`
+(fed_reference_path.csv, scenario_grid_reference.csv, fed_reference_targets.yaml).
+
+**Validation claim scope + caveats:**
+- Parity validates ONLY the **reconciled replication** — that the TSL
+  workbook-read port reproduces the source repo's reconciled historical path +
+  scenario grid on the pinned 2026-06-03 vintage. The projected→realized
+  2026 evolution (as new data arrives) has **NO benchmark** — validated by
+  construction/sanity, not against a reference.
+- The scenario-grid scalars (u* 0.044/0.0456, LFPR26 62.3954, census base
+  320k/pace 90) are the source's **frozen literals** (D1 ruling), not
+  recomputed from the workbook's CBO tabs; the historical path's u*/LFPR ARE
+  CBO-quarterly-derived (data-derived in both repos).
+- **Contract rule (user-updatable model):** the CNP16OV append segment must
+  retain its **handoff-month anchor** (the value at the last HPLFS month, the
+  diff-splice base for the first bridge increment); without it the first
+  increment is dropped (avg_2025 85,718 vs 87,095). The pinned fixture +
+  shipped template carry the May-2025 anchor.
+
 ## §3 Unvalidated catalog techniques (0 entries — ALL catalog techniques §2.5-validated as of S85 Q1 CLOSE; ID-only enumeration; §3 header restored at SC3 commit after accidental deletion at SC2 commit aaf5cf1; institutional cleanliness regression rectified at this commit)
 
 **Status framing for ALL entries below:** available via
