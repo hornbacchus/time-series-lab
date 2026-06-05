@@ -271,6 +271,9 @@ namespace TSL.AddIn
                     // next user). The bundled file is only ever a File.Copy source.
                     var workingPath = CreateTemplateWorkingCopy(templatePath, "BondYield_input");
                     app.Workbooks.Open(workingPath, ReadOnly: false);
+                    // Opening the workbook resets the ribbon to Home; restore the
+                    // Time Series Lab tab so the user stays on it.
+                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
                 });
             }
             catch (Exception ex)
@@ -359,6 +362,9 @@ namespace TSL.AddIn
                     // the shipped default). The bundled file is only a File.Copy source.
                     var workingPath = CreateTemplateWorkingCopy(templatePath, "Breakeven_Payrolls_input");
                     app.Workbooks.Open(workingPath, ReadOnly: false);
+                    // Opening the workbook resets the ribbon to Home; restore the
+                    // Time Series Lab tab so the user stays on it.
+                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
                 });
             }
             catch (Exception ex)
@@ -811,6 +817,11 @@ namespace TSL.AddIn
                     // Auto-fit columns
                     ws.Columns.AutoFit();
                     ws.Activate();
+
+                    // Activating a workbook/sheet resets the ribbon to the Home
+                    // tab; restore focus to the Time Series Lab tab so the user
+                    // stays where they were.
+                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
                 });
             }
             catch (Exception ex)
