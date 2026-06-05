@@ -2038,6 +2038,46 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_adf_triage": {
+        "type": "tiered_outputs",
+        # COMPONENT arms: ADF/KPSS validated cross-package vs urca at the
+        # engine's REALIZED triage lag (statsmodels AIC autolag / KPSS
+        # nlags="auto"). Bit-exact bands reuse the p3_adf / p3_kpss
+        # closed_form bands (1e-6 abs / 1e-4 rel; 1e-3 block) — the
+        # statistic agrees at machine precision GIVEN the matched lag
+        # (the library lag-selection rule is a trusted primitive, not
+        # re-validated; disclosed in the §2.5 entry).
+        "adf_component": {
+            "abs_tol": 1e-6, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3, "block_rel_tol": 1e-2,
+        },
+        "kpss_component": {
+            "abs_tol": 1e-6, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3, "block_rel_tol": 1e-2,
+        },
+        # PP arm: Pattern-J band (reuses p3_pp). Kernel/divisor convention
+        # divergence + triage auto-bandwidth Schwert(2/9) + runtime
+        # backend dispatch. PP bounds only the CONFLICTING tie-breaker
+        # text, NOT the verdict.
+        "pp_component": {
+            "abs_tol": 1e-3, "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1, "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "Scope-extension PILOT for the adf_test joint ADF/KPSS/PP "
+            "triage verdict (ribbon default), additive over p3_adf. "
+            "COMPONENT arms: ADF vs urca::ur.df and KPSS vs urca::ur.kpss "
+            "at the engine's realized auto-selected lag — closed_form "
+            "bit-exact bands (reuse p3_adf/p3_kpss); PP vs urca::ur.pp at "
+            "Pattern-J widening (reuse p3_pp). ORCHESTRATION arms (the 2x2 "
+            "rule test + integration cells) are boolean label-equality "
+            "checks gated PASS/BLOCK in compare(), not numeric-tolerance "
+            "comparisons, so they need no band here; their discrimination "
+            "is the load-bearing negative-control mutant assertion. Master "
+            "plan §7.1; Phase 7+ scope-extension §5.1 two-arm."
+        ),
+    },
+
     "p3_bocpd": {
         "type": "tiered_outputs",
         "primary": {
