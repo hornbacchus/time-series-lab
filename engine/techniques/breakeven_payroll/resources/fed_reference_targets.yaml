@@ -1,0 +1,23 @@
+contract_version: "phase1-v1"
+validated_against: "Murray & Vidangos, FEDS Notes 2026-04-02"
+
+# Finalized FROZEN stitching convention (mirrors conventions.FROZEN_STITCH).
+stitch:
+  qm_method: linear
+  qm_anchor: quarter_mid
+  mq_agg: mean
+  monthly_ma: 13
+  quarterly_ma: 5
+  center: true
+  quarterly_ma_endpoint: raw
+
+# References in persons/month. abs_tol provisional (decade +/-10-15k; 2026 < 10k).
+targets:
+  decade_averages:
+    - {id: avg_1970s, window: ["1970-Q1", "1979-Q4"], reference: 185000, abs_tol: 15000}
+    - {id: avg_2010s, window: ["2010-Q1", "2019-Q4"], reference: 80000,  abs_tol: 12000}
+  points:
+    - {id: avg_2023_24,  window: ["2023-Q1", "2024-Q4"], reference: 155000, abs_tol: 12000}
+    - {id: avg_2025,     window: ["2025-Q1", "2025-Q4"], reference: 85000,  abs_tol: 12000}
+    - {id: pt_late_2020, period: "2020-Q4",              reference: 50000,  abs_tol: 15000}
+    - {id: avg_2026,     window: ["2026-Q1", "2026-Q4"], reference: 7400,   abs_tol: 10000}  # full-year avg; < 10k gate
