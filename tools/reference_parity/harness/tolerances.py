@@ -499,6 +499,40 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         },
     },
 
+    # Phase 7+ bond_yield_forecast COMMISSION, Arm 1 — BVAR-SV per-equation
+    # SV-layer cross-package vs R stochvol. Same three-outcome disposition as
+    # the 2b/2c sv-entries (mu/phi relative bands, h Pearson correlation; sigma
+    # record-only). Matched mu prior (priormu=c(mu_OLS_i,1)) makes mu comparable.
+    "p3_byf_sv_crosspkg": {
+        "type": "three_outcome",
+        # GATED metrics: the robust SV-DYNAMICS agreement.
+        "h_corr": {"PASS": 0.95, "CAVEAT": 0.85},   # latent log-vol path corr
+        "phi": {"PASS": 0.10, "CAVEAT": 0.20},      # persistence (weak-id-tolerant)
+        # RECORD-ONLY (disclosed, NOT gated): mu + sigma — see justification.
+        "mu": {"PASS": 0.05, "CAVEAT": 0.10},       # reported only
+        "justification": (
+            "Bond-yield BVAR-SV per-equation SV vs R stochvol::svsample on the "
+            "engine's orthogonalized residuals. ★ This is a JOINT BVAR-SV "
+            "validated against UNIVARIATE stochvol fit to the posterior-median "
+            "orthogonalized residual — a different estimand than the 2b/2c "
+            "standalone-univariate sv-entries, so the disposition differs and "
+            "is HONESTLY looser. GATED: the latent log-vol PATH Pearson "
+            "correlation (PASS 0.95 / CAVEAT 0.85 — the robust SV-dynamics "
+            "metric) + phi persistence (PASS 0.10 / CAVEAT 0.20 — weak-id-"
+            "tolerant: low-persistence-prior macro vol is weakly identified, "
+            "and the strong h-correlation confirms the dynamics agree despite "
+            "phi point noise). RECORD-ONLY (measured + disclosed, NOT gated): "
+            "mu (unconditional log-vol mean) and sigma (vol-of-vol) — the "
+            "engine's mu/sigma are joint-posterior estimands over all (B,A,h) "
+            "draws while stochvol fits the FIXED median residual, so these "
+            "level/scale params are not apples-to-apples (engine validation.py "
+            "documents the same: 'expect mu disagreement to reflect prior/"
+            "structural differences, not sampler bugs'). Measured: mu rel "
+            "0.32-0.69, sigma rel 0.46-0.72 — disclosed, NOT widened to mask. "
+            "Master plan §7.1 mcmc class; honest CAVEAT-tier cross-package."
+        ),
+    },
+
     # Phase 2 Session 4 — 2c Student-t SV parity. Same as 2b
     # plus nu (degrees of freedom) parity.
     "2c_mcmc_sv_student_t": {
