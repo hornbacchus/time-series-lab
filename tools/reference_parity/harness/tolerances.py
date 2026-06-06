@@ -2017,6 +2017,30 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_kpss_trend": {
+        "type": "tiered_outputs",
+        # Scope-extension UNIT 2: kpss_test TREND spec (reg=ct), additive
+        # over p3_kpss (reg=c). Same closed-form KPSS eta statistic with a
+        # linear detrend -> urca::ur.kpss type="tau". Reuses the p3_kpss
+        # bit-exact band for both arms (reg=ct at the engine's realized
+        # auto bandwidth + at pinned LAG=5). B.i pure parameter-coverage:
+        # no orchestration arm (the decision is a single threshold).
+        "primary": {
+            "abs_tol": 1e-6, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3, "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "KPSS trend-spec (reg=ct) eta statistic is the same closed-form "
+            "ratio as the level spec, with a linear detrend; statsmodels.kpss "
+            "and urca::ur.kpss type='tau' compute the identical statistic "
+            "given identical bandwidth. Validated at the engine's realized "
+            "auto bandwidth (library-selected, read back) and at pinned "
+            "LAG=5; 1e-6 abs floor for subprocess CSV roundtrip noise — same "
+            "closed_form band as p3_kpss. Master plan §7.1 closed-form class; "
+            "Phase 7+ scope-extension B.i (component cross-package extension)."
+        ),
+    },
+
     "p3_pp": {
         "type": "tiered_outputs",
         "primary": {
