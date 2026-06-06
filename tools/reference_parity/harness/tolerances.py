@@ -2770,6 +2770,37 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_ccf_family": {
+        "type": "tiered_outputs",
+        # Scope-extension UNIT 3: validates the ENGINE custom-numpy CCF
+        # (cross_correlation_lag / prewhitened / rolling) vs R stats::ccf —
+        # additive over p3_ccf (which validates statsmodels, NOT the engine).
+        # ccf_vector: engine emitted CCF table is 6-dp rounded, so bit-exact
+        # is bounded by the emitted precision (~5e-7); abs 1e-6 / block 1e-4.
+        "ccf_vector": {
+            "abs_tol": 1e-6, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-2,
+        },
+        # reduction: rolling per-window CCF comes from the 4-dp heatmap; the
+        # rolling@first-window vs static-on-same-slice consistency is bounded
+        # by that precision; abs 2e-4 / block 1e-3.
+        "reduction": {
+            "abs_tol": 2e-4, "rel_tol": 1e-2,
+            "block_abs_tol": 1e-3, "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "Engine CCF is closed-form Pearson cross-correlation. The "
+            "cross_correlation arm validates the engine's emitted CCF vector "
+            "vs R stats::ccf at the emitted 6-dp precision (sign-flip lag "
+            "alignment); 5e-7 measured. The reduction arm checks rolling's "
+            "INDEPENDENT windowing CCF (4-dp heatmap) against the static "
+            "engine CCF on the same slice. The whiteness, optimal-lag, and "
+            "discrimination sub-arms are PASS/BLOCK gates (Ljung-Box min-p vs "
+            "0.05; argmax equality), not numeric bands. Phase 7+ "
+            "scope-extension B.i + defining-invariant (third case)."
+        ),
+    },
+
     "p3_gcc_phat": {
         "type": "tiered_outputs",
         "primary": {
