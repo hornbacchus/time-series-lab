@@ -2834,6 +2834,29 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_dtw_crosspkg": {
+        "type": "tiered_outputs",
+        # Scope-extension UNIT 5: ENGINE-invoked DTW distance vs the
+        # independent dtaidistance library (the FIRST engine-in-the-loop
+        # cross-package distance evidence; corrects the prior degenerate/
+        # superseded "cross-package Layer 1" claim). The engine emits the
+        # distance at 4-dp, so the match is bounded by that precision;
+        # measured 3.87e-05. abs 1e-4 / block 1e-2 per the 4-dp granularity.
+        "primary": {
+            "abs_tol": 1e-4, "rel_tol": 1e-3,
+            "block_abs_tol": 1e-2, "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "Engine hand-rolled _dtw (squared-euclidean cost + min(diag,ins,"
+            "del) + sqrt + Sakoe-Chiba window) == dtaidistance standard DTW "
+            "given matched z-normalization + window; measured bit-exact at the "
+            "engine's 4-dp emitted precision (3.87e-05). The z-norm negative "
+            "control (raw series) diverges by 1.18 (discrimination, gated in "
+            "compare). Phase 7+ scope-extension B.i; third case rejected "
+            "(denton boundary — full cross-package reference covers the path)."
+        ),
+    },
+
     "p3_transfer_function": {
         "type": "tiered_outputs",
         "primary": {
