@@ -2909,6 +2909,34 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_denton_chowlin_methods": {
+        "type": "tiered_outputs",
+        # Scope-extension UNIT 4: ENGINE-invoked per-method validation
+        # (Denton + Chow-Lin) vs tempdisagg, additive over p3_denton_chowlin
+        # (which mirrors only Denton, never invokes the engine). Both arms
+        # measured bit-exact at the engine's 6-dp emitted precision (Denton
+        # 6.8e-07; Chow-Lin chow-lin-fixed at pinned rho + matched design
+        # 5.0e-07 — the 1/(1-rho^2) AR(1) scaling cancels in the BLUE
+        # distribution). abs 1e-6 / block 1e-4 per the 6-dp granularity.
+        "denton": {
+            "abs_tol": 1e-6, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-2,
+        },
+        "chowlin": {
+            "abs_tol": 1e-6, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-2,
+        },
+        "justification": (
+            "Engine Denton (denton-cholette) and Chow-Lin (chow-lin-fixed at "
+            "a pinned rho, [intercept+trend+indicator] design, conversion=sum) "
+            "match tempdisagg::td bit-exact at the 6-dp emitted precision "
+            "(measured 6.8e-07 / 5.0e-07). The rho-auto grid-vs-continuous "
+            "divergence is a measured DISCLOSURE (not gated); adding-up is "
+            "structurally guaranteed (tautological, no arm — the cross-package "
+            "carries the discrimination). Phase 7+ scope-extension pure-B.i."
+        ),
+    },
+
     "p3_loess": {
         "type": "tiered_outputs",
         "primary": {
