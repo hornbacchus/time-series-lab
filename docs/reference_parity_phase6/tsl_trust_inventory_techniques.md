@@ -2030,6 +2030,21 @@ coverage. Pre-rewrite framing preserved above for institutional
 audit-trail granularity; post-rewrite parity scope reflects
 corrected harness + engine code path exercise.
 
+**Phase 7+ scope-extension update (UNIT 5, FINAL T1-core; harness Commit `78da125` `audit: dtw cross-package distance scope-extension check (p3_dtw_crosspkg)`; trust-inventory amendment this commit).**
+
+★ **OVERSTATEMENT CORRECTION — the old record was WRONG; this corrects it, it does not merely extend it.** The line-1480 verdict ("II.bit-exact — cross-package bit-exact parity validated (Pattern A cross-package per p3_dtw audit)") implies the engine's DTW distance is cross-package-validated. It is NOT, and was never:
+1. **Pre-rewrite**, `p3_dtw` compared a **harness** `_dtw_distance` vs `dtaidistance.dtw.distance` with the **ENGINE BYPASSED** entirely — degenerate self-parity (the harness was checked against dtaidistance; the engine's `_dtw` was not in the loop).
+2. **The SC8 rewrite** put the engine in the loop (RunContext) but **SWAPPED dtaidistance for a from-scratch self-reimplementation** mirroring the engine pipeline verbatim — to cover Layer 2 + Layer 3. So post-rewrite, the engine's DTW distance has been validated by **SELF-PARITY ONLY**.
+3. **Therefore the recorded "Pattern A cross-package bit-exact Layer 1" verdict was degenerate (engine-bypassed) and then superseded** — at no point was the engine's DTW distance validated against an independent library *with the engine in the loop*. The "post-rewrite Layer 1+2+3 parity" above is **self-parity**, not cross-package; stated plainly here.
+
+`p3_dtw_crosspkg` provides the **FIRST engine-in-the-loop cross-package distance evidence**: engine `dtw_alignment_lag.run()` (RunContext, Balanced) vs INLINE `dtaidistance.dtw.distance` on the engine's z-normalized series at the matched Sakoe-Chiba window. Measured **bit-exact 3.87e-05** at the engine's 4-dp emitted precision (window 19/20/21 all identical — the band does not bind; the step-pattern/window convention did not diverge). The z-norm negative control (raw series) diverges by **1.18** → discriminates. `p3_dtw` is left UNCHANGED (byte-identical, PASS) — its self-reimpl legitimately covers the engine-specific lag/warp downstream.
+
+Per-sub-surface R1 tiering (honest — corrects the overstatement):
+- DTW **distance** = **bit-exact cross-package vs dtaidistance, ENGINE-INVOKED | z-norm + Sakoe-Chiba window matched, disclosed** (3.87e-05 at 4-dp). FIRST engine-in-the-loop cross-package evidence; prior claim corrected.
+- lag/warp **downstream** stats (x_to_y averaging + carry-forward + segmentation) = **self-parity** (the unchanged `p3_dtw` reimpl; legitimate engine-specific downstream) — NOT cross-package; do not overstate.
+
+**Class-B verdict: pure-B.i** — the DTW distance is a single cross-package primitive; the lag is argmin-over-warp (trivial). **Third case REJECTED again on the denton boundary:** the distance has a full cross-package reference (dtaidistance) → the cross-package carries the discrimination; no defining-invariant arm (warp-path monotonicity/boundary is structural-by-construction, tautological — denton-style). **Taxonomy anchors now: ccf = third-case-applies** (no cross-package ref for the prewhitening filter → whiteness invariant was the sole discrimination); **denton + dtw = third-case-rejected** (a full reference covers the path). The boundary held twice.
+
 ### gcc_phat_delay (Phase 7+ S18; sixth §2.5 entry; FIRST Tier IV Q1 entry; FIRST Pattern A.3 self-parity Q1 entry; completes Block 1 Causality; THREE-LAYER DOWNSTREAM-TOPOLOGY framing per S15/S17 precedent + Tier IV adaptation per S18 STOP 2 empirical investigation + β disposition)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** Tier
