@@ -533,6 +533,41 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Phase 7+ bond_yield COMMISSION, Arm 2 — VAR-coefficient conjugate
+    # Minnesota machinery, cross-LANGUAGE/cross-METHOD (Route B; R BVAR
+    # infeasible). Two deterministic bit-exact arms.
+    "p3_byf_coef_crosspkg": {
+        "type": "tiered_outputs",
+        # CONJUGATE POSTERIOR: engine normal-equations (numpy LAPACK) vs R
+        # LAPACK augmented pseudo-observation OLS (QR). Two numerical routes
+        # to the same closed-form posterior; bit-exact modulo the diffuse-
+        # intercept conditioning (V_inv has a tiny intercept-precision entry,
+        # large condition number) + CSV roundtrip.
+        "posterior": {
+            "abs_tol": 1e-6, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-3, "block_rel_tol": 1e-2,
+        },
+        # PRIOR vs documented Litterman/Sims-Zha formula (own λ1/l^λ3; cross
+        # λ1·λ2·σ_i/(l^λ3·σ_j); intercept (λ4·σ)²) — both closed-form, bit-exact.
+        "prior": {
+            "abs_tol": 1e-9, "rel_tol": 1e-9,
+            "block_abs_tol": 1e-6, "block_rel_tol": 1e-6,
+        },
+        "justification": (
+            "Homoskedastic conjugate Minnesota posterior is closed-form. "
+            "Route B (R BVAR infeasible — hierarchical MH cannot pin to the "
+            "engine's fixed flat conjugate; R bvars unavailable): the conjugate "
+            "posterior is validated CROSS-LANGUAGE/CROSS-METHOD — engine "
+            "normal-equations (numpy LAPACK) vs R LAPACK augmented pseudo-"
+            "observation OLS (QR) — bit-exact (abs 1e-6 cushions the diffuse-"
+            "intercept conditioning + CSV roundtrip); the prior moments are "
+            "validated against the documented Litterman/Sims-Zha formula "
+            "(bit-exact, both closed-form). NOT a different-package validation; "
+            "labelled cross-language/cross-method honestly. Master plan §7.1 "
+            "closed_form class."
+        ),
+    },
+
     # Phase 2 Session 4 — 2c Student-t SV parity. Same as 2b
     # plus nu (degrees of freedom) parity.
     "2c_mcmc_sv_student_t": {
