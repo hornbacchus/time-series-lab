@@ -568,6 +568,31 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Phase 7+ bond_yield COMMISSION, Arm 3 — emitted yield paths. NO
+    # independent reference exists (R bvars unavailable; standalone repo
+    # same-lineage/retired) -> verified defining invariant + honest disclosure.
+    "p3_byf_paths": {
+        "type": "tiered_outputs",
+        # Load-bearing: strict-mode conditioning pins the conditioned macros
+        # EXACTLY (macro_t = projection_t.copy()).
+        "conditioning_strict": {"abs_tol": 1e-10},
+        # In-harness negative control: soft mode must diverge well above the
+        # strict pin (macros scatter with proj_unc std 0.5).
+        "conditioning_soft_control": {"min_divergence": 1e-3},
+        # PCA reconstruction identity yield_paths == pc_paths@loadings.T+mean.
+        "pca_reconstruction": {"abs_tol": 1e-10},
+        "justification": (
+            "Emitted yield paths have NO independent cross-package/cross-source "
+            "reference. Verified defining invariant: strict conditioning pins "
+            "the conditioned macros < 1e-10 (machine precision; deterministic "
+            "macro_t = projection_t.copy()); the soft-mode negative control "
+            "(unpinned, proj_unc 0.5) must diverge > 1e-3 in-harness -> the "
+            "invariant is verified-discriminating. PCA reconstruction is a "
+            "deterministic identity (< 1e-10). The third-case pattern on a "
+            "sub-surface with no reference; NOT cross-package. Master plan §7.1."
+        ),
+    },
+
     # Phase 2 Session 4 — 2c Student-t SV parity. Same as 2b
     # plus nu (degrees of freedom) parity.
     "2c_mcmc_sv_student_t": {
