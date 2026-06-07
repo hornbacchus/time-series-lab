@@ -593,6 +593,45 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Phase 7+ — var/vecm engine-invocation cross-package upgrades. Engine
+    # output is 6-dp rounded (B8 floor); the reference is rounded to match.
+    "p3_var_crosspkg": {
+        "type": "tiered_outputs",
+        # Engine-invoked VAR coefs/intercept/forecast vs R vars::VAR. Both
+        # exact OLS -> agree at machine precision pre-rounding; 6-dp rounding
+        # gives ~1e-6 residual. Wrapper-validated (modest tier).
+        "primary": {"abs_tol": 5e-6, "rel_tol": 1e-4,
+                    "block_abs_tol": 1e-3, "block_rel_tol": 1e-2},
+        "justification": (
+            "VAR(p) is closed-form OLS; engine (statsmodels wrapper) vs R "
+            "vars::VAR. ENGINE-INVOKED to validate the wrapper plumbing "
+            "(lag/trend/extraction); the estimator agreement is structural. "
+            "6-dp engine rounding -> abs 5e-6. Cross-package OLS, engine-"
+            "wrapper-validated (modest). Master plan §7.1 closed_form."
+        ),
+    },
+
+    # Phase 7+ — vecm engine-invocation cross-package (genuine: independent
+    # Johansen, rank + Phillips-normalized beta/alpha). Band set after measuring.
+    "p3_vecm_crosspkg": {
+        "type": "tiered_outputs",
+        # Measured: beta 9.99e-16, alpha 2.78e-13 (independent Johansen,
+        # machine-precision agreement). Band tightened to the measured
+        # precision (honest; a loose band would understate the evidence + miss
+        # regressions), with margin for cross-platform R variation.
+        "primary": {"abs_tol": 1e-9, "rel_tol": 1e-6,
+                    "block_abs_tol": 1e-7, "block_rel_tol": 1e-5},
+        "justification": (
+            "VECM Johansen is a generalized-eigenvalue / reduced-rank problem; "
+            "statsmodels VECM (engine) vs R urca::ca.jo are INDEPENDENT "
+            "implementations -> genuine cross-package (non-tautological). Rank "
+            "exact-match; beta/alpha at first-element normalization + alpha "
+            "sign-align. MEASURED machine-precision (beta 9.99e-16, alpha "
+            "2.78e-13); band set to that precision with cross-platform margin. "
+            "Master plan §7.1 single_impl_mle."
+        ),
+    },
+
     # Phase 7+ — fft_spectrum record-correction: engine FFT dominant frequency
     # vs the analytic truth of a known multi-tone (external authority), with a
     # white-noise negative control. Replaces the same-backend scipy-vs-numpy.
