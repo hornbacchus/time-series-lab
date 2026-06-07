@@ -593,6 +593,30 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Phase 7+ — fft_spectrum record-correction: engine FFT dominant frequency
+    # vs the analytic truth of a known multi-tone (external authority), with a
+    # white-noise negative control. Replaces the same-backend scipy-vs-numpy.
+    "p3_fft_analytic": {
+        "type": "tiered_outputs",
+        # dominant_frequency == the dominant tone's exact DFT bin.
+        "dominant_freq": {"abs_tol": 1e-6},
+        # tone present in the peak table within ~1 frequency-resolution bin.
+        "tone_match": {"tol": 3.0 / 512.0},
+        # discrimination: the tone concentrates power (>=50%); white noise does
+        # NOT (<=15%). Measured: tone 79.91% vs noise 1.99%.
+        "discrimination": {"tone_min_pct": 50.0, "noise_max_pct": 15.0},
+        "justification": (
+            "FFT of a known multi-tone signal has an analytic spectrum: the "
+            "dominant frequency is the larger-amplitude tone's bin exactly "
+            "(abs 1e-6). Both known tones must appear in the peak table within "
+            "~1 frequency-resolution bin. The white-noise negative control "
+            "discriminates: a pure tone concentrates >=50% of power in its top "
+            "peak (measured 79.91%), white noise <=15% (measured 1.99%). "
+            "External-authority closed-form-of-known-process; engine-invoked. "
+            "NOT same-backend FFT-vs-FFT. Master plan §7.1 closed_form."
+        ),
+    },
+
     # Phase 2 Session 4 — 2c Student-t SV parity. Same as 2b
     # plus nu (degrees of freedom) parity.
     "2c_mcmc_sv_student_t": {
