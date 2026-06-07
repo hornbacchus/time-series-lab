@@ -23832,6 +23832,8 @@ framing institutionalized at S60 as first application post-hygiene-
 ratification; subsequent Category 2 DEGENERATE-COHERENT §2.5 entries
 inherit this framing.
 
+**Phase 7+ record-correction (FUND-NOW exposure-overlay; harness Commit `1ab1018`).** The overlay flagged forecast_combination as a "FUND-NOW cross-package win (R forecastHybrid)" — ★ **forecastHybrid is an INFEASIBLE reference** (the bond_yield-R-BVAR pinned-but-infeasible pattern). R forecastHybrid combines **6 components** (auto.arima + state-space `ets()` + thetam + nnetar + stlm + tbats); the engine combines **3** (pmdarima ARIMA + classical **Holt-Winters** ETS + statsmodels Theta). Different component SET + classical-vs-state-space ETS + different ARIMA engine → the combined forecast cannot match (the COMPONENTS differ; a weighting-only comparison validates nothing when the inputs differ → **NOT built**, a fake arm avoided). The existing self-parity `p3_forecast_combination` is honest and stays byte-identical. ★ **Cross-reference the banked B1 finding:** the engine's classical Holt-Winters ETS component is the **same classical→state-space divergence** banked at ets_hw — the forecastHybrid-infeasibility and B1 are the same underlying issue surfacing in two places; B1 stays banked (§5.7), NOT fixed here.
+
 ### block_bootstrap (Phase 7+ S61; THIRTY-FIFTH §2.5 entry; FOURTH Evaluation / Uncertainty block entry; SECOND application of §4.7.A Sub-variant 3.D DEGENERATE DUAL-ARM framing at Category 2 DEGENERATE-COHERENT scope per Option (i) LEAN policy — pattern empirically established across two instances at S61 close per S60 forecast_combination first-application precedent)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
@@ -30699,6 +30701,8 @@ sharpest: set-identified + self-parity-only). Reuses M3a's scheme selector
   `p3_var_proxy_svar`) PASS unchanged. Wrapper-3/3 PASS (NaN; dispatch; set
   tables + diagnostics).
 
+**Phase 7+ record-correction (FUND-NOW exposure-overlay; harness Commit `1ab1018`).** The overlay flagged var as a "FUND-NOW cross-package cheap win (yes-unused R vars)" — a MIS-READ. `p3_var` already calls R `vars::VAR`, but `run_tsl` invokes **statsmodels VAR directly** (engine bypassed), and for exact-OLS VAR coefficients statsmodels≡R-vars is **structurally tautological** (same-estimator-class). New additive check **`p3_var_crosspkg`** closes the engine-invocation gap: ENGINE-INVOKED (`var_model.py` via RunContext — the published path) vs R `vars::VAR` at matched params (lag=2, trend=const) → coefs/intercept/forecast **all 0.0** (engine 6-dp == R rounded). ★ Honest **MODEST tier: cross-package OLS, engine-WRAPPER-validated** — validates the engine PATH (lag/trend/extraction/emission), NOT the estimator (closed-form OLS agrees by construction). Distinct from the bond_yield BVAR work (standalone user-data VAR). `p3_var` byte-identical.
+
 ### ENG-EXT-MULTIVARIATE-001 EXTENDED — FULLY DELIVERED (SECOND A-commission COMPLETE)
 
 The commission (commissioned S64, extended S65) is **fully delivered**:
@@ -31232,6 +31236,8 @@ and R alternatives; (c) ENG-EXT scan: check whether engine DFM
 emits factor-scores time series + variance decomposition (analogous
 to PCA workflow elements present at S63). Estimated session time:
 ~1-1.5h.
+
+**Phase 7+ record-correction (FUND-NOW exposure-overlay; harness Commit `1ab1018`).** Like var, the overlay's "yes-unused R urca/vars" was a mis-read — `p3_vecm` already calls R urca but `run_tsl` is **statsmodels-direct** (engine bypassed). New additive check **`p3_vecm_crosspkg`** is ENGINE-INVOKED (`vecm_model.py` via RunContext) vs R `urca::ca.jo`+`cajorls` at matched rank=1, deterministic ci↔ecdet=const, first-element β normalization. ★ **GENUINE cross-package** (the strongest of the three FUND-NOW arms): VECM Johansen is a generalized-eigenvalue / reduced-rank problem, statsmodels VECM (engine) and R urca are **independent implementations** — non-tautological. Measured machine-precision: **rank 1==1, β 9.99e-16, α 2.78e-13** (band tightened to that precision). `p3_vecm` byte-identical.
 
 ### dynamic_factor_model (Phase 7+ S66; FIFTY-FIFTH §2.5 entry; FOURTH Multivariate Systems block entry; fourth dispatch-set entry in ascending-complexity ordering; **Tier II.em-band (1e-2 abs / 5e-2 rel) — em_stochastic verdict_class per master plan §7.1** reflecting EM convergence non-determinism between statsmodels DynamicFactor + R MARSS::MARSS independent EM implementations; **factor scale + sign canonicalization** applied identically on both arms via loadings[0]=1.0 anchor; **Cat 1d VSC=NO at multiple axes** — engine Balanced default (k_factors=2, factor_order=2, error_order=1, auto-transform, standardize, factor rescaling + sign flip) ≠ validated harness config (k_factors=1, factor_order=1, error_order=0, no transform, no standardize, no rescaling); **State Space backbone cross-reference** to S48-S51 validations; **ENG-EXT DFM workflow scan: 4 of 5 elements PRESENT** (factor-scores time series + variance decomposition + loadings interpretability + DFM forecasting) — engine covers rates-desk-standard workflow analogous to S63 PCA COVERED outcome)
 
