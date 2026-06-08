@@ -593,6 +593,23 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Satellite-ledger fix — VAR max_lag regression guard (catalog key fix
+    # max_lags->max_lag). Guards the ENGINE honors max_lag (param affects VAR
+    # order); NOT the catalog-fix validation (ribbon->engine = Matt-Excel).
+    "p3_var_max_lag": {
+        "type": "tiered_outputs",
+        "discrimination": {"min_order_cap8": 2},
+        "justification": (
+            "VAR order selection is deterministic IC-argmin over OLS fits up to "
+            "max_lag. On a VAR(1,3) DGP: cap=1 forces order 1; cap=8 lets IC "
+            "select >=2 (measured 3). The load-bearing guard is the "
+            "discrimination — the two caps give DIFFERENT orders; if the engine "
+            "dropped max_lag (the catalog-bug shape) both would collapse to the "
+            "same default order. Regression guard on the already-correct engine "
+            "read, NOT the catalog-fix validation. Master plan §7.1 closed_form."
+        ),
+    },
+
     # Phase 7+ engine-improvement #3 — VECM half_life_periods guard (S65).
     # Valid-range half-life vs the documented formula -ln(2)/ln(1+alpha[0,0])
     # at the engine's own fitted alpha -> bit-exact (same closed form). The

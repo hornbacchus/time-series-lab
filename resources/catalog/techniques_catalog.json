@@ -787,7 +787,7 @@
       ],
       "parameters": [
         {
-          "name": "max_lags",
+          "name": "max_lag",
           "label": "Max Lags",
           "type": "int",
           "default": 12,
