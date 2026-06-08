@@ -24,13 +24,16 @@ discrimination):
     1/(1-rho^2) AR(1) scaling cancels in the BLUE distribution L = V C'(CVC')^-1
     → measured bit-exact (5.0e-07).
 
-DISCLOSED (measured, not a pass/block arm): the engine's rho-AUTO path uses a
-20-point GRID maxlog; tempdisagg's chow-lin-maxlog uses CONTINUOUS optimization.
-Measured rho gap on the fixture ~0.14 (grid 0.42 vs continuous 0.28) — larger
-than the grid resolution (0.05), so the grid does not converge to the
-continuous optimum (auto-series differ ~0.13). Banked as a candidate
-engine-improvement (continuous rho optimization). The validated arm pins rho;
-the auto path is disclosed as a grid-approximation with the measured gap.
+★ rho-AUTO — now a GATED cross-package arm (UPGRADED post engine-improvement #1,
+the continuous-optimizer fix). Pre-fix the engine used a 20-point GRID over an
+UNPROFILED (sigma^2=1) objective whose argmax sat ~0.14 from tempdisagg's
+profiled-sigma^2 continuous chow-lin-maxlog (grid 0.42 vs continuous 0.28) — an
+OBJECTIVE mismatch, NOT grid coarseness (the grid already nearly converged to
+its own, wrong, optimum). Post-fix the engine optimizes the CONCENTRATED
+(profiled-sigma^2) likelihood continuously over rho in [0, 0.999] -> auto-rho
+reproduces tempdisagg (measured gap 1.3e-7) and the auto SERIES matches
+cross-package (~1e-6). The arm now GATES (was disclosure-only). The validated
+fixed-rho arm is unchanged (byte-identical 4.99e-07 — the regression sentinel).
 """
 
 from __future__ import annotations
@@ -137,20 +140,30 @@ class DentonChowLinMethodsParity(P3ParityCheck):
         _arm("denton", "denton")
         _arm("cl_fixed", "chowlin")
 
-        # rho-auto grid-vs-continuous gap: a MEASURED DISCLOSURE, not a gate.
+        # rho-auto CROSS-PACKAGE arm — UPGRADED from a disclosure to a GATED arm
+        # post engine-improvement #1 (the continuous-optimizer fix): the engine's
+        # auto-rho now reproduces tempdisagg chow-lin-maxlog AND the auto series
+        # matches cross-package. Gates the outcome.
+        auto_band = ladder["chowlin_auto"]
         rho_gap = abs(tsl["eng_rho_auto"] - ref["rho_continuous"])
         na = min(len(tsl["cl_auto"]), len(ref["cl_maxlog_series"]))
-        auto_series_gap = float(np.max(np.abs(
-            tsl["cl_auto"][:na] - ref["cl_maxlog_series"][:na])))
-        primary["rho_auto_disclosure"] = {
-            "status": "PASS",  # disclosure only — never gates
-            "engine_grid_rho": round(tsl["eng_rho_auto"], 4),
-            "tempdisagg_continuous_rho": round(ref["rho_continuous"], 4),
-            "rho_gap": round(rho_gap, 4),
-            "auto_series_max_diff": round(auto_series_gap, 6),
-            "note": ("engine 20-point grid maxlog vs tempdisagg continuous-ML; "
-                     "disclosed grid-approximation; banked engine-improvement"),
+        series_cmp = _compare_vector(
+            tsl["cl_auto"][:na], ref["cl_maxlog_series"][:na], auto_band)
+        rho_status = "PASS" if rho_gap < float(auto_band["rho_abs_tol"]) else "BLOCK"
+        arm_status = ("BLOCK" if "BLOCK" in (series_cmp["status"], rho_status)
+                      else ("CAVEAT" if "CAVEAT" in (series_cmp["status"], rho_status)
+                            else "PASS"))
+        primary["chowlin_auto"] = {
+            "status": arm_status,
+            "engine_auto_rho": round(tsl["eng_rho_auto"], 6),
+            "tempdisagg_continuous_rho": round(ref["rho_continuous"], 6),
+            "rho_gap": rho_gap, "rho_status": rho_status,
+            "series_status": series_cmp["status"],
+            "auto_series_max_abs_diff": series_cmp.get("max_abs_diff"),
+            "note": ("continuous-ML auto-rho cross-package vs tempdisagg "
+                     "chow-lin-maxlog (post grid->continuous engine fix #1)"),
         }
+        statuses.append(arm_status)
 
         any_block = any(s == "BLOCK" for s in statuses)
         any_caveat = any(s == "CAVEAT" for s in statuses)
@@ -164,7 +177,8 @@ class DentonChowLinMethodsParity(P3ParityCheck):
                 "n_low": _N_LOW, "ratio": _RATIO, "pinned_rho": _PIN_RHO,
                 "denton_max_abs_diff": primary["denton"].get("max_abs_diff"),
                 "chowlin_fixed_max_abs_diff": primary["cl_fixed"].get("max_abs_diff"),
-                "rho_auto_grid_vs_continuous_gap": round(rho_gap, 4),
+                "chowlin_auto_rho_gap": rho_gap,
+                "chowlin_auto_status": arm_status,
                 "adding_up": "structural by construction (tautological; no arm)",
             },
         )

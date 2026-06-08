@@ -3106,14 +3106,32 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "abs_tol": 1e-6, "rel_tol": 1e-4,
             "block_abs_tol": 1e-4, "block_rel_tol": 1e-2,
         },
+        # Chow-Lin rho-AUTO: post the continuous-optimizer engine fix
+        # (banked-ledger item #1), the engine's auto-rho now reproduces
+        # tempdisagg chow-lin-maxlog. Underlying rho match 1.3e-7; the ENGINE
+        # EMITS rho rounded to 4-dp (engine line 363) so the rho-arm gap is
+        # rounding-dominated (~1.1e-5, floor ~5e-5) -> rho_abs_tol 1e-4 (2x the
+        # 4-dp floor; catches the prior 0.14 grid-regression by >1000x). The
+        # SERIES arm carries the full-precision cross-package evidence (auto
+        # series vs tempdisagg cl_maxlog_series, measured 5.1e-07 at the 6-dp
+        # emitted precision).
+        "chowlin_auto": {
+            "abs_tol": 1e-5, "rel_tol": 1e-4,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-2,
+            "rho_abs_tol": 1e-4,
+        },
         "justification": (
             "Engine Denton (denton-cholette) and Chow-Lin (chow-lin-fixed at "
             "a pinned rho, [intercept+trend+indicator] design, conversion=sum) "
             "match tempdisagg::td bit-exact at the 6-dp emitted precision "
-            "(measured 6.8e-07 / 5.0e-07). The rho-auto grid-vs-continuous "
-            "divergence is a measured DISCLOSURE (not gated); adding-up is "
-            "structurally guaranteed (tautological, no arm — the cross-package "
-            "carries the discrimination). Phase 7+ scope-extension pure-B.i."
+            "(measured 6.8e-07 / 5.0e-07). ★ Chow-Lin rho-AUTO is now a GATED "
+            "cross-package arm (was a disclosure): post the continuous-optimizer "
+            "engine fix, the engine's auto-rho reproduces tempdisagg "
+            "chow-lin-maxlog (measured rho gap 1.3e-7) and the auto series "
+            "matches cross-package (~1e-6); the prior grid landed 0.14 off (an "
+            "objective mismatch, now fixed). Adding-up is structurally "
+            "guaranteed (tautological, no arm). Phase 7+ pure-B.i + "
+            "engine-improvement #1."
         ),
     },
 

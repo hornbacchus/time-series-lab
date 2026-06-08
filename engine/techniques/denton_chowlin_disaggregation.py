@@ -12,7 +12,7 @@ Both implemented from scratch with numpy/scipy.
 """
 
 import numpy as np
-from scipy import linalg
+from scipy import linalg, optimize
 
 try:
     from interpretation import build_interpretation  # type: ignore
@@ -185,9 +185,23 @@ def _chowlin(y_low, z_high, conversion_ratio, rho=0.5):
     return x_high, info
 
 
-def _estimate_rho(y_low, z_high, conversion_ratio, n_grid=20):
+def _estimate_rho(y_low, z_high, conversion_ratio):
     """
-    Estimate optimal rho by maximizing the log-likelihood over a grid.
+    Estimate optimal rho by maximizing the CONCENTRATED (profiled-sigma^2)
+    Chow-Lin log-likelihood via continuous optimization.
+
+    Replaces the prior 20/50-point grid maxlog. The grid maximized an
+    UNPROFILED (sigma^2 = 1) objective ``-0.5*(logdet(V_low) + u'V_low^-1 u)``
+    whose argmax differs from the profiled-sigma^2 concentrated likelihood
+    that the canonical Chow-Lin maxlog (e.g. R ``tempdisagg::td``
+    "chow-lin-maxlog") maximizes — because the ``1/(1-rho^2)`` AR(1) scale
+    cancels in the profiled objective but NOT in the sigma^2=1 form. So the
+    grid landed ~0.14 off the continuous-ML optimum: an OBJECTIVE mismatch,
+    NOT a grid-resolution issue (the grid already nearly converged to its own,
+    wrong, optimum). This profiles sigma^2 out and optimizes continuously over
+    rho in [0, 0.999] (``truncated.rho = 0``), reproducing the canonical
+    continuous-ML rho. The GLS distribution solve (``_chowlin``) is unchanged;
+    only rho-SELECTION changed (fixed-rho paths are unaffected).
     """
     n_low = len(y_low)
     n_high = n_low * conversion_ratio
@@ -203,35 +217,36 @@ def _estimate_rho(y_low, z_high, conversion_ratio, n_grid=20):
     C = _build_aggregation_matrix(n_high, conversion_ratio)
     X_low = C @ X_high
 
-    best_rho = 0.5
-    best_ll = -np.inf
-
-    for rho in np.linspace(0.01, 0.99, n_grid):
+    def _neg_concentrated_ll(rho):
+        # Profiled-sigma^2 concentrated negative log-likelihood (up to const).
+        V_high = np.zeros((n_high, n_high))
+        for i in range(n_high):
+            for j in range(n_high):
+                V_high[i, j] = rho ** abs(i - j)
+        V_high /= (1.0 - rho ** 2)
+        V_low = C @ V_high @ C.T
         try:
-            V_high = np.zeros((n_high, n_high))
-            for i in range(n_high):
-                for j in range(n_high):
-                    V_high[i, j] = rho ** abs(i - j)
-            V_high /= (1.0 - rho ** 2)
-            V_low = C @ V_high @ C.T
-
             V_low_inv = linalg.inv(V_low)
             XtVinvX = X_low.T @ V_low_inv @ X_low
             beta = linalg.solve(XtVinvX, X_low.T @ V_low_inv @ y_low)
-            u_low = y_low - X_low @ beta
+        except linalg.LinAlgError:
+            return np.inf
+        u_low = y_low - X_low @ beta
+        sign, logdet = np.linalg.slogdet(V_low)
+        quad = float(u_low.T @ V_low_inv @ u_low)
+        if sign <= 0 or quad <= 0:
+            return np.inf
+        return 0.5 * (n_low * np.log(quad / n_low) + logdet)
 
-            # Log-likelihood (up to constant)
-            sign, logdet = np.linalg.slogdet(V_low)
-            if sign <= 0:
-                continue
-            ll = -0.5 * (logdet + u_low.T @ V_low_inv @ u_low)
-            if ll > best_ll:
-                best_ll = ll
-                best_rho = rho
-        except Exception:
-            continue
-
-    return best_rho
+    try:
+        res = optimize.minimize_scalar(
+            _neg_concentrated_ll, bounds=(0.0, 0.999), method="bounded",
+        )
+        if np.isfinite(res.fun):
+            return float(res.x)
+    except Exception:
+        pass
+    return 0.5
 
 
 def run(ctx: RunContext, progress_callback) -> dict:
@@ -341,8 +356,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     warn_list.append("Fast preset: using rho=0.5 without ML estimation.")
                 else:
                     progress_callback("Estimating optimal rho via ML", 35)
-                    n_grid = 20 if ctx.preset == "Balanced" else 50
-                    rho = _estimate_rho(lo_clean, z_high, conversion_ratio, n_grid=n_grid)
+                    rho = _estimate_rho(lo_clean, z_high, conversion_ratio)
             else:
                 rho = float(rho_param)
                 # CAI Phase 2 Session 19 fix (F-MD-DENTON-RHO):
