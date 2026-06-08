@@ -197,3 +197,14 @@ jobs:
         with:
           name: parity-fast-results
           path: parity-fast.json
+
+      - name: Catalog key-alignment guard
+        # Structural backstop (NOT numerical parity): asserts every dialog
+        # control in techniques_catalog.json is read by its technique's engine
+        # get_param. Exits non-zero on a NEW inert control beyond the documented
+        # KNOWN_INERT baseline (the inert-control defect class — a dialog control
+        # whose value is silently dropped). See
+        # tools/reference_parity/catalog_key_alignment.py.
+        shell: bash
+        run: |
+          python tools/reference_parity/catalog_key_alignment.py
