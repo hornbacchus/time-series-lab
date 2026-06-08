@@ -593,6 +593,24 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Phase 7+ engine-improvement #3 — VECM half_life_periods guard (S65).
+    # Valid-range half-life vs the documented formula -ln(2)/ln(1+alpha[0,0])
+    # at the engine's own fitted alpha -> bit-exact (same closed form). The
+    # over-correcting negative control is a None/nan boolean assertion (no band).
+    "p3_vecm_half_life": {
+        "type": "tiered_outputs",
+        "formula": {"abs_tol": 1e-6, "rel_tol": 1e-4},
+        "justification": (
+            "VECM adjustment half-life -ln(2)/ln(1+alpha[0,0]) (defined on "
+            "(-1,0)). S65 guard fix discrimination: valid-range half-life "
+            "matches the documented formula at the fitted alpha, at the 2-dp "
+            "emitted precision (B8 floor; abs 1e-6 after rounding both); the "
+            "over-correcting range (alpha[0,0] in (-2,-1)) must return None (the "
+            "undefined-flag) where the old loose guard silently leaked nan. "
+            "Verified-discriminating negative control."
+        ),
+    },
+
     # Phase 7+ — var/vecm engine-invocation cross-package upgrades. Engine
     # output is 6-dp rounded (B8 floor); the reference is rounded to match.
     "p3_var_crosspkg": {

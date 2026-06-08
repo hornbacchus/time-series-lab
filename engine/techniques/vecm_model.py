@@ -437,15 +437,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
             tables.append(fevd_table)
 
         # Half-life of adjustment on the first cointegrating relationship:
-        # half_life = −ln(2) / ln(1 + α[0, 0]) when α[0, 0] ∈ (−2, 0) and the
-        # first series is speed-adjusting toward equilibrium. Outside that
-        # range the formula either diverges or flips sign; we return None so
-        # the interpretation spec can route on presence/absence.
+        # half_life = −ln(2) / ln(1 + α[0, 0]), DEFINED only when
+        # α[0, 0] ∈ (−1, 0): there 1 + α[0,0] ∈ (0, 1), a stable monotone
+        # geometric decay toward equilibrium. For α[0, 0] ≤ −1 the adjustment
+        # OVER-corrects (oscillates sign each period) so there is no real
+        # half-life — 1 + α[0,0] ≤ 0 makes ln(1 + α[0,0]) undefined over the
+        # reals. NOTE: np.log of a negative returns nan SILENTLY (a warning, not
+        # an exception), so a looser guard (the old −2 < a0 < 0) would LEAK nan
+        # to the emitted field rather than be caught by the try/except below —
+        # hence the strict (−1, 0) bound. Outside it we return None so the
+        # interpretation spec routes on presence/absence.
         half_life_periods = None
         try:
             if r >= 1 and alpha_arr.shape[0] >= 1:
                 a0 = float(alpha_arr[0, 0])
-                if -2.0 < a0 < 0.0:
+                if -1.0 < a0 < 0.0:
                     half_life_periods = float(-np.log(2.0) / np.log(1.0 + a0))
         except Exception:
             half_life_periods = None
