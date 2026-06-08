@@ -2261,25 +2261,39 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
 
     "p3_bocpd": {
         "type": "tiered_outputs",
+        # n_cps / CP-index exact (integers).
         "primary": {
-            # Self-parity: TSL and reference both implement
-            # Adams-MacKay 2007 verbatim with NIG conjugate prior.
-            # n_cps and CP-index set must match exactly. Setting
-            # abs_tol=0 forces strict equality on integer counts.
-            "abs_tol": 0.0,
-            "rel_tol": 0.0,
-            "block_abs_tol": 1.0,
-            "block_rel_tol": 0.5,
+            "abs_tol": 0.0, "rel_tol": 0.0,
+            "block_abs_tol": 1.0, "block_rel_tol": 0.5,
+        },
+        # Recursion SENTINEL: engine MAP run-length sequence (data-dependent,
+        # integer) bit-exact vs the from-scratch reference -> confirms the
+        # recursion is UNCHANGED + correct (the S79 fix touched only the
+        # detection read-off, not the recursion).
+        "map_rl": {
+            "abs_tol": 0.5, "rel_tol": 0.0,
+            "block_abs_tol": 0.5, "block_rel_tol": 0.0,
+        },
+        # cp_prob (6-dp emitted) — trivially the constant hazard, kept as a
+        # secondary recursion check.
+        "cp_prob": {
+            "abs_tol": 1e-5, "rel_tol": 1e-3,
+            "block_abs_tol": 1e-4, "block_rel_tol": 1e-2,
         },
         "justification": (
-            "Self-parity: TSL bocpd.py and from-scratch reference "
-            "(in p3_bocpd.py) implement identical Adams-MacKay 2007 "
-            "recursion with NIG conjugate prior. Bit-exact match "
-            "expected on both n_change_points and the change-point "
-            "index set. Pattern A target. PyPI bocd uses non-"
-            "conjugate Gaussian prior and would not produce a "
-            "matching reference; self-parity is the only path to "
-            "PASS. Block band at abs_tol=1 (±1 CP off) → BLOCK."
+            "S79 engine-improvement #2 (MAP-run-length-reset detection fix). "
+            "FUNCTIONAL DETECTION check, NOT self-parity-on-broken (the prior "
+            "check was self-parity-COMPLICIT: the reference applied the same "
+            "non-functional cp_prob>threshold criterion, so both returned "
+            "n_cps=0 on a known change-point and the check PASSED with zero "
+            "detections — the §5.1 founding case). Upgraded: (a) recursion "
+            "SENTINEL — engine MAP run-length bit-exact vs the from-scratch "
+            "reference (the recursion is unchanged); (b) criterion "
+            "cross-validation — engine n_cps == reference n_cps, both via "
+            "MAP-reset; (c) functional POSITIVE — fires within +/-15 of the "
+            "true CP@150 (measured 153); (d) ★ functional NEGATIVE CONTROL — "
+            "n_cps=0 on a no-change-point series (catches a fires-on-everything "
+            "fix). The discrimination the self-parity check structurally lacked."
         ),
     },
 

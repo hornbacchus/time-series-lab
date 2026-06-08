@@ -170,10 +170,10 @@ def _run_multivariate(ctx, progress_callback, all_series):
     # regardless of the data), so it can never cross a 0.5 threshold (this is
     # why S79 reported n_cps=0). The correct signal is the MAP run-length
     # COLLAPSING to a fresh run: a change point is a time t where the MAP run
-    # length drops sharply (> min_gap), i.e. the posterior mass resets. (The
-    # univariate S79 path keeps its original criterion for byte-identical
-    # backward-compat; the S79 cp_prob-criterion bug is documented + banked as
-    # a separate univariate-fix candidate.)
+    # length drops sharply (> min_gap), i.e. the posterior mass resets.
+    # (Engine-improvement #2 ported this same MAP-reset criterion to the
+    # univariate S79 path — BOTH paths now use it; the non-functional
+    # cp_prob>threshold criterion is retired.)
     reset_idx = [t for t in range(1, n) if (map_rl[t - 1] - map_rl[t]) > min_gap]
     filtered_cps = []
     for t in reset_idx:
@@ -446,26 +446,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         progress_callback("Detecting change points", 82)
 
-        # Identify change points where cp_prob > threshold
-        raw_cps = np.where(cp_prob > threshold)[0]
-
-        # Enforce minimum gap between change points
+        # Detection via MAP run-length RESET (S79 FIX — ported verbatim from the
+        # correct multivariate path). The prior criterion
+        # `cp_prob = R[t+1,0] > threshold` was NON-FUNCTIONAL: R[t+1,0] == hazard
+        # EXACTLY (data-independent — the Adams-MacKay split normalizes
+        # P(r=0)=hazard regardless of the data), so it never crossed the 0.5
+        # threshold -> n_cps=0 on ANY input. The correct signal is the MAP run
+        # length COLLAPSING to a fresh run: a change point is a time t where the
+        # MAP run length drops sharply (> min_gap), i.e. the posterior mass
+        # resets. The recursion above is UNCHANGED — only this detection read-off.
+        reset_idx = [t for t in range(1, n) if (map_rl[t - 1] - map_rl[t]) > min_gap]
         filtered_cps = []
-        last_cp = -min_gap - 1
-        # Sort by probability (descending) and greedily select
-        if len(raw_cps) > 0:
-            sorted_idx = raw_cps[np.argsort(-cp_prob[raw_cps])]
-            selected = set()
-            for idx in sorted_idx:
-                # Check minimum gap from all selected
-                too_close = False
-                for s in selected:
-                    if abs(idx - s) < min_gap:
-                        too_close = True
-                        break
-                if not too_close:
-                    selected.add(idx)
-            filtered_cps = sorted(selected)
+        for t in reset_idx:
+            if not filtered_cps or (t - filtered_cps[-1]) >= min_gap:
+                filtered_cps.append(int(t))
 
         n_cps = len(filtered_cps)
 
@@ -571,8 +565,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
         if n_cps == 0:
             plain_english = (
                 f"BOCPD analysis of '{name}' ({n} observations) detected no change points "
-                f"at threshold {threshold}. The series appears stationary with no significant "
-                f"regime shifts."
+                f"(MAP run-length reset detection). The series appears stationary with no "
+                f"significant regime shifts."
             )
         elif n_cps == 1:
             cp = filtered_cps[0]
@@ -588,7 +582,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:
             plain_english = (
                 f"BOCPD analysis of '{name}' ({n} observations) detected {n_cps} change points "
-                f"at threshold {threshold}. The series is divided into {n_cps + 1} segments. "
+                f"(MAP run-length reset detection). The series is divided into {n_cps + 1} segments. "
             )
             max_shift_idx = np.argmax([abs(r[6]) if r[6] is not None else 0 for r in cp_rows])
             if cp_rows[max_shift_idx][6] is not None:
@@ -640,6 +634,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             charting_suggestions=charting,
             interpretation=interp,
             audit_fields={
+                "detection": "map_run_length_reset",
                 "hazard_lambda": hazard_lambda,
                 "threshold": threshold,
                 "prior_mu": round(prior_mu, 4),
