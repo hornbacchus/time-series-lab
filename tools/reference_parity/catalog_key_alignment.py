@@ -72,7 +72,8 @@ KNOWN_INERT: dict[str, list[str]] = {
     "denton_chowlin_disaggregation": ["target_frequency"],     # B (vs conversion_ratio)
     "dtw_alignment_lag": ["max_warp"],                         # C (vs window_frac)
     "fft_spectrum": ["top_n"],                                 # A -> n_top
-    "forecast_combination": ["models", "combination_method"],  # C (the defining knobs; priority)
+    # forecast_combination models + combination_method: FIXED (engine-wired,
+    # Commit pending) -> removed from the baseline; the guard now enforces them.
     "forecast_reconciliation": ["hierarchy_table"],            # C (vs S_matrix)
     "gaussian_process_forecast": ["max_lag"],                  # C (GP reads no lag param)
     "gradient_boosting_forecast": ["max_lag"],                 # A -> n_lags

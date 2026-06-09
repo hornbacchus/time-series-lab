@@ -173,6 +173,35 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
 
+        # Wired controls (engine-improvement): `models` selects the component
+        # subset; `combination_method` selects the headline/primary weighting
+        # scheme. Defaults reproduce the prior hardcoded behavior BYTE-IDENTICAL
+        # (all 3 models + inverse-MSE primary); all 3 schemes are still computed
+        # + emitted in the table — the control only selects WHICH is the primary.
+        _MODEL_ALIASES = {"auto_arima": "ARIMA", "arima": "ARIMA",
+                          "ets": "ETS", "holt_winters": "ETS", "theta": "Theta"}
+        _models_param = str(ctx.get_param("models", "auto_arima,ets,theta")
+                            or "auto_arima,ets,theta")
+        selected_models = []
+        for _tok in _models_param.split(","):
+            _comp = _MODEL_ALIASES.get(_tok.strip().lower())
+            if _comp and _comp not in selected_models:
+                selected_models.append(_comp)
+        if not selected_models:
+            selected_models = ["ARIMA", "ETS", "Theta"]
+        # combination_method -> (table/weights key, prose label). Default
+        # inverse_mse reproduces the prior "inverse-MSE" primary exactly.
+        _METHOD = {
+            "simple_average": ("Simple Average", "simple-average"),
+            "inverse_mse": ("Inverse-MSE", "inverse-MSE"),
+            "ols": ("OLS", "OLS"),
+        }
+        _cm_key = str(ctx.get_param("combination_method", "inverse_mse")
+                      or "inverse_mse").strip().lower()
+        if _cm_key not in _METHOD:
+            _cm_key = "inverse_mse"
+        primary_scheme, primary_prose = _METHOD[_cm_key]
+
         # Split into fit and holdout for weight estimation
         n_holdout = max(5, int(n * holdout_frac))
         n_fit = n - n_holdout
@@ -193,48 +222,51 @@ def run(ctx: RunContext, progress_callback) -> dict:
         full_forecasts = {}
         model_info = {}
 
-        # --- ARIMA ---
-        progress_callback("Fitting ARIMA model", 15)
-        try:
-            arima_model = _fit_arima(fit_data, seasonal, m_val if seasonal else 1, preset_cfg)
-            arima_holdout_fc = arima_model.predict(n_periods=actual_holdout_len)
-            # Refit on full data for final forecast
-            arima_full = _fit_arima(clean, seasonal, m_val if seasonal else 1, preset_cfg)
-            arima_final_fc = arima_full.predict(n_periods=horizon)
-            model_names.append("ARIMA")
-            holdout_forecasts["ARIMA"] = arima_holdout_fc
-            full_forecasts["ARIMA"] = arima_final_fc
-            model_info["ARIMA"] = f"({arima_full.order[0]},{arima_full.order[1]},{arima_full.order[2]})"
-        except Exception as e:
-            warn_list.append(f"ARIMA model failed: {e}")
+        # --- ARIMA --- (gated by the `models` control; default includes it)
+        if "ARIMA" in selected_models:
+            progress_callback("Fitting ARIMA model", 15)
+            try:
+                arima_model = _fit_arima(fit_data, seasonal, m_val if seasonal else 1, preset_cfg)
+                arima_holdout_fc = arima_model.predict(n_periods=actual_holdout_len)
+                # Refit on full data for final forecast
+                arima_full = _fit_arima(clean, seasonal, m_val if seasonal else 1, preset_cfg)
+                arima_final_fc = arima_full.predict(n_periods=horizon)
+                model_names.append("ARIMA")
+                holdout_forecasts["ARIMA"] = arima_holdout_fc
+                full_forecasts["ARIMA"] = arima_final_fc
+                model_info["ARIMA"] = f"({arima_full.order[0]},{arima_full.order[1]},{arima_full.order[2]})"
+            except Exception as e:
+                warn_list.append(f"ARIMA model failed: {e}")
 
-        # --- ETS ---
-        progress_callback("Fitting ETS model", 35)
-        try:
-            ets_model = _fit_ets(fit_data, m_val if seasonal else 1)
-            ets_holdout_fc = ets_model.forecast(actual_holdout_len)
-            ets_full = _fit_ets(clean, m_val if seasonal else 1)
-            ets_final_fc = ets_full.forecast(horizon)
-            model_names.append("ETS")
-            holdout_forecasts["ETS"] = np.array(ets_holdout_fc)
-            full_forecasts["ETS"] = np.array(ets_final_fc)
-            model_info["ETS"] = "ExponentialSmoothing"
-        except Exception as e:
-            warn_list.append(f"ETS model failed: {e}")
+        # --- ETS --- (gated by the `models` control; default includes it)
+        if "ETS" in selected_models:
+            progress_callback("Fitting ETS model", 35)
+            try:
+                ets_model = _fit_ets(fit_data, m_val if seasonal else 1)
+                ets_holdout_fc = ets_model.forecast(actual_holdout_len)
+                ets_full = _fit_ets(clean, m_val if seasonal else 1)
+                ets_final_fc = ets_full.forecast(horizon)
+                model_names.append("ETS")
+                holdout_forecasts["ETS"] = np.array(ets_holdout_fc)
+                full_forecasts["ETS"] = np.array(ets_final_fc)
+                model_info["ETS"] = "ExponentialSmoothing"
+            except Exception as e:
+                warn_list.append(f"ETS model failed: {e}")
 
-        # --- Theta ---
-        progress_callback("Fitting Theta model", 55)
-        try:
-            theta_model = _fit_theta(fit_data)
-            theta_holdout_fc = theta_model.forecast(actual_holdout_len)
-            theta_full = _fit_theta(clean)
-            theta_final_fc = theta_full.forecast(horizon)
-            model_names.append("Theta")
-            holdout_forecasts["Theta"] = np.array(theta_holdout_fc)
-            full_forecasts["Theta"] = np.array(theta_final_fc)
-            model_info["Theta"] = "ThetaModel"
-        except Exception as e:
-            warn_list.append(f"Theta model failed: {e}")
+        # --- Theta --- (gated by the `models` control; default includes it)
+        if "Theta" in selected_models:
+            progress_callback("Fitting Theta model", 55)
+            try:
+                theta_model = _fit_theta(fit_data)
+                theta_holdout_fc = theta_model.forecast(actual_holdout_len)
+                theta_full = _fit_theta(clean)
+                theta_final_fc = theta_full.forecast(horizon)
+                model_names.append("Theta")
+                holdout_forecasts["Theta"] = np.array(theta_holdout_fc)
+                full_forecasts["Theta"] = np.array(theta_final_fc)
+                model_info["Theta"] = "ThetaModel"
+            except Exception as e:
+                warn_list.append(f"Theta model failed: {e}")
 
         if len(model_names) < 2:
             return make_error_response(
@@ -300,6 +332,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
         fc_simple = _combine(simple_weights)
         fc_imse = _combine(imse_weights)
         fc_ols = _combine(ols_weights, ols_intercept)
+
+        # Primary (headline) scheme selected by `combination_method`. All 3
+        # schemes are still computed + emitted in the table; this picks which is
+        # the dominant/recommended. Default inverse-MSE reproduces the prior
+        # primary (dominant-from-imse, "inverse-MSE" text) byte-identical.
+        _scheme_weights = {"Simple Average": simple_weights,
+                           "Inverse-MSE": imse_weights, "OLS": ols_weights}
+        _scheme_fc = {"Simple Average": fc_simple,
+                      "Inverse-MSE": fc_imse, "OLS": fc_ols}
+        _scheme_intercept = {"Simple Average": 0.0,
+                             "Inverse-MSE": 0.0, "OLS": ols_intercept}
+        primary_weights = _scheme_weights[primary_scheme]
+        primary_forecast = _scheme_fc[primary_scheme]
+        primary_intercept = _scheme_intercept[primary_scheme]
 
         # Forecast table
         fc_rows = []
@@ -367,20 +413,20 @@ def run(ctx: RunContext, progress_callback) -> dict:
         best_mse = best_method[1]
 
         # Dominant model
-        dominant_model = max(imse_weights, key=imse_weights.get)
-        dom_weight = imse_weights[dominant_model]
+        dominant_model = max(primary_weights, key=primary_weights.get)
+        dom_weight = primary_weights[dominant_model]
 
         plain_english = (
             f"Forecast combination for '{name}' ({n} observations) using {len(model_names)} models: "
             f"{', '.join(model_names)}. "
             f"On the holdout set ({actual_holdout_len} points), the best method was "
             f"'{best_name}' (MSE={best_mse:.4f}). "
-            f"By inverse-MSE weighting, {dominant_model} dominates with weight {dom_weight:.2f}."
+            f"By {primary_prose} weighting, {dominant_model} dominates with weight {dom_weight:.2f}."
         )
 
         if dom_weight > 0.8:
             warn_list.append(
-                f"One model ({dominant_model}) dominates the inverse-MSE weights ({dom_weight:.2f}). "
+                f"One model ({dominant_model}) dominates the {primary_prose} weights ({dom_weight:.2f}). "
                 "Combination may not offer much improvement over this single model."
             )
 
@@ -400,21 +446,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Compute the ensemble holdout MSE directly from the
         # inverse-MSE-weighted forecast on the holdout set — no
         # display-label matching.
-        _imse_mse = None
+        _primary_mse = None
         _equal_mse = None
         try:
-            _imse_fc = np.zeros(actual_holdout_len)
+            _pfc = np.full(actual_holdout_len, primary_intercept)
             for m in model_names:
-                _imse_fc = _imse_fc + imse_weights[m] * holdout_forecasts[m][:actual_holdout_len]
-            _imse_mse = float(np.mean((holdout - _imse_fc) ** 2))
+                _pfc = _pfc + primary_weights[m] * holdout_forecasts[m][:actual_holdout_len]
+            _primary_mse = float(np.mean((holdout - _pfc) ** 2))
             _equal_fc = np.zeros(actual_holdout_len)
             for m in model_names:
                 _equal_fc = _equal_fc + simple_weights[m] * holdout_forecasts[m][:actual_holdout_len]
             _equal_mse = float(np.mean((holdout - _equal_fc) ** 2))
         except Exception:
-            _imse_mse = None
+            _primary_mse = None
             _equal_mse = None
-        _imse_weights_list = [float(imse_weights[m]) for m in model_names]
+        _primary_weights_list = [float(primary_weights[m]) for m in model_names]
         _per_model_mse_list = [float(holdout_mses[m]) for m in model_names]
         _dominant_mse = float(holdout_mses.get(dominant_model, 0.0))
 
@@ -423,14 +469,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "horizon": int(horizon),
             "n_models": int(len(model_names)),
             "model_names": list(model_names),
-            "weights": _imse_weights_list,
-            "ensemble_holdout_mse": _imse_mse,
+            "weights": _primary_weights_list,
+            "ensemble_holdout_mse": _primary_mse,
             "dominant_model_name": dominant_model,
             "dominant_model_weight": float(dom_weight),
             "dominant_model_mse": _dominant_mse,
             "equal_weight_holdout_mse": _equal_mse,
             "per_model_holdout_mse": _per_model_mse_list,
-            "combination_method": "inverse-MSE",
+            "combination_method": primary_prose,
             "holdout_length": int(actual_holdout_len),
         })
         return make_response(
@@ -449,6 +495,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "best_holdout_method": best_name,
                 "best_holdout_mse": best_mse,
                 "horizon": horizon,
+                # Wired controls (engine-improvement): the headline scheme +
+                # its combined forecast now reflect the `combination_method`
+                # control; `models` selects the component subset above.
+                "combination_method": _cm_key,
+                "models_selected": list(selected_models),
+                "primary_combined_forecast": [float(x) for x in primary_forecast],
             },
         )
 

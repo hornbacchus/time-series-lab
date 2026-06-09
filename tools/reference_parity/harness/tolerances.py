@@ -593,6 +593,29 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Inert-control fix #1 — forecast_combination models + combination_method
+    # discrimination (engine-wired controls now LIVE). Measured: combination_method
+    # moves the primary vector 0.47 (vs OLS), models-subset moves the combined
+    # 0.027. The control must MOVE the headline forecast vector (not just a label).
+    "p3_forecast_combination_controls": {
+        "type": "tiered_outputs",
+        "discrimination": {
+            "match_tol": 1e-6,        # primary == the selected scheme's column (exact)
+            "method_min_move": 1e-2,  # combination_method moves the primary vector (>=0.01; measured 0.47)
+            "models_min_move": 1e-3,  # models-subset moves the combined forecast (>=0.001; measured 0.027)
+        },
+        "justification": (
+            "Engine-wiring fix: models + combination_method are now LIVE. The "
+            "default reproduces the prior inverse-MSE-primary all-3-models "
+            "behavior byte-identical (sentinel = p3_forecast_combination). "
+            "Discrimination: combination_method moves the PRIMARY FORECAST VECTOR "
+            "(>=0.01; measured 0.47 vs OLS) — not just a label (the subtler-inert "
+            "trap); models-subset (drop ETS) moves the combined (>=0.001; measured "
+            "0.027). match_tol confirms the primary == the selected scheme's column. "
+            "Master plan §7.1 closed_form."
+        ),
+    },
+
     # Satellite-ledger fix — VAR max_lag regression guard (catalog key fix
     # max_lags->max_lag). Guards the ENGINE honors max_lag (param affects VAR
     # order); NOT the catalog-fix validation (ribbon->engine = Matt-Excel).
