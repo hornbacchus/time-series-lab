@@ -2544,11 +2544,11 @@
           "default": "symmetric_abs",
           "required": false,
           "advanced": true,
-          "description": "CAViaR specification",
+          "description": "CAViaR specification (Engle-Manganelli 2004): symmetric_abs (SAV), asymmetric_slope (AS), igarch (Indirect GARCH)",
           "options": [
             "symmetric_abs",
             "asymmetric_slope",
-            "adaptive"
+            "igarch"
           ]
         },
         {

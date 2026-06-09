@@ -593,6 +593,30 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Inert-control fix #3 — caviar quantile + model_type discrimination
+    # (engine-wired -> theta + specification via a value-map). quantile is
+    # DIRECTIONAL (higher q -> less-extreme 1-step VaR, monotone; measured
+    # -1.814/-1.347/-1.066 for q 0.01/0.05/0.10 -> gap 0.748). model_type is
+    # PER-VALUE (each catalog value -> its engine spec SAV/AS/IG; VaR spread
+    # ~0.094 across specs). The default (q=0.05, model_type=symmetric_abs)
+    # reproduces theta 0.05 / spec SAV byte-identical (sentinel = 3a_caviar_sav).
+    "p3_caviar_controls": {
+        "type": "tiered_outputs",
+        "default": {"abs_tol": 1e-9},            # resolved theta == passed value (sentinel)
+        "discrimination": {"min_var_gap": 0.20,  # v(0.10)-v(0.01); measured 0.748
+                           "min_spec_gap": 0.02},  # SAV/AS/IG VaR spread; measured 0.094
+        "justification": (
+            "CAViaR fit is a seeded stochastic-restart quantile-loss minimization; "
+            "the 1-step VaR is the deterministic recursion on the fitted params. "
+            "quantile -> theta is DIRECTIONAL (higher quantile -> less-extreme VaR, "
+            "monotone) and model_type -> specification is a PER-VALUE value-map "
+            "(symmetric_abs->SAV, asymmetric_slope->AS, igarch->IG, each validated). "
+            "The default reproduces theta 0.05 / spec SAV byte-identical (sentinel = "
+            "3a_caviar_sav). Master plan §7.1 closed_form (directional + categorical "
+            "discrimination, robust to optimizer noise)."
+        ),
+    },
+
     # Inert-control fix #2 — bvar lambda_shrinkage discrimination (engine-wired
     # -> lambda1, the Minnesota overall tightness). Directional: tighter -> more
     # shrinkage of own-lag-1 toward the RW prior (1.0). Measured own-lag-1

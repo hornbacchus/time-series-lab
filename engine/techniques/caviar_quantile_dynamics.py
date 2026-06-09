@@ -48,6 +48,20 @@ _PRESET_CONFIG = {
 # 1-day / 1-week / 2-week / 1-month.
 _DEFAULT_HORIZONS = [1, 5, 10, 22]
 
+# Value-map: the `model_type` dialog control's vocabulary -> the engine's
+# `specification` codes (Engle-Manganelli 2004). The catalog dialog offers
+# user-friendly names; the engine branches on SAV/AS/IG. Case-insensitive;
+# also accepts the native codes so a THOROUGH `model_type:"SAV"` works. NOTE:
+# the catalog's third spec is `igarch` (-> IG, Indirect GARCH), matching what
+# the engine implements; the Engle-Manganelli "Adaptive" spec is NOT yet in
+# the engine (a banked engine-improvement) and is deliberately absent here —
+# routing it to another spec would silently mislead the user.
+_MODEL_TYPE_MAP = {
+    "symmetric_abs": "SAV", "sav": "SAV", "symmetric_absolute_value": "SAV",
+    "asymmetric_slope": "AS", "as": "AS",
+    "igarch": "IG", "ig": "IG", "indirect_garch": "IG",
+}
+
 
 def run(ctx: RunContext, progress_callback) -> dict:
     """
@@ -56,9 +70,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
     Parameters (via ctx.params)
     ---------------------------
     theta : float, optional
-        Quantile level (default 0.05 for 5% VaR).
+        Quantile level (default 0.05 for 5% VaR). Sourced from the `quantile`
+        dialog control when a native `theta` is not passed (THOROUGH power-path).
     specification : str, optional
-        'SAV' (default), 'AS', or 'IG'.
+        'SAV' (default), 'AS', or 'IG'. Sourced from the `model_type` dialog
+        control via `_MODEL_TYPE_MAP` (symmetric_abs->SAV, asymmetric_slope->AS,
+        igarch->IG) when a native `specification` is not passed.
     """
     try:
         progress_callback("Validating inputs", 5)
@@ -81,7 +98,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Provide a longer return series."],
             )
 
-        theta = float(ctx.get_param("theta", 0.05))
+        # theta = the VaR quantile level, sourced from the `quantile` dialog
+        # control; precedence theta (THOROUGH power-path) > quantile (dialog) >
+        # default 0.05. The (0,1) gate validates the resolved value.
+        theta = float(ctx.get_param("theta", ctx.get_param("quantile", 0.05)))
         if theta <= 0 or theta >= 1:
             return make_error_response(
                 ctx,
@@ -89,12 +109,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Set theta between 0 and 1 (e.g., 0.05 for 5% VaR)."],
             )
 
-        spec = ctx.get_param("specification", "SAV").upper()
+        # specification sourced from the `model_type` dialog control via the
+        # value-map; precedence specification (THOROUGH, native SAV/AS/IG) >
+        # model_type (dialog, mapped) > default SAV.
+        _mt = ctx.get_param("model_type", None)
+        _mapped = (
+            _MODEL_TYPE_MAP.get(str(_mt).strip().lower(), _mt)
+            if _mt is not None else "SAV"
+        )
+        spec = str(ctx.get_param("specification", _mapped)).upper()
         if spec not in ("SAV", "AS", "IG"):
             return make_error_response(
                 ctx,
-                f"Unknown specification '{spec}'. Use 'SAV', 'AS', or 'IG'.",
-                error_fixes=["Choose one of: SAV, AS, IG."],
+                f"Unknown specification '{spec}'. Use 'SAV', 'AS', or 'IG' "
+                f"(model_type: symmetric_abs, asymmetric_slope, igarch).",
+                error_fixes=[
+                    "Choose one of: SAV, AS, IG.",
+                    "Or set model_type to symmetric_abs, asymmetric_slope, or igarch.",
+                ],
             )
 
         y = clean.copy()
