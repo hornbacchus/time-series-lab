@@ -60,7 +60,9 @@ KNOWN_INERT: dict[str, list[str]] = {
     # Shrink this dict as each per-control fix lands. (# helper-suspect = the key
     # is read by SOME other technique's get_param, verified COINCIDENTAL common
     # key-name here, not a cross-module helper read.)
-    "adf_test": ["max_lags"],                                  # B (default "auto" string) -> max_lag
+    # adf_test max_lags: FIXED (engine-wired -> max_lag with an "auto" string-
+    # sentinel branch; Commit pending) -> removed from the baseline; the guard
+    # now enforces it.
     "auto_arima": ["ic"],                                      # A -> information_criterion
     "autoencoder_anomaly": ["threshold_sigma", "encoding_dim"],  # C
     "block_bootstrap": ["statistic"],                          # C

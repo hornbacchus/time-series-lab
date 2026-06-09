@@ -593,6 +593,27 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Inert-control fix #4 — adf_test max_lags discrimination (type-mismatch:
+    # the string "auto" branched as a sentinel for auto-select; an int = a fixed
+    # maxlag cap). On a lag-4 DGP the cap BINDS the AIC selection: cap=1 -> lag
+    # 1, ADF -12.504 vs auto's lag 3 -5.156 -> gap 7.35. "auto" reproduces the
+    # no-param run byte-identical (sentinels = p3_adf + p3_adf_triage).
+    "p3_adf_maxlags": {
+        "type": "tiered_outputs",
+        "default": {"abs_tol": 1e-9},            # "auto" == no-param run (sentinel)
+        "discrimination": {"min_stat_gap": 1.0},  # |ADF(cap1) - ADF(auto)|; measured 7.35
+        "justification": (
+            "The ADF statistic is the deterministic statsmodels adfuller output "
+            "given (maxlag, autolag, regression). max_lags is now engine-wired -> "
+            "max_lag with the string 'auto' branched as a SENTINEL for auto-lag "
+            "selection (reproduces the no-param run byte-identical -- sentinels "
+            "p3_adf + p3_adf_triage); an int sets a fixed maxlag cap that, when it "
+            "binds the AIC selection (lag-4 DGP), changes the selected lag + ADF "
+            "statistic by a wide margin (cap1 -> lag1, |gap| 7.35). Master plan "
+            "§7.1 closed_form."
+        ),
+    },
+
     # Inert-control fix #3 — caviar quantile + model_type discrimination
     # (engine-wired -> theta + specification via a value-map). quantile is
     # DIRECTIONAL (higher q -> less-extreme 1-step VaR, monotone; measured

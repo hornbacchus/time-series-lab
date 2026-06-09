@@ -250,7 +250,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
         'ctt' (constant + linear + quadratic trend), 'n' (no constant).
     max_lag : int or None, optional
         Maximum lag. If omitted, Schwert's rule is applied:
-        max_lag = floor(12 · (T/100)^(1/4)).
+        max_lag = floor(12 · (T/100)^(1/4)). Also sourced from the `max_lags`
+        dialog control: the string "auto" (its default) -> auto-lag selection
+        (Schwert + autolag, == omitting it); an int -> a fixed maxlag cap.
     autolag : str, optional
         'AIC' (default), 'BIC', 't-stat', or None.
     significance_level : float, optional
@@ -271,7 +273,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         regression = ctx.get_param("regression", "c")
-        max_lag_param = ctx.get_param("max_lag", None)
+        # max_lag sourced from the `max_lags` dialog control (label "Max Lags",
+        # default the STRING "auto"); precedence max_lag (THOROUGH granular int)
+        # > max_lags (dialog) > None. The string "auto" is a SENTINEL for
+        # auto-lag selection (Schwert bound + autolag) == the current default --
+        # branch it HERE; never int-cast it downstream (_run_adf_single does
+        # int(max_lag_param), and int("auto") raises ValueError). An int (or
+        # int-string) sets a fixed maxlag cap.
+        max_lag_param = ctx.get_param("max_lag", ctx.get_param("max_lags", None))
+        if isinstance(max_lag_param, str):
+            _ml = max_lag_param.strip().lower()
+            if _ml in ("", "auto", "none"):
+                max_lag_param = None
+            else:
+                try:
+                    max_lag_param = int(_ml)
+                except ValueError:
+                    return make_error_response(
+                        ctx,
+                        f"max_lags must be 'auto' or an integer, got "
+                        f"'{max_lag_param}'.",
+                        error_fixes=[
+                            "Use 'auto' (Schwert bound + auto-lag selection) "
+                            "or a positive integer maximum lag.",
+                        ],
+                    )
         autolag_param = ctx.get_param("autolag", "AIC")
         if max_lag_param is not None and autolag_param is None:
             autolag = None
