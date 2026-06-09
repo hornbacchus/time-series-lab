@@ -593,6 +593,27 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Inert-control fix #2 — bvar lambda_shrinkage discrimination (engine-wired
+    # -> lambda1, the Minnesota overall tightness). Directional: tighter -> more
+    # shrinkage of own-lag-1 toward the RW prior (1.0). Measured own-lag-1
+    # 0.993/0.868/0.423 for lambda 0.02/0.1/0.8 -> spread 0.571.
+    "p3_bvar_shrinkage": {
+        "type": "tiered_outputs",
+        "default": {"abs_tol": 1e-9},          # default lambda1 == cfg 0.1 (sentinel)
+        "discrimination": {"min_spread": 0.10},  # tight-loose own-lag spread (measured 0.571)
+        "justification": (
+            "BVAR coefficient posterior mean is the closed-form conjugate "
+            "Minnesota-NIW GLS solve (deterministic given the hyperparameters). "
+            "lambda_shrinkage is now engine-wired -> lambda1; the default "
+            "(lambda_shrinkage=0.1 == cfg) reproduces the prior posterior "
+            "byte-identical (sentinel = 1c_bvar_irf_fevd). DIRECTIONAL "
+            "discrimination: tighter lambda_shrinkage shrinks own-lag-1 TOWARD "
+            "the RW prior mean 1.0 -> monotone tight>default>loose, spread >=0.10 "
+            "(measured 0.571). The right thing, not just something. Master plan "
+            "§7.1 closed_form."
+        ),
+    },
+
     # Inert-control fix #1 — forecast_combination models + combination_method
     # discrimination (engine-wired controls now LIVE). Measured: combination_method
     # moves the primary vector 0.47 (vs OLS), models-subset moves the combined

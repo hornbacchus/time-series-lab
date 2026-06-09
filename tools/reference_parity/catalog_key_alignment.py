@@ -65,7 +65,8 @@ KNOWN_INERT: dict[str, list[str]] = {
     "autoencoder_anomaly": ["threshold_sigma", "encoding_dim"],  # C
     "block_bootstrap": ["statistic"],                          # C
     "bocpd": ["hazard_rate"],                                  # B inverse of hazard_lambda
-    "bvar": ["lambda_shrinkage"],                              # C (vs lambda1/2/3)
+    # bvar lambda_shrinkage: FIXED (engine-wired -> lambda1; Commit pending) ->
+    # removed from the baseline; the guard now enforces it.
     "caviar_quantile_dynamics": ["quantile", "model_type"],    # C (vs specification/theta)
     "conformal_intervals": ["coverage"],                       # B alias of confidence_level
     "cusum_page_hinkley": ["threshold", "drift"],              # C (vs cusum_h/cusum_k/ph_*)

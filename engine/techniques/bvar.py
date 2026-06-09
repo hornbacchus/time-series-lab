@@ -228,7 +228,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
     lags : int, optional
         Number of lags. Preset-dependent.
     lambda1 : float, optional
-        Overall tightness of the Minnesota prior. Default 0.1.
+        Overall tightness of the Minnesota prior. Default 0.1. Sourced from the
+        ``lambda_shrinkage`` dialog control (the "Shrinkage" knob) when a granular
+        ``lambda1`` is not passed directly (THOROUGH power-path).
         Smaller = stronger shrinkage toward univariate random walks.
     lambda2 : float, optional
         Cross-variable shrinkage. Default preset-dependent.
@@ -273,7 +275,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         p = int(ctx.get_param("lags", cfg["max_lags"]))
-        lambda1 = float(ctx.get_param("lambda1", cfg["lambda1"]))
+        # lambda1 = the Minnesota overall tightness. Sourced from the
+        # `lambda_shrinkage` dialog control (the "Shrinkage" knob); precedence:
+        # a granular `lambda1` (THOROUGH power-path) wins, else `lambda_shrinkage`
+        # (dialog), else the preset default. Default lambda_shrinkage == cfg
+        # lambda1 (both 0.1), so the default path is byte-identical.
+        lambda1 = float(ctx.get_param("lambda1",
+                                      ctx.get_param("lambda_shrinkage", cfg["lambda1"])))
         lambda2 = float(ctx.get_param("lambda2", cfg["lambda2"]))
         lambda3 = float(ctx.get_param("lambda3", 1.0))
         horizon = max(1, int(ctx.get_param("horizon", 10)))
