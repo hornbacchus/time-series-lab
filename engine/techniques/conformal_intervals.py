@@ -206,7 +206,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
     horizon : int
         Forecast horizon. Default 10.
     confidence_level : float
-        Target coverage. Default 0.95.
+        Target coverage. Default 0.95. Sourced from the `coverage` dialog
+        control when not passed natively (THOROUGH power-path) — same quantity
+        and scale (the nominal interval LEVEL, e.g. 0.95; not the miscoverage
+        alpha, whose 1 - level conversion stays internal).
     cal_fraction : float, optional
         Fraction of data used for calibration. Default from preset.
     seasonal : bool
@@ -236,7 +239,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
         horizon = int(ctx.get_param("horizon", 10))
         if horizon < 1:
             horizon = 1
-        conf_level = float(ctx.get_param("confidence_level", 0.95))
+        # confidence_level = the target coverage, sourced from the `coverage`
+        # dialog control (same quantity/scale -- the nominal interval LEVEL,
+        # not the miscoverage alpha; the alpha = 1 - level conversion below
+        # stays internal). Precedence: confidence_level (THOROUGH) > coverage
+        # (dialog) > 0.95.
+        conf_level = float(ctx.get_param("confidence_level",
+                                         ctx.get_param("coverage", 0.95)))
         alpha = 1.0 - conf_level
         seasonal = ctx.get_param("seasonal", False)
         m_val = int(ctx.get_param("m", _infer_m(ctx.frequency)))

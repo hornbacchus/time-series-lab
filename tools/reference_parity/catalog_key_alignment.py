@@ -72,7 +72,9 @@ KNOWN_INERT: dict[str, list[str]] = {
     # caviar_quantile_dynamics quantile + model_type: FIXED (engine-wired ->
     # theta + specification via a value-map; Commit pending) -> removed from the
     # baseline; the guard now enforces them.
-    "conformal_intervals": ["coverage"],                       # B alias of confidence_level
+    # conformal_intervals coverage: FIXED (engine-wired -> confidence_level,
+    # a clean same-quantity alias; Commit pending) -> removed from the baseline;
+    # the guard now enforces it.
     "cusum_page_hinkley": ["threshold", "drift"],              # C (vs cusum_h/cusum_k/ph_*)
     "denton_chowlin_disaggregation": ["target_frequency"],     # B (vs conversion_ratio)
     "dtw_alignment_lag": ["max_warp"],                         # C (vs window_frac)

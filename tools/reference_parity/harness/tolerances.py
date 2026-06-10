@@ -593,6 +593,30 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Inert-control fix #5 — conformal_intervals coverage discrimination (a
+    # clean same-quantity alias of confidence_level: the nominal interval
+    # LEVEL, not the miscoverage alpha; both default 0.95). Directional +
+    # saturation-tolerant: width 1.770/2.549/2.585 for coverage 0.90/0.95/0.99
+    # -> strict lower step 0.78, plateau-prone top step 0.036, hard spread 0.816.
+    "p3_conformal_coverage": {
+        "type": "tiered_outputs",
+        "default": {"abs_tol": 1e-9},               # resolved cl == passed; default == c95
+        "discrimination": {"min_lower_step": 0.20,  # w(0.95)-w(0.90); measured 0.78
+                           "min_spread": 0.20},     # w(0.99)-w(0.90); measured 0.816
+        "justification": (
+            "Split-conformal width is the deterministic empirical quantile of "
+            "calibration residuals at ceil((n_cal+1)(1-alpha))/n_cal given the "
+            "seeded base forecaster. coverage -> confidence_level is a clean "
+            "same-quantity alias (the LEVEL; alpha = 1 - level stays internal). "
+            "DIRECTIONAL: higher coverage -> wider; strict lower step (catches a "
+            "complement-backwards wiring) + non-strict top step (tolerates only "
+            "the finite-calibration quantile plateau at high levels) + a hard "
+            "0.90<->0.99 spread (catches an inert engine). Default (0.95 == "
+            "native) byte-identical; sentinels = p3_conformal + p3_conformal_cqr "
+            "+ p3_conformal_enbpi. Master plan §7.1."
+        ),
+    },
+
     # Inert-control fix #4 — adf_test max_lags discrimination (type-mismatch:
     # the string "auto" branched as a sentinel for auto-select; an int = a fixed
     # maxlag cap). On a lag-4 DGP the cap BINDS the AIC selection: cap=1 -> lag
