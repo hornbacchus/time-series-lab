@@ -40,3 +40,17 @@ docs/UserGuide_Source.md
 # Bureau (own license) per instructions in the User Guide, Section 13.
 # See: https://www.census.gov/data/software/x13as.html
 resources/x13/
+
+# Working / scratch artifacts (housekeeping). NOTE: gitignore does not untrack
+# already-committed files; intentionally-kept output/ files (e.g. byf baselines
+# read by tests, phase7 maps) remain on disk but are ignored — `git add -f` to
+# version one. Patterns are scoped to avoid clobbering __init__.py / _helpers.
+# (.gitignore has no inline comments — keep these on their own lines.)
+# output/ = working space; only force-added files are tracked
+output/
+# harness-managed temp intermediates (regenerated each run)
+**/_tmp/
+# loose scratch dumps
+**/_*.txt
+# scratch notes
+**/*_scratch*.md
