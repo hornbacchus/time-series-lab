@@ -2257,6 +2257,16 @@
             "t",
             "skewt"
           ]
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": 10,
+          "required": false,
+          "advanced": false,
+          "description": "Volatility forecast periods",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2321,6 +2331,26 @@
             "t",
             "skewt"
           ]
+        },
+        {
+          "name": "o",
+          "label": "Asymmetry Order",
+          "type": "int",
+          "default": 1,
+          "required": false,
+          "advanced": false,
+          "description": "Asymmetric lag order",
+          "options": null
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": 10,
+          "required": false,
+          "advanced": false,
+          "description": "Volatility forecast periods",
+          "options": null
         }
       ],
       "output_tables": [

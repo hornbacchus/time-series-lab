@@ -21879,6 +21879,8 @@ observation expected per block: garch (S53) Tier II.mle-band; egarch
 sub-pattern (alpha-vs-gamma naming convention); HAR-family models
 are closed-form OLS not GARCH-MLE — different tier classification.
 
+**Phase 7+ GARCH dialog-completeness note (catalog-only; the missing-control class, the OPPOSITE axis from inert).** garch's own dialog was COMPLETE (it exposes `horizon`, int/10 == the engine default — the template the variant fixes mirror). The control-surface audit found the VARIANT dialogs had drifted: gjr_garch lacked `horizon`; egarch lacked `horizon` AND `o` — keys the shared engine (`garch_model.py`) reads for every variant. Fixed catalog-only in the same commit (see the egarch/gjr_garch notes); NO engine change; NO validation-tier change for any GARCH entry (honest label: dialog-completeness — the engine paths were always validated by `p3_sgarch`/`p3_gjr_garch`/`p3_egarch`, which PASS unchanged).
+
 ### egarch (Phase 7+ S54; TWENTY-EIGHTH §2.5 entry; SECOND Volatility / Risk / Tails block entry; FIRST Tier V Pattern J B.2 overlay entry within Volatility / Risk / Tails block; Pattern J B.2 sub-pattern SECOND-OBSERVATION TIGHTENING per S47 Note 24 codified framework — A3 SECOND-OBSERVATION TIGHTENING precedent threshold SATISFIED at B.2 sub-pattern scope per first-instance S6 egarch baseline + S54 confirmation)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
@@ -22161,6 +22163,8 @@ distribution + Model Diagnostics + interpretation builder) require
 expert review. Monte Carlo simulation forecast reproducibility ~3%
 relative scale at n=1000.
 
+**Phase 7+ GARCH dialog-completeness fix (catalog-only).** egarch's dialog was MISSING **`horizon`** AND **`o`** — both engine-read for EGARCH (`horizon` default 10; `o_default=1`, the asymmetry order). Added to the catalog: `o` ("Asymmetry Order", int, default **1** == the engine's EGARCH o_default) + `horizon` ("Forecast Horizon", int, default **10** == the engine default, mirroring the garch sibling's definition). ★ Defaults equal the engine's → adding the controls changes NOTHING at default (verified: egarch dialog-default (horizon=10, o=1) == the nothing-set run — (10, 1) both). Non-default now dialog-reachable (verified: horizon=5/o=2 honored). NO engine change; `p3_egarch` PASS unchanged; no guard trim (missing controls were never baselined — the inert backlog stays 28). Dialog-completeness, not new validation.
+
 ### gjr_garch (Phase 7+ S55; TWENTY-NINTH §2.5 entry; THIRD Volatility / Risk / Tails block entry; Pattern J B.2 sub-pattern SCOPE REFINEMENT per outcome (ii) — naming-convention divergence empirically isolated to EGARCH log-variance parameterization)
 
 **Tier (per Phase 7+ S6 §2 + S9 amendments tier taxonomy):** **Tier
@@ -22430,6 +22434,8 @@ variance-specific, not GARCH-family-asymmetric-broadly; Note 24
 framework substantively refined; no third-observation tightening
 manifested at S55 since outcome (ii) is scope-bounding evidence
 rather than further accumulation.
+
+**Phase 7+ GARCH dialog-completeness fix (catalog-only).** gjr_garch's dialog was MISSING **`horizon`** (engine-read, default 10; its `o` was already present, int/1). Added to the catalog: `horizon` ("Forecast Horizon", int, default **10** == the engine default, mirroring the garch sibling's definition). ★ Default equals the engine's → nothing changes at default; non-default now dialog-reachable (verified: horizon=5 → a 5-row forecast). NO engine change; `p3_gjr_garch` PASS unchanged; no guard trim (missing controls were never baselined). Dialog-completeness, not new validation.
 
 ### har_rv (Phase 7+ S56; THIRTIETH §2.5 entry; FOURTH Volatility / Risk / Tails block entry; FIRST HAR-family entry within Volatility / Risk / Tails block — structurally distinct from GARCH-family MLE; OLS-precision Pattern A.2 cross-package framing)
 
