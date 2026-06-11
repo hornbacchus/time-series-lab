@@ -466,7 +466,7 @@
           "name": "ic",
           "label": "Information Criterion",
           "type": "string",
-          "default": "aicc",
+          "default": "aic",
           "required": false,
           "advanced": true,
           "description": "Model selection criterion",
@@ -862,11 +862,11 @@
         {
           "name": "k_ar_diff",
           "label": "AR Lags (diff)",
-          "type": "int",
-          "default": 2,
+          "type": "string",
+          "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Number of lagged differences",
+          "description": "Number of lagged differences ('auto' = IC-selected, or an integer)",
           "options": null
         },
         {
@@ -920,11 +920,11 @@
         {
           "name": "k_ar_diff",
           "label": "AR Lags",
-          "type": "int",
-          "default": 2,
+          "type": "string",
+          "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Number of lagged differences",
+          "description": "Number of lagged differences ('auto' = IC-selected, or an integer)",
           "options": null
         },
         {
@@ -2433,10 +2433,10 @@
           "name": "horizon",
           "label": "Forecast Horizon",
           "type": "int",
-          "default": 10,
+          "default": 1,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Aggregate RV over the next h days (HAR target horizon)",
           "options": null
         }
       ],

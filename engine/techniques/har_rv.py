@@ -44,7 +44,9 @@ def run(ctx: RunContext, progress_callback) -> dict:
     use_log : bool, optional
         If True, estimate log-HAR model (default False).
     h_ahead : int, optional
-        Forecast horizon: aggregate RV over next h days (default 1).
+        Forecast horizon: aggregate RV over next h days (default 1). Also
+        sourced from the `horizon` dialog control when not passed natively
+        (the catalog default was corrected 10->1 to state the delivered value).
     """
     try:
         progress_callback("Validating inputs", 5)
@@ -64,7 +66,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
         weekly_lag = int(ctx.get_param("weekly_lag", 5))
         monthly_lag = int(ctx.get_param("monthly_lag", 22))
         use_log = bool(ctx.get_param("use_log", False))
-        h_ahead = int(ctx.get_param("h_ahead", 1))
+        # h_ahead sourced from the `horizon` dialog control; precedence h_ahead
+        # (THOROUGH) > horizon (dialog) > 1 (the delivered default -- the
+        # catalog default was corrected 10->1 to state it).
+        h_ahead = int(ctx.get_param("h_ahead", ctx.get_param("horizon", 1)))
 
         min_obs = monthly_lag + h_ahead + 10
         if n < min_obs:

@@ -115,6 +115,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
     ---------------------------
     lag : int, optional
         Number of lagged differences (k_ar_diff). If omitted, auto-selected.
+        Also sourced from the `k_ar_diff` dialog control: the string "auto"
+        (its default) -> IC-selection (== omitting it); an int -> a pinned lag.
     max_lag : int, optional
         Maximum lag for automatic selection. Default depends on preset.
     det_order : int, optional
@@ -172,7 +174,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
         max_lag = min(max_lag, n // (2 * k) - 1, n // 4)
         max_lag = max(max_lag, 1)
 
-        fixed_lag = ctx.get_param("lag")
+        # lag (the VECM diff-lag order, == statsmodels k_ar_diff) sourced from
+        # the `k_ar_diff` dialog control; precedence lag (THOROUGH) > k_ar_diff
+        # (dialog) > None. The dialog default is the STRING "auto" -- a SENTINEL
+        # for IC-selection (the delivered behavior); branch it here, never
+        # int-cast it. An int (or int-string) pins the lag.
+        fixed_lag = ctx.get_param("lag", ctx.get_param("k_ar_diff"))
+        if isinstance(fixed_lag, str):
+            _fl = fixed_lag.strip().lower()
+            if _fl in ("", "auto", "none"):
+                fixed_lag = None
+            else:
+                try:
+                    fixed_lag = int(_fl)
+                except ValueError:
+                    return make_error_response(
+                        ctx,
+                        f"k_ar_diff must be 'auto' or an integer, got "
+                        f"'{fixed_lag}'.",
+                        error_fixes=[
+                            "Use 'auto' (IC-selected lag order) or a positive "
+                            "integer number of lagged differences.",
+                        ],
+                    )
         if fixed_lag is not None:
             p = int(fixed_lag)
         else:

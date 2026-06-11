@@ -36,7 +36,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
         max_p, max_q, max_d : int, optional
             Upper bounds for auto search.
         information_criterion : str
-            'aic' (default), 'bic', 'hqic', 'oob'.
+            'aic' (default), 'aicc', 'bic', 'hqic', 'oob'. Also sourced from
+            the `ic` dialog control when not passed natively.
 
     For arima (manual):
         order : list[int]
@@ -115,7 +116,11 @@ def _run_auto_arima(ctx, clean, name, horizon, warnings, progress_callback):
     if d is not None:
         d = int(d)
 
-    ic = ctx.get_param("information_criterion", "aic")
+    # information_criterion sourced from the `ic` dialog control; precedence
+    # information_criterion (THOROUGH) > ic (dialog) > "aic" (the delivered
+    # default -- the catalog default was corrected aicc->aic to state it).
+    # pmdarima 2.1.1 accepts aicc/aic/bic/hqic/oob (all catalog values honorable).
+    ic = ctx.get_param("information_criterion", ctx.get_param("ic", "aic"))
 
     preset_config = {
         "Fast": {"max_p": 2, "max_q": 2, "max_d": 1, "max_P": 1, "max_Q": 1, "max_D": 1, "stepwise": True},

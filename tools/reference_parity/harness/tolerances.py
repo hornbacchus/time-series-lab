@@ -593,6 +593,55 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # A-batch (inert-control fixes #6-#9) — johansen/vecm k_ar_diff (adf
+    # string-sentinel pattern; catalog int->string/"auto"), auto_arima ic
+    # (catalog default aicc->aic), har_rv horizon (catalog default 10->1).
+    # All four preserve the DELIVERED dialog-default behavior; non-default now
+    # LIVE. vecm's unit also fixed the coint_rank="auto" default-path crash.
+    "p3_vecm_controls": {
+        "type": "tiered_outputs",
+        "justification": (
+            "Categorical/exact — the reported lag_order must equal the pinned "
+            "k_ar_diff exactly (int equality; the engine passes it straight to "
+            "SM_VECM(k_ar_diff=p)); 'auto' must reproduce the no-param "
+            "IC-selection; coint_rank='auto' must succeed (pre-fix: ValueError "
+            "on the dialog default — the crash regression pin). No numeric "
+            "ladder consumed. Master plan §7.1 closed_form."
+        ),
+    },
+    "p3_johansen_kardiff": {
+        "type": "tiered_outputs",
+        "justification": (
+            "Categorical/exact — the reported lag_order must equal the pinned "
+            "k_ar_diff exactly (the off-by-one guard; coint_johansen(k_ar_diff"
+            "=p) straight passthrough, identity confirmed); 'auto' == no-param "
+            "IC-selection. No numeric ladder consumed. Master plan §7.1."
+        ),
+    },
+    "p3_auto_arima_ic": {
+        "type": "tiered_outputs",
+        "justification": (
+            "Categorical — every catalog ic value (aicc/aic/bic; all pmdarima-"
+            "2.1.1-honorable, verified) resolves in the audit; aic-vs-bic "
+            "orders differ on the pre-verified split fixture (measured aic->"
+            "(2,0,1) vs bic->(0,0,2)); default == explicit-aic byte-identical. "
+            "No numeric ladder consumed. Master plan §7.1."
+        ),
+    },
+    "p3_har_rv_horizon": {
+        "type": "tiered_outputs",
+        "default": {"abs_tol": 1e-9},               # dialog-default h=1 == no-param coefs
+        "discrimination": {"min_coef_delta": 1e-4},  # h=1 vs h=10 OLS coef movement
+        "justification": (
+            "HAR-RV is deterministic OLS given (rv, lags, h); the resolved h "
+            "is exact (audit h_ahead) and the h-aggregated target moves the "
+            "coefficients (margin from structure — the floor 1e-4 is far below "
+            "any genuine target change, far above float noise). The catalog "
+            "default was corrected 10->1 to state the delivered value. Master "
+            "plan §7.1 closed_form."
+        ),
+    },
+
     # Inert-control fix #5 — conformal_intervals coverage discrimination (a
     # clean same-quantity alias of confidence_level: the nominal interval
     # LEVEL, not the miscoverage alpha; both default 0.95). Directional +

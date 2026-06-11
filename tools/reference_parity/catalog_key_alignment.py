@@ -63,7 +63,8 @@ KNOWN_INERT: dict[str, list[str]] = {
     # adf_test max_lags: FIXED (engine-wired -> max_lag with an "auto" string-
     # sentinel branch; Commit pending) -> removed from the baseline; the guard
     # now enforces it.
-    "auto_arima": ["ic"],                                      # A -> information_criterion
+    # auto_arima ic: FIXED (engine-wired -> information_criterion; catalog
+    # default corrected aicc->aic to state the delivered value; A-batch).
     "autoencoder_anomaly": ["threshold_sigma", "encoding_dim"],  # C
     "block_bootstrap": ["statistic"],                          # C
     "bocpd": ["hazard_rate"],                                  # B inverse of hazard_lambda
@@ -84,9 +85,11 @@ KNOWN_INERT: dict[str, list[str]] = {
     "forecast_reconciliation": ["hierarchy_table"],            # C (vs S_matrix)
     "gaussian_process_forecast": ["max_lag"],                  # C (GP reads no lag param)
     "gradient_boosting_forecast": ["max_lag"],                 # A -> n_lags
-    "har_rv": ["horizon"],                                     # A -> h_ahead
+    # har_rv horizon: FIXED (engine-wired -> h_ahead; catalog default corrected
+    # 10->1 to state the delivered value; A-batch).
     "intervention_analysis": ["intervention_dates", "intervention_type"],  # C (vs interventions/order)
-    "johansen_cointegration": ["k_ar_diff"],                   # A -> lag
+    # johansen_cointegration k_ar_diff: FIXED (engine-wired -> lag via the adf
+    # string-sentinel pattern; catalog int->string default "auto"; A-batch).
     "lomb_scargle": ["min_period", "max_period"],              # B inverse (period=1/freq)
     "lstm_gru_forecast": ["cell_type"],                        # A -> model_type
     "nar_narx": ["max_lag", "hidden_size"],                    # A -> ar_lags/hidden_layers
@@ -96,7 +99,10 @@ KNOWN_INERT: dict[str, list[str]] = {
     "stl_decompose": ["seasonal_window"],                      # A/C -> seasonal (verify semantics)
     "structural_ts": ["trend"],                                # C (reads level/autoregressive)
     "tar_setar": ["max_lag"],                                  # A -> ar_order
-    "vecm": ["k_ar_diff"],                                     # A -> lag
+    # vecm k_ar_diff: FIXED (engine-wired -> lag via the adf string-sentinel
+    # pattern; catalog int->string default "auto"; the same unit also fixed the
+    # vecm coint_rank="auto" default-path crash -- coint_rank was never
+    # baselined here, the guard is name-blind to read-but-crashes; A-batch).
     "x13_seasonal_adjust": ["method"],                         # C
 }
 

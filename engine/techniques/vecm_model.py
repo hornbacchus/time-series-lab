@@ -64,11 +64,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
     Parameters (via ctx.params)
     ---------------------------
     lag : int, optional
-        Number of lagged differences. If omitted, selected by IC.
+        Number of lagged differences. If omitted, selected by IC. Also sourced
+        from the `k_ar_diff` dialog control: the string "auto" (its default) ->
+        IC-selection (== omitting it); an int -> a pinned lag.
     max_lag : int, optional
         Max lag for order selection. Default depends on preset.
-    coint_rank : int, optional
-        Number of cointegrating relations. If omitted, estimated from data.
+    coint_rank : int or "auto", optional
+        Number of cointegrating relations. If omitted or "auto" (the dialog
+        default), estimated from data via the trace test.
     deterministic : str, optional
         'ci' (restricted constant, default), 'co' (constant outside),
         'li' (restricted linear trend), 'lo' (linear trend outside), 'n' (none).
@@ -153,7 +156,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
         max_lag = min(max_lag, n // (2 * k) - 1, n // 4)
         max_lag = max(max_lag, 1)
 
-        fixed_lag = ctx.get_param("lag")
+        # lag (the diff-lag order, == statsmodels k_ar_diff) sourced from the
+        # `k_ar_diff` dialog control; precedence lag (THOROUGH) > k_ar_diff
+        # (dialog) > None. The dialog default is the STRING "auto" -- a SENTINEL
+        # for IC-selection (the delivered behavior); branch it here, never
+        # int-cast it. An int (or int-string) pins the lag.
+        fixed_lag = ctx.get_param("lag", ctx.get_param("k_ar_diff"))
+        if isinstance(fixed_lag, str):
+            _fl = fixed_lag.strip().lower()
+            if _fl in ("", "auto", "none"):
+                fixed_lag = None
+            else:
+                try:
+                    fixed_lag = int(_fl)
+                except ValueError:
+                    return make_error_response(
+                        ctx,
+                        f"k_ar_diff must be 'auto' or an integer, got "
+                        f"'{fixed_lag}'.",
+                        error_fixes=[
+                            "Use 'auto' (IC-selected lag order) or a positive "
+                            "integer number of lagged differences.",
+                        ],
+                    )
         if fixed_lag is not None:
             p = int(fixed_lag)
         else:
@@ -173,6 +198,28 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # Cointegration rank
         progress_callback("Estimating cointegration rank", 25)
         coint_rank_param = ctx.get_param("coint_rank")
+        # The dialog's coint_rank default is the STRING "auto" -- pre-fix it
+        # crashed the int() cast below (ValueError: invalid literal for int()
+        # with base 10: 'auto') on the dialog's DEFAULT value. Branch the
+        # sentinel here: "auto" -> None -> the existing select_coint_rank
+        # auto-rank path (the documented behavior); an int-string -> int.
+        if isinstance(coint_rank_param, str):
+            _cr = coint_rank_param.strip().lower()
+            if _cr in ("", "auto", "none"):
+                coint_rank_param = None
+            else:
+                try:
+                    coint_rank_param = int(_cr)
+                except ValueError:
+                    return make_error_response(
+                        ctx,
+                        f"coint_rank must be 'auto' or an integer, got "
+                        f"'{coint_rank_param}'.",
+                        error_fixes=[
+                            "Use 'auto' (trace-test selected rank) or a "
+                            "non-negative integer cointegration rank.",
+                        ],
+                    )
         # Capture Johansen trace statistics for audit disclosure, even when
         # the user provides rank explicitly. Re-calling select_coint_rank
         # is cheap (the expensive VECM fit happens below) and gives us the
