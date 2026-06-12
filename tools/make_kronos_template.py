@@ -19,7 +19,7 @@ import sys
 
 import pandas as pd
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 SRC = os.environ.get(
     "KRONOS_EXAMPLE_CSV",
@@ -72,15 +72,23 @@ def main():
     ws.merge_cells("A3:F5")
     ws.row_dimensions[3].height = 70
 
+    # The Bespoke input-cell convention (owner ruling, K3.2): every cell the
+    # READER consumes gets solid yellow #FFFF00 + thin black borders on all
+    # four sides. T/top_p are read-but-ignored display constants -> NOT styled
+    # (the convention must not lie).
+    input_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+    thin = Side(style="thin", color="000000")
+    input_border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
     r = 7
     ws.cell(row=r, column=1, value="Parameters (column B is yours to edit)").font = Font(bold=True)
-    yellow = PatternFill("solid", fgColor="FFF2CC")
     for name, val, note in PARAMS:
         r += 1
         ws.cell(row=r, column=1, value=name).font = Font(bold=True)
         v = ws.cell(row=r, column=2, value=val)
         if name not in ("T", "top_p"):
-            v.fill = yellow
+            v.fill = input_fill
+            v.border = input_border
         ws.cell(row=r, column=3, value=note)
 
     r += 2
@@ -91,9 +99,13 @@ def main():
         c.fill = PatternFill("solid", fgColor="D9E1F2")
     for i, row in df.iterrows():
         rr = hdr + 1 + i
-        ws.cell(row=rr, column=1, value=pd.Timestamp(row["timestamps"]).date())
+        c0 = ws.cell(row=rr, column=1, value=pd.Timestamp(row["timestamps"]).date())
+        c0.fill = input_fill
+        c0.border = input_border
         for ci, col in enumerate(["open", "high", "low", "close", "volume"], 2):
-            ws.cell(row=rr, column=ci, value=float(row[col]))
+            c = ws.cell(row=rr, column=ci, value=float(row[col]))
+            c.fill = input_fill
+            c.border = input_border
     ws.cell(row=hdr + len(df) + 2, column=1,
             value="Any OHLCV series may be pasted over the block above "
                   "(>=120 rows; Volume may be blank). Example data: the last "
