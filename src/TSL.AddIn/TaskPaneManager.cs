@@ -185,6 +185,19 @@ namespace TSL.AddIn
                                 Logger.Error("ExcelWriter.WriteRunResult threw on main thread.", writeEx);
                             }
 
+                            // Kronos Forecast (EXPERIMENTAL): overlay the fan chart
+                            // on the freshly written results sheet. Best-effort
+                            // enhancement -- the tables already carry the data; a
+                            // chart failure never fails the run.
+                            if (writeResult != null && writeResult.Success &&
+                                string.Equals(request?.TechniqueId, "kronos_forecast",
+                                    StringComparison.OrdinalIgnoreCase))
+                            {
+                                try { ExcelWriter.TryAddKronosFanChart(writeResult.ResultSheetName); }
+                                catch (Exception chartEx)
+                                { Logger.Info($"Kronos fan chart skipped: {chartEx.Message}"); }
+                            }
+
                             _hostControl?.Invoke((System.Action)(() =>
                             {
                                 var sheets = new List<OutputSheetLink>();
@@ -386,6 +399,46 @@ namespace TSL.AddIn
         }
 
         /// <summary>
+        /// Open the Run view for Kronos Forecast (Bespoke #3; EXPERIMENTAL) in
+        /// CONFIGURE-then-run mode — the Breakeven shape exactly: no cell
+        /// selection, no pane params (every knob lives in the workbook's
+        /// kronos_input sheet), the Run button routed to the shared
+        /// OnWorkbookRunRequested.
+        /// </summary>
+        public static void OpenKronosConfig()
+        {
+            EnsureTaskPane();
+            _taskPane.Visible = true;
+
+            const string techniqueId = "kronos_forecast";
+            _hostControl.ViewModel.NavigateToRun(techniqueId);
+            var runVm = _hostControl.ViewModel.CurrentView as RunViewModel;
+            if (runVm == null) return;
+
+            try
+            {
+                var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
+                if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
+                    runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueId = techniqueId;
+                // No curated pane params: L/H/M/seed live in the workbook's
+                // kronos_input parameter cells. input_workbook is auto-resolved
+                // at Run-click. An empty list renders the Run affordance only.
+                runVm.SetParameters(new List<(string Name, string Label, string Type,
+                    string Description, List<string> Options, object Default)>());
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Could not load Kronos Forecast parameters: {ex.Message}");
+            }
+
+            runVm.SetSeriesPreviews(new List<SeriesPreviewItem>());
+            runVm.RequiresSelection = false;
+            runVm.WorkbookInputMode = true;
+            runVm.IsRunning = false;
+        }
+
+        /// <summary>
         /// Handles the Run button for a WORKBOOK-INPUT technique. Resolves the
         /// active workbook, writes a clean local %TEMP% copy (off OneDrive,
         /// captures unsaved edits — the d923c6a mechanism), merges the user's
@@ -402,6 +455,7 @@ namespace TSL.AddIn
             {
                 "bond_yield_forecast",
                 "breakeven_payroll",
+                "kronos_forecast",
             };
 
         private static void OnWorkbookRunRequested(string techniqueId)

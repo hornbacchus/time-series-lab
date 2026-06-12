@@ -179,6 +179,29 @@ namespace TSL.AddIn
                     screentip='Run the breakeven payrolls computation on the active workbook'
                     supertip='Computes the quarterly breakeven payrolls path (2026 flagged FORECAST), the 10-row net-migration scenario grid, the reconciliation anchors, and the signal-vs-noise overlay into a new &quot;Breakeven Payrolls Results&quot; sheet (the input workbook is never modified).' />
           </menu>
+          <!-- Kronos Forecast (Bespoke member #3; EXPERIMENTAL by design): a
+               workbook-input technique cloning the Breakeven pattern. The
+               negative evaluation record travels on every surface; sampled
+               paths only, never presented as calibrated bands. -->
+          <menu id='menuKronosForecast'
+                label='Kronos Forecast'
+                size='large'
+                imageMso='ChartTypeLineInsertGallery'
+                screentip='Kronos Forecast (EXPERIMENTAL)'
+                supertip='EXPERIMENTAL — research curiosity, not a validated forecaster. Sampled close-path forecasts from the Kronos financial foundation model; bands are sampled path spread, not calibrated confidence intervals. Workbook-input: use &apos;Open Input Template&apos; (pre-filled OHLCV + parameter cells), then &apos;Run Kronos Forecast&apos;.'>
+            <button id='btnKronosOpenTemplate'
+                    label='Open Input Template'
+                    imageMso='TableInsertExcel'
+                    onAction='OnKronosOpenTemplate'
+                    screentip='Open the Kronos Forecast input template'
+                    supertip='Opens a pre-filled .xlsx (250 days of example OHLCV + the L/H/M/seed parameter cells; paste any OHLCV series over the block). EXPERIMENTAL — the status block at the top of the sheet is the evaluation record.' />
+            <button id='btnKronosRun'
+                    label='Run Kronos Forecast'
+                    imageMso='MacroPlay'
+                    onAction='OnKronosRun'
+                    screentip='Run Kronos on the active input workbook'
+                    supertip='Samples M close-price paths over an H-day horizon (defaults ~30-60s; progress reports elapsed vs expected). EXPERIMENTAL — research curiosity, not a validated forecaster: sampled paths, not calibrated bands. Results land in a separate output workbook; the input is never modified.' />
+          </menu>
         </group>
 
         <group id='grpExplore' label='Explore'>

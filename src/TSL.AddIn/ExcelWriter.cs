@@ -769,6 +769,127 @@ namespace TSL.AddIn
             return TruncateSheetName(baseName + "_" + DateTime.Now.ToString("HHmmss"));
         }
 
+        /// <summary>
+        /// Kronos Forecast fan chart (Bespoke #3; EXPERIMENTAL): a stacked-area
+        /// band fan (P10 base transparent, P10→P25 / P25→P75 / P75→P90 shaded)
+        /// with the close-path median overlaid as a line, built from the
+        /// "Kronos Forecast Summary" table the engine emitted. Reads cell
+        /// ranges directly and creates NO named ranges (the no-pathway
+        /// guardrail extends to the chart). The chart title carries the
+        /// mandatory band label verbatim. Best-effort: any failure logs and
+        /// returns false — the data is already on the sheet; the chart is an
+        /// enhancement, never a gate.
+        /// </summary>
+        public static bool TryAddKronosFanChart(string resultSheetName)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(resultSheetName)) return false;
+                var app = (Application)ExcelDnaUtil.Application;
+                Worksheet ws = null;
+                foreach (Workbook wb in app.Workbooks)
+                {
+                    foreach (Worksheet s in wb.Worksheets)
+                        if (string.Equals(s.Name, resultSheetName, StringComparison.OrdinalIgnoreCase))
+                        { ws = s; break; }
+                    if (ws != null) break;
+                }
+                if (ws == null) return false;
+
+                // Locate the summary table the engine emitted: title row, then
+                // headers (Date|Median Close|P25|P75|P10|P90), then H data rows.
+                Range title = ws.UsedRange.Find("Kronos Forecast Summary",
+                    LookAt: XlLookAt.xlPart, MatchCase: false);
+                if (title == null) return false;
+                int hdrRow = title.Row + 1;
+                int first = hdrRow + 1;
+                int last = first;
+                while (C(ws, last + 1, 1).Value2 != null && last - first < 60) last++;
+                int n = last - first + 1;
+                if (n < 2) return false;
+
+                // Helper columns beside the table (H..K): the stacked-band
+                // decomposition. Plain cell formulas; no named ranges.
+                C(ws, hdrRow, 8).Value2 = "fan base (P10)";
+                C(ws, hdrRow, 9).Value2 = "P10→P25";
+                C(ws, hdrRow, 10).Value2 = "P25→P75";
+                C(ws, hdrRow, 11).Value2 = "P75→P90";
+                for (int r = first; r <= last; r++)
+                {
+                    C(ws, r, 8).Formula = $"=E{r}";        // P10
+                    C(ws, r, 9).Formula = $"=C{r}-E{r}";   // P25 - P10
+                    C(ws, r, 10).Formula = $"=D{r}-C{r}";  // P75 - P25
+                    C(ws, r, 11).Formula = $"=F{r}-D{r}";  // P90 - P75
+                }
+
+                Range dates = ws.Range[C(ws, first, 1), C(ws, last, 1)];
+                var charts = (ChartObjects)ws.ChartObjects(Type.Missing);
+                ChartObject co = charts.Add(440, Math.Max(10, (title.Top as double? ?? 10)), 520, 300);
+                Chart ch = co.Chart;
+                ch.ChartType = XlChartType.xlAreaStacked;
+
+                var sc = (SeriesCollection)ch.SeriesCollection();
+                int[] cols = { 8, 9, 10, 11 };
+                string[] names = { "fan base", "P10–P25", "P25–P75", "P75–P90" };
+                for (int i = 0; i < 4; i++)
+                {
+                    Series s = sc.NewSeries();
+                    s.Name = names[i];
+                    s.XValues = dates;
+                    s.Values = ws.Range[C(ws, first, cols[i]), C(ws, last, cols[i])];
+                    s.ChartType = XlChartType.xlAreaStacked;
+                    // Legacy styling APIs (no office-PIA dependency): the base
+                    // series is fully transparent; the bands are light fills.
+                    if (i == 0)
+                        s.Interior.ColorIndex = XlColorIndex.xlColorIndexNone;
+                    else
+                        s.Interior.Color = (i == 2) ? 0xD8B380 : 0xF0DCC0; // BGR light blues
+                    s.Border.LineStyle = XlLineStyle.xlLineStyleNone;
+                }
+                Series med = sc.NewSeries();
+                med.Name = "Median close";
+                med.XValues = dates;
+                med.Values = ws.Range[C(ws, first, 2), C(ws, last, 2)];
+                med.ChartType = XlChartType.xlLine;
+                med.Border.Color = 0x8B3A1F; // BGR dark blue
+                med.Border.Weight = XlBorderWeight.xlMedium;
+
+                ch.HasTitle = true;
+                // The mandatory band label, verbatim ON the chart (matches the
+                // engine's emitted string exactly).
+                ch.ChartTitle.Text =
+                    "Kronos close paths: sampled path spread -- NOT calibrated confidence bands";
+                ch.ChartTitle.Font.Size = 10;
+                ch.HasLegend = true;
+                ch.Legend.Position = XlLegendPosition.xlLegendPositionBottom;
+
+                // The stacked fan's vertical axis starts at 0 by default, which
+                // crushes the band; anchor the minimum just under the fan base.
+                try
+                {
+                    var ax = (Axis)ch.Axes(XlAxisType.xlValue, XlAxisGroup.xlPrimary);
+                    double p10min = double.MaxValue;
+                    for (int r = first; r <= last; r++)
+                    {
+                        var v = C(ws, r, 5).Value2 as double?;
+                        if (v.HasValue && v.Value < p10min) p10min = v.Value;
+                    }
+                    if (p10min != double.MaxValue)
+                        ax.MinimumScale = Math.Floor(p10min * 0.995 * 100) / 100;
+                }
+                catch (Exception axEx)
+                {
+                    Logger.Info($"Kronos fan chart axis anchor skipped: {axEx.Message}");
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Kronos fan chart skipped: {ex.Message}");
+                return false;
+            }
+        }
+
         public class WriteResult
         {
             public bool Success { get; set; }

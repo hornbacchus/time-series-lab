@@ -377,6 +377,87 @@ namespace TSL.AddIn
             }
         }
 
+        // ── Kronos Forecast (Bespoke member #3; EXPERIMENTAL) ──────────────
+        // Clones the Breakeven Payrolls invocation mechanics exactly: open a
+        // WORKING COPY of the bundled template (never the bundled file in
+        // place); Run routes configure-then-run through the shared
+        // workbook-input dispatch.
+
+        public void OnKronosOpenTemplate(IRibbonControl control)
+        {
+            try
+            {
+                var templatePath = LocateKronosTemplate();
+                if (templatePath == null)
+                {
+                    MessageBox.Show(
+                        "Kronos Forecast input template not found.\n\n" +
+                        "Reinstall Time Series Lab to restore the bundled template.",
+                        "Time Series Lab",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    var app = (Application)ExcelDnaUtil.Application;
+                    var workingPath = CreateTemplateWorkingCopy(templatePath, "Kronos_Forecast_input");
+                    app.Workbooks.Open(workingPath, ReadOnly: false);
+                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error opening Kronos Forecast input template: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        public void OnKronosRun(IRibbonControl control)
+        {
+            try
+            {
+                TaskPaneManager.OpenKronosConfig();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error opening Kronos Forecast: {ex.Message}",
+                    "Time Series Lab",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Resolve the bundled Kronos Forecast input template (the lineage-
+        /// verified 250-day IEF example + parameter cells). Mirrors
+        /// LocateBreakevenPayrollTemplate (dev repo path → installed path).
+        /// </summary>
+        private string LocateKronosTemplate()
+        {
+            const string templateRel =
+                @"engine\techniques\kronos_forecast\resources\templates\kronos_forecast_input_template.xlsx";
+
+            var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+            if (!string.IsNullOrEmpty(xllDir))
+            {
+                var projectRoot = Path.GetFullPath(
+                    Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
+                var devPath = Path.Combine(projectRoot, templateRel);
+                if (File.Exists(devPath)) return devPath;
+            }
+
+            var installedPath = Path.Combine(AddIn.AppDataPath, templateRel);
+            if (File.Exists(installedPath)) return installedPath;
+
+            return null;
+        }
+
         /// <summary>
         /// Resolve the bundled Breakeven Payrolls input template path (the pinned,
         /// May-2025-anchored .xlsx). Mirrors LocateBondYieldForecastTemplate
