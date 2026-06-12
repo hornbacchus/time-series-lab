@@ -106,13 +106,24 @@ def main():
             c = ws.cell(row=rr, column=ci, value=float(row[col]))
             c.fill = input_fill
             c.border = input_border
+            # DISPLAY-ONLY number formats (K4 finding #2): prices at 3
+            # decimals, volume as a grouped integer. Cell VALUES stay full
+            # precision -- the lineage sha + the reproduction property depend
+            # on values, never on display.
+            c.number_format = "0.000" if col != "volume" else "#,##0"
     ws.cell(row=hdr + len(df) + 2, column=1,
             value="Any OHLCV series may be pasted over the block above "
                   "(>=120 rows; Volume may be blank). Example data: the last "
                   "250 trading days of IEF from the Kronos program's frozen, "
                   "sha-manifested snapshot (static; not a live feed).")
 
-    for col, w in (("A", 16), ("B", 12), ("C", 96), ("D", 10), ("E", 10), ("F", 12)):
+    # Column widths sized for the DATA content (K4 finding #1): the OHLC
+    # price columns uniform; Date/Volume sensible for theirs. The parameter
+    # annotations in C8:C14 deliberately do NOT drive any width -- they
+    # OVERFLOW across the empty D..F cells of their rows (standard Excel
+    # behavior; fully readable; no merged spans, so the reader's column-A/B
+    # scan geometry is untouched).
+    for col, w in (("A", 14), ("B", 11), ("C", 11), ("D", 11), ("E", 11), ("F", 12)):
         ws.column_dimensions[col].width = w
 
     os.makedirs(os.path.dirname(DST), exist_ok=True)
