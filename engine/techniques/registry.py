@@ -204,6 +204,9 @@ TECHNIQUE_REGISTRY = {
     "breakeven_payroll": "techniques.breakeven_payroll",
     "breakeven": "techniques.breakeven_payroll",
 
+    # --- Kronos Forecast (Bespoke #3; workbook-input; EXPERIMENTAL -- K2 exposure) ---
+    "kronos_forecast": "techniques.kronos_forecast",
+
     # --- Dynamic Factor Model (Batch 2) ---
     "dynamic_factor_model": "techniques.dynamic_factor_model",
     "dynamic_factor": "techniques.dynamic_factor_model",

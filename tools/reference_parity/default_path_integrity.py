@@ -63,6 +63,10 @@ sys.path.insert(0, os.path.join(_ROOT, "engine"))
 EXCLUDED = {
     "bond_yield_forecast": "bespoke pane (curated param whitelist + workbook input)",
     "breakeven_payroll": "bespoke pane (empty param list + workbook input)",
+    # 2026-06-12 (K2 exposure): Bespoke #3 -- workbook-input via a Kronos-venv
+    # subprocess; EXPERIMENTAL by design. The generic dialog emission does not
+    # apply (input_workbook is injected by the workbook run path).
+    "kronos_forecast": "bespoke workbook-input (Kronos subprocess; experimental)",
 }
 
 # ★ Findings baseline (disclosure): baseline-success + dialog-default-failure,

@@ -1207,6 +1207,46 @@
       ]
     },
     {
+      "id": "kronos_forecast",
+      "name": "Kronos Forecast (EXPERIMENTAL)",
+      "category": "ML / Deep Learning",
+      "summary": "EXPERIMENTAL showcase: sampled close-path forecasts from the Kronos financial foundation model. Out-of-sample evaluation (Jul 2025-Jun 2026) found no confirmed predictive or distributional value; bands are sampled path spread, NOT calibrated confidence intervals. Not for published research.",
+      "description_file": "kronos_forecast.md",
+      "min_series": 0,
+      "max_series": 0,
+      "supports_auto_udf": false,
+      "auto_udf_name": null,
+      "presets": [
+        "Fast",
+        "Balanced",
+        "Thorough"
+      ],
+      "parameters": [
+        {
+          "name": "input_workbook",
+          "label": "Input Workbook (.xlsx path)",
+          "type": "string",
+          "default": null,
+          "required": true,
+          "advanced": false,
+          "description": "Absolute path to the Kronos Forecast workbook (the kronos_input sheet: an OHLCV block + the L/H/M/seed parameter cells). Use the 'Open Input Template' Ribbon menu item to create one. All knobs live in the workbook, not here.",
+          "options": null
+        }
+      ],
+      "output_tables": [
+        "kronos_parameters",
+        "kronos_close_paths",
+        "kronos_forecast_summary"
+      ],
+      "tags": [
+        "experimental",
+        "foundation_model",
+        "kronos",
+        "forecasting",
+        "bespoke"
+      ]
+    },
+    {
       "id": "dynamic_factor_model",
       "name": "Dynamic Factor Model",
       "category": "Multivariate Systems",

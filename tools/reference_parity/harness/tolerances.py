@@ -642,6 +642,27 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # Kronos Forecast (Bespoke #3, EXPERIMENTAL) — cross-source REPRODUCTION
+    # of the characterized artifact (NOT forecast-skill validation; the
+    # evaluation record found none). Both arms: seed-once + ONE predict_batch
+    # of M x sample_count=1 against the same pinned venv/model/tokenizer ->
+    # machine-precision agreement expected (measure at the pre-run; the seed
+    # scheme and batch mechanics are identical by construction).
+    "p3_kronos_reproduction": {
+        "type": "tiered_outputs",
+        "default": {"abs_tol": 1e-9},
+        "justification": (
+            "Seed-pinned torch sampling reproduced across two independent "
+            "wrappers (the TSL runner vs the Kronos program's kxaf/forecaster "
+            "rollout_paths_batched) in the SAME pinned venv: identical global "
+            "seeding (random/numpy/torch.manual_seed), identical ONE-batch "
+            "mechanics, identical pins -> the (M, H) close matrices must agree "
+            "to machine precision AS A BATCH. SKIP (not ERROR) on hosts "
+            "without the Kronos assets. dl_seed_pinned; tier slow (never in "
+            "the fast CI lane). Master plan §7.1."
+        ),
+    },
+
     # Inert-control fix #5 — conformal_intervals coverage discrimination (a
     # clean same-quantity alias of confidence_level: the nominal interval
     # LEVEL, not the miscoverage alpha; both default 0.95). Directional +

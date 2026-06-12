@@ -46,6 +46,10 @@ ALLOWLIST = {
     "breakeven_payroll": "bespoke workbook-input package",
     "kalman_filter": "reads ctx.params via the _resolve_params(ctx) helper, not direct get_param",
     "kalman_smoother": "reads ctx.params via the _resolve_params(ctx) helper, not direct get_param",
+    # 2026-06-12 (K2 exposure): Bespoke #3, the breakeven D-set shape --
+    # workbook-input; the only catalog control (input_workbook) is consumed by
+    # the dispatch's workbook reader, not via per-key get_param of dialog knobs.
+    "kronos_forecast": "bespoke workbook-input (Kronos subprocess; experimental); knobs live in the workbook",
 }
 
 # ★ KNOWN_INERT baseline (disposition b) — the inert controls that exist today,
