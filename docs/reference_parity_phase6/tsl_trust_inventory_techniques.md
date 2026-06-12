@@ -39333,6 +39333,52 @@ expert review.
 - Catalog: `resources/catalog/techniques_catalog.json` (84
   techniques; canonical registry)
 
+## §6 EXPERIMENTAL tools — OUTSIDE validation scope (not §2/§2.5 semantics)
+
+> Entries in this section are **NOT validated techniques** and carry **no
+> §2/§2.5 trust claim**. They ship deliberately and visibly EXPERIMENTAL; the
+> labeling is the design. Nothing here counts toward any validation metric,
+> coverage statement, or publication claim elsewhere in this document.
+
+### kronos_forecast — "Kronos Forecast (EXPERIMENTAL)" (Bespoke #3; exposed at K2)
+
+- **The evaluation record (travels with the tool):** the Kronos Cross-Asset
+  Forecaster program's out-of-sample evaluation (Jul 2025–Jun 2026;
+  KXAF_CLOSEOUT_MEMO.md, Kronos repo @ `68dcff9`) found, across five
+  pre-registered/exploratory threads on strictly post-cutoff data: **no
+  confirmed directional edge, no cross-asset ranking ability, a clean FX
+  negative, and a miscalibrated path distribution** (50% bands covering
+  ~11–22% of outcomes). The tool's status block (template + every output,
+  verbatim): *"EXPERIMENTAL — research curiosity, not a validated forecaster;
+  out-of-sample evaluation (Jul 2025 – Jun 2026) found no confirmed
+  predictive or distributional value; bands are sampled path spread, not
+  calibrated confidence intervals; model knowledge ends ~June 2025; not for
+  published research; re-test 2026-12-01 per RATES_RERUN_PROTOCOL.md; see
+  KXAF_CLOSEOUT_MEMO.md."* Band labeling exact and mandatory: **"sampled path
+  spread — NOT calibrated confidence bands."**
+- **What IS checked — REPRODUCTION, not skill:** `p3_kronos_reproduction`
+  (tier slow, `dl_seed_pinned`) — the TSL runner's (M, H) close matrix vs the
+  evaluation program's own `kxaf/forecaster.py` `rollout_paths_batched`, same
+  seed/pins/inputs, compared AS A BATCH (chunking would change the path set).
+  **Pre-run at K2: PASS, max_abs_diff = 0.0** (byte-exact; pins echoed:
+  upstream `67b630e6`, model `2b554741`, tokenizer `0e011738`, torch
+  2.12.0+cpu, Python 3.12.10). This demonstrates the TSL integration
+  faithfully reproduces the characterized artifact — it does NOT validate
+  forecast skill. SKIP (never ERROR) on hosts without the Kronos assets.
+- **The December trigger (2026-12-01; RATES_RERUN_PROTOCOL.md; one slip
+  2027-03-16):** on CONFIRM under Protocol v2, the IEF/1–2-week configuration
+  may be promoted to a labeled technique via the BVAR-precedent path; on any
+  other verdict the experimental label becomes permanent ("no predictive
+  value established") or the tool is retired — owner's call then, documented
+  either way.
+- **Guardrails as built:** no pathway into other TSL techniques (the output
+  sheet exposes no named ranges; grep-asserted at K2 — nothing references the
+  Kronos output or kronos_* keys outside the package/check); pins asserted at
+  every run (structured error on mismatch — verified discriminating at K1);
+  close paths only rendered (the invalid-OHLC finding); compute local-CPU
+  via the pinned `C:\KronosDev` venv (subprocess boundary — three
+  incompatible Pythons; no silent upgrades possible).
+
 ## Banking footer
 
 **B-Phase6-S8-TRUST-INVENTORY-TECHNIQUES-FIRST-INSTANCE
