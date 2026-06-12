@@ -556,11 +556,27 @@ namespace TSL.AddIn
             if (paramFields.Count > 0)
                 WriteSection("Parameters", paramFields);
 
-            // Seed & Determinism
-            WriteSection("Determinism", new Dictionary<string, string>
+            // Seed & Determinism. The REQUEST seed is the platform-level
+            // default; a technique whose engine resolves its own seed (e.g.
+            // the workbook-input tools: kronos reads it from the template's
+            // parameter cell) echoes the REAL one in audit_fields["seed"] --
+            // display that one, and annotate the request seed as unused, so
+            // the provenance row never misleads on a seed-defined tool.
+            var determinism = new Dictionary<string, string>();
+            object engineSeed = null;
+            if (response.AuditFields != null)
+                response.AuditFields.TryGetValue("seed", out engineSeed);
+            if (engineSeed != null)
             {
-                { "Seed", request.Seed.ToString() },
-            });
+                determinism["Seed"] = engineSeed.ToString();
+                determinism["Request seed"] =
+                    $"{request.Seed} (platform default — unused; the engine seed above governs)";
+            }
+            else
+            {
+                determinism["Seed"] = request.Seed.ToString();
+            }
+            WriteSection("Determinism", determinism);
 
             // Engine audit fields (from response)
             if (response.AuditFields != null)
