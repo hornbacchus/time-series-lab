@@ -300,6 +300,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # silent-fall-through pattern.
         _stack_user = ctx.get_param("stack_types", None)
         _STACK_TYPES_VALID = {"generic", "trend", "seasonality"}
+        # The dialog sends stack_types as a comma-separated STRING (e.g.
+        # "trend,seasonality,generic"); pre-fix list() iterated it CHAR-BY-CHAR
+        # and the validation rejected single letters. Split it first.
+        if isinstance(_stack_user, str):
+            _stack_user = [tok.strip().lower() for tok in _stack_user.split(",") if tok.strip()] or None
         if _stack_user is None:
             stack_types = preset_cfg["stack_types"]
         else:

@@ -129,6 +129,10 @@ def _run_multivariate(ctx, progress_callback, all_series):
     n_bkps = ctx.get_param("n_bkps")
 
     penalty_param = ctx.get_param("penalty")
+    # "auto" (the dialog default) is a SENTINEL for the preset-based automatic
+    # penalty (== unset). bic/aic/mbic tokens and numerics pass through below.
+    if isinstance(penalty_param, str) and penalty_param.strip().lower() in ("", "auto", "none"):
+        penalty_param = None
     if penalty_param is None:
         penalty_method = {"Fast": "bic", "Balanced": "bic",
                           "Thorough": "mbic"}.get(ctx.preset, "bic")
@@ -305,6 +309,11 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         # Penalty
         penalty_param = ctx.get_param("penalty")
+        # "auto" (the dialog default) is a SENTINEL for the preset-based
+        # automatic penalty (== unset). bic/aic/mbic tokens and numerics pass
+        # through below.
+        if isinstance(penalty_param, str) and penalty_param.strip().lower() in ("", "auto", "none"):
+            penalty_param = None
         if penalty_param is None:
             # Preset-based default
             preset_pen = {

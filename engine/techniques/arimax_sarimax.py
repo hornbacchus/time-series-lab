@@ -141,6 +141,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
         enforce_inv = ctx.get_param("enforce_invertibility", True)
 
         order_param = ctx.get_param("order")
+        # The dialog's `order` default is the STRING "auto" -- a SENTINEL for
+        # automatic order selection (== unset -> the preset search below). An
+        # explicit string parses as comma/space-separated ints ("1,1,1" ->
+        # (1,1,1)). Pre-fix BOTH dialog paths were dead: "auto" crashed
+        # int('a') and "1,1,1" crashed int(',') -- the tuple(int(x) for x in
+        # order_param) cast iterated the raw string char-by-char.
+        if isinstance(order_param, str):
+            _op = order_param.strip().lower()
+            if _op in ("", "auto", "none"):
+                order_param = None
+            else:
+                try:
+                    order_param = [int(tok) for tok in _op.replace(";", ",").replace(" ", ",").split(",") if tok.strip()]
+                except ValueError:
+                    return make_error_response(
+                        ctx,
+                        f"order must be 'auto' or comma-separated integers "
+                        f"(e.g. '1,1,1'), got '{order_param}'.",
+                        error_fixes=["Use 'auto' (automatic selection) or p,d,q integers."],
+                    )
         seasonal_param = ctx.get_param("seasonal_order", [0, 0, 0, 0])
         seasonal_order = tuple(int(x) for x in seasonal_param) if seasonal_param else (0, 0, 0, 0)
 

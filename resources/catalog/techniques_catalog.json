@@ -1614,13 +1614,15 @@
           "name": "model",
           "label": "Model",
           "type": "string",
-          "default": "stochastic_volatility",
+          "default": "local_level",
           "required": false,
           "advanced": false,
-          "description": "Nonlinear model to filter",
+          "description": "Nonlinear state-space model to filter",
           "options": [
-            "stochastic_volatility",
-            "local_level"
+            "local_level",
+            "local_level_sv",
+            "nonlinear_growth",
+            "random_walk_sv"
           ]
         }
       ],
@@ -3801,13 +3803,13 @@
           "name": "method",
           "label": "Method",
           "type": "string",
-          "default": "chow_lin",
+          "default": "chowlin",
           "required": false,
           "advanced": false,
           "description": "Disaggregation method",
           "options": [
             "denton",
-            "chow_lin"
+            "chowlin"
           ]
         },
         {

@@ -80,6 +80,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         # Window length
         L_param = ctx.get_param("window_length")
+        # The dialog default is the STRING "auto" -- a SENTINEL for the
+        # data-driven window formula below (== unset); int-strings arrive
+        # typed post-F1, but accept them here too; bad strings error cleanly.
+        if isinstance(L_param, str):
+            _lp = L_param.strip().lower()
+            if _lp in ("", "auto", "none"):
+                L_param = None
+            else:
+                try:
+                    L_param = int(_lp)
+                except ValueError:
+                    return make_error_response(
+                        ctx,
+                        f"window_length must be 'auto' or an integer, got '{L_param}'.",
+                        error_fixes=["Use 'auto' (data-driven window) or a positive integer."],
+                    )
         if L_param is not None:
             L = int(L_param)
         else:

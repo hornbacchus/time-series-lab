@@ -90,6 +90,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         # Determine decomposition level
         level_param = ctx.get_param("level")
+        # The dialog default is the STRING "auto" -- a SENTINEL for the
+        # preset-capped dwt_max_level selection below (== unset); int-strings
+        # accepted; bad strings error cleanly.
+        if isinstance(level_param, str):
+            _lv = level_param.strip().lower()
+            if _lv in ("", "auto", "none"):
+                level_param = None
+            else:
+                try:
+                    level_param = int(_lv)
+                except ValueError:
+                    return make_error_response(
+                        ctx,
+                        f"level must be 'auto' or an integer, got '{level_param}'.",
+                        error_fixes=["Use 'auto' (length-based level) or a positive integer."],
+                    )
         max_level = pywt.dwt_max_level(n, wavelet.dec_len)
         if level_param is not None:
             level = int(level_param)

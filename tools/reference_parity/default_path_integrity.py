@@ -75,22 +75,26 @@ EXCLUDED = {
 # vocab = a catalog default value outside the engine's accepted set;
 # type = a structural type-handling crash.
 KNOWN_DEFAULT_FAILURES: dict[str, str] = {
-    # -- the ""-class: FIXED at the source (F1, addin: GetParametersDict omits
-    # empty values, Commit d7d48b8) -> the 7 entries trimmed 2026-06-12 after
-    # the two-run protocol confirmed exactly those 7 went stale (no leak into
-    # the auto/vocab/type entries). The ""-arm is unreachable post-fix.
-    # -- the "auto"-class (string default, no engine sentinel branch) --
-    "mstl_decompose": "int('auto') ValueError ('auto'-class)",
-    "ssa": "int('auto') ValueError ('auto'-class)",
-    "wavelet_transform": "int('auto') ValueError ('auto'-class)",
-    "pelt_change_points": "penalty 'auto' rejected; engine accepts bic/aic/mbic/numeric ('auto'-class vocab)",
-    # -- vocabulary (catalog default outside the engine's accepted set) --
-    "denton_chowlin_disaggregation": "method 'chow_lin' vs engine 'chowlin' (vocab: underscore)",
-    "particle_filter": "model 'stochastic_volatility' not in engine set (vocab)",
-    # -- type-handling (structural) --
-    "arimax_sarimax": "int('a') ValueError (a string param char-cast; type)",
-    "nbeats_forecast": "stack_types string iterated char-by-char (type: str-as-list)",
-    "tcn_forecast": "object of type 'int' has no len() (type: int-as-list)",
+    # ★ BASELINE EMPTIED 2026-06-12 — the default-path fix program is COMPLETE
+    # and this tool is henceforth a PURE REGRESSION GUARD (exit 1 on ANY
+    # finding). The arc, for the record:
+    #   - the ""-class x7: FIXED at the C# source (F1, addin: GetParametersDict
+    #     omits empty values, d7d48b8) — null-default/cleared boxes now emit
+    #     key-absent.
+    #   - the "auto"-class x4 (mstl periods, ssa window_length, wavelet level,
+    #     pelt penalty at BOTH read sites): engine string-sentinel branches —
+    #     "auto"/""/"none" -> the verified-adaptive absent path; explicit
+    #     values/tokens byte-identical (F2, the engine: commit of this unit).
+    #   - vocabulary x2: catalog corrections — denton method chow_lin->chowlin;
+    #     particle_filter options -> the engine's real 4-token set, default
+    #     local_level (preserve-delivered) (F3, same commit).
+    #   - type x3: arimax order string parse ("auto"->auto-select; "1,1,1"->
+    #     tuple — BOTH dialog paths were dead pre-fix); nbeats stack_types
+    #     str->split->list; tcn n_channels int->preset-depth list (F3, same
+    #     commit).
+    # Each fix verified: auto==absent byte-identical (nan-aware), explicit
+    # values land, sentinels unchanged, and the two-run protocol went
+    # stale-on-exactly-the-9 -> trim -> clean PASS at 0.
 }
 
 

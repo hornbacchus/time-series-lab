@@ -39,6 +39,21 @@ _FREQ_PERIODS = {
 def _infer_periods(ctx: RunContext) -> list:
     """Infer seasonal periods from frequency or params."""
     user_periods = ctx.get_param("periods")
+    # The dialog's `periods` default is the STRING "auto" -- a SENTINEL for
+    # frequency inference (== unset). An explicit string parses as
+    # comma-separated ints ("7,365" -> [7, 365]); a bad string errors cleanly.
+    if isinstance(user_periods, str):
+        _up = user_periods.strip().lower()
+        if _up in ("", "auto", "none"):
+            user_periods = None
+        else:
+            try:
+                user_periods = [int(tok) for tok in _up.replace(";", ",").split(",") if tok.strip()]
+            except ValueError:
+                raise ValueError(
+                    f"periods must be 'auto' or comma-separated integers "
+                    f"(e.g. '7,365'), got '{user_periods}'."
+                )
     if user_periods is not None:
         if isinstance(user_periods, (list, tuple)):
             return sorted(int(p) for p in user_periods)

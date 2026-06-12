@@ -235,6 +235,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
         n_channels = ctx.get_param("n_channels", preset_cfg["n_channels"])
         if isinstance(n_channels, str):
             n_channels = preset_cfg["n_channels"]
+        # The dialog's n_channels control is a single INT (channels per level);
+        # the engine architecture wants a per-level LIST. Replicate the int to
+        # the preset's depth (catalog default 32 + Balanced [32,32] -> [32,32]
+        # == the preset, byte-identical). Pre-fix len(int) crashed.
+        if isinstance(n_channels, (int, float)) and not isinstance(n_channels, bool):
+            n_channels = [int(n_channels)] * len(preset_cfg["n_channels"])
         kernel_size = int(ctx.get_param("kernel_size", preset_cfg["kernel_size"]))
         epochs = int(ctx.get_param("epochs", preset_cfg["epochs"]))
         n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
