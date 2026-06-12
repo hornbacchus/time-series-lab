@@ -422,15 +422,21 @@ namespace TSL.UI.ViewModels
 
         /// <summary>
         /// Serialize current parameter values into a Dictionary suitable for
-        /// the RunRequest.Params field the engine consumes.
+        /// the RunRequest.Params field the engine consumes. An empty value is
+        /// "unset": the key is omitted so the engine applies its own default.
+        /// (A null catalog default or a cleared box previously emitted "" and
+        /// crashed engine int()/float() casts — the ""-emission class; the
+        /// key-absent path is the engines' documented default semantics.)
         /// </summary>
         public System.Collections.Generic.Dictionary<string, object> GetParametersDict()
         {
             var d = new System.Collections.Generic.Dictionary<string, object>();
             foreach (var p in Parameters)
             {
-                if (!string.IsNullOrEmpty(p.Name))
-                    d[p.Name] = p.OutputValue;
+                if (string.IsNullOrEmpty(p.Name)) continue;
+                var v = p.OutputValue;
+                if (v is string s && string.IsNullOrWhiteSpace(s)) continue;
+                d[p.Name] = v;
             }
             return d;
         }
