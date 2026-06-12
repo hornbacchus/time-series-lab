@@ -11,11 +11,14 @@ EMISSION FIDELITY (read from the C# source, the single emission rule):
 TechniqueParameterItem.OutputValue (src/TSL.UI/ViewModels/
 TechniqueExplorerViewModel.cs): bool -> bool; int -> int.TryParse(str(default))
 else THE RAW STRING; float/double -> double.TryParse else the raw string;
-string -> the string as-is. Defaults populate via Default?.ToString() ?? "",
-so a NULL-default numeric control emits the EMPTY STRING "" under its key.
-GetParametersDict and both TaskPaneManager consumers (l.445 workbook path,
-l.843 generic run dispatch) pass the dict VERBATIM -- no empty-value
-sanitization. The constructor below replicates this exactly.
+string -> the string as-is. Defaults populate via Default?.ToString() ?? "".
+★ F1 (the addin: GetParametersDict fix): an EMPTY value is "unset" -- the dict
+builder OMITS the key (string.IsNullOrWhiteSpace skip), so a null catalog
+default or a cleared box no longer emits "" (the ""-emission class is closed
+at the source; key-absent -> the engine's own default). Both TaskPaneManager
+consumers (l.445 workbook path, l.843 generic run dispatch) pass the dict
+verbatim. The constructor below replicates the post-F1 rule exactly (the
+empty-skip mirrored as str.strip() == "").
 
 RUN IDENTITY: pane-style run_ids (NOT "udf_"-prefixed) so run_id-gated engine
 branches take the DIALOG path -- e.g. adf_test's _is_triage_mode routes udf_*
@@ -72,14 +75,10 @@ EXCLUDED = {
 # vocab = a catalog default value outside the engine's accepted set;
 # type = a structural type-handling crash.
 KNOWN_DEFAULT_FAILURES: dict[str, str] = {
-    # -- the ""-class (null-default numeric -> int('')/float('') crash) --
-    "stl_decompose": "period='' -> int('') (\"\"-class)",
-    "classical_decompose": "period='' -> int('') (\"\"-class)",
-    "pca_analysis": "n_components='' -> int('') (\"\"-class)",
-    "structural_ts": "seasonal='' -> int('') (\"\"-class)",
-    "caviar_quantile_dynamics": "n_simulation_paths='' -> int('') (\"\"-class)",
-    "random_forest_forecast": "max_depth='' -> int('') (\"\"-class)",
-    "forecast_reconciliation": "S_matrix='' -> float('') (\"\"-class via matrix parse)",
+    # -- the ""-class: FIXED at the source (F1, addin: GetParametersDict omits
+    # empty values, Commit d7d48b8) -> the 7 entries trimmed 2026-06-12 after
+    # the two-run protocol confirmed exactly those 7 went stale (no leak into
+    # the auto/vocab/type entries). The ""-arm is unreachable post-fix.
     # -- the "auto"-class (string default, no engine sentinel branch) --
     "mstl_decompose": "int('auto') ValueError ('auto'-class)",
     "ssa": "int('auto') ValueError ('auto'-class)",
@@ -190,6 +189,10 @@ def sweep():
         series = _fixture(k)
         defaults = {p["name"]: _emit(p.get("type"), p.get("default"))
                     for p in entry["parameters"] if p.get("name")}
+        # F1 mirror (the C# GetParametersDict empty-skip): an empty emission is
+        # "unset" -- the key is omitted, the engine applies its own default.
+        defaults = {k: v for k, v in defaults.items()
+                    if not (isinstance(v, str) and v.strip() == "")}
         t0 = time.time()
         b_st, b_err = _run(tid, series, {})
         # cheap retry: a baseline failure trivially attributable to input shape
