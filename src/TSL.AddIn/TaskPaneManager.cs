@@ -198,6 +198,24 @@ namespace TSL.AddIn
                                 { Logger.Info($"Kronos fan chart skipped: {chartEx.Message}"); }
                             }
 
+                            // Run-archiving (owner ruling, K3.1): every successful
+                            // Bespoke workbook-input run self-archives the results
+                            // workbook to <repoRoot>\output\{tool}_runs\. Placed
+                            // AFTER the chart hook so the archived copy contains
+                            // the chart. Best-effort -- never fails the run.
+                            if (writeResult != null && writeResult.Success &&
+                                _workbookInputTechniques.Contains(request?.TechniqueId ?? ""))
+                            {
+                                try
+                                {
+                                    ExcelWriter.TryArchiveRunWorkbook(
+                                        request?.TechniqueId, writeResult.ResultSheetName,
+                                        response?.AuditFields);
+                                }
+                                catch (Exception archEx)
+                                { Logger.Info($"Run archive skipped: {archEx.Message}"); }
+                            }
+
                             _hostControl?.Invoke((System.Action)(() =>
                             {
                                 var sheets = new List<OutputSheetLink>();

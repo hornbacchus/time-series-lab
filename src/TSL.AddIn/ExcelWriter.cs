@@ -770,6 +770,81 @@ namespace TSL.AddIn
         }
 
         /// <summary>
+        /// Run-archiving for the Bespoke workbook-input tools (owner ruling,
+        /// K3.1): every SUCCESSFUL run self-archives the RESULTS workbook (it
+        /// contains the output sheet + chart; the input workbook is never the
+        /// results carrier) as a complete copy to
+        /// &lt;repoRoot&gt;\output\{byf_runs|breakeven_runs|kronos_runs}\
+        /// {tool}_run_YYYYMMDD_HHMMSS[_seed{N}].xlsx. SaveCopyAs only — the
+        /// open workbook's path, dirty flag, and identity are untouched. The
+        /// seed suffix comes from response.audit_fields["seed"] when the run
+        /// carries one (kronos does; BYF echoes its seed in a config table but
+        /// not audit_fields — omitted, never invented; breakeven is unseeded).
+        /// BEST-EFFORT (the chart-hook precedent): never fails the run; any
+        /// failure logs via the house Logger and the results stay in the open
+        /// workbook as today. output/ is gitignored — run exhaust, never staged.
+        /// </summary>
+        public static bool TryArchiveRunWorkbook(
+            string techniqueId, string resultSheetName,
+            Dictionary<string, object> auditFields)
+        {
+            try
+            {
+                string folder, tool;
+                switch ((techniqueId ?? "").ToLowerInvariant())
+                {
+                    case "bond_yield_forecast": folder = "byf_runs"; tool = "byf"; break;
+                    case "breakeven_payroll": folder = "breakeven_runs"; tool = "breakeven"; break;
+                    case "kronos_forecast": folder = "kronos_runs"; tool = "kronos"; break;
+                    default: return false;
+                }
+                if (string.IsNullOrEmpty(resultSheetName)) return false;
+
+                // repoRoot via the locators' xllDir-relative math (the ..x6
+                // pattern) — the dev-deploy single-user posture; no absolute
+                // paths hardcoded.
+                var xllDir = System.IO.Path.GetDirectoryName(ExcelDnaUtil.XllPath);
+                if (string.IsNullOrEmpty(xllDir)) return false;
+                var repoRoot = System.IO.Path.GetFullPath(
+                    System.IO.Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
+                var dir = System.IO.Path.Combine(repoRoot, "output", folder);
+                System.IO.Directory.CreateDirectory(dir);   // idempotent ensure-on-write
+
+                // Find the open RESULTS workbook (the one carrying the result
+                // sheet — the chart builder's location pattern).
+                var app = (Application)ExcelDnaUtil.Application;
+                Workbook target = null;
+                foreach (Workbook wb in app.Workbooks)
+                {
+                    foreach (Worksheet s in wb.Worksheets)
+                        if (string.Equals(s.Name, resultSheetName, StringComparison.OrdinalIgnoreCase))
+                        { target = wb; break; }
+                    if (target != null) break;
+                }
+                if (target == null) return false;
+
+                string seedSuffix = "";
+                if (auditFields != null && auditFields.TryGetValue("seed", out var sv)
+                    && sv != null && long.TryParse(sv.ToString(), out var seed))
+                    seedSuffix = $"_seed{seed}";
+
+                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var path = System.IO.Path.Combine(dir, $"{tool}_run_{stamp}{seedSuffix}.xlsx");
+                for (int n = 1; System.IO.File.Exists(path); n++)
+                    path = System.IO.Path.Combine(dir, $"{tool}_run_{stamp}{seedSuffix}_{n}.xlsx");
+
+                target.SaveCopyAs(path);
+                Logger.Info($"Run archived: {path}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Run archive skipped ({techniqueId}): {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Kronos Forecast fan chart (Bespoke #3; EXPERIMENTAL): a stacked-area
         /// band fan (P10 base transparent, P10→P25 / P25→P75 / P75→P90 shaded)
         /// with the close-path median overlaid as a line, built from the
