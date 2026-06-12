@@ -192,6 +192,23 @@ def audit():
     return results
 
 
+def registry_invariant():
+    """catalog SUBSET-OF registry: every catalog technique_id must be a
+    TECHNIQUE_REGISTRY key (else the dialog advertises a technique no run can
+    reach -- the critical_slowing_down gap, F4). Returns (violations, n_alias,
+    orphans): the REVERSE set (registry-not-in-catalog) is REPORT-only -- the
+    registry is an INTENTIONAL superset (alias/convenience ids); an ORPHAN
+    (a registry entry whose MODULE no catalog id reaches) is the mirror class
+    of the gap, reported + banked, never failed here."""
+    controls = _catalog_controls()
+    reg = _registry_map()
+    violations = sorted(t for t in controls if t not in reg)
+    catalog_targets = {reg[t] for t in controls if t in reg}
+    rev = {k: v for k, v in reg.items() if k not in controls}
+    orphans = sorted(k for k, v in rev.items() if v not in catalog_targets)
+    return violations, len(rev) - len(orphans), orphans
+
+
 def main(argv):
     report = "--report" in argv
     results = audit()
@@ -199,6 +216,24 @@ def main(argv):
     print(f"# techniques with inert controls (D-set allowlisted): {len(results)}")
     total = sum(len(r["inert"]) for r in results.values())
     print(f"# total inert controls: {total}")
+
+    # --- catalog SUBSET-OF registry invariant (F4) ---
+    violations, n_alias, orphans = registry_invariant()
+    print(f"# registry invariant: catalog-not-in-registry={len(violations)} | "
+          f"reverse: alias={n_alias}, orphan={len(orphans)}")
+    if orphans:
+        print("## REPORT-ONLY: registry entries whose module no catalog id reaches "
+              "(implemented-but-unexposed; banked, not failed):")
+        for k in orphans:
+            print(f"  {k}")
+    if violations:
+        print("\n## [FAIL] catalog technique(s) ABSENT from TECHNIQUE_REGISTRY "
+              "(the dialog advertises an unreachable technique):")
+        for t in violations:
+            print(f"  {t}")
+        print("\nRegister the technique in engine/techniques/registry.py, or "
+              "remove/mark the catalog entry.")
+        return 1
 
     new_inert = {}
     for tid, r in sorted(results.items()):

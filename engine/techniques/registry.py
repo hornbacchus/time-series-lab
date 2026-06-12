@@ -256,6 +256,9 @@ TECHNIQUE_REGISTRY = {
     "narx": "techniques.nar_narx",
     "mlp_forecast": "techniques.nar_narx",
 
+    # --- Critical Slowing Down (Regimes / Nonlinear) ---
+    "critical_slowing_down": "techniques.critical_slowing_down",
+
     # --- ML / Deep Learning (new) ---
     "prophet_forecast": "techniques.prophet_forecast",
     "prophet": "techniques.prophet_forecast",
