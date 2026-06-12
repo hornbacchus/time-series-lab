@@ -157,7 +157,9 @@ def run(ctx, progress_callback) -> dict:
                 ["model load (s)", res["timings"]["load_s"]],
                 ["sampling (s)", res["timings"]["predict_s"]],
                 ["total wall (s)", round(wall, 1)],
-                ["run stamp", _dt.datetime.now().isoformat(timespec="seconds")],
+                # The "(local)" suffix keeps Excel from coercing the stamp
+                # into a raw date serial on write (display-only fix).
+                ["run stamp", _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " (local)"],
                 ["band labeling", BAND_LABEL],
             ]),
             make_table("Kronos Close Paths", ["Path"] + dates,
