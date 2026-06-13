@@ -828,6 +828,13 @@ namespace TSL.AddIn
                 }
             }
 
+            // Capture the technique the Run view is CURRENTLY bound to BEFORE
+            // NavigateToRun overwrites it -- the gate below compares against
+            // this (NavigateToRun sets TechniqueId = techniqueId up front, so
+            // comparing the post-navigation id was always equal -> the dead
+            // gate that left every selection technique with zero param controls).
+            var priorTechniqueId = _hostControl.ViewModel.CurrentRunTechniqueId;
+
             // Navigate to Run view and populate series previews
             _hostControl.ViewModel.NavigateToRun(techniqueId);
             var runVm = _hostControl.ViewModel.CurrentView as RunViewModel;
@@ -845,8 +852,16 @@ namespace TSL.AddIn
                 if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
                     runVm.TechniqueName = techEntry.Name;
 
-                bool techniqueChanged = !string.Equals(runVm.TechniqueId, techniqueId,
-                    StringComparison.OrdinalIgnoreCase);
+                // Compare against the PRE-navigation id (NavigateToRun already
+                // set runVm.TechniqueId = techniqueId). The empty-Parameters
+                // belt repopulates a first-ever load even if the prior id
+                // somehow matched. Edit-preservation holds: a same-technique
+                // re-run has priorTechniqueId == techniqueId AND a non-empty
+                // Parameters collection, so it does NOT clobber the user's
+                // edits; a technique switch repopulates at defaults.
+                bool techniqueChanged =
+                    !string.Equals(priorTechniqueId, techniqueId, StringComparison.OrdinalIgnoreCase)
+                    || runVm.Parameters.Count == 0;
                 runVm.TechniqueId = techniqueId;
 
                 if (techniqueChanged && techEntry?.Parameters != null)

@@ -214,6 +214,19 @@ namespace TSL.UI.ViewModels
             CurrentViewTitle = "UDF Browser";
         }
 
+        /// <summary>
+        /// The technique id the (singleton) Run view is currently bound to, read
+        /// BEFORE a NavigateToRun overwrites it. LaunchTechnique uses this to
+        /// decide whether to (re)populate the parameter controls: NavigateToRun
+        /// sets <see cref="RunViewModel.TechniqueId"/> up front, so a gate that
+        /// compares the post-navigation id is always equal and never repopulates
+        /// (the dead-gate that left every selection technique with zero param
+        /// controls). Comparing against this pre-navigation id restores the
+        /// "populate on change, preserve user edits on same-technique re-run"
+        /// behavior the gate intended.
+        /// </summary>
+        public string CurrentRunTechniqueId => _runVm?.TechniqueId;
+
         public void NavigateToRun(string techniqueId)
         {
             var vm = GetOrCreateRun();
