@@ -246,6 +246,14 @@ namespace TSL.UI.ViewModels
 
         public TechniqueExplorerViewModel()
         {
+            // RunCommand raises RunRequested -> the AddIn's OnRunRequested
+            // (execute:true) -> immediate dispatch. ★ Intentionally NOT bound to
+            // any Explorer control: binding a button to this re-introduces the
+            // navigate-AND-execute auto-run defect (Fix A2 -- the Explorer
+            // "Run on Selection" used to do exactly this, running before the
+            // user could edit a param). The Explorer's primary action uses
+            // OpenRunViewCommand (configure-then-wait); execution happens only
+            // when the user clicks "Run" on the Run panel itself.
             RunCommand = new RelayCommand(
                 () => { if (_selectedTechnique != null) RunRequested?.Invoke(_selectedTechnique.Id); },
                 () => _selectedTechnique != null);

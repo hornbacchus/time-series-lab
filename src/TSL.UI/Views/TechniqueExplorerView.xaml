@@ -348,9 +348,9 @@
                 Padding="8,8">
             <StackPanel>
                 <UniformGrid Columns="2" Margin="0,0,0,6">
-                    <Button Content="Run on Selection" Style="{StaticResource AccentButton}"
-                            Command="{Binding RunCommand}" Margin="0,0,3,0"
-                            ToolTip="Extract the current Excel selection and run this technique." />
+                    <Button Content="Configure &amp; Run" Style="{StaticResource AccentButton}"
+                            Command="{Binding OpenRunViewCommand}" Margin="0,0,3,0"
+                            ToolTip="Open the Run panel for this technique with the current selection — edit parameters, then click Run." />
                     <Button Content="Insert AUTO" Style="{StaticResource OutlineButton}"
                             Command="{Binding InsertAutoFormulaCommand}" Margin="3,0,0,0" />
                 </UniformGrid>

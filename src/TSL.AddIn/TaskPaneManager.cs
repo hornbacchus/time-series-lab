@@ -652,6 +652,7 @@ namespace TSL.AddIn
                     try
                     {
                         _hostControl.ViewModel.RunRequested -= OnRunRequested;
+                        _hostControl.ViewModel.ConfigureRunRequested -= OnConfigureRunRequested;
                         _hostControl.ViewModel.WorkbookRunRequested -= OnWorkbookRunRequested;
                         _hostControl.ViewModel.RunCancelRequested -= OnCancelRequested;
                         _hostControl.ViewModel.DataReadinessChecksRequested -= OnDataReadinessChecksRequested;
@@ -670,6 +671,12 @@ namespace TSL.AddIn
 
                 // Wire the RunRequested event to extract selection and run the engine
                 _hostControl.ViewModel.RunRequested += OnRunRequested;
+
+                // The Explorer's "Configure & Run" -> open the pane populated and
+                // WAIT (RunTechnique = LaunchTechnique execute:false). Distinct
+                // from RunRequested so the Explorer action no longer auto-runs
+                // (Fix A2); execution stays the panel "Run" click's job.
+                _hostControl.ViewModel.ConfigureRunRequested += OnConfigureRunRequested;
 
                 // Workbook-input dispatch (Bond Yield Forecast Run button) and the
                 // Run view's Cancel button.
@@ -727,6 +734,16 @@ namespace TSL.AddIn
         /// </summary>
         private static void OnRunRequested(string techniqueId, string preset)
             => LaunchTechnique(techniqueId, preset, execute: true);
+
+        /// <summary>
+        /// The Explorer's "Configure &amp; Run" handler (Fix A2). Opens the Run
+        /// pane POPULATED (selection + previews + params) and WAITS — does NOT
+        /// execute. Delegates to <see cref="RunTechnique"/> (= LaunchTechnique
+        /// execute:false), the same populate-then-stop path the ribbon uses;
+        /// execution happens only on the pane's own "Run" click (OnRunRequested).
+        /// </summary>
+        private static void OnConfigureRunRequested(string techniqueId)
+            => RunTechnique(techniqueId);
 
         /// <summary>
         /// Extracts data from the current Excel selection (including non-adjacent

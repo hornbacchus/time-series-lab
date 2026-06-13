@@ -110,6 +110,18 @@ namespace TSL.UI.ViewModels
         public event Action<string> WorkbookRunRequested; // techniqueId
 
         /// <summary>
+        /// Raised when the user clicks the Explorer's primary "Configure &amp; Run"
+        /// action. The AddIn layer opens the Run pane POPULATED (selection +
+        /// previews + params) and WAITS (RunTechnique -> LaunchTechnique
+        /// execute:false) -- it does NOT execute. This is the navigate-and-
+        /// configure path (Fix A2): execution happens only on the Run-panel
+        /// "Run" click (which raises RunRequested -> execute:true). Distinct
+        /// from RunRequested precisely so the Explorer action and the panel-Run
+        /// action no longer share one event.
+        /// </summary>
+        public event Action<string> ConfigureRunRequested; // techniqueId
+
+        /// <summary>
         /// Raised when the user clicks Cancel in the Run view. The AddIn layer
         /// hard-stops the engine and returns the view to ready.
         /// </summary>
@@ -287,7 +299,12 @@ namespace TSL.UI.ViewModels
                 _explorerVm.RunRequested += (id) => RunRequested?.Invoke(id, Preset);
                 _explorerVm.InsertAutoFormulaRequested += (id) => InsertAutoFormulaRequested?.Invoke(id);
                 _explorerVm.InsertThoroughFormulaRequested += (id) => InsertThoroughFormulaRequested?.Invoke(id);
-                _explorerVm.NavigateToRunRequested += (id) => NavigateToRun(id);
+                // The Explorer's "Configure & Run" raises NavigateToRunRequested.
+                // Forward to the AddIn (ConfigureRunRequested -> RunTechnique,
+                // execute:false) so the pane is POPULATED (selection + params)
+                // and WAITS -- a BARE NavigateToRun would skip the AddIn-side
+                // selection/param populate and regress Fix A.
+                _explorerVm.NavigateToRunRequested += (id) => ConfigureRunRequested?.Invoke(id);
             }
             return _explorerVm;
         }
