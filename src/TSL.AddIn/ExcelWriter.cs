@@ -247,11 +247,12 @@ namespace TSL.AddIn
             return writeResult;
         }
 
-        // Matches a trailing "_Results_<yyyyMMdd>_<HHmmss>" stamp, with an
-        // optional "_<n>" collision counter — i.e. a name THIS writer produced.
+        // Matches a trailing "_Results_<yyyyMMdd>_<HHmmss>" stamp, with any
+        // trailing numeric groups — the millisecond "_<fff>" precision and/or
+        // an "_<n>" collision counter — i.e. a name THIS writer produced.
         private static readonly System.Text.RegularExpressions.Regex ResultsSuffixRx =
             new System.Text.RegularExpressions.Regex(
-                @"_Results_\d{8}_\d{6}(?:_\d+)?$",
+                @"_Results_\d{8}_\d{6}(?:_\d+)*$",
                 System.Text.RegularExpressions.RegexOptions.IgnoreCase
                 | System.Text.RegularExpressions.RegexOptions.Compiled);
 
@@ -285,7 +286,12 @@ namespace TSL.AddIn
         private static string BuildOutputPath(string dir, string baseName)
         {
             baseName = StripResultsSuffix(baseName);
-            var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            // Millisecond precision so two sequential runs mint DISTINCT names
+            // without depending on File.Exists — which is documented-unreliable
+            // on OneDrive (placeholder/sync false-negatives) and is where the
+            // unsaved-"Book1" output lands (the MyDocuments fallback). The
+            // counter below stays as belt-and-suspenders for the same-ms case.
+            var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
             var fileName = $"{baseName}_Results_{stamp}.xlsx";
             var path = System.IO.Path.Combine(dir, fileName);
             int counter = 1;
@@ -844,7 +850,10 @@ namespace TSL.AddIn
                     && sv != null && long.TryParse(sv.ToString(), out var seed))
                     seedSuffix = $"_seed{seed}";
 
-                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                // Millisecond precision (symmetry with BuildOutputPath) so
+                // back-to-back archives mint distinct names without leaning on
+                // the OneDrive-flaky File.Exists; the counter stays as a belt.
+                var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                 var path = System.IO.Path.Combine(dir, $"{tool}_run_{stamp}{seedSuffix}.xlsx");
                 for (int n = 1; System.IO.File.Exists(path); n++)
                     path = System.IO.Path.Combine(dir, $"{tool}_run_{stamp}{seedSuffix}_{n}.xlsx");
