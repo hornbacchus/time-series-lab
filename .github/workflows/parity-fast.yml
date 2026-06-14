@@ -208,3 +208,13 @@ jobs:
         shell: bash
         run: |
           python tools/reference_parity/catalog_key_alignment.py
+
+      - name: Sample-data ordering guard
+        # Durable invariant: every dated CSV in resources/sample_data/ must be
+        # ascending by date (oldest -> newest). Exits non-zero on any
+        # non-ascending dated sample (a descending/scrambled load feeds an
+        # order-sensitive technique backwards when no time-index column is
+        # selected). Pure-stdlib, <1s. See tools/check_sample_data_ordering.py.
+        shell: bash
+        run: |
+          python tools/check_sample_data_ordering.py
