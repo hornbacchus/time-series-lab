@@ -107,14 +107,16 @@ def _run_auto_arima(ctx, clean, name, horizon, warnings, progress_callback):
     progress_callback("Searching for optimal ARIMA order", 15)
 
     seasonal = ctx.get_param("seasonal", False)
-    m = int(ctx.get_param("m", 1))
+    # Blank/absent int -> default (F1 cleared-box rule; literal get_param keeps
+    # the catalog_key_alignment guard able to see the read).
+    _m = ctx.get_param("m", 1)
+    m = 1 if (_m is None or str(_m).strip() == "") else int(_m)
     if seasonal and m <= 1:
         warnings.append("seasonal=True but m=1. Setting m based on frequency or defaulting to 12.")
         m = _infer_m(ctx.frequency)
 
-    d = ctx.get_param("d", None)
-    if d is not None:
-        d = int(d)
+    _d = ctx.get_param("d")
+    d = None if (_d is None or (isinstance(_d, str) and _d.strip() == "")) else int(_d)
 
     # information_criterion sourced from the `ic` dialog control; precedence
     # information_criterion (THOROUGH) > ic (dialog) > "aic" (the delivered
@@ -129,10 +131,37 @@ def _run_auto_arima(ctx, clean, name, horizon, warnings, progress_callback):
     }
     cfg = preset_config.get(ctx.preset, preset_config["Balanced"])
 
-    # Allow user overrides
-    max_p = int(ctx.get_param("max_p", cfg["max_p"]))
-    max_q = int(ctx.get_param("max_q", cfg["max_q"]))
-    max_d = int(ctx.get_param("max_d", cfg["max_d"]))
+    # Allow user overrides. Blank/absent -> the preset default (byte-identical;
+    # the catalog default is blank so the preset-aware cfg value is preserved).
+    _mp = ctx.get_param("max_p", cfg["max_p"])
+    max_p = cfg["max_p"] if (_mp is None or str(_mp).strip() == "") else int(_mp)
+    _mq = ctx.get_param("max_q", cfg["max_q"])
+    max_q = cfg["max_q"] if (_mq is None or str(_mq).strip() == "") else int(_mq)
+    _md = ctx.get_param("max_d", cfg["max_d"])
+    max_d = cfg["max_d"] if (_md is None or str(_md).strip() == "") else int(_md)
+
+    # Fix B Tier 1a-bis: validate the exposed search knobs via 1a's _validation
+    # helper. Hard ceilings (no input mutation -- the BYF discipline; large
+    # search orders cause very slow runs). max_d>=d is NOT enforced (d pins
+    # differencing; max_d is the moot-when-d-fixed search ceiling). seasonal=>m>1
+    # is already engine-enforced above (auto-infer); m<n is validated only for an
+    # explicitly user-set m so the inferred default stays byte-identical.
+    from techniques._validation import ParamError, check_order_bounds, check_seasonal, require
+    try:
+        check_order_bounds(max_p=max_p, max_q=max_q, max_d=max_d,
+                           cap_p=12, cap_q=12, cap_d=3)
+        require(d is None or 0 <= int(d) <= 3,
+                f"ARIMA differencing d ({d}) must be between 0 and 3.",
+                fixes=["Use d in 0..3, or leave blank to auto-select."])
+        _user_m = ctx.get_param("m")
+        if _user_m is not None and str(_user_m).strip() != "":
+            if seasonal:
+                check_seasonal(seasonal=True, m=m)
+            require(m < len(clean),
+                    f"Seasonal period m ({m}) must be less than the series length ({len(clean)}).",
+                    fixes=["Use a smaller seasonal period, or provide a longer series."])
+    except ParamError as e:
+        return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
     progress_callback("Fitting auto_arima (this may take a moment)", 25)
 
@@ -170,7 +199,9 @@ def _run_auto_arima(ctx, clean, name, horizon, warnings, progress_callback):
     model = pm.auto_arima(
         clean,
         d=d,
+        start_p=min(2, max_p),
         max_p=max_p,
+        start_q=min(2, max_q),
         max_q=max_q,
         max_d=max_d,
         seasonal=seasonal,

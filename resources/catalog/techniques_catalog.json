@@ -521,10 +521,61 @@
           "advanced": true,
           "description": "Model selection criterion",
           "options": [
-            "aicc",
             "aic",
-            "bic"
+            "bic",
+            "aicc",
+            "hqic"
           ]
+        },
+        {
+          "name": "d",
+          "label": "Differencing (d)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Pin the order of differencing (0-3). Blank = auto-select.",
+          "options": null
+        },
+        {
+          "name": "m",
+          "label": "Seasonal Period (m)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Seasonal period (used when Seasonal is on). Blank = inferred from frequency (12 monthly, 4 quarterly). Must be < series length.",
+          "options": null
+        },
+        {
+          "name": "max_p",
+          "label": "Max AR Order (max_p)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Upper bound on the AR order searched (0-12). Blank = preset default. Larger = slower search.",
+          "options": null
+        },
+        {
+          "name": "max_q",
+          "label": "Max MA Order (max_q)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Upper bound on the MA order searched (0-12). Blank = preset default. Larger = slower search.",
+          "options": null
+        },
+        {
+          "name": "max_d",
+          "label": "Max Differencing (max_d)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Upper bound on the differencing searched (0-3). Blank = preset default.",
+          "options": null
         }
       ],
       "output_tables": [

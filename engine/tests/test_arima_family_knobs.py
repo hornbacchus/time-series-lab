@@ -125,5 +125,40 @@ class TestArimaxParseFix(unittest.TestCase):
         self.assertEqual(r.get("status"), "success", _err(r))
 
 
+class TestAutoArimaSearchKnobs(unittest.TestCase):
+    """Tier 1a-bis: auto_arima search knobs (d/m/max_*/ic). The start_p/q fix
+    makes max_p<2 usable (was a pmdarima crash); caps fail-fast; d-range guard;
+    d2/max_d1 is VALID (d pins differencing, max_d moot)."""
+
+    def _auto(self, params):
+        p = {"seasonal": False}
+        p.update(params)
+        raw = {"technique_id": "auto_arima", "preset": "Balanced", "frequency": "",
+               "series": [{"name": "y", "values": _SEASONAL}], "params": p}
+        return arima.run(RunContext(raw), lambda *a, **k: None)
+
+    def test_max_p_1_no_crash(self):            # the start_p/q prerequisite fix
+        r = self._auto({"max_p": 1, "max_q": 1})
+        self.assertEqual(r.get("status"), "success", _err(r))
+
+    def test_max_p_over_cap_fail_fast(self):
+        r = self._auto({"max_p": 50})
+        self.assertEqual(r.get("status"), "failure")
+        self.assertIn("maximum", _err(r))
+
+    def test_d_out_of_range_fail_fast(self):
+        r = self._auto({"d": 5})
+        self.assertEqual(r.get("status"), "failure")
+        self.assertIn("between 0 and 3", _err(r))
+
+    def test_d2_maxd1_is_valid(self):           # correction 2: NOT a fail-fast
+        r = self._auto({"d": 2, "max_d": 1})
+        self.assertEqual(r.get("status"), "success", _err(r))
+
+    def test_ic_hqic_valid(self):               # the new dropdown option
+        r = self._auto({"ic": "hqic"})
+        self.assertEqual(r.get("status"), "success", _err(r))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
