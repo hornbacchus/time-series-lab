@@ -358,7 +358,7 @@ def handle_request(handle, raw_request: dict):
     """
     Process a single RunRequest and send progress events + final RunResponse.
     """
-    from techniques.base import RunContext, make_error_response
+    from techniques.base import RunContext, make_error_response, maybe_add_no_time_index_hint
 
     engine_versions = _get_engine_versions()
 
@@ -440,6 +440,11 @@ def handle_request(handle, raw_request: dict):
                     rows = tbl.get("rows")
                     if isinstance(rows, list):
                         tbl["rows"] = list(reversed(rows))
+
+        # No-time-index orientation hint (order-robustness diagnostic, ruling
+        # 4): a direction-sensitive technique on a bare value column cannot be
+        # oriented (no date column to read) -- surface a non-blocking hint.
+        maybe_add_no_time_index_hint(ctx, response)
 
     except ValueError as e:
         log.warning(f"Run {run_id}: ValueError: {e}")

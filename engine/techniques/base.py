@@ -1311,6 +1311,56 @@ class RunContext:
 
 
 # ======================================================================
+# No-time-index orientation hint (order-robustness diagnostic, ruling 4)
+# ======================================================================
+
+# Techniques whose result is INVARIANT under time-reversal -- distribution /
+# correlation / spectral methods where row order doesn't change the answer.
+# These do NOT get the no-time-index hint. Everything else (forecasts, any
+# AR/recursive model, change-point/regime, causality lead-lag, volatility) is
+# direction-sensitive and DOES. (Causality + wavelet-coherence are sensitive
+# in the lead/lag SIGN, so they are deliberately NOT in this set.)
+_ORDER_INVARIANT_TECHNIQUES = frozenset({
+    "pca_analysis", "evt_pot_gpd", "robust_estimators",
+    "fft_spectrum", "periodogram_spectral_density", "lomb_scargle",
+    "wavelet_transform", "ssa", "emd_hht",
+})
+
+NO_TIME_INDEX_HINT = (
+    "No date column detected - assuming top-to-bottom chronological order. "
+    "For automatic orientation (and newest-first display), include a date "
+    "column in your selection."
+)
+
+
+def maybe_add_no_time_index_hint(ctx, response) -> None:
+    """Prepend a non-blocking orientation hint to a successful response when a
+    direction-sensitive technique ran on a bare value column.
+
+    Fires only when: the run succeeded, a value series was provided
+    (``ctx.series`` non-empty -- so workbook-input techniques like
+    bond_yield_forecast, whose ``series`` is empty, are skipped), NO time
+    index was detected (``ctx.time`` empty -> the engine cannot orient), and
+    the technique is not order-invariant. Best-effort; never raises.
+    """
+    try:
+        if not isinstance(response, dict) or response.get("status") != "success":
+            return
+        if not getattr(ctx, "series", None) or getattr(ctx, "time", None):
+            return
+        if getattr(ctx, "technique_id", None) in _ORDER_INVARIANT_TECHNIQUES:
+            return
+        warns = response.get("warnings")
+        if not isinstance(warns, list):
+            warns = []
+            response["warnings"] = warns
+        if NO_TIME_INDEX_HINT not in warns:
+            warns.insert(0, NO_TIME_INDEX_HINT)
+    except Exception:
+        pass
+
+
+# ======================================================================
 # Output builders
 # ======================================================================
 
