@@ -160,6 +160,23 @@ def _preflight_validate_params(params: dict) -> list[str]:
                 f"This guards against documented OOM (n_draws_subsample) "
                 f"and excessive runtime."
             )
+    # Cross-field: n_draws is the TOTAL incl. burn-in, so it must strictly
+    # exceed n_burn (BVARSV.__init__ enforces `n_draws > n_burn` at 35% into
+    # the fit). When the user set BOTH, catch it here at the 5% pre-flight so
+    # the failure surfaces at validation, not deep in the fit. The partial-
+    # override case (only one of the pair in params) is covered by the
+    # effective-value check after the config merge in run().
+    if "n_draws" in params and "n_burn" in params:
+        try:
+            nd, nb = int(float(params["n_draws"])), int(float(params["n_burn"]))
+        except (TypeError, ValueError):
+            nd = nb = None  # non-numeric already reported by the bounds loop
+        if nd is not None and nd <= nb:
+            errors.append(
+                f"MCMC Burn-in ({nb}) must be less than MCMC Draws ({nd}) "
+                f"- lower Burn-in or raise Draws (Draws is the total, "
+                f"including burn-in)."
+            )
     return errors
 
 
@@ -592,6 +609,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
             config_path = Path(user_config) if user_config else package_default_config()
             config = load_config(config_path)
             config = _apply_param_overrides(config, ctx.params)
+            # Cross-field validation on the EFFECTIVE (post-override) chain:
+            # n_draws is the total incl. burn-in, so it must strictly exceed
+            # n_burn. BVARSV.__init__ enforces this, but only at 35% into the
+            # fit; raise here (12%, before the workbook read / PCA / fit) so an
+            # inverted pair fails fast with an actionable message. This also
+            # catches the partial-override case the 5% params-only check can't
+            # see (user lowered only Draws; Burn-in defaulted to 3000).
+            _nd = int(config["estimation"]["n_draws"])
+            _nb = int(config["estimation"]["n_burn"])
+            if _nd <= _nb:
+                raise _PreflightFailure(
+                    f"MCMC Burn-in ({_nb}) must be less than MCMC Draws "
+                    f"({_nd}) - lower Burn-in or raise Draws.",
+                    fixes=[
+                        "Lower MCMC Burn-in below MCMC Draws, or raise MCMC "
+                        "Draws above Burn-in.",
+                        "MCMC Draws is the TOTAL number of draws including "
+                        "burn-in, so it must exceed Burn-in (e.g. Draws 10000, "
+                        "Burn-in 3000).",
+                    ],
+                )
             scenario = str(ctx.get_param("scenario", "baseline") or "baseline")
 
             # -- Sheet-naming auto-detection (Session 3 carry-forward A) -
