@@ -209,12 +209,20 @@ jobs:
         run: |
           python tools/reference_parity/catalog_key_alignment.py
 
-      - name: Sample-data ordering guard
-        # Durable invariant: every dated CSV in resources/sample_data/ must be
-        # ascending by date (oldest -> newest). Exits non-zero on any
-        # non-ascending dated sample (a descending/scrambled load feeds an
-        # order-sensitive technique backwards when no time-index column is
-        # selected). Pure-stdlib, <1s. See tools/check_sample_data_ordering.py.
+      - name: Engine unit tests (guards + conventions)
+        # Runs engine/tests/ in CI -- the durability fix that closes the gap
+        # that HID the sample-data scramble regression (engine tests had never
+        # run in CI; only the parity harness did, and it is order-insensitive).
+        # Carries the sample-data ordering+contiguity guards -- INCLUDING the
+        # T1b strict row-by-row descending check that catches a lexicographic
+        # scramble the endpoint-only (T1) and internally-resorting (T2/T3)
+        # tests are blind to -- plus the ARIMAX/exog:null class guard, the BYF
+        # draws>burn validation guard, and the identification-convention /
+        # interpretation-contract checks. unittest (not pytest) keeps the dep
+        # set unchanged; PYTHONPATH=tools lets test_harness import the
+        # reference_parity package.
         shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/tools
         run: |
-          python tools/check_sample_data_ordering.py
+          python -m unittest discover -s engine/tests -p "test_*.py" -t .

@@ -97,6 +97,32 @@ class TestReverseChronologicalOrder(unittest.TestCase):
         )
 
 
+class TestStrictlyDescendingByRow(unittest.TestCase):
+    """T1b — every sample CSV must be strictly DESCENDING row-by-row, not just
+    endpoint-ordered. T1 (above) checks only first>last, and T2/T3 re-sort
+    internally via enforce_contiguous_tail — so a lexicographic/string-sort
+    scramble (the historical preprocess_sample_data bug, treasury 361a/5784d)
+    slips past all of them. This walks every adjacent row pair on-disk."""
+
+    def test_all_sample_csvs_strictly_descending(self):
+        failures = []
+        for fname in SAMPLE_DATA_FREQ:
+            df = _load(fname)
+            diffs = df.iloc[:, 0].diff().dropna()
+            n_nondesc = int((diffs >= pd.Timedelta(0)).sum())
+            if n_nondesc:
+                failures.append(
+                    f"{fname}: {n_nondesc} non-descending row step(s) "
+                    f"(interior scramble; rows must run strictly newest -> oldest)"
+                )
+        self.assertFalse(
+            failures,
+            "Sample CSVs not strictly descending row-by-row (interior scramble "
+            "the endpoint/contiguity tests cannot see):\n  "
+            + "\n  ".join(failures)
+        )
+
+
 class TestUniformInterRowDeltas(unittest.TestCase):
     """T2 — the row sequence in every sample CSV is contiguous at its
     declared frequency. The contiguity helper returns the original

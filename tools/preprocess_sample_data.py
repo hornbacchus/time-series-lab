@@ -97,8 +97,18 @@ def _process_one(csv_path: str, freq: str, dry_run: bool) -> dict:
     before_rows = len(df)
     order_before = _detect_order(df, date_col)
 
-    # Sort ascending internally for the helper's gap walk.
-    df_asc = df.sort_values(date_col).reset_index(drop=True)
+    # Sort ascending by PARSED date for the helper's gap walk. A raw
+    # df.sort_values(date_col) sorts the date STRINGS lexicographically --
+    # for "%d-%b-%Y" data ("31-Oct-2025") that groups by day-of-month and
+    # scrambles the series (the historical root cause of the shipped sample
+    # scramble). Sort via a temporary parsed key so the original date string
+    # formatting is preserved verbatim; only the row ORDER changes.
+    df_asc = (
+        df.assign(_sortkey=pd.to_datetime(df[date_col]))
+          .sort_values("_sortkey", kind="stable")
+          .drop(columns="_sortkey")
+          .reset_index(drop=True)
+    )
 
     truncated_asc, info = enforce_contiguous_tail(df_asc, freq)
 
@@ -106,10 +116,10 @@ def _process_one(csv_path: str, freq: str, dry_run: bool) -> dict:
     dropped_range = info.get("dropped_date_range")
     below_min = bool(info.get("below_min"))
 
-    # Re-emit in DESCENDING order (newest-at-top) for writeback.
-    truncated_desc = truncated_asc.sort_values(
-        date_col, ascending=False
-    ).reset_index(drop=True)
+    # Re-emit in DESCENDING order (newest-at-top): truncated_asc is already
+    # ascending (enforce_contiguous_tail preserves caller order), so reverse
+    # it -- NOT a string sort_values, which would re-introduce the scramble.
+    truncated_desc = truncated_asc.iloc[::-1].reset_index(drop=True)
 
     # Idempotency check is on data-level changes only, NOT on byte
     # equality. pd.to_csv may produce trivially different formatting
