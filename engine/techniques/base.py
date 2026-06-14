@@ -1155,7 +1155,11 @@ class RunContext:
         self.frequency: str = _normalize_frequency(raw.get("frequency", ""))
         self.time: list = raw.get("time", [])
         self.series: list = raw.get("series", [])  # list of {name, values}
-        self.exog: list = raw.get("exog", [])       # list of {name, values}
+        # `or []` coerces a present-but-null "exog" to []. The C# client always
+        # serializes "exog": null (RunRequest.Exog is never populated), and
+        # raw.get's default only applies when the key is ABSENT — so without this
+        # any technique iterating ctx.exog would hit 'NoneType' is not iterable.
+        self.exog: list = raw.get("exog") or []     # list of {name, values}
         self.params: dict = raw.get("params", {})
         self.fill_config: dict = raw.get("fill_config", {})
         self.resample_config: dict = raw.get("resample_config", {})

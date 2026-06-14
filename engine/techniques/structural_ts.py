@@ -74,7 +74,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             if len(svals) >= n:
                 exog_arrays.append(svals[:n])
                 exog_names.append(sname)
-        for ex in ctx.exog:
+        for ex in (ctx.exog or []):
             arr = np.array(ex.get("values", []), dtype=np.float64)
             if len(arr) >= n:
                 exog_arrays.append(arr[:n])
