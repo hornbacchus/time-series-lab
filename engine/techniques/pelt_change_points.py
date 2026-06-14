@@ -127,19 +127,43 @@ def _run_multivariate(ctx, progress_callback, all_series):
     min_size = int(ctx.get_param("min_size", 5))
     jump = int(ctx.get_param("jump", 1))
     n_bkps = ctx.get_param("n_bkps")
+    if isinstance(n_bkps, str) and n_bkps.strip() == "":
+        n_bkps = None  # empty textbox == unset (penalty-based detection)
 
-    penalty_param = ctx.get_param("penalty")
-    # "auto" (the dialog default) is a SENTINEL for the preset-based automatic
-    # penalty (== unset). bic/aic/mbic tokens and numerics pass through below.
-    if isinstance(penalty_param, str) and penalty_param.strip().lower() in ("", "auto", "none"):
-        penalty_param = None
-    if penalty_param is None:
-        penalty_method = {"Fast": "bic", "Balanced": "bic",
-                          "Thorough": "mbic"}.get(ctx.preset, "bic")
-    elif isinstance(penalty_param, (int, float)):
-        penalty_method = float(penalty_param)
+    # Penalty. Precedence: a numeric Penalty Value (manual override) wins over
+    # the Penalty dropdown, which falls back to the preset-based "auto".
+    # (n_bkps, handled below, overrides ALL of these.)
+    penalty_value_param = ctx.get_param("penalty_value")
+    if isinstance(penalty_value_param, str) and penalty_value_param.strip() == "":
+        penalty_value_param = None  # empty textbox == unset
+    if penalty_value_param is not None:
+        try:
+            penalty_method = float(penalty_value_param)
+        except (TypeError, ValueError):
+            return make_error_response(
+                ctx,
+                f"Penalty Value must be a number, got {penalty_value_param!r}.",
+                error_fixes=["Enter a positive number, or clear Penalty Value to use the Penalty criterion."],
+            )
+        if penalty_method <= 0:
+            return make_error_response(
+                ctx,
+                f"Penalty Value must be > 0 when set, got {penalty_method}.",
+                error_fixes=["Use a positive penalty, or clear Penalty Value to use the Penalty criterion."],
+            )
     else:
-        penalty_method = str(penalty_param).lower()
+        penalty_param = ctx.get_param("penalty")
+        # "auto" (the dialog default) is a SENTINEL for the preset-based automatic
+        # penalty (== unset). bic/aic/mbic tokens and numerics pass through below.
+        if isinstance(penalty_param, str) and penalty_param.strip().lower() in ("", "auto", "none"):
+            penalty_param = None
+        if penalty_param is None:
+            penalty_method = {"Fast": "bic", "Balanced": "bic",
+                              "Thorough": "mbic"}.get(ctx.preset, "bic")
+        elif isinstance(penalty_param, (int, float)):
+            penalty_method = float(penalty_param)
+        else:
+            penalty_method = str(penalty_param).lower()
 
     _PENALTY_METHOD_OPTS = ("bic", "aic", "mbic")
     if isinstance(penalty_method, str) and penalty_method not in _PENALTY_METHOD_OPTS:
@@ -155,6 +179,22 @@ def _run_multivariate(ctx, progress_callback, all_series):
     # Joint multivariate PELT — pass the (n,k) signal directly (no reshape).
     if n_bkps is not None:
         n_bkps = int(n_bkps)
+        # Exact feasible bound: K+1 segments each >= min_size on n points
+        # => K <= floor(n/min_size) - 1.
+        _max_bkps = n // min_size - 1
+        if n_bkps < 0 or n_bkps > _max_bkps:
+            return make_error_response(
+                ctx,
+                f"Number of Breakpoints ({n_bkps}) is out of range: with "
+                f"{n} observations and Min Segment Size {min_size}, at most "
+                f"{_max_bkps} breakpoint(s) are feasible ({n_bkps + 1} "
+                f"segments each need >= {min_size} points).",
+                error_fixes=[f"Use a value between 0 and {_max_bkps}, or lower Min Segment Size."],
+            )
+        warn_list.append(
+            f"Break count forced to {n_bkps}; penalty criterion ignored "
+            f"(Number of Breakpoints overrides penalty)."
+        )
         algo = rpt.Binseg(model=cost_model, min_size=min_size, jump=jump).fit(X)
         bkps = algo.predict(n_bkps=n_bkps)
         penalty_value = None
@@ -306,26 +346,50 @@ def run(ctx: RunContext, progress_callback) -> dict:
         min_size = int(ctx.get_param("min_size", 5))
         jump = int(ctx.get_param("jump", 1))
         n_bkps = ctx.get_param("n_bkps")
+        if isinstance(n_bkps, str) and n_bkps.strip() == "":
+            n_bkps = None  # empty textbox == unset (penalty-based detection)
 
-        # Penalty
-        penalty_param = ctx.get_param("penalty")
-        # "auto" (the dialog default) is a SENTINEL for the preset-based
-        # automatic penalty (== unset). bic/aic/mbic tokens and numerics pass
-        # through below.
-        if isinstance(penalty_param, str) and penalty_param.strip().lower() in ("", "auto", "none"):
-            penalty_param = None
-        if penalty_param is None:
-            # Preset-based default
-            preset_pen = {
-                "Fast": "bic",
-                "Balanced": "bic",
-                "Thorough": "mbic",
-            }
-            penalty_method = preset_pen.get(ctx.preset, "bic")
-        elif isinstance(penalty_param, (int, float)):
-            penalty_method = float(penalty_param)
+        # Penalty. Precedence: a numeric Penalty Value (manual override) wins
+        # over the Penalty dropdown, which falls back to the preset-based
+        # "auto". (n_bkps, handled below, overrides ALL of these.)
+        penalty_value_param = ctx.get_param("penalty_value")
+        if isinstance(penalty_value_param, str) and penalty_value_param.strip() == "":
+            penalty_value_param = None  # empty textbox == unset
+        if penalty_value_param is not None:
+            try:
+                penalty_method = float(penalty_value_param)
+            except (TypeError, ValueError):
+                return make_error_response(
+                    ctx,
+                    f"Penalty Value must be a number, got {penalty_value_param!r}.",
+                    error_fixes=["Enter a positive number, or clear Penalty Value to use the Penalty criterion."],
+                )
+            if penalty_method <= 0:
+                return make_error_response(
+                    ctx,
+                    f"Penalty Value must be > 0 when set, got {penalty_method}.",
+                    error_fixes=["Use a positive penalty, or clear Penalty Value to use the Penalty criterion."],
+                )
         else:
-            penalty_method = str(penalty_param).lower()
+            # Penalty
+            penalty_param = ctx.get_param("penalty")
+            # "auto" (the dialog default) is a SENTINEL for the preset-based
+            # automatic penalty (== unset). bic/aic/mbic tokens and numerics pass
+            # through below.
+            if isinstance(penalty_param, str) and penalty_param.strip().lower() in ("", "auto", "none"):
+                penalty_param = None
+            if penalty_param is None:
+                # Preset-based default
+                preset_pen = {
+                    "Fast": "bic",
+                    "Balanced": "bic",
+                    "Thorough": "mbic",
+                }
+                penalty_method = preset_pen.get(ctx.preset, "bic")
+            elif isinstance(penalty_param, (int, float)):
+                penalty_method = float(penalty_param)
+            else:
+                penalty_method = str(penalty_param).lower()
 
         # CAI Phase 2 Session 15 fix (F-CP-PELT-PENALTY): explicit
         # allowlist gate. Pre-fix, invalid string penalties (e.g.
@@ -353,8 +417,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
         signal = clean.reshape(-1, 1)
 
         if n_bkps is not None:
-            # Fixed number of breakpoints: use Binseg or BottomUp
+            # Fixed number of breakpoints: use Binseg (overrides the penalty).
             n_bkps = int(n_bkps)
+            # Exact feasible bound: K+1 segments each >= min_size on n points
+            # => K <= floor(n/min_size) - 1.
+            _max_bkps = n // min_size - 1
+            if n_bkps < 0 or n_bkps > _max_bkps:
+                return make_error_response(
+                    ctx,
+                    f"Number of Breakpoints ({n_bkps}) is out of range: with "
+                    f"{n} observations and Min Segment Size {min_size}, at most "
+                    f"{_max_bkps} breakpoint(s) are feasible ({n_bkps + 1} "
+                    f"segments each need >= {min_size} points).",
+                    error_fixes=[f"Use a value between 0 and {_max_bkps}, or lower Min Segment Size."],
+                )
+            warn_list.append(
+                f"Break count forced to {n_bkps}; penalty criterion ignored "
+                f"(Number of Breakpoints overrides penalty)."
+            )
             algo = rpt.Binseg(model=cost_model, min_size=min_size, jump=jump).fit(signal)
             bkps = algo.predict(n_bkps=n_bkps)
         else:

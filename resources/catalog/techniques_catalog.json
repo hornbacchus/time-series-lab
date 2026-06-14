@@ -3065,7 +3065,42 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Penalty value or 'auto' (BIC-based)",
+          "description": "Penalty criterion: 'auto' (preset-based — BIC for Fast/Balanced, mBIC for Thorough), or force 'bic'/'aic'/'mbic'. Higher penalty = fewer change points. For a manual numeric penalty use Penalty Value. Ignored when Number of Breakpoints is set.",
+          "options": [
+            "auto",
+            "bic",
+            "aic",
+            "mbic"
+          ]
+        },
+        {
+          "name": "penalty_value",
+          "label": "Penalty Value",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Manual numeric penalty (must be > 0). When set, overrides the Penalty dropdown. Higher = fewer change points. Leave blank to use the Penalty criterion.",
+          "options": null
+        },
+        {
+          "name": "min_size",
+          "label": "Min Segment Size",
+          "type": "int",
+          "default": 5,
+          "required": false,
+          "advanced": false,
+          "description": "Minimum observations per segment (granularity floor). Larger = coarser segmentation.",
+          "options": null
+        },
+        {
+          "name": "n_bkps",
+          "label": "Number of Breakpoints",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Force an EXACT number of change points (switches to binary segmentation). When set, OVERRIDES the penalty criterion. Leave blank for automatic penalty-based detection (the default).",
           "options": null
         }
       ],
