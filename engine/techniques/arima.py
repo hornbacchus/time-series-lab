@@ -243,31 +243,26 @@ def _run_manual_arima(ctx, clean, name, horizon, warnings, progress_callback):
     """Fit ARIMA with user-specified order."""
     progress_callback("Parsing ARIMA order", 15)
 
-    order_param = ctx.get_param("order")
-    if order_param is None:
-        return make_error_response(
-            ctx,
-            "The 'order' parameter [p, d, q] is required for manual ARIMA.",
-            error_fixes=[
-                "Provide order=[p, d, q], e.g. order=[1, 1, 1].",
-                "Or use the 'auto_arima' technique for automatic selection.",
-            ],
+    # Fix B Tier 1a: order/seasonal_order arrive as catalog STRINGS ("1,1,1");
+    # the shared helper parses string|list|tuple uniformly (the prior list-only
+    # parse made a dialog-typed order CRASH "must be a list of 3 integers").
+    # seasonal=>m>1 cross-field guard.
+    from techniques._validation import ParamError, parse_int_tuple, require, check_seasonal
+    try:
+        order = parse_int_tuple(ctx.get_param("order"), 3, "ARIMA Order")
+        require(
+            order is not None,
+            "The 'ARIMA Order' parameter (p,d,q) is required for manual ARIMA.",
+            fixes=["Provide order as p,d,q (e.g. '1,1,1'), or use the 'auto_arima' technique."],
         )
-
-    if isinstance(order_param, (list, tuple)) and len(order_param) == 3:
-        order = tuple(int(x) for x in order_param)
-    else:
-        return make_error_response(
-            ctx,
-            f"'order' must be a list of 3 integers [p, d, q], got: {order_param}",
-            error_fixes=["Example: order=[1, 1, 1] for ARIMA(1,1,1)."],
+        seasonal_order = parse_int_tuple(
+            ctx.get_param("seasonal_order", "0,0,0,0"), 4, "Seasonal Order",
+            default=(0, 0, 0, 0),
         )
-
-    seasonal_order_param = ctx.get_param("seasonal_order", [0, 0, 0, 0])
-    if isinstance(seasonal_order_param, (list, tuple)) and len(seasonal_order_param) == 4:
-        seasonal_order = tuple(int(x) for x in seasonal_order_param)
-    else:
-        seasonal_order = (0, 0, 0, 0)
+        check_seasonal(P=seasonal_order[0], D=seasonal_order[1],
+                       Q=seasonal_order[2], m=seasonal_order[3])
+    except ParamError as e:
+        return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
     progress_callback("Fitting ARIMA model", 30)
 

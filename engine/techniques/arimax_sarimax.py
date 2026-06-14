@@ -161,8 +161,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
                         f"(e.g. '1,1,1'), got '{order_param}'.",
                         error_fixes=["Use 'auto' (automatic selection) or p,d,q integers."],
                     )
-        seasonal_param = ctx.get_param("seasonal_order", [0, 0, 0, 0])
-        seasonal_order = tuple(int(x) for x in seasonal_param) if seasonal_param else (0, 0, 0, 0)
+        # Fix B Tier 1a: parse seasonal_order via the shared helper (string|list);
+        # the prior `tuple(int(x) for x in ...)` crashed on a dialog string
+        # (iterated chars). seasonal=>m>1 cross-field guard.
+        from techniques._validation import ParamError, parse_int_tuple, check_seasonal
+        try:
+            seasonal_order = parse_int_tuple(
+                ctx.get_param("seasonal_order", "0,0,0,0"), 4, "Seasonal Order",
+                default=(0, 0, 0, 0),
+            )
+            check_seasonal(P=seasonal_order[0], D=seasonal_order[1],
+                           Q=seasonal_order[2], m=seasonal_order[3])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
 

@@ -97,23 +97,24 @@ def run(ctx: RunContext, progress_callback) -> dict:
         if horizon < 1:
             horizon = 1
 
-        # Parse orders
-        order_param = ctx.get_param("order", [1, 1, 1])
-        if isinstance(order_param, (list, tuple)) and len(order_param) == 3:
-            order = tuple(int(x) for x in order_param)
-        else:
-            order = (1, 1, 1)
-            warn_list.append(f"Invalid order '{order_param}'. Using default (1,1,1).")
-
+        # Parse orders. Fix B Tier 1a: order/seasonal_order arrive as catalog
+        # STRINGS; the shared helper parses string|list|tuple (the prior
+        # list-only parse silently DROPPED a dialog-typed order to the default).
+        # seasonal_order blank -> (1,1,1,m_inferred): the frequency-aware default
+        # is preserved byte-identical; an explicit P,D,Q,m is honored. m>1 guard.
+        from techniques._validation import ParamError, parse_int_tuple, check_seasonal
         m = _infer_m(ctx)
-
-        seas_param = ctx.get_param("seasonal_order", [1, 1, 1, m])
-        if isinstance(seas_param, (list, tuple)) and len(seas_param) == 4:
-            seasonal_order = tuple(int(x) for x in seas_param)
-        elif isinstance(seas_param, (list, tuple)) and len(seas_param) == 3:
-            seasonal_order = tuple(int(x) for x in seas_param) + (m,)
-        else:
-            seasonal_order = (1, 1, 1, m)
+        try:
+            order = parse_int_tuple(ctx.get_param("order"), 3, "SARIMA Order",
+                                    default=(1, 1, 1))
+            seasonal_order = parse_int_tuple(
+                ctx.get_param("seasonal_order"), 4, "Seasonal Order",
+                default=(1, 1, 1, m),
+            )
+            check_seasonal(P=seasonal_order[0], D=seasonal_order[1],
+                           Q=seasonal_order[2], m=seasonal_order[3])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         # Validate: need enough data for seasonal differencing
         min_obs = seasonal_order[3] * (seasonal_order[1] + 1) + order[1] + max(order[0], seasonal_order[0] * seasonal_order[3])

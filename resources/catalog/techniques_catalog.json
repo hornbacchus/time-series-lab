@@ -348,6 +348,16 @@
           "options": null
         },
         {
+          "name": "seasonal_order",
+          "label": "Seasonal Order (P,D,Q,m)",
+          "type": "string",
+          "default": "0,0,0,0",
+          "required": false,
+          "advanced": true,
+          "description": "Seasonal order P,D,Q,m. Default 0,0,0,0 = non-seasonal. A non-zero P/D/Q requires m>1 (e.g. 1,1,1,12).",
+          "options": null
+        },
+        {
           "name": "horizon",
           "label": "Forecast Horizon",
           "type": "int",
@@ -396,12 +406,12 @@
         },
         {
           "name": "seasonal_order",
-          "label": "Seasonal Order (P,D,Q,s)",
+          "label": "Seasonal Order (P,D,Q,m)",
           "type": "string",
-          "default": "1,1,1,12",
+          "default": "",
           "required": false,
           "advanced": false,
-          "description": "Seasonal order",
+          "description": "Seasonal order P,D,Q,m. Blank = auto (1,1,1) at the frequency-inferred period; or specify e.g. 1,1,1,12 (monthly) or 1,1,1,4 (quarterly).",
           "options": null
         },
         {
@@ -412,6 +422,46 @@
           "required": false,
           "advanced": false,
           "description": "Periods to forecast",
+          "options": null
+        },
+        {
+          "name": "m",
+          "label": "Seasonal Period (m)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Seasonal period. Blank = inferred from frequency (12 monthly, 4 quarterly). Also the 4th value of Seasonal Order.",
+          "options": null
+        },
+        {
+          "name": "trend",
+          "label": "Trend",
+          "type": "string",
+          "default": "n",
+          "required": false,
+          "advanced": false,
+          "description": "Deterministic trend: n (none), c (constant), t (linear), ct (constant+linear).",
+          "options": ["n", "c", "t", "ct"]
+        },
+        {
+          "name": "enforce_stationarity",
+          "label": "Enforce Stationarity",
+          "type": "bool",
+          "default": true,
+          "required": false,
+          "advanced": true,
+          "description": "Constrain AR roots to be stationary (default true).",
+          "options": null
+        },
+        {
+          "name": "enforce_invertibility",
+          "label": "Enforce Invertibility",
+          "type": "bool",
+          "default": true,
+          "required": false,
+          "advanced": true,
+          "description": "Constrain MA roots to be invertible (default true).",
           "options": null
         }
       ],
@@ -524,6 +574,46 @@
           "required": false,
           "advanced": false,
           "description": "Periods to forecast",
+          "options": null
+        },
+        {
+          "name": "seasonal_order",
+          "label": "Seasonal Order (P,D,Q,m)",
+          "type": "string",
+          "default": "0,0,0,0",
+          "required": false,
+          "advanced": true,
+          "description": "Seasonal order P,D,Q,m. Default 0,0,0,0 = non-seasonal. A non-zero P/D/Q requires m>1 (e.g. 1,1,1,12).",
+          "options": null
+        },
+        {
+          "name": "trend",
+          "label": "Trend",
+          "type": "string",
+          "default": "c",
+          "required": false,
+          "advanced": false,
+          "description": "Deterministic trend: n (none), c (constant), t (linear), ct (constant+linear).",
+          "options": ["n", "c", "t", "ct"]
+        },
+        {
+          "name": "enforce_stationarity",
+          "label": "Enforce Stationarity",
+          "type": "bool",
+          "default": true,
+          "required": false,
+          "advanced": true,
+          "description": "Constrain AR roots to be stationary (default true).",
+          "options": null
+        },
+        {
+          "name": "enforce_invertibility",
+          "label": "Enforce Invertibility",
+          "type": "bool",
+          "default": true,
+          "required": false,
+          "advanced": true,
+          "description": "Constrain MA roots to be invertible (default true).",
           "options": null
         }
       ],
