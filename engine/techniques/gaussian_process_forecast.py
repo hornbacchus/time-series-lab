@@ -105,7 +105,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Use a value strictly between 0 and 1."],
             )
         alpha_ci = 1.0 - conf_level
-        normalize = ctx.get_param("normalize", True)
+        _nm = ctx.get_param("normalize", True)
+        normalize = _nm if isinstance(_nm, bool) else str(_nm).strip().lower() in ("true", "1", "yes")
         kernel_type = ctx.get_param("kernel", "rbf").lower()
         # CAI Phase 2 Session 26 fix (F-ML-GP-KERNEL): explicit
         # allowlist gate. Pre-fix, invalid kernel silently fell
@@ -123,9 +124,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        n_restarts = preset_cfg["n_restarts"]
+        n_restarts = preset_cfg["n_restarts"]  # Tier 1b-bis: banked (net-new + ~inert)
         max_train = preset_cfg["max_train"]
-        gp_alpha = preset_cfg["alpha"]
+        # gp_alpha (GP noise floor): wired this unit; blank -> preset alpha
+        # (preset-aware, byte-identical). Literal get_param for catalog_key_alignment.
+        _ga = ctx.get_param("gp_alpha", preset_cfg["alpha"])
+        gp_alpha = preset_cfg["alpha"] if (_ga is None or str(_ga).strip() == "") else float(_ga)
+        from techniques._validation import ParamError, require
+        try:
+            require(gp_alpha > 0, f"gp_alpha ({gp_alpha}) must be > 0.",
+                    fixes=["Use a positive noise level (e.g. 1e-7), or leave blank for the preset default."])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         # Subsample if series is too long (GP is O(n^3))
         if n > max_train:
@@ -345,6 +355,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
         audit = {
             "kernel_type": kernel_type,
             "kernel_params": kernel_str,
+            "gp_alpha": gp_alpha,
             "log_marginal_likelihood": round(lml, 4),
             "rmse": round(rmse, 4),
             "r2": round(r2, 4),

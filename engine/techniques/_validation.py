@@ -124,6 +124,42 @@ def parse_int_list(value, label, *, allow_auto=False, default=None):
     )
 
 
+def parse_float_list(value, label, *, allow_auto=False, default=None):
+    """Parse a VARIABLE-length list of floats: '0.1,0.5,0.9' | [...] | (...) ->
+    tuple[float]. Absent (None) / empty ('') -> default (F1 cleared-box rule);
+    with allow_auto, 'auto'/'none' -> default too. Malformed / non-numeric ->
+    ParamError (named). The float-valued sibling of parse_int_list (Tier 1b-bis:
+    quantile_regression levels)."""
+    if value is None:
+        return default
+    if isinstance(value, str):
+        s = value.strip()
+        if s == "":
+            return default
+        if allow_auto and s.lower() in ("auto", "none"):
+            return default
+        parts = [p for p in s.replace(";", ",").replace(" ", ",").split(",") if p.strip()]
+        try:
+            return tuple(float(p) for p in parts)
+        except ValueError:
+            raise ParamError(
+                f"{label} must be comma-separated numbers (e.g. '0.1,0.5,0.9'), got '{value}'.",
+                fixes=["Enter numbers separated by commas, or leave blank for the default."],
+            )
+    if isinstance(value, (list, tuple)):
+        try:
+            return tuple(float(x) for x in value)
+        except (ValueError, TypeError):
+            raise ParamError(
+                f"{label} must be a list of numbers, got {value!r}.",
+                fixes=["Provide numbers separated by commas (e.g. '0.1,0.5,0.9')."],
+            )
+    raise ParamError(
+        f"{label} must be comma-separated numbers or a list, got {type(value).__name__}.",
+        fixes=["Enter numbers separated by commas (e.g. '0.1,0.5,0.9')."],
+    )
+
+
 def check_order_bounds(*, p=None, q=None, d=None,
                        max_p=None, max_q=None, max_d=None,
                        cap_p=None, cap_q=None, cap_d=None) -> None:

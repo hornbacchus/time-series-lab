@@ -217,7 +217,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
+        # Fix B Tier 1b-bis: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment.
+        _nlg = ctx.get_param("n_lags", preset_cfg["n_lags"])
+        n_lags = preset_cfg["n_lags"] if (_nlg is None or str(_nlg).strip() == "") else int(_nlg)
         # CAI Phase 2 Session 23 fix (F-TR-GBM-NLAGS): explicit
         # range gate. Pre-fix, n_lags=0 silently accepted produced
         # a degenerate model with no features.
@@ -230,10 +233,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     "features (typical values 4-24).",
                 ],
             )
-        n_estimators = int(ctx.get_param("n_estimators", preset_cfg["n_estimators"]))
-        max_depth = int(ctx.get_param("max_depth", preset_cfg["max_depth"]))
-        lr = float(ctx.get_param("learning_rate", preset_cfg["learning_rate"]))
+        _ne = ctx.get_param("n_estimators", preset_cfg["n_estimators"])
+        n_estimators = preset_cfg["n_estimators"] if (_ne is None or str(_ne).strip() == "") else int(_ne)
+        _md = ctx.get_param("max_depth", preset_cfg["max_depth"])
+        max_depth = preset_cfg["max_depth"] if (_md is None or str(_md).strip() == "") else int(_md)
+        _lr = ctx.get_param("learning_rate", preset_cfg["learning_rate"])
+        lr = preset_cfg["learning_rate"] if (_lr is None or str(_lr).strip() == "") else float(_lr)
+        # subsample: wired this unit (was preset-derived 0.8/1.0); blank -> that
+        # same preset-derived value (byte-identical).
+        _ss_default = 0.8 if ctx.preset != "Fast" else 1.0
+        _ss = ctx.get_param("subsample", _ss_default)
+        subsample = _ss_default if (_ss is None or str(_ss).strip() == "") else float(_ss)
         rolling_windows = preset_cfg["rolling_windows"]
+
+        from techniques._validation import ParamError, require
+        try:
+            require(n_estimators >= 1, f"n_estimators ({n_estimators}) must be >= 1.",
+                    fixes=["Use n_estimators >= 1, or leave blank for the preset default."])
+            require(max_depth >= 1, f"max_depth ({max_depth}) must be >= 1.",
+                    fixes=["Use max_depth >= 1, or leave blank."])
+            require(lr > 0, f"learning_rate ({lr}) must be > 0.",
+                    fixes=["Use a positive learning rate, or leave blank."])
+            require(0 < subsample <= 1, f"subsample ({subsample}) must be in (0, 1].",
+                    fixes=["Use a fraction in (0, 1], or leave blank for the preset default."])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         # Cap lags to reasonable size
         n_lags = min(n_lags, n // 3)
@@ -257,7 +281,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             learning_rate=lr,
             loss="squared_error",
             random_state=ctx.seed,
-            subsample=0.8 if ctx.preset != "Fast" else 1.0,
+            subsample=subsample,
         )
         model.fit(X, y)
 
@@ -393,6 +417,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             "n_estimators": n_estimators,
             "max_depth": max_depth,
             "learning_rate": lr,
+            "subsample": subsample,
             "n_lags": n_lags,
             "n_features": len(feature_names),
             "train_rmse": round(train_rmse, 4),

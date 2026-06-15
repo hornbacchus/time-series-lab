@@ -352,8 +352,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        reservoir_size = int(ctx.get_param("reservoir_size", preset_cfg["reservoir_size"]))
-        spectral_radius = float(ctx.get_param("spectral_radius", preset_cfg["spectral_radius"]))
+        # Fix B Tier 1b-bis: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment.
+        _rs = ctx.get_param("reservoir_size", preset_cfg["reservoir_size"])
+        reservoir_size = preset_cfg["reservoir_size"] if (_rs is None or str(_rs).strip() == "") else int(_rs)
+        _sr = ctx.get_param("spectral_radius", preset_cfg["spectral_radius"])
+        spectral_radius = preset_cfg["spectral_radius"] if (_sr is None or str(_sr).strip() == "") else float(_sr)
         # CAI Phase 2 Session 25 fix (F-SN-ESN-SPECTRAL): explicit
         # range gate. Negative spectral_radius makes no sense for
         # eigenvalue-magnitude scaling.
@@ -366,7 +370,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     "stable echo state property.",
                 ],
             )
-        leak_rate = float(ctx.get_param("leak_rate", preset_cfg["leak_rate"]))
+        _lk = ctx.get_param("leak_rate", preset_cfg["leak_rate"])
+        leak_rate = preset_cfg["leak_rate"] if (_lk is None or str(_lk).strip() == "") else float(_lk)
         # CAI Phase 2 Session 25 fix (F-SN-ESN-LEAK): explicit
         # range gate. Leaky-integrator parameter only meaningful
         # in [0, 1].
@@ -379,10 +384,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     "1.0 means no leak (standard ESN).",
                 ],
             )
-        input_scaling = float(ctx.get_param("input_scaling", preset_cfg["input_scaling"]))
-        ridge_alpha = float(ctx.get_param("ridge_alpha", preset_cfg["ridge_alpha"]))
-        warmup = int(ctx.get_param("warmup", preset_cfg["warmup"]))
+        _is = ctx.get_param("input_scaling", preset_cfg["input_scaling"])
+        input_scaling = preset_cfg["input_scaling"] if (_is is None or str(_is).strip() == "") else float(_is)
+        _ra = ctx.get_param("ridge_alpha", preset_cfg["ridge_alpha"])
+        ridge_alpha = preset_cfg["ridge_alpha"] if (_ra is None or str(_ra).strip() == "") else float(_ra)
+        _wu = ctx.get_param("warmup", preset_cfg["warmup"])
+        warmup = preset_cfg["warmup"] if (_wu is None or str(_wu).strip() == "") else int(_wu)
         sparsity = preset_cfg["sparsity"]
+
+        from techniques._validation import ParamError, require
+        try:
+            require(reservoir_size >= 1, f"reservoir_size ({reservoir_size}) must be >= 1.",
+                    fixes=["Use reservoir_size >= 1, or leave blank for the preset default."])
+            require(ridge_alpha > 0, f"ridge_alpha ({ridge_alpha}) must be > 0.",
+                    fixes=["Use a positive ridge regularization (e.g. 1e-6), or leave blank."])
+            require(input_scaling > 0, f"input_scaling ({input_scaling}) must be > 0.",
+                    fixes=["Use a positive input scaling, or leave blank."])
+            require(warmup >= 0, f"warmup ({warmup}) must be >= 0.",
+                    fixes=["Use warmup >= 0, or leave blank."])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         # Ensure warmup is reasonable
         warmup = min(warmup, n // 4)

@@ -87,8 +87,12 @@ KNOWN_INERT: dict[str, list[str]] = {
     # forecast_combination models + combination_method: FIXED (engine-wired,
     # Commit pending) -> removed from the baseline; the guard now enforces them.
     "forecast_reconciliation": ["hierarchy_table"],            # C (vs S_matrix)
-    "gaussian_process_forecast": ["max_lag"],                  # C (GP reads no lag param)
-    "gradient_boosting_forecast": ["max_lag"],                 # A -> n_lags
+    # gaussian_process_forecast max_lag: FIXED (Fix B Tier 1b-bis) -- the dead
+    # catalog control was REMOVED (GP regresses value~time-index, no lag concept;
+    # the engine never read it) -> removed from the baseline.
+    # gradient_boosting_forecast max_lag: FIXED (Fix B Tier 1b-bis) -- catalog
+    # control renamed max_lag -> n_lags to match the engine read (type-A);
+    # default blank -> preset cfg (byte-identical) -> removed from the baseline.
     # har_rv horizon: FIXED (engine-wired -> h_ahead; catalog default corrected
     # 10->1 to state the delivered value; A-batch).
     "intervention_analysis": ["intervention_dates", "intervention_type"],  # C (vs interventions/order)

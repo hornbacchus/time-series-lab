@@ -214,12 +214,44 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        n_lags = int(ctx.get_param("max_lag", preset_cfg["n_lags"]))
+        # Fix B Tier 1b-bis: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment. (lag key stays
+        # "max_lag" -- already wired; the n_lags rename is a banked cosmetic pass.)
+        _ml = ctx.get_param("max_lag", preset_cfg["n_lags"])
+        n_lags = preset_cfg["n_lags"] if (_ml is None or str(_ml).strip() == "") else int(_ml)
         kernel = ctx.get_param("kernel", preset_cfg["kernel"])
-        C = float(ctx.get_param("C", preset_cfg["C"]))
-        epsilon = float(ctx.get_param("epsilon", preset_cfg["epsilon"]))
-        gamma = preset_cfg["gamma"]
+        _c = ctx.get_param("C", preset_cfg["C"])
+        C = preset_cfg["C"] if (_c is None or str(_c).strip() == "") else float(_c)
+        _eps = ctx.get_param("epsilon", preset_cfg["epsilon"])
+        epsilon = preset_cfg["epsilon"] if (_eps is None or str(_eps).strip() == "") else float(_eps)
+        # gamma: wired this unit (was preset-only "scale"); accepts scale|auto|
+        # positive float. blank -> preset gamma (byte-identical).
+        _gm = ctx.get_param("gamma", preset_cfg["gamma"])
         rolling_windows = preset_cfg["rolling_windows"]
+
+        from techniques._validation import ParamError, require
+        try:
+            require(C > 0, f"C ({C}) must be > 0.",
+                    fixes=["Use a positive regularization C, or leave blank for the preset default."])
+            require(epsilon >= 0, f"epsilon ({epsilon}) must be >= 0.",
+                    fixes=["Use epsilon >= 0, or leave blank."])
+            if _gm is None or str(_gm).strip() == "":
+                gamma = preset_cfg["gamma"]
+            else:
+                _gms = str(_gm).strip().lower()
+                if _gms in ("scale", "auto"):
+                    gamma = _gms
+                else:
+                    try:
+                        gamma = float(_gm)
+                    except ValueError:
+                        raise ParamError(
+                            f"gamma must be 'scale', 'auto', or a positive number, got '{_gm}'.",
+                            fixes=["Use 'scale' (default), 'auto', or a positive number."])
+                    require(gamma > 0, f"gamma ({gamma}) must be > 0 when numeric.",
+                            fixes=["Use a positive number, or 'scale'/'auto'."])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         # CAI Phase 2 Session 26 fix (F-ML-SVR-KERNEL): explicit
         # allowlist gate. Pre-fix, invalid kernel was loud-and-

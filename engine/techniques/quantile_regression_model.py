@@ -181,7 +181,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
+        # Fix B Tier 1b-bis: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment.
+        _nlg = ctx.get_param("n_lags", preset_cfg["n_lags"])
+        n_lags = preset_cfg["n_lags"] if (_nlg is None or str(_nlg).strip() == "") else int(_nlg)
         # CAI Phase 2 Session 26 fix (F-ML-QR-NLAGS): explicit
         # range gate.
         if n_lags < 1:
@@ -190,24 +193,39 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 f"n_lags must be >= 1. Got {n_lags}.",
                 error_fixes=["Use a positive integer for lagged features."],
             )
-        n_estimators = int(ctx.get_param("n_estimators", preset_cfg["n_estimators"]))
-        max_depth = int(ctx.get_param("max_depth", preset_cfg["max_depth"]))
-        lr = float(ctx.get_param("learning_rate", preset_cfg["learning_rate"]))
+        _ne = ctx.get_param("n_estimators", preset_cfg["n_estimators"])
+        n_estimators = preset_cfg["n_estimators"] if (_ne is None or str(_ne).strip() == "") else int(_ne)
+        _md = ctx.get_param("max_depth", preset_cfg["max_depth"])
+        max_depth = preset_cfg["max_depth"] if (_md is None or str(_md).strip() == "") else int(_md)
+        _lr = ctx.get_param("learning_rate", preset_cfg["learning_rate"])
+        lr = preset_cfg["learning_rate"] if (_lr is None or str(_lr).strip() == "") else float(_lr)
         rolling_windows = preset_cfg["rolling_windows"]
 
-        quantiles_param = ctx.get_param("quantiles", None)
-        if quantiles_param is not None:
-            if isinstance(quantiles_param, list):
-                quantiles = sorted([float(q) for q in quantiles_param])
+        # quantiles: parse a catalog STRING ("0.1,0.5,0.9") via the shared helper
+        # (the prior code silently DROPPED a string -> preset; blank -> preset,
+        # byte-identical). A list copy avoids mutating the module-level cfg.
+        from techniques._validation import ParamError, require, parse_float_list
+        try:
+            require(n_estimators >= 1, f"n_estimators ({n_estimators}) must be >= 1.",
+                    fixes=["Use n_estimators >= 1, or leave blank for the preset default."])
+            require(max_depth >= 1, f"max_depth ({max_depth}) must be >= 1.",
+                    fixes=["Use max_depth >= 1, or leave blank."])
+            require(lr > 0, f"learning_rate ({lr}) must be > 0.",
+                    fixes=["Use a positive learning rate, or leave blank."])
+            _q = parse_float_list(ctx.get_param("quantiles"), "Quantiles", default=None)
+            if _q is not None:
+                for q in _q:
+                    require(0 < q < 1, f"Each quantile must be in (0, 1), got {q}.",
+                            fixes=["Use quantile levels strictly between 0 and 1 (e.g. '0.1,0.5,0.9')."])
+                quantiles = sorted(_q)
             else:
-                quantiles = preset_cfg["quantiles"]
-        else:
-            quantiles = preset_cfg["quantiles"]
+                quantiles = list(preset_cfg["quantiles"])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         # Ensure 0.5 is in quantiles (for median)
         if 0.5 not in quantiles:
-            quantiles.append(0.5)
-            quantiles.sort()
+            quantiles = sorted(quantiles + [0.5])
 
         n_lags = min(n_lags, n // 3)
 

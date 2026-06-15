@@ -4080,13 +4080,13 @@
           "options": null
         },
         {
-          "name": "max_lag",
-          "label": "Max Lag Features",
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
           "type": "int",
-          "default": 24,
+          "default": null,
           "required": false,
           "advanced": false,
-          "description": "Maximum lag features to create",
+          "description": "Number of past observations used as lag features. Blank uses the preset default.",
           "options": null
         },
         {
@@ -4095,8 +4095,38 @@
           "type": "int",
           "default": 200,
           "required": false,
+          "advanced": false,
+          "description": "Number of boosting trees (>= 1).",
+          "options": null
+        },
+        {
+          "name": "max_depth",
+          "label": "Max Tree Depth",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Maximum depth of each tree (>= 1). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "learning_rate",
+          "label": "Learning Rate",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Boosting shrinkage rate (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "subsample",
+          "label": "Subsample Fraction",
+          "type": "float",
+          "default": null,
+          "required": false,
           "advanced": true,
-          "description": "Number of boosting trees",
+          "description": "Row subsample fraction per tree, in (0, 1]. Blank uses the preset default (0.8, or 1.0 on Fast).",
           "options": null
         }
       ],
@@ -4138,13 +4168,53 @@
           "options": null
         },
         {
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of past observations used as lag features. Blank uses the preset default.",
+          "options": null
+        },
+        {
           "name": "quantiles",
           "label": "Quantiles",
           "type": "string",
-          "default": "0.1,0.25,0.5,0.75,0.9",
+          "default": null,
           "required": false,
           "advanced": false,
-          "description": "Comma-separated quantile levels",
+          "description": "Comma-separated quantile levels in (0, 1), e.g. '0.1,0.5,0.9'; 0.5 is always included. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "n_estimators",
+          "label": "Trees",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Number of boosting trees per quantile (>= 1). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "max_depth",
+          "label": "Max Tree Depth",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Maximum depth of each tree (>= 1). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "learning_rate",
+          "label": "Learning Rate",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Boosting shrinkage rate (> 0). Blank uses the preset default.",
           "options": null
         }
       ],
@@ -4185,13 +4255,37 @@
           "options": null
         },
         {
-          "name": "max_lag",
-          "label": "Max Lag Features",
-          "type": "int",
-          "default": 12,
+          "name": "kernel",
+          "label": "Kernel",
+          "type": "string",
+          "default": "rbf",
+          "required": false,
+          "advanced": false,
+          "description": "Covariance kernel: rbf (squared exponential), matern (Matern 2.5), or rational_quadratic.",
+          "options": [
+            "rbf",
+            "matern",
+            "rational_quadratic"
+          ]
+        },
+        {
+          "name": "normalize",
+          "label": "Normalize",
+          "type": "bool",
+          "default": true,
+          "required": false,
+          "advanced": false,
+          "description": "Z-score the series before fitting the GP.",
+          "options": null
+        },
+        {
+          "name": "gp_alpha",
+          "label": "Noise Level",
+          "type": "float",
+          "default": null,
           "required": false,
           "advanced": true,
-          "description": "Lag features for GP input",
+          "description": "Observation noise added to the kernel diagonal (> 0). Blank uses the preset default.",
           "options": null
         }
       ],
@@ -4907,12 +5001,13 @@
           "type": "string",
           "default": "rbf",
           "required": false,
-          "advanced": true,
-          "description": "SVM kernel function",
+          "advanced": false,
+          "description": "SVM kernel function: rbf, linear, poly, or sigmoid.",
           "options": [
             "rbf",
             "linear",
-            "poly"
+            "poly",
+            "sigmoid"
           ]
         },
         {
@@ -4922,7 +5017,27 @@
           "default": 1.0,
           "required": false,
           "advanced": true,
-          "description": "Regularization parameter",
+          "description": "Regularization parameter (> 0).",
+          "options": null
+        },
+        {
+          "name": "epsilon",
+          "label": "Epsilon",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Epsilon-tube width; no penalty within epsilon of the target (>= 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "gamma",
+          "label": "Gamma",
+          "type": "string",
+          "default": "scale",
+          "required": false,
+          "advanced": true,
+          "description": "Kernel coefficient: 'scale', 'auto', or a positive number.",
           "options": null
         }
       ],
@@ -5166,6 +5281,36 @@
           "required": false,
           "advanced": true,
           "description": "Leaking rate for reservoir updates",
+          "options": null
+        },
+        {
+          "name": "input_scaling",
+          "label": "Input Scaling",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Scaling applied to the input weights (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "ridge_alpha",
+          "label": "Ridge Alpha",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Ridge regularization for the readout layer (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "warmup",
+          "label": "Warmup Steps",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Initial reservoir states discarded before training the readout (>= 0). Blank uses the preset default.",
           "options": null
         }
       ],
