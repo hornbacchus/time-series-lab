@@ -938,6 +938,16 @@
           "options": null
         },
         {
+          "name": "lag",
+          "label": "Fixed Lag Order",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Fix the VAR order to this value. Blank auto-selects up to Max Lags by the information criterion.",
+          "options": null
+        },
+        {
           "name": "ic",
           "label": "Info Criterion",
           "type": "string",
@@ -950,6 +960,54 @@
             "bic",
             "hqic"
           ]
+        },
+        {
+          "name": "trend",
+          "label": "Trend",
+          "type": "string",
+          "default": "c",
+          "required": false,
+          "advanced": false,
+          "description": "Deterministic trend: n (none), c (constant), ct (constant + linear trend).",
+          "options": [
+            "n",
+            "c",
+            "ct"
+          ]
+        },
+        {
+          "name": "svar_identification",
+          "label": "Identification",
+          "type": "string",
+          "default": "cholesky",
+          "required": false,
+          "advanced": false,
+          "description": "Structural identification scheme: cholesky (recursive ordering), blanchard_quah (long-run restrictions), or sign_restriction (set identification).",
+          "options": [
+            "cholesky",
+            "blanchard_quah",
+            "sign_restriction"
+          ]
+        },
+        {
+          "name": "irf_periods",
+          "label": "IRF Periods",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of impulse-response horizons (>= 1). Blank uses the default (20).",
+          "options": null
+        },
+        {
+          "name": "sr_n_draws",
+          "label": "Sign-Restriction Draws",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Number of rotation draws for set identification (>= 1). Applies to the sign_restriction scheme. Blank uses the preset default.",
+          "options": null
         },
         {
           "name": "horizon",
@@ -1126,7 +1184,57 @@
           "default": 0.1,
           "required": false,
           "advanced": true,
-          "description": "Minnesota prior shrinkage parameter",
+          "description": "Minnesota prior shrinkage parameter (overall tightness)",
+          "options": null
+        },
+        {
+          "name": "lambda2",
+          "label": "Cross-Equation Shrinkage",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Minnesota cross-equation shrinkage (> 0; smaller = stronger shrinkage of other variables' lags). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "lambda3",
+          "label": "Lag-Decay",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Minnesota lag-decay exponent (> 0; 1 = harmonic, 2 = quadratic). Blank uses the default (1.0).",
+          "options": null
+        },
+        {
+          "name": "include_constant",
+          "label": "Include Constant",
+          "type": "bool",
+          "default": true,
+          "required": false,
+          "advanced": true,
+          "description": "Include an intercept term in the VAR.",
+          "options": null
+        },
+        {
+          "name": "n_draws",
+          "label": "Posterior Draws",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Number of posterior draws for IRF/forecast credible bands (>= 1). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "irf_horizon",
+          "label": "IRF Horizon",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Impulse-response / FEVD horizon (>= 1). Blank uses the preset default.",
           "options": null
         },
         {

@@ -282,11 +282,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # lambda1 (both 0.1), so the default path is byte-identical.
         lambda1 = float(ctx.get_param("lambda1",
                                       ctx.get_param("lambda_shrinkage", cfg["lambda1"])))
-        lambda2 = float(ctx.get_param("lambda2", cfg["lambda2"]))
-        lambda3 = float(ctx.get_param("lambda3", 1.0))
+        # Fix B Tier 1c-2: blank/absent -> default (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment. (lambda2/lambda3
+        # are already >0-guarded below.)
+        _l2 = ctx.get_param("lambda2", cfg["lambda2"])
+        lambda2 = cfg["lambda2"] if (_l2 is None or str(_l2).strip() == "") else float(_l2)
+        _l3 = ctx.get_param("lambda3", 1.0)
+        lambda3 = 1.0 if (_l3 is None or str(_l3).strip() == "") else float(_l3)
         horizon = max(1, int(ctx.get_param("horizon", 10)))
-        include_const = ctx.get_param("include_constant", True)
-        n_draws = int(ctx.get_param("n_draws", cfg["n_draws"]))
+        _ic = ctx.get_param("include_constant", True)
+        include_const = _ic if isinstance(_ic, bool) else str(_ic).strip().lower() in ("true", "1", "yes")
+        _nd = ctx.get_param("n_draws", cfg["n_draws"])
+        n_draws = cfg["n_draws"] if (_nd is None or str(_nd).strip() == "") else int(_nd)
         # CAI Phase 2 Session 22 fix (F-MV-BVAR-LAMBDA): explicit
         # range gates. Pre-fix, negative lambda shrinkage values
         # were silently accepted (Minnesota prior undefined for
@@ -325,6 +332,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=[
                     "Use a positive integer; typical macro VAR "
                     "lag orders are 1-12 monthly / 1-4 quarterly.",
+                ],
+            )
+        # Fix B Tier 1c-2: n_draws positivity guard (discharges the banked
+        # SV/bvar-ordering note; n_draws<1 produced empty/degenerate IRF bands
+        # -- np.percentile on an empty tensor / negative array dimensions).
+        if n_draws < 1:
+            return make_error_response(
+                ctx,
+                f"n_draws must be >= 1. Got {n_draws}.",
+                error_fixes=[
+                    "Use a positive number of posterior draws (e.g. 1000), "
+                    "or leave blank for the preset default.",
                 ],
             )
 
@@ -509,9 +528,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
         compute_irf_fevd = bool(ctx.get_param(
             "compute_irf_fevd", cfg.get("compute_irf_fevd", True)
         ))
-        irf_horizon = int(ctx.get_param(
-            "irf_horizon", cfg.get("irf_horizon", 24)
-        ))
+        _irh_default = cfg.get("irf_horizon", 24)
+        _irh = ctx.get_param("irf_horizon", _irh_default)
+        irf_horizon = _irh_default if (_irh is None or str(_irh).strip() == "") else int(_irh)
+        if irf_horizon < 1:
+            return make_error_response(
+                ctx,
+                f"irf_horizon must be >= 1. Got {irf_horizon}.",
+                error_fixes=["Use a positive IRF horizon, or leave blank for the preset default."],
+            )
         irf_horizon = max(2, irf_horizon)
         irf_fevd_computed = False
         irf_results = None

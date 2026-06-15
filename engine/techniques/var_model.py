@@ -334,8 +334,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = int(ctx.get_param("horizon", 10))
-        irf_periods = int(ctx.get_param("irf_periods", 20))
-        trend_param = ctx.get_param("trend", "c")
+        # Fix B Tier 1c-2: blank/absent -> default (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment.
+        _irp = ctx.get_param("irf_periods", 20)
+        irf_periods = 20 if (_irp is None or str(_irp).strip() == "") else int(_irp)
+        if irf_periods < 1:
+            return make_error_response(
+                ctx,
+                f"irf_periods must be >= 1. Got {irf_periods}.",
+                error_fixes=["Use a positive number of IRF periods, or leave blank for the default."],
+            )
+        _tr = ctx.get_param("trend", "c")
+        trend_param = "c" if (_tr is None or str(_tr).strip() == "") else str(_tr).strip().lower()
 
         # Lag selection
         progress_callback("Selecting VAR lag order", 15)
@@ -348,8 +358,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
         ic = ctx.get_param("ic", "aic")
 
         fixed_lag = ctx.get_param("lag")
-        if fixed_lag is not None:
+        if fixed_lag is not None and str(fixed_lag).strip() != "":
             p = int(fixed_lag)
+            if p < 1:
+                return make_error_response(
+                    ctx,
+                    f"lag must be >= 1. Got {p}.",
+                    error_fixes=["Use a positive fixed VAR order, or leave blank to auto-select."],
+                )
         else:
             import pandas as pd
             df = pd.DataFrame(stacked, columns=names)
@@ -596,7 +612,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # IRF / structural FEVD) alongside the UNCHANGED Cholesky IRF + bands +
         # FEVD. This scheme-selector + structural-output structure is the
         # pattern M3c (proxy) + M3b (sign-restriction) reuse.
-        svar_identification = str(ctx.get_param("svar_identification", "cholesky"))
+        _svar = ctx.get_param("svar_identification", "cholesky")
+        svar_identification = "cholesky" if (_svar is None or str(_svar).strip() == "") else str(_svar).strip().lower()
+        # Fix B Tier 1c-2: allowlist guard (was silent fallthrough -> cholesky).
+        # The dialog offers cholesky/blanchard_quah/sign_restriction; proxy stays
+        # power-path (it needs a proxy_instrument, banked for the C# unit).
+        if svar_identification not in ("cholesky", "blanchard_quah", "proxy", "sign_restriction"):
+            return make_error_response(
+                ctx,
+                f"Unknown svar_identification '{svar_identification}'. Must be one of: "
+                "cholesky, blanchard_quah, proxy, sign_restriction.",
+                error_fixes=[
+                    "Use 'cholesky' (default), 'blanchard_quah' (long-run restrictions), "
+                    "'sign_restriction' (set identification), or 'proxy' (external instrument).",
+                ],
+            )
         bq_tables = []
         bq_computed = False
         if svar_identification == "blanchard_quah":
@@ -744,10 +774,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
         sr_cholesky_admissible = None
         if svar_identification == "sign_restriction":
             progress_callback("Sign-restriction set-identification", 88)
-            sr_n_draws = int(ctx.get_param(
-                "sr_n_draws",
-                {"Fast": 500, "Balanced": 2000, "Thorough": 5000}.get(ctx.preset, 2000),
-            ))
+            _srd_default = {"Fast": 500, "Balanced": 2000, "Thorough": 5000}.get(ctx.preset, 2000)
+            _srd = ctx.get_param("sr_n_draws", _srd_default)
+            sr_n_draws = _srd_default if (_srd is None or str(_srd).strip() == "") else int(_srd)
+            if sr_n_draws < 1:
+                return make_error_response(
+                    ctx,
+                    f"sr_n_draws must be >= 1. Got {sr_n_draws}.",
+                    error_fixes=["Use a positive number of sign-restriction draws, or leave blank."],
+                )
             R_param = ctx.get_param("sign_restrictions")
             if R_param is None:
                 # Default: recursive-consistent diagonal-positive + a
