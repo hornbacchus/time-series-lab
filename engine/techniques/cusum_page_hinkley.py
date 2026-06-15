@@ -93,10 +93,22 @@ def _run_multivariate(ctx, progress_callback, all_series):
     # (Σ⁻¹ normalizes dimensionality). Defaults parallel the univariate
     # 0.5σ/5σ. HEURISTIC (Fast preset); the permutation bootstrap
     # (Balanced/Thorough) is the calibrated threshold path.
-    k_m = float(ctx.get_param("cusum_k", 0.5))
-    h_m = float(ctx.get_param("cusum_h", 5.0))
-    ph_delta = float(ctx.get_param("ph_delta", 0.005))
-    ph_lambda = float(ctx.get_param("ph_lambda", 5.0))
+    # Fix B Tier 1c-3: blank/absent -> default (byte-identical); literal reads.
+    _km = ctx.get_param("cusum_k", 0.5)
+    k_m = 0.5 if (_km is None or str(_km).strip() == "") else float(_km)
+    _hm = ctx.get_param("cusum_h", 5.0)
+    h_m = 5.0 if (_hm is None or str(_hm).strip() == "") else float(_hm)
+    _pd = ctx.get_param("ph_delta", 0.005)
+    ph_delta = 0.005 if (_pd is None or str(_pd).strip() == "") else float(_pd)
+    _pl = ctx.get_param("ph_lambda", 5.0)
+    ph_lambda = 5.0 if (_pl is None or str(_pl).strip() == "") else float(_pl)
+    for _nm, _v, _ok in (("cusum_h", h_m, h_m > 0), ("cusum_k", k_m, k_m >= 0),
+                         ("ph_delta", ph_delta, ph_delta >= 0), ("ph_lambda", ph_lambda, ph_lambda >= 0)):
+        if not _ok:
+            _bound = "> 0" if _nm == "cusum_h" else ">= 0"
+            return make_error_response(
+                ctx, f"{_nm} must be {_bound}. Got {_v}.",
+                error_fixes=[f"Use {_nm} {_bound}, or leave blank for the auto default."])
 
     # Reference mean vector + covariance (UNCONDITIONAL pinv — no
     # conditional guard branch; pinv handles rank-deficiency
@@ -344,12 +356,27 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Ensure the series has variation."],
             )
 
-        target = float(ctx.get_param("target", mu))
-        cusum_k = float(ctx.get_param("cusum_k", 0.5 * sigma))
-        cusum_h = float(ctx.get_param("cusum_h", 5.0 * sigma))
-        ph_delta = float(ctx.get_param("ph_delta", 0.005 * sigma))
-        ph_lambda = float(ctx.get_param("ph_lambda", 50.0))
+        # Fix B Tier 1c-3: blank/absent -> auto default (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment. cusum_h/cusum_k
+        # were the inert catalog threshold/drift, now renamed to the engine keys.
+        _tg = ctx.get_param("target", mu)
+        target = mu if (_tg is None or str(_tg).strip() == "") else float(_tg)
+        _ck = ctx.get_param("cusum_k", 0.5 * sigma)
+        cusum_k = 0.5 * sigma if (_ck is None or str(_ck).strip() == "") else float(_ck)
+        _ch = ctx.get_param("cusum_h", 5.0 * sigma)
+        cusum_h = 5.0 * sigma if (_ch is None or str(_ch).strip() == "") else float(_ch)
+        _pd = ctx.get_param("ph_delta", 0.005 * sigma)
+        ph_delta = 0.005 * sigma if (_pd is None or str(_pd).strip() == "") else float(_pd)
+        _pl = ctx.get_param("ph_lambda", 50.0)
+        ph_lambda = 50.0 if (_pl is None or str(_pl).strip() == "") else float(_pl)
         significance = float(ctx.get_param("significance_level", 0.05))
+        for _nm, _v, _ok in (("cusum_h", cusum_h, cusum_h > 0), ("cusum_k", cusum_k, cusum_k >= 0),
+                             ("ph_delta", ph_delta, ph_delta >= 0), ("ph_lambda", ph_lambda, ph_lambda >= 0)):
+            if not _ok:
+                _bound = "> 0" if _nm == "cusum_h" else ">= 0"
+                return make_error_response(
+                    ctx, f"{_nm} must be {_bound}. Got {_v}.",
+                    error_fixes=[f"Use {_nm} {_bound}, or leave blank for the auto default."])
 
         progress_callback("Computing CUSUM statistics", 20)
 

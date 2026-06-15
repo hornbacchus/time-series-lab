@@ -62,10 +62,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
             warnings.append(f"{n_dropped} missing values removed.")
 
         n = len(clean)
-        daily_lag = int(ctx.get_param("daily_lag", 1))
-        weekly_lag = int(ctx.get_param("weekly_lag", 5))
-        monthly_lag = int(ctx.get_param("monthly_lag", 22))
-        use_log = bool(ctx.get_param("use_log", False))
+        # Fix B Tier 1c-3: blank/absent -> Corsi canonical (byte-identical);
+        # literal get_param keeps keys visible to catalog_key_alignment.
+        _dl = ctx.get_param("daily_lag", 1)
+        daily_lag = 1 if (_dl is None or str(_dl).strip() == "") else int(_dl)
+        _wl = ctx.get_param("weekly_lag", 5)
+        weekly_lag = 5 if (_wl is None or str(_wl).strip() == "") else int(_wl)
+        _ml = ctx.get_param("monthly_lag", 22)
+        monthly_lag = 22 if (_ml is None or str(_ml).strip() == "") else int(_ml)
+        _ul = ctx.get_param("use_log", False)
+        use_log = _ul if isinstance(_ul, bool) else str(_ul).strip().lower() in ("true", "1", "yes")
+        for _nm, _v in (("daily_lag", daily_lag), ("weekly_lag", weekly_lag), ("monthly_lag", monthly_lag)):
+            if _v < 1:
+                return make_error_response(
+                    ctx, f"{_nm} must be >= 1. Got {_v}.",
+                    error_fixes=[f"Use {_nm} >= 1, or leave blank for the canonical default."])
         # h_ahead sourced from the `horizon` dialog control; precedence h_ahead
         # (THOROUGH) > horizon (dialog) > 1 (the delivered default -- the
         # catalog default was corrected 10->1 to state it).

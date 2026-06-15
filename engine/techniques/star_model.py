@@ -83,8 +83,16 @@ def run(ctx: RunContext, progress_callback) -> dict:
             filled = values
 
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        ar_order = int(ctx.get_param("ar_order", min(cfg["max_ar"], max(1, n // 15))))
-        star_type = ctx.get_param("star_type", cfg["star_type"]).upper()
+        # Fix B Tier 1c-3: blank/absent -> default (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment. ar_order/
+        # star_type were the inert catalog max_lag/transition, now renamed.
+        # star_type is preset-aware (Thorough = "both") -> blank routes to cfg,
+        # NOT a fixed token (the .upper() must not run on a blank "").
+        _ar_default = min(cfg["max_ar"], max(1, n // 15))
+        _ar = ctx.get_param("ar_order", _ar_default)
+        ar_order = _ar_default if (_ar is None or str(_ar).strip() == "") else int(_ar)
+        _st = ctx.get_param("star_type", cfg["star_type"])
+        star_type = (cfg["star_type"] if (_st is None or str(_st).strip() == "") else str(_st)).upper()
         # CAI Phase 2 Session 12 fix (F-MR-STAR-TYPE): explicit
         # allowlist for star_type. Pre-fix the wrapper uppercased
         # any string and threaded it through `types_to_fit`,
@@ -105,8 +113,15 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     "and report best by IC).",
                 ],
             )
-        delay = int(ctx.get_param("delay", 1))
-        horizon = max(1, int(ctx.get_param("horizon", 10)))
+        _dly = ctx.get_param("delay", 1)
+        delay = 1 if (_dly is None or str(_dly).strip() == "") else int(_dly)
+        _hz = ctx.get_param("horizon", 10)
+        horizon = 10 if (_hz is None or str(_hz).strip() == "") else int(_hz)
+        for _nm, _v in (("ar_order", ar_order), ("delay", delay), ("horizon", horizon)):
+            if _v < 1:
+                return make_error_response(
+                    ctx, f"{_nm} must be >= 1. Got {_v}.",
+                    error_fixes=[f"Use {_nm} >= 1, or leave blank for the default."])
         maxiter = cfg["maxiter"]
 
         start_idx = max(ar_order, delay)

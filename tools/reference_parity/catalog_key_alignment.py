@@ -80,7 +80,10 @@ KNOWN_INERT: dict[str, list[str]] = {
     # conformal_intervals coverage: FIXED (engine-wired -> confidence_level,
     # a clean same-quantity alias; Commit pending) -> removed from the baseline;
     # the guard now enforces it.
-    "cusum_page_hinkley": ["threshold", "drift"],              # C (vs cusum_h/cusum_k/ph_*)
+    # cusum_page_hinkley threshold/drift: FIXED (Fix B Tier 1c-3) -- the inert
+    # catalog controls were renamed threshold->cusum_h, drift->cusum_k to match
+    # the engine reads (null defaults preserved -> auto 5sigma/0.5sigma, byte-
+    # identical) -> removed from the baseline; the guard now enforces them.
     "denton_chowlin_disaggregation": ["target_frequency"],     # B (vs conversion_ratio)
     "dtw_alignment_lag": ["max_warp"],                         # C (vs window_frac)
     "fft_spectrum": ["top_n"],                                 # A -> n_top
@@ -106,7 +109,11 @@ KNOWN_INERT: dict[str, list[str]] = {
     "nar_narx": ["max_lag", "hidden_size"],                    # A -> ar_lags/hidden_layers
     "robust_estimators": ["trim_pct"],                         # B scale (x100 vs trim_fraction)
     "rolling_origin_cv": ["n_folds", "model"],                 # A n_folds->folds; model C
-    "star": ["max_lag", "transition"],                         # A -> ar_order/star_type
+    # star max_lag/transition: FIXED (Fix B Tier 1c-3) -- the inert catalog
+    # controls were renamed max_lag->ar_order, transition->star_type (and
+    # transition's wrong options {logistic,exponential} -> the engine tokens
+    # {LSTAR,ESTAR,both}); null defaults preserve the preset-aware/data-driven
+    # engine defaults (Thorough star_type="both") -> removed from the baseline.
     "stl_decompose": ["seasonal_window"],                      # A/C -> seasonal (verify semantics)
     "structural_ts": ["trend"],                                # C (reads level/autoregressive)
     "tar_setar": ["max_lag"],                                  # A -> ar_order

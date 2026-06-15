@@ -2324,27 +2324,48 @@
       ],
       "parameters": [
         {
-          "name": "max_lag",
-          "label": "Max Lag",
+          "name": "ar_order",
+          "label": "AR Order",
           "type": "int",
-          "default": 4,
+          "default": null,
           "required": false,
           "advanced": false,
-          "description": "Maximum AR lag",
+          "description": "Autoregressive order (>= 1). Blank auto-selects from the preset and series length.",
           "options": null
         },
         {
-          "name": "transition",
+          "name": "star_type",
           "label": "Transition Function",
           "type": "string",
-          "default": "logistic",
+          "default": null,
           "required": false,
           "advanced": false,
-          "description": "Transition function type",
+          "description": "Transition function: LSTAR (logistic), ESTAR (exponential), or both (fit both, pick best by IC). Blank uses the preset default.",
           "options": [
-            "logistic",
-            "exponential"
+            "LSTAR",
+            "ESTAR",
+            "both"
           ]
+        },
+        {
+          "name": "delay",
+          "label": "Transition Delay",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Lag of the transition variable (>= 1). Blank uses 1.",
+          "options": null
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Forecast horizon (>= 1). Blank uses 10.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2758,6 +2779,46 @@
           "required": false,
           "advanced": false,
           "description": "Aggregate RV over the next h days (HAR target horizon)",
+          "options": null
+        },
+        {
+          "name": "daily_lag",
+          "label": "Daily Window",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Daily-component window (>= 1). Blank uses the Corsi canonical (1).",
+          "options": null
+        },
+        {
+          "name": "weekly_lag",
+          "label": "Weekly Window",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Weekly-component window (>= 1). Blank uses the Corsi canonical (5).",
+          "options": null
+        },
+        {
+          "name": "monthly_lag",
+          "label": "Monthly Window",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Monthly-component window (>= 1). Blank uses the Corsi canonical (22).",
+          "options": null
+        },
+        {
+          "name": "use_log",
+          "label": "Log RV",
+          "type": "bool",
+          "default": false,
+          "required": false,
+          "advanced": true,
+          "description": "Fit on log realized variance.",
           "options": null
         }
       ],
@@ -3416,23 +3477,53 @@
       ],
       "parameters": [
         {
-          "name": "threshold",
+          "name": "cusum_h",
           "label": "Threshold",
           "type": "float",
           "default": null,
           "required": false,
-          "advanced": true,
-          "description": "Detection threshold (auto if null)",
+          "advanced": false,
+          "description": "CUSUM detection threshold (> 0). Blank uses 5x the series standard deviation.",
           "options": null
         },
         {
-          "name": "drift",
+          "name": "cusum_k",
           "label": "Drift",
           "type": "float",
           "default": null,
           "required": false,
+          "advanced": false,
+          "description": "CUSUM allowance / slack (>= 0). Blank uses 0.5x the series standard deviation.",
+          "options": null
+        },
+        {
+          "name": "target",
+          "label": "Target",
+          "type": "float",
+          "default": null,
+          "required": false,
           "advanced": true,
-          "description": "Allowance/drift parameter",
+          "description": "Reference value monitored for deviations. Blank uses the series mean.",
+          "options": null
+        },
+        {
+          "name": "ph_delta",
+          "label": "Page-Hinkley Delta",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Page-Hinkley minimum-change magnitude (>= 0). Blank uses 0.005x the series standard deviation.",
+          "options": null
+        },
+        {
+          "name": "ph_lambda",
+          "label": "Page-Hinkley Lambda",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Page-Hinkley detection threshold (>= 0). Blank uses 50.",
           "options": null
         }
       ],
