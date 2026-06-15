@@ -247,15 +247,22 @@ def run(ctx: RunContext, progress_callback) -> dict:
         conf_level = float(ctx.get_param("confidence_level",
                                          ctx.get_param("coverage", 0.95)))
         alpha = 1.0 - conf_level
-        seasonal = ctx.get_param("seasonal", False)
-        m_val = int(ctx.get_param("m", _infer_m(ctx.frequency)))
+        # Fix B Tier 1c-1: blank/absent -> default (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment. seasonal/m
+        # are read here but consumed only on the split (ARIMA) path.
+        _se = ctx.get_param("seasonal", False)
+        seasonal = _se if isinstance(_se, bool) else str(_se).strip().lower() in ("true", "1", "yes")
+        _m_default = _infer_m(ctx.frequency)
+        _m = ctx.get_param("m", _m_default)
+        m_val = _m_default if (_m is None or str(_m).strip() == "") else int(_m)
         if seasonal and m_val <= 1:
             m_val = _infer_m(ctx.frequency)
             if m_val <= 1:
                 m_val = 12
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        cal_frac = float(ctx.get_param("cal_fraction", preset_cfg["cal_fraction"]))
+        _cf = ctx.get_param("cal_fraction", preset_cfg["cal_fraction"])
+        cal_frac = preset_cfg["cal_fraction"] if (_cf is None or str(_cf).strip() == "") else float(_cf)
         # CAI Phase 2 Session 21 fix (F-EU-CI-CALFRAC): explicit
         # range gate. Pre-fix, out-of-range cal_fraction silently
         # accepted.
@@ -283,7 +290,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # ENG-EXT-CONFORMAL-001 C1 — method selector (ADDITIVE). Default
         # "split" = the existing split-conformal path (byte-identical; this
         # branch not taken). "cqr" = conformalized quantile regression.
-        conformal_method = str(ctx.get_param("conformal_method", "split"))
+        _cm = ctx.get_param("conformal_method", "split")
+        conformal_method = "split" if (_cm is None or str(_cm).strip() == "") else str(_cm).strip().lower()
+        # Fix B Tier 1c-1: allowlist guard (was silent fallthrough -> split).
+        if conformal_method not in ("split", "cqr", "enbpi"):
+            return make_error_response(
+                ctx,
+                f"Unknown conformal_method '{conformal_method}'. Must be one of: split, cqr, enbpi.",
+                error_fixes=[
+                    "Use 'split' (default; ARIMA + split-conformal), 'cqr' "
+                    "(conformalized quantile regression), or 'enbpi' (ensemble "
+                    "batch prediction intervals).",
+                ],
+            )
         if conformal_method == "cqr":
             return _run_cqr(
                 ctx, progress_callback, name, clean, n, horizon, alpha,
@@ -532,7 +551,17 @@ def _run_cqr(ctx, progress_callback, name, clean, n, horizon, alpha,
         from sklearn.ensemble import GradientBoostingRegressor
 
         progress_callback("Building quantile-regression features", 15)
-        n_lags = int(ctx.get_param("n_lags", min(12, max(3, n // 10))))
+        # Fix B Tier 1c-1: blank/absent -> data-driven default (byte-identical);
+        # n_lags applies to the CQR + EnbPI methods.
+        _nl_default = min(12, max(3, n // 10))
+        _nl = ctx.get_param("n_lags", _nl_default)
+        n_lags = _nl_default if (_nl is None or str(_nl).strip() == "") else int(_nl)
+        if not (1 <= n_lags < n):
+            return make_error_response(
+                ctx,
+                f"n_lags must be in [1, {n}). Got {n_lags}.",
+                error_fixes=["Use a positive number of lags smaller than the series length."],
+            )
         rolling_windows = [3, 6]
         seed = int(ctx.seed)
 
@@ -680,12 +709,43 @@ def _run_enbpi(ctx, progress_callback, name, clean, n, horizon, alpha,
             _create_features, _build_forecast_features,
         )
         progress_callback("Building features for EnbPI", 15)
-        n_lags = int(ctx.get_param("n_lags", min(12, max(3, n // 10))))
+        # Fix B Tier 1c-1: blank/absent -> default (byte-identical). n_lags +
+        # enbpi_base/n_resamplings/block_length apply to the EnbPI method.
+        _nl_default = min(12, max(3, n // 10))
+        _nl = ctx.get_param("n_lags", _nl_default)
+        n_lags = _nl_default if (_nl is None or str(_nl).strip() == "") else int(_nl)
         rolling_windows = [3, 6]
         seed = int(ctx.seed)
-        base_kind = str(ctx.get_param("enbpi_base", "gbr"))
-        n_resamplings = int(ctx.get_param("n_resamplings", 30))
-        block_length = int(ctx.get_param("block_length", 10))
+        _eb = ctx.get_param("enbpi_base", "gbr")
+        base_kind = "gbr" if (_eb is None or str(_eb).strip() == "") else str(_eb).strip().lower()
+        _nr = ctx.get_param("n_resamplings", 30)
+        n_resamplings = 30 if (_nr is None or str(_nr).strip() == "") else int(_nr)
+        _bl = ctx.get_param("block_length", 10)
+        block_length = 10 if (_bl is None or str(_bl).strip() == "") else int(_bl)
+        if not (1 <= n_lags < n):
+            return make_error_response(
+                ctx,
+                f"n_lags must be in [1, {n}). Got {n_lags}.",
+                error_fixes=["Use a positive number of lags smaller than the series length."],
+            )
+        if base_kind not in ("gbr", "neural"):
+            return make_error_response(
+                ctx,
+                f"Unknown enbpi_base '{base_kind}'. Must be one of: gbr, neural.",
+                error_fixes=["Use 'gbr' (gradient boosting, default) or 'neural' (MLP)."],
+            )
+        if n_resamplings < 1:
+            return make_error_response(
+                ctx,
+                f"n_resamplings must be >= 1. Got {n_resamplings}.",
+                error_fixes=["Use a positive number of bootstrap resamples (e.g. 30)."],
+            )
+        if block_length < 1:
+            return make_error_response(
+                ctx,
+                f"block_length must be >= 1. Got {block_length}.",
+                error_fixes=["Use a positive block length (e.g. 10)."],
+            )
 
         X, y, _ = _create_features(clean, n_lags, rolling_windows)
         if len(y) < 40:

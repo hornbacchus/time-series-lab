@@ -3827,6 +3827,93 @@
           "advanced": false,
           "description": "Forecast horizon",
           "options": null
+        },
+        {
+          "name": "conformal_method",
+          "label": "Method",
+          "type": "string",
+          "default": "split",
+          "required": false,
+          "advanced": false,
+          "description": "Conformal method: split (ARIMA + split-conformal), cqr (conformalized quantile regression), or enbpi (ensemble batch prediction intervals).",
+          "options": [
+            "split",
+            "cqr",
+            "enbpi"
+          ]
+        },
+        {
+          "name": "cal_fraction",
+          "label": "Calibration Fraction",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Calibration-set fraction in (0, 1) holding residuals used to calibrate coverage. Applies to the split and CQR methods. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of lag features for the regression base. Applies to the CQR and EnbPI methods. Blank uses a data-driven default.",
+          "options": null
+        },
+        {
+          "name": "n_resamplings",
+          "label": "Bootstrap Resamples",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Number of bootstrap resamples (>= 1). Applies to the EnbPI method. Blank uses the default (30).",
+          "options": null
+        },
+        {
+          "name": "block_length",
+          "label": "Block Length",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Block length for the block bootstrap (>= 1). Applies to the EnbPI method. Blank uses the default (10).",
+          "options": null
+        },
+        {
+          "name": "enbpi_base",
+          "label": "EnbPI Base Learner",
+          "type": "string",
+          "default": "gbr",
+          "required": false,
+          "advanced": true,
+          "description": "EnbPI base learner: gbr (gradient boosting) or neural (MLP). Applies to the EnbPI method.",
+          "options": [
+            "gbr",
+            "neural"
+          ]
+        },
+        {
+          "name": "seasonal",
+          "label": "Seasonal",
+          "type": "bool",
+          "default": false,
+          "required": false,
+          "advanced": true,
+          "description": "Fit a seasonal ARIMA base. Applies to the split method.",
+          "options": null
+        },
+        {
+          "name": "m",
+          "label": "Seasonal Period",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Seasonal period. Applies to the split method when Seasonal is on. Blank infers from the data frequency.",
+          "options": null
         }
       ],
       "output_tables": [
