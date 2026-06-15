@@ -435,14 +435,37 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        d_model = int(ctx.get_param("d_model", preset_cfg["d_model"]))
-        n_heads = int(ctx.get_param("n_heads", preset_cfg["n_heads"]))
-        n_encoder_layers = int(ctx.get_param("n_encoder_layers", preset_cfg["n_encoder_layers"]))
-        dim_feedforward = int(ctx.get_param("dim_feedforward", preset_cfg["dim_feedforward"]))
-        epochs = int(ctx.get_param("epochs", preset_cfg["epochs"]))
-        n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
-        lr = float(ctx.get_param("learning_rate", preset_cfg["lr"]))
-        dropout = float(ctx.get_param("dropout", preset_cfg["dropout"]))
+        # Fix B Tier 1b: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps the key visible to catalog_key_alignment.
+        _dm = ctx.get_param("d_model", preset_cfg["d_model"])
+        d_model = preset_cfg["d_model"] if (_dm is None or str(_dm).strip() == "") else int(_dm)
+        _nh = ctx.get_param("n_heads", preset_cfg["n_heads"])
+        n_heads = preset_cfg["n_heads"] if (_nh is None or str(_nh).strip() == "") else int(_nh)
+        _nel = ctx.get_param("n_encoder_layers", preset_cfg["n_encoder_layers"])
+        n_encoder_layers = preset_cfg["n_encoder_layers"] if (_nel is None or str(_nel).strip() == "") else int(_nel)
+        _dff = ctx.get_param("dim_feedforward", preset_cfg["dim_feedforward"])
+        dim_feedforward = preset_cfg["dim_feedforward"] if (_dff is None or str(_dff).strip() == "") else int(_dff)
+        _ep = ctx.get_param("epochs", preset_cfg["epochs"])
+        epochs = preset_cfg["epochs"] if (_ep is None or str(_ep).strip() == "") else int(_ep)
+        _nlg = ctx.get_param("n_lags", preset_cfg["n_lags"])
+        n_lags = preset_cfg["n_lags"] if (_nlg is None or str(_nlg).strip() == "") else int(_nlg)
+        _lrp = ctx.get_param("learning_rate", preset_cfg["lr"])
+        lr = preset_cfg["lr"] if (_lrp is None or str(_lrp).strip() == "") else float(_lrp)
+        _dp = ctx.get_param("dropout", preset_cfg["dropout"])
+        dropout = preset_cfg["dropout"] if (_dp is None or str(_dp).strip() == "") else float(_dp)
+
+        from techniques._validation import ParamError, require
+        try:
+            require(n_lags >= 1, f"n_lags ({n_lags}) must be >= 1.",
+                    fixes=["Use n_lags >= 1, or leave blank for the preset default."])
+            require(1 <= epochs <= 1000, f"epochs ({epochs}) must be between 1 and 1000.",
+                    fixes=["Use 1..1000 epochs, or leave blank."])
+            require(lr > 0, f"learning_rate ({lr}) must be > 0.",
+                    fixes=["Use a positive learning rate, or leave blank."])
+            require(0 <= dropout < 1, f"dropout ({dropout}) must be in [0, 1).",
+                    fixes=["Use a dropout fraction between 0 and 1 (e.g. 0.1)."])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         # CAI Phase 2 Session 24 fix (F-NN-TF-DMODEL): explicit
         # multi-parameter consistency gate. Pre-fix, d_model not

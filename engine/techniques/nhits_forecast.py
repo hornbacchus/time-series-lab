@@ -329,50 +329,46 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
-        n_stacks = int(ctx.get_param("n_stacks", preset_cfg["n_stacks"]))
-        n_blocks = int(ctx.get_param("n_blocks", preset_cfg["n_blocks"]))
-        # CAI Phase 2 Session 25 fix (F-SN-NHITS-POOLING +
-        # F-SN-NHITS-POOLING-NEG): explicit allowlist gate. Pre-fix,
-        # invalid `pooling_sizes` (non-list, non-positive entries)
-        # silently fell through to preset default via try/except
-        # pass (line 337-338). Session 24 N-BEATS stack_types
-        # pattern — propagated to N-HiTS sibling. Now rejects
-        # explicitly with actionable error.
-        _pooling_user = ctx.get_param("pooling_sizes", None)
-        if _pooling_user is not None:
-            try:
-                _candidate = list(_pooling_user)
-            except (TypeError, ValueError):
-                return make_error_response(
-                    ctx,
-                    f"pooling_sizes must be a list of positive integers. "
-                    f"Got {_pooling_user!r}.",
-                    error_fixes=[
-                        "Provide a list like [2, 2, 1] specifying "
-                        "pooling factor per stack.",
-                    ],
-                )
-            if not _candidate:
-                return make_error_response(
-                    ctx,
-                    "pooling_sizes must be a non-empty list.",
-                    error_fixes=["Provide at least one pooling size."],
-                )
-            if not all(isinstance(p, (int, float)) and p >= 1 for p in _candidate):
-                return make_error_response(
-                    ctx,
-                    f"pooling_sizes entries must all be >= 1. Got {_candidate}.",
-                    error_fixes=[
-                        "All pooling sizes must be positive integers; "
-                        "1 means no pooling, 2+ means downsampling.",
-                    ],
-                )
-            preset_cfg = dict(preset_cfg)
-            preset_cfg["pooling_sizes"] = [int(p) for p in _candidate]
-        hidden_size = int(ctx.get_param("hidden_size", preset_cfg["hidden_size"]))
-        epochs = int(ctx.get_param("epochs", preset_cfg["epochs"]))
-        n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
-        lr = float(ctx.get_param("learning_rate", preset_cfg["lr"]))
+        # Fix B Tier 1b: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps keys visible to catalog_key_alignment.
+        _ns = ctx.get_param("n_stacks", preset_cfg["n_stacks"])
+        n_stacks = preset_cfg["n_stacks"] if (_ns is None or str(_ns).strip() == "") else int(_ns)
+        _nb = ctx.get_param("n_blocks", preset_cfg["n_blocks"])
+        n_blocks = preset_cfg["n_blocks"] if (_nb is None or str(_nb).strip() == "") else int(_nb)
+        _hs = ctx.get_param("hidden_size", preset_cfg["hidden_size"])
+        hidden_size = preset_cfg["hidden_size"] if (_hs is None or str(_hs).strip() == "") else int(_hs)
+        _ep = ctx.get_param("epochs", preset_cfg["epochs"])
+        epochs = preset_cfg["epochs"] if (_ep is None or str(_ep).strip() == "") else int(_ep)
+        _nlg = ctx.get_param("n_lags", preset_cfg["n_lags"])
+        n_lags = preset_cfg["n_lags"] if (_nlg is None or str(_nlg).strip() == "") else int(_nlg)
+        _lrp = ctx.get_param("learning_rate", preset_cfg["lr"])
+        lr = preset_cfg["lr"] if (_lrp is None or str(_lrp).strip() == "") else float(_lrp)
+
+        # pooling_sizes: parse the catalog string via the shared helper (the
+        # prior list() iterated a string CHAR-BY-CHAR and crashed on a blank);
+        # blank -> preset. A user list must match n_stacks (one pool factor per
+        # stack; the engine otherwise silently pads missing stacks with 1).
+        from techniques._validation import ParamError, require, parse_int_list
+        try:
+            require(n_lags >= 1, f"n_lags ({n_lags}) must be >= 1.",
+                    fixes=["Use n_lags >= 1, or leave blank for the preset default."])
+            require(1 <= epochs <= 1000, f"epochs ({epochs}) must be between 1 and 1000.",
+                    fixes=["Use 1..1000 epochs, or leave blank."])
+            require(lr > 0, f"learning_rate ({lr}) must be > 0.",
+                    fixes=["Use a positive learning rate, or leave blank."])
+            _pooling = parse_int_list(ctx.get_param("pooling_sizes"), "Pooling Sizes", default=None)
+            if _pooling is not None:
+                require(all(p >= 1 for p in _pooling),
+                        f"pooling_sizes entries must all be >= 1, got {list(_pooling)}.",
+                        fixes=["1 = no pooling, 2+ = downsampling per stack."])
+                require(len(_pooling) == n_stacks,
+                        f"pooling_sizes has {len(_pooling)} entries but n_stacks is {n_stacks} - "
+                        f"they must match (one pooling factor per stack).",
+                        fixes=[f"Provide exactly {n_stacks} pooling sizes, or leave blank for the preset."])
+                preset_cfg = dict(preset_cfg)
+                preset_cfg["pooling_sizes"] = list(_pooling)
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
         pooling_sizes = preset_cfg["pooling_sizes"]
 
         n_lags = min(n_lags, n // 3)

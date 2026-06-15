@@ -95,7 +95,10 @@ KNOWN_INERT: dict[str, list[str]] = {
     # johansen_cointegration k_ar_diff: FIXED (engine-wired -> lag via the adf
     # string-sentinel pattern; catalog int->string default "auto"; A-batch).
     "lomb_scargle": ["min_period", "max_period"],              # B inverse (period=1/freq)
-    "lstm_gru_forecast": ["cell_type"],                        # A -> model_type
+    # lstm_gru_forecast cell_type: FIXED (Fix B Tier 1b) -- the catalog control
+    # was renamed cell_type -> model_type to match the engine read; default
+    # "LSTM".lower() == the engine default "lstm" (byte-identical) -> removed from
+    # the baseline; the guard now enforces it.
     "nar_narx": ["max_lag", "hidden_size"],                    # A -> ar_lags/hidden_layers
     "robust_estimators": ["trim_pct"],                         # B scale (x100 vs trim_fraction)
     "rolling_origin_cv": ["n_folds", "model"],                 # A n_folds->folds; model C

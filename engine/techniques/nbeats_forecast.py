@@ -339,12 +339,31 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     ],
                 )
             stack_types = [str(s) for s in _candidate]
-        n_blocks = int(ctx.get_param("n_blocks", preset_cfg["n_blocks"]))
-        hidden_size = int(ctx.get_param("hidden_size", preset_cfg["hidden_size"]))
-        theta_size = int(ctx.get_param("theta_size", preset_cfg["theta_size"]))
-        epochs = int(ctx.get_param("epochs", preset_cfg["epochs"]))
-        n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
-        lr = float(ctx.get_param("learning_rate", preset_cfg["lr"]))
+        # Fix B Tier 1b: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps the key visible to catalog_key_alignment.
+        _nb = ctx.get_param("n_blocks", preset_cfg["n_blocks"])
+        n_blocks = preset_cfg["n_blocks"] if (_nb is None or str(_nb).strip() == "") else int(_nb)
+        _hs = ctx.get_param("hidden_size", preset_cfg["hidden_size"])
+        hidden_size = preset_cfg["hidden_size"] if (_hs is None or str(_hs).strip() == "") else int(_hs)
+        _ts = ctx.get_param("theta_size", preset_cfg["theta_size"])
+        theta_size = preset_cfg["theta_size"] if (_ts is None or str(_ts).strip() == "") else int(_ts)
+        _ep = ctx.get_param("epochs", preset_cfg["epochs"])
+        epochs = preset_cfg["epochs"] if (_ep is None or str(_ep).strip() == "") else int(_ep)
+        _nlg = ctx.get_param("n_lags", preset_cfg["n_lags"])
+        n_lags = preset_cfg["n_lags"] if (_nlg is None or str(_nlg).strip() == "") else int(_nlg)
+        _lrp = ctx.get_param("learning_rate", preset_cfg["lr"])
+        lr = preset_cfg["lr"] if (_lrp is None or str(_lrp).strip() == "") else float(_lrp)
+
+        from techniques._validation import ParamError, require
+        try:
+            require(n_lags >= 1, f"n_lags ({n_lags}) must be >= 1.",
+                    fixes=["Use n_lags >= 1, or leave blank for the preset default."])
+            require(1 <= epochs <= 1000, f"epochs ({epochs}) must be between 1 and 1000.",
+                    fixes=["Use 1..1000 epochs, or leave blank."])
+            require(lr > 0, f"learning_rate ({lr}) must be > 0.",
+                    fixes=["Use a positive learning rate, or leave blank."])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         n_lags = min(n_lags, n // 3)
 

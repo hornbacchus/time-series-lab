@@ -89,6 +89,41 @@ def parse_int_tuple(value, n: int, label: str, *, allow_auto: bool = False,
     return tuple(ints)
 
 
+def parse_int_list(value, label, *, allow_auto=False, default=None):
+    """Parse a VARIABLE-length list of ints: 'a,b,c' | [a,b,c] | (a,b,c) -> tuple.
+    Absent (None) / empty ('') -> default (F1 cleared-box rule); with allow_auto,
+    'auto'/'none' -> default too. Malformed / non-integer -> ParamError (named).
+    The list-valued sibling of parse_int_tuple (no fixed length)."""
+    if value is None:
+        return default
+    if isinstance(value, str):
+        s = value.strip()
+        if s == "":
+            return default
+        if allow_auto and s.lower() in ("auto", "none"):
+            return default
+        parts = [p for p in s.replace(";", ",").replace(" ", ",").split(",") if p.strip()]
+        try:
+            return tuple(int(p) for p in parts)
+        except ValueError:
+            raise ParamError(
+                f"{label} must be comma-separated integers (e.g. '4,2,1'), got '{value}'.",
+                fixes=["Enter integers separated by commas, or leave blank for the default."],
+            )
+    if isinstance(value, (list, tuple)):
+        try:
+            return tuple(int(x) for x in value)
+        except (ValueError, TypeError):
+            raise ParamError(
+                f"{label} must be a list of integers, got {value!r}.",
+                fixes=["Provide integers separated by commas (e.g. '4,2,1')."],
+            )
+    raise ParamError(
+        f"{label} must be comma-separated integers or a list, got {type(value).__name__}.",
+        fixes=["Enter integers separated by commas (e.g. '4,2,1')."],
+    )
+
+
 def check_order_bounds(*, p=None, q=None, d=None,
                        max_p=None, max_q=None, max_d=None,
                        cap_p=None, cap_q=None, cap_d=None) -> None:

@@ -241,10 +241,29 @@ def run(ctx: RunContext, progress_callback) -> dict:
         # == the preset, byte-identical). Pre-fix len(int) crashed.
         if isinstance(n_channels, (int, float)) and not isinstance(n_channels, bool):
             n_channels = [int(n_channels)] * len(preset_cfg["n_channels"])
-        kernel_size = int(ctx.get_param("kernel_size", preset_cfg["kernel_size"]))
-        epochs = int(ctx.get_param("epochs", preset_cfg["epochs"]))
-        n_lags = int(ctx.get_param("n_lags", preset_cfg["n_lags"]))
-        lr = float(ctx.get_param("learning_rate", preset_cfg["lr"]))
+        # Fix B Tier 1b: blank/absent -> preset cfg (byte-identical); literal
+        # get_param keeps the key visible to catalog_key_alignment.
+        _ks = ctx.get_param("kernel_size", preset_cfg["kernel_size"])
+        kernel_size = preset_cfg["kernel_size"] if (_ks is None or str(_ks).strip() == "") else int(_ks)
+        _ep = ctx.get_param("epochs", preset_cfg["epochs"])
+        epochs = preset_cfg["epochs"] if (_ep is None or str(_ep).strip() == "") else int(_ep)
+        _nlg = ctx.get_param("n_lags", preset_cfg["n_lags"])
+        n_lags = preset_cfg["n_lags"] if (_nlg is None or str(_nlg).strip() == "") else int(_nlg)
+        _lrp = ctx.get_param("learning_rate", preset_cfg["lr"])
+        lr = preset_cfg["lr"] if (_lrp is None or str(_lrp).strip() == "") else float(_lrp)
+
+        from techniques._validation import ParamError, require
+        try:
+            require(n_lags >= 1, f"n_lags ({n_lags}) must be >= 1.",
+                    fixes=["Use n_lags >= 1, or leave blank for the preset default."])
+            require(1 <= epochs <= 1000, f"epochs ({epochs}) must be between 1 and 1000.",
+                    fixes=["Use 1..1000 epochs, or leave blank."])
+            require(lr > 0, f"learning_rate ({lr}) must be > 0.",
+                    fixes=["Use a positive learning rate, or leave blank."])
+            require(kernel_size >= 1, f"kernel_size ({kernel_size}) must be >= 1.",
+                    fixes=["Use kernel_size >= 1, or leave blank for the preset default."])
+        except ParamError as e:
+            return make_error_response(ctx, str(e), error_fixes=e.fixes)
 
         n_lags = min(n_lags, n // 3)
 

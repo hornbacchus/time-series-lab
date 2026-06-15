@@ -4231,17 +4231,27 @@
           "options": null
         },
         {
-          "name": "cell_type",
-          "label": "Cell Type",
+          "name": "model_type",
+          "label": "Model Type",
           "type": "string",
           "default": "LSTM",
           "required": false,
           "advanced": false,
-          "description": "RNN cell type",
+          "description": "Recurrent cell type. Applies to the PyTorch backend; if PyTorch is unavailable the model falls back to an sklearn ensemble that ignores this setting.",
           "options": [
             "LSTM",
             "GRU"
           ]
+        },
+        {
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of past observations fed to the network per step. Blank uses the preset default.",
+          "options": null
         },
         {
           "name": "hidden_size",
@@ -4249,8 +4259,18 @@
           "type": "int",
           "default": 32,
           "required": false,
-          "advanced": true,
-          "description": "Hidden state dimension",
+          "advanced": false,
+          "description": "Hidden state dimension.",
+          "options": null
+        },
+        {
+          "name": "n_layers",
+          "label": "Layers",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of stacked recurrent layers. Blank uses the preset default.",
           "options": null
         },
         {
@@ -4259,8 +4279,18 @@
           "type": "int",
           "default": 50,
           "required": false,
-          "advanced": true,
-          "description": "Training epochs",
+          "advanced": false,
+          "description": "Training epochs (1-1000).",
+          "options": null
+        },
+        {
+          "name": "learning_rate",
+          "label": "Learning Rate",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Optimizer learning rate (> 0). Blank uses the preset default.",
           "options": null
         }
       ],
@@ -4302,13 +4332,23 @@
           "options": null
         },
         {
-          "name": "n_channels",
-          "label": "Channels",
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
           "type": "int",
-          "default": 32,
+          "default": null,
           "required": false,
-          "advanced": true,
-          "description": "TCN channel width",
+          "advanced": false,
+          "description": "Number of past observations fed to the network per step. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "kernel_size",
+          "label": "Kernel Size",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Convolution kernel width (>= 1). Blank uses the preset default. Applies to the PyTorch backend; if PyTorch is unavailable the model falls back to an sklearn ensemble that ignores this setting.",
           "options": null
         },
         {
@@ -4317,8 +4357,28 @@
           "type": "int",
           "default": 50,
           "required": false,
+          "advanced": false,
+          "description": "Training epochs (1-1000).",
+          "options": null
+        },
+        {
+          "name": "learning_rate",
+          "label": "Learning Rate",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Optimizer learning rate (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "n_channels",
+          "label": "Channels",
+          "type": "int",
+          "default": 32,
+          "required": false,
           "advanced": true,
-          "description": "Training epochs",
+          "description": "TCN channel width.",
           "options": null
         }
       ],
@@ -4359,13 +4419,23 @@
           "options": null
         },
         {
-          "name": "stack_types",
-          "label": "Stack Types",
-          "type": "string",
-          "default": "trend,seasonality,generic",
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
+          "type": "int",
+          "default": null,
           "required": false,
-          "advanced": true,
-          "description": "N-BEATS stack configuration",
+          "advanced": false,
+          "description": "Number of past observations fed to the network per step. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "hidden_size",
+          "label": "Hidden Size",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Hidden layer width of each block. Blank uses the preset default.",
           "options": null
         },
         {
@@ -4374,8 +4444,48 @@
           "type": "int",
           "default": 50,
           "required": false,
+          "advanced": false,
+          "description": "Training epochs (1-1000).",
+          "options": null
+        },
+        {
+          "name": "learning_rate",
+          "label": "Learning Rate",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Optimizer learning rate (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "n_blocks",
+          "label": "Blocks per Stack",
+          "type": "int",
+          "default": null,
+          "required": false,
           "advanced": true,
-          "description": "Training epochs",
+          "description": "Number of blocks within each stack. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "theta_size",
+          "label": "Theta Size",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Basis-expansion coefficient dimension. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "stack_types",
+          "label": "Stack Types",
+          "type": "string",
+          "default": "trend,seasonality,generic",
+          "required": false,
+          "advanced": true,
+          "description": "N-BEATS stack configuration (comma-separated: any of trend, seasonality, generic).",
           "options": null
         }
       ],
@@ -4415,13 +4525,53 @@
           "options": null
         },
         {
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of past observations fed to the network per step. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "epochs",
+          "label": "Epochs",
+          "type": "int",
+          "default": 50,
+          "required": false,
+          "advanced": false,
+          "description": "Training epochs (1-1000).",
+          "options": null
+        },
+        {
+          "name": "learning_rate",
+          "label": "Learning Rate",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Optimizer learning rate (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "n_encoder_layers",
+          "label": "Encoder Layers",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of stacked Transformer encoder layers. Blank uses the preset default.",
+          "options": null
+        },
+        {
           "name": "d_model",
           "label": "Model Dimension",
           "type": "int",
           "default": 32,
           "required": false,
           "advanced": true,
-          "description": "Transformer model dimension",
+          "description": "Transformer model dimension. Must be divisible by Attention Heads. Applies to the PyTorch backend; if PyTorch is unavailable the model falls back to an sklearn ensemble that ignores this setting.",
           "options": null
         },
         {
@@ -4431,17 +4581,27 @@
           "default": 4,
           "required": false,
           "advanced": true,
-          "description": "Number of attention heads",
+          "description": "Number of attention heads (Model Dimension must be divisible by this). Applies to the PyTorch backend; if PyTorch is unavailable the model falls back to an sklearn ensemble that ignores this setting.",
           "options": null
         },
         {
-          "name": "epochs",
-          "label": "Epochs",
+          "name": "dim_feedforward",
+          "label": "Feedforward Dimension",
           "type": "int",
-          "default": 50,
+          "default": null,
           "required": false,
           "advanced": true,
-          "description": "Training epochs",
+          "description": "Width of the encoder feedforward sublayer. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "dropout",
+          "label": "Dropout",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": true,
+          "description": "Dropout fraction in [0, 1). Blank uses the preset default. Applies to the PyTorch backend; if PyTorch is unavailable the model falls back to an sklearn ensemble that ignores this setting.",
           "options": null
         },
         {
@@ -4870,13 +5030,53 @@
           "options": null
         },
         {
+          "name": "n_lags",
+          "label": "Input Window (Lags)",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of past observations fed to the network per step. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "hidden_size",
+          "label": "Hidden Size",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Hidden layer width of each block. Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "epochs",
+          "label": "Epochs",
+          "type": "int",
+          "default": 50,
+          "required": false,
+          "advanced": false,
+          "description": "Training epochs (1-1000).",
+          "options": null
+        },
+        {
+          "name": "learning_rate",
+          "label": "Learning Rate",
+          "type": "float",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Optimizer learning rate (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
           "name": "n_stacks",
           "label": "Stacks",
           "type": "int",
           "default": 3,
           "required": false,
           "advanced": true,
-          "description": "Number of hierarchical stacks",
+          "description": "Number of hierarchical stacks.",
           "options": null
         },
         {
@@ -4886,17 +5086,17 @@
           "default": 1,
           "required": false,
           "advanced": true,
-          "description": "Blocks per stack",
+          "description": "Blocks per stack.",
           "options": null
         },
         {
-          "name": "epochs",
-          "label": "Epochs",
-          "type": "int",
-          "default": 50,
+          "name": "pooling_sizes",
+          "label": "Pooling Sizes",
+          "type": "string",
+          "default": null,
           "required": false,
           "advanced": true,
-          "description": "Training epochs",
+          "description": "Downsampling factor per stack as a comma-separated list (e.g. '4,2,1'); 1 = no pooling. If set, the number of entries must equal Stacks. Blank uses the preset default.",
           "options": null
         }
       ],
