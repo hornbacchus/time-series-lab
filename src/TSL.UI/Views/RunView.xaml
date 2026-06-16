@@ -111,6 +111,22 @@
                 <Run Text="{Binding Preset, Mode=OneWay}" FontWeight="SemiBold" />
             </TextBlock>
 
+            <!-- ── Technique blurb (short summary; the catalog `summary` field) ── -->
+            <TextBlock Text="{Binding TechniqueSummary}"
+                       FontSize="13" Foreground="#424242"
+                       TextWrapping="Wrap" Margin="0,0,0,16">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding TechniqueSummary}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <!-- ── Selection preview ──────────────────────────────── -->
             <TextBlock Text="SELECTION PREVIEW" FontSize="11" FontWeight="Bold"
                        Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
@@ -179,22 +195,6 @@
             <ComboBox ItemsSource="{Binding AvailableFrequencies}"
                       SelectedItem="{Binding SelectedFrequency}"
                       FontSize="13" Padding="6,4" Margin="0,0,0,16" />
-
-            <!-- ── Technique blurb (short summary; the catalog `summary` field) ── -->
-            <TextBlock Text="{Binding TechniqueSummary}"
-                       FontSize="13" Foreground="#424242"
-                       TextWrapping="Wrap" Margin="0,0,0,16">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding TechniqueSummary}" Value="">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
 
             <!-- ── Technique-specific parameters ──────────────────── -->
             <StackPanel Visibility="{Binding HasParameters, Converter={StaticResource BoolToVis}}">
