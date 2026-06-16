@@ -94,6 +94,7 @@ namespace TSL.AddIn
                 var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
                 if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
                     runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueSummary = techEntry?.Summary ?? "";
                 runVm.TechniqueId = techniqueId;
             }
             catch (Exception ex)
@@ -331,6 +332,7 @@ namespace TSL.AddIn
                 var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
                 if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
                     runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueSummary = techEntry?.Summary ?? "";
                 runVm.TechniqueId = techniqueId;
 
                 // Curated, forecasting-intent params only (README's named knobs):
@@ -397,6 +399,7 @@ namespace TSL.AddIn
                 var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
                 if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
                     runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueSummary = techEntry?.Summary ?? "";
                 runVm.TechniqueId = techniqueId;
                 // No curated pane params: the scenario is set in the workbook's
                 // scenario_inputs tab, not the pane. input_workbook is auto-resolved
@@ -438,6 +441,7 @@ namespace TSL.AddIn
                 var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
                 if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
                     runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueSummary = techEntry?.Summary ?? "";
                 runVm.TechniqueId = techniqueId;
                 // No curated pane params: L/H/M/seed live in the workbook's
                 // kronos_input parameter cells. input_workbook is auto-resolved
@@ -868,6 +872,7 @@ namespace TSL.AddIn
                 var techEntry = TechniqueCatalogService.GetTechnique(techniqueId);
                 if (techEntry != null && !string.IsNullOrEmpty(techEntry.Name))
                     runVm.TechniqueName = techEntry.Name;
+                runVm.TechniqueSummary = techEntry?.Summary ?? "";
 
                 // Compare against the PRE-navigation id (NavigateToRun already
                 // set runVm.TechniqueId = techniqueId). The empty-Parameters

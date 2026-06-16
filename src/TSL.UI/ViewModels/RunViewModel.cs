@@ -130,6 +130,18 @@ namespace TSL.UI.ViewModels
             }
         }
 
+        private string _techniqueSummary = "";
+        /// <summary>
+        /// Short one-line technique blurb (the catalog <c>summary</c> field),
+        /// shown atop the Configure &amp; Run panel. Set by the AddIn layer; the
+        /// detailed markdown blurb stays on the Explorer screen.
+        /// </summary>
+        public string TechniqueSummary
+        {
+            get => _techniqueSummary;
+            set => SetProperty(ref _techniqueSummary, value);
+        }
+
         private string _preset = "Balanced";
         public string Preset
         {
@@ -261,6 +273,7 @@ namespace TSL.UI.ViewModels
         public ICommand CancelCommand { get; }
         public ICommand GoToSheetCommand { get; }
         public ICommand ResetCommand { get; }
+        public ICommand RestoreDefaultsCommand { get; }
 
         /// <summary>
         /// Raised when the user clicks Run. The AddIn layer subscribes to
@@ -310,6 +323,7 @@ namespace TSL.UI.ViewModels
                 (param) => param is string s && !string.IsNullOrEmpty(s));
 
             ResetCommand = new RelayCommand(OnReset);
+            RestoreDefaultsCommand = new RelayCommand(OnRestoreDefaults);
         }
 
         // ── Public API (called from AddIn layer) ────────────────────────
@@ -386,6 +400,25 @@ namespace TSL.UI.ViewModels
         }
 
         /// <summary>
+        /// Reset every parameter control to its catalog default — the state the
+        /// panel shows on open (blank/auto for the new knobs, whose blank routes
+        /// to the engine/preset default). Mirrors the SetParameters default logic.
+        /// Restoring to the engine's RESOLVED preset values would need cross-layer
+        /// plumbing the panel does not have (the C# side never receives the engine
+        /// _PRESET_CONFIG); that richer restore is banked.
+        /// </summary>
+        private void OnRestoreDefaults()
+        {
+            foreach (var p in Parameters)
+            {
+                if (p.IsBool)
+                    p.BoolValue = p.Default is bool b && b;
+                else
+                    p.StringValue = p.Default?.ToString() ?? "";
+            }
+        }
+
+        /// <summary>
         /// Populate the Parameters collection from a catalog parameter list.
         /// Call this whenever the selected technique changes so the Run pane
         /// shows the right controls with their default values.
@@ -406,6 +439,7 @@ namespace TSL.UI.ViewModels
                     Type = p.Type ?? "string",
                     Description = p.Description ?? "",
                     Options = p.Options,
+                    Default = p.Default,
                 };
                 if (item.IsBool)
                 {

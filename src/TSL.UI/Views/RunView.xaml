@@ -104,15 +104,15 @@
         <StackPanel Margin="12,8">
 
             <!-- ── Technique header ───────────────────────────────── -->
-            <TextBlock Text="{Binding TechniqueDisplayName}" FontSize="16" FontWeight="Bold"
+            <TextBlock Text="{Binding TechniqueDisplayName}" FontSize="17" FontWeight="Bold"
                        Foreground="#212121" Margin="0,0,0,4" />
-            <TextBlock FontSize="12" Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,12">
+            <TextBlock FontSize="13" Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,12">
                 <Run Text="Preset:" />
                 <Run Text="{Binding Preset, Mode=OneWay}" FontWeight="SemiBold" />
             </TextBlock>
 
             <!-- ── Selection preview ──────────────────────────────── -->
-            <TextBlock Text="SELECTION PREVIEW" FontSize="10" FontWeight="Bold"
+            <TextBlock Text="SELECTION PREVIEW" FontSize="11" FontWeight="Bold"
                        Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
             <Border Background="{StaticResource CategoryBgBrush}" CornerRadius="4"
                     Padding="8" Margin="0,0,0,12"
@@ -122,8 +122,8 @@
                         <DataTemplate>
                             <DockPanel Margin="0,2">
                                 <TextBlock DockPanel.Dock="Left" Text="{Binding Name}"
-                                           FontSize="12" FontWeight="SemiBold" Foreground="#424242" />
-                                <TextBlock DockPanel.Dock="Right" FontSize="11"
+                                           FontSize="13" FontWeight="SemiBold" Foreground="#424242" />
+                                <TextBlock DockPanel.Dock="Right" FontSize="12"
                                            Foreground="{StaticResource SubtleTextBrush}"
                                            HorizontalAlignment="Right">
                                     <Run Text="{Binding Length, Mode=OneWay}" />
@@ -131,7 +131,7 @@
                                     <Run Text=" | " />
                                     <Run Text="{Binding MissingDisplay, Mode=OneWay}" />
                                 </TextBlock>
-                                <TextBlock Text="{Binding Address}" FontSize="10" Margin="8,0"
+                                <TextBlock Text="{Binding Address}" FontSize="11" Margin="8,0"
                                            Foreground="{StaticResource SubtleTextBrush}"
                                            TextTrimming="CharacterEllipsis" />
                             </DockPanel>
@@ -145,7 +145,7 @@
                                         <Setter.Value>
                                             <ControlTemplate>
                                                 <TextBlock Text="No series selected. Select data in Excel first."
-                                                           FontSize="11" Foreground="{StaticResource SubtleTextBrush}"
+                                                           FontSize="12" Foreground="{StaticResource SubtleTextBrush}"
                                                            FontStyle="Italic" />
                                             </ControlTemplate>
                                         </Setter.Value>
@@ -158,31 +158,47 @@
             </Border>
 
             <!-- ── Time index ─────────────────────────────────────── -->
-            <TextBlock Text="TIME INDEX" FontSize="10" FontWeight="Bold"
+            <TextBlock Text="TIME INDEX" FontSize="11" FontWeight="Bold"
                        Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
             <CheckBox Content="Use time index column" IsChecked="{Binding UseTimeIndex}"
-                      FontSize="12" Margin="0,0,0,4" />
+                      FontSize="13" Margin="0,0,0,4" />
             <TextBox Text="{Binding TimeIndexAddress, UpdateSourceTrigger=PropertyChanged}"
                      IsEnabled="{Binding UseTimeIndex}"
-                     Padding="6,4" FontSize="11" FontFamily="Consolas"
+                     Padding="6,4" FontSize="12" FontFamily="Consolas"
                      BorderBrush="{StaticResource BorderBrush}" Margin="0,0,0,12" />
 
             <!-- ── Frequency ──────────────────────────────────────── -->
-            <TextBlock Text="FREQUENCY" FontSize="10" FontWeight="Bold"
+            <TextBlock Text="FREQUENCY" FontSize="11" FontWeight="Bold"
                        Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
             <DockPanel Margin="0,0,0,4">
-                <TextBlock DockPanel.Dock="Left" Text="Detected:" FontSize="11" Margin="0,0,6,0"
+                <TextBlock DockPanel.Dock="Left" Text="Detected:" FontSize="12" Margin="0,0,6,0"
                            VerticalAlignment="Center" />
-                <TextBlock Text="{Binding DetectedFrequency}" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="{Binding DetectedFrequency}" FontSize="12" FontWeight="SemiBold"
                            Foreground="#424242" VerticalAlignment="Center" />
             </DockPanel>
             <ComboBox ItemsSource="{Binding AvailableFrequencies}"
                       SelectedItem="{Binding SelectedFrequency}"
-                      FontSize="12" Padding="6,4" Margin="0,0,0,16" />
+                      FontSize="13" Padding="6,4" Margin="0,0,0,16" />
+
+            <!-- ── Technique blurb (short summary; the catalog `summary` field) ── -->
+            <TextBlock Text="{Binding TechniqueSummary}"
+                       FontSize="13" Foreground="#424242"
+                       TextWrapping="Wrap" Margin="0,0,0,16">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding TechniqueSummary}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <!-- ── Technique-specific parameters ──────────────────── -->
             <StackPanel Visibility="{Binding HasParameters, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="PARAMETERS" FontSize="10" FontWeight="Bold"
+                <TextBlock Text="PARAMETERS" FontSize="11" FontWeight="Bold"
                            Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
                 <ItemsControl ItemsSource="{Binding Parameters}" Margin="0,0,0,12">
                     <ItemsControl.ItemTemplate>
@@ -192,32 +208,32 @@
                                 <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
                                           Content="{Binding Label}"
                                           ToolTip="{Binding Description}"
-                                          FontSize="12"
+                                          FontSize="13"
                                           Visibility="{Binding IsBool, Converter={StaticResource BoolToVis}}" />
 
                                 <!-- Dropdown (string with options): label above, combo below -->
                                 <StackPanel Visibility="{Binding IsDropdown, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold"
+                                    <TextBlock Text="{Binding Label}" FontSize="12" FontWeight="SemiBold"
                                                Margin="0,0,0,3" ToolTip="{Binding Description}" />
                                     <ComboBox ItemsSource="{Binding Options}"
                                               SelectedItem="{Binding StringValue, Mode=TwoWay}"
-                                              FontSize="12" Padding="6,4"
+                                              FontSize="13" Padding="6,4"
                                               ToolTip="{Binding Description}" />
                                 </StackPanel>
 
                                 <!-- Text input (int / string without options): label above, textbox below -->
                                 <StackPanel Visibility="{Binding IsTextInput, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold"
+                                    <TextBlock Text="{Binding Label}" FontSize="12" FontWeight="SemiBold"
                                                Margin="0,0,0,3" ToolTip="{Binding Description}" />
                                     <TextBox Text="{Binding StringValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             FontSize="12" Padding="6,4"
+                                             FontSize="13" Padding="6,4"
                                              BorderBrush="{StaticResource BorderBrush}"
                                              ToolTip="{Binding Description}" />
                                 </StackPanel>
 
                                 <!-- Helper text (description) under non-bool params -->
                                 <TextBlock Text="{Binding Description}"
-                                           FontSize="10" Foreground="{StaticResource SubtleTextBrush}"
+                                           FontSize="11" Foreground="{StaticResource SubtleTextBrush}"
                                            TextWrapping="Wrap" Margin="0,3,0,0">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -247,15 +263,21 @@
                         Command="{Binding CancelCommand}" Margin="4,0,0,0" />
             </UniformGrid>
 
+            <!-- ── Restore Defaults (resets each param to its catalog default) ── -->
+            <Button Content="Restore Defaults" Style="{StaticResource LinkButton}"
+                    Command="{Binding RestoreDefaultsCommand}"
+                    HorizontalAlignment="Left" Margin="0,-4,0,12"
+                    Visibility="{Binding HasParameters, Converter={StaticResource BoolToVis}}" />
+
             <!-- ── Progress ───────────────────────────────────────── -->
             <StackPanel Visibility="{Binding ShowProgress, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="PROGRESS" FontSize="10" FontWeight="Bold"
+                <TextBlock Text="PROGRESS" FontSize="11" FontWeight="Bold"
                            Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
 
                 <DockPanel Margin="0,0,0,4">
-                    <TextBlock DockPanel.Dock="Right" FontSize="11" Foreground="#424242"
+                    <TextBlock DockPanel.Dock="Right" FontSize="12" Foreground="#424242"
                                Text="{Binding ProgressPercent, StringFormat='{}{0}%'}" />
-                    <TextBlock Text="{Binding ProgressStage}" FontSize="11" Foreground="#424242"
+                    <TextBlock Text="{Binding ProgressStage}" FontSize="12" Foreground="#424242"
                                FontWeight="SemiBold" />
                 </DockPanel>
 
@@ -266,7 +288,7 @@
                         Padding="6" MinHeight="160" MaxHeight="320" Margin="0,0,0,12">
                     <ListBox x:Name="ProgressLogList" ItemsSource="{Binding ProgressLog}"
                              BorderThickness="0"
-                             Background="Transparent" FontSize="10" FontFamily="Consolas"
+                             Background="Transparent" FontSize="11" FontFamily="Consolas"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
@@ -283,24 +305,24 @@
             <Border Background="#FFEBEE" CornerRadius="4" Padding="10,8" Margin="0,0,0,12"
                     Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}">
                 <StackPanel>
-                    <TextBlock Text="Error" FontSize="12" FontWeight="Bold"
+                    <TextBlock Text="Error" FontSize="13" FontWeight="Bold"
                                Foreground="{StaticResource ErrorBrush}" Margin="0,0,0,4" />
-                    <TextBlock Text="{Binding ErrorMessage}" FontSize="11" Foreground="#C62828"
+                    <TextBlock Text="{Binding ErrorMessage}" FontSize="12" Foreground="#C62828"
                                TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 
             <!-- ── Results ────────────────────────────────────────── -->
             <StackPanel Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="RESULTS" FontSize="10" FontWeight="Bold"
+                <TextBlock Text="RESULTS" FontSize="11" FontWeight="Bold"
                            Foreground="{StaticResource SuccessBrush}" Margin="0,0,0,6" />
 
                 <Border Background="#E8F5E9" CornerRadius="4" Padding="10,8" Margin="0,0,0,8">
-                    <TextBlock Text="{Binding ResultSummary}" FontSize="12" Foreground="#2E7D32"
+                    <TextBlock Text="{Binding ResultSummary}" FontSize="13" Foreground="#2E7D32"
                                TextWrapping="Wrap" />
                 </Border>
 
-                <TextBlock Text="Output Sheets:" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="Output Sheets:" FontSize="12" FontWeight="SemiBold"
                            Foreground="#424242" Margin="0,0,0,4" />
                 <ItemsControl ItemsSource="{Binding OutputSheets}">
                     <ItemsControl.ItemTemplate>
@@ -316,7 +338,7 @@
                 <Button Content="Reset" Command="{Binding ResetCommand}"
                         Foreground="{StaticResource SubtleTextBrush}"
                         Background="Transparent" BorderThickness="0"
-                        FontSize="11" Cursor="Hand" Margin="0,8,0,0"
+                        FontSize="12" Cursor="Hand" Margin="0,8,0,0"
                         HorizontalAlignment="Left" />
             </StackPanel>
 
