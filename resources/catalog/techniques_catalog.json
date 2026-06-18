@@ -2459,7 +2459,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "GARCH lag order",
+          "description": "ARCH order: number of past squared-shock terms. Default 1; GARCH(1,1) is standard for daily returns.",
           "options": null
         },
         {
@@ -2469,7 +2469,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "ARCH lag order",
+          "description": "GARCH order: number of past conditional-variance terms. Default 1.",
           "options": null
         },
         {
@@ -2479,7 +2479,7 @@
           "default": "t",
           "required": false,
           "advanced": false,
-          "description": "Innovation distribution",
+          "description": "Innovation distribution. Default Student-t, which accommodates the fat tails of real returns; options normal, t, skewt, ged. Normal usually understates tail risk.",
           "options": [
             "normal",
             "t",
@@ -2494,7 +2494,7 @@
           "default": 10,
           "required": false,
           "advanced": false,
-          "description": "Volatility forecast periods",
+          "description": "Variance-forecast horizon in periods. Default 10. Set to the number of days ahead you need.",
           "options": null
         }
       ],
@@ -2533,7 +2533,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "GARCH lag order",
+          "description": "ARCH order: number of past squared-shock terms. Default 1.",
           "options": null
         },
         {
@@ -2543,7 +2543,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "Asymmetric lag order",
+          "description": "Leverage (asymmetry) order: negative-shock terms. Default 1, switching on the leverage effect; 0 reduces the model to plain GARCH.",
           "options": null
         },
         {
@@ -2553,7 +2553,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "ARCH lag order",
+          "description": "GARCH order: number of past conditional-variance terms. Default 1.",
           "options": null
         },
         {
@@ -2563,7 +2563,7 @@
           "default": "t",
           "required": false,
           "advanced": false,
-          "description": "Innovation distribution",
+          "description": "Innovation distribution. Default Student-t; options normal, t, skewt. Use t/skewt for fat-tailed returns.",
           "options": [
             "normal",
             "t",
@@ -2577,7 +2577,7 @@
           "default": 10,
           "required": false,
           "advanced": false,
-          "description": "Volatility forecast periods",
+          "description": "Variance-forecast horizon in periods. Default 10.",
           "options": null
         }
       ],
@@ -2617,7 +2617,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "GARCH lag order",
+          "description": "ARCH order: number of past standardized-shock terms. Default 1.",
           "options": null
         },
         {
@@ -2627,7 +2627,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "ARCH lag order",
+          "description": "GARCH order: number of past log-variance terms. Default 1.",
           "options": null
         },
         {
@@ -2637,7 +2637,7 @@
           "default": "t",
           "required": false,
           "advanced": false,
-          "description": "Innovation distribution",
+          "description": "Innovation distribution. Default Student-t; options normal, t, skewt.",
           "options": [
             "normal",
             "t",
@@ -2651,7 +2651,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "Asymmetric lag order",
+          "description": "Leverage (asymmetry) order in the log-variance equation. Default 1. In EGARCH a negative leverage coefficient means negative shocks raise volatility more.",
           "options": null
         },
         {
@@ -2661,7 +2661,7 @@
           "default": 10,
           "required": false,
           "advanced": false,
-          "description": "Volatility forecast periods",
+          "description": "Variance-forecast horizon in periods. Default 10. Multi-step EGARCH forecasts use simulation.",
           "options": null
         }
       ],
@@ -2698,7 +2698,7 @@
           "default": "gaussian",
           "required": false,
           "advanced": false,
-          "description": "Return-innovation distribution: 'gaussian' (default) or 'student_t' (estimates degrees-of-freedom ν jointly with SV parameters).",
+          "description": "Return-innovation distribution. Default gaussian; student_t additionally estimates tail-heaviness. Use student_t when returns are visibly fat-tailed.",
           "options": [
             "gaussian",
             "student_t"
@@ -2711,7 +2711,7 @@
           "default": "quasi_ml",
           "required": false,
           "advanced": false,
-          "description": "Inference method: 'quasi_ml' (default, fast) or 'mcmc' (Balanced or Thorough preset only; removes the log-squared transformation bias via direct sampling on returns).",
+          "description": "Estimation method. Default quasi_ml (fast but biased — fits log squared returns); mcmc samples the return likelihood directly for an unbiased fit. quasi_ml for a quick look, mcmc for publication-grade estimates.",
           "options": [
             "quasi_ml",
             "mcmc"
@@ -2724,7 +2724,7 @@
           "default": "auto",
           "required": false,
           "advanced": true,
-          "description": "MCMC sampler backend (only used when inference_method='mcmc'). 'auto' (default) tries PyMC NUTS first; auto-downgrades to Kim-Shephard-Chib Gibbs when no C++ compiler is detected (pytensor would otherwise fall back to pure-Python execution and run ~100x slower). 'pymc' explicitly requests NUTS (still warn-and-downgrades if no compiler). 'gibbs' explicitly requests the Gibbs sampler (no compilation needed, predictable performance).",
+          "description": "MCMC sampler (used only when inference is mcmc). Default auto tries PyMC NUTS and falls back to Gibbs when no C++ compiler is available; pymc forces NUTS; gibbs needs no compiler.",
           "options": [
             "auto",
             "pymc",
@@ -2738,7 +2738,7 @@
           "default": false,
           "required": false,
           "advanced": true,
-          "description": "Compute posterior predictive 90% coverage. Thorough preset default True; Balanced default False (opt-in). MCMC path only.",
+          "description": "Compute posterior-predictive checks (MCMC diagnostic). Blank defaults to on under the Thorough preset, off otherwise.",
           "options": null
         }
       ],
@@ -2778,7 +2778,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "Aggregate RV over the next h days (HAR target horizon)",
+          "description": "Forecast horizon (days ahead) for realized variance. Default 1.",
           "options": null
         },
         {
@@ -2788,7 +2788,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Daily-component window (>= 1). Blank uses the Corsi canonical (1).",
+          "description": "Daily-component lag. Blank uses the Corsi canonical 1.",
           "options": null
         },
         {
@@ -2798,7 +2798,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Weekly-component window (>= 1). Blank uses the Corsi canonical (5).",
+          "description": "Weekly-component averaging window. Blank uses the Corsi canonical 5.",
           "options": null
         },
         {
@@ -2808,7 +2808,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Monthly-component window (>= 1). Blank uses the Corsi canonical (22).",
+          "description": "Monthly-component averaging window. Blank uses the Corsi canonical 22.",
           "options": null
         },
         {
@@ -2818,7 +2818,7 @@
           "default": false,
           "required": false,
           "advanced": true,
-          "description": "Fit on log realized variance.",
+          "description": "Fit in log realized-variance space. Default off; turn on if RV is heavily right-skewed.",
           "options": null
         }
       ],
@@ -2855,7 +2855,7 @@
           "default": 0.975,
           "required": false,
           "advanced": false,
-          "description": "Quantile for threshold (default p97.5)",
+          "description": "Quantile defining the peaks-over-threshold cutoff. Default 0.975 (the extreme 2.5% are exceedances). Higher values (0.99) give a purer but smaller tail sample; at least 10 exceedances are needed, 30+ for reliability.",
           "options": null
         },
         {
@@ -2865,7 +2865,7 @@
           "default": "0.95,0.99",
           "required": false,
           "advanced": false,
-          "description": "Comma-separated VaR confidence levels",
+          "description": "VaR/ES confidence levels, comma-separated. Default 0.95,0.99. Add 0.999 for deep-tail stress levels.",
           "options": null
         },
         {
@@ -2875,7 +2875,7 @@
           "default": false,
           "required": false,
           "advanced": false,
-          "description": "Apply Ferro-Segers 2003 intervals declustering to exceedances before GPD fitting. Recommended for time-series data with volatility clustering; produces extremal index theta and bias-corrected VaR / ES on cluster peaks. Default false for backward compatibility.",
+          "description": "Apply Ferro-Segers declustering to volatility-clustered exceedances. Default off; turn on when extreme moves cluster in time and you want cluster-peak tail estimates.",
           "options": null
         }
       ],
@@ -2916,7 +2916,7 @@
           "default": 0.05,
           "required": false,
           "advanced": false,
-          "description": "Target quantile (e.g., 0.05 for 5% VaR)",
+          "description": "VaR tail probability. Default 0.05 (5% VaR); use 0.01 for 1% VaR. Smaller values target deeper in the tail and need more data.",
           "options": null
         },
         {
@@ -2926,7 +2926,7 @@
           "default": "symmetric_abs",
           "required": false,
           "advanced": true,
-          "description": "CAViaR specification (Engle-Manganelli 2004): symmetric_abs (SAV), asymmetric_slope (AS), igarch (Indirect GARCH)",
+          "description": "CAViaR specification: symmetric_abs (SAV, default), asymmetric_slope (AS), or igarch (IG). The Engle-Manganelli Adaptive spec is not available.",
           "options": [
             "symmetric_abs",
             "asymmetric_slope",
@@ -2940,7 +2940,7 @@
           "default": "[1, 5, 10, 22]",
           "required": false,
           "advanced": false,
-          "description": "List of forecast horizons in periods for multi-horizon VaR (default: 1-day / 1-week / 2-week / 1-month at daily frequency).",
+          "description": "Forecast horizons (days) for multi-step VaR. Default [1, 5, 10, 22]. Multi-step VaR can be non-stationary and unreliable when the stationarity flag trips — the 1-day VaR is the robust output.",
           "options": null
         },
         {
@@ -2950,7 +2950,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Monte Carlo bootstrap path count for multi-horizon VaR (preset defaults: Fast=500, Balanced=2000, Thorough=10000).",
+          "description": "Monte-Carlo paths for multi-horizon VaR. Blank uses the preset default (Fast 500 / Balanced 2,000 / Thorough 10,000), lower-bounded at 100.",
           "options": null
         }
       ],
@@ -2990,7 +2990,7 @@
           "default": null,
           "required": true,
           "advanced": false,
-          "description": "Intraday sampling frequency (number of intraday return intervals). E.g., 79 for 5-minute returns in a 6.5-hour US equity session. Required — no default.",
+          "description": "Intraday sampling count (intraday returns per day). Required — no default; supply it for your data (e.g. 78–79 for 5-minute US equity returns). Drives the jump test.",
           "options": null
         },
         {
@@ -3000,7 +3000,7 @@
           "default": 0.01,
           "required": false,
           "advanced": false,
-          "description": "BNS ratio-test significance level (default 0.01 = 99% threshold).",
+          "description": "Significance level for the Barndorff-Nielsen-Shephard jump test. Default 0.01; lower flags fewer, more-significant jumps.",
           "options": null
         },
         {
@@ -3010,7 +3010,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "Forward-averaging horizon for the dependent variable (same semantics as HAR-RV).",
+          "description": "Forecast horizon (days ahead). Default 1.",
           "options": null
         },
         {
@@ -3020,7 +3020,7 @@
           "default": 1,
           "required": false,
           "advanced": true,
-          "description": "Daily component lag (default 1).",
+          "description": "Daily-component lag. Default 1 (Corsi canonical).",
           "options": null
         },
         {
@@ -3030,7 +3030,7 @@
           "default": 5,
           "required": false,
           "advanced": true,
-          "description": "Weekly component window (default 5).",
+          "description": "Weekly-component window. Default 5 (Corsi canonical).",
           "options": null
         },
         {
@@ -3040,7 +3040,7 @@
           "default": 22,
           "required": false,
           "advanced": true,
-          "description": "Monthly component window (default 22).",
+          "description": "Monthly-component window. Default 22 (Corsi canonical).",
           "options": null
         },
         {
@@ -3050,7 +3050,7 @@
           "default": false,
           "required": false,
           "advanced": true,
-          "description": "Apply log transform to RV / C / J before regression. Note: J has many zeros; log(J + ε) introduces large negative spikes. Prefer false unless RV is heavily right-skewed.",
+          "description": "Fit in log space. Default off and discouraged here — the jump series contains zeros, so logging injects large negative spikes; keep off unless RV is heavily right-skewed.",
           "options": null
         }
       ],
