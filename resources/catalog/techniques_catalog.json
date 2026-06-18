@@ -802,7 +802,7 @@
           "default": "c",
           "required": false,
           "advanced": true,
-          "description": "Regression type",
+          "description": "Which deterministic terms to include: c (constant — the usual default, for a series fluctuating around a fixed level), ct (constant + trend — if the series trends over time), ctt (adds a quadratic trend), or n (none). Pick ct if you can see a clear upward or downward drift.",
           "options": [
             "c",
             "ct",
@@ -817,7 +817,7 @@
           "default": "auto",
           "required": false,
           "advanced": true,
-          "description": "Max lags for ADF or 'auto'",
+          "description": "The most augmentation lags the test will consider (these absorb short-run autocorrelation so the test is clean). Blank auto-selects using the standard Schwert rule and AIC — the usual choice, and data-dependent, so leaving it blank is recommended.",
           "options": null
         }
       ],
@@ -854,7 +854,7 @@
           "default": "c",
           "required": false,
           "advanced": true,
-          "description": "Test type: c (level) or ct (trend)",
+          "description": "What kind of stationarity to test for: c (stationary around a fixed level — the default) or ct (stationary around a trend). Use ct when the series clearly trends and you want to know if it's stationary once that trend is removed.",
           "options": [
             "c",
             "ct"
@@ -893,7 +893,7 @@
           "default": "c",
           "required": false,
           "advanced": true,
-          "description": "Regression type",
+          "description": "Which deterministic terms to include: c (constant — the default), ct (constant + trend), or n (none). Choose ct if the series visibly trends.",
           "options": [
             "c",
             "ct",
