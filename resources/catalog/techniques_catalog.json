@@ -5799,7 +5799,7 @@
           "default": "gaussian",
           "required": false,
           "advanced": false,
-          "description": "Method for removing slowly-varying mean from input series. Gaussian kernel is the literature default. Detrending choice materially affects results.",
+          "description": "How to remove the trend before computing indicators. Default gaussian (kernel smoothing); first_diff or linear are alternatives. The choice materially affects the indicators — try more than one.",
           "options": [
             "gaussian",
             "first_diff",
@@ -5813,7 +5813,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Gaussian kernel sigma in samples. Default T/10 per Dakos convention. Ignored unless detrending_method='gaussian'.",
+          "description": "Smoothing bandwidth for Gaussian detrending. Blank uses a data-dependent default (about one-tenth of the series length); larger is smoother.",
           "options": null
         },
         {
@@ -5823,7 +5823,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Rolling-window size for indicator computation. Default per preset (50% of series length).",
+          "description": "Window length for the rolling autocorrelation and variance. Blank uses a preset fraction of the series (around half). Longer windows give steadier indicators but fewer trend points.",
           "options": null
         },
         {
@@ -5833,7 +5833,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Trailing-window size for Kendall tau. Default per preset (Fast=30%, Balanced/Thorough=50% of indicator-series length).",
+          "description": "How many of the most recent rolling-indicator points the Kendall-tau trend is measured over. Blank uses a data-dependent default.",
           "options": null
         },
         {
@@ -5843,7 +5843,7 @@
           "default": true,
           "required": false,
           "advanced": false,
-          "description": "When True (default), computes empirical p-values for Kendall tau via AR(1)-bootstrap surrogates. Adds significant runtime: 200-5000 surrogates per preset. Set False for fast asymptotic p-values.",
+          "description": "Test each indicator trend against AR(1) surrogate series for significance. Default on; the surrogate p-values are the honest check on whether a trend is real.",
           "options": null
         },
         {
@@ -5853,7 +5853,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Surrogate count for empirical p-values. Default per preset (Fast=200, Balanced=1000, Thorough=5000). Higher counts yield tighter p-value precision at proportional runtime cost.",
+          "description": "Number of surrogate series for the significance test. Blank uses a preset, auto-capped to a data-dependent ceiling to limit memory; more surrogates give finer p-values.",
           "options": null
         },
         {
@@ -5863,7 +5863,7 @@
           "default": "equal_weight_zscore",
           "required": false,
           "advanced": true,
-          "description": "Method for combining per-indicator Kendall taus into composite EWS score. equal_weight_zscore averages z-scored taus. fisher_combined uses Fisher's method on p-values; requires compute_pvalues=True.",
+          "description": "How to combine the individual indicators into one score. Default equal_weight_zscore; fisher_combined pools their p-values instead.",
           "options": [
             "equal_weight_zscore",
             "fisher_combined"
@@ -5876,7 +5876,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "When True, populates the six rolling-indicator time series in audit_fields for plotting. Set False to reduce payload size on long input series.",
+          "description": "Return the full rolling-indicator series (not just the summary trends) for plotting. Default on.",
           "options": null
         }
       ],
