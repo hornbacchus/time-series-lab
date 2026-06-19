@@ -3359,7 +3359,7 @@
           "default": "rbf",
           "required": false,
           "advanced": false,
-          "description": "Cost function model",
+          "description": "Cost model for the segmentation. Default rbf (a kernel cost detecting general distributional changes); l2 (mean shifts), l1 (robust to outliers), normal, clinear.",
           "options": [
             "l1",
             "l2",
@@ -3375,7 +3375,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Penalty criterion: 'auto' (preset-based — BIC for Fast/Balanced, mBIC for Thorough), or force 'bic'/'aic'/'mbic'. Higher penalty = fewer change points. For a manual numeric penalty use Penalty Value. Ignored when Number of Breakpoints is set.",
+          "description": "How the number of change points is chosen. Default auto (a data-computed BIC-family penalty); bic, aic, or mbic select a specific criterion. Higher penalty → fewer change points.",
           "options": [
             "auto",
             "bic",
@@ -3390,7 +3390,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Manual numeric penalty (must be > 0). When set, overrides the Penalty dropdown. Higher = fewer change points. Leave blank to use the Penalty criterion.",
+          "description": "Explicit penalty value, overriding the penalty rule. Blank uses the rule above; a larger number yields fewer change points.",
           "options": null
         },
         {
@@ -3400,7 +3400,7 @@
           "default": 5,
           "required": false,
           "advanced": false,
-          "description": "Minimum observations per segment (granularity floor). Larger = coarser segmentation.",
+          "description": "Minimum segment length (points between consecutive change points). Default 5; raise it to suppress spurious short segments.",
           "options": null
         },
         {
@@ -3410,7 +3410,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Force an EXACT number of change points (switches to binary segmentation). When set, OVERRIDES the penalty criterion. Leave blank for automatic penalty-based detection (the default).",
+          "description": "Force an exact number of change points, overriding the penalty. Blank lets the penalty decide; set an integer to fix the count.",
           "options": null
         }
       ],
@@ -3483,7 +3483,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "CUSUM detection threshold (> 0). Blank uses 5x the series standard deviation.",
+          "description": "CUSUM detection threshold (the alarm level for the cumulative sum). Blank uses a data-dependent default of about 5× the series standard deviation. Higher → fewer, later alarms.",
           "options": null
         },
         {
@@ -3493,7 +3493,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "CUSUM allowance / slack (>= 0). Blank uses 0.5x the series standard deviation.",
+          "description": "CUSUM allowance (the reference slack the cumulative sum must exceed before accumulating). Blank uses about half the series standard deviation; larger desensitizes the detector to small drifts.",
           "options": null
         },
         {
@@ -3503,7 +3503,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Reference value monitored for deviations. Blank uses the series mean.",
+          "description": "Reference level the series is monitored against. Blank uses the series mean.",
           "options": null
         },
         {
@@ -3513,7 +3513,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Page-Hinkley minimum-change magnitude (>= 0). Blank uses 0.005x the series standard deviation.",
+          "description": "Page-Hinkley magnitude threshold — the minimum shift size it reacts to. Blank uses a small data-dependent value (about 0.005× the standard deviation).",
           "options": null
         },
         {
@@ -3523,7 +3523,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Page-Hinkley detection threshold (>= 0). Blank uses 50.",
+          "description": "Page-Hinkley alarm threshold. Blank uses 50; higher → fewer Page-Hinkley alarms.",
           "options": null
         }
       ],
@@ -3570,7 +3570,7 @@
           "default": 0.05,
           "required": false,
           "advanced": true,
-          "description": "ESD significance level",
+          "description": "Significance level for the anomaly test. Default 0.05; lower flags fewer, more-extreme anomalies.",
           "options": null
         }
       ],

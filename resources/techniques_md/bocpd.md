@@ -1,77 +1,19 @@
-# BOCPD (Bayesian Online Change Point Detection)
-
 ## What It Does
-
-BOCPD (Bayesian Online Change Point Detection) detects change points in real time as data arrives, computing the **posterior probability of a change point** at each time step. It maintains a probability distribution over the "run length" -- the number of time steps since the last change point -- and updates this distribution with each new observation. This provides a principled, probabilistic approach to online change detection.
+BOCPD (Bayesian Online Change-Point Detection, Adams-MacKay 2007) processes a series one observation at a time, maintaining a posterior distribution over the *run length* — the time elapsed since the last change point — and updating it at each step. It is an *online/streaming* detector: it does not need the whole series in advance. When incoming data stop fitting the current run, the posterior mass collapses back to a short run length — and that reset is a detected change point.
 
 ## When to Use It
+- You want sequential, real-time detection as observations arrive, rather than an offline pass over a finished series.
+- You want a probabilistic view of how long the current regime has persisted (the run-length posterior).
+- You're monitoring a live series for regime changes.
+- Use BOCPD for online detection; use `pelt_change_points` for offline optimal segmentation of a complete series; use `cusum_page_hinkley` for a lightweight sequential mean-shift alarm.
 
-- You need to detect change points in real time (streaming data, monitoring)
-- You want probabilistic change point detection with posterior probabilities
-- The data arrives sequentially and decisions must be made without future information
-- You are monitoring a process for quality control, anomaly detection, or system health
-- You prefer a Bayesian framework that naturally handles uncertainty about change locations
+## How to Read the Result
+The output is the set of detected change-point locations together with the run-length posterior. A change point is flagged where the most-probable (MAP) run length drops sharply — the posterior abandoning the current run for a fresh one. On a synthetic series with a single mean shift at position 120, BOCPD fires once, at index 122, detecting a shift of +3.78. On a pure-noise series with no genuine change point, it correctly stays silent (zero detections). One important caveat on the output: the per-point change *probability* series is a diagnostic by-product and is *not* the detection signal — the run-length reset is what marks a change point, so read the detected locations, not the probability trace.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `pelt_change_points` for an offline cross-check of the located breaks; `intervention_analysis` to quantify a break's effect.
+- *(alternatives)* `pelt_change_points` (offline optimal segmentation); `cusum_page_hinkley` (sequential single-shift alarm).
 
-- Data within each segment follows a known parametric model (Gaussian, Poisson, etc.)
-- Change points occur independently with a known or estimated hazard rate (geometric prior by default)
-- The parameters reset to their prior values after each change point
-- The prior distributions for segment parameters are conjugate to the likelihood (for computational efficiency)
-- Observations are independent within each segment, conditional on the segment parameters
-
-## Outputs
-
-- **Run length posterior**: at each time, the probability distribution over how long the current segment has been running
-- **Change point probability**: the probability that a change occurred at each time step
-- **Estimated segment parameters**: posterior mean of parameters for the current segment
-- **MAP run length**: the most probable run length at each time, indicating the last change point
-- **Real-time alerts**: flagging time points where change probability exceeds a threshold
-
-## Technical Details
-
-**Setup**: At each time t, the run length `r_t` indicates how many observations have occurred since the last change point. If `r_t = 0`, a change point just occurred at time t.
-
-**Recursive update** (Adams and MacKay, 2007):
-
-For each new observation `y_t`, update the run length distribution:
-
-1. **Growth probability** (no change, extend current run):
-`P(r_t = r_{t-1} + 1, y_{1:t}) = P(r_{t-1}, y_{1:t-1}) * pi_t(y_t | r_{t-1}) * (1 - H(r_{t-1}))`
-
-where `pi_t(y_t | r_{t-1})` is the predictive probability of `y_t` given the current run data, and `H(r)` is the hazard function (probability of a change point given run length r).
-
-2. **Change point probability** (new segment starts):
-`P(r_t = 0, y_{1:t}) = sum_{r_{t-1}} P(r_{t-1}, y_{1:t-1}) * pi_t(y_t | r_{t-1}) * H(r_{t-1})`
-
-3. **Normalize**: `P(r_t | y_{1:t}) = P(r_t, y_{1:t}) / P(y_{1:t})`
-
-**Predictive probability**: With conjugate priors, `pi_t(y_t | r_{t-1})` is the posterior predictive distribution given the data in the current run. For a Gaussian model with unknown mean and known variance:
-
-- Prior: `mu ~ N(mu_0, sigma_0^2)`
-- After observing `y_{t-r}, ..., y_{t-1}`, the posterior is Gaussian with updated mean and precision.
-- The predictive distribution for `y_t` is Student-t (for unknown variance) or Gaussian (for known variance).
-
-**Hazard function**: The simplest choice is a constant hazard `H(r) = 1/lambda`, corresponding to a geometric prior on segment length with expected length lambda. This means change points are equally likely at any time.
-
-**Efficient computation**: Maintain sufficient statistics (sum, sum of squares, count) for each active run length. When a new observation arrives, update all active runs. Prune runs with negligible probability to keep computation bounded.
-
-**Computational cost**: O(T) per time step in the worst case (maintaining T possible run lengths), but pruning keeps the effective cost much lower. With pruning threshold epsilon, runs with `P(r_t) < epsilon` are discarded.
-
-**Extensions**:
-- **Unknown hazard rate**: Place a prior on lambda and update it online.
-- **Multivariate observations**: Use multivariate conjugate priors (Normal-Wishart).
-- **Non-conjugate models**: Use approximate inference (particle filters, variational methods).
-- **Gradual changes**: Use models that can capture both abrupt and gradual transitions.
-
-**Comparison with offline methods**: BOCPD processes data sequentially and does not need the full series. PELT requires the full series but can be more accurate because it optimizes a global objective. BOCPD provides probabilities at each step; PELT provides a single best segmentation.
-
-## Interpretation
-
-**Plain-Language Finding (Tier 1)** - count of posterior-probability-thresholded change points, most recent with posterior probability and pre/post mean shift, pointer to run-length posterior in data tables.
-
-**Technical Interpretation (Tier 2)** - BOCPD with hazard rate and probability threshold, streaming-compatible (contrast with offline PELT).
-
-**Caveats (Tier 3, conditional)**:
-- Trailing detection (within 5 obs of series end) - uncertain, more data may reverse.
-- High detection count (> 10% of series) - threshold may be too loose.
+## Technical Detail
+Implementation is the Adams-MacKay recursion (numpy/scipy) with a Normal-inverse-Gamma observation model and a constant hazard. Each step updates the run-length distribution through the posterior predictive likelihood; a change point is recorded where the MAP run length falls by more than a minimum gap, indicating the posterior has reset to a fresh run. The hazard parameter — the prior expected run length between changes — governs sensitivity: a longer expected run length yields fewer change points. The minimum gap (set by preset) prevents immediate re-triggering after a detection.
+*Reference run:* a synthetic mean-shift series (shift 0→4 at position 120, n=240), Balanced, seed 42 — fires once, change point at index 122 (true break 120), detected shift +3.78, by MAP run-length reset; on a separate pure-noise series (n=240) it stays silent with zero detections.
