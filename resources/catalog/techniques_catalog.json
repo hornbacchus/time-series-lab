@@ -1743,7 +1743,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12. Forecasts are flat at the final level (this model has no trend).",
           "options": null
         }
       ],
@@ -1781,7 +1781,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12. Forecasts carry the final slope forward.",
           "options": null
         }
       ],
@@ -1818,7 +1818,7 @@
           "default": true,
           "required": false,
           "advanced": false,
-          "description": "Include stochastic level",
+          "description": "Level/trend specification for the decomposition. The model fits a local-linear-trend level by default (a level with an evolving slope); leave it at the default for the standard trend-plus-seasonal-plus-cycle decomposition.",
           "options": null
         },
         {
@@ -1838,7 +1838,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Seasonal period (null = none)",
+          "description": "Seasonal period (observations per cycle). Blank infers it from the data frequency (12 for monthly). Set explicitly to force a period.",
           "options": null
         },
         {
@@ -1848,7 +1848,7 @@
           "default": false,
           "required": false,
           "advanced": true,
-          "description": "Include stochastic cycle",
+          "description": "Include a longer-term cyclical component (beyond the seasonal). Default follows the preset.",
           "options": null
         },
         {
@@ -1858,7 +1858,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         }
       ],
@@ -1896,7 +1896,7 @@
           "default": 500,
           "required": false,
           "advanced": false,
-          "description": "Number of particles",
+          "description": "Number of particles representing the state distribution. Default 500; more improves accuracy at proportional cost (presets raise it to 2,000 / 10,000). Watch the effective sample size for degeneracy.",
           "options": null
         },
         {
@@ -1906,7 +1906,7 @@
           "default": "local_level",
           "required": false,
           "advanced": false,
-          "description": "Nonlinear state-space model to filter",
+          "description": "State-space model: local_level (default), local_level_sv (stochastic volatility), nonlinear_growth, or random_walk_sv. Pick the one matching your dynamics.",
           "options": [
             "local_level",
             "local_level_sv",
@@ -1949,7 +1949,7 @@
           "default": "local_level",
           "required": false,
           "advanced": false,
-          "description": "Named template or 'custom' for user-supplied matrices",
+          "description": "State-space template: local_level (default), local_linear_trend, seasonal, or ar1 — or custom to supply your own system matrices. Match it to the series' structure.",
           "options": [
             "local_level",
             "local_linear_trend",
@@ -1965,7 +1965,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Period for the 'seasonal' template",
+          "description": "Seasonal period for the seasonal template (observations per cycle). Default 12.",
           "options": null
         },
         {
@@ -1975,7 +1975,7 @@
           "default": 1,
           "required": false,
           "advanced": true,
-          "description": "Order for the 'ar1' template (fixed at 1 in this release)",
+          "description": "Autoregressive order for the AR template. Fixed at 1 this release.",
           "options": null
         },
         {
@@ -1985,7 +1985,7 @@
           "default": "diffuse",
           "required": false,
           "advanced": true,
-          "description": "State-space initialization method",
+          "description": "Initial state handling. Default diffuse (a non-informative start, appropriate when the initial state is unknown).",
           "options": [
             "diffuse",
             "known",
@@ -1999,7 +1999,7 @@
           "default": 20,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 20. Forecasts propagate the final filtered state.",
           "options": null
         },
         {
@@ -2009,7 +2009,7 @@
           "default": 0.1,
           "required": false,
           "advanced": true,
-          "description": "Significance level for forecast intervals",
+          "description": "Significance level for the interval bands. Default 0.1 (90% intervals).",
           "options": null
         }
       ],
@@ -2050,7 +2050,7 @@
           "default": "local_level",
           "required": false,
           "advanced": false,
-          "description": "Named template or 'custom' for user-supplied matrices",
+          "description": "State-space template: local_level (default), local_linear_trend, seasonal, or ar1 — or custom to supply your own system matrices.",
           "options": [
             "local_level",
             "local_linear_trend",
@@ -2066,7 +2066,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Period for the 'seasonal' template",
+          "description": "Seasonal period for the seasonal template (observations per cycle). Default 12.",
           "options": null
         },
         {
@@ -2076,7 +2076,7 @@
           "default": 1,
           "required": false,
           "advanced": true,
-          "description": "Order for the 'ar1' template (fixed at 1 in this release)",
+          "description": "Autoregressive order for the AR template. Fixed at 1 this release.",
           "options": null
         },
         {
@@ -2086,7 +2086,7 @@
           "default": "diffuse",
           "required": false,
           "advanced": true,
-          "description": "State-space initialization method",
+          "description": "Initial state handling. Default diffuse (a non-informative start).",
           "options": [
             "diffuse",
             "known",
@@ -2100,7 +2100,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "Emit the smoothed disturbance table (Balanced/Thorough default True; Fast default False)",
+          "description": "Also compute the smoothed disturbances (attributing historical shocks to the state versus observation noise). Default on.",
           "options": null
         },
         {
@@ -2110,7 +2110,7 @@
           "default": 20,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 20. Smoothed and filtered forecasts coincide (they agree at the final point).",
           "options": null
         },
         {
@@ -2120,7 +2120,7 @@
           "default": 0.1,
           "required": false,
           "advanced": true,
-          "description": "Significance level for forecast intervals",
+          "description": "Significance level for the interval bands. Default 0.1 (90% intervals).",
           "options": null
         }
       ],
