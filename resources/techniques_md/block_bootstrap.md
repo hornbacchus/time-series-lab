@@ -1,87 +1,19 @@
-# Block Bootstrap
-
 ## What It Does
-
-The block bootstrap resamples **contiguous blocks** of observations from a time series to generate new pseudo-series that preserve the temporal dependence structure. Unlike the standard (iid) bootstrap which resamples individual observations, the block bootstrap respects the autocorrelation in the data, making it valid for constructing confidence intervals, prediction intervals, and hypothesis tests for time series statistics.
+The block bootstrap estimates the uncertainty of a statistic computed on a dependent (autocorrelated) series. Ordinary bootstrap resampling shuffles individual observations, which destroys the series' time dependence and gives wrong uncertainty estimates; the block bootstrap instead resamples *overlapping blocks* of consecutive observations, preserving the short-range correlation structure within each block. It returns confidence intervals for the series' mean, variance, and first-order autocorrelation.
 
 ## When to Use It
+- You need a confidence interval for a statistic of an autocorrelated series (returns, rates, any time-dependent data).
+- Ordinary bootstrap or analytic standard errors would be wrong because they assume independence.
+- You want a distribution-free uncertainty estimate that respects the time dependence.
+- Use the block bootstrap whenever the data are autocorrelated; ordinary bootstrap is fine only for independent observations.
 
-- You need confidence intervals for a time series statistic but the analytical formula is unavailable or unreliable
-- You want to assess the uncertainty of forecast accuracy metrics from rolling origin evaluation
-- The distributional assumptions required for analytical inference (e.g., normality) are questionable
-- You need to generate synthetic time series for simulation or stress testing
-- You want prediction intervals that do not rely on Gaussian error assumptions
+## How to Read the Result
+The output is the estimate and a confidence interval for each of the mean, the variance, and the first-order autocorrelation. On the SP500 daily returns, the mean's 95% interval is [0.002, 0.087] with a standard error of 0.022 — the interval accounts for the autocorrelation that an ordinary bootstrap would ignore (and which would otherwise understate the uncertainty). The block length is chosen automatically to match the series' persistence; a longer block preserves more dependence at the cost of fewer distinct resamples. The intervals for variance and autocorrelation are reported alongside the mean.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* report the interval alongside the point statistic in any analysis of dependent data.
+- *(alternatives)* analytic standard errors for independent data; `rolling_origin_cv` for forecast-accuracy uncertainty rather than statistic uncertainty.
 
-- The time series is stationary (or locally stationary within each block)
-- The block length is long enough to capture the dependence structure but short enough to allow sufficient resampling
-- The statistic of interest can be meaningfully computed on the resampled series
-- The resampled series is a reasonable approximation to new draws from the data-generating process
-- The number of bootstrap replications is large enough for stable inference
-
-## Outputs
-
-- **Bootstrap distribution**: the empirical distribution of the statistic of interest across replications
-- **Confidence intervals**: percentile-based or bias-corrected intervals for the statistic
-- **Standard error**: the bootstrap estimate of the standard deviation of the statistic
-- **Bias estimate**: the difference between the bootstrap mean and the observed statistic
-- **Prediction intervals**: for forecasts, by resampling residuals or fitted errors
-
-## Technical Details
-
-**Non-overlapping Block Bootstrap (NBB)**:
-
-1. Choose block length `l`.
-2. Divide the series into `k = floor(n/l)` non-overlapping blocks: `B_1 = (y_1, ..., y_l)`, `B_2 = (y_{l+1}, ..., y_{2l})`, etc.
-3. Resample k blocks with replacement and concatenate to form a bootstrap series of length `k * l`.
-4. Compute the statistic of interest on the bootstrap series.
-5. Repeat B times to build the bootstrap distribution.
-
-**Moving Block Bootstrap (MBB)** (Kunsch, 1989; Liu and Singh, 1992):
-
-1. Define all possible overlapping blocks of length l: `B_i = (y_i, y_{i+1}, ..., y_{i+l-1})` for i = 1, ..., n-l+1.
-2. Randomly select `k = ceil(n/l)` blocks with replacement.
-3. Concatenate and truncate to length n.
-4. Compute the statistic; repeat B times.
-
-MBB uses more blocks than NBB, improving efficiency.
-
-**Stationary Bootstrap** (Politis and Romano, 1994):
-
-Instead of a fixed block length, each block has a random length drawn from a geometric distribution with mean l:
-- Start at a random time index.
-- With probability `1/l`, start a new block at a random location; with probability `1 - 1/l`, extend the current block.
-
-This ensures the resampled series is stationary (unlike MBB, which can have discontinuities at block junctions).
-
-**Block length selection**: Critical for performance. Too short: dependence is not preserved, bootstrap is inconsistent. Too long: too few distinct blocks, high variance.
-
-Methods for selecting l:
-- **Rule of thumb**: `l = n^{1/3}` (optimal rate for many statistics).
-- **Politis-White (2004) automatic selection**: Estimates the spectral density at frequency zero and uses it to determine the optimal block length.
-- **Cross-validation**: Try multiple block lengths and select the one that minimizes the bootstrap variance.
-
-**Bootstrap for prediction intervals**:
-
-1. Fit the forecasting model to the original series.
-2. Compute in-sample residuals `e_t = y_t - y_hat_t`.
-3. For each bootstrap replication:
-   a. Resample residuals using the block bootstrap (preserving residual autocorrelation).
-   b. Generate a new series by adding resampled residuals to the fitted values.
-   c. Refit the model and produce forecasts.
-4. The quantiles of the bootstrap forecast distribution give prediction intervals.
-
-**Sieve bootstrap** (alternative approach): Fit an AR(p) model (with p selected by AIC), resample the residuals using the iid bootstrap (since AR residuals are approximately iid), and generate new series from the AR model with resampled innovations. This parameterically captures the dependence and allows iid resampling of residuals.
-
-**Number of replications B**: At least 1,000 for confidence intervals, 5,000-10,000 for accurate tail probabilities. Use the Monte Carlo error `SE_MC = s / sqrt(B)` (where s is the bootstrap standard deviation) to assess whether B is large enough.
-
-## Interpretation
-
-**Plain-Language Finding (Tier 1)** - 95% CIs for mean, variance, ACF(1). Mean CI vs zero is the actionable test. Explicitly cites whether the mean CI excludes zero at the 5% level.
-
-**Technical Interpretation (Tier 2)** - non-overlapping block bootstrap with block length tuned to series autocorrelation, per-statistic point / bias / SE / CI in prose form (V2 convention).
-
-**Caveats (Tier 3, conditional)**:
-- Wide mean CI (width > point estimate) - weak evidence about mean.
-- High bootstrap bias (> 10% of point) - block length too short.
+## Technical Detail
+The method is the moving block bootstrap (numpy): overlapping blocks of consecutive observations are resampled with replacement and concatenated to form each bootstrap series, preserving short-range dependence. The block length defaults to an automatic choice of order `n^(1/3)` inflated for the series' persistence (capped at half the series length); the number of bootstrap replications is set by preset. The statistics computed are the mean, variance, and first-order autocorrelation — these are fixed, not selectable. Confidence intervals are the bootstrap percentiles.
+*Reference run:* sp500_returns.csv (2,512 daily log-return %), Balanced — automatic block length 15 (persistence-inflated), 1,000 replications; the mean's 95% confidence interval is [0.002, 0.087], standard error 0.022 (variance and first-order autocorrelation intervals are also reported).

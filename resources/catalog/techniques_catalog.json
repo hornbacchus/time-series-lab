@@ -3902,7 +3902,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Forecast horizon per fold",
+          "description": "Forecast horizon per fold (periods ahead). Default 12. The model is evaluated on forecasts this far out at each rolling origin.",
           "options": null
         },
         {
@@ -3953,7 +3953,7 @@
           "default": 500,
           "required": false,
           "advanced": false,
-          "description": "Number of bootstrap replications",
+          "description": "Number of bootstrap replications. Default 500; more gives smoother interval estimates (presets raise it to 1,000 / 5,000).",
           "options": null
         },
         {
@@ -3963,7 +3963,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Block length or 'auto'",
+          "description": "Length of the resampled overlapping blocks. Default auto — chosen from the series' persistence as roughly the cube root of the length, inflated for autocorrelation. Longer blocks preserve more dependence.",
           "options": null
         },
         {
@@ -4014,7 +4014,7 @@
           "default": 0.95,
           "required": false,
           "advanced": false,
-          "description": "Target coverage probability",
+          "description": "Target coverage probability (as a fraction). Default 0.95 — the intervals are built to contain the outcome this fraction of the time on average.",
           "options": null
         },
         {
@@ -4024,7 +4024,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Forecast horizon",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         },
         {
@@ -4034,7 +4034,7 @@
           "default": "split",
           "required": false,
           "advanced": false,
-          "description": "Conformal method: split (ARIMA + split-conformal), cqr (conformalized quantile regression), or enbpi (ensemble batch prediction intervals).",
+          "description": "Conformal method: split (default — constant-width split conformal), cqr (conformalized quantile regression, varying width), or enbpi (ensemble method for time series).",
           "options": [
             "split",
             "cqr",
@@ -4048,7 +4048,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Calibration-set fraction in (0, 1) holding residuals used to calibrate coverage. Applies to the split and CQR methods. Blank uses the preset default.",
+          "description": "Fraction of the data reserved for calibration. Blank uses a preset (around 0.2-0.3). Larger calibration sets give a more stable quantile estimate.",
           "options": null
         },
         {
@@ -4058,7 +4058,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Number of lag features for the regression base. Applies to the CQR and EnbPI methods. Blank uses a data-driven default.",
+          "description": "Number of autoregressive lags used by the CQR and EnbPI methods. Blank derives it from the data.",
           "options": null
         },
         {
@@ -4068,7 +4068,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Number of bootstrap resamples (>= 1). Applies to the EnbPI method. Blank uses the default (30).",
+          "description": "Number of resamples for the EnbPI ensemble. Default 30.",
           "options": null
         },
         {
@@ -4078,7 +4078,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Block length for the block bootstrap (>= 1). Applies to the EnbPI method. Blank uses the default (10).",
+          "description": "Block length for the EnbPI time-series bootstrap. Default 10.",
           "options": null
         },
         {
@@ -4088,7 +4088,7 @@
           "default": "gbr",
           "required": false,
           "advanced": true,
-          "description": "EnbPI base learner: gbr (gradient boosting) or neural (MLP). Applies to the EnbPI method.",
+          "description": "Base learner for EnbPI. Default gbr (gradient-boosted regression).",
           "options": [
             "gbr",
             "neural"
@@ -4101,7 +4101,7 @@
           "default": false,
           "required": false,
           "advanced": true,
-          "description": "Fit a seasonal ARIMA base. Applies to the split method.",
+          "description": "Whether the underlying model treats the series as seasonal. Default off.",
           "options": null
         },
         {
@@ -4111,7 +4111,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Seasonal period. Applies to the split method when Seasonal is on. Blank infers from the data frequency.",
+          "description": "Seasonal period for the underlying model. Blank infers it from the data frequency.",
           "options": null
         }
       ],
@@ -4147,7 +4147,7 @@
           "default": "auto_arima,ets,theta",
           "required": false,
           "advanced": false,
-          "description": "Comma-separated model list",
+          "description": "Members to combine, comma-separated. Default auto_arima,ets,theta. Each is fit and weighted by the combination method.",
           "options": null
         },
         {
@@ -4157,7 +4157,7 @@
           "default": "inverse_mse",
           "required": false,
           "advanced": false,
-          "description": "Combination method",
+          "description": "How members are weighted: inverse_mse (default — weight inversely to each member's holdout error, down-weighting weak models), simple_average (equal weights), or ols (regression-determined).",
           "options": [
             "simple_average",
             "inverse_mse",
@@ -4171,7 +4171,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Forecast horizon",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         }
       ],
