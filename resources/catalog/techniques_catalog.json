@@ -954,7 +954,7 @@
           "default": "aic",
           "required": false,
           "advanced": true,
-          "description": "Lag selection criterion",
+          "description": "Information criterion for automatic lag selection. Default aic; options aic, bic, hqic. bic penalizes extra lags more heavily (selects fewer).",
           "options": [
             "aic",
             "bic",
@@ -968,7 +968,7 @@
           "default": "c",
           "required": false,
           "advanced": false,
-          "description": "Deterministic trend: n (none), c (constant), ct (constant + linear trend).",
+          "description": "Deterministic terms in the VAR. Default c (constant); n none, ct constant and trend.",
           "options": [
             "n",
             "c",
@@ -996,7 +996,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Number of impulse-response horizons (>= 1). Blank uses the default (20).",
+          "description": "Horizon (periods) for the impulse-response and variance-decomposition output. Blank uses 20.",
           "options": null
         },
         {
@@ -1055,7 +1055,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Cointegration rank or 'auto' (Johansen test)",
+          "description": "Cointegrating rank — the number of long-run relationships. Blank auto-selects by the trace test; set an integer to fix it (e.g. from a Johansen test).",
           "options": null
         },
         {
@@ -1065,7 +1065,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Number of lagged differences ('auto' = IC-selected, or an integer)",
+          "description": "Number of lagged differences in the short-run dynamics. Blank auto-selects by information criterion.",
           "options": null
         },
         {
@@ -1075,7 +1075,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         }
       ],
@@ -1113,7 +1113,7 @@
           "default": 0,
           "required": false,
           "advanced": true,
-          "description": "Deterministic term order (-1, 0, 1)",
+          "description": "Deterministic trend assumption. Default 0 (constant in the cointegrating relation); −1 none, 1 linear trend.",
           "options": null
         },
         {
@@ -1174,7 +1174,7 @@
           "default": 4,
           "required": false,
           "advanced": false,
-          "description": "Number of VAR lags",
+          "description": "Number of VAR lags. Default 4. The Minnesota prior shrinks higher lags toward zero, so over-specifying is less costly here than in an unrestricted VAR.",
           "options": null
         },
         {
@@ -1184,7 +1184,7 @@
           "default": 0.1,
           "required": false,
           "advanced": true,
-          "description": "Minnesota prior shrinkage parameter (overall tightness)",
+          "description": "Overall prior tightness (λ1). Default 0.1. Smaller shrinks the system harder toward the random-walk prior; larger lets the data dominate. Monotone in the shrinkage direction.",
           "options": null
         },
         {
@@ -1244,7 +1244,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         }
       ],
@@ -1517,7 +1517,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "Number of latent factors",
+          "description": "Number of latent common factors to extract. Default 1; increase when several independent forces drive the panel.",
           "options": null
         },
         {
@@ -1527,7 +1527,7 @@
           "default": 2,
           "required": false,
           "advanced": true,
-          "description": "Autoregressive order for factors",
+          "description": "Autoregressive order of the factor dynamics. Default 2.",
           "options": null
         },
         {
@@ -1580,7 +1580,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Number of components to retain (null = all)",
+          "description": "Number of components to retain. Blank keeps all available (the smaller of observations and series); set an integer to cap the count.",
           "options": null
         },
         {
@@ -1590,7 +1590,7 @@
           "default": true,
           "required": false,
           "advanced": false,
-          "description": "Standardize series to zero mean and unit variance before PCA",
+          "description": "Center and scale each series before decomposition. Default on, and recommended — the Kaiser eigenvalue rule is only meaningful on standardized data, and unscaled PCA lets the highest-variance series dominate.",
           "options": null
         },
         {
@@ -1600,7 +1600,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Rotation method for loadings",
+          "description": "Optional component rotation for interpretability. Default none; varimax rotates the retained loadings toward a simpler structure.",
           "options": [
             null,
             "varimax"

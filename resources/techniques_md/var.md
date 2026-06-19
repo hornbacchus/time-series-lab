@@ -1,72 +1,19 @@
-# Vector Autoregression (VAR)
-
 ## What It Does
-
-VAR (Vector Autoregression) models multiple time series simultaneously, where each variable is expressed as a linear function of its own past values and the past values of all other variables in the system. It captures the dynamic interdependencies among a set of time series without requiring prior assumptions about which variables are exogenous and which are endogenous.
+A Vector Autoregression models several series jointly, each as a linear function of the past values of all of them. It captures how the system co-evolves: how a shock to one variable propagates to the others over time. The outputs are joint forecasts, impulse-response functions (the dynamic response to a one-unit shock), forecast-error variance decompositions (which shocks drive each variable's uncertainty), and Granger-causality tests. A structural identification scheme is selectable to give the shocks economic meaning.
 
 ## When to Use It
+- You have several stationary (or differenced-to-stationary) series and want their joint dynamics, not separate univariate models.
+- You want impulse responses or variance decompositions — how shocks transmit through the system.
+- You want to test Granger causality (does one series help predict another).
+- Use plain VAR when the series are stationary and uncointegrated; use `vecm` when they share a long-run equilibrium (cointegrated levels); use `bvar` when the system is large relative to the sample and needs shrinkage.
 
-- You have multiple related time series that influence each other (e.g., GDP, inflation, interest rates)
-- You want to understand dynamic interactions between variables without imposing structural restrictions
-- You need multi-step forecasts for a system of variables
-- You want to perform impulse response analysis or forecast error variance decomposition
-- Granger causality testing is needed to assess whether one variable helps predict another
+## How to Read the Result
+Lag length is chosen by information criterion: on the Treasury reference, AIC selects VAR(5). The largest companion-matrix root (modulus 0.9991 here) measures stability — close to 1 is a near-unit-root system, expected for yield levels, and a value above 1 signals an explosive, misspecified model. Granger tests report directional predictability: here 30Y leads 2Y significantly (F 3.40, p 0.004), among others, so the long end leads the short end. Read impulse responses for the shape and persistence of each transmission, and the variance decomposition for which shocks matter at which horizon (own-shocks dominate at short horizons here). The information criteria are package-convention-specific — use them to select lags within this model, not to compare against another package's AIC.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `vecm` if the series turn out cointegrated; `bvar` for a shrinkage-regularized version of the same system; `forecast_reconciliation` to make a hierarchy of VAR forecasts coherent.
+- *(alternatives)* `bvar` (Bayesian shrinkage — better for large systems); `vecm` (cointegrated levels); `dynamic_factor_model` when a few common factors drive many series. The BVAR-SV `bond_yield_forecast` is the flagship application of this family to the yield curve.
 
-- All variables in the system are stationary (or the VAR is estimated in differences)
-- The number of lags is sufficient to capture the dynamics but not so large as to overfit
-- Residuals are white noise (no remaining autocorrelation) and may be contemporaneously correlated
-- The system is stable (all eigenvalues of the companion matrix lie inside the unit circle)
-- No important variables are omitted from the system
-
-## Outputs
-
-- **Coefficient matrices** showing how each variable depends on lagged values of all variables
-- **Multi-step forecasts** for all variables simultaneously
-- **Impulse response functions (IRFs)**: how each variable responds over time to a shock in another
-- **Forecast error variance decomposition (FEVD)**: the proportion of forecast uncertainty for each variable attributable to shocks from each other variable
-- **Granger causality tests**: whether lagged values of one variable significantly predict another
-
-## Technical Details
-
-**Model specification**: A VAR(p) model for a k-dimensional vector `Y_t = (Y_{1,t}, ..., Y_{k,t})'` is:
-
-`Y_t = c + A_1 Y_{t-1} + A_2 Y_{t-2} + ... + A_p Y_{t-p} + u_t`
-
-where `c` is a k-by-1 vector of constants, `A_i` are k-by-k coefficient matrices, and `u_t ~ N(0, Sigma_u)` is the vector of innovations with covariance matrix `Sigma_u`.
-
-**Estimation**: Each equation can be estimated separately by OLS, which is efficient because all equations have the same regressors. The OLS estimator for each equation is consistent and asymptotically normal. The residual covariance matrix is estimated as `Sigma_hat = (1/T) * sum u_hat_t * u_hat_t'`.
-
-**Lag order selection**: Select p using information criteria applied to the system:
-- AIC(p) = log|Sigma_hat(p)| + 2*p*k^2/T
-- BIC(p) = log|Sigma_hat(p)| + p*k^2*log(T)/T
-
-AIC tends to overfit; BIC tends to select more parsimonious models.
-
-**Stability condition**: The VAR(p) is stable if all eigenvalues of the k*p by k*p companion matrix have modulus less than 1. The companion form stacks the system into a VAR(1):
-
-`Z_t = C + A * Z_{t-1} + U_t`
-
-where `Z_t = (Y_t', Y_{t-1}', ..., Y_{t-p+1}')'` and `A` is the companion matrix.
-
-**Impulse response functions**: The VAR can be written as an infinite vector MA: `Y_t = mu + sum_{i=0}^{inf} Phi_i u_{t-i}`, where `Phi_i` are the MA coefficient matrices. Element `(j,k)` of `Phi_i` gives the response of variable j at horizon i to a unit shock in variable k. Since innovations may be contemporaneously correlated, structural identification (e.g., Cholesky decomposition of `Sigma_u`) is used to orthogonalize shocks.
-
-**Granger causality**: Variable X Granger-causes variable Y if lagged values of X significantly improve the prediction of Y, conditional on Y's own lags. Tested via an F-test (or Wald test) comparing the unrestricted VAR with a restricted version excluding the lags of X in the Y equation.
-
-**Forecast error variance decomposition**: Decomposes the h-step forecast error variance of each variable into contributions from orthogonalized shocks: `FEVD_j,k(h) = sum_{i=0}^{h-1} (e_j' Phi_i P e_k)^2 / sum_{i=0}^{h-1} e_j' Phi_i Sigma_u Phi_i' e_j`, where `P` is the Cholesky factor of `Sigma_u`.
-
-## Interpretation
-
-Every VAR run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
-
-**Plain-Language Finding (Tier 1)** - 2-4 sentences. Leads with the system stability verdict (max companion-matrix root modulus relative to 1), names the lag order and variable count, and cites the single strongest within-system Granger relationship. Closes with a forecast-horizon note keyed to stability: stable systems support standard-horizon forecasts; near-unstable ones widen sharply with horizon.
-
-**Technical Interpretation (Tier 2)** - the companion-matrix max root modulus with its stability classification, the Granger-within-VAR test verdict on the strongest pair, and a pointer to the IRF/FEVD data tables.
-
-**Caveats (Tier 3, conditional)**:
-- **Near-unstable** - max root modulus >= 0.95; long-horizon forecasts widen and a VECM refit may be appropriate.
-- **Borderline Granger p** - strongest p in (0.04, 0.06).
-- **FEVD dominance** - any target variable's variance is >80% explained by one source at horizon >= 4.
-
-The wrapper surfaces `max_root_modulus` in audit_fields (computed from `fit.roots`) so the spec can route on stability without redoing the companion-matrix math.
+## Technical Detail
+Reduced-form estimation is OLS per equation (statsmodels `VAR`), with lag length chosen by the selected information criterion (`VAR(data).fit(maxlags=…, trend='c')`). The structural identification scheme is selectable: `cholesky` (the default, a recursive ordering — byte-identical to the model's prior behavior), `blanchard_quah` (long-run restrictions), or `sign_restriction` (set-identified by sign constraints, which exposes its own draw-count control). A proxy/instrument scheme exists in the engine but is not reachable from this dialog — it needs an external instrument input. Two cautions: under Cholesky the identification depends on the input series order, so order them from most to least exogenous; and the impulse-response confidence bands are a Monte-Carlo bootstrap distribution (5th/95th percentiles over 500 replications at Balanced) that holds the covariance matrix at its point estimate, so they reflect coefficient uncertainty only, not a fully calibrated predictive band. When a non-Cholesky scheme is selected, read the labeled structural-IRF tables — the generic methodology line still references Cholesky.
+*Reference run:* treasury_yields.csv (2Y/5Y/10Y/30Y, 6,146 obs), Cholesky scheme, Balanced, seed 42 — VAR(5) by AIC, AIC −29.00 / BIC −28.91, largest companion root 0.9991 (near-unit-root, expected for yields), 12-step forecast and 20-period IRF with 500-replication bands; Granger 30Y → 2Y significant (F 3.40, p 0.004).

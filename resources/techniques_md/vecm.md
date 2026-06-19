@@ -1,79 +1,19 @@
-# Vector Error Correction Model (VECM)
-
 ## What It Does
-
-VECM (Vector Error Correction Model) extends the VAR framework for systems of non-stationary time series that share long-run equilibrium relationships (cointegration). While a VAR in differences would lose information about these long-run relationships, the VECM preserves them by including error correction terms that pull the variables back toward their equilibrium when they deviate.
+A Vector Error Correction Model is a VAR for series that are individually non-stationary but share one or more long-run equilibrium relationships (cointegration). It separates the long-run structure — the equilibrium relationships (β) and the speed each series adjusts back toward them (α) — from the short-run dynamics. For yields, this captures that maturities wander individually but the curve's spreads are mean-reverting. Outputs are the cointegrating vectors, adjustment speeds, forecasts, impulse responses, and variance decompositions.
 
 ## When to Use It
+- Your series are non-stationary in levels but move together in the long run (cointegrated) — typical of a yield curve or a set of arbitrage-linked prices.
+- You want the long-run equilibrium relationships and how fast deviations correct.
+- You've run a cointegration test (`johansen_cointegration`) and found rank at least 1.
+- Use VECM over differencing-then-VAR when you care about the level relationships; use plain `var` when the series are not cointegrated.
 
-- Multiple time series are individually non-stationary (I(1)) but move together in the long run
-- Economic theory suggests a long-run equilibrium between variables (e.g., prices and wages, exchange rates and price levels)
-- The Johansen test has identified one or more cointegrating relationships
-- You want both short-term dynamics and long-run equilibrium behavior in a single model
-- Forecasting non-stationary systems where differencing would discard useful long-run information
+## How to Read the Result
+The cointegrating rank is how many long-run relationships exist (selected here by the trace test: rank 2). Each cointegrating vector β is reported Phillips-normalized — its pivot entry set to 1 — so the entries read as equilibrium spread coefficients; on the reference, V1 is `[1, 0, −4.15, 3.33]` across the four maturities. The adjustment coefficient α measures correction speed: near zero (here α on 2Y is about −0.0041) means very slow reversion, giving a long half-life (170 periods here). A half-life reported as undefined means the estimated adjustment fell outside the stable correction range and the closed-form half-life does not apply. The trace statistic against its critical value (70.68 vs 47.85 at 5%) is the evidence for the chosen rank.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* nothing required — VECM is usually the destination after a cointegration finding.
+- *(alternatives)* `johansen_cointegration` to determine the rank first; `var` on differences when the series are not cointegrated; `bvar` for a shrinkage approach to the same system.
 
-- All variables are integrated of the same order, typically I(1)
-- There exists at least one cointegrating relationship (otherwise, use a VAR in differences)
-- The number of cointegrating vectors is correctly specified
-- The error correction mechanism is linear and symmetric
-- No structural breaks in the cointegrating relationship
-
-## Outputs
-
-- **Cointegrating vectors**: the long-run equilibrium relationships between variables
-- **Adjustment (loading) coefficients**: how quickly each variable adjusts back to equilibrium
-- **Short-run dynamics**: coefficients on lagged differences showing transient effects
-- **Forecasts** that respect the long-run equilibrium
-- **Impulse response functions** and variance decompositions
-
-## Technical Details
-
-**From VAR to VECM**: Starting from a VAR(p) in levels `Y_t = A_1 Y_{t-1} + ... + A_p Y_{t-p} + u_t`, the VECM representation is:
-
-`Delta Y_t = Pi * Y_{t-1} + Gamma_1 * Delta Y_{t-1} + ... + Gamma_{p-1} * Delta Y_{t-p+1} + u_t`
-
-where:
-- `Pi = A_1 + A_2 + ... + A_p - I_k` is the long-run impact matrix
-- `Gamma_i = -(A_{i+1} + A_{i+2} + ... + A_p)` capture short-run dynamics
-
-**Cointegration and rank of Pi**: The key insight is the rank of the matrix `Pi`:
-- If rank(Pi) = 0: no cointegration, use VAR in differences.
-- If rank(Pi) = k (full rank): variables are stationary, use VAR in levels.
-- If rank(Pi) = r where 0 < r < k: there are r cointegrating relationships.
-
-When rank(Pi) = r, we can decompose: `Pi = alpha * beta'`, where:
-- `beta` is a k-by-r matrix whose columns are the cointegrating vectors (long-run equilibrium relationships)
-- `alpha` is a k-by-r matrix of adjustment (loading) coefficients
-
-The term `beta' Y_{t-1}` measures the deviation from the r equilibria, and `alpha` determines how each variable responds to those deviations.
-
-**Estimation (Johansen's method)**:
-
-1. Regress `Delta Y_t` on `Delta Y_{t-1}, ..., Delta Y_{t-p+1}` and collect residuals `R_0t`.
-2. Regress `Y_{t-1}` on `Delta Y_{t-1}, ..., Delta Y_{t-p+1}` and collect residuals `R_1t`.
-3. Form the sample covariance matrices `S_{ij} = (1/T) sum R_{it} R_{jt}'`.
-4. Solve the generalized eigenvalue problem `|lambda S_{11} - S_{10} S_{00}^{-1} S_{01}| = 0` to get ordered eigenvalues `lambda_1 >= ... >= lambda_k`.
-5. The eigenvectors associated with the r largest eigenvalues form `beta_hat`.
-6. `alpha_hat = S_{01} beta_hat`.
-
-**Testing the cointegrating rank**: The trace test statistic is `trace(r) = -T * sum_{i=r+1}^{k} log(1 - lambda_i)`, tested against critical values. The maximum eigenvalue test uses `lambda_max(r) = -T * log(1 - lambda_{r+1})`.
-
-**Forecasting**: VECM forecasts are generated recursively, and the error correction term keeps forecasts from diverging from the long-run equilibrium. This makes VECM forecasts especially valuable at longer horizons where the equilibrium relationship dominates.
-
-## Interpretation
-
-Every VECM run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
-
-**Plain-Language Finding (Tier 1)** - 2-4 sentences, no Greek letters outside citation form. Reports whether the series form a cointegrating relationship and, when they do, names the Phillips-normalized spread (X - c*Y) and the adjustment half-life. States the practical implication - the spread is a valid stationary state variable - without prescribing a specific modeling framework.
-
-**Technical Interpretation (Tier 2)** - Johansen trace test at each rank with critical values, Phillips-normalized cointegrating vector (beta with first coefficient 1), and error-correction coefficient alpha_1 with the derived half-life.
-
-**Caveats (Tier 3, conditional)**:
-- **Fast half-life** (< 5 periods) - may reflect noise rather than a durable equilibrium.
-- **Slow half-life** (> 100 periods) - the long-run equilibrium may be weakly identified.
-- **Borderline trace statistic** (within 10% of CV) - rank verdict is marginal.
-- **Near-unit alpha** - first series barely adjusts; cointegration is weakly identified.
-
-The wrapper surfaces `beta_normalized`, `alpha_normalized`, `half_life_periods`, `trace_stat`, and `trace_cv_5pct` in audit_fields so the spec consumes facts already computed.
+## Technical Detail
+Estimation is statsmodels `VECM` with the cointegrating rank and lag order selectable or auto-selected (`VECM(data, k_ar_diff=…, coint_rank=…, deterministic='ci').fit()`); blank rank auto-selects by the trace test and blank lags by information criterion. β and α are Phillips-normalized (the product `α·β'` is scale-invariant, so normalization only pins the reporting scale). Impulse responses are Cholesky-orthogonalized; the variance decomposition is built in-house (statsmodels provides no `VECM.fevd()`) using the same cumulative squared orthogonalized-MA formula as the VAR. The half-life is returned only when the adjustment coefficient lies strictly in (−1, 0); outside that range the closed form is undefined and the field is left empty rather than reporting a spurious value.
+*Reference run:* treasury_yields.csv (2Y/5Y/10Y/30Y, 6,146 obs), rank and lags auto-selected, deterministic 'ci', Balanced — rank 2, 4 lagged differences; β V1 `[1, 0, −4.15, 3.33]` (Phillips-normalized), α (2Y, eq 1) −0.0041, half-life 170.1 periods, trace statistic 70.68 vs 47.85 critical value (5%).
