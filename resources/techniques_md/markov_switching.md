@@ -1,75 +1,19 @@
-# Markov Switching Model
-
 ## What It Does
-
-A Markov switching model allows the parameters of a time series model to change depending on an unobserved **regime** or state. The transitions between regimes follow a Markov chain, meaning the probability of being in a given regime depends only on the previous regime. This captures structural changes in the data such as business cycle expansions and recessions, bull and bear markets, or shifts between high and low volatility periods.
+A Markov-Switching model is a regime-switching regression or autoregression: like a hidden Markov model the regime is unobserved and follows a Markov chain, but each regime carries its own *regression or AR coefficients* (and optionally its own variance), not just a mean. It captures a series whose dynamics — not merely its average level — change with the regime. Outputs are the smoothed probability of each regime at each point, the transition matrix, expected regime durations, and a regime-aware forecast.
 
 ## When to Use It
+- You want regime-dependent *dynamics* (AR coefficients, regression slopes), not just a regime-dependent mean and variance.
+- You want smoothed regime probabilities (the probability the system was in each regime at each date) and expected regime durations.
+- You're modeling a series whose persistence or response structure shifts between states (expansion versus recession dynamics).
+- Use it over `hmm` when the regimes differ in their dynamics; use `hmm` for a lighter mean/variance segmentation; use `tar_setar` / `star` when the regime is driven by an observed variable.
 
-- Your data appears to switch between distinct behavioral patterns (e.g., growth vs. contraction)
-- You want to model business cycles with different mean growth rates across regimes
-- Financial returns exhibit periods of high and low volatility
-- The data shows occasional abrupt shifts in level, trend, or variance
-- You want to estimate the probability of being in each regime at each point in time
+## How to Read the Result
+Each regime's mean and the expected durations characterize the states: on the SP500 reference a two-regime AR(1) model finds Regime 0 (positive mean +0.122, 1,777 observations) expected to last about 49 days and Regime 1 (negative mean −0.131, 734 observations) about 21 days — a long calm regime punctuated by shorter stress spells. The smoothed probabilities show when each regime was active. The decisive check is the benchmark comparison: the engine reports the RMSE improvement over a plain AR of the same order — here only +0.86%, meaning the regime structure barely earns its added complexity on this data. As with any EM fit, confirm convergence and that restarts agreed, and read regimes by their means (labels are arbitrary and relabeled). Note that the multi-step forecast is formed by iterating a regime-probability-weighted prediction and becomes less reliable at long horizons.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* compare against `hmm` (does the extra dynamic structure change the segmentation?) and a plain AR (the RMSE-lift check).
+- *(alternatives)* `hmm` for hidden-state mean/variance segmentation; `tar_setar` / `star` for observed-threshold regimes; a single AR when the RMSE-lift is negligible.
 
-- The number of regimes is known and fixed (usually 2 or 3)
-- Regime transitions follow a first-order Markov chain (history beyond the previous state does not matter)
-- Within each regime, the model parameters are constant
-- The model specification (e.g., AR, regression) is the same across regimes (only parameter values change)
-- The regimes represent genuinely distinct states, not gradual transitions
-
-## Outputs
-
-- **Regime-specific parameters**: separate intercepts, coefficients, and/or variances for each regime
-- **Smoothed regime probabilities**: the probability of being in each regime at each time point, using all data
-- **Filtered regime probabilities**: real-time regime probabilities using data up to each time point
-- **Transition probability matrix**: the probability of switching from one regime to another
-- **Expected regime durations**: the average time spent in each regime before switching
-
-## Technical Details
-
-**Model specification**: For a Markov switching autoregression with k regimes and an AR(p) process:
-
-`Y_t = c(S_t) + phi_1(S_t) Y_{t-1} + ... + phi_p(S_t) Y_{t-p} + sigma(S_t) e_t`
-
-where `S_t in {1, 2, ..., k}` is the unobserved regime at time t and `e_t ~ N(0, 1)`.
-
-**Transition probabilities**: `P(S_t = j | S_{t-1} = i) = p_{ij}`, collected in the k-by-k transition matrix P where rows sum to 1.
-
-**Expected duration**: The expected duration of regime i is `1 / (1 - p_{ii})`.
-
-**Hamilton filter** (forward recursion for filtered probabilities):
-
-1. **Prediction**: `P(S_t = j | Y_{t-1}, ..., Y_1) = sum_i P(S_t = j | S_{t-1} = i) * P(S_{t-1} = i | Y_{t-1}, ..., Y_1)`
-
-2. **Likelihood for each regime**: `f(Y_t | S_t = j, Y_{t-1}, ...) = N(Y_t; mu_j, sigma_j^2)`, where `mu_j` is the conditional mean under regime j.
-
-3. **Update**: `P(S_t = j | Y_t, ..., Y_1) = f(Y_t | S_t = j) * P(S_t = j | Y_{t-1}) / f(Y_t | Y_{t-1})`, where the denominator is the mixture likelihood `f(Y_t | Y_{t-1}) = sum_j f(Y_t | S_t = j) * P(S_t = j | Y_{t-1})`.
-
-**Kim smoother** (backward recursion for smoothed probabilities):
-
-`P(S_t = i | Y_T, ..., Y_1) = P(S_t = i | Y_t, ..., Y_1) * sum_j [p_{ij} * P(S_{t+1} = j | Y_T) / P(S_{t+1} = j | Y_t)]`
-
-**Estimation**: Parameters (regime-specific coefficients and transition probabilities) are estimated via MLE using the EM algorithm:
-
-- **E-step**: Run the Hamilton filter and Kim smoother to compute smoothed regime probabilities and joint probabilities `P(S_t = j, S_{t-1} = i | Y_T)`.
-- **M-step**: Update transition probabilities: `p_hat_{ij} = sum_t P(S_t = j, S_{t-1} = i | Y_T) / sum_t P(S_{t-1} = i | Y_T)`. Update regime-specific parameters using weighted regressions with smoothed probabilities as weights.
-
-**Log-likelihood**: `log L = sum_t log f(Y_t | Y_{t-1})`, summing the log of the mixture likelihood at each step. The number of regimes is selected by BIC or likelihood ratio tests (with non-standard distributions due to unidentified parameters under the null).
-
-## Interpretation
-
-Every Markov-switching run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
-
-**Plain-Language Finding (Tier 1)** - 2-4 sentences. Names the regime count, the regime labels after mean-sorting (low-mean / high-mean for k=2; lowest-mean / mid-mean / highest-mean for k>=3), the current-state label, and the smoothed probability. Closes with a structure-implication sentence rather than a forecasting directive.
-
-**Technical Interpretation (Tier 2)** - per-regime (mu, sigma) citations, smoothed-probability current-state placement, pointer to the transition-matrix and expected-duration tables.
-
-**Caveats (Tier 3, conditional)**:
-- **Weakly separated regimes** - any pair's |mu_i - mu_j| < common sigma; regimes may be empirically indistinguishable.
-- **Near-absorbing state** - expected duration > 50 periods; forecasts can treat as effectively permanent.
-- **Ambiguous current state** - final-period max smoothed probability < 0.6; forecasts should weight multiple regimes.
-
-Mean-axis labeling is locked to the wrapper's current sort convention. A future variance-sort wrapper extension will add variance-regime descriptions to the spec.
+## Technical Detail
+Estimation is statsmodels `MarkovRegression` (order 0) or `MarkovAutoregression` (order 1 or higher), fit with multiple search repetitions, with regimes deterministically relabeled to defeat label-switching. Because statsmodels does not implement forecasting for these models, the multi-step forecast is built in-house by iterating a regime-probability-weighted one-step prediction, with its interval assumptions disclosed in the audit. The engine also computes the RMSE improvement over an AR benchmark of the same order. You set the number of regimes, the AR order, and whether the variance switches; the forecast horizon and the switching-trend option default internally.
+*Reference run:* sp500_returns.csv (2,512 daily log-return %), 2 regimes, order 1, Balanced, seed 42 — Regime 0 mean +0.122 (1,777 observations), Regime 1 mean −0.131 (734 observations); log-likelihood −3283.74, AIC 6583.5, expected durations 49.1 and 20.6 days; RMSE improvement over AR(1) +0.86%.

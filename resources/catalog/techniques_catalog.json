@@ -2162,7 +2162,7 @@
           "default": 2,
           "required": false,
           "advanced": false,
-          "description": "Number of hidden regimes",
+          "description": "Number of regimes. Default 2; each regime carries its own regression/AR coefficients.",
           "options": null
         },
         {
@@ -2172,7 +2172,7 @@
           "default": 1,
           "required": false,
           "advanced": false,
-          "description": "Autoregressive order within each regime",
+          "description": "Autoregressive order within each regime. Default 1; 0 makes it a switching-mean regression rather than a switching AR.",
           "options": null
         },
         {
@@ -2182,7 +2182,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "Allow variance to switch between regimes",
+          "description": "Whether the residual variance also switches by regime. Default on; turn off to hold variance constant across regimes.",
           "options": null
         }
       ],
@@ -2219,7 +2219,7 @@
           "default": 2,
           "required": false,
           "advanced": false,
-          "description": "Number of hidden states",
+          "description": "Number of hidden states (regimes) to discover. Default 2 (e.g. calm vs stress); more states segment the series more finely but need more data.",
           "options": null
         },
         {
@@ -2229,7 +2229,7 @@
           "default": "full",
           "required": false,
           "advanced": true,
-          "description": "Covariance matrix type",
+          "description": "Form of each state's covariance. Default full; options trade flexibility against parameter count (full, diag, tied, spherical).",
           "options": [
             "full",
             "diag",
@@ -2281,7 +2281,7 @@
           "default": 2,
           "required": false,
           "advanced": false,
-          "description": "Number of threshold regimes",
+          "description": "Number of threshold regimes. Default 2; each regime gets its own AR model, switching at the estimated threshold(s).",
           "options": null
         },
         {
@@ -2291,7 +2291,7 @@
           "default": 1,
           "required": false,
           "advanced": true,
-          "description": "Threshold delay parameter",
+          "description": "Which lag of the series triggers the regime switch. Default 1 (the switch keys off the value one period back).",
           "options": null
         }
       ],
@@ -2330,7 +2330,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Autoregressive order (>= 1). Blank auto-selects from the preset and series length.",
+          "description": "Autoregressive order in each regime. Blank auto-selects from the data; set an integer to fix it.",
           "options": null
         },
         {
@@ -2340,7 +2340,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Transition function: LSTAR (logistic), ESTAR (exponential), or both (fit both, pick best by IC). Blank uses the preset default.",
+          "description": "Transition shape. Default selects by preset; LSTAR (logistic — directional, monotone), ESTAR (exponential — symmetric), or both (fit each, keep the better AIC).",
           "options": [
             "LSTAR",
             "ESTAR",
@@ -2354,7 +2354,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Lag of the transition variable (>= 1). Blank uses 1.",
+          "description": "Which lag is the transition variable. Default 1.",
           "options": null
         },
         {
@@ -2364,7 +2364,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Forecast horizon (>= 1). Blank uses 10.",
+          "description": "Forecast horizon in periods. Default 10.",
           "options": null
         }
       ],
@@ -2421,7 +2421,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 10.",
           "options": null
         }
       ],

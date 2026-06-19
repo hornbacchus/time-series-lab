@@ -1,80 +1,19 @@
-# NAR / NARX Models
-
 ## What It Does
-
-NAR (Nonlinear AutoRegressive) and NARX (Nonlinear AutoRegressive with eXogenous inputs) models use neural networks or other nonlinear function approximators to capture complex, nonlinear relationships between a time series and its own lagged values (NAR) or additional input variables (NARX). They provide a flexible, data-driven approach to nonlinear time series modeling when parametric nonlinear models like STAR or TAR are too restrictive.
+NAR (Nonlinear AutoRegression) and its exogenous-input variant NARX forecast a series with a neural network — a multilayer perceptron — that learns nonlinear dependence on the series' own lags (and, for NARX, on lagged external inputs). It captures nonlinear patterns a linear AR would miss. Outputs are forecasts with bootstrap intervals, a cross-validated RMSE, and a permutation-based ranking of which lags matter most.
 
 ## When to Use It
+- You suspect nonlinear lag dependence that a linear AR or ARIMA cannot capture.
+- You want a flexible nonlinear forecaster and are willing to validate it carefully (neural nets overfit easily).
+- For NARX, you have exogenous drivers whose lagged values should inform the forecast.
+- Use it when nonlinearity is the point and you have enough data; prefer a linear AR/ARIMA when the relationship is approximately linear or data is scarce (the network will overfit).
 
-- The relationship between the series and its lags is complex and nonlinear in ways not captured by STAR/TAR/threshold models
-- You have external variables with nonlinear effects on the target series
-- You want to leverage neural network flexibility while maintaining the time series regression structure
-- The data is abundant enough to train a nonlinear model without severe overfitting
-- You need a nonlinear forecasting model that can incorporate exogenous inputs
+## How to Read the Result
+The honest headline is the cross-validated RMSE, not the in-sample fit. On the SP500 reference the in-sample RMSE is 1.069 (R² 0.124) but the cross-validated RMSE is higher at 1.260 — the gap is the overfit the cross-validation correctly exposes, and the CV number is the one to trust. The permutation importance ranks the lags (lag-1 dominates here). The most important thing to understand about validation: **there is no external gold-standard package to check this implementation against.** Unlike ARIMA (validated against statsmodels) or HMM (against hmmlearn), this engine *is* the reference implementation for NAR/NARX — its results are validated by cross-validated error and a linear-AR baseline, *not* by cross-package agreement. Results are made reproducible by seeding: two runs with the same seed produce bit-identical outputs (verified — only the wall-clock timestamp differs). Read the model as a carefully-reproducible nonlinear forecaster, not an externally-certified one.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* benchmark against a linear `arima` or AR to confirm the nonlinearity earns its complexity.
+- *(alternatives)* the classical forecasters (`arima`, `theta_forecast`) when the relationship is near-linear; other ML forecasters for a different nonlinear family.
 
-- The current value depends on a finite number of lagged values and/or exogenous inputs
-- The functional relationship, while nonlinear, is smooth enough to be learned from data
-- Enough training data is available to estimate the nonlinear function without overfitting
-- The input-output relationship is time-invariant (or changes slowly enough to be captured)
-- The noise is additive and independent of the inputs
-
-## Outputs
-
-- **Nonlinear fitted values**: the model's estimate of the series at each time point
-- **Multi-step forecasts** (recursive or direct)
-- **Variable importance**: relative contribution of each lagged input
-- **Residual diagnostics**: checking for remaining nonlinearity and autocorrelation
-- **Network architecture details**: hidden layer sizes, activation functions, weights
-
-## Technical Details
-
-**NAR model**:
-`Y_t = f(Y_{t-1}, Y_{t-2}, ..., Y_{t-p}) + e_t`
-
-where `f` is a nonlinear function (typically a feedforward neural network) and `e_t` is white noise.
-
-**NARX model**:
-`Y_t = f(Y_{t-1}, ..., Y_{t-p}, X_{t-1}, ..., X_{t-q}) + e_t`
-
-where `X_t` is a vector of exogenous inputs with lags up to q.
-
-**Neural network implementation**: A single-hidden-layer feedforward network:
-
-`f(z) = beta_0 + sum_{j=1}^{H} beta_j * g(alpha_{0j} + sum_i alpha_{ij} z_i)`
-
-where `z = (Y_{t-1}, ..., Y_{t-p}, X_{t-1}, ..., X_{t-q})`, `g` is an activation function (sigmoid, tanh, or ReLU), H is the number of hidden neurons, `alpha` are input-to-hidden weights, and `beta` are hidden-to-output weights.
-
-**Universal approximation**: A single hidden layer with enough neurons can approximate any continuous function to arbitrary accuracy (Cybenko's theorem). In practice, the number of hidden neurons H is chosen via cross-validation, typically between 3 and 20.
-
-**Training**:
-1. **Lag selection**: Choose p (and q for NARX) using AIC, BIC, or cross-validation. Mutual information or partial autocorrelation can guide initial choices.
-2. **Network architecture**: Select H. Too few neurons underfits; too many overfits.
-3. **Optimization**: Minimize the sum of squared errors using backpropagation with gradient descent variants (Adam, L-BFGS). Multiple random initializations are used to avoid local minima.
-4. **Regularization**: Weight decay (L2 penalty), early stopping based on validation error, or dropout to prevent overfitting. Bayesian regularization (evidence framework) automatically determines the effective complexity.
-
-**Forecasting strategies**:
-- **Recursive (iterated)**: Feed predicted values back as inputs for multi-step forecasts. Error accumulates.
-- **Direct**: Train separate models for each forecast horizon h. Avoids error accumulation but requires more models.
-- **MIMO (Multi-Input Multi-Output)**: A single model outputs all horizons simultaneously.
-
-**Testing for nonlinearity**: Before fitting NAR/NARX, test whether nonlinearity is needed:
-- **BDS test**: Tests for residual nonlinear dependence after fitting a linear AR model.
-- **Terasvirta neural network test**: Tests whether adding hidden-layer terms significantly improves fit over the linear model.
-- **White's test**: Uses neural network auxiliary regressions.
-
-**Comparison with linear models**: NAR/NARX should outperform linear ARIMA when genuine nonlinearity exists. If the true process is linear, the extra flexibility can lead to worse forecasts due to overfitting. Always compare against linear benchmarks using out-of-sample evaluation.
-
-
-## Interpretation
-
-Every NAR/NARX run emits a two-tier Interpretation block. Stands alone per D5 framing: "Feedforward neural forecaster (MLP with AR lags)".
-
-**Tier 1** - distinct framing that emphasizes the feedforward-MLP nature (NOT a temporal architecture). Cites architecture, AR lags, exogenous regressors (NARX mode), total parameters, training iterations, and permutation-based top-5 features.
-
-**Tier 2** - explains sklearn MLPRegressor + AR-lag feature construction. Uniquely among C7 neural specs, exposes permutation-based feature importance (LSTM/GRU/TCN/Transformer have none at the wrapper level).
-
-**Caveats (Tier 3, conditional)**:
-- Low R-squared < 0.4 - consider exogenous regressors (NARX), longer AR lags, or a temporal architecture.
-- Effective training samples < 100.
+## Technical Detail
+The model is a multilayer-perceptron regressor (scikit-learn `MLPRegressor`, not a deep-learning/torch model) fit on standardized autoregressive-lag features, with early stopping; cross-validation uses a time-series split, multi-step forecasts iterate the one-step model (carrying exogenous values forward for NARX), prediction intervals come from a 200-replication bootstrap, and feature importance is by permutation. The number of lags, the hidden-layer architecture, and the training settings default by preset. Validation is cross-validated RMSE against a linear-AR baseline — there is no independent reference implementation to cross-check against, so results are seed-pinned for reproducibility and table outputs carry a 6-decimal rounding floor.
+*Reference run:* sp500_returns.csv (2,512 daily log-return %), NAR, 5 lags, a (20, 10) hidden architecture, Balanced, seed 42 — in-sample RMSE 1.069 (R² 0.124), cross-validated RMSE 1.260 (the gap the CV catches as mild overfit), top feature lag-1, 341 parameters; two same-seed runs verified bit-identical (only the timestamp differs).

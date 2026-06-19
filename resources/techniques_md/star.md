@@ -1,80 +1,19 @@
-# STAR Models (Smooth Transition AR)
-
 ## What It Does
-
-Smooth Transition Autoregressive (STAR) models generalize the abrupt regime switches of SETAR models by allowing **gradual transitions** between regimes. Instead of jumping between two sets of parameters at a sharp threshold, the model smoothly blends them using a logistic or exponential transition function. This is more realistic for many economic and financial processes where regime changes occur progressively.
+A Smooth Transition Autoregression (STAR) blends two AR regimes *continuously* through a transition function rather than switching abruptly at a threshold. As a transition variable (a lagged value) moves, the model shifts gradually from one regime's dynamics to the other's — logistic (LSTAR) for a directional, monotone transition, or exponential (ESTAR) for a symmetric one. Outputs are the AR coefficients of each regime, the transition location `c`, the transition smoothness `γ` (gamma), and forecasts.
 
 ## When to Use It
+- You believe the regime change is gradual rather than a hard switch (a smooth blend between dynamics).
+- You want a directional transition (LSTAR — behaves differently as the variable rises versus falls) or a symmetric one (ESTAR — behaves differently in the middle versus the extremes).
+- You want a continuous nonlinear model that nests a linear AR as a limiting case.
+- Use STAR for smooth transitions; use `tar_setar` for a hard threshold; use `markov_switching` / `hmm` when the regime is hidden rather than a function of an observed variable.
 
-- Your data transitions gradually between different dynamic behaviors rather than switching abruptly
-- Business cycle dynamics shift smoothly between expansion and contraction modes
-- You want a nonlinear model that nests the linear AR as a special case (for testing)
-- SETAR seems too restrictive with its sharp threshold, but you still want interpretable regime-dependent dynamics
-- You need to model asymmetric adjustment where the speed of transition varies
+## How to Read the Result
+Read the transition location `c` (where the regime switch is centered) and the per-regime AR coefficients (the two sets of dynamics being blended) — these are the interpretable, well-identified quantities. **Do not over-interpret the transition smoothness `γ`.** In STAR models `γ` is *weakly identified*: the likelihood is nearly flat in `γ` over a wide range, so its point estimate is unstable and the engine does not report a standard error or confidence interval for it. This is a known statistical property of STAR models, not a defect. On the SP500 reference the instability is visible directly — changing the AR order from 2 to 4 swings `γ` from 0.061 to 0.097 and the transition location `c` from −0.53 to +2.74, for a trivial 2.7-point change in AIC; both fits describe a `γ` so small the transition is nearly linear (the two regimes are barely distinguishable on this data). Treat a fitted `γ` as indicative of *whether* the transition is sharp or gradual, never as a precise number.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* compare against `tar_setar` (is a hard threshold a better description?) and a linear AR (when `γ` is near zero, the regimes barely differ).
+- *(alternatives)* `tar_setar` (hard transition); `markov_switching` / `hmm` (hidden regimes); a plain AR when the transition is negligible.
 
-- Two regimes with a smooth transition between them (extensions to multiple regimes exist)
-- The transition variable is observable (typically a lagged value of the series)
-- The transition function is monotonic (LSTAR) or symmetric (ESTAR) and correctly specified
-- The model is stationary and ergodic
-- Enough data to estimate the transition function parameters (typically 100+ observations)
-
-## Outputs
-
-- **Regime-specific AR coefficients**: parameters for the two extreme regimes
-- **Transition function parameters**: the threshold location (c) and smoothness (gamma)
-- **Transition function values**: showing how smoothly the model moves between regimes over time
-- **Linearity test results**: whether the nonlinear STAR model significantly improves over a linear AR
-- **Fitted values and forecasts** with the nonlinear dynamics
-
-## Technical Details
-
-**General STAR model**:
-
-`Y_t = (c_1 + phi_{1,1} Y_{t-1} + ... + phi_{1,p} Y_{t-p})(1 - G(s_t; gamma, c)) + (c_2 + phi_{2,1} Y_{t-1} + ... + phi_{2,p} Y_{t-p}) G(s_t; gamma, c) + e_t`
-
-Or more compactly: `Y_t = x_t' Phi_1 (1 - G_t) + x_t' Phi_2 G_t + e_t`, where `x_t = (1, Y_{t-1}, ..., Y_{t-p})'` and `G_t = G(s_t; gamma, c)` is the transition function with transition variable `s_t` (typically `Y_{t-d}`).
-
-**LSTAR (Logistic STAR)**:
-`G(s_t; gamma, c) = 1 / (1 + exp(-gamma (s_t - c)))`, gamma > 0
-
-- When gamma -> 0: G -> 0.5, the model becomes linear (average of both regimes).
-- When gamma -> infinity: G approaches a step function (SETAR).
-- The transition is asymmetric: different behavior above and below c.
-
-**ESTAR (Exponential STAR)**:
-`G(s_t; gamma, c) = 1 - exp(-gamma (s_t - c)^2)`, gamma > 0
-
-- G = 0 when s_t = c (the inner regime).
-- G -> 1 as s_t moves away from c in either direction (the outer regime).
-- Symmetric around c: useful for modeling mean-reverting deviations.
-
-**Linearity testing** (Luukkonen-Saikkonen-Terasvirta test):
-
-Since gamma = 0 makes the model linear but also makes c unidentified (nuisance parameter problem), a Taylor expansion of G around gamma = 0 is used. The auxiliary regression:
-
-`Y_t = beta_0 x_t + beta_1 x_t s_t + beta_2 x_t s_t^2 + beta_3 x_t s_t^3 + u_t`
-
-Test H0: beta_1 = beta_2 = beta_3 = 0 using an F-test or LM test. Rejection indicates nonlinearity. Sequential testing of the beta terms helps choose between LSTAR and ESTAR.
-
-**Estimation**: Nonlinear least squares (NLS) or MLE. The procedure is:
-
-1. Select the transition variable and delay via linearity tests for each candidate.
-2. Obtain starting values: grid search over c (within the range of s_t) and gamma.
-3. Estimate all parameters jointly by NLS, minimizing `sum e_t^2`.
-
-**Identification issue**: gamma and c can be poorly identified when gamma is very large (near SETAR) or very small (near linear). Rescaling gamma by the standard deviation of s_t helps: `gamma* = gamma / std(s_t)`.
-
-**Forecasting**: Multi-step forecasts require simulating forward, since `E[G(Y_{t+h-d})]` does not equal `G(E[Y_{t+h-d}])`. Monte Carlo simulation or skeleton (deterministic) forecasts are used.
-
-## Interpretation
-
-**Plain-Language Finding (Tier 1)** - LSTAR or ESTAR model with transition variable, smoothness gamma with speed descriptor (gradual/moderate/fast/discrete), centering c, current regime-indicator value.
-
-**Technical Interpretation (Tier 2)** - transition function math, per-regime AR coefficients in citation form (lower regime AR(1)=..., upper regime AR(1)=...), AIC comparison against linear AR baseline.
-
-**Caveats (Tier 3, conditional)**:
-- Very gradual transition (gamma < 0.5) - may not need two regimes.
-- Effectively discrete (gamma > 100) - TAR suffices with fewer parameters.
-- AIC improvement < 2 vs linear AR - STAR adds little.
+## Technical Detail
+Estimation is nonlinear least squares (`scipy.optimize.minimize`, L-BFGS-B) minimizing the residual sum of squares, with the transition function `G(s) = 1 / (1 + exp(-gamma*(s - c)))` for LSTAR or `G(s) = 1 - exp(-gamma*(s - c)^2)` for ESTAR; the "both" option fits each and selects by AIC. To make the weakly-identified `γ` and location `c` as robust as the data allow, the optimizer is started from multiple points — a spread of quantiles of the transition variable for `c` plus several random starts — and the best fit by residual sum of squares is kept. The AR order defaults to a data-dependent automatic choice. No standard error or confidence interval is computed for `γ` (no Hessian is inverted), and that absence is itself the honest signal that `γ` is not point-identified.
+*Reference run:* sp500_returns.csv (2,512 daily log-return %), LSTAR, Balanced, seed 42 — across AR orders 2 and 4 the smoothness `γ` ranged 0.061 to 0.097 and the transition location `c` from −0.53 to +2.74 for an AIC change of just 432.98 to 430.28, both reporting a very gradual (nearly linear) transition — the flat-likelihood signature of weak `γ` identification.
