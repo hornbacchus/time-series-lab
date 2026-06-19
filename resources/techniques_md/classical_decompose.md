@@ -1,68 +1,19 @@
-# Classical Decomposition
-
 ## What It Does
-
-Classical decomposition separates a time series into **trend-cycle**, **seasonal**, and **irregular** (remainder) components using moving averages. It is the simplest and oldest decomposition approach, offering either an additive model (Y = T + S + R) or a multiplicative model (Y = T * S * R).
+Classical decomposition splits a time series into three components — trend, seasonal, and residual — using the ratio-to-moving-average method. It estimates the trend with a centered moving average, extracts a fixed seasonal pattern that repeats each cycle, and leaves the remainder as the residual. It is the simplest, most transparent decomposition, and a good first look at a series' structure.
 
 ## When to Use It
+- You want a quick, interpretable breakdown of a series into trend, seasonal, and residual.
+- The seasonal pattern is roughly constant over time (a fixed shape each cycle).
+- You want a transparent baseline before reaching for more flexible methods.
+- Use classical decomposition for a fixed seasonal pattern; use `stl_decompose` when the seasonality evolves or the series has outliers; use `mstl_decompose` for multiple seasonal cycles.
 
-- You need a quick, interpretable decomposition as a first look at your data
-- The seasonal pattern is stable and does not change over time
-- You want to understand the general trend direction after removing seasonality
-- Your audience prefers straightforward, easy-to-explain methods
-- You are working with data that has no extreme outliers
+## How to Read the Result
+The output is the three component series plus strength measures for the seasonal and trend components (each between 0 and 1, higher meaning that component explains more of the variation). On the airline series, an additive decomposition returns a seasonal strength of 0.76 and a trend strength of 0.97 — a strong trend with clear, moderately strong seasonality. Choose the model to match the series: additive when the seasonal swings are a roughly constant size, multiplicative when they grow with the level (as airline passengers do). Note that if you request a multiplicative model on a series with zero or negative values, the engine falls back to additive and warns, since multiplicative decomposition requires strictly positive data.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `stl_decompose` for a more flexible, outlier-robust decomposition of the same series.
+- *(alternatives)* `stl_decompose` (evolving seasonality, robust); `mstl_decompose` (multiple seasonal periods); `x13_seasonal_adjust` for official-statistics-grade seasonal adjustment.
 
-- The seasonal period is known and fixed
-- The seasonal pattern repeats identically from one cycle to the next
-- Additive model: seasonal fluctuations are constant in magnitude regardless of the level
-- Multiplicative model: seasonal fluctuations scale proportionally with the level
-- The series is long enough to estimate at least two full seasonal cycles
-
-## Outputs
-
-- **Trend-cycle component**: smoothed series showing the long-run movement
-- **Seasonal indices**: one value per position in the seasonal cycle (e.g., 12 values for monthly data)
-- **Remainder**: the residual after removing trend and seasonal effects
-- Decomposition plot with all components
-
-## Technical Details
-
-**Step 1 -- Trend estimation**: Apply a centered moving average of order `m` (the seasonal period) to the original series. If `m` is even, a 2x`m` moving average is used (i.e., a moving average of order `m` followed by a moving average of order 2) to maintain symmetry. This yields the trend-cycle estimate `T_t`.
-
-For additive decomposition:
-
-**Step 2 -- Detrend**: Compute `Y_t - T_t` for all time points where the trend is defined.
-
-**Step 3 -- Seasonal indices**: For each seasonal position `j` (e.g., January, February, ...), average the detrended values across all years: `S_j = mean(Y_t - T_t)` for all `t` corresponding to position `j`. Adjust the indices so they sum to zero: `S_j' = S_j - mean(S_1, ..., S_m)`.
-
-**Step 4 -- Remainder**: `R_t = Y_t - T_t - S_t`.
-
-For multiplicative decomposition:
-
-**Step 2**: Compute `Y_t / T_t`.
-
-**Step 3**: `S_j = mean(Y_t / T_t)` for position `j`, adjusted so indices average to 1.0: `S_j' = S_j * m / sum(S_1, ..., S_m)`.
-
-**Step 4**: `R_t = Y_t / (T_t * S_t)`.
-
-**Limitations of the classical approach**:
-- The moving average loses `floor(m/2)` observations at each end of the series, so the trend cannot be estimated for the first and last few periods.
-- Seasonal indices are fixed across the entire series, so the method cannot capture evolving seasonality.
-- The trend estimate can be distorted by outliers since the moving average assigns equal weight to all observations in the window.
-- There is no robustness mechanism; a single extreme value affects the trend and consequently the seasonal and remainder estimates.
-
-**Choosing additive vs. multiplicative**: If the magnitude of seasonal swings grows with the level of the series, use multiplicative. If seasonal swings remain constant, use additive. Alternatively, apply a log transform and use the additive model, which is equivalent to a multiplicative decomposition on the original scale.
-
-## Interpretation
-
-Every classical_decompose run emits a two-tier plain-language Interpretation block.
-
-**Plain-Language Finding (Tier 1)** - names the technique, observations, period, seasonal strength band (weak/moderate/strong/very strong), trend strength band, and the dominant component. Closes by pointing at the seasonally-adjusted values for downstream analysis.
-
-**Technical Interpretation (Tier 2)** - discloses the additive vs multiplicative model, the two-sided centered moving average at the detected period, and the ratio-to-moving-average method. Warns that classical assumes stable seasonality across the sample.
-
-**Caveats (Tier 3, conditional)**:
-- Residual ACF Ljung-Box rejects white-noise - residuals carry structure, consider STL or MSTL.
-- Multiplicative-on-nonpositive-values - wrapper auto-switched to additive.
+## Technical Detail
+Estimation is statsmodels `seasonal_decompose` (ratio-to-moving-average). The trend is a centered moving average; the seasonal component is the average detrended value for each position in the cycle, held fixed across cycles. The seasonal period is inferred from the data frequency when left blank. The trend endpoints are filled by extrapolation rather than dropped, so the trend and residual series cover the full sample. The additive/multiplicative choice is set by the model parameter, with an automatic fallback to additive (and a warning) if a multiplicative model is requested on non-positive data.
+*Reference run:* airline_passengers.csv (144 monthly observations), additive model, Balanced — period 12 inferred, seasonal strength 0.76, trend strength 0.97.

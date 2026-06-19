@@ -24,7 +24,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Seasonal period (auto-detected if null)",
+          "description": "Seasonal period (observations per cycle). Blank infers it from the data frequency.",
           "options": null
         },
         {
@@ -44,7 +44,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "Use robust fitting to reduce outlier influence",
+          "description": "Down-weight outliers so they do not distort the trend and seasonal components. Default on (the Fast preset turns it off for speed).",
           "options": null
         }
       ],
@@ -83,7 +83,7 @@
           "default": "additive",
           "required": false,
           "advanced": false,
-          "description": "Additive or multiplicative decomposition",
+          "description": "Decomposition model. Default additive (seasonal swings of constant size); multiplicative (swings grow with the level). Multiplicative needs strictly positive data — it falls back to additive on non-positive values.",
           "options": [
             "additive",
             "multiplicative"
@@ -96,7 +96,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Seasonal period (auto-detected if null)",
+          "description": "Seasonal period (observations per cycle). Blank infers it from the data frequency (12 monthly, 4 quarterly).",
           "options": null
         }
       ],
@@ -133,7 +133,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Comma-separated periods or 'auto'",
+          "description": "Seasonal period(s), comma-separated for multiple cycles (e.g. 7,365 for daily data). Blank infers them from the data frequency. A period without at least two full cycles of data is dropped.",
           "options": null
         }
       ],
@@ -183,7 +183,7 @@
           "default": 120,
           "required": false,
           "advanced": false,
-          "description": "Most recent N observations to fit on. BLS uses ~120 months (10 yrs) for payrolls. Set to 0 to use all data (capped at X-13's 85-year program limit).",
+          "description": "Number of most-recent observations to fit. Default 120 (a rolling concurrent window; older data are dropped with a warning). Set to 0 to use all available data.",
           "options": null
         },
         {
@@ -193,7 +193,7 @@
           "default": false,
           "required": false,
           "advanced": false,
-          "description": "Add a March 2020 additive outlier and an April 2020 level shift to the X-13 regARIMA specification, matching how BLS treats pandemic months in the CES payrolls series (PAYEMS/PAYNSA). Has no effect if your selected range does not span March-April 2020.",
+          "description": "Add COVID-period outlier adjustments. Default off; applies only to monthly series spanning March-April 2020.",
           "options": null
         }
       ],

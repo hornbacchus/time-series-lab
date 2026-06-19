@@ -1,61 +1,19 @@
-# STL Decomposition
-
 ## What It Does
-
-STL (Seasonal and Trend decomposition using Loess) breaks a time series into three components: **trend**, **seasonal**, and **remainder**. It uses locally weighted regression (Loess) to iteratively extract each component, making it robust to outliers and flexible enough to handle changing seasonal patterns over time.
+STL (Seasonal-Trend decomposition by Loess) splits a series into trend, seasonal, and residual components using locally-weighted regression (Loess). Unlike classical decomposition, the seasonal component can evolve over time rather than being held fixed, and the procedure is robust to outliers. It is the modern default for decomposing a single-seasonal series.
 
 ## When to Use It
+- The seasonal pattern changes shape or amplitude over time (evolving seasonality).
+- The series has outliers you do not want distorting the trend and seasonal estimates.
+- You want a flexible, well-behaved decomposition as a basis for seasonal adjustment or anomaly detection.
+- Use STL for a single evolving seasonal cycle; use `classical_decompose` for a simple fixed pattern; use `mstl_decompose` when there is more than one seasonal period.
 
-- You want to understand the underlying trend after removing seasonal effects
-- You need to check whether seasonal patterns are stable or evolving
-- You suspect outliers are distorting simpler decomposition methods
-- Your data has a single, known seasonal period (e.g., monthly data with yearly seasonality)
-- You want a preprocessing step before forecasting or anomaly detection
+## How to Read the Result
+The output is the three component series plus seasonal and trend strength measures. On the airline series, STL returns a seasonal strength of 0.98 and a trend strength of 0.997 — slightly higher than classical decomposition because the Loess fit adapts to the evolving seasonal amplitude. The robustness setting matters: with it on, outliers are down-weighted so they do not distort the trend and seasonal components (note that the Fast preset disables robustness for speed). The seasonal component is allowed to change gradually across cycles, which is the main advantage over the fixed classical pattern.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `stl_esd_anomaly` to flag anomalies in the STL residual; `x13_seasonal_adjust` for official seasonal adjustment.
+- *(alternatives)* `classical_decompose` (fixed seasonal pattern); `mstl_decompose` (multiple seasonal periods); `x13_seasonal_adjust` (Census-grade adjustment).
 
-- The time series is regularly spaced (no missing timestamps)
-- There is a single dominant seasonal period that you can specify
-- The seasonal component is additive (for multiplicative patterns, apply a log transform first)
-- Enough data exists to estimate the seasonal pattern (at least two full cycles recommended)
-
-## Outputs
-
-- **Trend component**: the long-term movement after removing seasonality
-- **Seasonal component**: the repeating pattern at the specified period
-- **Remainder component**: what is left after removing trend and seasonal effects; useful for spotting anomalies
-- Diagnostic plots showing all three components aligned with the original series
-
-## Technical Details
-
-STL operates through an inner loop and an outer loop. The inner loop alternates between estimating the seasonal and trend components using Loess smoothing. The outer loop assigns robustness weights to reduce the influence of outliers in the remainder.
-
-**Inner loop steps** (repeated `n_inner` times):
-
-1. **Detrend**: subtract the current trend estimate from the series to isolate seasonality.
-2. **Cycle-subseries smoothing**: for each position within the seasonal cycle (e.g., each month), apply Loess smoothing across years. The smoothing window `n_s` controls seasonal smoothness.
-3. **Low-pass filter**: apply a moving average filter of length equal to the seasonal period, followed by Loess smoothing with window `n_l`, to extract a low-frequency component from the seasonal estimate.
-4. **Remove low-pass**: subtract the low-pass result from the cycle-subseries smooth to get the final seasonal component.
-5. **Deseason**: subtract the seasonal component from the original series.
-6. **Trend smoothing**: apply Loess with window `n_t` to the deseasoned series to update the trend estimate.
-
-**Outer loop** (repeated `n_outer` times): compute the remainder as `R = Y - T - S`, then assign robustness weights using a bisquare function on `|R| / (6 * median(|R|))`. These weights downweight large residuals in subsequent inner loop Loess fits.
-
-**Key parameters**:
-- `n_s` (seasonal smoother span): must be odd, larger values produce smoother seasonal components. Minimum recommended value is 7.
-- `n_t` (trend smoother span): controls trend flexibility. Recommended default is the smallest odd integer >= `1.5 * period / (1 - 1.5/n_s)`.
-- `n_l` (low-pass smoother span): recommended as the smallest odd integer >= period.
-- `n_inner`: typically 1-2 for non-robust, 1 for robust fitting.
-- `n_outer`: 0 for non-robust decomposition, 15 for robust decomposition with outlier resistance.
-
-The Loess smoother at each point fits a weighted least-squares polynomial (degree 1 or 2) using a tricube weight function `W(u) = (1 - u^3)^3` based on the distance to neighboring points within the smoothing window.
-
-## Interpretation
-
-**Plain-Language Finding (Tier 1)** - observations, period, seasonal and trend strengths with adjective bands, and an actionable closer pointing at the trend for growth-rate analysis and the seasonal for calendar-pattern attribution.
-
-**Technical Interpretation (Tier 2)** - LOESS-based decomposition with seasonal window s.window and robust fitting flag. Explains strength formulas and STL's adaptive-seasonality advantage over classical.
-
-**Caveats (Tier 3, conditional)**:
-- Near-noise series (both strengths < 0.3) - decomposition uninformative.
-- Non-robust fit with flagged large residuals - suggest robust=True.
+## Technical Detail
+Estimation is statsmodels `STL` (Loess-based). The seasonal smoothing window governs how quickly the seasonal shape may evolve; the engine sets it from the period when not specified (the seasonal parameter), and the Loess degrees and iteration counts are governed by preset. Robustness, when on, runs additional iterations that down-weight outliers (the Fast preset turns this off). The seasonal period is inferred from the data frequency when left blank.
+*Reference run:* airline_passengers.csv (144 monthly observations), robust on, Balanced — period 12, seasonal strength 0.98, trend strength 0.997.
