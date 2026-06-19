@@ -3130,7 +3130,7 @@
           "default": "hann",
           "required": false,
           "advanced": true,
-          "description": "Tapering window",
+          "description": "Window applied before the transform to reduce spectral leakage. Default hann; other windows trade frequency resolution against leakage suppression.",
           "options": [
             "hann",
             "hamming",
@@ -3219,7 +3219,7 @@
           "default": "db4",
           "required": false,
           "advanced": false,
-          "description": "Wavelet family",
+          "description": "Wavelet basis. Default db4 (Daubechies-4); other families trade time versus frequency localization.",
           "options": [
             "db4",
             "db8",
@@ -3235,7 +3235,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Number of levels or 'auto'",
+          "description": "Decomposition depth (number of detail bands). Blank uses an automatic, preset-capped depth. Each level halves the frequency band.",
           "options": null
         }
       ],
@@ -3272,7 +3272,7 @@
           "default": "cmor1.5-1.0",
           "required": false,
           "advanced": true,
-          "description": "Complex wavelet for coherence",
+          "description": "Complex wavelet used for the coherence. Default cmor1.5-1.0 (complex Morlet); supported wavelets convert scale to period by an approximately one-to-one factor.",
           "options": null
         }
       ],
@@ -3310,7 +3310,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "Embedding window length or 'auto'",
+          "description": "Embedding window length (lagged copies in the trajectory matrix). Blank uses half the series length. Longer windows resolve longer cycles; it bounds the longest period recoverable.",
           "options": null
         },
         {
@@ -3320,7 +3320,7 @@
           "default": 5,
           "required": false,
           "advanced": false,
-          "description": "Number of SSA components to extract",
+          "description": "Number of components to extract and group. Default 5; clear the box for a preset-aware value (more components separate finer structure).",
           "options": null
         }
       ],
@@ -5724,7 +5724,7 @@
           "default": 8,
           "required": false,
           "advanced": false,
-          "description": "Maximum Intrinsic Mode Functions to extract",
+          "description": "Maximum number of intrinsic mode functions to extract. Default 8; the sifting stops earlier if a residual trend is reached.",
           "options": null
         },
         {
@@ -5734,7 +5734,7 @@
           "default": "emd",
           "required": false,
           "advanced": false,
-          "description": "Decomposition method",
+          "description": "Decomposition method: emd (standard) or eemd (noise-assisted ensemble, which mitigates mode mixing at higher cost).",
           "options": [
             "emd",
             "eemd"
@@ -5747,7 +5747,7 @@
           "default": 100,
           "required": false,
           "advanced": true,
-          "description": "Number of ensemble trials for EEMD",
+          "description": "Number of noise-perturbed copies averaged by EEMD. Default 100; more reduces mode mixing but costs proportionally more.",
           "options": null
         },
         {
@@ -5757,7 +5757,7 @@
           "default": 0.05,
           "required": false,
           "advanced": true,
-          "description": "Noise amplitude for EEMD (fraction of signal std)",
+          "description": "Amplitude of the added noise for EEMD, as a fraction of the series standard deviation. Default 0.05.",
           "options": null
         }
       ],

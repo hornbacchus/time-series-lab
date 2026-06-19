@@ -1,75 +1,19 @@
-# Wavelet Transform
-
 ## What It Does
-
-The wavelet transform analyzes a time series simultaneously in **time and frequency** (or time and scale), revealing how the frequency content changes over time. Unlike the Fourier transform which gives a global frequency decomposition, wavelets provide a local analysis: they detect when periodic components appear, disappear, or change character. This makes wavelets ideal for non-stationary signals with transient features, regime changes, or evolving periodicities.
+The wavelet transform decomposes a series into time-frequency components, showing not just *which* cycles are present but *when* they occur. Unlike the Fourier transform, which gives a single global spectrum, the wavelet transform localizes frequency content in time — so a cycle that appears only in part of the series, or that strengthens and fades, is visible as such. It splits the series into frequency bands plus a smooth trend.
 
 ## When to Use It
+- The frequency content of your series changes over time (cycles that come and go, or shift).
+- You want to know *when* a cycle is active, not just that it exists somewhere in the series.
+- You want a multi-resolution view — coarse trend plus progressively finer detail bands.
+- Use the wavelet transform for time-varying frequency content; use `fft_spectrum`/`periodogram_spectral_density` for a stationary global spectrum.
 
-- The frequency content of your series changes over time (non-stationary spectral properties)
-- You want to identify when specific periodicities are active or dominant
-- You need to analyze transient events, structural breaks, or localized oscillations
-- Your data has features at multiple scales that appear at different times
-- Standard Fourier analysis loses temporal information that is important for your analysis
+## How to Read the Result
+The output is a set of detail bands (each covering a range of periods) plus an approximation (the trend), with the energy in each. The bands are dyadic octaves — the first detail band covers periods of about 2-4 observations, the next 4-8, the next 8-16, and so on. On a constructed period-12 signal, the energy lands in the 8-16 band (where period 12 belongs) and the trend in the approximation (95% of energy) — correctly localizing the cycle. Read which band holds the energy to identify the dominant period range, and read the band's time profile to see when that cycle is active. Note that wavelet coefficients near the start and end of the series are affected by edge artifacts within roughly a filter-length of the boundaries.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `wavelet_coherence_phase_lag` to compare the time-frequency structure of two series.
+- *(alternatives)* `fft_spectrum`/`periodogram_spectral_density` for a global spectrum; `emd_hht` for an adaptive (data-driven band) decomposition; `ssa` for variance-based component separation.
 
-- The time series is regularly sampled (for the standard discrete wavelet transform)
-- The chosen wavelet (mother wavelet) is appropriate for the features you want to detect
-- The series is long enough to resolve the scales of interest (at least a few cycles at the lowest frequency)
-- Edge effects near the boundaries of the series are acknowledged (the cone of influence)
-- The signal-to-noise ratio is sufficient for meaningful time-frequency analysis
-
-## Outputs
-
-- **Wavelet power spectrum**: a 2D map of power as a function of time and scale/frequency
-- **Scale-averaged power**: power summed over selected scales, as a function of time
-- **Global wavelet spectrum**: power averaged over time, comparable to a Fourier spectrum
-- **Cone of influence**: the region where edge effects are not significant
-- **Significant power regions**: areas exceeding the background noise level at a given confidence
-
-## Technical Details
-
-**Continuous Wavelet Transform (CWT)**: For a time series `y(t)` and mother wavelet `psi(t)`:
-
-`W(a, b) = (1/sqrt(a)) integral y(t) psi*((t-b)/a) dt`
-
-where `a > 0` is the scale (inversely related to frequency), `b` is the time location, and `psi*` is the complex conjugate of the wavelet. In practice, computed for discretized time and a set of scales.
-
-**Morlet wavelet**: The most common choice for time series analysis:
-
-`psi(t) = pi^{-1/4} exp(i*omega_0*t) exp(-t^2/2)`
-
-A complex sinusoid modulated by a Gaussian envelope. The parameter `omega_0` (typically 6) controls the time-frequency tradeoff. For `omega_0 = 6`, the relationship between scale and Fourier period is: `period = 1.03 * a`.
-
-**Wavelet power spectrum**: `|W(a,b)|^2` gives the local power at scale a and time b. Plotted as a heatmap with time on the x-axis and scale (or equivalent period) on the y-axis.
-
-**Significance testing**: Under a null hypothesis of red noise (AR(1) process), the wavelet power at each point follows a chi-squared distribution:
-
-`|W(a,b)|^2 / sigma^2 ~ (1/2) P_k chi^2_2`
-
-where `P_k` is the theoretical Fourier spectrum of the AR(1) process at the frequency corresponding to scale a, and `chi^2_2` is a chi-squared with 2 degrees of freedom (for complex wavelets). The 95% significance level is `P_k * chi^2_2(0.95) / 2`.
-
-**Cone of influence (COI)**: Near the edges of the time series, the wavelet overlaps with regions outside the data. The COI marks the boundary where edge effects become important. For the Morlet wavelet, the e-folding time is `sqrt(2) * a`, and the COI follows this contour from each edge.
-
-**Discrete Wavelet Transform (DWT)**: Samples the CWT at dyadic scales `a = 2^j` and positions `b = k * 2^j`:
-
-`d_{j,k} = sum_t y(t) psi_{j,k}(t)`
-
-The DWT uses a cascade of high-pass and low-pass filters (quadrature mirror filters) to decompose the signal into detail coefficients `d_{j,k}` at each scale and approximation coefficients at the coarsest scale. Common wavelet families: Daubechies, Symlets, Coiflets.
-
-**Maximal Overlap DWT (MODWT)**: A shift-invariant version that does not downsample, producing the same number of coefficients as the original series at each scale. Better for time series analysis than the standard DWT because it is not sensitive to the starting point.
-
-**Scale-to-frequency conversion**: For the Morlet wavelet with `omega_0 = 6`: `frequency = 1 / (1.03 * scale)`. For Daubechies wavelets at level j with sampling interval dt: the frequency band is approximately `[1/(2^{j+1} dt), 1/(2^j dt)]`.
-
-## Interpretation
-
-wavelet_transform runs emit a two-tier Interpretation block. Output shape is Class 4 (component decomposition) - DWT produces reconstructed time series per dyadic frequency band, not a 2D scalogram heatmap.
-
-**Plain-Language Finding (Tier 1)** - wavelet family, decomposition level (vs max possible for series length), dominant component (Approximation band or a specific detail) with period range and energy-concentration adjective band, second-highest detail band for context.
-
-**Technical Interpretation (Tier 2)** - PyWavelets-based DWT, boundary extension mode (symmetric default), per-band dyadic octave ranges (D1 period 2-4 obs, D2 period 4-8 obs, etc.), Approximation band period > 2^(level+1) obs, boundary artifact caveat within ~filter_length samples of each edge, energy normalization caveat (lower-frequency bands aggregate fewer downsampled coefficients).
-
-**Caveats (Tier 3, conditional)**:
-- Approximation band carries > 95% of energy - trend-dominant; detail bands are effectively numerical residual.
-- Max-level decomposition on short series - trend-vs-noise separation at coarsest scale is fragile.
+## Technical Detail
+The transform is a discrete wavelet decomposition (PyWavelets `wavedec`) using the chosen wavelet (Daubechies-4 by default) to a chosen level (defaulting to an automatic, preset-capped depth). It produces dyadic detail bands — band D1 covers periods of roughly 2-4 observations, D2 4-8, D3 8-16, and so on — plus an approximation band holding the trend. Energy per band identifies the dominant period range; edge effects affect coefficients within about a filter length of the boundaries.
+*Reference run:* a constructed period-12 signal, Daubechies-4, Balanced — the cycle's energy concentrated in the 8-16 (D3) band where period 12 belongs, with the trend in the approximation band (95% of energy).

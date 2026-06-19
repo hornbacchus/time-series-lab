@@ -1,82 +1,19 @@
-# Singular Spectrum Analysis (SSA)
-
 ## What It Does
-
-Singular Spectrum Analysis (SSA) decomposes a time series into interpretable components -- **trend**, **oscillations**, and **noise** -- using a data-adaptive, model-free approach based on the singular value decomposition (SVD) of a trajectory matrix. Unlike parametric methods, SSA does not assume a specific model form. The components emerge from the data's own structure, making SSA particularly powerful for extracting signals from noisy data.
+Singular Spectrum Analysis (SSA) decomposes a series into interpretable components — trend, oscillatory cycles, and noise — without assuming a model. It embeds the series into a trajectory matrix of lagged copies, applies a singular value decomposition, and groups the resulting components by similarity. It is a flexible, model-free way to separate a series into its underlying structure, useful for smoothing, trend extraction, or isolating a cycle.
 
 ## When to Use It
+- You want to separate a series into trend, cyclical, and noise components without specifying a model.
+- You want to extract or remove a trend or a specific oscillation as a reconstructed series.
+- You want a data-driven decomposition robust to non-stationarity.
+- Use SSA to decompose and reconstruct components; use `fft_spectrum`/`periodogram_spectral_density` when you only need the frequencies, not the separated series.
 
-- You want a nonparametric decomposition that adapts to the data without assuming a model
-- The signal has complex or non-sinusoidal periodicities that standard methods miss
-- You need to separate trend from oscillatory components without specifying periods in advance
-- You are extracting signals from noisy data where the signal shape is unknown
-- You want to identify the number and nature of underlying components in the data
+## How to Read the Result
+The output is the decomposed components, ranked by how much variance each explains, grouped into trend, oscillatory, and noise. On a constructed trend-plus-period-12 signal, SSA separates a trend component (72% of variance, the leading group) from an oscillatory pair (18%, capturing the cycle) — recovering the structure. Read the components by their variance share and shape: the leading components are the trend and dominant cycles, the trailing ones are noise. One framing point: SSA orders components by *variance*, not by frequency — it does not label a component with a frequency. You identify what each component is (trend versus a particular cycle) by inspecting its shape, which is why a cyclical pair appears as two adjacent components of similar variance.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `fft_spectrum` or `periodogram_spectral_density` on an extracted oscillatory component to pin its frequency.
+- *(alternatives)* `emd_hht` (a different model-free decomposition); `stl_decompose` when the structure is explicitly trend-plus-seasonal.
 
-- The time series is regularly spaced
-- The window length L is chosen appropriately (large enough to capture relevant dynamics, smaller than N/2)
-- The components can be separated by their singular values (distinct eigenvalues for distinct components)
-- Noise is additive and separable from the signal components
-- The series is long enough for the trajectory matrix to have meaningful structure
-
-## Outputs
-
-- **Decomposed components**: trend, oscillatory components, and noise
-- **Singular values**: showing the relative importance of each component
-- **Eigenvectors**: the patterns associated with each component
-- **Reconstructed signal**: the series with noise removed (sum of selected components)
-- **W-correlation matrix**: showing the separability between components (low values indicate good separation)
-
-## Technical Details
-
-**SSA algorithm** (four steps):
-
-**Step 1 -- Embedding**: Convert the time series `y_1, ..., y_N` into a trajectory matrix using a window (embedding) of length L:
-
-```
-X = [Y_1, Y_2, ..., Y_K]   where K = N - L + 1
-```
-
-Each column `Y_j = (y_j, y_{j+1}, ..., y_{j+L-1})'` is an L-dimensional lagged vector. X is an L-by-K Hankel matrix (constant along anti-diagonals).
-
-**Step 2 -- SVD (Decomposition)**: Compute the SVD of the trajectory matrix:
-
-`X = sum_{i=1}^{d} sqrt(lambda_i) U_i V_i'`
-
-where `lambda_1 >= lambda_2 >= ... >= lambda_d > 0` are the eigenvalues of `X X'` (or equivalently, the squared singular values of X), `U_i` are the left singular vectors (eigenvectors of `X X'`), `V_i` are the right singular vectors, and d = rank(X).
-
-Each elementary matrix `X_i = sqrt(lambda_i) U_i V_i'` is a rank-1 component of the trajectory matrix.
-
-**Step 3 -- Grouping**: Partition the set of indices `{1, ..., d}` into m groups `I_1, ..., I_m`. For each group, sum the corresponding elementary matrices: `X_{I_j} = sum_{i in I_j} X_i`. The choice of grouping is guided by:
-- **Singular value spectrum**: Large gaps between consecutive eigenvalues suggest natural groupings.
-- **Eigenvector structure**: Plot pairs of eigenvectors (U_i, U_{i+1}); paired oscillatory components produce circular patterns.
-- **W-correlation matrix**: Components with low weighted correlation are well-separated and should be in different groups.
-
-**Step 4 -- Diagonal averaging (Hankelization)**: Each grouped matrix `X_{I_j}` is not generally Hankel. Convert it back to a time series by averaging along anti-diagonals:
-
-For an L-by-K matrix Z, the reconstructed series element is:
-`y_hat_k = (1/m_k) sum_{(i,j): i+j=k+1} Z_{i,j}`
-
-where `m_k` is the number of elements on the k-th anti-diagonal.
-
-**Choosing L**: The window length L is the key parameter. Typical choices:
-- L = N/2 or close to it for maximum separability
-- L should be at least as large as the longest period of interest
-- L should be a multiple of suspected periodicities for better separation
-
-**W-correlation**: The weighted correlation between reconstructed components measures separability: `rho_w(F_i, F_j) = (F_i, F_j)_w / (||F_i||_w * ||F_j||_w)`, where the inner product uses weights proportional to the number of times each element appears in the trajectory matrix. Values near 0 indicate good separation; values near 1 indicate the components are entangled.
-
-**SSA forecasting**: The recurrence (linear recurrence formula) method uses the relationship between L-dimensional vectors to extrapolate: if the signal satisfies a linear recurrence of order <= L-1, the SSA eigenvectors capture this, and forecasts are generated by projecting forward using the recurrence coefficients derived from the eigenvectors.
-
-## Interpretation
-
-ssa_model runs emit a two-tier Interpretation block with honest ordinal-labels disclosure - SSA's eigentriple groups are ordered by variance contribution but carry no semantic meaning without eigenvector inspection.
-
-**Plain-Language Finding (Tier 1)** - window length L, number of singular components, number of w-correlation groups, dominant group variance share with adjective band, second group share for context, components needed for 95% and 99% reconstruction.
-
-**Technical Interpretation (Tier 2)** - SVD of trajectory matrix, embedding dimension K, w-correlation grouping threshold, eigenvalue variance share by first component. Explicit honest-disclosure: component labels are ordinal (Group 0, Group 1, ...) by variance contribution; semantic identity requires eigenvector inspection. This wrapper does not automatically classify components by type.
-
-**Caveats (Tier 3, conditional)**:
-- First eigenvalue captures > 95% of variance - series is effectively single-component; consider simpler detrend.
-- Fewer than 5 components needed for 99% reconstruction - decomposition is numerically low-rank; higher components are at noise scale.
+## Technical Detail
+The series is embedded into a trajectory matrix with a chosen window length (defaulting to half the series length), decomposed by singular value decomposition, and the components reconstructed by diagonal averaging. Components are grouped — by default through their weighted correlation — into trend, oscillatory, and noise. Components are ordered by variance (singular value), not frequency; semantic identity (trend versus a specific cycle) comes from inspecting the reconstructed shapes.
+*Reference run:* a constructed trend-plus-period-12 signal, window length 128, Balanced — a trend component (72% of variance, leading group) separated from an oscillatory pair (18%), recovering the structure.

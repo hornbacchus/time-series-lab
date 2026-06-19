@@ -1,74 +1,19 @@
-# FFT Spectrum Analysis
-
 ## What It Does
-
-FFT (Fast Fourier Transform) spectrum analysis decomposes a time series into its constituent **frequency components**, revealing the periodic oscillations that make up the signal. It transforms data from the time domain to the frequency domain, showing how much of the series' variance is concentrated at each frequency. This identifies dominant cycles, periodicities, and the overall spectral shape of the data.
+The FFT spectrum computes the fast Fourier transform of a series and reports its amplitude (and power) at each frequency, identifying the dominant periodic components. It is the most direct frequency-domain view of a series: which cycles are present and how strong each is. Where the periodogram emphasizes the spectral density, this emphasizes the amplitude spectrum and the ranked list of dominant periods.
 
 ## When to Use It
+- You want the amplitude or power at each frequency and a ranked list of the strongest cycles.
+- You want a direct, fast decomposition of a regularly-sampled series into its frequency components.
+- The series is evenly sampled and roughly stationary over the window.
+- Use the FFT for evenly-sampled stationary data; use `lomb_scargle` for irregular sampling; use `wavelet_transform` when the frequency content changes over time.
 
-- You want to identify the dominant periodicities (cycles) in your data
-- You need to determine whether seasonal patterns exist and at what frequencies
-- You are analyzing signals that are composed of multiple oscillating components
-- You want to filter out specific frequency bands (e.g., remove high-frequency noise)
-- You need a fast computational tool for frequency analysis of large datasets
+## How to Read the Result
+The output is the amplitude/power at each frequency and the top dominant periods. On a constructed two-cycle signal (a period-12 and a period-4 component), the FFT correctly returns a dominant period of 11.9 and a second period of 4.0 — recovering both. Frequency is in cycles per observation, period is its reciprocal. Two caveats: with no window applied by default, spectral leakage can spread a sharp cycle's energy into neighboring frequencies (apply a window if peaks look smeared); and the FFT assumes the frequency content is constant over the whole series — if cycles strengthen, fade, or shift over time, the global spectrum blurs them together and a wavelet transform is the better tool.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `wavelet_transform` to check whether a dominant cycle is stable across the sample.
+- *(alternatives)* `periodogram_spectral_density` (spectral density estimate); `lomb_scargle` (uneven sampling); `ssa` to extract a component as a reconstructed series.
 
-- The time series is regularly spaced (equal intervals between observations)
-- The series length is ideally a power of 2 for computational efficiency (zero-padding is used otherwise)
-- The signal can be meaningfully represented as a sum of sinusoidal components
-- The series is stationary or at least approximately so (trends should be removed first)
-- The frequency content is relatively stable over the duration of the series
-
-## Outputs
-
-- **Power spectrum**: the distribution of variance across frequencies, showing dominant periodicities
-- **Frequency axis**: from 0 (DC component / mean) to the Nyquist frequency (1/(2*dt))
-- **Phase spectrum**: the phase angle of each frequency component
-- **Dominant frequencies and corresponding periods**: the strongest cyclical components
-- **Amplitude spectrum**: the magnitude of each frequency component
-
-## Technical Details
-
-**Discrete Fourier Transform (DFT)**: For a series `y_0, y_1, ..., y_{N-1}`, the DFT is:
-
-`Y_k = sum_{n=0}^{N-1} y_n * exp(-2*pi*i*k*n/N)` for k = 0, 1, ..., N-1
-
-where `i = sqrt(-1)`. Each `Y_k` is a complex number representing the amplitude and phase of the sinusoidal component at frequency `f_k = k / (N * dt)`, where dt is the sampling interval.
-
-**FFT algorithm**: The FFT computes the DFT in O(N log N) operations instead of O(N^2), using the Cooley-Tukey divide-and-conquer approach. The series is recursively split into even- and odd-indexed subsequences, their DFTs computed, and the results combined using "twiddle factors" `W_N^k = exp(-2*pi*i*k/N)`.
-
-**Power spectral density (PSD)**:
-
-`S(f_k) = (2 * dt / N) * |Y_k|^2` for k = 1, ..., N/2 - 1
-
-The factor of 2 accounts for the symmetry of the DFT for real-valued signals. The power at frequency `f_k` represents the variance contributed by oscillations at that frequency.
-
-**Frequency resolution**: `Delta_f = 1 / (N * dt)`. Longer series provide finer frequency resolution. Two sinusoidal components can only be distinguished if their frequencies differ by at least `Delta_f`.
-
-**Nyquist frequency**: `f_{Nyquist} = 1 / (2 * dt)`. Frequencies above this are aliased (they appear as lower frequencies in the DFT). The sampling interval must be small enough that the highest frequency of interest is below Nyquist.
-
-**Spectral leakage**: A finite-length series acts as if the signal is multiplied by a rectangular window. This causes energy from a single frequency to spread ("leak") into neighboring frequency bins. The side lobes of the rectangular window's frequency response are responsible.
-
-**Windowing**: Multiply the time series by a tapering window function before computing the FFT to reduce leakage:
-- **Hann window**: `w_n = 0.5 (1 - cos(2*pi*n/(N-1)))`. Good general-purpose choice.
-- **Hamming window**: `w_n = 0.54 - 0.46 cos(2*pi*n/(N-1))`. Slightly narrower main lobe.
-- **Blackman window**: `w_n = 0.42 - 0.5 cos(2*pi*n/(N-1)) + 0.08 cos(4*pi*n/(N-1))`. Better sidelobe suppression.
-
-Windows reduce leakage at the cost of widening the main lobe (reducing frequency resolution).
-
-**Zero padding**: Appending zeros to the series before the FFT interpolates the spectrum (finer frequency grid) but does not improve true frequency resolution. Useful for visualization.
-
-**Preprocessing**: Remove the mean (and any linear trend) before computing the FFT. The DC component (k=0) reflects the mean; a trend creates a large low-frequency contribution that can obscure other features.
-
-## Interpretation
-
-fft_spectrum runs emit a two-tier Interpretation block framed around the dominant period and its concentration share.
-
-**Plain-Language Finding (Tier 1)** - dominant period in observations, frequency in cycles/obs, top-peak power share with adjective band (weak / moderate / strong / dominant), top-10 peaks aggregate share, Nyquist limit, detrending choice, windowing choice with spectral-leakage caveat when rectangular.
-
-**Technical Interpretation (Tier 2)** - DFT formulation, windowing and tapering trade-offs, frequency resolution, Nyquist aliasing caveat, stationarity assumption. Explicit pointer to wavelet_transform for time-localized analysis.
-
-**Caveats (Tier 3, conditional)**:
-- Dominant peak < 10% (weak concentration) - broadband rather than cyclic.
-- No windowing on long series with a clear peak - spectral leakage inflates peak power; try window='hann'.
+## Technical Detail
+The transform is scipy's FFT. The series is mean-detrended by default; an optional window reduces leakage. Frequency is in cycles per observation and the period is its reciprocal; the dominant periods are reported by descending power, subject to a minimum-period cutoff. The amplitude spectrum is the magnitude of the transform.
+*Reference run:* a constructed signal combining a period-12 and a period-4 cycle (n≈256), Balanced — dominant period 11.9 (frequency 0.084) and a second period of 4.0, recovering both components.

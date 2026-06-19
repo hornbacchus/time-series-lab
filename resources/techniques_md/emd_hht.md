@@ -1,55 +1,19 @@
-# EMD / Hilbert-Huang Transform
+## What It Does
+Empirical Mode Decomposition (EMD) with the Hilbert-Huang Transform decomposes a series into a handful of data-driven oscillatory components called intrinsic mode functions (IMFs), plus a residual trend. Unlike Fourier or wavelet methods, which use fixed basis functions, EMD derives the components *from the data itself*, so it adapts to non-stationary and nonlinear series. The Hilbert transform then gives each IMF an instantaneous frequency and amplitude over time.
 
-Empirical Mode Decomposition (EMD) with the Hilbert-Huang Transform (HHT) is a fully adaptive, data-driven method for analyzing nonlinear and non-stationary time series. Unlike Fourier analysis (which assumes stationarity) or wavelet transforms (which require choosing a basis), EMD derives its basis functions directly from the data.
+## When to Use It
+- You want a fully data-driven decomposition with no fixed basis or pre-specified frequencies.
+- Your series is non-stationary or nonlinear and fixed-frequency methods struggle.
+- You want instantaneous (time-varying) frequency and amplitude for each component.
+- Use EMD/HHT for adaptive decomposition of nonlinear/non-stationary series; use `wavelet_transform` for a fixed multi-resolution view; use `ssa` for a variance-based decomposition.
 
-## How It Works
+## How to Read the Result
+The output is the set of IMFs (ordered from highest to lowest frequency), a residual trend, and per-IMF mean period and energy. On a constructed period-12 signal, the dominant IMF has a mean period of 12.1 — recovering the cycle. Read the IMFs from fast to slow: the early ones capture high-frequency detail, the later ones slower cycles, and the residual the trend. Two important caveats. First, the IMF energy shares do *not* sum to 100% — the IMFs are not orthogonal, so unlike SSA or PCA this is not an additive variance decomposition; treat the shares as relative importance, not partitioned variance. Second, EMD can suffer mode mixing, where a single cycle is split across IMFs or two cycles blend into one — so an IMF is not guaranteed to be a single clean oscillation, and an instantaneous frequency is only meaningful for an IMF that is genuinely mono-component.
 
-EMD decomposes a signal into a set of Intrinsic Mode Functions (IMFs) through an iterative sifting process. Each IMF represents an oscillatory mode embedded in the data, ordered from highest to lowest frequency. The Hilbert transform is then applied to each IMF to compute instantaneous amplitude and instantaneous frequency, producing a time-frequency-energy representation called the Hilbert-Huang spectrum.
+## Related Techniques
+- *(use after)* analyze a dominant IMF's instantaneous frequency, or `fft_spectrum` on an IMF to confirm its period.
+- *(alternatives)* `wavelet_transform` (fixed bands, orthogonal); `ssa` (variance-ordered, additive); `stl_decompose` for explicit trend-plus-seasonal.
 
-**Ensemble EMD (EEMD)** adds white noise to the signal before decomposition, averaging over many trials. This reduces the mode-mixing problem where different oscillatory modes bleed into the same IMF.
-
-## When to Use
-
-- **Nonlinear and non-stationary signals** where Fourier analysis gives misleading results
-- **Time-varying frequency content** — unlike FFT, EMD captures how frequencies change over time
-- **Exploratory decomposition** to understand the oscillatory structure of a signal
-- **Pre-processing** before applying other techniques (e.g., detrending via residual removal)
-- **Geophysical, financial, and biomedical signals** that exhibit complex multi-scale dynamics
-
-## Key Parameters
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `max_imfs` | 8 | Maximum number of IMFs to extract |
-| `method` | emd | "emd" (standard) or "eemd" (ensemble) |
-| `ensemble_size` | 100 | Number of noise-added trials for EEMD |
-| `noise_width` | 0.05 | Noise amplitude as fraction of signal standard deviation |
-
-## Output Tables
-
-- **IMF Summary**: Variance, variance %, mean frequency, mean period, and mean amplitude for each IMF and the residual
-- **IMF Components**: Time series values for each extracted IMF and the residual
-- **Instantaneous Frequency**: Time-varying frequency for each IMF (from Hilbert transform)
-- **Configuration**: Method, backend, and parameter settings used
-
-## Dependencies
-
-Uses the `emd` package (Andrew Quinn, Oxford) when available for optimized sifting, EEMD, and CEEMDAN. Falls back to a numpy-based sifting implementation if `emd` is not installed. Install with `pip install emd`. The Hilbert transform always uses `scipy.signal.hilbert`.
-
-## Presets
-
-- **Fast**: Standard EMD, up to 4 IMFs, 50 sift iterations
-- **Balanced**: Standard EMD, up to 8 IMFs, 200 sift iterations
-- **Thorough**: Ensemble EMD (100 trials), up to 12 IMFs, 500 sift iterations
-
-## Interpretation
-
-emd_hht runs emit a two-tier Interpretation block framed around IMF decomposition (Class 4) with Hilbert instantaneous-frequency context (Class 2 proxy).
-
-**Plain-Language Finding (Tier 1)** - EMD variant (standard EMD or EEMD), backend (emd library or numpy fallback), number of IMFs extracted, dominant IMF with variance share and mean period (high-frequency-noise / short-cycle-oscillation descriptor), per-IMF period progression, residual trend variance share with non-orthogonal-overlap honest disclosure (defers mechanistic explanation to Tier 2).
-
-**Technical Interpretation (Tier 2)** - iterative envelope-based sifting, Cauchy stopping criterion (SD threshold 0.001), EEMD ensemble averaging when applicable, Hilbert transform produces per-IMF instantaneous frequency (time-frequency proxy, not unified 2D Hilbert-Huang spectrum), mode-mixing caveat, instantaneous-frequency-only-valid-for-mono-component-IMFs honest disclosure, residual-variance-exceeds-100% explanation for sifting-based non-orthogonality.
-
-**Caveats (Tier 3, conditional)**:
-- Residual variance > 100% of input - IMF non-orthogonality; shares are not variance-additive.
-- numpy_fallback backend - emd library unavailable; results valid but may differ from reference.
+## Technical Detail
+The decomposition is empirical mode decomposition (PyEMD): iterative sifting extracts intrinsic mode functions until a residual remains, then the Hilbert transform yields each IMF's instantaneous frequency and amplitude. The number of IMFs is capped by a parameter; the EEMD variant (noise-assisted ensemble, used under the Thorough preset) mitigates mode mixing by averaging decompositions of noise-perturbed copies. Because the sifting is iterative and (for EEMD) noise-driven, the procedure is stochastic; IMFs are non-orthogonal so their energy shares are not an additive variance partition.
+*Reference run:* a constructed period-12 signal, standard EMD, Balanced — 8 IMFs extracted, the dominant IMF (IMF 2) with a mean period of 12.1, recovering the cycle.
