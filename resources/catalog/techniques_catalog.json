@@ -1342,7 +1342,7 @@
           "default": 1000,
           "required": false,
           "advanced": true,
-          "description": "Subsample of kept posterior draws used for conditional forecasting. Range 100-5000 (capped to mitigate OOM on long horizons; friction-points §3 OOM-evidence-based default).",
+          "description": "Number of kept posterior draws used to build the conditional-forecast distribution. Default 1,000; range 100-5000, capped to limit memory use on long horizons.",
           "options": null
         },
         {
@@ -1352,7 +1352,7 @@
           "default": 0.25,
           "required": false,
           "advanced": true,
-          "description": "Soft-mode projection uncertainty (std around economist projection). Minimum 0.01 enforced (Session 0 tiered: <0.0001 raises ValueError; <0.01 raises BVARWarning; >=0.01 clean).",
+          "description": "Standard deviation around the economist projections — how tightly the forecast is pinned to the chosen scenario. Default 0.25; smaller pins the paths more tightly to the projections, larger lets them deviate. Minimum 0.01.",
           "options": null
         },
         {
@@ -1362,7 +1362,7 @@
           "default": 0.2,
           "required": false,
           "advanced": true,
-          "description": "Overall prior tightness. Range 0.001-2.0 (Session 0 lambda guard prevents zero-divide).",
+          "description": "Overall prior tightness (λ1). Default 0.2. Smaller shrinks the VAR coefficients harder toward the random-walk prior; larger lets the data speak. Range 0.001-2.0.",
           "options": null
         },
         {
@@ -1372,7 +1372,7 @@
           "default": 0.5,
           "required": false,
           "advanced": true,
-          "description": "Cross-equation prior shrinkage. Minimum 0.001 (Session 0 lambda guard).",
+          "description": "Cross-equation shrinkage (λ2). Default 0.5. Controls how strongly each equation's coefficients are pulled toward the others; smaller is tighter. Minimum 0.001.",
           "options": null
         },
         {
@@ -1382,7 +1382,7 @@
           "default": 1.0,
           "required": false,
           "advanced": true,
-          "description": "Lag-decay prior. Minimum 0.001 (Session 0 lambda guard).",
+          "description": "Lag-decay exponent (λ3). Default 1.0 (harmonic decay); higher values shrink more distant lags more aggressively. Minimum 0.001.",
           "options": null
         },
         {
