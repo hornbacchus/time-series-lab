@@ -1,79 +1,19 @@
-# Auto-ARIMA
-
 ## What It Does
-
-Auto-ARIMA automates the selection of the best ARIMA or SARIMA model by systematically searching over combinations of (p, d, q) and (P, D, Q)_s orders. It uses unit root tests to determine differencing, then evaluates candidate models using information criteria, returning the model that balances fit and parsimony without requiring manual ACF/PACF interpretation.
+auto_arima automatically searches for the best ARIMA (or seasonal ARIMA) order rather than requiring you to specify it. It fits many candidate orders, scores each by an information criterion, and returns the best one with its forecast. It is the convenient route to a well-specified ARIMA when you do not want to choose the orders by hand.
 
 ## When to Use It
+- You want an ARIMA forecast without manually selecting the order.
+- You want the order chosen by a consistent information criterion rather than by eye.
+- You're forecasting many series and need an automated, repeatable specification.
+- Use it to find a good order automatically; use `arima`/`sarima` when you already know the order or want full manual control.
 
-- You want ARIMA/SARIMA forecasting without manually identifying model orders
-- You are processing many series in batch and cannot inspect each one individually
-- You want a defensible, reproducible model selection procedure
-- You are uncertain whether your series needs seasonal differencing or how many AR/MA terms are appropriate
-- You need a quick but statistically principled forecast
+## How to Read the Result
+The output is the selected order, the forecast, and the winning model's information criterion. On the airline series, with seasonality on, the search selects ARIMA(1,1,3)(1,0,0)[12] — recovering the period of 12 — at AIC 1139.8. Read it as the *best searched* model under the chosen criterion, not a guaranteed global optimum: the search is stepwise on the faster presets (exhaustive only under Thorough), so it can skip a better order the stepwise path does not visit. And when several orders sit within a couple of AIC points, the exact winner can differ across software versions, so treat near-ties as interchangeable rather than meaningful.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `arima` or `sarima` to refit the selected order manually if you want to adjust it.
+- *(alternatives)* `arima`/`sarima` (manual order); `ets_hw` and `theta_forecast` as non-ARIMA forecasters worth benchmarking against.
 
-- The same assumptions as ARIMA/SARIMA apply: stationarity after differencing, white noise residuals
-- The true model can be reasonably approximated by an ARIMA(p,d,q)(P,D,Q)_s within the search range
-- The information criterion used (AIC, AICc, or BIC) provides a good balance of fit and complexity for your use case
-- The search range is broad enough to include the best model
-
-## Outputs
-
-- **Selected model order**: the (p, d, q)(P, D, Q)_s specification chosen
-- **Point forecasts and prediction intervals**
-- **Estimated parameters** with standard errors
-- **Information criterion value** for the selected model
-- **Search trace** (optional): showing all models evaluated and their criteria values
-- **Residual diagnostics** for the chosen model
-
-## Technical Details
-
-The dominant auto-ARIMA algorithm is the **Hyndman-Khandakar** stepwise procedure, used in the R `forecast` package and Python's `pmdarima`:
-
-**Step 1 -- Determine differencing orders**:
-- **d**: Apply the KPSS test iteratively. Start with d=0; if the test rejects stationarity, increment d. Repeat until the test does not reject or d reaches `max_d` (default 2).
-- **D**: Apply the OCSB (Osborn-Chui-Smith-Birchenhall) test or the Canova-Hansen test to determine if seasonal differencing is needed. Usually D = 0 or 1.
-
-**Step 2 -- Define the search space**:
-- p ranges from 0 to `max_p` (default 5)
-- q ranges from 0 to `max_q` (default 5)
-- P ranges from 0 to `max_P` (default 2)
-- Q ranges from 0 to `max_Q` (default 2)
-
-**Step 3 -- Stepwise search**:
-
-Rather than evaluating all combinations (which could be hundreds), the stepwise algorithm:
-
-1. Fit four initial models: ARIMA(0,d,0), ARIMA(2,d,2), ARIMA(1,d,0), ARIMA(0,d,1), each with and without a constant (if d <= 1). Include seasonal terms if D was determined.
-2. Select the model with the lowest AICc as the current best.
-3. From the current best, generate candidate models by varying p and q by +/-1 and toggling the constant term. For seasonal models, also vary P and Q by +/-1.
-4. Fit all candidates and update the current best if any candidate has a lower AICc.
-5. Repeat step 3-4 until no improvement is found (convergence).
-
-**Information criteria used**:
-- **AICc** (default): `AICc = AIC + 2k(k+1)/(n-k-1)`, corrects for small samples.
-- **AIC**: `-2 log(L) + 2k`
-- **BIC**: `-2 log(L) + k log(n)`, penalizes complexity more heavily, tends to select simpler models.
-
-**Grid search alternative**: Instead of stepwise, an exhaustive grid search evaluates all combinations within the specified ranges. This is slower but guaranteed to find the global optimum within the search space. The stepwise approach can get trapped in local optima but is typically 5-20x faster.
-
-**Practical considerations**:
-- If the algorithm fails to converge for a candidate model (common with near-unit-root parameters), that model is skipped.
-- When `d + D >= 2`, the constant term is excluded to avoid explosive forecasts.
-- A maximum model order constraint `p + q + P + Q <= max_order` (default 5) prevents overly complex models.
-
-## Interpretation
-
-Every auto_arima run emits a two-tier plain-language Interpretation block distinct from the manual arima spec.
-
-**Plain-Language Finding (Tier 1)** - AIC-minimized (p,d,q)(P,D,Q)[m] order with candidate count searched under pmdarima's stepwise algorithm. Fit RMSE vs seasonal-naive baseline with percentage delta; forecast end-of-horizon trend.
-
-**Technical Interpretation (Tier 2)** - IC used, search mode (stepwise vs exhaustive), search bounds (max_p / max_q / max_d, and seasonal equivalents), winning order's AIC / BIC, stepwise-tie reproducibility caveat, Ljung-Box diagnostic. The stepwise-tie caveat sits immediately after the search-disclosure sentence.
-
-**Caveats (Tier 3, conditional)**:
-- Fit RMSE >= naive baseline.
-- Ljung-Box rejects white-noise.
-- Winning order at a search bound - widen the search.
-- Seasonal m auto-inferred from frequency - verify the period.
+## Technical Detail
+The search uses pmdarima's `auto_arima`, scanning ranges of the AR, MA, and differencing orders (and their seasonal counterparts when seasonality is on), scoring each by the selected information criterion (default AIC; AICc, BIC, HQIC also available). The search is stepwise on Fast and Balanced and exhaustive under Thorough. The seasonal period is inferred from the data frequency when left blank. This is a *search*, not a single fit — the result is the best candidate found, not a proof of optimality.
+*Reference run:* airline_passengers.csv (144 monthly observations), seasonality on, criterion AIC, horizon 12, Balanced — selected ARIMA(1,1,3)(1,0,0)[12] (period 12 auto-inferred), AIC 1139.8, RMSE 40.4, after searching at least 21 candidate specifications.

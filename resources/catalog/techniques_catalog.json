@@ -231,7 +231,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Number of periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         },
         {
@@ -241,7 +241,7 @@
           "default": "add",
           "required": false,
           "advanced": false,
-          "description": "Trend component type",
+          "description": "Trend component. Default add (additive); mul multiplicative, none for no trend.",
           "options": [
             "add",
             "mul",
@@ -255,7 +255,7 @@
           "default": "add",
           "required": false,
           "advanced": false,
-          "description": "Seasonal component type",
+          "description": "Seasonal component. Default add (additive); mul multiplicative, none. Blank auto-detects additive or none.",
           "options": [
             "add",
             "mul",
@@ -269,7 +269,7 @@
           "default": false,
           "required": false,
           "advanced": true,
-          "description": "Use damped trend",
+          "description": "Damp the trend so it flattens at longer horizons. Default off; turn on when an undamped trend over-extrapolates.",
           "options": null
         }
       ],
@@ -308,7 +308,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         }
       ],
@@ -344,7 +344,7 @@
           "default": "1,1,1",
           "required": false,
           "advanced": false,
-          "description": "ARIMA order as p,d,q",
+          "description": "ARIMA order as p,d,q (AR, differencing, MA). Default 1,1,1. d differences the series to stationarity; p and q set the AR and MA terms.",
           "options": null
         },
         {
@@ -354,7 +354,7 @@
           "default": "0,0,0,0",
           "required": false,
           "advanced": true,
-          "description": "Seasonal order P,D,Q,m. Default 0,0,0,0 = non-seasonal. A non-zero P/D/Q requires m>1 (e.g. 1,1,1,12).",
+          "description": "Optional seasonal order as P,D,Q,m. Default 0,0,0,0 (no seasonal component); for a genuine seasonal model use the SARIMA technique.",
           "options": null
         },
         {
@@ -364,7 +364,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         }
       ],
@@ -401,7 +401,7 @@
           "default": "1,1,1",
           "required": false,
           "advanced": false,
-          "description": "Non-seasonal order",
+          "description": "Non-seasonal order as p,d,q (AR, differencing, MA). Default 1,1,1.",
           "options": null
         },
         {
@@ -411,7 +411,7 @@
           "default": "",
           "required": false,
           "advanced": false,
-          "description": "Seasonal order P,D,Q,m. Blank = auto (1,1,1) at the frequency-inferred period; or specify e.g. 1,1,1,12 (monthly) or 1,1,1,4 (quarterly).",
+          "description": "Seasonal order as P,D,Q,m. Blank uses a default seasonal structure at the period inferred from the data frequency; set explicitly to control it (e.g. 1,1,1,12 for monthly annual seasonality).",
           "options": null
         },
         {
@@ -421,7 +421,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         },
         {
@@ -431,7 +431,7 @@
           "default": null,
           "required": false,
           "advanced": false,
-          "description": "Seasonal period. Blank = inferred from frequency (12 monthly, 4 quarterly). Also the 4th value of Seasonal Order.",
+          "description": "Seasonal period (observations per cycle). Blank infers it from the data frequency (12 monthly, 4 quarterly).",
           "options": null
         },
         {
@@ -441,7 +441,7 @@
           "default": "n",
           "required": false,
           "advanced": false,
-          "description": "Deterministic trend: n (none), c (constant), t (linear), ct (constant+linear).",
+          "description": "Deterministic trend. Default n (none); c constant, t linear, ct both.",
           "options": ["n", "c", "t", "ct"]
         },
         {
@@ -451,7 +451,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "Constrain AR roots to be stationary (default true).",
+          "description": "Constrain the AR parameters to be stationary. Default on; rarely turned off.",
           "options": null
         },
         {
@@ -461,7 +461,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "Constrain MA roots to be invertible (default true).",
+          "description": "Constrain the MA parameters to be invertible. Default on; rarely turned off.",
           "options": null
         }
       ],
@@ -499,7 +499,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         },
         {
@@ -509,7 +509,7 @@
           "default": true,
           "required": false,
           "advanced": false,
-          "description": "Include seasonal terms",
+          "description": "Search seasonal orders as well as non-seasonal. Default on; turn off for a purely non-seasonal search.",
           "options": null
         },
         {
@@ -519,7 +519,7 @@
           "default": "aic",
           "required": false,
           "advanced": true,
-          "description": "Model selection criterion",
+          "description": "Information criterion used to score and select the order. Default aic; aicc, bic, hqic available. bic penalizes complexity more (selects simpler models).",
           "options": [
             "aic",
             "bic",
@@ -534,7 +534,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Pin the order of differencing (0-3). Blank = auto-select.",
+          "description": "Differencing order. Blank lets the search determine it from stationarity tests; set an integer to fix it.",
           "options": null
         },
         {
@@ -544,7 +544,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Seasonal period (used when Seasonal is on). Blank = inferred from frequency (12 monthly, 4 quarterly). Must be < series length.",
+          "description": "Seasonal period. Blank infers it from the data frequency.",
           "options": null
         },
         {
@@ -554,7 +554,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Upper bound on the AR order searched (0-12). Blank = preset default. Larger = slower search.",
+          "description": "Upper bound on the AR order searched. Blank uses a preset bound (wider under Thorough).",
           "options": null
         },
         {
@@ -564,7 +564,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Upper bound on the MA order searched (0-12). Blank = preset default. Larger = slower search.",
+          "description": "Upper bound on the MA order searched. Blank uses a preset bound.",
           "options": null
         },
         {
@@ -574,7 +574,7 @@
           "default": null,
           "required": false,
           "advanced": true,
-          "description": "Upper bound on the differencing searched (0-3). Blank = preset default.",
+          "description": "Upper bound on the differencing order searched. Blank uses a preset bound.",
           "options": null
         }
       ],
@@ -614,7 +614,7 @@
           "default": "auto",
           "required": false,
           "advanced": false,
-          "description": "ARIMA order or 'auto'",
+          "description": "ARIMA order as p,d,q. Default auto (searched); set explicitly to fix it.",
           "options": null
         },
         {
@@ -624,7 +624,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12. Forecasting requires future values of the exogenous series.",
           "options": null
         },
         {
@@ -634,7 +634,7 @@
           "default": "0,0,0,0",
           "required": false,
           "advanced": true,
-          "description": "Seasonal order P,D,Q,m. Default 0,0,0,0 = non-seasonal. A non-zero P/D/Q requires m>1 (e.g. 1,1,1,12).",
+          "description": "Seasonal order as P,D,Q,m. Default 0,0,0,0 (non-seasonal); a non-zero order activates the seasonal SARIMAX model.",
           "options": null
         },
         {
@@ -644,7 +644,7 @@
           "default": "c",
           "required": false,
           "advanced": false,
-          "description": "Deterministic trend: n (none), c (constant), t (linear), ct (constant+linear).",
+          "description": "Deterministic trend. Default c (constant); n none, t linear, ct both.",
           "options": ["n", "c", "t", "ct"]
         },
         {
@@ -654,7 +654,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "Constrain AR roots to be stationary (default true).",
+          "description": "Constrain the AR parameters to be stationary. Default on.",
           "options": null
         },
         {
@@ -664,7 +664,7 @@
           "default": true,
           "required": false,
           "advanced": true,
-          "description": "Constrain MA roots to be invertible (default true).",
+          "description": "Constrain the MA parameters to be invertible. Default on.",
           "options": null
         }
       ],
@@ -703,7 +703,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Maximum lag for transfer function",
+          "description": "Maximum input lag included in the distributed-lag model. Default 12; clear the box for a preset-aware value. Set it to cover the longest plausible delay from input to output.",
           "options": null
         }
       ],
@@ -740,7 +740,7 @@
           "default": "sba",
           "required": false,
           "advanced": false,
-          "description": "Intermittent demand method",
+          "description": "Intermittent-demand method: sba (Syntetos-Boylan, the default — a bias-corrected Croston), croston (classic), or tsb (Teunter-Syntetos-Babai, updates demand probability). Clear to compare methods across the preset set.",
           "options": [
             "croston",
             "sba",
@@ -754,7 +754,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Periods to forecast",
+          "description": "Forecast horizon in periods. Default 12.",
           "options": null
         },
         {
@@ -764,7 +764,7 @@
           "default": 0.1,
           "required": false,
           "advanced": true,
-          "description": "Smoothing parameter",
+          "description": "Smoothing parameter for the underlying exponential smoothing. Default 0.1; lower is smoother and more stable. Clear to grid-search alpha.",
           "options": null
         }
       ],

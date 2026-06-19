@@ -1,64 +1,19 @@
-# SARIMA
-
 ## What It Does
-
-SARIMA (Seasonal ARIMA) extends the ARIMA model to handle time series with seasonal patterns by adding seasonal autoregressive, differencing, and moving average terms. It captures both the short-term dynamics within a season and the patterns that repeat across seasons, making it the standard parametric model for seasonal time series forecasting.
+SARIMA (Seasonal ARIMA) extends ARIMA with a seasonal component, modeling both the short-term dynamics and a repeating seasonal cycle. Alongside the non-seasonal `(p, d, q)` orders it adds seasonal orders `(P, D, Q)` at a seasonal period `m` (12 for monthly data with an annual cycle). It is the standard tool for forecasting series with a clear seasonal pattern.
 
 ## When to Use It
+- Your series has a seasonal cycle (monthly with annual seasonality, quarterly, weekly patterns).
+- You want explicit control over both the non-seasonal and seasonal model orders.
+- A non-seasonal ARIMA leaves seasonal structure in the residuals.
+- Use SARIMA when the seasonality is known; use `auto_arima` (seasonality on) to search the seasonal order automatically.
 
-- Your data has a clear seasonal pattern (e.g., monthly data with yearly cycles)
-- You need a model that captures both within-season and between-season dependencies
-- The seasonal pattern is relatively stable over time
-- You want a well-established statistical model with prediction intervals
-- You have at least 3-4 complete seasonal cycles of data
+## How to Read the Result
+The output is the forecast, the seasonal and non-seasonal coefficients, the AIC, and prediction intervals. On the airline series a (1,1,1)(1,1,1) SARIMA with the period inferred as 12 returns AIC 1022.3 and RMSE 44.9 — a clear improvement over the non-seasonal ARIMA (AIC 1394.7) on the same data, because it now captures the annual cycle. The seasonal period is the key specification: leave the seasonal order blank and the engine infers the period from the data frequency and fits a default seasonal structure, or set it explicitly.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* compare against `auto_arima` to confirm the chosen order is competitive.
+- *(alternatives)* `arima` (non-seasonal); `auto_arima` (automatic seasonal order); `ets_hw` (an exponential-smoothing route to seasonal forecasting); `arimax_sarimax` to add exogenous regressors.
 
-- The series is univariate and equally spaced
-- After regular and seasonal differencing, the series is stationary
-- Residuals are white noise (uncorrelated, constant variance)
-- The seasonal period is known and fixed
-- The seasonal pattern can be captured by a linear combination of seasonal lags
-
-## Outputs
-
-- **Point forecasts** with seasonal patterns projected forward
-- **Prediction intervals** accounting for both regular and seasonal uncertainty
-- **Estimated coefficients** for both regular and seasonal AR/MA terms
-- **Residual diagnostics**: ACF/PACF plots, Ljung-Box test at seasonal lags
-- **Information criteria** for model comparison (AIC, BIC)
-
-## Technical Details
-
-A SARIMA(p, d, q)(P, D, Q)_s model has two sets of components:
-
-- **Non-seasonal**: AR(p), differencing d, MA(q) -- capturing short-term dynamics.
-- **Seasonal**: AR(P), differencing D, MA(Q) at seasonal period s -- capturing repeating seasonal dynamics.
-
-**Model equation**: Let `B` be the backshift operator and `B^s` the seasonal backshift. The model is:
-
-`phi(B) * Phi(B^s) * (1-B)^d * (1-B^s)^D * Y_t = c + theta(B) * Theta(B^s) * e_t`
-
-where:
-- `phi(B) = 1 - phi_1 B - ... - phi_p B^p` (non-seasonal AR)
-- `Phi(B^s) = 1 - Phi_1 B^s - ... - Phi_P B^{Ps}` (seasonal AR)
-- `theta(B) = 1 + theta_1 B + ... + theta_q B^q` (non-seasonal MA)
-- `Theta(B^s) = 1 + Theta_1 B^s + ... + Theta_Q B^{Qs}` (seasonal MA)
-- `(1-B)^d` is regular differencing
-- `(1-B^s)^D` is seasonal differencing
-
-**Common example -- SARIMA(1,1,1)(1,1,1)_12 for monthly data**:
-
-`(1 - phi_1 B)(1 - Phi_1 B^{12})(1-B)(1-B^{12}) Y_t = (1 + theta_1 B)(1 + Theta_1 B^{12}) e_t`
-
-This expands to dependencies on lags 1, 2, 12, 13, 14, 24, 25, 26 of the doubly differenced series, showing how the seasonal and non-seasonal operators interact multiplicatively.
-
-**Identification for seasonal models**:
-1. **Seasonal differencing**: If the ACF at seasonal lags (s, 2s, 3s, ...) decays slowly, apply seasonal differencing `(1-B^s)`. Usually D = 0 or 1.
-2. **Regular differencing**: After seasonal differencing, check if the non-seasonal ACF still decays slowly. Usually d = 0 or 1.
-3. **Seasonal P, Q**: Examine ACF and PACF at lags s, 2s, 3s. ACF cutting off after lag s suggests Q=1; PACF cutting off suggests P=1. Typically P, Q in {0, 1, 2}.
-4. **Non-seasonal p, q**: Examine ACF and PACF at early lags (1, 2, 3, ...). Apply standard ARMA identification rules.
-
-**Estimation**: MLE is used, but the likelihood computation must handle the seasonal structure. For large seasonal periods, the covariance matrix becomes large, and efficient algorithms like the Kalman filter in state space form are used.
-
-**Forecasting**: Forecasts are generated recursively, with seasonal components producing the characteristic repeating pattern in multi-step forecasts. Prediction intervals account for the multiplicative interaction between seasonal and non-seasonal error propagation.
+## Technical Detail
+Estimation is statsmodels `SARIMAX` by maximum likelihood. The non-seasonal order `(p, d, q)` and seasonal order `(P, D, Q, m)` are specified; leaving the seasonal order blank resolves to a default seasonal structure at the frequency-inferred period `m`. Stationarity and invertibility constraints are enforced by default. Outputs include AIC/BIC, coefficients, and forecasts with prediction intervals.
+*Reference run:* airline_passengers.csv (144 monthly observations), order (1,1,1), seasonal order left blank, horizon 12, Balanced — the blank seasonal order resolved to (1,1,1,12) at the inferred period, AIC 1022.3, RMSE 44.9 (an improvement over the non-seasonal ARIMA's 1394.7 on the same data).

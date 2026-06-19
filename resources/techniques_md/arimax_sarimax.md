@@ -1,80 +1,19 @@
-# ARIMAX / SARIMAX
-
 ## What It Does
-
-ARIMAX (ARIMA with eXogenous variables) and SARIMAX (Seasonal ARIMA with eXogenous variables) extend the ARIMA/SARIMA framework by including external predictor variables (regressors) alongside the time series' own lagged values. This allows the model to capture relationships between the target series and other variables (e.g., temperature affecting energy demand, advertising spend affecting sales) while still modeling the temporal dynamics of the residuals.
+ARIMAX/SARIMAX extends ARIMA (or SARIMA) with exogenous regressors — external driver series that help explain the target. The model captures the target's own ARIMA dynamics *and* its response to the drivers at once: a dynamic regression with ARIMA errors. Use it when you have explanatory variables whose values inform the forecast, not just the target's own past.
 
 ## When to Use It
+- You have one or more external driver series (exogenous regressors) that explain the target.
+- You want the driver effects estimated jointly with the target's ARIMA dynamics.
+- You're doing scenario analysis (forecasting the target under assumed driver paths).
+- Use it when you have explanatory series; use plain `arima`/`sarima` when only the target's own history is available; use `transfer_function` for an interpretable distributed-lag view of an input-output relationship.
 
-- You believe external factors drive or influence your target variable
-- You have reliable exogenous variables available both in-sample and for the forecast horizon
-- Pure ARIMA residuals show patterns correlated with known external variables
-- You need to produce scenario-based forecasts (e.g., "what if advertising doubles?")
-- You want a regression model that properly accounts for autocorrelated errors
+## How to Read the Result
+The first series is the target (endogenous); the second and subsequent series are the exogenous regressors. The output is the forecast, the ARIMA coefficients, the exogenous regression coefficients (the estimated driver effects), and the AIC. On a synthetic series built as `y = 1.5·x + ARMA(1,1)` noise, an automatic-order ARIMAX recovers the structure with AIC 861.7 and RMSE 0.99 (about 48% better than naive), the exogenous regressor entering significantly. One practical caveat: to forecast forward you need future values of the exogenous series — if they are not supplied the engine carries the last value forward and warns, so a forecast that depends on assumed driver paths is only as good as those assumptions.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `transfer_function` for a complementary distributed-lag view of the same input-output relationship.
+- *(alternatives)* `arima`/`sarima` (no exogenous drivers); `transfer_function` (distributed-lag OLS with a long-run multiplier); the VAR family when drivers and target are mutually endogenous.
 
-- Exogenous variables are available for the entire forecast horizon (you must supply future values)
-- The relationship between exogenous variables and the target is contemporaneous and linear
-- After accounting for exogenous effects and differencing, residuals follow a stationary ARMA process
-- Exogenous variables are not caused by the target variable (no reverse causality)
-- No perfect multicollinearity among the regressors
-
-## Outputs
-
-- **Point forecasts** conditional on provided future exogenous values
-- **Prediction intervals** reflecting both regression and ARMA uncertainty
-- **Regression coefficients** for each exogenous variable with standard errors
-- **ARMA coefficients** for the error process
-- **Residual diagnostics** confirming white noise errors after modeling
-
-## Technical Details
-
-**Model specification**: A SARIMAX(p,d,q)(P,D,Q)_s model with k exogenous regressors is:
-
-`Y_t = beta_1 X_{1,t} + beta_2 X_{2,t} + ... + beta_k X_{k,t} + eta_t`
-
-where `eta_t` follows a SARIMA(p,d,q)(P,D,Q)_s process:
-
-`phi(B) Phi(B^s) (1-B)^d (1-B^s)^D eta_t = c + theta(B) Theta(B^s) e_t`
-
-This is a **regression with ARIMA errors** formulation. The regression captures the systematic effect of exogenous variables, and the ARIMA component models the remaining temporal structure.
-
-**Important distinction -- transfer function vs. regression with ARIMA errors**:
-
-In the ARIMAX formulation above, the exogenous variables affect `Y_t` contemporaneously (at the same time period). The differencing operator applies to the error process `eta_t`, not to the exogenous variables. This differs from a transfer function model where the exogenous inputs can have lagged effects through rational polynomial filters.
-
-Some software implementations differ: statsmodels in Python applies differencing to the entire model (including regressors), while the R `forecast::Arima` function treats regressors as entering the undifferenced equation. Be aware of which convention your software uses.
-
-**Estimation**:
-
-1. An initial regression of `Y_t` on `X_{1,t}, ..., X_{k,t}` is computed (possibly with differencing).
-2. The residuals from this regression are examined for ARMA structure.
-3. The full model (regression + ARIMA errors) is estimated jointly via MLE, iterating between regression parameter updates and ARMA parameter updates until convergence.
-
-The log-likelihood depends on the innovations `e_t`, computed via the Kalman filter in state space form, which handles the interaction between regression and ARMA components correctly.
-
-**Forecasting**:
-
-For h-step-ahead forecasts, you need future values of all exogenous variables `X_{1,t+h}, ..., X_{k,t+h}`. The forecast is:
-
-`Y_hat_{t+h} = beta_1 X_{1,t+h} + ... + beta_k X_{k,t+h} + eta_hat_{t+h}`
-
-where `eta_hat_{t+h}` is the ARIMA forecast of the error component. Prediction intervals combine the uncertainty from the ARIMA error forecasts with the regression estimation uncertainty.
-
-**Model selection**: Use AICc or BIC to compare models with different exogenous variable subsets and ARIMA orders. Stepwise procedures can be applied to both the ARIMA order and the regressor selection.
-
-## Interpretation
-
-Every ARIMAX / SARIMAX run emits a two-tier plain-language Interpretation block. The spec variant (arimax vs sarimax) is chosen from the fitted seasonal order: runs with a non-trivial seasonal specification route to the sarimax spec; runs without seasonal route to arimax.
-
-**Plain-Language Finding (Tier 1)** - names the fitted order (and seasonal order for sarimax), observations, count of exogenous regressors, horizon, fit RMSE vs the naive baseline (last-value for arimax, seasonal-naive for sarimax) with percentage delta, and the end-of-horizon forecast level. The horizon-trend phrasing uses the four-rule fallback hierarchy (near-zero observation, near-zero-scale, extreme percentage, returns-class mean) for robustness on economic series.
-
-**Technical Interpretation (Tier 2)** - discloses the user-chosen (p,d,q) and (P,D,Q)[m], the differencing levels applied, AIC / BIC / in-sample RMSE, residual Ljung-Box at lag 10, and — when exogenous regressors are present — each exogenous coefficient with its p-value and significance verdict at 5% / 10%. Also explicitly discloses the exog-carry-forward convention: the naive baseline uses last-value-carried-forward for both the endogenous series and exogenous regressors, making the RMSE comparison apples-to-apples on identical exogenous paths.
-
-**Caveats (Tier 3, conditional)**:
-- Fit RMSE >= naive baseline - the model does not beat naive.
-- Residuals reject normality (Jarque-Bera) - prediction intervals assume Gaussian errors and may be mis-calibrated.
-- Maximum-likelihood optimization did not fully converge - coefficient standard errors are approximate.
-- (arimax) None of the exogenous regressors reach the 5% significance threshold - refit without exog and compare AIC.
-- (sarimax) Combined ARMA+SARMA order (p+q+P+Q) is high and exceeds 10% of sample size - model may be overparameterized (composite threshold: order > 6 AND > 0.1 * n_obs).
+## Technical Detail
+Estimation is statsmodels `SARIMAX` with exogenous regressors by maximum likelihood. The first series is the endogenous target; remaining series are the exogenous regressors. A non-zero seasonal order routes through the seasonal branch. The order can be set explicitly or searched automatically. Stationarity and invertibility constraints are enforced by default. Forecasting requires future exogenous values; absent them, the last observed value is carried forward with a warning.
+*Reference run:* a synthetic series `y = 1.5·x + ARMA(1,1)` with `x` an AR(0.7) process (n=300), automatic order, Balanced — selected ARIMAX(3,0,3) with the exogenous regressor, AIC 861.7, RMSE 0.99 (about 48% better than naive).
