@@ -1,88 +1,19 @@
-# Cross-Correlation / Lag Analysis
-
 ## What It Does
-
-Cross-correlation analysis measures the **linear association between two time series at different time lags**, identifying which lag produces the strongest relationship. The Cross-Correlation Function (CCF) computes the Pearson correlation between one series and a time-shifted version of another, revealing whether one series leads, lags, or moves simultaneously with the other, and by how many time periods.
+The cross-correlation function (CCF) measures the correlation between two series across a range of leads and lags. The lag at which the absolute correlation peaks is the estimated lead-lag relationship — how many periods one series leads or follows the other. It is the most direct way to find the offset at which two series co-move most strongly.
 
 ## When to Use It
+- You want the lag at which two series are most strongly correlated (the lead-lag offset).
+- You want a quick, interpretable picture of the whole lead-lag structure, not just one number.
+- You're exploring whether two series move together with a delay.
+- Use plain CCF for a first look; use `prewhitened_ccf_lag` when both series are autocorrelated or trending (which inflates the raw CCF); use `rolling_ccf_lag` to see whether the lead-lag is stable over time.
 
-- You want to identify the time delay between a cause and its effect
-- You are exploring the lead-lag relationship between two series before building a model
-- You need to determine the appropriate lag for input variables in a transfer function or regression model
-- You want a quick visualization of the temporal relationship between two series
-- You are checking whether two series are related and at what time offset
+## How to Read the Result
+The output is the correlation at each lag, the peak lag, and significance bands. Positive lag means the first series leads the second. On a synthetic pair where the first series leads the second by 5 periods, the CCF peaks at +5 with a correlation of 0.96 — recovering the lead exactly. The crucial caveat is autocorrelation inflation: when each series is itself autocorrelated, the raw CCF is inflated and more lags look significant than truly are. The engine reports both a naive band and an autocorrelation-corrected (Bartlett, effective-sample-size) band — here the inflation factor is 2.8 (effective sample 107 versus 300), so read significance against the corrected band. If both series are trending or strongly autocorrelated, prefer the prewhitened version.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `prewhitened_ccf_lag` to confirm a peak is not an autocorrelation artifact; `rolling_ccf_lag` to check stability over time.
+- *(alternatives)* `prewhitened_ccf_lag` (removes autocorrelation inflation); `granger_causality` for a predictive test; `dtw_alignment_lag` when the relationship is a nonlinear time-warp rather than a constant lag.
 
-- Both series are stationary (or have been differenced to achieve stationarity)
-- The relationship between the series is linear
-- The series are measured at the same frequency and aligned in time
-- The cross-correlation structure is stable over time
-- Autocorrelation within each series does not spuriously inflate the cross-correlations
-
-## Outputs
-
-- **Cross-correlation function (CCF)**: correlation values at each lag from -max_lag to +max_lag
-- **Peak lag**: the lag with the highest absolute cross-correlation
-- **Peak correlation**: the strength of the relationship at the optimal lag
-- **Confidence bounds**: approximate 95% significance bands under the null of no cross-correlation
-- **CCF plot**: visual display of correlations across lags
-
-## Technical Details
-
-**Sample cross-correlation function**: For two series `x_t` and `y_t` of length T:
-
-`r_{xy}(k) = c_{xy}(k) / (s_x * s_y)`
-
-where the sample cross-covariance is:
-
-`c_{xy}(k) = (1/T) sum_{t=1}^{T-k} (x_t - x_bar)(y_{t+k} - y_bar)` for k >= 0
-`c_{xy}(k) = (1/T) sum_{t=1}^{T+k} (x_{t-k} - x_bar)(y_t - y_bar)` for k < 0
-
-and `s_x`, `s_y` are the sample standard deviations.
-
-**Lag sign convention**:
-- `r_{xy}(k) > 0` for k > 0: x leads y (x at time t is correlated with y at time t+k)
-- `r_{xy}(k) > 0` for k < 0: y leads x
-
-**Approximate confidence bounds**: Under the null hypothesis that x and y are independent white noise processes, the cross-correlations are approximately:
-
-`r_{xy}(k) ~ N(0, 1/T)`
-
-The 95% confidence bounds are approximately `+/- 1.96 / sqrt(T)`. Cross-correlations exceeding these bounds are considered significant.
-
-**Problem of spurious cross-correlation**: If both series are autocorrelated, the cross-correlation can be misleadingly high even when there is no true relationship. Sources of spurious cross-correlation:
-- Common trends in both series (remove trends first by differencing)
-- Shared seasonal patterns (deseasonalize first)
-- Autocorrelation inflating the variance of cross-correlation estimates
-
-**Prewhitening** (the recommended approach for identifying lag relationships):
-
-1. Fit an ARIMA model to the input series x_t and compute the residuals (white noise) alpha_t.
-2. Apply the exact same ARIMA filter to the output series y_t to get beta_t.
-3. Compute the CCF between alpha_t and beta_t.
-
-This removes the confounding effect of autocorrelation and produces reliable cross-correlation estimates. See the prewhitened CCF technique for details.
-
-**Confidence intervals with autocorrelation**: When prewhitening is not used, Bartlett's formula provides adjusted standard errors:
-
-`Var(r_{xy}(k)) approx (1/T) sum_{j=-inf}^{inf} [r_{xx}(j) r_{yy}(j) + r_{xy}(j+k) r_{yx}(j-k)]`
-
-This is more complex than the white noise bounds and requires estimating the autocovariance functions.
-
-**Practical guidelines**:
-- Always check and handle stationarity before computing the CCF.
-- Prewhitening is strongly recommended for reliable lag identification.
-- The maximum lag to examine should be small relative to T (typically T/4 or less).
-- Multiple significant lags may indicate a distributed lag relationship (transfer function model).
-- A single dominant peak suggests a simple delay.
-
-## Interpretation
-
-**Plain-Language Finding (Tier 1)** - static single-window CCF. Names leader/follower, lag, peak rho with correlation-strength adjective, Bartlett-band significance, single-window vs rolling caveat.
-
-**Technical Interpretation (Tier 2)** - static lag range, peak vs Bartlett band, pointer to prewhitening for autocorrelation-robust variant.
-
-**Caveats (Tier 3, conditional)**:
-- Insignificant peak (|rho| < band) - pair may be informationally independent.
-- Boundary peak (at +/-max_lag) - optimum outside search range.
+## Technical Detail
+The CCF is computed directly across lags up to the maximum. Positive lag = first series leads second. Correlations are normalized by default. The engine also computes an autocorrelation-corrected significance band using Bartlett's formula with an effective sample size, alongside the naive band, so you can judge whether a peak survives the autocorrelation adjustment.
+*Reference run:* a synthetic AR(1) pair where the first series leads the second by 5 periods (n=300), max lag 30, Balanced — the CCF peaks at lag +5 with correlation 0.96; autocorrelation-inflation factor 2.8 (effective sample 107 of 300), with 13 lags exceeding the band (the motivation for the prewhitened variant).

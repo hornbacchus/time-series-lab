@@ -3658,7 +3658,7 @@
           "default": 12,
           "required": false,
           "advanced": false,
-          "description": "Maximum number of lags to test",
+          "description": "Maximum number of lags tested. Default 12; the reported optimal lag is the most significant within this range. Clear the box to use a preset-aware default. Inputs should be stationary.",
           "options": null
         }
       ],
@@ -3694,7 +3694,7 @@
           "default": 30,
           "required": false,
           "advanced": false,
-          "description": "Maximum lag to compute",
+          "description": "Maximum lead/lag (in periods) searched in each direction. Default 30. Set it wider than the lead-lag you expect to see; clear the box for a preset-aware default.",
           "options": null
         }
       ],
@@ -3732,7 +3732,7 @@
           "default": 30,
           "required": false,
           "advanced": false,
-          "description": "Maximum lag to search",
+          "description": "Maximum lead/lag (in periods) searched after prewhitening. Default 30; clear the box for a preset-aware default.",
           "options": null
         }
       ],
@@ -3807,7 +3807,7 @@
           "default": 60,
           "required": false,
           "advanced": false,
-          "description": "Rolling window size",
+          "description": "Length of the rolling window (in periods). Default 60; shorter tracks faster changes but is noisier. Clear the box for a preset-adaptive window.",
           "options": null
         },
         {
@@ -3817,7 +3817,7 @@
           "default": 20,
           "required": false,
           "advanced": false,
-          "description": "Maximum lag per window",
+          "description": "Maximum lead/lag searched within each window. Default 20.",
           "options": null
         }
       ],

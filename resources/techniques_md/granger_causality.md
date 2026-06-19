@@ -1,82 +1,19 @@
-# Granger Causality Test
-
 ## What It Does
-
-The Granger causality test determines whether one time series is useful in **predicting** another. If past values of series X significantly improve the forecast of series Y (beyond what Y's own past provides), then X is said to "Granger-cause" Y. This is a test of predictive causality, not true causality -- it measures whether X contains information about Y's future that is not already in Y's own history.
+Granger causality tests whether one series' past values help predict another series, beyond what the second series' own past already explains. If adding the history of series A improves the forecast of series B, A is said to "Granger-cause" B. It is a test of *predictive precedence*, run as an F-test on whether the lagged terms of the candidate driver are jointly significant in a regression for the target.
 
 ## When to Use It
+- You want to know whether one series leads another in a predictive sense (does A's past forecast B).
+- You're screening which of several variables carry predictive information about a target.
+- You want a formal significance test, not just a correlation.
+- Use it for predictive lead-lag; use `cross_correlation_lag` for the lag at which two series co-move most strongly, or the regime/structural models when you need the actual mechanism.
 
-- You want to test whether one variable has predictive power for another
-- You are investigating lead-lag relationships between economic or financial variables
-- You need to justify including one variable as a predictor in a forecasting model for another
-- You want evidence (or lack thereof) for directional information flow between series
-- You are building a VAR model and want to understand which variables drive which
+## How to Read the Result
+The output is the test direction, the optimal lag, the F-statistic, and the p-value. Series order matters and is not obvious: the *second* series is the hypothesized cause and the *first* is the effect — the test asks whether series 2 Granger-causes series 1. On a synthetic pair where one series genuinely leads another by 5 periods, the test (with the leader as the second series) returns a significant result at lag 5 (F = 611.5, p < 0.0001), correctly recovering both the direction and the lag. The decisive caveat: *Granger causality is predictive, not structural.* "A Granger-causes B" means A's past helps predict B — it does **not** establish that A causes B; a common third driver or a lead-lag artifact can produce the same signal. Treat it as evidence of predictive precedence, not proof of a causal mechanism.
 
-## Key Assumptions
+## Related Techniques
+- *(use after)* `cross_correlation_lag` to see the lag structure of the relationship; the regime or VAR models for the joint dynamics.
+- *(alternatives)* `cross_correlation_lag` / `prewhitened_ccf_lag` for correlation-based lead-lag; a structural model when you need genuine causality, which no purely statistical test can establish.
 
-- Both series are stationary (or have been differenced to achieve stationarity)
-- The relationship between the series is linear
-- The chosen number of lags is sufficient to capture the predictive relationship
-- No important confounding variables are omitted from the model
-- The residuals are white noise (no remaining autocorrelation)
-
-## Outputs
-
-- **F-statistic** (or chi-squared statistic): the test statistic for joint significance of the lags of X in the Y equation
-- **p-value**: the probability of observing the test statistic under the null of no Granger causality
-- **Direction of causality**: X -> Y, Y -> X, bidirectional, or neither
-- **Selected lag order**: the number of lags used in the test
-- **Coefficient estimates**: the estimated effect of each lag of X on Y
-
-## Technical Details
-
-**Bivariate Granger causality test**: Test whether X Granger-causes Y by comparing two models:
-
-Unrestricted: `Y_t = c + sum_{i=1}^{p} alpha_i Y_{t-i} + sum_{j=1}^{p} beta_j X_{t-j} + u_t`
-
-Restricted: `Y_t = c + sum_{i=1}^{p} alpha_i Y_{t-i} + u_t`
-
-**Null hypothesis**: H0: `beta_1 = beta_2 = ... = beta_p = 0` (X does not Granger-cause Y)
-
-**Test statistic**: F-test comparing the restricted and unrestricted models:
-
-`F = ((RSS_R - RSS_U) / p) / (RSS_U / (T - 2p - 1))`
-
-Under H0, `F ~ F(p, T - 2p - 1)`.
-
-Alternatively, the Wald chi-squared test: `W = T * (RSS_R - RSS_U) / RSS_U ~ chi^2(p)` under H0.
-
-**Lag selection**: Critical for the validity of the test. Too few lags may miss the predictive relationship; too many reduce power. Choose p using:
-- AIC or BIC on the unrestricted VAR(p) model for both variables
-- Ensure residuals from the selected lag order are white noise (Ljung-Box test)
-
-**Conditional Granger causality**: In a multivariate system with additional variables Z:
-
-`Y_t = c + sum alpha_i Y_{t-i} + sum beta_j X_{t-j} + sum gamma_k Z_{t-k} + u_t`
-
-Test `beta_1 = ... = beta_p = 0`. This tests whether X predicts Y beyond what both Y and Z provide, addressing potential confounding by Z.
-
-**Toda-Yamamoto approach**: When the stationarity status is uncertain, fit a VAR(p + d_max) in levels (where d_max is the maximum order of integration) but test only the first p lags. This avoids pre-testing for unit roots and cointegration while maintaining the chi-squared distribution of the test statistic.
-
-**Interpretation pitfalls**:
-- Granger causality is about prediction, not causation. X may Granger-cause Y because both respond to a common unobserved factor, with X responding faster.
-- Failure to reject may occur due to insufficient lag length, nonlinear relationships, or low power.
-- Bidirectional Granger causality (feedback) is common in economics and does not indicate simultaneous causation.
-- The test is sensitive to the information set: adding or removing variables can change the results.
-
-**Nonlinear Granger causality**: Extensions using nonparametric methods (Diks-Panchenko test) or transfer entropy measure whether X provides nonlinear predictive information about Y beyond the linear relationship captured by the standard test.
-
-## Interpretation
-
-Every Granger causality run emits a two-tier plain-language Interpretation block between the one-line Summary and the Warnings section.
-
-**Plain-Language Finding (Tier 1)** - 2-4 sentences, no Greek letters outside citation form. States the direction of predictive flow at the best lag and whether the reverse channel is also significant, then the practical implication for forecasting.
-
-**Technical Interpretation (Tier 2)** - names the test (Granger F-test, SSR-based), discloses the lag-range searched, cites the strongest-lag F-statistic and p-value, and names whether the reverse-direction test was run at this preset.
-
-**Caveats (Tier 3, conditional)** - italic gray bullets, one per trigger:
-- **Bidirectional causality** - both the forward and reverse tests reject at alpha. Signals a feedback loop rather than one-way causation.
-- **Borderline p-value** - best-lag p sits in (0.04, 0.06); the verdict is sensitive to the significance level and names the direction of the potential flip.
-- **Small sample** - n < 50; Granger tests have limited power in this range.
-
-Deterministic: identical inputs produce bit-identical output. The wrapper does not invent economic narrative.
+## Technical Detail
+Estimation is statsmodels `grangercausalitytests` — for each lag up to the maximum, an F-test compares a regression of the target on its own lags against one that adds the candidate driver's lags. The reported optimal lag is the one with the smallest p-value across the search (not an information-criterion choice). Inputs must be stationary (difference them first if not), or the test can spuriously reject. The series order convention is that the second series is the hypothesized cause; the reverse-direction test is also run under the Thorough preset.
+*Reference run:* a synthetic AR(1) pair where one series leads another by 5 periods (n=300), max lag 12, Balanced, with the leader as the second series — the leader Granger-causes the follower at optimal lag 5 (F = 611.5, p < 0.0001), recovering the true lag.
