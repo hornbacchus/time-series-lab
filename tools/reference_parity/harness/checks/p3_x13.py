@@ -170,11 +170,20 @@ class X13Parity(P3ParityCheck):
         y = np.asarray(fixture["y"], dtype=np.float64)
         # Will raise RPackageMissingError (→ SKIP) if seasonal
         # package isn't installed (typical Windows scenario).
+        # Phase 2 (SEATS mode-switch) fix: force X-11 via x11="".
+        # R seas() DEFAULTS to SEATS, but the TSL arm runs X-11
+        # (method="x11", the byte-identical default) — so the
+        # bare seas(y_ts) latently compared X-11 vs SEATS and only
+        # "passed" by SKIPping while seasonal was uninstalled.
+        # Installing seasonal for p3_x13_seats would otherwise turn
+        # this into a collateral BLOCK. x11="" makes it a true
+        # X-11-vs-X-11 back-compat gate (agrees to machine
+        # precision on the calendar-effect-free DGP).
         r_code = rf"""
             suppressPackageStartupMessages({{ library(seasonal) }})
             y <- as.numeric(read.csv("{{{{INPUT_y}}}}", header=FALSE)[, 1])
             y_ts <- ts(y, start = c(2010, 1), frequency = {self.PERIOD})
-            res <- seas(y_ts)
+            res <- seas(y_ts, x11 = "")
             seasadj <- as.numeric(final(res))
             trend <- as.numeric(trend(res))
             write.table(matrix(seasadj, ncol=1), "{{{{OUTPUT_seasadj}}}}",

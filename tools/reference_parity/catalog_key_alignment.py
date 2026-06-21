@@ -128,7 +128,11 @@ KNOWN_INERT: dict[str, list[str]] = {
     # pattern; catalog int->string default "auto"; the same unit also fixed the
     # vecm coint_rank="auto" default-path crash -- coint_rank was never
     # baselined here, the guard is name-blind to read-but-crashes; A-batch).
-    "x13_seasonal_adjust": ["method"],                         # C
+    # x13_seasonal_adjust method: FIXED (Phase-2 SEATS mode-switch build) --
+    # the engine now reads `method` and branches the decomposition spec
+    # (x11{}/seats{}) + the S-table extraction; default flipped to "x11"
+    # (byte-identical back-compat). Removed from the baseline; the guard now
+    # enforces it (backlog 18 -> 17).
 }
 
 

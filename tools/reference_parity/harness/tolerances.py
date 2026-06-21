@@ -3463,6 +3463,30 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_x13_seats": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "justification": (
+            "X-13 SEATS mode (Phase-2 mode-switch build). SAME-BINARY "
+            "CROSS-WRAPPER tier: TSL drives the Census X-13 binary's "
+            "seats{} spec directly; R seasonal::seas() defaults to SEATS "
+            "over the same binary. Validates the engine's spec-writing + "
+            "S-table (s10/s11/s12/s13) extraction against the reference "
+            "standard -- NOT an independent algorithm re-derivation (none "
+            "exists; all wrap the Census binary). With aligned specs the "
+            "arms agree to machine precision (measured rel 0.0 on airline "
+            "and the DGP); the 1e-3/1e-2 band mirrors p3_x13. SKIP-graceful "
+            "when seasonal/binary absent -- the run_tsl invariants "
+            "(S-tables present, reconstruction identity, SEATS != X-11) "
+            "still enforce a correct decomposition R-independently."
+        ),
+    },
+
     # ------------------------------------------------------------------
     # Bond Yield Forecast (BYF integration Session 4)
     # ------------------------------------------------------------------

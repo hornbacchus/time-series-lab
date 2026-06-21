@@ -149,7 +149,7 @@ def _infer_period(ctx):
 
 def _write_x13_spec(spec_path, data_path, period, transform, outlier,
                     start_year, start_period, arima_model=None,
-                    covid_outliers=False, n_obs=0):
+                    covid_outliers=False, n_obs=0, method="x11"):
     """Write an X-13 spec file.
 
     If ``arima_model`` is None, use automdl (automatic model selection).
@@ -225,15 +225,26 @@ def _write_x13_spec(spec_path, data_path, period, transform, outlier,
         spec_lines.append("outlier{}")
         spec_lines.append("")
 
-    # X-11 decomposition. Default X-11 mode is "mult" (multiplicative),
-    # which requires strictly positive values. When the caller chose no
-    # transform (typical for change/flow series with negatives), force
-    # additive decomposition instead.
-    spec_lines.append("x11{")
-    if transform == "none":
-        spec_lines.append("  mode = add")
-    spec_lines.append("  save = (d10 d11 d12 d13)")
-    spec_lines.append("}")
+    # Decomposition block. X-11 (the default) is the Census moving-average
+    # seasonal adjustment; SEATS is the model-based ARIMA-SEATS signal
+    # extraction driven by the regARIMA model fitted above (automdl / arima).
+    # Both save the analogous decomposition tables — d10/d11/d12/d13 for X-11,
+    # s10/s11/s12/s13 for SEATS — read back by method downstream. The additive
+    # vs multiplicative choice is carried by the transform block above for both
+    # (SEATS has no mode= keyword; transform=none -> additive decomposition).
+    if method == "seats":
+        spec_lines.append("seats{")
+        spec_lines.append("  save = (s10 s11 s12 s13)")
+        spec_lines.append("}")
+    else:
+        # X-11 default mode is "mult" (multiplicative), which requires
+        # strictly positive values. When the caller chose no transform
+        # (typical for change/flow series with negatives), force additive.
+        spec_lines.append("x11{")
+        if transform == "none":
+            spec_lines.append("  mode = add")
+        spec_lines.append("  save = (d10 d11 d12 d13)")
+        spec_lines.append("}")
 
     with open(spec_path, "w") as f:
         f.write("\n".join(spec_lines))
@@ -401,6 +412,26 @@ def run(ctx: RunContext, progress_callback) -> dict:
         preset_cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
         transform = ctx.get_param("transform", preset_cfg["transform"])
         outlier = ctx.get_param("outlier", preset_cfg["outlier"])
+        # Seasonal-adjustment method. X-11 (default) is the Census
+        # moving-average adjustment; SEATS is the model-based ARIMA-SEATS
+        # signal extraction. Previously this control was inert (the engine
+        # hardwired X-11); it now selects the decomposition block written
+        # below. Allowlist-gated like `transform`.
+        method = ctx.get_param("method", "x11")
+        if isinstance(method, str):
+            method = method.strip().lower()
+        _METHOD_OPTS = ("x11", "seats")
+        if method not in _METHOD_OPTS:
+            return make_error_response(
+                ctx,
+                f"Unknown method '{method}'. Must be one of: "
+                f"{', '.join(_METHOD_OPTS)}.",
+                error_fixes=[
+                    "Use 'x11' (default; the Census X-11 moving-average "
+                    "seasonal adjustment) or 'seats' (the model-based "
+                    "ARIMA-SEATS signal-extraction alternative).",
+                ],
+            )
         # CAI Phase 2 Session 16 fix (F-CD-X13-TRANSFORM): explicit
         # allowlist gate. Pre-fix, invalid `transform` strings fell
         # through silently — _write_x13_spec emitted no transform
@@ -501,7 +532,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
         x13_binary = _find_x13_binary()
 
         if x13_binary is None:
-            # Try statsmodels as last resort
+            # Try statsmodels as last resort. The statsmodels wrapper performs
+            # X-11 only; if the caller asked for SEATS, disclose that X-11 ran.
+            if method == "seats":
+                warn_list.append(
+                    "SEATS requires the X-13 binary, which was not found; "
+                    "the statsmodels fallback performs X-11 adjustment instead."
+                )
             progress_callback("X-13 binary not found, trying statsmodels wrapper", 20)
             start_date_str = f"{start_year}-{start_period:02d}-01" if period == 12 else None
 
@@ -574,7 +611,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     _write_x13_spec(
                         spec_path, data_path, period, transform, outlier,
                         start_year, start_period, arima_model=arima_model,
-                        covid_outliers=covid_outliers, n_obs=n,
+                        covid_outliers=covid_outliers, n_obs=n, method=method,
                     )
                     r = subprocess.run(
                         [x13_binary, spec_stem],
@@ -728,33 +765,53 @@ def run(ctx: RunContext, progress_callback) -> dict:
                     return np.array(vals) if vals else None
 
                 # Try standard X-13 output file names. Files are created
-                # in the cwd (tmpdir) using the spec stem as the base.
-                sa = _read_x13_output(spec_stem + ".d11")  # seasonally adjusted
-                trend = _read_x13_output(spec_stem + ".d12")  # trend
-                seasonal = _read_x13_output(spec_stem + ".d10")  # seasonal factors
-                irregular = _read_x13_output(spec_stem + ".d13")  # irregular
+                # in the cwd (tmpdir) using the spec stem as the base. X-11
+                # writes d10/d11/d12/d13; SEATS writes the analogous
+                # s10/s11/s12/s13 — the same four series (seasonal / SA /
+                # trend / irregular) into the same output contract.
+                _sa_t, _tr_t, _se_t, _ir_t = (
+                    ("s11", "s12", "s10", "s13") if method == "seats"
+                    else ("d11", "d12", "d10", "d13")
+                )
+                sa = _read_x13_output(spec_stem + "." + _sa_t)  # seasonally adjusted
+                trend = _read_x13_output(spec_stem + "." + _tr_t)  # trend
+                seasonal = _read_x13_output(spec_stem + "." + _se_t)  # seasonal factors
+                irregular = _read_x13_output(spec_stem + "." + _ir_t)  # irregular
 
                 if sa is None:
-                    # X-13 finished but produced no d11 table — surface this
+                    # X-13 finished but produced no SA table — surface this
                     # instead of silently returning the raw input. List any
-                    # files we did see so the user can diagnose.
+                    # files we did see so the user can diagnose. For SEATS the
+                    # SA table is .s11 (e.g. when the regARIMA model is not
+                    # SEATS-decomposable); for X-11 it is .d11.
                     present = sorted(
                         f for f in os.listdir(tmpdir)
                         if f.startswith(os.path.basename(spec_stem))
                     )
+                    _sa_ext = ".s11" if method == "seats" else ".d11"
+                    _method_fixes = (
+                        ["Try method=x11 if the fitted ARIMA model is not "
+                         "SEATS-decomposable for this series."]
+                        if method == "seats" else []
+                    )
                     return make_error_response(
                         ctx,
                         "X-13 did not produce a seasonally-adjusted series "
-                        "(.d11 file missing). "
+                        f"({_sa_ext} file missing). "
                         f"Files present: {', '.join(present) or '(none)'}",
                         error_fixes=[
                             "Check that the series has clear seasonality (12 or 4 periods).",
                             "Try transform=none if the series contains zeros or negatives.",
                             "Try period=4 for quarterly data if period=12 was inferred wrongly.",
-                        ],
+                        ] + _method_fixes,
                     )
 
+            # Keep the X-11 backend string byte-identical to pre-SEATS builds
+            # (the additive feature must not perturb the default path); only
+            # SEATS annotates the mode. method is also recorded in audit_fields.
             backend_note = f"X-13 binary ({x13_binary})"
+            if method == "seats":
+                backend_note += ", method=SEATS"
             clean_values = values
 
         progress_callback("Building output", 80)
@@ -860,6 +917,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
             interpretation=interp,
             audit_fields={
                 "backend": backend_note,
+                "method": method,
                 "period": period,
                 "transform": transform,
                 "outlier": outlier,

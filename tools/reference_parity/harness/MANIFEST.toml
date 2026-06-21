@@ -110,8 +110,7 @@ robustbase = "0.99.7"
 # Session 14 (Batch 10 final): lmtest for p3_granger (Granger
 # F-test); tempdisagg for p3_denton_chowlin; forecastHybrid
 # documented but not consumed this batch (forecast_combination
-# uses self-parity reference). seasonal NOT pinned — X-13 binary
-# required; p3_x13 SKIPs gracefully when unavailable.
+# uses self-parity reference).
 lmtest = "0.9.40"
 tempdisagg = "1.2.0"
 dtw = "1.23.2"
@@ -123,6 +122,13 @@ forecastHybrid = "5.1.21"
 # (5e-3 abs / 5e-2 rel). Pre-flight verified at S4 (v1.0.5
 # installs cleanly on R 4.5.3).
 BVAR = "1.0.5"
+# Phase 2 (SEATS mode-switch build, 2026-06-21): seasonal wraps the same
+# Census X-13 binary TSL drives; seas() defaults to SEATS. Now consumed by
+# p3_x13_seats (engine SEATS vs R SEATS, machine-precision agreement) and by
+# the X-11 fix to p3_x13 (seas(x11="")). x13binary bundles the binary the R
+# arm uses. Both checks remain SKIP-graceful when these are unavailable.
+x13binary = "1.1.61.2"
+seasonal = "1.10.0"
 
 [python]
 version = "3.14"

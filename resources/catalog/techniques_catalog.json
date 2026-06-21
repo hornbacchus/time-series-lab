@@ -167,10 +167,10 @@
           "name": "method",
           "label": "Method",
           "type": "string",
-          "default": "seats",
+          "default": "x11",
           "required": false,
           "advanced": false,
-          "description": "SEATS or X11",
+          "description": "Seasonal-adjustment method: x11 (the agency-standard Census X-11 moving-average adjustment, the default) or seats (the model-based ARIMA-SEATS alternative, which uses the fitted regARIMA model to decompose the series in the frequency domain). X-11 is the default.",
           "options": [
             "seats",
             "x11"
