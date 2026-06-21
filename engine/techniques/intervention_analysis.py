@@ -13,6 +13,8 @@ The model is: Y_t = ARIMA(p,d,q) + sum_i(omega_i * D_i(t)) + eps_t
 where D_i(t) are intervention dummy variables.
 """
 
+import re
+
 import numpy as np
 
 try:
@@ -79,14 +81,38 @@ def run(ctx: RunContext, progress_callback) -> dict:
 
         n = len(filled)
 
-        # Parse interventions
+        # Parse interventions. Precedence: an explicit `interventions` list
+        # (UDF / programmatic back-compat) > the flat dialog inputs
+        # (intervention_dates + intervention_type) > auto-detect.
+        # F-CP-INT-WIRE: the dialog's flat date/type inputs were previously never
+        # read (the engine always auto-detected, silently ignoring user-specified
+        # interventions); they are now translated into the interventions list here
+        # and fed to the existing _parse_interventions (which already resolves a
+        # 'time' date against the time column or an integer 'index').
         interventions_raw = ctx.get_param("interventions")
         if interventions_raw is None or not isinstance(interventions_raw, list) or len(interventions_raw) == 0:
-            # If no interventions specified, try to auto-detect one via structural break
-            warnings.append(
-                "No interventions specified. Auto-detecting a single structural break point."
-            )
-            interventions_raw = [_auto_detect_intervention(filled, ctx.time)]
+            dates_param = ctx.get_param("intervention_dates")
+            if dates_param is not None and str(dates_param).strip():
+                itype = str(ctx.get_param("intervention_type", "step")).strip().lower()
+                interventions_raw = []
+                for j, tok in enumerate(str(dates_param).split(",")):
+                    tok = tok.strip()
+                    if not tok:
+                        continue
+                    spec = {"type": itype, "name": f"Intervention {j + 1}"}
+                    # An integer token is an observation position; anything else is
+                    # a date matched against the time column by _parse_interventions.
+                    if re.fullmatch(r"-?\d+", tok):
+                        spec["index"] = int(tok)
+                    else:
+                        spec["time"] = tok
+                    interventions_raw.append(spec)
+            else:
+                # No interventions specified -> auto-detect a single structural break.
+                warnings.append(
+                    "No interventions specified. Auto-detecting a single structural break point."
+                )
+                interventions_raw = [_auto_detect_intervention(filled, ctx.time)]
 
         interventions = _parse_interventions(interventions_raw, n, ctx.time)
 

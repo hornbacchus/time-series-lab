@@ -3226,6 +3226,20 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_intervention_wiring": {
+        "type": "integrity_assertion",
+        "expected_n_interventions": 2,
+        "justification": (
+            "intervention_analysis WIRING discrimination (F-CP-INT-WIRE): the flat "
+            "dialog inputs (intervention_dates + intervention_type) must reach the "
+            "engine. On a TWO-intervention fixture, supplying the flat inputs must "
+            "yield n_interventions == 2 at the user's indices -- the pre-fix engine "
+            "ignored the flat inputs and auto-detected a SINGLE break (n == 1), so "
+            "n==2 + matching indices discriminates the wired build from the broken "
+            "one. Hard assertions, not a numeric parity band."
+        ),
+    },
+
     "p3_structural_ts_level_default": {
         "type": "integrity_assertion",
         "rmse_degenerate_band": 300.0,

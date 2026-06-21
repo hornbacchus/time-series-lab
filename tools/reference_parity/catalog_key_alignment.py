@@ -98,7 +98,11 @@ KNOWN_INERT: dict[str, list[str]] = {
     # default blank -> preset cfg (byte-identical) -> removed from the baseline.
     # har_rv horizon: FIXED (engine-wired -> h_ahead; catalog default corrected
     # 10->1 to state the delivered value; A-batch).
-    "intervention_analysis": ["intervention_dates", "intervention_type"],  # C (vs interventions/order)
+    # intervention_analysis intervention_dates/intervention_type: FIXED (Phase-1
+    # defect #3) -- the engine now reads the flat dialog inputs and translates
+    # them into its interventions list (precedence: explicit interventions list >
+    # flat dates/type > auto-detect) -> removed from the baseline; the guard now
+    # enforces them (backlog 20 -> 18).
     # johansen_cointegration k_ar_diff: FIXED (engine-wired -> lag via the adf
     # string-sentinel pattern; catalog int->string default "auto"; A-batch).
     "lomb_scargle": ["min_period", "max_period"],              # B inverse (period=1/freq)

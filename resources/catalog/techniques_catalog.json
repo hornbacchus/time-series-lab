@@ -3597,7 +3597,7 @@
           "default": "",
           "required": true,
           "advanced": false,
-          "description": "Comma-separated intervention dates (YYYY-MM-DD)",
+          "description": "Comma-separated dates (YYYY-MM-DD) of known interventions to model, or integer observation positions for an undated series (e.g. 120,160). Leave blank to auto-detect a single intervention. Each date/position is modeled with the type below.",
           "options": null
         },
         {
@@ -3607,7 +3607,7 @@
           "default": "step",
           "required": false,
           "advanced": false,
-          "description": "Type of intervention effect",
+          "description": "Shape of the intervention effect applied to every listed date: step (a permanent level shift), pulse (a one-period spike), or ramp (a gradual sustained change).",
           "options": [
             "step",
             "pulse",
