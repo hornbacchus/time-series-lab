@@ -117,12 +117,19 @@ def run(ctx: RunContext, progress_callback) -> dict:
         x = x_clean - np.mean(x_clean)
         y = y_clean - np.mean(y_clean)
 
-        # FFT length (next power of 2 for efficiency, with zero-padding for interpolation)
-        nfft = int(2 ** np.ceil(np.log2(2 * n - 1))) * interp_factor
+        # FFT length. The cross-spectrum is computed at the BASE length and the
+        # GCC is interpolated by frequency-domain zero-padding on the inverse
+        # transform (irfft to a longer length), which genuinely sinc-interpolates
+        # the cross-correlation to 1/interp_factor sample resolution. The prior
+        # build zero-padded x/y in the TIME domain, which does NOT interpolate the
+        # correlation, so the reported delay was mis-scaled by interp_factor
+        # (F-CL-GCC-DELAY fix; the bug also sign-flipped the read-off, see below).
+        n_base = int(2 ** np.ceil(np.log2(2 * n - 1)))
+        nfft = n_base * interp_factor
 
-        # Cross-power spectrum
-        X = np.fft.rfft(x, n=nfft)
-        Y = np.fft.rfft(y, n=nfft)
+        # Cross-power spectrum (computed at the base length)
+        X = np.fft.rfft(x, n=n_base)
+        Y = np.fft.rfft(y, n=n_base)
         Gxy = X * np.conj(Y)
 
         # Apply weighting
@@ -138,15 +145,21 @@ def run(ctx: RunContext, progress_callback) -> dict:
         else:  # unfiltered
             W = np.ones_like(Gxy, dtype=float)
 
-        # GCC
-        gcc = np.fft.irfft(Gxy * W, n=nfft)
+        # GCC. irfft to nfft = n_base * interp_factor zero-pads the spectrum in the
+        # frequency domain (= genuine sinc interpolation). The * interp_factor
+        # restores the base-length peak height that the 1/N irfft normalization
+        # would otherwise shrink (SNR is scale-invariant, so this leaves SNR alone).
+        gcc = np.fft.irfft(Gxy * W, n=nfft) * interp_factor
 
         # Rearrange to center the zero lag
         gcc = np.fft.fftshift(gcc)
         center = nfft // 2
 
-        # Lag axis (in samples, accounting for interpolation)
-        lags_samples = (np.arange(nfft) - center) / interp_factor
+        # Lag axis (in real samples; 1/interp_factor resolution). Sign convention:
+        # positive lag = the FIRST series ('{x}') leads the second ('{y}'), to match
+        # cross_correlation_lag. Gxy = X*conj(Y) peaks at -D for y[t]=x[t-D], so the
+        # axis is negated to report the delay D with the correct sign.
+        lags_samples = -(np.arange(nfft) - center) / interp_factor
         lags_time = lags_samples / fs
 
         # Restrict to max_lag
@@ -189,8 +202,8 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 x_b = np.concatenate([x[s:s + block_size] for s in block_starts])[:n]
                 y_b = np.concatenate([y[s:s + block_size] for s in block_starts])[:n]
 
-                X_b = np.fft.rfft(x_b, n=nfft)
-                Y_b = np.fft.rfft(y_b, n=nfft)
+                X_b = np.fft.rfft(x_b, n=n_base)
+                Y_b = np.fft.rfft(y_b, n=n_base)
                 Gxy_b = X_b * np.conj(Y_b)
 
                 if weighting == "phat":
@@ -198,7 +211,10 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 else:
                     W_b = np.ones_like(Gxy_b, dtype=float)
 
-                gcc_b = np.fft.irfft(Gxy_b * W_b, n=nfft)
+                # Same base-length + frequency-domain-interpolation scheme as the
+                # main GCC, so the CI inherits the corrected (signed, real-sample)
+                # lag axis via lags_restricted.
+                gcc_b = np.fft.irfft(Gxy_b * W_b, n=nfft) * interp_factor
                 gcc_b = np.fft.fftshift(gcc_b)
                 gcc_b_r = gcc_b[lag_mask]
                 pi_b = np.argmax(gcc_b_r)
@@ -262,13 +278,14 @@ def run(ctx: RunContext, progress_callback) -> dict:
             gcc_rows,
         )
 
-        # Determine lead/lag direction
+        # Determine lead/lag direction. Positive delay = first series ('{x}') leads
+        # the second ('{y}'), matching cross_correlation_lag's convention.
         if abs(estimated_delay_samples) < 0.5:
             direction = f"'{x_name}' and '{y_name}' are approximately synchronized"
         elif estimated_delay_samples > 0:
-            direction = f"'{y_name}' leads '{x_name}' by {abs(estimated_delay_time):.3f} time units"
-        else:
             direction = f"'{x_name}' leads '{y_name}' by {abs(estimated_delay_time):.3f} time units"
+        else:
+            direction = f"'{y_name}' leads '{x_name}' by {abs(estimated_delay_time):.3f} time units"
 
         # Peak sharpness (quality indicator)
         gcc_std = float(np.std(gcc_restricted))

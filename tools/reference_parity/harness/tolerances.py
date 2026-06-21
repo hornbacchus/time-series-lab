@@ -3200,10 +3200,29 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         },
         "justification": (
             "GCC-PHAT delay is integer-valued (argmax of cross-"
-            "correlation peak). Self-parity reference; bit-exact "
+            "correlation peak). Engine-vs-Knapp-Carter reference; bit-exact "
             "delay match expected. Block band 1.0 absolute "
             "accommodates a potential boundary-tie-break ±1 sample "
             "without escalating to BLOCK."
+        ),
+    },
+
+    "p3_gcc_phat_recovery": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 0.05,
+            "rel_tol": 0.0,
+            "block_abs_tol": 0.35,
+            "block_rel_tol": 0.0,
+        },
+        "justification": (
+            "GCC-PHAT delay-RECOVERY discrimination (F-CL-GCC-DELAY): the "
+            "engine must recover an injected known delay across sign (+5/-5), "
+            "scale (exact on Fast/Balanced/Thorough = interp_factor 1/4/16), and "
+            "sub-sample (fractional delays to the interpolation grid at "
+            "Balanced/Thorough). abs_tol 0.05 passes exact integer + on-grid "
+            "fractional recovery; block 0.35 FAILS the pre-fix read-off (which "
+            "reported -true/interp = -5.0/-1.25/-0.31, all >0.35 from truth)."
         ),
     },
 
