@@ -345,6 +345,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 "alpha": alpha,
                 "direction": direction,
                 "max_anomalies_pct": max_anomalies_pct,
+                "max_anomalies": int(max_anomalies),
                 "n_anomalies": n_anomalies,
                 "anomaly_rate": round(n_anomalies / n, 6),
                 "median_remainder": round(median_r, 6),

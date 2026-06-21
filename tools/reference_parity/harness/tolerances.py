@@ -3226,6 +3226,21 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_stl_max_anomalies_cap": {
+        "type": "integrity_assertion",
+        "expected_max_anomalies_fraction": 0.10,
+        "justification": (
+            "stl_esd_anomaly UNIT discrimination (F-STL-PCT-UNIT): the engine "
+            "reads max_anomalies_pct as a FRACTION (int(n * pct)). The catalog "
+            "default was 10.0 -> cap 10n, clamped to the structural max n//2 "
+            "(the 10% ceiling silently DISABLED). The fix sets the default to "
+            "0.10. On a clean fixture the computed cap must equal "
+            "max(1, int(0.10 * n)) AND be < n//2 -- the intended 10% ceiling, "
+            "not the disabled structural max. Pre-fix (10.0) yields cap == n//2 "
+            "-> BLOCK. Hard assertions on the engine's computed cap, not a band."
+        ),
+    },
+
     "p3_intervention_wiring": {
         "type": "integrity_assertion",
         "expected_n_interventions": 2,

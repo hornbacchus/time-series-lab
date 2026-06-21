@@ -3545,12 +3545,12 @@
       "parameters": [
         {
           "name": "max_anomalies_pct",
-          "label": "Max Anomalies %",
+          "label": "Max Anomaly Fraction",
           "type": "float",
-          "default": 10.0,
+          "default": 0.1,
           "required": false,
           "advanced": false,
-          "description": "Maximum percentage of points that can be anomalies",
+          "description": "Maximum fraction of points that can be flagged as anomalies (0.0-1.0; e.g. 0.10 = 10%). Caps the ESD search; the default 0.10 limits flags to 10% of the series.",
           "options": null
         },
         {
