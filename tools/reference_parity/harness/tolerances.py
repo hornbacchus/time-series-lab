@@ -3226,6 +3226,21 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_structural_ts_level_default": {
+        "type": "integrity_assertion",
+        "rmse_degenerate_band": 300.0,
+        "justification": (
+            "structural_ts dialog-default QUALITY gate (Phase-1 defect #2). Hard "
+            "assertions, not a numeric parity band: the catalog `level` default "
+            "must be a STRING spec (not the broken bool), the fitted "
+            "decomposition must include a Trend component, and RMSE must be "
+            "non-degenerate (<= 300; the bool-default degenerate model produced "
+            "~1210 on airline). The Trend-present + string-default asserts are "
+            "the primary fixture-independent discriminators; the RMSE band is a "
+            "secondary sanity check."
+        ),
+    },
+
     "p3_dtw": {
         "type": "tiered_outputs",
         "primary": {

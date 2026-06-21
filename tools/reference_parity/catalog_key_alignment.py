@@ -115,7 +115,10 @@ KNOWN_INERT: dict[str, list[str]] = {
     # {LSTAR,ESTAR,both}); null defaults preserve the preset-aware/data-driven
     # engine defaults (Thorough star_type="both") -> removed from the baseline.
     "stl_decompose": ["seasonal_window"],                      # A/C -> seasonal (verify semantics)
-    "structural_ts": ["trend"],                                # C (reads level/autoregressive)
+    # structural_ts trend: FIXED (Phase-1 defect #2) -- the inert bool `trend`
+    # was REMOVED from the catalog (level bool->string-enum exposes the actual
+    # spec; the level spec encompasses the trend) -> removed from the baseline;
+    # the guard now enforces it (backlog 21 -> 20).
     "tar_setar": ["max_lag"],                                  # A -> ar_order
     # vecm k_ar_diff: FIXED (engine-wired -> lag via the adf string-sentinel
     # pattern; catalog int->string default "auto"; the same unit also fixed the

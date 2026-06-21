@@ -1814,22 +1814,12 @@
         {
           "name": "level",
           "label": "Level",
-          "type": "bool",
-          "default": true,
+          "type": "string",
+          "default": "local linear trend",
           "required": false,
           "advanced": false,
-          "description": "Level/trend specification for the decomposition. The model fits a local-linear-trend level by default (a level with an evolving slope); leave it at the default for the standard trend-plus-seasonal-plus-cycle decomposition.",
-          "options": null
-        },
-        {
-          "name": "trend",
-          "label": "Trend",
-          "type": "bool",
-          "default": true,
-          "required": false,
-          "advanced": false,
-          "description": "Include stochastic trend/slope",
-          "options": null
+          "description": "Level/trend specification for the decomposition. Default 'local linear trend' (a level with an evolving slope — the standard trend-plus-seasonal-plus-cycle model). Other choices: 'local level' (a drifting level, no trend), 'smooth trend' (a smoothly-evolving trend), 'deterministic trend' (a fixed straight-line trend).",
+          "options": ["local level", "local linear trend", "smooth trend", "deterministic trend"]
         },
         {
           "name": "seasonal",
