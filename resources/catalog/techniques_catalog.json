@@ -3770,7 +3770,7 @@
           "default": 30,
           "required": false,
           "advanced": false,
-          "description": "Maximum lag to search",
+          "description": "Maximum delay (in samples) searched in each direction. Default 30. Set it wider than the largest delay you expect; the peak is found within this range.",
           "options": null
         }
       ],
