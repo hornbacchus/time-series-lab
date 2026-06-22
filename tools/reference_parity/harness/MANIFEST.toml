@@ -122,13 +122,19 @@ forecastHybrid = "5.1.21"
 # (5e-3 abs / 5e-2 rel). Pre-flight verified at S4 (v1.0.5
 # installs cleanly on R 4.5.3).
 BVAR = "1.0.5"
-# Phase 2 (SEATS mode-switch build, 2026-06-21): seasonal wraps the same
-# Census X-13 binary TSL drives; seas() defaults to SEATS. Now consumed by
-# p3_x13_seats (engine SEATS vs R SEATS, machine-precision agreement) and by
-# the X-11 fix to p3_x13 (seas(x11="")). x13binary bundles the binary the R
-# arm uses. Both checks remain SKIP-graceful when these are unavailable.
-x13binary = "1.1.61.2"
-seasonal = "1.10.0"
+# Phase 2 (SEATS mode-switch build, 2026-06-21) — x13binary + seasonal are
+# LINUX-SLOW-JOB-ONLY extras, intentionally NOT listed as [r.packages] keys.
+# They wrap the same Census X-13 binary TSL drives (seas() defaults to SEATS);
+# consumed by p3_x13_seats (engine SEATS vs R SEATS, machine-precision
+# agreement) and the X-11 fix to p3_x13 (seas(x11="")), both tier=slow and
+# SKIP-graceful when unavailable. The Windows slow runner omits them (the
+# x13binary Windows binary bundles into a non-functional path; X-13 checks SKIP
+# there). Per validate_install_matrix's design — Linux-only packages live in
+# the slow-Linux job, NOT in MANIFEST (else the four-surface gate, Rule 1, would
+# require them on Windows too) — they must stay OUT of this table. Pinned
+# versions for local reproducibility (installed into the [r] libs_user above):
+# x13binary 1.1.61.2, seasonal 1.10.0. [Fix: Phase-2 MANIFEST pin omission that
+# failed the gate on the Phase-3 CI runs; corrected forward.]
 
 [python]
 version = "3.14"
