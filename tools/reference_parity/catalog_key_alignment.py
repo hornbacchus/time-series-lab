@@ -69,9 +69,11 @@ KNOWN_INERT: dict[str, list[str]] = {
     # now enforces it.
     # auto_arima ic: FIXED (engine-wired -> information_criterion; catalog
     # default corrected aicc->aic to state the delivered value; A-batch).
-    "autoencoder_anomaly": ["threshold_sigma", "encoding_dim"],  # C
+    "autoencoder_anomaly": ["threshold_sigma"],  # C (encoding_dim FIXED P3-A -> hidden_dim)
     "block_bootstrap": ["statistic"],                          # C
-    "bocpd": ["hazard_rate"],                                  # B inverse of hazard_lambda
+    # bocpd hazard_rate: FIXED (Phase-3 batch A) -- renamed -> hazard_lambda (the
+    # engine's key for the SAME expected-run-length quantity; "hazard_rate" was a
+    # misnomer, NOT an inverse). Default 250->200 (= engine default, byte-identical).
     # bvar lambda_shrinkage: FIXED (engine-wired -> lambda1; Commit pending) ->
     # removed from the baseline; the guard now enforces it.
     # caviar_quantile_dynamics quantile + model_type: FIXED (engine-wired ->
@@ -86,7 +88,7 @@ KNOWN_INERT: dict[str, list[str]] = {
     # identical) -> removed from the baseline; the guard now enforces them.
     "denton_chowlin_disaggregation": ["target_frequency"],     # B (vs conversion_ratio)
     "dtw_alignment_lag": ["max_warp"],                         # C (vs window_frac)
-    "fft_spectrum": ["top_n"],                                 # A -> n_top
+    # fft_spectrum top_n: FIXED (Phase-3 batch A) -- renamed -> n_top (clean).
     # forecast_combination models + combination_method: FIXED (engine-wired,
     # Commit pending) -> removed from the baseline; the guard now enforces them.
     "forecast_reconciliation": ["hierarchy_table"],            # C (vs S_matrix)
@@ -110,20 +112,22 @@ KNOWN_INERT: dict[str, list[str]] = {
     # was renamed cell_type -> model_type to match the engine read; default
     # "LSTM".lower() == the engine default "lstm" (byte-identical) -> removed from
     # the baseline; the guard now enforces it.
-    "nar_narx": ["max_lag", "hidden_size"],                    # A -> ar_lags/hidden_layers
+    # nar_narx max_lag/hidden_size: FIXED (Phase-3 batch A) -- renamed -> ar_lags /
+    # hidden_layers (the engine wraps a scalar hidden_size into a 1-tuple).
     "robust_estimators": ["trim_pct"],                         # B scale (x100 vs trim_fraction)
-    "rolling_origin_cv": ["n_folds", "model"],                 # A n_folds->folds; model C
+    "rolling_origin_cv": ["model"],  # model C (n_folds FIXED P3-A -> folds)
     # star max_lag/transition: FIXED (Fix B Tier 1c-3) -- the inert catalog
     # controls were renamed max_lag->ar_order, transition->star_type (and
     # transition's wrong options {logistic,exponential} -> the engine tokens
     # {LSTAR,ESTAR,both}); null defaults preserve the preset-aware/data-driven
     # engine defaults (Thorough star_type="both") -> removed from the baseline.
-    "stl_decompose": ["seasonal_window"],                      # A/C -> seasonal (verify semantics)
+    # stl_decompose seasonal_window: FIXED (Phase-3 batch A) -- renamed -> seasonal
+    # (the STL LOESS seasonal-smoother span; clean semantics).
     # structural_ts trend: FIXED (Phase-1 defect #2) -- the inert bool `trend`
     # was REMOVED from the catalog (level bool->string-enum exposes the actual
     # spec; the level spec encompasses the trend) -> removed from the baseline;
     # the guard now enforces it (backlog 21 -> 20).
-    "tar_setar": ["max_lag"],                                  # A -> ar_order
+    # tar_setar max_lag: FIXED (Phase-3 batch A) -- renamed -> ar_order (clean).
     # vecm k_ar_diff: FIXED (engine-wired -> lag via the adf string-sentinel
     # pattern; catalog int->string default "auto"; the same unit also fixed the
     # vecm coint_rank="auto" default-path crash -- coint_rank was never

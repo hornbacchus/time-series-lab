@@ -3226,6 +3226,19 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_phase3_rename_wiring": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-3 batch A wiring discrimination (8 inert controls renamed "
+            "catalog-key -> engine-key). Each renamed control must change the "
+            "engine's deterministic output when set to two distinct values "
+            "(behavioral proof the engine acts on it, complementing the "
+            "structural catalog_key_alignment guard). A control invariant to its "
+            "value -> BLOCK (engine reads-but-ignores = wrong disposition). Hard "
+            "per-control assertions, not a numeric band."
+        ),
+    },
+
     "p3_stl_max_anomalies_cap": {
         "type": "integrity_assertion",
         "expected_max_anomalies_fraction": 0.10,

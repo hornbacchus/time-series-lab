@@ -28,7 +28,7 @@
           "options": null
         },
         {
-          "name": "seasonal_window",
+          "name": "seasonal",
           "label": "Seasonal Window",
           "type": "int",
           "default": 7,
@@ -2255,7 +2255,7 @@
       ],
       "parameters": [
         {
-          "name": "max_lag",
+          "name": "ar_order",
           "label": "Max Lag",
           "type": "int",
           "default": 4,
@@ -2385,7 +2385,7 @@
       ],
       "parameters": [
         {
-          "name": "max_lag",
+          "name": "ar_lags",
           "label": "Max Lag",
           "type": "int",
           "default": 6,
@@ -2395,7 +2395,7 @@
           "options": null
         },
         {
-          "name": "hidden_size",
+          "name": "hidden_layers",
           "label": "Hidden Units",
           "type": "int",
           "default": 10,
@@ -3077,7 +3077,7 @@
       ],
       "parameters": [
         {
-          "name": "top_n",
+          "name": "n_top",
           "label": "Top N Frequencies",
           "type": "int",
           "default": 10,
@@ -3430,13 +3430,13 @@
       ],
       "parameters": [
         {
-          "name": "hazard_rate",
+          "name": "hazard_lambda",
           "label": "Hazard Rate",
           "type": "float",
-          "default": 250.0,
+          "default": 200,
           "required": false,
           "advanced": false,
-          "description": "Expected run length (1/hazard)",
+          "description": "Expected run length: the mean number of observations between changepoints (larger = fewer, more conservative changepoints).",
           "options": null
         }
       ],
@@ -3876,7 +3876,7 @@
       ],
       "parameters": [
         {
-          "name": "n_folds",
+          "name": "folds",
           "label": "Folds",
           "type": "int",
           "default": 3,
@@ -5364,7 +5364,7 @@
           "options": null
         },
         {
-          "name": "encoding_dim",
+          "name": "hidden_dim",
           "label": "Encoding Dimension",
           "type": "int",
           "default": 8,
