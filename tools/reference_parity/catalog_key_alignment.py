@@ -86,8 +86,12 @@ KNOWN_INERT: dict[str, list[str]] = {
     # catalog controls were renamed threshold->cusum_h, drift->cusum_k to match
     # the engine reads (null defaults preserved -> auto 5sigma/0.5sigma, byte-
     # identical) -> removed from the baseline; the guard now enforces them.
-    "denton_chowlin_disaggregation": ["target_frequency"],     # B (vs conversion_ratio)
-    "dtw_alignment_lag": ["max_warp"],                         # C (vs window_frac)
+    # denton_chowlin_disaggregation target_frequency: FIXED (Phase-3 batch B) --
+    # replaced with conversion_ratio (the engine's int disaggregation factor; the
+    # ambiguous frequency-string is gone).
+    # dtw_alignment_lag max_warp: FIXED (Phase-3 batch B) -- replaced with
+    # window_frac (the engine's fractional Sakoe-Chiba band; the absolute-samples
+    # max_warp was never read). (The banked direction-inversion finding is separate.)
     # fft_spectrum top_n: FIXED (Phase-3 batch A) -- renamed -> n_top (clean).
     # forecast_combination models + combination_method: FIXED (engine-wired,
     # Commit pending) -> removed from the baseline; the guard now enforces them.
@@ -107,14 +111,17 @@ KNOWN_INERT: dict[str, list[str]] = {
     # enforces them (backlog 20 -> 18).
     # johansen_cointegration k_ar_diff: FIXED (engine-wired -> lag via the adf
     # string-sentinel pattern; catalog int->string default "auto"; A-batch).
-    "lomb_scargle": ["min_period", "max_period"],              # B inverse (period=1/freq)
+    # lomb_scargle min_period/max_period: FIXED (Phase-3 batch B) -- the engine now
+    # reads the period bounds and translates them to angular freq (omega=2*pi/P)
+    # with the min<->max inversion (min_period -> max_freq, max_period -> min_freq).
     # lstm_gru_forecast cell_type: FIXED (Fix B Tier 1b) -- the catalog control
     # was renamed cell_type -> model_type to match the engine read; default
     # "LSTM".lower() == the engine default "lstm" (byte-identical) -> removed from
     # the baseline; the guard now enforces it.
     # nar_narx max_lag/hidden_size: FIXED (Phase-3 batch A) -- renamed -> ar_lags /
     # hidden_layers (the engine wraps a scalar hidden_size into a 1-tuple).
-    "robust_estimators": ["trim_pct"],                         # B scale (x100 vs trim_fraction)
+    # robust_estimators trim_pct: FIXED (Phase-3 batch B) -- replaced with
+    # trim_fraction (0-1 fraction, default 0.10; the engine reads trim_fraction).
     "rolling_origin_cv": ["model"],  # model C (n_folds FIXED P3-A -> folds)
     # star max_lag/transition: FIXED (Fix B Tier 1c-3) -- the inert catalog
     # controls were renamed max_lag->ar_order, transition->star_type (and

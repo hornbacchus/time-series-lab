@@ -108,17 +108,30 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 error_fixes=["Ensure the time column has varying values."],
             )
 
-        # Frequency grid (angular frequencies)
+        # Frequency grid (angular frequencies). The engine works in angular
+        # frequency omega; the dialog exposes the friendlier PERIOD bounds
+        # (min_period / max_period). Translate with omega = 2*pi / P, which
+        # INVERTS the bounds: the shortest period (min_period) is the highest
+        # frequency (omega_max), and the longest period (max_period) is the
+        # lowest frequency (omega_min). Precedence: explicit angular min_freq/
+        # max_freq (programmatic back-compat) > the period bounds (dialog) >
+        # the data-driven default span.
         min_freq_param = ctx.get_param("min_freq")
         max_freq_param = ctx.get_param("max_freq")
+        min_period_param = ctx.get_param("min_period")
+        max_period_param = ctx.get_param("max_period")
 
         if min_freq_param is not None:
             omega_min = float(min_freq_param)
+        elif max_period_param is not None:  # longest period -> lowest freq
+            omega_min = 2 * np.pi / float(max_period_param)
         else:
             omega_min = 2 * np.pi / T_span
 
         if max_freq_param is not None:
             omega_max = float(max_freq_param)
+        elif min_period_param is not None:  # shortest period -> highest freq
+            omega_max = 2 * np.pi / float(min_period_param)
         else:
             omega_max = np.pi * n / T_span
 

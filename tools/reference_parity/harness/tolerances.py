@@ -3226,6 +3226,19 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_phase3_translate_wiring": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-3 batch B wiring discrimination (5 inert controls exposed via "
+            "unit/representation translation). Each must change the engine output "
+            "when set to two distinct values; lomb_scargle additionally must show "
+            "the correct period<->angular-frequency inversion (min_period caps the "
+            "short-cycle/high-freq end -- on a 4+40 period signal, min_period=10 "
+            "excludes the period-4 peak, min_period=2 includes it). A control with "
+            "no effect, or lomb wired backwards, -> BLOCK."
+        ),
+    },
+
     "p3_phase3_rename_wiring": {
         "type": "integrity_assertion",
         "justification": (

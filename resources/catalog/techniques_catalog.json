@@ -3838,13 +3838,13 @@
       ],
       "parameters": [
         {
-          "name": "max_warp",
-          "label": "Max Warp",
-          "type": "int",
-          "default": 20,
+          "name": "window_frac",
+          "label": "Warp Window Fraction",
+          "type": "float",
+          "default": null,
           "required": false,
           "advanced": false,
-          "description": "Maximum warping distance",
+          "description": "Warping-window width as a fraction of the series length (Sakoe-Chiba band, 0 to 1; e.g. 0.20 allows 20% warping). Blank uses the preset default.",
           "options": null
         }
       ],
@@ -4193,13 +4193,13 @@
       ],
       "parameters": [
         {
-          "name": "trim_pct",
-          "label": "Trim %",
+          "name": "trim_fraction",
+          "label": "Trim Fraction",
           "type": "float",
-          "default": 10.0,
+          "default": 0.1,
           "required": false,
           "advanced": true,
-          "description": "Trimming percentage for trimmed/Winsorized mean",
+          "description": "Trimming fraction (0 to 0.5) for the trimmed and Winsorized means; e.g. 0.10 trims 10% from each tail.",
           "options": null
         }
       ],
@@ -4305,18 +4305,13 @@
           ]
         },
         {
-          "name": "target_frequency",
-          "label": "Target Frequency",
-          "type": "string",
-          "default": "Monthly",
+          "name": "conversion_ratio",
+          "label": "Conversion Ratio",
+          "type": "int",
+          "default": 3,
           "required": false,
           "advanced": false,
-          "description": "Target high-frequency",
-          "options": [
-            "Monthly",
-            "Weekly",
-            "Daily"
-          ]
+          "description": "The disaggregation factor: how many high-frequency periods per low-frequency period (3 = quarterly to monthly, 4 = annual to quarterly, 12 = annual to monthly)."
         }
       ],
       "output_tables": [
