@@ -1655,16 +1655,6 @@
           ]
         },
         {
-          "name": "hierarchy_table",
-          "label": "Hierarchy Table",
-          "type": "string",
-          "default": "TSL_HIERARCHY",
-          "required": false,
-          "advanced": false,
-          "description": "Name of hierarchy mapping table",
-          "options": null
-        },
-        {
           "name": "S_matrix",
           "label": "Summing Matrix S",
           "type": "string",
@@ -3894,20 +3884,6 @@
           "advanced": false,
           "description": "Forecast horizon per fold (periods ahead). Default 12. The model is evaluated on forecasts this far out at each rolling origin.",
           "options": null
-        },
-        {
-          "name": "model",
-          "label": "Model",
-          "type": "string",
-          "default": "auto_arima",
-          "required": false,
-          "advanced": false,
-          "description": "Base model to evaluate",
-          "options": [
-            "auto_arima",
-            "ets",
-            "theta"
-          ]
         }
       ],
       "output_tables": [
@@ -3955,21 +3931,6 @@
           "advanced": false,
           "description": "Length of the resampled overlapping blocks. Default auto — chosen from the series' persistence as roughly the cube root of the length, inflated for autocorrelation. Longer blocks preserve more dependence.",
           "options": null
-        },
-        {
-          "name": "statistic",
-          "label": "Statistic",
-          "type": "string",
-          "default": "mean",
-          "required": false,
-          "advanced": false,
-          "description": "Statistic to bootstrap",
-          "options": [
-            "mean",
-            "variance",
-            "acf1",
-            "trend_slope"
-          ]
         }
       ],
       "output_tables": [
@@ -5349,13 +5310,13 @@
           "options": null
         },
         {
-          "name": "threshold_sigma",
-          "label": "Threshold (sigma)",
+          "name": "contamination",
+          "label": "Contamination",
           "type": "float",
-          "default": 3.0,
+          "default": 0.05,
           "required": false,
           "advanced": false,
-          "description": "Number of standard deviations for anomaly threshold",
+          "description": "Expected anomaly rate: the fraction of points flagged as anomalies (0 to 0.5). Sets the reconstruction-error percentile threshold; e.g. 0.05 flags the most-anomalous 5% of points.",
           "options": null
         },
         {

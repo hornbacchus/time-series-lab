@@ -3226,6 +3226,16 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_autoencoder_contamination": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-3 batch C expose discrimination: autoencoder_anomaly "
+            "contamination (the engine's real percentile-threshold knob, newly "
+            "exposed after the fake threshold_sigma was removed) must change the "
+            "anomaly output at two distinct values. No effect -> BLOCK."
+        ),
+    },
+
     "p3_phase3_translate_wiring": {
         "type": "integrity_assertion",
         "justification": (

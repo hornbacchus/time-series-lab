@@ -69,8 +69,12 @@ KNOWN_INERT: dict[str, list[str]] = {
     # now enforces it.
     # auto_arima ic: FIXED (engine-wired -> information_criterion; catalog
     # default corrected aicc->aic to state the delivered value; A-batch).
-    "autoencoder_anomaly": ["threshold_sigma"],  # C (encoding_dim FIXED P3-A -> hidden_dim)
-    "block_bootstrap": ["statistic"],                          # C
+    # autoencoder_anomaly threshold_sigma: FIXED (Phase-3 batch C) -- REMOVED (the
+    # engine uses a contamination percentile, not a sigma z-score; the real knob
+    # `contamination` was newly exposed). encoding_dim FIXED P3-A -> hidden_dim.
+    # block_bootstrap statistic: FIXED (Phase-3 batch C) -- REMOVED (the engine
+    # always computes mean+variance+acf1; the control selected nothing, trend_slope
+    # was never computed).
     # bocpd hazard_rate: FIXED (Phase-3 batch A) -- renamed -> hazard_lambda (the
     # engine's key for the SAME expected-run-length quantity; "hazard_rate" was a
     # misnomer, NOT an inverse). Default 250->200 (= engine default, byte-identical).
@@ -95,7 +99,9 @@ KNOWN_INERT: dict[str, list[str]] = {
     # fft_spectrum top_n: FIXED (Phase-3 batch A) -- renamed -> n_top (clean).
     # forecast_combination models + combination_method: FIXED (engine-wired,
     # Commit pending) -> removed from the baseline; the guard now enforces them.
-    "forecast_reconciliation": ["hierarchy_table"],            # C (vs S_matrix)
+    # forecast_reconciliation hierarchy_table: FIXED (Phase-3 batch C) -- REMOVED
+    # (the engine reads S_matrix or auto-constructs a 2-level hierarchy from series
+    # order; it never read a named hierarchy table. The .md was already honest.)
     # gaussian_process_forecast max_lag: FIXED (Fix B Tier 1b-bis) -- the dead
     # catalog control was REMOVED (GP regresses value~time-index, no lag concept;
     # the engine never read it) -> removed from the baseline.
@@ -122,7 +128,9 @@ KNOWN_INERT: dict[str, list[str]] = {
     # hidden_layers (the engine wraps a scalar hidden_size into a 1-tuple).
     # robust_estimators trim_pct: FIXED (Phase-3 batch B) -- replaced with
     # trim_fraction (0-1 fraction, default 0.10; the engine reads trim_fraction).
-    "rolling_origin_cv": ["model"],  # model C (n_folds FIXED P3-A -> folds)
+    # rolling_origin_cv model: FIXED (Phase-3 batch C) -- REMOVED (the engine always
+    # fits auto_arima; the [auto_arima, ets, theta] choice selected nothing. n_folds
+    # FIXED P3-A -> folds.)
     # star max_lag/transition: FIXED (Fix B Tier 1c-3) -- the inert catalog
     # controls were renamed max_lag->ar_order, transition->star_type (and
     # transition's wrong options {logistic,exponential} -> the engine tokens
@@ -144,6 +152,8 @@ KNOWN_INERT: dict[str, list[str]] = {
     # (x11{}/seats{}) + the S-table extraction; default flipped to "x11"
     # (byte-identical back-compat). Removed from the baseline; the guard now
     # enforces it (backlog 18 -> 17).
+    # ★ KNOWN_INERT is now EMPTY (Phase 3 drained the inert backlog 17 -> 0). The
+    # guard is now a pure regression sentinel: ANY inert control trips it.
 }
 
 
