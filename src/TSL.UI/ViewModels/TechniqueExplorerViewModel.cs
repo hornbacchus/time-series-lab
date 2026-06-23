@@ -372,6 +372,17 @@ namespace TSL.UI.ViewModels
         /// <summary>
         /// Provides a built-in sample catalog so the UI is usable before the
         /// AddIn layer loads the real catalog from disk.
+        ///
+        /// ★ DESIGN-TIME-ONLY / NOT AUTHORITATIVE (Phase 4a-harden #4). This is a
+        /// hardcoded preview stub; it does NOT drive any run. The real parameters
+        /// load from resources/catalog/techniques_catalog.json via TaskPaneManager,
+        /// which is the SINGLE SOURCE OF TRUTH. This stub has drifted from the
+        /// catalog (stale technique ids, stale defaults) and must NOT be trusted
+        /// for parameter values. A regression sentinel,
+        /// tools/reference_parity/stub_catalog_divergence.py, fails CI on any NEW
+        /// stub-vs-catalog divergence. PREFERRED FIX (banked for the next C# build
+        /// cycle): ELIMINATE this stub -- have the design-time preview read the JSON
+        /// catalog too -- removing the second source of truth entirely.
         /// </summary>
         private void LoadBuiltInCatalog()
         {

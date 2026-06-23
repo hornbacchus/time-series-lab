@@ -209,6 +209,16 @@ jobs:
         run: |
           python tools/reference_parity/catalog_key_alignment.py
 
+      - name: Stub-catalog divergence guard
+        # Phase 4a-harden #4: the hardcoded design-time C# param stub
+        # (TechniqueExplorerViewModel.cs) is a SECOND source of param truth that
+        # has drifted from the authoritative JSON catalog. Exits non-zero on a NEW
+        # stub-vs-catalog divergence beyond the documented KNOWN_STUB_DIVERGENCE
+        # baseline. See tools/reference_parity/stub_catalog_divergence.py.
+        shell: bash
+        run: |
+          python tools/reference_parity/stub_catalog_divergence.py
+
       - name: Engine unit tests (guards + conventions)
         # Runs engine/tests/ in CI -- the durability fix that closes the gap
         # that HID the sample-data scramble regression (engine tests had never

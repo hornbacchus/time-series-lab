@@ -72,6 +72,8 @@ Invoke-GateStep -Name "validate_install_matrix" `
     -PyArgs @("tools/validate_install_matrix.py") -Accept @(0)
 Invoke-GateStep -Name "catalog_key_alignment guard" `
     -PyArgs @("tools/reference_parity/catalog_key_alignment.py") -Accept @(0)
+Invoke-GateStep -Name "stub_catalog_divergence guard" `
+    -PyArgs @("tools/reference_parity/stub_catalog_divergence.py") -Accept @(0)
 Invoke-GateStep -Name "engine unit tests" `
     -PyArgs @("-m", "unittest", "discover", "-s", "engine/tests", "-p", "test_*.py", "-t", ".") -Accept @(0)
 # ... then the slow parity suite (with the completion / anti-truncation guard).

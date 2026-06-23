@@ -16,6 +16,13 @@ correlation), not at particle-level.
 
 Audit strategy: compare filtered state mean trajectories via
 Pearson correlation; expect corr > 0.9 PASS; 0.7–0.9 CAVEAT.
+
+★ Phase 4a-audit #5 note: this check SKIPs when the `particles` package is
+absent. That SKIP is STOCHASTIC-BY-DESIGN, NOT a maskable method-mismatch (the
+p3_x13 class, where a SKIP hid an X-11-vs-SEATS comparison). The two arms run
+independent SMC with different RNG + resampling, so they are compared
+distributionally (filtered-mean correlation), never for arm-equality — so there
+is no hidden BLOCK behind the SKIP to surface.
 """
 
 from __future__ import annotations
