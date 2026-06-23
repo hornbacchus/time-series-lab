@@ -100,17 +100,34 @@ class SsaParity(P3ParityCheck):
         )}
 
     def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
+        # Phase 4a-harden #1: invoke the ENGINE (was a _ssa_reference MIRROR that
+        # never ran engine code). The engine does not expose U/Vt (eigenvectors),
+        # so the comparison realigns to the engine's PUBLISHED spectrum -- the
+        # "Singular Values & Explained Variance" table (Singular Value 6dp,
+        # Eigenvalue 4dp). window_length + n_components are pinned to the
+        # reference's (L=N//2, 10) so the SVD is over the identical Hankel matrix.
         _ensure_engine_on_path()
+        from techniques.base import RunContext  # type: ignore
+        import techniques.ssa_model as ssa_mod  # type: ignore
         y = np.asarray(fixture["y"], dtype=np.float64)
-        # Bypass TSL wrapper rounding: invoke the same SSA math
-        # directly. Match Balanced preset L=N//2, n_components=10.
         L = len(y) // self.L_FACTOR
-        out = _ssa_reference(y, L=L, n_components=self.N_COMPONENTS)
+        ctx = RunContext({
+            "run_id": "p3_ssa", "technique_id": "ssa_model",
+            "preset": "Balanced", "seed": 42, "frequency": "",
+            "time": list(range(len(y))),
+            "series": [{"name": "y", "values": y.tolist()}],
+            "params": {"window_length": L, "n_components": self.N_COMPONENTS},
+        })
+        resp = ssa_mod.run(ctx, lambda *a, **k: None)
+        if resp.get("status") != "success":
+            raise RuntimeError(f"engine ssa_model failed: {resp.get('error_message')}")
+        tbl = next(t for t in resp.get("tables", [])
+                   if t.get("name") == "Singular Values & Explained Variance")
+        rows = tbl["rows"]
         return {
-            "singular_values": out["singular_values"],
-            "eigenvalues": out["eigenvalues"],
-            "U_first_col": out["U"][:, 0],
-            "Vt_first_row": out["Vt"][0, :],
+            "singular_values": np.array([float(r[1]) for r in rows]),  # 6dp
+            "eigenvalues": np.array([float(r[2]) for r in rows]),       # 4dp
+            "engine_L": resp.get("audit_fields", {}).get("window_length"),
         }
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -120,8 +137,6 @@ class SsaParity(P3ParityCheck):
         return {
             "singular_values": out["singular_values"],
             "eigenvalues": out["eigenvalues"],
-            "U_first_col": out["U"][:, 0],
-            "Vt_first_row": out["Vt"][0, :],
             "numpy_version": np.__version__,
         }
 
@@ -131,12 +146,14 @@ class SsaParity(P3ParityCheck):
         ladder = get_ladder(self.technique_id)
         primary: dict[str, Any] = {}
         statuses: list[str] = []
-        for k in (
-            "singular_values", "eigenvalues",
-            "U_first_col", "Vt_first_row",
-        ):
+        # Eigenvectors (U/Vt) are not exposed by the engine; compare the published
+        # spectrum (singular values + eigenvalues) -- the SVD core of SSA. Engine
+        # arm is 4-6dp-rounded (table floor), reference is full precision.
+        for k in ("singular_values", "eigenvalues"):
+            n_common = min(len(tsl[k]), len(ref[k]))
             primary[k] = _compare_vector(
-                tsl[k], ref[k], ladder["primary"],
+                np.asarray(tsl[k])[:n_common], np.asarray(ref[k])[:n_common],
+                ladder["primary"],
             )
             statuses.append(primary[k]["status"])
         any_block = any(s == "BLOCK" for s in statuses)

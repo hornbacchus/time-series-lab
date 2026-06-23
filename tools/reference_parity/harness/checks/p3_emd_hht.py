@@ -135,18 +135,38 @@ class EmdHhtParity(P3ParityCheck):
         )}
 
     def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
+        # Phase 4a-harden #1: invoke the ENGINE (was a _numpy_emd MIRROR that never
+        # ran engine code -- the engine-never-invoked hollow class). Extract the
+        # IMF component series from the engine's published "IMF Components" table
+        # (Index | IMF 1..n | Residual); at n=512 Balanced the table is full
+        # resolution (step 1). Values are 6dp-rounded (the wrapper floor) so the
+        # engine-side reconstruction holds to ~1e-4, not 1e-10 (PyEMD, unrounded,
+        # still hits 1e-10). The real engine-vs-PyEMD comparison is n_imfs + the
+        # energy-curve correlation, both robust to 6dp.
         _ensure_engine_on_path()
+        from techniques.base import RunContext  # type: ignore
+        import techniques.emd_hht as emd_mod  # type: ignore
         y = np.asarray(fixture["y"], dtype=np.float64)
-        # Use TSL's _numpy_emd directly (matches Balanced preset
-        # max_imfs=8, max_iter=200). Bypass wrapper output
-        # rounding.
-        imfs = _numpy_emd_minimal(y, max_imfs=8, max_iter=200)
-        residual = y - imfs.sum(axis=0) if imfs.size > 0 else y
-        n_imfs = len(imfs)
-        # Reconstruction identity
-        reconstruction = imfs.sum(axis=0) + residual
-        recon_max_abs = float(np.max(np.abs(reconstruction - y)))
-        # Cumulative energy curve (decreasing in IMF index)
+        ctx = RunContext({
+            "run_id": "p3_emd_hht", "technique_id": "emd_hht",
+            "preset": "Balanced", "seed": 42, "frequency": "",
+            "time": list(range(len(y))),
+            "series": [{"name": "y", "values": y.tolist()}],
+            "params": {"max_imfs": 8},
+        })
+        resp = emd_mod.run(ctx, lambda *a, **k: None)
+        if resp.get("status") != "success":
+            raise RuntimeError(f"engine emd_hht failed: {resp.get('error_message')}")
+        tbl = next(t for t in resp.get("tables", []) if t.get("name") == "IMF Components")
+        cols, rows = tbl["columns"], tbl["rows"]
+        n_imfs = len(cols) - 2  # minus Index + Residual
+        idxs = [int(r[0]) - 1 for r in rows]
+        imfs = np.array([[float(r[j]) for r in rows] for j in range(1, 1 + n_imfs)]) \
+            if n_imfs > 0 else np.empty((0, len(rows)))
+        residual = np.array([float(r[-1]) for r in rows])
+        y_aligned = y[idxs]
+        recon = (imfs.sum(axis=0) + residual) if n_imfs > 0 else residual
+        recon_max_abs = float(np.max(np.abs(recon - y_aligned)))
         imf_energies = np.array([float(np.sum(imf ** 2)) for imf in imfs])
         cum_energy = (
             np.cumsum(imf_energies) / imf_energies.sum()
@@ -195,10 +215,13 @@ class EmdHhtParity(P3ParityCheck):
     ) -> ParityResult:
         ladder = get_ladder(self.technique_id)
         primary: dict[str, Any] = {}
-        # Reconstruction identity: machine-precision on both sides
+        # Reconstruction identity. The engine arm is extracted from the published
+        # 6dp-rounded "IMF Components" table, so its floor is ~1e-4 (not 1e-10);
+        # the PyEMD arm is unrounded -> 1e-10. The threshold difference reflects
+        # the wrapper rounding, NOT a divergence.
         primary["reconstruction_identity_tsl"] = {
             "status": ("PASS"
-                       if tsl.get("reconstruction_max_abs", 1.0) < 1e-10
+                       if tsl.get("reconstruction_max_abs", 1.0) < 1e-3
                        else "BLOCK"),
             "max_abs_residual": tsl.get("reconstruction_max_abs"),
         }
