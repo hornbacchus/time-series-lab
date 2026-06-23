@@ -102,6 +102,46 @@ KNOWN_DEFAULT_FAILURES: dict[str, str] = {
 }
 
 
+# ★ Quality-aware extension (Phase 4a-harden #3): the tool already runs BOTH the
+# omit-params baseline AND the dialog-default set. When both SUCCEED, compare a
+# size-robust magnitude signature of the two outputs; an EXTREME divergence means
+# the dialog default produces a materially different (suspect/degenerate) result
+# than the engine's own default -- the structural_ts signature (a degenerate model
+# ran SUCCESSFULLY at RMSE ~1210 vs the working ~57; the crash-only sweep was
+# blind to it). ★ HONESTLY A WARN TIER, NOT A HARD GATE: a legitimate dialog
+# default CAN differ from the engine default (e.g. a deliberate horizon), so a
+# divergence is SURFACED for review, never failed. The per-technique quality
+# checks (p3_structural_ts_level_default, p3_stl_max_anomalies_cap) remain the
+# HARD layer; this is the generalizable partial. #2 (catalog_key_alignment type
+# check) and #3 (this) are independent detectors of the same structural_ts class.
+QUALITY_DIVERGENCE_THRESHOLD = 3.0  # relative mean-|value| diff (x) to WARN
+
+# Legitimate dialog-default-vs-omit divergences (a catalog default deliberately
+# differs from the engine's own default). Baselined so they do NOT warn. Seeded
+# from the first quality sweep; add with a one-line justification.
+KNOWN_DEFAULT_DIVERGENCE: dict[str, str] = {}
+
+
+def _run_magnitude(res):
+    """Size-robust magnitude signature of a run: mean |finite numeric value| over
+    all output table cells + audit numerics. None if the run has no numerics."""
+    import numpy as np
+    vals = []
+    for t in res.get("tables", []) or []:
+        for row in t.get("rows", []) or []:
+            for c in row:
+                if isinstance(c, (int, float)) and not isinstance(c, bool):
+                    f = float(c)
+                    if np.isfinite(f):
+                        vals.append(abs(f))
+    for v in (res.get("audit_fields", {}) or {}).values():
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            f = float(v)
+            if np.isfinite(f):
+                vals.append(abs(f))
+    return float(np.mean(vals)) if vals else None
+
+
 def _emit(ptype, default):
     """Replicate TechniqueParameterItem.OutputValue for the dialog-DEFAULT
     state: StringValue = Default?.ToString() ?? ''."""
@@ -155,17 +195,18 @@ def _fixture(k: int, n: int = 240):
 
 
 def _run(tid, series, params):
-    """One engine invocation; returns (status, error_text)."""
+    """One engine invocation; returns (status, error_text, magnitude). magnitude
+    is the output signature (for the #3 quality check) on success, else None."""
     from techniques.base import RunContext  # type: ignore
     from techniques import registry  # type: ignore
     import importlib
     mod_path = registry.TECHNIQUE_REGISTRY.get(tid)
     if not mod_path:
-        return "no-module", "not in registry"
+        return "no-module", "not in registry", None
     try:
         mod = importlib.import_module(mod_path)
     except Exception as e:
-        return "import-error", f"{type(e).__name__}: {e}"
+        return "import-error", f"{type(e).__name__}: {e}", None
     n = len(series[0]["values"])
     ctx = RunContext({
         # pane-style run_id (NOT udf_-prefixed): run_id-gated branches take the
@@ -181,9 +222,11 @@ def _run(tid, series, params):
             warnings.simplefilter("ignore")
             r = mod.run(ctx, lambda *a, **k: None)
         st = r.get("status", "no-status")
-        return ("ok", "") if st == "success" else ("fail", str(r.get("error_message", ""))[:140])
+        if st == "success":
+            return "ok", "", _run_magnitude(r)
+        return "fail", str(r.get("error_message", ""))[:140], None
     except Exception as e:
-        return "exception", f"{type(e).__name__}: {str(e)[:120]}"
+        return "exception", f"{type(e).__name__}: {str(e)[:120]}", None
 
 
 def sweep():
@@ -202,7 +245,7 @@ def sweep():
         defaults = {k: v for k, v in defaults.items()
                     if not (isinstance(v, str) and v.strip() == "")}
         t0 = time.time()
-        b_st, b_err = _run(tid, series, {})
+        b_st, b_err, b_mag = _run(tid, series, {})
         # cheap retry: a baseline failure trivially attributable to input shape
         retried = None
         if b_st != "ok" and k == 1 and any(
@@ -210,8 +253,8 @@ def sweep():
                 for w in ("series", "exog", "column", "two", "second", "at least 2")):
             series = _fixture(3)
             retried = (b_st, b_err)
-            b_st, b_err = _run(tid, series, {})
-        d_st, d_err = _run(tid, series, defaults)
+            b_st, b_err, b_mag = _run(tid, series, {})
+        d_st, d_err, d_mag = _run(tid, series, defaults)
         dt = time.time() - t0
         if b_st == "ok" and d_st == "ok":
             quad = "PASS"
@@ -221,9 +264,19 @@ def sweep():
             quad = "PARAMS-REQUIRED"  # baseline FAIL + default OK
         else:
             quad = "FIXTURE-EXCLUDED"  # both fail -> disclosed exclusion
+        # ★ #3 quality WARN: both succeeded but the dialog-default output diverges
+        # EXTREMELY from the omit-params baseline (the structural_ts degenerate
+        # signature). WARN-only; baselined legitimate divergences excluded.
+        quality_warn = None
+        if (quad == "PASS" and b_mag is not None and d_mag is not None
+                and tid not in KNOWN_DEFAULT_DIVERGENCE):
+            rel = abs(d_mag - b_mag) / max(abs(b_mag), 1e-9)
+            if rel > QUALITY_DIVERGENCE_THRESHOLD:
+                quality_warn = {"baseline_mag": b_mag, "default_mag": d_mag, "rel": rel}
         results[tid] = {"quadrant": quad, "baseline": (b_st, b_err),
                         "default": (d_st, d_err), "defaults_sent": defaults,
-                        "retried_first_attempt": retried, "secs": round(dt, 1)}
+                        "retried_first_attempt": retried, "secs": round(dt, 1),
+                        "quality_warn": quality_warn}
     return results
 
 
@@ -256,6 +309,18 @@ def main(argv):
             if r.get("retried_first_attempt"):
                 line += f"\n      first-attempt(1-series): {r['retried_first_attempt']}"
             print(line)
+
+    # ★ #3 quality WARN (report-only, NOT a gate): dialog-default output diverges
+    # extremely from the omit-params baseline -- a possibly-degenerate default.
+    qwarns = {t: r["quality_warn"] for t, r in results.items() if r.get("quality_warn")}
+    if qwarns:
+        print(f"\n## ★ QUALITY WARN ({len(qwarns)}) -- dialog-default output diverges "
+              f">{QUALITY_DIVERGENCE_THRESHOLD:g}x from the omit-params baseline (WARN, "
+              f"NOT a gate; review whether the catalog default is degenerate -- the "
+              f"structural_ts class; per-technique quality checks are the hard layer):")
+        for t, q in sorted(qwarns.items()):
+            print(f"  {t}: baseline_mag={q['baseline_mag']:.4g} "
+                  f"default_mag={q['default_mag']:.4g} rel={q['rel']:.1f}x")
 
     new = {t: r for t, r in findings.items() if t not in KNOWN_DEFAULT_FAILURES}
     stale = [t for t in KNOWN_DEFAULT_FAILURES
