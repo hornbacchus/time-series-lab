@@ -37,6 +37,36 @@ _ENGINE_DIR = os.path.join(_ROOT, "engine", "techniques")
 
 _GET_PARAM = re.compile(r"get_param\(\s*\W(\w+)")
 
+# ★ Type-aware extension (Phase 4a-harden #2): capture get_param(key, <default>)
+# so the declared CATALOG type can be compared to the engine's literal default.
+# This catches the structural_ts class -- a key that IS read but at the WRONG type
+# (catalog bool vs engine string default -> a degenerate model). HEURISTIC: only
+# the LITERAL-default case is decidable; None / a variable / a cfg[...] lookup ->
+# INCONCLUSIVE (skipped, never failed).
+_GET_PARAM_DEFAULT = re.compile(r"""get_param\(\s*['"](\w+)['"]\s*,\s*([^,\n)]+)""")
+
+# catalog declared-type -> coarse bucket (the comparison granularity: int and
+# float are both "numeric", so an int-literal default for a float param is OK).
+_CATALOG_TYPE_BUCKET = {
+    "bool": "bool", "boolean": "bool",
+    "string": "string", "str": "string", "enum": "string",
+    "int": "numeric", "integer": "numeric", "float": "numeric",
+    "double": "numeric", "number": "numeric",
+}
+
+
+def _default_bucket(expr):
+    """Bucket a get_param default LITERAL into bool / string / numeric, else
+    inconclusive (None, a variable, a cfg[...] lookup, an expression)."""
+    e = expr.strip()
+    if e in ("True", "False"):
+        return "bool"
+    if len(e) >= 2 and e[0] == e[-1] and e[0] in ("'", '"'):
+        return "string"
+    if re.fullmatch(r"[-+]?\d+(\.\d+)?", e):
+        return "numeric"
+    return "inconclusive"
+
 # ★ D-set allowlist (VERIFIED read-only): techniques whose config reaches the
 # engine via a NON-get_param path, so a get_param scan is blind. Documented +
 # auditable — NOT a silent skip. If an allowlisted technique later shows a
@@ -156,6 +186,15 @@ KNOWN_INERT: dict[str, list[str]] = {
     # guard is now a pure regression sentinel: ANY inert control trips it.
 }
 
+# ★ KNOWN_TYPE_OK baseline (type-aware extension, Phase 4a-harden #2): catalog
+# params whose declared type intentionally differs from the engine get_param
+# literal-default bucket (documented-OK; e.g. a deliberate string-sentinel for a
+# numeric knob). Keyed tid -> [param, ...]. Seeded EMPTY -- a pure regression
+# sentinel for the bool-vs-string class (structural_ts level was the exemplar,
+# now fixed). Add an entry only with a one-line justification of why the
+# divergence is intentional.
+KNOWN_TYPE_OK: dict[str, list[str]] = {}
+
 
 def _walk_techniques(obj, out):
     if isinstance(obj, dict):
@@ -242,6 +281,72 @@ def audit():
     return results
 
 
+def _catalog_param_types():
+    """Return {(tid, name): declared_type_str} from the catalog."""
+    with open(_CATALOG, encoding="utf-8") as fh:
+        cat = json.load(fh)
+    out = {}
+
+    def walk(obj):
+        if isinstance(obj, dict):
+            if "id" in obj and isinstance(obj.get("parameters"), list):
+                for p in obj["parameters"]:
+                    if isinstance(p, dict) and p.get("name"):
+                        out[(obj["id"], p["name"])] = p.get("type")
+            for v in obj.values():
+                walk(v)
+        elif isinstance(obj, list):
+            for v in obj:
+                walk(v)
+
+    walk(cat)
+    return out
+
+
+def _engine_default_buckets(files):
+    """{key: bucket} from get_param(key, <literal>) in files. If a key has
+    multiple defaults, prefer a non-inconclusive bucket."""
+    buckets = {}
+    for f in files:
+        try:
+            with open(f, encoding="utf-8", errors="ignore") as fh:
+                txt = fh.read()
+        except OSError:
+            continue
+        for key, expr in _GET_PARAM_DEFAULT.findall(txt):
+            b = _default_bucket(expr)
+            prev = buckets.get(key)
+            if prev is None or (prev == "inconclusive" and b != "inconclusive"):
+                buckets[key] = b
+    return buckets
+
+
+def type_audit():
+    """Heuristic TYPE alignment: for each catalog control whose engine reads it
+    with a LITERAL default, compare the catalog declared-type bucket against the
+    engine default bucket. Flag a contradiction (catalog bool vs engine string,
+    etc.). Returns {tid: [(name, catalog_type, cat_bucket, eng_bucket), ...]}.
+    INCONCLUSIVE (non-literal default / no declared type) is silently skipped."""
+    controls = _catalog_controls()
+    types = _catalog_param_types()
+    reg = _registry_map()
+    findings = {}
+    for tid, names in controls.items():
+        if tid in ALLOWLIST:
+            continue
+        mod = reg.get(tid) or ("techniques." + tid)
+        ebuckets = _engine_default_buckets(_module_files(mod))
+        for n in names:
+            ctype = types.get((tid, n))
+            cbucket = _CATALOG_TYPE_BUCKET.get((ctype or "").lower())
+            ebucket = ebuckets.get(n)
+            if cbucket is None or ebucket is None or ebucket == "inconclusive":
+                continue
+            if cbucket != ebucket:
+                findings.setdefault(tid, []).append((n, ctype, cbucket, ebucket))
+    return findings
+
+
 def registry_invariant():
     """catalog SUBSET-OF registry: every catalog technique_id must be a
     TECHNIQUE_REGISTRY key (else the dialog advertises a technique no run can
@@ -323,9 +428,35 @@ def main(argv):
               "add it to the documented ALLOWLIST.")
         return 1
 
+    # --- type-aware alignment (Phase 4a-harden #2; heuristic on literal defaults) ---
+    tfindings = type_audit()
+    new_type = {}
+    for tid, items in tfindings.items():
+        baseline = set(KNOWN_TYPE_OK.get(tid, []))
+        new = [it for it in items if it[0] not in baseline]
+        if new:
+            new_type[tid] = new
+    if report and tfindings:
+        print("\n## Type-alignment findings (catalog type vs engine literal-default bucket):")
+        for tid, items in sorted(tfindings.items()):
+            for n, ct, cb, eb in items:
+                print(f"  {tid}.{n}: catalog type={ct!r} ({cb}) vs engine default bucket={eb}")
+    if new_type:
+        print("\n## [FAIL] NEW type mismatch(es) (catalog type contradicts the engine "
+              "get_param literal default -- the structural_ts bool-vs-string class):")
+        for tid, items in sorted(new_type.items()):
+            for n, ct, cb, eb in items:
+                print(f"  {tid}.{n}: catalog declares {ct!r} ({cb}) but the engine's "
+                      f"get_param default is {eb} -- the control is read at the WRONG type.")
+        print("\nFix the catalog type to match what the engine reads, or add to "
+              "KNOWN_TYPE_OK with a justification if the divergence is intentional.")
+        return 1
+
     print("\n## [PASS] no NEW inert controls beyond the known baseline.")
     print(f"   (known-inert backlog pending per-control fixes: "
-          f"{sum(len(v) for v in KNOWN_INERT.values())})")
+          f"{sum(len(v) for v in KNOWN_INERT.values())}; "
+          f"type-alignment: {sum(len(v) for v in tfindings.values())} finding(s), "
+          f"{sum(len(v) for v in new_type.values())} new)")
     return 0
 
 
