@@ -1775,6 +1775,16 @@
           "advanced": false,
           "description": "Forecast horizon in periods. Default 12. Forecasts are flat at the final level (this model has no trend).",
           "options": null
+        },
+        {
+          "name": "confidence_level",
+          "label": "Confidence Level",
+          "type": "float",
+          "default": 0.95,
+          "required": false,
+          "advanced": false,
+          "description": "Confidence level for the forecast/interval bands (0 to 1); e.g. 0.95 = a 95% band. A higher level gives wider bands.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -1812,6 +1822,16 @@
           "required": false,
           "advanced": false,
           "description": "Forecast horizon in periods. Default 12. Forecasts carry the final slope forward.",
+          "options": null
+        },
+        {
+          "name": "confidence_level",
+          "label": "Confidence Level",
+          "type": "float",
+          "default": 0.95,
+          "required": false,
+          "advanced": false,
+          "description": "Confidence level for the forecast/interval bands (0 to 1); e.g. 0.95 = a 95% band. A higher level gives wider bands.",
           "options": null
         }
       ],
@@ -3994,6 +4014,16 @@
           "advanced": false,
           "description": "Forecast horizon per fold (periods ahead). Default 12. The model is evaluated on forecasts this far out at each rolling origin.",
           "options": null
+        },
+        {
+          "name": "confidence_level",
+          "label": "Confidence Level",
+          "type": "float",
+          "default": 0.95,
+          "required": false,
+          "advanced": false,
+          "description": "Confidence level for the forecast/interval bands (0 to 1); e.g. 0.95 = a 95% band. A higher level gives wider bands.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -4040,6 +4070,16 @@
           "required": false,
           "advanced": false,
           "description": "Length of the resampled overlapping blocks. Default auto — chosen from the series' persistence as roughly the cube root of the length, inflated for autocorrelation. Longer blocks preserve more dependence.",
+          "options": null
+        },
+        {
+          "name": "confidence_level",
+          "label": "Confidence Level",
+          "type": "float",
+          "default": 0.95,
+          "required": false,
+          "advanced": false,
+          "description": "Confidence level for the forecast/interval bands (0 to 1); e.g. 0.95 = a 95% band. A higher level gives wider bands.",
           "options": null
         }
       ],
@@ -4308,7 +4348,18 @@
         "Balanced",
         "Thorough"
       ],
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "confidence_level",
+          "label": "Confidence Level",
+          "type": "float",
+          "default": 0.95,
+          "required": false,
+          "advanced": false,
+          "description": "Confidence level for the forecast/interval bands (0 to 1); e.g. 0.95 = a 95% band. A higher level gives wider bands.",
+          "options": null
+        }
+      ],
       "output_tables": [
         "imputed_series",
         "fill_flags",
@@ -4638,6 +4689,16 @@
           "required": false,
           "advanced": true,
           "description": "Observation noise added to the kernel diagonal (> 0). Blank uses the preset default.",
+          "options": null
+        },
+        {
+          "name": "confidence_level",
+          "label": "Confidence Level",
+          "type": "float",
+          "default": 0.95,
+          "required": false,
+          "advanced": false,
+          "description": "Confidence level for the forecast/interval bands (0 to 1); e.g. 0.95 = a 95% band. A higher level gives wider bands.",
           "options": null
         }
       ],

@@ -3241,6 +3241,18 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_confidence_level_exposure": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-4b confidence_level exposure/harmonization across 6 techniques. "
+            "Each must change the output (0.95 vs 0.99) AND widen the band at "
+            "higher confidence where a band is extractable -- the direction guard "
+            "for the alpha=1-confidence_level translation (local_level, "
+            "local_linear_trend); an inverted translation would NARROW the band "
+            "-> BLOCK. Byte-identical-on-default verified separately."
+        ),
+    },
+
     "p3_tier1_knobgap_exposure": {
         "type": "integrity_assertion",
         "justification": (

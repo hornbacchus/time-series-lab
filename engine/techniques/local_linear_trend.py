@@ -75,7 +75,13 @@ def run(ctx: RunContext, progress_callback) -> dict:
             )
 
         horizon = max(1, int(ctx.get_param("horizon", 10)))
-        alpha = float(ctx.get_param("alpha", 0.05))
+        # Confidence level (Phase 4b harmonization): the dialog exposes the
+        # intuitive confidence_level (0.95 = a 95% band); the engine works in
+        # alpha = 1 - confidence_level. Precedence: explicit confidence_level
+        # (dialog) > alpha (programmatic back-compat) > 0.05 default. A HIGHER
+        # confidence_level -> a LOWER alpha -> a WIDER band.
+        _cl = ctx.get_param("confidence_level")
+        alpha = (1.0 - float(_cl)) if _cl is not None else float(ctx.get_param("alpha", 0.05))
         damped = ctx.get_param("damped", False)
         cfg = _PRESET_CONFIG.get(ctx.preset, _PRESET_CONFIG["Balanced"])
 
