@@ -3241,6 +3241,18 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_tier2_knobgap_exposure": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-4b Tier-2 knob-gap exposure: each newly-exposed control "
+            "(bocpd.threshold, pelt.jump, dynamic_factor_model.k_factors, "
+            "theta_forecast.period, denton.rho, x13.transform) must change the "
+            "engine output at two distinct values. Byte-identical-on-default "
+            "verified separately. No-effect -> BLOCK. (GARCH mean held out -- "
+            "non-deterministic forecast path; disposition re-adjudicated.)"
+        ),
+    },
+
     "p3_confidence_level_exposure": {
         "type": "integrity_assertion",
         "justification": (

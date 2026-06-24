@@ -195,6 +195,16 @@
           "advanced": false,
           "description": "Add COVID-period outlier adjustments. Default off; applies only to monthly series spanning March-April 2020.",
           "options": null
+        },
+        {
+          "name": "transform",
+          "label": "Transform",
+          "type": "string",
+          "default": "auto",
+          "required": false,
+          "advanced": false,
+          "description": "Pre-adjustment transform: auto (X-13 picks log/none, the default), log, or none (additive decomposition).",
+          "options": ["auto", "log", "none"]
         }
       ],
       "output_tables": [
@@ -309,6 +319,16 @@
           "required": false,
           "advanced": false,
           "description": "Forecast horizon in periods. Default 12.",
+          "options": null
+        },
+        {
+          "name": "period",
+          "label": "Seasonal Period",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Seasonal period (e.g. 12 for monthly). Leave blank to infer from the data frequency.",
           "options": null
         }
       ],
@@ -1583,6 +1603,16 @@
           "required": false,
           "advanced": false,
           "description": "Forecast horizon in periods. Default 10.",
+          "options": null
+        },
+        {
+          "name": "k_factors",
+          "label": "Number of Factors",
+          "type": "int",
+          "default": null,
+          "required": false,
+          "advanced": false,
+          "description": "Number of latent common factors. Leave blank to auto-select from the data.",
           "options": null
         }
       ],
@@ -3512,6 +3542,16 @@
           "advanced": true,
           "description": "Force an exact number of change points, overriding the penalty. Blank lets the penalty decide; set an integer to fix the count.",
           "options": null
+        },
+        {
+          "name": "jump",
+          "label": "Min Segment Spacing",
+          "type": "int",
+          "default": 1,
+          "required": false,
+          "advanced": false,
+          "description": "Minimum spacing (in periods) between detected change points; higher reduces over-segmentation.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -3547,6 +3587,16 @@
           "required": false,
           "advanced": false,
           "description": "Expected run length: the mean number of observations between changepoints (larger = fewer, more conservative changepoints).",
+          "options": null
+        },
+        {
+          "name": "threshold",
+          "label": "Changepoint Threshold",
+          "type": "float",
+          "default": 0.5,
+          "required": false,
+          "advanced": false,
+          "description": "Probability threshold for flagging a changepoint (0 to 1); lower flags more changepoints (more sensitive).",
           "options": null
         }
       ],
@@ -4444,6 +4494,16 @@
           "required": false,
           "advanced": false,
           "description": "The disaggregation factor: how many high-frequency periods per low-frequency period (3 = quarterly to monthly, 4 = annual to quarterly, 12 = annual to monthly)."
+        },
+        {
+          "name": "rho",
+          "label": "AR(1) Rho",
+          "type": "string",
+          "default": "auto",
+          "required": false,
+          "advanced": false,
+          "description": "Residual autocorrelation for the Chow-Lin GLS: auto (estimate from data, the default) or a value in [0, 1).",
+          "options": null
         }
       ],
       "output_tables": [
