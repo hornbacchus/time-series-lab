@@ -3241,6 +3241,17 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_horizon_exposure": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-4b knob-gap exposure: the newly-exposed `horizon` control must "
+            "change the engine output at 5 vs 20 on each of the 5 techniques "
+            "(dynamic_factor_model, hmm, markov_switching, particle_filter, "
+            "tar_setar). Byte-identical-on-default verified separately (omit == "
+            "default 10). No-effect -> BLOCK. Hard per-technique assertions."
+        ),
+    },
+
     "p3_phase3_translate_wiring": {
         "type": "integrity_assertion",
         "justification": (

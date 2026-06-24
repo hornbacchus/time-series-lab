@@ -1544,6 +1544,16 @@
             "diff",
             "none"
           ]
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": 10,
+          "required": false,
+          "advanced": false,
+          "description": "Forecast horizon in periods. Default 10.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -1893,6 +1903,16 @@
             "nonlinear_growth",
             "random_walk_sv"
           ]
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": 10,
+          "required": false,
+          "advanced": false,
+          "description": "Forecast horizon in periods. Default 10.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2164,6 +2184,16 @@
           "advanced": true,
           "description": "Whether the residual variance also switches by regime. Default on; turn off to hold variance constant across regimes.",
           "options": null
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": 10,
+          "required": false,
+          "advanced": false,
+          "description": "Forecast horizon in periods. Default 10.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2215,6 +2245,16 @@
             "diag",
             "spherical"
           ]
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": 10,
+          "required": false,
+          "advanced": false,
+          "description": "Forecast horizon in periods. Default 10.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2272,6 +2312,16 @@
           "required": false,
           "advanced": true,
           "description": "Which lag of the series triggers the regime switch. Default 1 (the switch keys off the value one period back).",
+          "options": null
+        },
+        {
+          "name": "horizon",
+          "label": "Forecast Horizon",
+          "type": "int",
+          "default": 10,
+          "required": false,
+          "advanced": false,
+          "description": "Forecast horizon in periods. Default 10.",
           "options": null
         }
       ],
