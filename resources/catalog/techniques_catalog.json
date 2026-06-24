@@ -705,6 +705,16 @@
           "advanced": false,
           "description": "Maximum input lag included in the distributed-lag model. Default 12; clear the box for a preset-aware value. Set it to cover the longest plausible delay from input to output.",
           "options": null
+        },
+        {
+          "name": "polynomial",
+          "label": "Lag Polynomial",
+          "type": "string",
+          "default": "unrestricted",
+          "required": false,
+          "advanced": false,
+          "description": "Distributed-lag structure: unrestricted (a free coefficient per lag) or almon (a smooth polynomial-constrained lag shape).",
+          "options": ["unrestricted", "almon"]
         }
       ],
       "output_tables": [
@@ -1076,6 +1086,26 @@
           "required": false,
           "advanced": false,
           "description": "Forecast horizon in periods. Default 12.",
+          "options": null
+        },
+        {
+          "name": "deterministic",
+          "label": "Deterministic Terms",
+          "type": "string",
+          "default": "ci",
+          "required": false,
+          "advanced": false,
+          "description": "Deterministic terms in the cointegration model: n (none), co (constant outside the cointegration relation), ci (constant inside, the default), lo (linear trend outside), li (linear trend inside).",
+          "options": ["n", "co", "ci", "lo", "li"]
+        },
+        {
+          "name": "irf_periods",
+          "label": "IRF Horizon",
+          "type": "int",
+          "default": 20,
+          "required": false,
+          "advanced": false,
+          "description": "Number of periods for the impulse-response functions. Default 20.",
           "options": null
         }
       ],
@@ -2194,6 +2224,16 @@
           "advanced": false,
           "description": "Forecast horizon in periods. Default 10.",
           "options": null
+        },
+        {
+          "name": "switching_trend",
+          "label": "Switching Trend",
+          "type": "bool",
+          "default": true,
+          "required": false,
+          "advanced": false,
+          "description": "Whether the trend/level switches across regimes (the default) or stays fixed while only the variance switches.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2907,6 +2947,16 @@
           "advanced": false,
           "description": "Apply Ferro-Segers declustering to volatility-clustered exceedances. Default off; turn on when extreme moves cluster in time and you want cluster-peak tail estimates.",
           "options": null
+        },
+        {
+          "name": "tail",
+          "label": "Tail",
+          "type": "string",
+          "default": "upper",
+          "required": false,
+          "advanced": false,
+          "description": "Which tail to model for extreme-value analysis: upper (default; unusually large values) or lower (unusually small).",
+          "options": ["upper", "lower"]
         }
       ],
       "output_tables": [
@@ -3602,6 +3652,16 @@
           "advanced": true,
           "description": "Significance level for the anomaly test. Default 0.05; lower flags fewer, more-extreme anomalies.",
           "options": null
+        },
+        {
+          "name": "direction",
+          "label": "Anomaly Direction",
+          "type": "string",
+          "default": "both",
+          "required": false,
+          "advanced": false,
+          "description": "Anomaly direction: both (default, two-sided), upper (flag only unusually high values), or lower (only unusually low).",
+          "options": ["both", "upper", "lower"]
         }
       ],
       "output_tables": [
@@ -4211,6 +4271,16 @@
           "required": false,
           "advanced": true,
           "description": "Trimming fraction (0 to 0.5) for the trimmed and Winsorized means; e.g. 0.10 trims 10% from each tail.",
+          "options": null
+        },
+        {
+          "name": "winsor_fraction",
+          "label": "Winsor Fraction",
+          "type": "float",
+          "default": 0.1,
+          "required": false,
+          "advanced": false,
+          "description": "Fraction winsorized (capped) at each tail for the Winsorized mean (0 to 0.5); e.g. 0.10 caps the most extreme 10% at each end. The capping counterpart to the trimmed mean's trim fraction.",
           "options": null
         }
       ],

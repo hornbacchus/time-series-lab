@@ -3241,6 +3241,18 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_tier1_knobgap_exposure": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-4b Tier-1 knob-gap exposure: each newly-exposed control "
+            "(transfer_function.polynomial, vecm.deterministic+irf_periods, "
+            "evt_pot_gpd.tail, robust_estimators.winsor_fraction, "
+            "stl_esd_anomaly.direction, markov_switching.switching_trend) must "
+            "change the engine output at two distinct values. Byte-identical-on-"
+            "default verified separately. No-effect -> BLOCK."
+        ),
+    },
+
     "p3_horizon_exposure": {
         "type": "integrity_assertion",
         "justification": (
