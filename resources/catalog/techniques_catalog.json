@@ -2616,6 +2616,16 @@
           "advanced": false,
           "description": "Variance-forecast horizon in periods. Default 10. Set to the number of days ahead you need.",
           "options": null
+        },
+        {
+          "name": "mean",
+          "label": "Mean Model",
+          "type": "string",
+          "default": "Constant",
+          "required": false,
+          "advanced": false,
+          "description": "Conditional-mean model: Constant (a fitted mean level, the default) or Zero (no mean term -- for already-centered series such as returns).",
+          "options": ["Constant", "Zero"]
         }
       ],
       "output_tables": [
@@ -2699,6 +2709,16 @@
           "advanced": false,
           "description": "Variance-forecast horizon in periods. Default 10.",
           "options": null
+        },
+        {
+          "name": "mean",
+          "label": "Mean Model",
+          "type": "string",
+          "default": "Constant",
+          "required": false,
+          "advanced": false,
+          "description": "Conditional-mean model: Constant (a fitted mean level, the default) or Zero (no mean term -- for already-centered series such as returns).",
+          "options": ["Constant", "Zero"]
         }
       ],
       "output_tables": [
@@ -2783,6 +2803,16 @@
           "advanced": false,
           "description": "Variance-forecast horizon in periods. Default 10. Multi-step EGARCH forecasts use simulation.",
           "options": null
+        },
+        {
+          "name": "mean",
+          "label": "Mean Model",
+          "type": "string",
+          "default": "Constant",
+          "required": false,
+          "advanced": false,
+          "description": "Conditional-mean model: Constant (a fitted mean level, the default) or Zero (no mean term -- for already-centered series such as returns).",
+          "options": ["Constant", "Zero"]
         }
       ],
       "output_tables": [

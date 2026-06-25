@@ -1,0 +1,103 @@
+"""Phase 4b — GARCH mean exposure discrimination (garch / egarch / gjr_garch).
+
+`mean` (the conditional-mean model) was engine-read (garch_model.py, default
+"Constant") but catalog-absent on all 3 GARCH techniques. Exposed as
+["Constant","Zero"] (default "Constant").
+
+★ Two lessons embedded in this check:
+  - The GARCH FORECAST path is NON-DETERMINISTIC (simulation, not seed-pinned), so
+    a forecast-digest discrimination is unreliable. This check validates via the
+    DETERMINISTIC fitted PARAMETER TABLE instead.
+  - The discrimination CONTRAST must be the minimal-distinguishing pair. Constant
+    vs "AR" is DEGENERATE here (mean="AR" without lags collapses to a constant,
+    relabelled mu->Const) -> it would false-NEGATIVE. The clean contrast is
+    Constant vs Zero: Constant fits a mean parameter `mu`; Zero drops it. On a
+    NON-CENTERED series this is a deterministic, unambiguous difference on all 3.
+
+Asserts, per technique: the fitted param table contains `mu` under Constant and
+does NOT under Zero (the mean parameter appears/disappears). Byte-identical-on-
+default (absent == Constant) is verified by the same param-table observable.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+import numpy as np
+
+from reference_parity.harness.base import ParityResult
+from reference_parity.harness.check_base import P3ParityCheck
+from reference_parity.harness.path_setup import _ensure_engine_on_path
+
+
+def _param_names(res: dict):
+    for tb in res.get("tables", []) or []:
+        if "param" in str(tb.get("name", "")).lower():
+            return tuple(str(r[0]) for r in tb.get("rows", []) if r)
+    return None
+
+
+class GarchMeanExposureParity(P3ParityCheck):
+    technique_id = "p3_garch_mean_exposure"
+    tier = "fast"
+    fixture_id = ""
+    verdict_class = "closed_form"
+    verdict_class_rationale = (
+        "Knob-gap exposure for GARCH `mean`, validated via the DETERMINISTIC "
+        "fitted param table (the GARCH forecast is non-deterministic). The "
+        "minimal-distinguishing contrast Constant-vs-Zero (mean parameter "
+        "appears/disappears) proves effect on all 3; a degenerate Constant-vs-AR "
+        "contrast would false-negative. No effect -> BLOCK."
+    )
+
+    def setup_fixture(self, seed: int) -> dict[str, Any]:
+        rng = np.random.default_rng(9)
+        n = 400
+        r = np.zeros(n)
+        s = np.ones(n)
+        for i in range(1, n):
+            s[i] = np.sqrt(0.02 + 0.1 * r[i - 1] ** 2 + 0.85 * s[i - 1] ** 2)
+            r[i] = s[i] * rng.standard_normal()
+        # NON-CENTERED (mean ~3) so Constant (fits mu) differs from Zero (no mean).
+        return {"ret": (r * 10 + 3.0).tolist()}
+
+    def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
+        _ensure_engine_on_path()
+        from techniques.base import RunContext  # type: ignore
+        from techniques import registry  # type: ignore
+        import importlib
+
+        ret = fixture["ret"]
+
+        def run(tid, params):
+            mod = importlib.import_module(registry.TECHNIQUE_REGISTRY[tid])
+            ctx = RunContext({"run_id": "p3_garch_mean", "technique_id": tid, "preset": "Balanced",
+                              "seed": 42, "frequency": "", "time": list(range(len(ret))),
+                              "series": [{"name": "y", "values": ret}], "params": params})
+            return mod.run(ctx, lambda *a, **k: None)
+
+        out = {}
+        for tid in ("garch", "egarch", "gjr_garch"):
+            p_absent = _param_names(run(tid, {}))
+            p_const = _param_names(run(tid, {"mean": "Constant"}))
+            p_zero = _param_names(run(tid, {"mean": "Zero"}))
+            out[tid] = {
+                "ok": all(x is not None for x in (p_absent, p_const, p_zero)),
+                "byte_identical": p_absent == p_const,
+                "effect": (p_const is not None and p_zero is not None
+                           and "mu" in p_const and "mu" not in p_zero),
+            }
+        return out
+
+    def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
+        return {"expected": "Constant fits mu; Zero drops it; absent == Constant"}
+
+    def compare(self, tsl: dict[str, Any], ref: dict[str, Any]) -> ParityResult:
+        primary = {}
+        for tid, r in tsl.items():
+            passed = r["ok"] and r["byte_identical"] and r["effect"]
+            primary[tid] = {"status": "PASS" if passed else "BLOCK",
+                            "byte_identical": r["byte_identical"], "mean_has_effect": r["effect"]}
+        outcome = "BLOCK" if any(v["status"] == "BLOCK" for v in primary.values()) else "PASS"
+        return ParityResult(technique_id=self.technique_id, outcome=outcome,
+                            metrics={"primary": primary}, diagnostics={"n": len(tsl)})

@@ -3241,6 +3241,18 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    "p3_garch_mean_exposure": {
+        "type": "integrity_assertion",
+        "justification": (
+            "Phase-4b GARCH `mean` exposure (garch/egarch/gjr_garch), validated "
+            "via the DETERMINISTIC fitted param table (the GARCH forecast is "
+            "non-deterministic). Constant fits a `mu` mean parameter; Zero drops "
+            "it -- the minimal-distinguishing contrast (Constant-vs-AR is "
+            "degenerate without lags). byte-identical absent==Constant. "
+            "No-effect -> BLOCK."
+        ),
+    },
+
     "p3_tier2_knobgap_exposure": {
         "type": "integrity_assertion",
         "justification": (
