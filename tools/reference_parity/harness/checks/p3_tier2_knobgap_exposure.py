@@ -101,8 +101,22 @@ class Tier2KnobGapParity(P3ParityCheck):
         return {"expected": "every Tier-2 control changes output"}
 
     def compare(self, tsl: dict[str, Any], ref: dict[str, Any]) -> ParityResult:
-        primary = {k: {"status": "PASS" if (r["ok"] and r["differs"]) else "BLOCK",
-                       "differs": r["differs"]} for k, r in tsl.items()}
-        outcome = "BLOCK" if any(v["status"] == "BLOCK" for v in primary.values()) else "PASS"
+        # ★ A control whose technique COULD NOT RUN in this environment (e.g.
+        # x13_seasonal_adjust needs the Census binary, which is gitignored and so
+        # absent on the CI runner) is "couldn't test" -> CAVEAT, NOT "no effect"
+        # -> BLOCK. (The binary IS present locally, so the local gate can't see
+        # this; without the CAVEAT path the check BLOCKs CI while passing locally.)
+        primary = {}
+        for k, r in tsl.items():
+            if not r["ok"]:
+                st = "CAVEAT"     # technique couldn't run here (missing dependency)
+            elif r["differs"]:
+                st = "PASS"       # ran and the control changed the output
+            else:
+                st = "BLOCK"      # ran but no effect -> wrong disposition
+            primary[k] = {"status": st, "differs": r["differs"], "ran": r["ok"]}
+        statuses = [v["status"] for v in primary.values()]
+        outcome = ("BLOCK" if "BLOCK" in statuses
+                   else ("CAVEAT" if "CAVEAT" in statuses else "PASS"))
         return ParityResult(technique_id=self.technique_id, outcome=outcome,
                             metrics={"primary": primary}, diagnostics={"n": len(tsl)})
