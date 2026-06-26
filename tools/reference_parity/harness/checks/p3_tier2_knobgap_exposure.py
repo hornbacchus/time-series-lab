@@ -85,8 +85,13 @@ class Tier2KnobGapParity(P3ParityCheck):
             ("pelt_change_points.jump", "pelt_change_points", uni(fixture["cps_close"]), "jump", 1, 5, "", {}),
             ("dynamic_factor_model.k_factors", "dynamic_factor_model", fixture["multi"], "k_factors", 1, 2, "M", {}),
             ("theta_forecast.period", "theta_forecast", uni(fixture["seas"]), "period", 4, 12, "M", {}),
+            # ★ explicit-vs-explicit (0.1 vs 0.9), NOT auto-vs-value: "auto"
+            # estimates rho from the data and could COINCIDE with the compared
+            # value on a re-rolled fixture (latent degeneracy -- the
+            # minimal-distinguishing-contrast lesson). Two explicit values can't
+            # collapse.
             ("denton_chowlin_disaggregation.rho", "denton_chowlin_disaggregation", uni(fixture["quarterly"]),
-             "rho", "auto", "0.9", "Q", {"conversion_ratio": 3}),
+             "rho", "0.1", "0.9", "Q", {"conversion_ratio": 3}),
             ("x13_seasonal_adjust.transform", "x13_seasonal_adjust", uni(fixture["pos"]), "transform", "log", "none", "M", {}),
         ]
         out = {}
