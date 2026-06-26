@@ -13,7 +13,15 @@ jobs:
     # typical; 10m24s hit cancellation once on commit fad9013).
     # 15 min gives stable headroom without enabling slow-tier-
     # class work.
-    timeout-minutes: 15
+    # Phase 4b: bumped 15 -> 20. The knob-gap discrimination
+    # checks (horizon / tier1 / tier2 / confidence_level /
+    # garch-mean exposure, ~2-3 min) grew the suite to ~13-15 min;
+    # runner variance tipped it over 15 (9d48532 hit 15m20s
+    # cancellation). Same phenomenon as the 10->15 bump (the suite
+    # grew because we ADDED validation), same response. 20 gives
+    # real headroom (not another knife-edge) while keeping every
+    # check on the per-push tier.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
