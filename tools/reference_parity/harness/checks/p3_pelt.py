@@ -9,6 +9,16 @@ This is a SAME-LIBRARY parity check: both arms call
 with identical arguments. Pattern A bit-exact target;
 divergence indicates a TSL preprocessing or argument-handling
 bug, not a methodology difference.
+
+★ FUNCTIONAL LAYER (self-parity (F) upgrade): same-library bit-exact
+parity proves DETERMINISM, not that the detector FUNCTIONS (the BOCPD
+scar -- a detector that passed self-parity while never firing). So a
+defining-invariant functional check runs the ENGINE (default penalty,
+the user path) on a structured series with KNOWN injected breaks and
+asserts the detected change points land near the true breaks, AND on a
+flat no-break series asserts the detector stays quiet. The pair is
+verified-discriminating: a broken detector that fires everywhere fails
+the negative control; one that never fires fails the structured arm.
 """
 
 from __future__ import annotations
@@ -64,10 +74,36 @@ class PeltParity(P3ParityCheck):
     MIN_SIZE = 5
     MODEL = "l2"
 
+    # Functional layer (§5.1): structured fixture with KNOWN breaks +
+    # flat negative control. FN_SHIFT is large enough that the breaks are
+    # unambiguously detectable (pre-flight: engine recovers exactly
+    # [200, 400] at default penalty; flat -> 0).
+    FN_SHIFT = 8.0
+    FN_TRUE_BREAKS = (200, 400)
+    FN_WINDOW = 15        # +/- samples a detected CP may fall from a true break
+    # Negative-control guard: catch GROSS over-firing, not the modest
+    # false-positive rate intrinsic to a BIC penalty. Calibration (16
+    # seeds): a working detector gives 0-5 false CPs on 600 noise samples
+    # (mean 2.1); a broken too-liberal detector (penalty=1) gives 63. The
+    # <=10 guard sits cleanly between -> verified-discriminating.
+    FN_FLAT_MAX = 10
+
     def setup_fixture(self, seed: int) -> dict[str, Any]:
-        return {"y": _generate_mean_shift_dgp(
-            seed=seed, n=self.DGP_N, n_segments=self.DGP_K,
-        )}
+        rng = np.random.default_rng(seed + 7)
+        a, b = self.FN_TRUE_BREAKS
+        struct = np.concatenate([
+            rng.standard_normal(a),
+            self.FN_SHIFT + rng.standard_normal(b - a),
+            rng.standard_normal(self.DGP_N - b),
+        ])
+        flat = rng.standard_normal(self.DGP_N)
+        return {
+            "y": _generate_mean_shift_dgp(
+                seed=seed, n=self.DGP_N, n_segments=self.DGP_K,
+            ),
+            "y_struct": struct,
+            "y_flat": flat,
+        }
 
     def _pelt_predict(self, y: np.ndarray, pen: float) -> list[int]:
         """Run ruptures.Pelt with the same arguments TSL uses."""
@@ -118,10 +154,35 @@ class PeltParity(P3ParityCheck):
         # convert to 0-indexed indices for comparison
         cps_1indexed = a.get("change_point_positions") or []
         cps_0indexed = [int(x) - 1 for x in cps_1indexed]
+
+        # --- Functional layer: run the ENGINE with DEFAULT penalty (the
+        # user-facing path) on the structured + flat fixtures.
+        def _engine_cps(vals: list[float]) -> list[int]:
+            fctx = RunContext({
+                "run_id": "p3_pelt_fn",
+                "technique_id": "pelt_change_points",
+                "preset": "Balanced", "seed": 42, "frequency": "irregular",
+                "time": list(range(len(vals))),
+                "series": [{"name": "y", "values": list(vals)}],
+                "params": {},  # engine default penalty resolution
+            })
+            fr = pelt_run(fctx, lambda *_a, **_k: None)
+            fa = fr.get("audit_fields", {}) if fr.get("status") == "success" else {}
+            return sorted(int(x) - 1 for x in (fa.get("change_point_positions") or []))
+
+        struct_cps = _engine_cps(list(fixture["y_struct"]))
+        flat_cps = _engine_cps(list(fixture["y_flat"]))
         return {
             "n_change_points": int(a.get("n_change_points", 0)),
             "change_points": sorted(cps_0indexed),
             "penalty": pen,
+            "functional": {
+                "true_breaks": list(self.FN_TRUE_BREAKS),
+                "window": self.FN_WINDOW,
+                "struct_cps": struct_cps,
+                "struct_n": len(struct_cps),
+                "flat_n": len(flat_cps),
+            },
         }
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -162,6 +223,30 @@ class PeltParity(P3ParityCheck):
             "tsl_only": sorted(tsl_cps - ref_cps),
             "ref_only": sorted(ref_cps - tsl_cps),
             "intersection_size": len(tsl_cps & ref_cps),
+        }
+        # --- Functional layer (§5.1): the detector must FIRE near the
+        # known breaks AND stay quiet on the flat control. The pair is
+        # verified-discriminating (a fires-everywhere or never-fires bug
+        # fails one arm). A BLOCK here = a real engine defect, NOT a
+        # tolerance to tune (the BOCPD precedent).
+        fn = tsl.get("functional", {})
+        true_breaks = fn.get("true_breaks", [])
+        win = int(fn.get("window", self.FN_WINDOW))
+        struct_cps = fn.get("struct_cps", [])
+        hits = [b for b in true_breaks
+                if any(abs(c - b) <= win for c in struct_cps)]
+        detects = (len(hits) == len(true_breaks)
+                   and fn.get("struct_n", 0) >= len(true_breaks))
+        primary["functional_detects_breaks"] = {
+            "status": "PASS" if detects else "BLOCK",
+            "true_breaks": true_breaks, "detected": struct_cps,
+            "hits_within_window": hits, "window": win,
+        }
+        flat_n = int(fn.get("flat_n", 99))
+        primary["functional_negative_control"] = {
+            "status": "PASS" if flat_n <= self.FN_FLAT_MAX else "BLOCK",
+            "flat_n_change_points": flat_n,
+            "max_tolerated": self.FN_FLAT_MAX,
         }
         any_block = any(
             primary[k]["status"] == "BLOCK" for k in primary

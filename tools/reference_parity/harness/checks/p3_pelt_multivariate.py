@@ -19,6 +19,15 @@ numeric penalty to BOTH the engine (via params, bypassing the string
 branch) AND the direct-ruptures reference, so the comparison isolates
 the wrapper's stacking/argument-handling from any penalty-convention
 divergence.
+
+★ FUNCTIONAL LAYER (self-parity (F) upgrade): same-library bit-exact
+parity proves DETERMINISM, not that the joint detector FUNCTIONS. So a
+defining-invariant functional check runs the ENGINE (default penalty,
+the user path) on a multivariate series with a KNOWN JOINT break and
+asserts the detected joint change points land near the true breaks, AND
+on a flat no-break multivariate series asserts the detector stays quiet.
+Verified-discriminating: a fires-everywhere bug fails the control, a
+never-fires bug fails the structured arm.
 """
 
 from __future__ import annotations
@@ -78,10 +87,31 @@ class PeltMultivariateParity(P3ParityCheck):
     MIN_SIZE = 5
     MODEL = "l2"
 
+    # Functional layer (§5.1): structured fixture with a KNOWN JOINT break
+    # + flat negative control. FN_SHIFT large enough to be unambiguous
+    # (pre-flight: engine recovers exactly [200, 400] at default penalty;
+    # flat -> 0).
+    FN_SHIFT = 8.0
+    FN_TRUE_BREAKS = (200, 400)
+    FN_WINDOW = 15
+    # Negative-control guard: catch GROSS over-firing, not the modest
+    # BIC false-positive rate (see p3_pelt calibration: working 0-5,
+    # broken 63). <=10 is verified-discriminating.
+    FN_FLAT_MAX = 10
+
     def setup_fixture(self, seed: int) -> dict[str, Any]:
-        return {"X": _generate_joint_mean_shift_dgp(
-            seed=seed, n=self.DGP_N, k=self.DGP_K, n_segments=self.DGP_SEG,
-        )}
+        rng = np.random.default_rng(seed + 7)
+        a, b = self.FN_TRUE_BREAKS
+        struct = rng.standard_normal((self.DGP_N, self.DGP_K))
+        struct[a:b, :] += self.FN_SHIFT  # joint shift across all features
+        flat = rng.standard_normal((self.DGP_N, self.DGP_K))
+        return {
+            "X": _generate_joint_mean_shift_dgp(
+                seed=seed, n=self.DGP_N, k=self.DGP_K, n_segments=self.DGP_SEG,
+            ),
+            "X_struct": struct,
+            "X_flat": flat,
+        }
 
     @staticmethod
     def _mv_penalty(X: np.ndarray) -> float:
@@ -122,11 +152,40 @@ class PeltMultivariateParity(P3ParityCheck):
                 "(auto-detect did not engage the multivariate path)."
             )
         cps_0indexed = [int(x) - 1 for x in (a.get("change_point_positions") or [])]
+
+        # --- Functional layer: run the ENGINE (default penalty) on the
+        # structured + flat multivariate fixtures.
+        def _engine_mv_cps(Xarr: np.ndarray) -> list[int]:
+            nn, kk = Xarr.shape
+            fctx = RunContext({
+                "run_id": "p3_pelt_mv_fn",
+                "technique_id": "pelt_change_points",
+                "preset": "Balanced", "seed": 42, "frequency": "irregular",
+                "time": list(range(nn)),
+                "series": [
+                    {"name": f"t{j}", "values": Xarr[:, j].tolist()}
+                    for j in range(kk)
+                ],
+                "params": {},  # engine default penalty resolution
+            })
+            fr = pelt_run(fctx, lambda *_a, **_k: None)
+            fa = fr.get("audit_fields", {}) if fr.get("status") == "success" else {}
+            return sorted(int(x) - 1 for x in (fa.get("change_point_positions") or []))
+
+        struct_cps = _engine_mv_cps(np.asarray(fixture["X_struct"], dtype=np.float64))
+        flat_cps = _engine_mv_cps(np.asarray(fixture["X_flat"], dtype=np.float64))
         return {
             "n_change_points": int(a.get("n_change_points", 0)),
             "change_points": sorted(cps_0indexed),
             "penalty": pen,
             "n_features": int(a.get("n_features", k)),
+            "functional": {
+                "true_breaks": list(self.FN_TRUE_BREAKS),
+                "window": self.FN_WINDOW,
+                "struct_cps": struct_cps,
+                "struct_n": len(struct_cps),
+                "flat_n": len(flat_cps),
+            },
         }
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -164,6 +223,28 @@ class PeltMultivariateParity(P3ParityCheck):
             "tsl_only": sorted(tsl_cps - ref_cps),
             "ref_only": sorted(ref_cps - tsl_cps),
             "intersection_size": len(tsl_cps & ref_cps),
+        }
+        # --- Functional layer (§5.1): the joint detector must FIRE near
+        # the known joint breaks AND stay quiet on the flat control.
+        # Verified-discriminating; a BLOCK = a real engine defect.
+        fn = tsl.get("functional", {})
+        true_breaks = fn.get("true_breaks", [])
+        win = int(fn.get("window", self.FN_WINDOW))
+        struct_cps = fn.get("struct_cps", [])
+        hits = [b for b in true_breaks
+                if any(abs(c - b) <= win for c in struct_cps)]
+        detects = (len(hits) == len(true_breaks)
+                   and fn.get("struct_n", 0) >= len(true_breaks))
+        primary["functional_detects_joint_breaks"] = {
+            "status": "PASS" if detects else "BLOCK",
+            "true_breaks": true_breaks, "detected": struct_cps,
+            "hits_within_window": hits, "window": win,
+        }
+        flat_n = int(fn.get("flat_n", 99))
+        primary["functional_negative_control"] = {
+            "status": "PASS" if flat_n <= self.FN_FLAT_MAX else "BLOCK",
+            "flat_n_change_points": flat_n,
+            "max_tolerated": self.FN_FLAT_MAX,
         }
         any_block = any(primary[k]["status"] == "BLOCK" for k in primary)
         any_caveat = any(primary[k]["status"] == "CAVEAT" for k in primary)
