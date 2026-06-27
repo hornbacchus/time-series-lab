@@ -690,8 +690,11 @@ namespace TSL.AddIn
                 // Wire the Data Readiness checks request
                 _hostControl.ViewModel.DataReadinessChecksRequested += OnDataReadinessChecksRequested;
 
-                // Push the real technique catalog into the Explorer VM, replacing
-                // the 9-item dev stub that it loads at construction.
+                // Push the real technique catalog into the Explorer VM. The VM now
+                // constructs EMPTY (the design-time preview stub was removed -- the
+                // JSON catalog is the single source of truth); this push happens
+                // BEFORE CreateCustomTaskPane below, so the pane is never shown
+                // before the catalog is loaded.
                 try
                 {
                     var catalog = TechniqueCatalogService.GetCatalog();
@@ -703,7 +706,7 @@ namespace TSL.AddIn
                     }
                     else
                     {
-                        Logger.Warn("Technique catalog is empty; Explorer will fall back to built-in stub.");
+                        Logger.Warn("Technique catalog is empty; the Explorer will be empty (no built-in stub fallback).");
                     }
                 }
                 catch (Exception catEx)

@@ -275,6 +275,8 @@
                          to readable monospace; sized-to-content inside the outer
                          ScrollViewer, no double-scroll) -->
                     <StackPanel helpers:MarkdownBehavior.Source="{Binding SelectedTechniqueDescription}"
+                                helpers:MarkdownBehavior.NavigateCommand="{Binding NavigateToRelatedCommand}"
+                                helpers:MarkdownBehavior.KnownIds="{Binding AllTechniqueIds}"
                                 Margin="0,0,0,12" />
 
                     <!-- AUTO vs THOROUGH explanation -->

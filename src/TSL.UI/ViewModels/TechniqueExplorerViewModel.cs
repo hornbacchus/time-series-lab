@@ -125,6 +125,14 @@ namespace TSL.UI.ViewModels
         // Master list loaded from catalog
         private List<TechniqueItem> _allTechniques = new List<TechniqueItem>();
 
+        /// <summary>
+        /// The set of all known technique ids. Bound to MarkdownBehavior.KnownIds
+        /// so a backtick id-span in a "Related Techniques" section renders as a
+        /// clickable cross-reference. Refreshed whenever the catalog loads.
+        /// </summary>
+        public IEnumerable<string> AllTechniqueIds =>
+            _allTechniques.Where(t => !string.IsNullOrEmpty(t.Id)).Select(t => t.Id);
+
         // ── Selected state ──────────────────────────────────────────────
 
         private TechniqueCategory _selectedCategory;
@@ -242,6 +250,10 @@ namespace TSL.UI.ViewModels
         public ICommand ShowAllCategoriesCommand { get; }
         public ICommand ToggleAdvancedCommand { get; }
 
+        // Cross-reference navigation: a clickable related-technique id (rendered
+        // by MarkdownBehavior as a Hyperlink) invokes this with the id string.
+        public ICommand NavigateToRelatedCommand { get; }
+
         // ── Constructor ─────────────────────────────────────────────────
 
         public TechniqueExplorerViewModel()
@@ -276,8 +288,17 @@ namespace TSL.UI.ViewModels
 
             ToggleAdvancedCommand = new RelayCommand(() => ShowAdvancedParams = !ShowAdvancedParams);
 
-            // Load built-in sample catalog for design-time / standalone
-            LoadBuiltInCatalog();
+            // A clicked related-technique cross-reference passes its id here.
+            NavigateToRelatedCommand = new RelayCommand(param =>
+            {
+                var id = param as string;
+                if (!string.IsNullOrEmpty(id)) SelectTechniqueById(id);
+            });
+
+            // No built-in stub: the real catalog is pushed in via LoadTechniques
+            // (TaskPaneManager.EnsureTaskPane) BEFORE the pane is shown. Until
+            // then _allTechniques is empty (handled gracefully by the null-safe
+            // Selected* properties); at design-time the preview is simply blank.
         }
 
         // ── Public API ──────────────────────────────────────────────────
@@ -289,6 +310,9 @@ namespace TSL.UI.ViewModels
         public void LoadTechniques(IEnumerable<TechniqueItem> techniques)
         {
             _allTechniques = techniques.ToList();
+            // Refresh the cross-reference id-set BEFORE ApplyFilter selects the
+            // first technique (whose description renders the related links).
+            OnPropertyChanged(nameof(AllTechniqueIds));
             RebuildCategories();
             ApplyFilter();
         }
@@ -367,207 +391,6 @@ namespace TSL.UI.ViewModels
             {
                 SelectedTechnique = FilteredTechniques.First();
             }
-        }
-
-        /// <summary>
-        /// Provides a built-in sample catalog so the UI is usable before the
-        /// AddIn layer loads the real catalog from disk.
-        ///
-        /// ★ DESIGN-TIME-ONLY / NOT AUTHORITATIVE (Phase 4a-harden #4). This is a
-        /// hardcoded preview stub; it does NOT drive any run. The real parameters
-        /// load from resources/catalog/techniques_catalog.json via TaskPaneManager,
-        /// which is the SINGLE SOURCE OF TRUTH. This stub has drifted from the
-        /// catalog (stale technique ids, stale defaults) and must NOT be trusted
-        /// for parameter values. A regression sentinel,
-        /// tools/reference_parity/stub_catalog_divergence.py, fails CI on any NEW
-        /// stub-vs-catalog divergence. PREFERRED FIX (banked for the next C# build
-        /// cycle): ELIMINATE this stub -- have the design-time preview read the JSON
-        /// catalog too -- removing the second source of truth entirely.
-        /// </summary>
-        private void LoadBuiltInCatalog()
-        {
-            _allTechniques = new List<TechniqueItem>
-            {
-                new TechniqueItem
-                {
-                    Id = "stl_decompose",
-                    Name = "STL Decomposition",
-                    Category = "Decomposition",
-                    Summary = "Seasonal-Trend decomposition using LOESS. Separates a time series into trend, seasonal, and residual components.",
-                    Description = "STL (Seasonal and Trend decomposition using LOESS) is a robust method for decomposing a time series into three components:\n\n" +
-                                  "- Trend: The long-term progression of the series\n" +
-                                  "- Seasonal: The repeating short-term cycle\n" +
-                                  "- Residual: The remainder after removing trend and seasonality\n\n" +
-                                  "AUTO mode: Uses automatic period detection and default LOESS windows.\n" +
-                                  "THOROUGH mode: Optimises LOESS bandwidths and tests multiple seasonal periods.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.STL",
-                    MinSeries = 1,
-                    MaxSeries = 1,
-                    Tags = new List<string> { "decomposition", "seasonal", "trend" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "Components", "Diagnostics" },
-                    Parameters = new List<TechniqueParameterItem>
-                    {
-                        new TechniqueParameterItem { Name = "period", Label = "Seasonal Period", Type = "int", Default = 0, Required = false, Description = "0 = auto-detect" },
-                        new TechniqueParameterItem { Name = "robust", Label = "Robust Fitting", Type = "bool", Default = true, Required = false, Description = "Use robust (outlier-resistant) fitting" },
-                    }
-                },
-                new TechniqueItem
-                {
-                    Id = "auto_arima",
-                    Name = "Auto ARIMA Forecast",
-                    Category = "Forecasting",
-                    Summary = "Automatic ARIMA model selection and forecasting with confidence intervals.",
-                    Description = "Auto ARIMA automatically selects the best ARIMA(p,d,q)(P,D,Q)m model by searching over possible orders and choosing the model with the lowest information criterion (AICc).\n\n" +
-                                  "AUTO mode: Fast stepwise search with default parameters.\n" +
-                                  "THOROUGH mode: Exhaustive grid search over a wider parameter space, includes cross-validation.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.ARIMA",
-                    MinSeries = 1,
-                    MaxSeries = 1,
-                    Tags = new List<string> { "forecasting", "arima", "prediction" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "Forecast", "ModelSummary", "Residuals" },
-                    Parameters = new List<TechniqueParameterItem>
-                    {
-                        new TechniqueParameterItem { Name = "horizon", Label = "Forecast Horizon", Type = "int", Default = 12, Required = false, Description = "Number of periods to forecast" },
-                        new TechniqueParameterItem { Name = "seasonal", Label = "Seasonal", Type = "bool", Default = true, Required = false, Description = "Include seasonal component" },
-                        new TechniqueParameterItem { Name = "ci_level", Label = "Confidence Level", Type = "float", Default = 0.95, Required = false, Advanced = true, Description = "Confidence interval level (0-1)" },
-                    }
-                },
-                new TechniqueItem
-                {
-                    Id = "granger_causality",
-                    Name = "Granger Causality Test",
-                    Category = "Causality & Correlation",
-                    Summary = "Tests whether one time series is useful in forecasting another.",
-                    Description = "The Granger Causality test determines whether lagged values of one series (X) contain information that helps predict another series (Y), beyond what is contained in lagged values of Y alone.\n\n" +
-                                  "AUTO mode: Tests a default range of lags (1-4) with standard F-test.\n" +
-                                  "THOROUGH mode: Uses BIC to select optimal lag length, includes Toda-Yamamoto procedure for non-stationary data.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.GRANGER",
-                    MinSeries = 2,
-                    MaxSeries = 2,
-                    Tags = new List<string> { "causality", "granger", "bivariate" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "TestResults", "LagSelection" },
-                    Parameters = new List<TechniqueParameterItem>
-                    {
-                        new TechniqueParameterItem { Name = "max_lag", Label = "Max Lag", Type = "int", Default = 4, Required = false, Description = "Maximum lag order to test" },
-                    }
-                },
-                new TechniqueItem
-                {
-                    Id = "prewhitened_ccf_lag",
-                    Name = "Lead-Lag Finder (CCF)",
-                    Category = "Causality & Correlation",
-                    Summary = "Finds the lead-lag relationship between two series using prewhitened cross-correlation.",
-                    Description = "Uses prewhitened cross-correlation to identify which series leads or lags the other and by how many periods. Prewhitening removes autocorrelation first, producing more reliable CCF estimates.\n\n" +
-                                  "AUTO mode: Uses auto.arima prewhitening filter.\n" +
-                                  "THOROUGH mode: Compares multiple prewhitening approaches and provides bootstrap confidence bands.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.CCF",
-                    MinSeries = 2,
-                    MaxSeries = 2,
-                    Tags = new List<string> { "correlation", "cross-correlation", "lead-lag", "ccf" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "CCFValues", "PeakLags" },
-                    Parameters = new List<TechniqueParameterItem>
-                    {
-                        new TechniqueParameterItem { Name = "max_lag", Label = "Max Lag", Type = "int", Default = 20, Required = false, Description = "Maximum lag to compute CCF for" },
-                    }
-                },
-                new TechniqueItem
-                {
-                    Id = "stl_esd_anomaly",
-                    Name = "STL + ESD Anomaly Detection",
-                    Category = "Anomaly Detection",
-                    Summary = "Detects anomalies by combining STL decomposition with Extreme Studentized Deviate test.",
-                    Description = "First decomposes the series via STL to remove trend and seasonality, then applies the Generalized ESD test on the residual component to flag statistical outliers.\n\n" +
-                                  "AUTO mode: Uses default STL settings and ESD alpha = 0.05.\n" +
-                                  "THOROUGH mode: Tunes STL bandwidths, tests multiple significance levels, and cross-validates anomaly thresholds.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.ANOMALY",
-                    MinSeries = 1,
-                    MaxSeries = 1,
-                    Tags = new List<string> { "anomaly", "outlier", "esd" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "Anomalies", "Components" },
-                    Parameters = new List<TechniqueParameterItem>
-                    {
-                        new TechniqueParameterItem { Name = "alpha", Label = "Significance Level", Type = "float", Default = 0.05, Required = false, Description = "ESD test significance level" },
-                        new TechniqueParameterItem { Name = "max_anomalies_pct", Label = "Max Anomaly %", Type = "float", Default = 0.10, Required = false, Advanced = true, Description = "Max fraction of points that can be anomalies" },
-                    }
-                },
-                new TechniqueItem
-                {
-                    Id = "adf_kpss_stationarity",
-                    Name = "Stationarity Tests (ADF + KPSS)",
-                    Category = "Statistical Tests",
-                    Summary = "Joint ADF and KPSS testing to determine stationarity and required differencing.",
-                    Description = "Runs both the Augmented Dickey-Fuller (ADF) test and the Kwiatkowski-Phillips-Schmidt-Shin (KPSS) test. Interpreting them jointly resolves ambiguity:\n\n" +
-                                  "- Both conclude stationary: series is stationary\n" +
-                                  "- Both conclude non-stationary: series has a unit root\n" +
-                                  "- ADF rejects but KPSS does not: trend-stationary\n" +
-                                  "- ADF fails but KPSS rejects: difference-stationary\n\n" +
-                                  "AUTO mode: Standard ADF + KPSS with automatic lag selection.\n" +
-                                  "THOROUGH mode: Includes Phillips-Perron, Zivot-Andrews breakpoint test, and HEGY seasonal unit root test.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.STATIONARY",
-                    MinSeries = 1,
-                    MaxSeries = null,
-                    Tags = new List<string> { "stationarity", "unit-root", "adf", "kpss" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "TestResults" },
-                    Parameters = new List<TechniqueParameterItem>()
-                },
-                new TechniqueItem
-                {
-                    Id = "ets_forecast",
-                    Name = "Exponential Smoothing (ETS)",
-                    Category = "Forecasting",
-                    Summary = "Error-Trend-Seasonal (ETS) framework with automatic model selection.",
-                    Description = "ETS models cover a family of exponential smoothing methods including simple, Holt's linear, and Holt-Winters seasonal smoothing. Model selection is automatic based on information criteria.\n\n" +
-                                  "AUTO mode: Automatic model selection from the ETS family.\n" +
-                                  "THOROUGH mode: Full ETS grid search including damped trends and multiplicative components.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.ETS",
-                    MinSeries = 1,
-                    MaxSeries = 1,
-                    Tags = new List<string> { "forecasting", "ets", "exponential-smoothing" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "Forecast", "ModelSummary" },
-                    Parameters = new List<TechniqueParameterItem>
-                    {
-                        new TechniqueParameterItem { Name = "horizon", Label = "Forecast Horizon", Type = "int", Default = 12, Required = false, Description = "Number of periods to forecast" },
-                    }
-                },
-                new TechniqueItem
-                {
-                    Id = "rolling_correlation",
-                    Name = "Rolling Correlation",
-                    Category = "Causality & Correlation",
-                    Summary = "Computes time-varying correlation between two series using a rolling window.",
-                    Description = "Calculates the Pearson correlation coefficient over a rolling window, revealing how the relationship between two series changes over time.\n\n" +
-                                  "AUTO mode: Default window size based on data length.\n" +
-                                  "THOROUGH mode: Tests multiple window sizes and includes DCC-GARCH dynamic correlation.",
-                    SupportsAutoUdf = true,
-                    AutoUdfName = "TSL.AUTO.ROLLCORR",
-                    MinSeries = 2,
-                    MaxSeries = 2,
-                    Tags = new List<string> { "correlation", "rolling", "time-varying" },
-                    Presets = new List<string> { "Fast", "Balanced", "Thorough" },
-                    OutputTables = new List<string> { "RollingCorrelation" },
-                    Parameters = new List<TechniqueParameterItem>
-                    {
-                        new TechniqueParameterItem { Name = "window", Label = "Window Size", Type = "int", Default = 30, Required = false, Description = "Rolling window size in periods" },
-                    }
-                },
-            };
-
-            RebuildCategories();
-            ApplyFilter();
         }
     }
 }

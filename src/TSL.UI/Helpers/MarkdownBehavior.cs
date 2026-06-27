@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace TSL.UI.Helpers
@@ -25,6 +26,14 @@ namespace TSL.UI.Helpers
     /// backtick math all render as monospace blocks/runs; blockquotes render
     /// indented-italic. Nothing shows as raw <c>#</c>/<c>|</c> soup.
     ///
+    /// ★ CLICKABLE CROSS-REFERENCES: a backtick span whose text is a KNOWN
+    /// technique id (the "Related Techniques" sections wrap sibling ids in
+    /// backticks) renders as a <see cref="Hyperlink"/> that invokes
+    /// <see cref="NavigateCommandProperty"/> with the id — navigating the Explorer
+    /// to that technique. The id-set comes from <see cref="KnownIdsProperty"/>;
+    /// backtick spans that are NOT ids (e.g. `period`, `0.95`) stay plain code.
+    /// When neither attached property is set the rendering is unchanged.
+    ///
     /// No external dependency — net48 WPF only. Defensive: any parse failure
     /// falls back to the raw text as a plain wrapped TextBlock.
     /// </summary>
@@ -36,6 +45,7 @@ namespace TSL.UI.Helpers
         private static readonly Brush HeaderBrush = new SolidColorBrush(Color.FromRgb(0x21, 0x21, 0x21));
         private static readonly Brush SubtleBrush = new SolidColorBrush(Color.FromRgb(0x75, 0x75, 0x75));
         private static readonly Brush MonoBg = new SolidColorBrush(Color.FromRgb(0xF5, 0xF5, 0xF5));
+        private static readonly Brush LinkBrush = new SolidColorBrush(Color.FromRgb(0x15, 0x6A, 0xC7));
         private static readonly FontFamily MonoFont = new FontFamily("Consolas, Courier New, monospace");
 
         // inline: `code` | **bold** | *italic*  (order matters: code first so a
@@ -47,35 +57,84 @@ namespace TSL.UI.Helpers
         private static readonly Regex InlineRx = new Regex(
             @"`[^`]+`|\*\*(?:.+?)\*\*|\*(?:.+?)\*", RegexOptions.Compiled);
 
+        // ── attached properties ───────────────────────────────────────────────
+        // Source: the markdown string. NavigateCommand + KnownIds: optional
+        // cross-reference wiring (a backtick id-span -> a Hyperlink that runs
+        // NavigateCommand with the id). All three re-render the host on change so
+        // binding order is irrelevant.
+
         public static readonly DependencyProperty SourceProperty =
             DependencyProperty.RegisterAttached(
                 "Source", typeof(string), typeof(MarkdownBehavior),
-                new PropertyMetadata(null, OnSourceChanged));
+                new PropertyMetadata(null, OnAnyChanged));
 
         public static string GetSource(DependencyObject o) => (string)o.GetValue(SourceProperty);
         public static void SetSource(DependencyObject o, string v) => o.SetValue(SourceProperty, v);
 
-        private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static readonly DependencyProperty NavigateCommandProperty =
+            DependencyProperty.RegisterAttached(
+                "NavigateCommand", typeof(ICommand), typeof(MarkdownBehavior),
+                new PropertyMetadata(null, OnAnyChanged));
+
+        public static ICommand GetNavigateCommand(DependencyObject o) => (ICommand)o.GetValue(NavigateCommandProperty);
+        public static void SetNavigateCommand(DependencyObject o, ICommand v) => o.SetValue(NavigateCommandProperty, v);
+
+        public static readonly DependencyProperty KnownIdsProperty =
+            DependencyProperty.RegisterAttached(
+                "KnownIds", typeof(IEnumerable<string>), typeof(MarkdownBehavior),
+                new PropertyMetadata(null, OnAnyChanged));
+
+        public static IEnumerable<string> GetKnownIds(DependencyObject o) => (IEnumerable<string>)o.GetValue(KnownIdsProperty);
+        public static void SetKnownIds(DependencyObject o, IEnumerable<string> v) => o.SetValue(KnownIdsProperty, v);
+
+        private static void OnAnyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (!(d is Panel host)) return;
+            if (d is Panel host) Rebuild(host);
+        }
+
+        private static void Rebuild(Panel host)
+        {
             host.Children.Clear();
-            var md = e.NewValue as string;
+            var md = GetSource(host);
             if (string.IsNullOrWhiteSpace(md)) return;
+            var ctx = BuildCtx(host);
             try
             {
-                foreach (var block in Render(md))
+                foreach (var block in Render(md, ctx))
                     host.Children.Add(block);
             }
             catch
             {
                 // Never let a parse bug blank the pane — fall back to raw text.
                 host.Children.Clear();
-                host.Children.Add(Paragraph(md));
+                host.Children.Add(Paragraph(md, ctx));
             }
         }
 
+        // ── link context (null/empty == no linkification; backward compatible) ──
+        private sealed class LinkCtx
+        {
+            public HashSet<string> Ids;
+            public ICommand Navigate;
+            public bool CanLink => Ids != null && Ids.Count > 0 && Navigate != null;
+        }
+
+        private static LinkCtx BuildCtx(Panel host)
+        {
+            var cmd = GetNavigateCommand(host);
+            var ids = GetKnownIds(host);
+            HashSet<string> set = null;
+            if (ids != null)
+            {
+                set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var id in ids)
+                    if (!string.IsNullOrEmpty(id)) set.Add(id);
+            }
+            return new LinkCtx { Ids = set, Navigate = cmd };
+        }
+
         // ── block parser (line-oriented) ─────────────────────────────────────
-        private static IEnumerable<UIElement> Render(string md)
+        private static IEnumerable<UIElement> Render(string md, LinkCtx ctx)
         {
             var lines = md.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
             int i = 0;
@@ -124,7 +183,7 @@ namespace TSL.UI.Helpers
                         sb.Append(lines[i].TrimStart().TrimStart('>').Trim()).Append(' ');
                         i++;
                     }
-                    yield return Quote(sb.ToString().Trim());
+                    yield return Quote(sb.ToString().Trim(), ctx);
                     continue;
                 }
 
@@ -136,7 +195,7 @@ namespace TSL.UI.Helpers
                     string text = t.Substring(level).Trim();
                     i++;
                     if (level <= 1) continue;     // skip the title (= the pane header)
-                    yield return Header(text, level);
+                    yield return Header(text, level, ctx);
                     continue;
                 }
 
@@ -145,7 +204,7 @@ namespace TSL.UI.Helpers
                 {
                     while (i < lines.Length && IsListItem(lines[i].TrimStart()))
                     {
-                        yield return ListItem(lines[i].TrimStart());
+                        yield return ListItem(lines[i].TrimStart(), ctx);
                         i++;
                     }
                     continue;
@@ -168,13 +227,13 @@ namespace TSL.UI.Helpers
                         sb.Append(p.Trim());
                         i++;
                     }
-                    yield return Paragraph(sb.ToString());
+                    yield return Paragraph(sb.ToString(), ctx);
                 }
             }
         }
 
         // ── block builders ───────────────────────────────────────────────────
-        private static TextBlock Header(string text, int level)
+        private static TextBlock Header(string text, int level, LinkCtx ctx)
         {
             var tb = new TextBlock
             {
@@ -184,11 +243,11 @@ namespace TSL.UI.Helpers
                 TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(0, 10, 0, 3),
             };
-            AppendInlines(tb.Inlines, text);
+            AppendInlines(tb.Inlines, text, ctx);
             return tb;
         }
 
-        private static TextBlock Paragraph(string text)
+        private static TextBlock Paragraph(string text, LinkCtx ctx)
         {
             var tb = new TextBlock
             {
@@ -198,11 +257,11 @@ namespace TSL.UI.Helpers
                 LineHeight = 18,
                 Margin = new Thickness(0, 0, 0, 8),
             };
-            AppendInlines(tb.Inlines, text);
+            AppendInlines(tb.Inlines, text, ctx);
             return tb;
         }
 
-        private static TextBlock ListItem(string raw)
+        private static TextBlock ListItem(string raw, LinkCtx ctx)
         {
             // raw begins with a bullet (-, *, +) or "N." — keep an ordered number,
             // normalise a bullet to "•".
@@ -220,7 +279,7 @@ namespace TSL.UI.Helpers
                 Margin = new Thickness(12, 0, 0, 4),
             };
             tb.Inlines.Add(new Run(prefix));
-            AppendInlines(tb.Inlines, rest);
+            AppendInlines(tb.Inlines, rest, ctx);
             return tb;
         }
 
@@ -244,7 +303,7 @@ namespace TSL.UI.Helpers
             };
         }
 
-        private static TextBlock Quote(string text)
+        private static TextBlock Quote(string text, LinkCtx ctx)
         {
             var tb = new TextBlock
             {
@@ -255,12 +314,14 @@ namespace TSL.UI.Helpers
                 LineHeight = 18,
                 Margin = new Thickness(12, 0, 0, 8),
             };
-            AppendInlines(tb.Inlines, text);
+            AppendInlines(tb.Inlines, text, ctx);
             return tb;
         }
 
-        // ── inline parser:  **bold**  *italic*  _italic_  `code`  ─────────────
-        private static void AppendInlines(InlineCollection inlines, string text)
+        // ── inline parser:  **bold**  *italic*  `code`  ──────────────────────
+        // A `code` span whose text is a known technique id renders as a clickable
+        // Hyperlink (cross-reference); every other span is unchanged.
+        private static void AppendInlines(InlineCollection inlines, string text, LinkCtx ctx)
         {
             if (string.IsNullOrEmpty(text)) return;
             int pos = 0;
@@ -271,8 +332,11 @@ namespace TSL.UI.Helpers
                 string tok = m.Value;
                 if (tok.Length >= 2 && tok[0] == '`')
                 {
-                    inlines.Add(new Run(tok.Substring(1, tok.Length - 2))
-                    { FontFamily = MonoFont, Foreground = HeaderBrush });
+                    string code = tok.Substring(1, tok.Length - 2);
+                    if (ctx != null && ctx.CanLink && ctx.Ids.Contains(code))
+                        inlines.Add(MakeLink(code, ctx));
+                    else
+                        inlines.Add(new Run(code) { FontFamily = MonoFont, Foreground = HeaderBrush });
                 }
                 else if (tok.StartsWith("**"))
                 {
@@ -286,6 +350,20 @@ namespace TSL.UI.Helpers
             }
             if (pos < text.Length)
                 inlines.Add(new Run(text.Substring(pos)));
+        }
+
+        // A cross-reference link: mono (it was a code-span id) + link-coloured +
+        // underlined (Hyperlink default) + hand cursor on hover. Clicking runs the
+        // NavigateCommand with the id as the parameter.
+        private static Hyperlink MakeLink(string id, LinkCtx ctx)
+        {
+            return new Hyperlink(new Run(id) { FontFamily = MonoFont })
+            {
+                Command = ctx.Navigate,
+                CommandParameter = id,
+                Foreground = LinkBrush,
+                ToolTip = "Go to " + id,
+            };
         }
 
         // ── small helpers ────────────────────────────────────────────────────
