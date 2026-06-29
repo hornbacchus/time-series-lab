@@ -126,12 +126,23 @@ namespace TSL.UI.ViewModels
         private List<TechniqueItem> _allTechniques = new List<TechniqueItem>();
 
         /// <summary>
-        /// The set of all known technique ids. Bound to MarkdownBehavior.KnownIds
-        /// so a backtick id-span in a "Related Techniques" section renders as a
-        /// clickable cross-reference. Refreshed whenever the catalog loads.
+        /// Maps every known technique id -> its display Name. Bound to
+        /// MarkdownBehavior.IdNameMap so a backtick id-span in a "Related
+        /// Techniques" section renders as a clickable cross-reference showing the
+        /// display name (matching the Explorer list, which also binds Name) while
+        /// navigating by id. Refreshed whenever the catalog loads.
         /// </summary>
-        public IEnumerable<string> AllTechniqueIds =>
-            _allTechniques.Where(t => !string.IsNullOrEmpty(t.Id)).Select(t => t.Id);
+        public IReadOnlyDictionary<string, string> TechniqueIdNameMap
+        {
+            get
+            {
+                var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var t in _allTechniques)
+                    if (!string.IsNullOrEmpty(t.Id) && !map.ContainsKey(t.Id))
+                        map[t.Id] = t.Name;
+                return map;
+            }
+        }
 
         // ── Selected state ──────────────────────────────────────────────
 
@@ -310,9 +321,9 @@ namespace TSL.UI.ViewModels
         public void LoadTechniques(IEnumerable<TechniqueItem> techniques)
         {
             _allTechniques = techniques.ToList();
-            // Refresh the cross-reference id-set BEFORE ApplyFilter selects the
-            // first technique (whose description renders the related links).
-            OnPropertyChanged(nameof(AllTechniqueIds));
+            // Refresh the cross-reference id->name map BEFORE ApplyFilter selects
+            // the first technique (whose description renders the related links).
+            OnPropertyChanged(nameof(TechniqueIdNameMap));
             RebuildCategories();
             ApplyFilter();
         }

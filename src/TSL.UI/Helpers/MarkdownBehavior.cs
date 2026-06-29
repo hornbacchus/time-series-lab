@@ -28,11 +28,16 @@ namespace TSL.UI.Helpers
     ///
     /// ★ CLICKABLE CROSS-REFERENCES: a backtick span whose text is a KNOWN
     /// technique id (the "Related Techniques" sections wrap sibling ids in
-    /// backticks) renders as a <see cref="Hyperlink"/> that invokes
-    /// <see cref="NavigateCommandProperty"/> with the id — navigating the Explorer
-    /// to that technique. The id-set comes from <see cref="KnownIdsProperty"/>;
-    /// backtick spans that are NOT ids (e.g. `period`, `0.95`) stay plain code.
-    /// When neither attached property is set the rendering is unchanged.
+    /// backticks) renders as a <see cref="Hyperlink"/> showing the technique's
+    /// DISPLAY NAME, which invokes <see cref="NavigateCommandProperty"/> with the
+    /// id — navigating the Explorer to that technique. The id->name map comes from
+    /// <see cref="IdNameMapProperty"/>; backtick spans that are NOT ids (e.g.
+    /// `period`, `0.95`) stay plain code. When the map/command are unset the
+    /// rendering is unchanged.
+    ///
+    /// ★ SCROLL-TO-TOP: when the rendered content changes (a new technique), the
+    /// containing <see cref="ScrollViewer"/> is reset to the top (dispatched after
+    /// the layout pass) so navigation lands at the start of the new description.
     ///
     /// No external dependency — net48 WPF only. Defensive: any parse failure
     /// falls back to the raw text as a plain wrapped TextBlock.
@@ -58,10 +63,10 @@ namespace TSL.UI.Helpers
             @"`[^`]+`|\*\*(?:.+?)\*\*|\*(?:.+?)\*", RegexOptions.Compiled);
 
         // ── attached properties ───────────────────────────────────────────────
-        // Source: the markdown string. NavigateCommand + KnownIds: optional
-        // cross-reference wiring (a backtick id-span -> a Hyperlink that runs
-        // NavigateCommand with the id). All three re-render the host on change so
-        // binding order is irrelevant.
+        // Source: the markdown string. NavigateCommand + IdNameMap: optional
+        // cross-reference wiring (a backtick id-span -> a Hyperlink that shows the
+        // display name and runs NavigateCommand with the id). All three re-render
+        // the host on change so binding order is irrelevant.
 
         public static readonly DependencyProperty SourceProperty =
             DependencyProperty.RegisterAttached(
@@ -79,13 +84,16 @@ namespace TSL.UI.Helpers
         public static ICommand GetNavigateCommand(DependencyObject o) => (ICommand)o.GetValue(NavigateCommandProperty);
         public static void SetNavigateCommand(DependencyObject o, ICommand v) => o.SetValue(NavigateCommandProperty, v);
 
-        public static readonly DependencyProperty KnownIdsProperty =
+        // Maps technique id -> display name. The keys are the known-id set (a
+        // backtick span IS a link iff the map has that key); the value is the
+        // link's display text. Built case-insensitively by the VM.
+        public static readonly DependencyProperty IdNameMapProperty =
             DependencyProperty.RegisterAttached(
-                "KnownIds", typeof(IEnumerable<string>), typeof(MarkdownBehavior),
+                "IdNameMap", typeof(IReadOnlyDictionary<string, string>), typeof(MarkdownBehavior),
                 new PropertyMetadata(null, OnAnyChanged));
 
-        public static IEnumerable<string> GetKnownIds(DependencyObject o) => (IEnumerable<string>)o.GetValue(KnownIdsProperty);
-        public static void SetKnownIds(DependencyObject o, IEnumerable<string> v) => o.SetValue(KnownIdsProperty, v);
+        public static IReadOnlyDictionary<string, string> GetIdNameMap(DependencyObject o) => (IReadOnlyDictionary<string, string>)o.GetValue(IdNameMapProperty);
+        public static void SetIdNameMap(DependencyObject o, IReadOnlyDictionary<string, string> v) => o.SetValue(IdNameMapProperty, v);
 
         private static void OnAnyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -109,28 +117,34 @@ namespace TSL.UI.Helpers
                 host.Children.Clear();
                 host.Children.Add(Paragraph(md, ctx));
             }
+
+            // The content just changed (a new technique). Reset the containing
+            // ScrollViewer to the top so navigation lands at the START of the new
+            // description, not wherever the previous one was scrolled to. Dispatched
+            // at Background priority so it runs AFTER the new content's layout pass
+            // (a reset before layout would be clobbered / leave a stale offset);
+            // the ancestor is resolved at dispatch time, when the host is settled
+            // in the visual tree. No-op if there is no containing ScrollViewer.
+            host.Dispatcher.BeginInvoke(
+                new Action(() => FindAncestorScrollViewer(host)?.ScrollToTop()),
+                System.Windows.Threading.DispatcherPriority.Background);
         }
 
         // ── link context (null/empty == no linkification; backward compatible) ──
         private sealed class LinkCtx
         {
-            public HashSet<string> Ids;
+            public IReadOnlyDictionary<string, string> Names;  // id -> display name
             public ICommand Navigate;
-            public bool CanLink => Ids != null && Ids.Count > 0 && Navigate != null;
+            public bool CanLink => Names != null && Names.Count > 0 && Navigate != null;
         }
 
         private static LinkCtx BuildCtx(Panel host)
         {
-            var cmd = GetNavigateCommand(host);
-            var ids = GetKnownIds(host);
-            HashSet<string> set = null;
-            if (ids != null)
+            return new LinkCtx
             {
-                set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var id in ids)
-                    if (!string.IsNullOrEmpty(id)) set.Add(id);
-            }
-            return new LinkCtx { Ids = set, Navigate = cmd };
+                Names = GetIdNameMap(host),
+                Navigate = GetNavigateCommand(host),
+            };
         }
 
         // ── block parser (line-oriented) ─────────────────────────────────────
@@ -320,7 +334,8 @@ namespace TSL.UI.Helpers
 
         // ── inline parser:  **bold**  *italic*  `code`  ──────────────────────
         // A `code` span whose text is a known technique id renders as a clickable
-        // Hyperlink (cross-reference); every other span is unchanged.
+        // Hyperlink showing the technique's display name; every other span is
+        // unchanged.
         private static void AppendInlines(InlineCollection inlines, string text, LinkCtx ctx)
         {
             if (string.IsNullOrEmpty(text)) return;
@@ -333,7 +348,7 @@ namespace TSL.UI.Helpers
                 if (tok.Length >= 2 && tok[0] == '`')
                 {
                     string code = tok.Substring(1, tok.Length - 2);
-                    if (ctx != null && ctx.CanLink && ctx.Ids.Contains(code))
+                    if (ctx != null && ctx.CanLink && ctx.Names.ContainsKey(code))
                         inlines.Add(MakeLink(code, ctx));
                     else
                         inlines.Add(new Run(code) { FontFamily = MonoFont, Foreground = HeaderBrush });
@@ -352,21 +367,32 @@ namespace TSL.UI.Helpers
                 inlines.Add(new Run(text.Substring(pos)));
         }
 
-        // A cross-reference link: mono (it was a code-span id) + link-coloured +
+        // A cross-reference link: shows the technique's DISPLAY NAME (falling back
+        // to the id if the map has no/empty name) in the body font, link-coloured +
         // underlined (Hyperlink default) + hand cursor on hover. Clicking runs the
-        // NavigateCommand with the id as the parameter.
+        // NavigateCommand with the ID as the parameter.
         private static Hyperlink MakeLink(string id, LinkCtx ctx)
         {
-            return new Hyperlink(new Run(id) { FontFamily = MonoFont })
+            string name;
+            if (!ctx.Names.TryGetValue(id, out name) || string.IsNullOrEmpty(name))
+                name = id;
+            return new Hyperlink(new Run(name))
             {
                 Command = ctx.Navigate,
                 CommandParameter = id,
                 Foreground = LinkBrush,
-                ToolTip = "Go to " + id,
+                ToolTip = "Go to " + name,
             };
         }
 
         // ── small helpers ────────────────────────────────────────────────────
+        private static ScrollViewer FindAncestorScrollViewer(DependencyObject node)
+        {
+            for (var p = VisualTreeHelper.GetParent(node); p != null; p = VisualTreeHelper.GetParent(p))
+                if (p is ScrollViewer sv) return sv;
+            return null;
+        }
+
         private static bool IsListItem(string t)
         {
             if (t.StartsWith("- ") || t.StartsWith("* ") || t.StartsWith("+ ")) return true;
