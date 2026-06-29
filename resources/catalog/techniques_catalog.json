@@ -2083,13 +2083,13 @@
           "options": null
         },
         {
-          "name": "alpha",
-          "label": "Alpha (1 - CI)",
+          "name": "confidence_level",
+          "label": "Confidence Level",
           "type": "float",
-          "default": 0.1,
+          "default": 0.9,
           "required": false,
           "advanced": true,
-          "description": "Significance level for the interval bands. Default 0.1 (90% intervals).",
+          "description": "Confidence level for the interval bands (0 to 1); e.g. 0.90 = a 90% band. A higher level gives wider bands.",
           "options": null
         }
       ],
@@ -2194,13 +2194,13 @@
           "options": null
         },
         {
-          "name": "alpha",
-          "label": "Alpha (1 - CI)",
+          "name": "confidence_level",
+          "label": "Confidence Level",
           "type": "float",
-          "default": 0.1,
+          "default": 0.9,
           "required": false,
           "advanced": true,
-          "description": "Significance level for the interval bands. Default 0.1 (90% intervals).",
+          "description": "Confidence level for the interval bands (0 to 1); e.g. 0.90 = a 90% band. A higher level gives wider bands.",
           "options": null
         }
       ],
@@ -4189,13 +4189,13 @@
       ],
       "parameters": [
         {
-          "name": "coverage",
-          "label": "Coverage",
+          "name": "confidence_level",
+          "label": "Confidence Level",
           "type": "float",
           "default": 0.95,
           "required": false,
           "advanced": false,
-          "description": "Target coverage probability (as a fraction). Default 0.95 — the intervals are built to contain the outcome this fraction of the time on average.",
+          "description": "Confidence level for the prediction intervals (0 to 1); e.g. 0.95 = a 95% interval, built to contain the outcome that fraction of the time on average. A higher level gives wider intervals.",
           "options": null
         },
         {

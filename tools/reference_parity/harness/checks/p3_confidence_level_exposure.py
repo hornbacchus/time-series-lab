@@ -1,10 +1,14 @@
-"""Phase 4b — confidence_level exposure/harmonization discrimination (6 techniques).
+"""Phase 4b + Item 4 — confidence_level exposure/harmonization discrimination (9 techniques).
 
 The CI band level was engine-read but catalog-absent: block_bootstrap,
 gaussian_process_forecast, kalman_imputation, rolling_origin_cv read
 `confidence_level` (0.95); local_level, local_linear_trend read `alpha` (0.05).
-Phase 4b exposes ONE harmonized control -- `confidence_level` -- on all 6 (the two
-alpha-keyed ones translate engine-side: alpha = 1 - confidence_level).
+Phase 4b exposes ONE harmonized control -- `confidence_level` -- on those 6 (the two
+alpha-keyed ones translate engine-side: alpha = 1 - confidence_level). Item 4 extends
+the same harmonization to the last 3 CI-band stragglers: kalman_filter +
+kalman_smoother (the alpha=1-confidence_level translation in the SHARED resolver --
+byte-identical at confidence_level 0.90) and conformal_intervals (a catalog-only
+rename from `coverage`, the engine already read confidence_level).
 
 This check proves: (1) each control has effect (0.95 vs 0.99 output differs); and
 (2) ★ the band gets WIDER at a higher confidence (0.99 band width > 0.95) wherever
@@ -89,16 +93,28 @@ class ConfidenceLevelExposureParity(P3ParityCheck):
 
         y, ymiss = fixture["y"], fixture["ymiss"]
         techs = ["block_bootstrap", "gaussian_process_forecast", "kalman_imputation",
-                 "rolling_origin_cv", "local_level", "local_linear_trend"]
+                 "rolling_origin_cv", "local_level", "local_linear_trend",
+                 # Item 4 -- the harmonized CI-band controls (both kalman twins +
+                 # conformal). kalman reads confidence_level in the SHARED
+                 # _resolve_params (alpha = 1 - confidence_level); conformal already
+                 # read confidence_level (catalog-only rename from `coverage`).
+                 "kalman_filter", "kalman_smoother", "conformal_intervals"]
+        # Per-technique inversion-guard contrast (default 0.95 vs 0.99). conformal uses
+        # 0.50 vs 0.95: split-conformal's distribution-free width SATURATES at high
+        # confidence with a finite calibration set (the empirical quantile clamps to the
+        # max calibration residual -- a CORRECT finite-sample property, NOT inertness),
+        # so the guard must test the responsive range, not the 0.95/0.99 plateau.
+        contrast = {"conformal_intervals": (0.50, 0.95)}
         out = {}
         for tid in techs:
             vals = ymiss if tid == "kalman_imputation" else y
-            r95, r99 = run(tid, vals, 0.95), run(tid, vals, 0.99)
-            w95, w99 = _ci_width(r95), _ci_width(r99)
+            lo, hi = contrast.get(tid, (0.95, 0.99))
+            r_lo, r_hi = run(tid, vals, lo), run(tid, vals, hi)
+            w_lo, w_hi = _ci_width(r_lo), _ci_width(r_hi)
             out[tid] = {
-                "ok": r95.get("status") == "success" and r99.get("status") == "success",
-                "differs": _digest(r95) != _digest(r99),
-                "wider": (None if (w95 is None or w99 is None) else bool(w99 > w95)),
+                "ok": r_lo.get("status") == "success" and r_hi.get("status") == "success",
+                "differs": _digest(r_lo) != _digest(r_hi),
+                "wider": (None if (w_lo is None or w_hi is None) else bool(w_hi > w_lo)),
             }
         return out
 

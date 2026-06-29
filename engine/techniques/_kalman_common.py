@@ -100,7 +100,15 @@ def _resolve_params(ctx):
         )
 
     horizon = max(1, int(ctx.get_param("horizon", cfg["horizon"])))
-    alpha = float(ctx.get_param("alpha", 0.10))
+    # Item 4 — confidence_level harmonization (the 4b pattern; shared by BOTH
+    # kalman twins, filter + smoother). The dialog exposes the intuitive
+    # confidence_level (e.g. 0.90 = a 90% band); the engine works in
+    # alpha = 1 - confidence_level. Precedence: explicit confidence_level >
+    # legacy alpha > 0.10. A HIGHER confidence_level -> a LOWER alpha -> a WIDER
+    # band (correct, non-inverted). Byte-identical: confidence_level 0.90 ->
+    # alpha 0.10 (the old default); a passed legacy alpha is still honored.
+    _cl = ctx.get_param("confidence_level")
+    alpha = (1.0 - float(_cl)) if _cl is not None else float(ctx.get_param("alpha", 0.10))
 
     compute_ci = bool(ctx.get_param("compute_ci", cfg["compute_ci"]))
     disturbance_smoother = bool(
