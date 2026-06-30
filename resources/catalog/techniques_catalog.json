@@ -2624,8 +2624,18 @@
           "default": "Constant",
           "required": false,
           "advanced": false,
-          "description": "Conditional-mean model: Constant (a fitted mean level, the default) or Zero (no mean term -- for already-centered series such as returns).",
-          "options": ["Constant", "Zero"]
+          "description": "Conditional-mean model: Constant (a fitted mean level, the default), Zero (no mean term -- for already-centered series such as returns), or AR (autoregressive conditional mean -- set AR Lags to the number of lags).",
+          "options": ["Constant", "Zero", "AR"]
+        },
+        {
+          "name": "ar_lags",
+          "label": "AR Lags",
+          "type": "int",
+          "default": 1,
+          "required": false,
+          "advanced": true,
+          "description": "Number of autoregressive lags in the conditional mean. Only used when Mean = AR (ignored for Constant/Zero); AR with 1 or more lags adds genuine AR dynamics beyond a constant mean.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2717,8 +2727,18 @@
           "default": "Constant",
           "required": false,
           "advanced": false,
-          "description": "Conditional-mean model: Constant (a fitted mean level, the default) or Zero (no mean term -- for already-centered series such as returns).",
-          "options": ["Constant", "Zero"]
+          "description": "Conditional-mean model: Constant (a fitted mean level, the default), Zero (no mean term -- for already-centered series such as returns), or AR (autoregressive conditional mean -- set AR Lags to the number of lags).",
+          "options": ["Constant", "Zero", "AR"]
+        },
+        {
+          "name": "ar_lags",
+          "label": "AR Lags",
+          "type": "int",
+          "default": 1,
+          "required": false,
+          "advanced": true,
+          "description": "Number of autoregressive lags in the conditional mean. Only used when Mean = AR (ignored for Constant/Zero); AR with 1 or more lags adds genuine AR dynamics beyond a constant mean.",
+          "options": null
         }
       ],
       "output_tables": [
@@ -2811,8 +2831,18 @@
           "default": "Constant",
           "required": false,
           "advanced": false,
-          "description": "Conditional-mean model: Constant (a fitted mean level, the default) or Zero (no mean term -- for already-centered series such as returns).",
-          "options": ["Constant", "Zero"]
+          "description": "Conditional-mean model: Constant (a fitted mean level, the default), Zero (no mean term -- for already-centered series such as returns), or AR (autoregressive conditional mean -- set AR Lags to the number of lags).",
+          "options": ["Constant", "Zero", "AR"]
+        },
+        {
+          "name": "ar_lags",
+          "label": "AR Lags",
+          "type": "int",
+          "default": 1,
+          "required": false,
+          "advanced": true,
+          "description": "Number of autoregressive lags in the conditional mean. Only used when Mean = AR (ignored for Constant/Zero); AR with 1 or more lags adds genuine AR dynamics beyond a constant mean.",
+          "options": null
         }
       ],
       "output_tables": [

@@ -121,6 +121,12 @@ def run(ctx: RunContext, progress_callback) -> dict:
         o_order = int(ctx.get_param("o", o_default))
 
         mean_model = ctx.get_param("mean", "Constant")
+        # AR lag count for the conditional mean. Only ENGAGES when mean="AR":
+        # arch ignores `lags` for ConstantMean/ZeroMean (verified), so this is
+        # passed unconditionally and is naturally inert otherwise. Without it,
+        # mean="AR" defaults to lags=0 == a constant (the 4b AR(0)=Constant
+        # collapse); ar_lags>=1 adds genuine AR dynamics (the y[1..p] coefs).
+        ar_lags = int(ctx.get_param("ar_lags", 1))
         dist = ctx.get_param("dist", "normal").lower()
         if dist not in ("normal", "t", "skewt", "ged"):
             warn_list.append(f"Unknown distribution '{dist}'. Using 'normal'.")
@@ -137,6 +143,7 @@ def run(ctx: RunContext, progress_callback) -> dict:
                 am = arch_model(
                     clean,
                     mean=mean_model,
+                    lags=ar_lags,
                     vol=vol_type,
                     p=p_order,
                     q=q_order,

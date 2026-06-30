@@ -1,22 +1,26 @@
-"""Phase 4b — GARCH mean exposure discrimination (garch / egarch / gjr_garch).
+"""Phase 4b + Tier-B capstone — GARCH mean + ar_lags discrimination (garch / egarch / gjr_garch).
 
 `mean` (the conditional-mean model) was engine-read (garch_model.py, default
-"Constant") but catalog-absent on all 3 GARCH techniques. Exposed as
-["Constant","Zero"] (default "Constant").
+"Constant") but catalog-absent on all 3 GARCH techniques. 4b exposed it as
+["Constant","Zero"]; the Tier-B capstone RE-ADDED "AR" and exposed `ar_lags` (the
+engine now passes lags=ar_lags), making mean="AR" GENUINE.
 
-★ Two lessons embedded in this check:
+★ Lessons embedded in this check:
   - The GARCH FORECAST path is NON-DETERMINISTIC (simulation, not seed-pinned), so
     a forecast-digest discrimination is unreliable. This check validates via the
     DETERMINISTIC fitted PARAMETER TABLE instead.
-  - The discrimination CONTRAST must be the minimal-distinguishing pair. Constant
-    vs "AR" is DEGENERATE here (mean="AR" without lags collapses to a constant,
-    relabelled mu->Const) -> it would false-NEGATIVE. The clean contrast is
-    Constant vs Zero: Constant fits a mean parameter `mu`; Zero drops it. On a
-    NON-CENTERED series this is a deterministic, unambiguous difference on all 3.
+  - 4b's Constant-vs-"AR" contrast was DEGENERATE (mean="AR" without lags collapses
+    to a constant, relabelled mu->Const) -> it false-NEGATIVEd, so 4b used the clean
+    Constant-vs-Zero contrast (Constant fits `mu`; Zero drops it). ★ The CAPSTONE
+    RESOLVES the degeneracy: mean="AR" with ar_lags>=1 adds an AR coefficient
+    (`y[1]`), genuinely differing from Constant -- so AR is no longer inert.
 
-Asserts, per technique: the fitted param table contains `mu` under Constant and
-does NOT under Zero (the mean parameter appears/disappears). Byte-identical-on-
-default (absent == Constant) is verified by the same param-table observable.
+Asserts, per technique: (1) Constant fits `mu`, Zero drops it (mean has effect);
+(2) absent == Constant (byte-identical-on-default); (3) ★ mean="AR", ar_lags=1
+gains an AR coef `y[1]` and DIFFERS from Constant (ar_lags makes AR genuine -- the
+feature-is-real proof); (4) mean="Constant" with ar_lags=3 == Constant (arch
+ignores lags for ConstantMean, so ar_lags is naturally inert for non-AR means --
+the unconditional-pass guard). All via the deterministic param table.
 """
 
 from __future__ import annotations
@@ -81,11 +85,23 @@ class GarchMeanExposureParity(P3ParityCheck):
             p_absent = _param_names(run(tid, {}))
             p_const = _param_names(run(tid, {"mean": "Constant"}))
             p_zero = _param_names(run(tid, {"mean": "Zero"}))
+            # Capstone: ar_lags makes mean=AR GENUINE (the 4b degeneracy resolved).
+            p_ar1 = _param_names(run(tid, {"mean": "AR", "ar_lags": 1}))
+            # Guard: ar_lags is IGNORED for Constant (arch ignores lags for
+            # ConstantMean) -> byte-identical, so ar_lags is naturally inert for
+            # non-AR means (not a bug; the unconditional-pass is safe).
+            p_const_lags3 = _param_names(run(tid, {"mean": "Constant", "ar_lags": 3}))
             out[tid] = {
-                "ok": all(x is not None for x in (p_absent, p_const, p_zero)),
+                "ok": all(x is not None for x in (p_absent, p_const, p_zero, p_ar1)),
                 "byte_identical": p_absent == p_const,
                 "effect": (p_const is not None and p_zero is not None
                            and "mu" in p_const and "mu" not in p_zero),
+                # mean=AR(lags=1) gains an AR coefficient `y[1]` and DIFFERS from
+                # Constant -- the feature-is-real proof (vs AR(0) == Constant in 4b).
+                "ar_genuine": (p_ar1 is not None and p_ar1 != p_const
+                               and any("y[" in str(x) for x in p_ar1)),
+                "ar_lags_inert_for_constant": (p_const_lags3 is not None
+                                               and p_const_lags3 == p_const),
             }
         return out
 
@@ -95,9 +111,12 @@ class GarchMeanExposureParity(P3ParityCheck):
     def compare(self, tsl: dict[str, Any], ref: dict[str, Any]) -> ParityResult:
         primary = {}
         for tid, r in tsl.items():
-            passed = r["ok"] and r["byte_identical"] and r["effect"]
+            passed = (r["ok"] and r["byte_identical"] and r["effect"]
+                      and r["ar_genuine"] and r["ar_lags_inert_for_constant"])
             primary[tid] = {"status": "PASS" if passed else "BLOCK",
-                            "byte_identical": r["byte_identical"], "mean_has_effect": r["effect"]}
+                            "byte_identical": r["byte_identical"], "mean_has_effect": r["effect"],
+                            "ar_genuine_with_lags": r["ar_genuine"],
+                            "ar_lags_inert_for_constant": r["ar_lags_inert_for_constant"]}
         outcome = "BLOCK" if any(v["status"] == "BLOCK" for v in primary.values()) else "PASS"
         return ParityResult(technique_id=self.technique_id, outcome=outcome,
                             metrics={"primary": primary}, diagnostics={"n": len(tsl)})
