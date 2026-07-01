@@ -159,7 +159,14 @@ class JohansenBartlettParity(P3ParityCheck):
                 {"name": "y2", "values": y[:, 1].tolist()},
             ],
             "params": {
-                "lag_order": p,
+                # k_ar_diff = p - 1 (urca K=p <-> statsmodels k_ar_diff=p-1) so the
+                # wrapper's rank invariant runs at the SAME lag as the direct
+                # statsmodels arm (k_ar_diff=p-1) and urca (K=p). This was the INERT
+                # `lag_order` -- the engine reads `lag`/`k_ar_diff`, NEVER `lag_order`,
+                # so the wrapper had been auto-selecting the lag; it coincided with
+                # p-1 on this fixture (rank 1, lag 1 either way), but the intended
+                # matched spec is now enforced rather than left to the coincidence.
+                "k_ar_diff": p - 1,
                 "det_order": det_order,
                 "finite_sample_correction": True,
             },
