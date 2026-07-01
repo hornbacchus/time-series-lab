@@ -30721,11 +30721,17 @@ sharpest: set-identified + self-parity-only). Reuses M3a's scheme selector
   - **LOAD-BEARING functional checks (formulation-correctness — set-ID's
     checkable invariants):** `sign_satisfaction` == 1.0 (every retained rotation
     satisfies the signs); `cholesky_in_set` == True (the diagonal-normalized
-    Cholesky is ADMISSIBLE — the strongest invariant, NOT band-containment; a
-    set-construction bug excluding it fails); `economic_sign` (median impact's
+    Cholesky is ADMISSIBLE — ~~the strongest invariant, NOT band-containment; a
+    set-construction bug excluding it fails~~ **billing FALSIFIED at the Flag A
+    deep-confirm (commit `8182d87`): as implemented it is predicate-satisfaction
+    on (Σ̂, R) alone — disconnected from the sampling machinery — and VACUOUS on
+    this fixture's R; the GATE is swapped for factorization preservation — see
+    the Flag A amendment below**); `economic_sign` (median impact's
     restricted entries have the correct sign). VERIFIED DISCRIMINATING against
     deliberate bugs (retain-all → sign-satisfaction 0.58 caught; a Cholesky-
-    excluding sign pattern → admissible False caught). Rotation-sampling
+    excluding sign pattern → admissible False caught — **dev-time input-level
+    (R-variation) probes; upgraded ASSERTED → DEMONSTRATED-at-output-level at
+    the Flag A amendment below**). Rotation-sampling
     determinism matched across arms (the identical-parameterization discipline).
   Overall **PASS**, deterministic (×2).
 
@@ -30738,6 +30744,78 @@ sharpest: set-identified + self-parity-only). Reuses M3a's scheme selector
   tables + diagnostics).
 
 **Phase 7+ record-correction (FUND-NOW exposure-overlay; harness Commit `1ab1018`).** The overlay flagged var as a "FUND-NOW cross-package cheap win (yes-unused R vars)" — a MIS-READ. `p3_var` already calls R `vars::VAR`, but `run_tsl` invokes **statsmodels VAR directly** (engine bypassed), and for exact-OLS VAR coefficients statsmodels≡R-vars is **structurally tautological** (same-estimator-class). New additive check **`p3_var_crosspkg`** closes the engine-invocation gap: ENGINE-INVOKED (`var_model.py` via RunContext — the published path) vs R `vars::VAR` at matched params (lag=2, trend=const) → coefs/intercept/forecast **all 0.0** (engine 6-dp == R rounded). ★ Honest **MODEST tier: cross-package OLS, engine-WRAPPER-validated** — validates the engine PATH (lag/trend/extraction/emission), NOT the estimator (closed-form OLS agrees by construction). Distinct from the bond_yield BVAR work (standalone user-data VAR). `p3_var` byte-identical.
+
+---
+
+**ENG-EXT-MULTIVARIATE-001 deep-confirm — Flag A (M3c proxy + M3b sign-restriction:
+functional gates recomputed-in-check, the cholesky_in_set vacuity finding + gate
+swap, discrimination DEMONSTRATED at output level on all six gates; audit-hygiene
+commit `8182d87`):**
+
+The two self-parity SVAR schemes deep-confirmed at their honest terminal (no
+cross-package reference exists for either — svars wrong family, VARsignR
+CRAN-archived, set-ID not point-matchable — CORRECT, not a gap). The output-level
+trace surfaced a real defect-class: **4 of the 6 load-bearing functional gates
+consumed ENGINE SELF-REPORTED scalars** (proxy relevance + irrelevant control;
+sign sign_satisfaction + cholesky_admissible) — for `sign_satisfaction` the gate
+was structurally TAUTOLOGICAL (rotations retained BY the engine's `_satisfies`
+trivially satisfy `_satisfies`; a shared-predicate bug could never fire it). Fixed
+at `8182d87`: gates RECOMPUTED in-check from the emitted outputs (the shock
+series / b1; the retained set / sigma_u / median_b0) with an INDEPENDENTLY
+re-expressed predicate (vectorized elementwise vs R's nonzero entries; own
+diag-normalization; library cholesky; check-side corr — no engine helper
+imported); engine scalars demoted to consistency-cross-checked diagnostics
+(proxy 1e-9 / sign 1e-12; real-build divergence **0.0 / 0.0 / 0.0 / match=True**
+— no live engine bug).
+
+- **M3c proxy — upgraded:** (1) relevance gate recomputed from the emitted shock
+  series (`|corr(eps_hat, z)| ≥ 0.2` in-check) — real build **0.881007**,
+  float-identical to the engine scalar; (2) the irrelevant-instrument negative
+  control now GATED (`|corr(eps_hat_irrel, z_irrel)| < 0.2` — catches vacuous
+  relevance; real build **0.018471**); (3) NEW DGP-recovery known-answer arm —
+  b1 must recover B_true[:,0] normalized = **[1.0, 0.5]** (CORRECTNESS beyond
+  self-parity's match-not-correctness); CALIBRATED: max multi-seed gap
+  **0.133478** (10 seeds; pinned 42 = the max; range 0.005–0.133), tol **0.40**
+  (≈3× margin, conservative side), broken-build wrong-column injection
+  [1.0, 2.5] distance **2.0** = 5× tol. DEMONSTRATED at output level (3/3):
+  eps_hat→noise ⇒ recomputed corr **0.00771** BLOCK; eps_hat_irrel→correlated ⇒
+  recomputed **0.995581** BLOCK; b1→wrong column ⇒ dist **2.0** BLOCK.
+
+- **M3b sign-restriction — the vacuity finding + the swap:** the
+  `cholesky_in_set` GATE was found **VACUOUS on this fixture** — structural
+  proof: `np.linalg.cholesky` returns lower-triangular P with positive diagonal;
+  the fixture's R = [[+1,−1],[0,+1]] restricts only (0,0)+/(1,1)+ (diag>0 —
+  always satisfied) and (0,1)− (P[0,1]=0 structurally — always satisfied),
+  leaving (1,0) free ⇒ the predicate can never fire for ANY 2×2 sigma_u.
+  Adversarially verified: **~485k probes (exhaustive 17⁴ grid incl. ±inf/NaN/
+  denormals + 400k fuzz + 2k targeted), 0 BLOCKs**. The prior "strongest
+  invariant / a set-construction bug excluding it fails" billing is FALSIFIED
+  as-implemented: it was predicate-satisfaction on (Σ̂, R) alone — never
+  touching the rotation-sampling machinery (the sibling of the
+  sign_satisfaction tautology: a no-discrimination-power problem). SWAPPED for
+  **factorization preservation** — every retained B0 must satisfy
+  `B0·B0ᵀ == Σ̂` (B0 = P·Q, Q orthogonal ⟹ B0B0ᵀ = PPᵀ = Σ̂; diag-norm sign
+  flips preserve it); with recomputed sign_satisfaction this enforces BOTH
+  halves of set-membership {B0 : B0B0ᵀ = Σ, signs hold} on every retained draw,
+  genuinely guarding the chol/QR/orthogonality/diag-normalize/retention
+  pipeline — exactly what the old billing described. Real-build max residual
+  **1.11e-15** over 979 draws (machine precision — no live engine finding);
+  tol 1e-10 (~5 orders above float noise, ~9 below the injection);
+  PASS iff resid ≤ tol so NaN corruption lands BLOCK (probed), not silent PASS.
+  `cholesky_admissible` demoted to a consistency-cross-checked diagnostic
+  (recomputed == reported still asserted; no longer a gate). "Verified
+  discriminating" upgraded ASSERTED → **DEMONSTRATED at output level (3/3)**:
+  restriction-violating B0 into kept ⇒ recomputed fraction **0.99898** < 1.0
+  BLOCK (the tautology closed — an engine predicate bug retaining violators now
+  fires the independent recompute); kept[0]×1.1 ⇒ recomputed max resid
+  **0.262** BLOCK; median_b0 restricted sign flipped ⇒ economic_sign BLOCK.
+
+  Method note (the demonstration standard): output-level = corrupt the EMITTED
+  output and let the check's own in-check recomputation produce the failing
+  value — direct metric-scalar injection demonstrates nothing about a gate that
+  trusts an engine self-report. Both checks PASS ×2 deterministic post-change;
+  real arms byte-identical (self-parity 0.0 / 0.881007 / 0.018471 / 1.0);
+  ci_gate_local green.
 
 ### ENG-EXT-MULTIVARIATE-001 EXTENDED — FULLY DELIVERED (SECOND A-commission COMPLETE)
 
