@@ -1637,6 +1637,12 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         "instrument_relevance": {
             "min_corr": 0.2,
         },
+        "b0_recovery": {
+            "abs_tol": 0.40,
+        },
+        "engine_scalar_consistency": {
+            "abs_tol": 1e-9,
+        },
         "justification": (
             "ENG-EXT-MULTIVARIATE-001 M3c — proxy / external-instrument SVAR. "
             "Net-new (statsmodels SVAR is A/B/AB short-run only); NO usable "
@@ -1652,7 +1658,20 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "F > 10). It is the formulation-correctness substitute for the "
             "absent cross-package arm (A1c lesson). Verified discriminating: "
             "relevant instrument corr ≈ 0.87 PASS, irrelevant control ≈ 0.09 "
-            "BLOCK. Do NOT relax the threshold to mask a non-correlated shock."
+            "BLOCK. Do NOT relax the threshold to mask a non-correlated shock. "
+            "Flag A deep-confirm: BOTH relevance gates RECOMPUTED in-check "
+            "from the emitted shock series (engine scalars cross-checked at "
+            "engine_scalar_consistency 1e-9 — corrcoef centering-order float "
+            "noise only — never gated on; closes the self-report tautology); "
+            "the irrelevant control is GATED (< min_corr, catches vacuous "
+            "relevance). b0_recovery 0.40: DGP-recovery known-answer arm — "
+            "b1 must recover B_true[:,0] normalized = [1.0, 0.5]; CALIBRATED "
+            "max gap 0.133478 across 10 seeds (pinned 42 = the max; range "
+            "0.005-0.133), tol = 3x max observed (margin factor 3, stated); "
+            "broken-build wrong-column injection [1.0, 2.5] distance 2.0 = "
+            "5x tol. Do NOT widen: 0.40 already accommodates 3x the worst "
+            "observed finite-sample gap; a recovery farther than that is a "
+            "formulation bug (wrong column / wrong normalization), not noise."
         ),
     },
 
@@ -1660,8 +1679,10 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
     # (the third validation kind). Self-parity matched-rotation-sampling →
     # bit-exact set summary (median impact + median/lo16/hi84 IRF bands);
     # plus the LOAD-BEARING functional checks (sign-satisfaction == 1.0;
-    # Cholesky-in-set admissibility; economic sign) as the
+    # factorization preservation B0·B0' == Σ̂; economic sign) as the
     # formulation-correctness substitute for the absent cross-package arm.
+    # Flag A: gates recomputed-in-check; cholesky_in_set gate swapped out
+    # (fixture-vacuous) for factorization preservation.
     "p3_var_sign_restriction": {
         "type": "tiered_outputs",
         "set_summary_selfparity": {
@@ -1671,11 +1692,14 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         "sign_satisfaction": {
             "min_frac": 1.0,
         },
-        "cholesky_in_set": {
-            "required": True,
+        "factorization_preservation": {
+            "abs_tol": 1e-10,
         },
         "economic_sign": {
             "required": True,
+        },
+        "engine_scalar_consistency": {
+            "abs_tol": 1e-12,
         },
         "justification": (
             "ENG-EXT-MULTIVARIATE-001 M3b — sign-restriction SVAR, the A-phase's "
@@ -1691,13 +1715,31 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
             "normalization/retention) → bit-exact set summary (deterministic). "
             "The functional checks are LOAD-BEARING (the A1c formulation-"
             "correctness substitute): sign_satisfaction == 1.0 (every retained "
-            "rotation satisfies the signs); cholesky_in_set (the diagonal-"
-            "normalized Cholesky is admissible — the strongest invariant, a "
-            "set-construction bug excluding it fails); economic_sign (median "
-            "impact's restricted entries have the correct sign). Verified "
-            "discriminating against deliberate bugs (retain-all → 0.58 caught; "
-            "Cholesky-excluding pattern → admissible False caught). Do NOT relax "
-            "these to mask a set-construction bug."
+            "rotation satisfies the signs); factorization_preservation (every "
+            "retained B0 satisfies B0·B0' == Σ̂ — the genuine set-construction "
+            "invariant); economic_sign (median impact's restricted entries "
+            "have the correct sign). Do NOT relax these to mask a "
+            "set-construction bug. Flag A deep-confirm: all gates RECOMPUTED "
+            "in-check from the emitted outputs (the retained set / sigma_u / "
+            "median_b0) with an INDEPENDENTLY re-expressed predicate — the "
+            "engine-reported scalars are cross-checked at "
+            "engine_scalar_consistency 1e-12 (integer-count fractions + "
+            "boolean equality — exact), never gated on. Closes the "
+            "self-report tautology (rotations retained BY the engine "
+            "predicate trivially satisfied the engine predicate). "
+            "factorization_preservation 1e-10: CALIBRATED — real-build max "
+            "residual 1.11e-15 over 979 retained draws (float64 chol·Q "
+            "noise), tol ~5 orders above float noise and ~9 orders below the "
+            "x1.1-scaled-member injection (0.262); PASS iff resid <= tol so "
+            "NaN corruption lands BLOCK. It REPLACES the cholesky_in_set "
+            "GATE — found VACUOUS on this fixture (lower-triangular Cholesky "
+            "+ R restricting only row 0 + diag => the predicate can never "
+            "fire for ANY 2x2 sigma_u; structural proof + ~485k adversarial "
+            "probes, 0 BLOCKs); cholesky_admissible is demoted to a "
+            "consistency-cross-checked diagnostic. Discrimination "
+            "DEMONSTRATED at output level (violating B0 into kept -> "
+            "fraction 0.99898 BLOCK; scaled member -> resid 0.262 BLOCK; "
+            "flipped restricted sign in median_b0 -> economic_sign BLOCK)."
         ),
     },
 

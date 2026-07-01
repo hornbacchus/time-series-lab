@@ -19,8 +19,15 @@ Two complementary arms (each validates a DIFFERENT thing — the A1c lesson):
   DEFINING property of proxy identification is that the identified shock
   CORRELATES with the instrument (instrument relevance / first stage). A
   formulation bug producing a shock NOT correlated with the instrument FAILS
-  this check. Verified discriminating: a relevant instrument gives corr ≈ 0.87
-  (PASS), an irrelevant one ≈ 0.09 (BLOCK). NOT a soft diagnostic.
+  this check. RECOMPUTED IN-CHECK from the emitted shock series (Flag A
+  deep-confirm) — the engine-reported relevance scalar is a cross-checked
+  diagnostic, never a gate input (closes the self-report tautology). Plus a
+  GATED negative control (the shock must NOT correlate with the irrelevant
+  instrument — catches vacuous relevance) and a DGP-RECOVERY known-answer arm
+  (b1 must recover B_true's target column [1.0, 0.5] — correctness, beyond
+  self-parity's match-not-correctness). Discrimination DEMONSTRATED at output
+  level (corrupted eps_hat / eps_hat_irrel / b1 each BLOCK). NOT soft
+  diagnostics.
 
 This is the FIRST self-parity SVAR (M3a was cross-package); it establishes the
 self-parity-SVAR pattern + the load-bearing-functional-check discipline that
@@ -101,13 +108,22 @@ class VarProxySvarParity(P3ParityCheck):
         "The LOAD-BEARING instrument-relevance functional check (corr of the "
         "identified shock with the instrument > 0.2 — the scheme-defining "
         "property) is the formulation-correctness substitute for the absent "
-        "cross-package arm (A1c self-parity-validates-match-not-correctness)."
+        "cross-package arm (A1c self-parity-validates-match-not-correctness). "
+        "Flag A deep-confirm: the relevance gate is RECOMPUTED in-check from "
+        "the emitted shock series (engine scalars cross-checked, never gated "
+        "on); the irrelevant-instrument negative control is GATED; and a "
+        "DGP-recovery known-answer arm (b1 vs the known [1.0, 0.5]) validates "
+        "correctness beyond match. All demonstrated discriminating at output "
+        "level."
     )
 
     DGP_N = 600
     P_FIT = 1
     STEPS = 10
     NORMALIZE_VAR = 0
+    # DGP truth for the recovery arm: B_true[:, 0] / B_true[NORMALIZE_VAR, 0]
+    # (see _generate_proxy_dgp) — the known answer the proxy-SVAR must recover.
+    B0_TARGET = (1.0, 0.5)
 
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         Y, z, z_irrel = _generate_proxy_dgp(seed=seed, n=self.DGP_N)
@@ -121,6 +137,7 @@ class VarProxySvarParity(P3ParityCheck):
 
         Y = np.asarray(fixture["Y"], dtype=np.float64)
         z = np.asarray(fixture["z"], dtype=np.float64)
+        z_irrel = np.asarray(fixture["z_irrel"], dtype=np.float64)
         with _w.catch_warnings():
             _w.simplefilter("ignore")
             fit = VAR(Y).fit(self.P_FIT, trend="c")
@@ -128,12 +145,18 @@ class VarProxySvarParity(P3ParityCheck):
                 fit, z, normalize_var=self.NORMALIZE_VAR)
             Phi = np.asarray(fit.ma_rep(maxn=self.STEPS), dtype=np.float64)
             sirf = np.array([Phi[h] @ b1 for h in range(Phi.shape[0])])
-            # control: relevance on the irrelevant instrument (discrimination)
-            _, _, rel_irrel = _proxy_svar(
-                fit, np.asarray(fixture["z_irrel"], dtype=np.float64),
-                normalize_var=self.NORMALIZE_VAR)
+            # control: the identified shock on the irrelevant instrument.
+            # The shock SERIES (not just the engine's relevance scalars) are
+            # emitted so compare() recomputes both relevance gates in-check
+            # from the outputs — the engine-reported scalars are cross-checked
+            # diagnostics, never gate inputs (the self-report-tautology fix).
+            _, eps_hat_irrel, rel_irrel = _proxy_svar(
+                fit, z_irrel, normalize_var=self.NORMALIZE_VAR)
         return {"b1": b1, "sirf": sirf, "relevance": float(relevance),
-                "relevance_irrelevant": float(rel_irrel)}
+                "relevance_irrelevant": float(rel_irrel),
+                "eps_hat": np.asarray(eps_hat, dtype=np.float64),
+                "eps_hat_irrel": np.asarray(eps_hat_irrel, dtype=np.float64),
+                "z": z, "z_irrel": z_irrel}
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
         b1, sirf, relevance = _ref_proxy_svar(
@@ -158,17 +181,67 @@ class VarProxySvarParity(P3ParityCheck):
         statuses.append(primary["b1_selfparity"]["status"])
         statuses.append(primary["struct_irf_selfparity"]["status"])
 
-        # --- LOAD-BEARING instrument-relevance functional check ---
+        # --- LOAD-BEARING instrument-relevance functional check, RECOMPUTED
+        # in-check from the emitted shock series (output-level; the engine-
+        # reported scalar is cross-checked below, never gated on) ---
         min_corr = float(ladder["instrument_relevance"]["min_corr"])
-        corr = float(tsl["relevance"])
-        rel_status = "PASS" if abs(corr) >= min_corr else "BLOCK"
+        eps = np.asarray(tsl["eps_hat"], dtype=np.float64).reshape(-1)
+        z = np.asarray(tsl["z"], dtype=np.float64).reshape(-1)[-eps.shape[0]:]
+        corr = float(abs(np.corrcoef(eps, z)[0, 1]))
+        rel_status = "PASS" if corr >= min_corr else "BLOCK"
         primary["instrument_relevance"] = {
             "status": rel_status,
             "corr": round(corr, 6),
             "min_corr": min_corr,
-            "corr_irrelevant_control": round(float(tsl.get("relevance_irrelevant", 0.0)), 6),
         }
         statuses.append(rel_status)
+
+        # --- negative-control gate: the identified shock must NOT correlate
+        # with the IRRELEVANT instrument (a vacuous-relevance bug — a shock
+        # correlating with EVERY instrument — passes the relevant arm but
+        # fails this one) ---
+        eps_i = np.asarray(tsl["eps_hat_irrel"], dtype=np.float64).reshape(-1)
+        z_i = np.asarray(
+            tsl["z_irrel"], dtype=np.float64).reshape(-1)[-eps_i.shape[0]:]
+        ctrl = float(abs(np.corrcoef(eps_i, z_i)[0, 1]))
+        ctrl_status = "PASS" if ctrl < min_corr else "BLOCK"
+        primary["irrelevant_control"] = {
+            "status": ctrl_status,
+            "corr": round(ctrl, 6),
+            "max_corr": min_corr,
+        }
+        statuses.append(ctrl_status)
+
+        # --- DGP-recovery known-answer arm: b1 must recover the DGP truth
+        # B_true[:, 0] normalized to the reference variable = [1.0, 0.5]
+        # (CORRECTNESS, beyond self-parity's match-not-correctness; tol
+        # calibrated across seeds — see the ladder justification) ---
+        rec_tol = float(ladder["b0_recovery"]["abs_tol"])
+        target = np.asarray(self.B0_TARGET, dtype=np.float64)
+        rec_dist = float(np.max(np.abs(
+            np.asarray(tsl["b1"], dtype=np.float64).reshape(-1) - target)))
+        rec_status = "PASS" if rec_dist <= rec_tol else "BLOCK"
+        primary["b0_recovery"] = {
+            "status": rec_status,
+            "max_abs_dist": round(rec_dist, 6),
+            "abs_tol": rec_tol,
+        }
+        statuses.append(rec_status)
+
+        # --- consistency: the recomputed gate values vs the engine-reported
+        # scalars (material divergence on a real build = a live engine bug or
+        # a convention mismatch — surfaced, never papered over) ---
+        cons_tol = float(ladder["engine_scalar_consistency"]["abs_tol"])
+        d_rel = abs(corr - abs(float(tsl["relevance"])))
+        d_ctrl = abs(ctrl - abs(float(tsl["relevance_irrelevant"])))
+        cons_status = "PASS" if max(d_rel, d_ctrl) <= cons_tol else "BLOCK"
+        primary["engine_scalar_consistency"] = {
+            "status": cons_status,
+            "relevance_diff": d_rel,
+            "control_diff": d_ctrl,
+            "abs_tol": cons_tol,
+        }
+        statuses.append(cons_status)
 
         any_block = any(s == "BLOCK" for s in statuses)
         any_caveat = any(s == "CAVEAT" for s in statuses)
@@ -183,6 +256,9 @@ class VarProxySvarParity(P3ParityCheck):
                 "b1_max_abs": primary["b1_selfparity"].get("max_abs_diff"),
                 "sirf_max_abs": primary["struct_irf_selfparity"].get("max_abs_diff"),
                 "relevance_corr": round(corr, 6),
-                "relevance_irrelevant_control": round(float(tsl.get("relevance_irrelevant", 0.0)), 6),
+                "relevance_corr_reported": round(float(tsl["relevance"]), 6),
+                "irrelevant_control": round(ctrl, 6),
+                "irrelevant_control_reported": round(float(tsl.get("relevance_irrelevant", 0.0)), 6),
+                "b0_recovery_dist": round(rec_dist, 6),
             },
         )
