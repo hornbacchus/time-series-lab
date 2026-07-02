@@ -107,15 +107,29 @@ namespace TSL.Installer
 
             UpdateProgress(70, "Extracting Python runtime...");
 
-            // Extract Python runtime if zip exists
+            // Extract Python runtime if zip exists. Refresh policy (P-D2):
+            // re-extract when the pack's VERSION.txt marker differs from the
+            // installed one — not merely when python.exe is absent, else
+            // upgrades never refresh the runtime. VERSION.txt (written by
+            // build_pack: commit + build date + python version) doubles as
+            // the bundle's traceability record.
             var runtimeZip = Path.Combine(sourceDir, "python_runtime.zip");
             if (File.Exists(runtimeZip))
             {
                 var runtimeDir = Path.Combine(InstallBase, "engine", "runtime");
-                if (!File.Exists(Path.Combine(runtimeDir, "python.exe")))
+                var packMarker = Path.Combine(sourceDir, "VERSION.txt");
+                var installedMarker = Path.Combine(InstallBase, "VERSION.txt");
+                bool markerDiffers = File.Exists(packMarker) &&
+                    (!File.Exists(installedMarker) ||
+                     File.ReadAllText(packMarker) != File.ReadAllText(installedMarker));
+                if (!File.Exists(Path.Combine(runtimeDir, "python.exe")) || markerDiffers)
                 {
+                    if (Directory.Exists(runtimeDir))
+                        Directory.Delete(runtimeDir, true);
                     ZipFile.ExtractToDirectory(runtimeZip, runtimeDir);
                 }
+                if (File.Exists(packMarker))
+                    File.Copy(packMarker, installedMarker, true);
             }
 
             UpdateProgress(85, "Registering Excel auto-load...");
