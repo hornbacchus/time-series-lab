@@ -561,6 +561,12 @@ class BondYieldForecastParity(P3ParityCheck):
         # The full-system ess_min/geweke (incl. SV) are recorded below for
         # DISCLOSURE (scoped gate, complete disclosure — not a masked
         # finding); the production Audit shows them too (engine-side).
+        # AUD-S2(a) DISCLOSED COMPARISON-VALIDITY GUARD: the ESS values are
+        # engine-computed diagnostics consumed as gate inputs BY DESIGN —
+        # the direction is FAIL-SAFE (a self-reported ESS can only BLOCK on
+        # under-mixing, never rescue a failing build; correctness is carried
+        # by the coefficient/SV comparator arms, to which a falsely-good ESS
+        # degrades gracefully). Not the Flag A self-report defect class.
         b_ess = float(tsl["b_coef_ess_min"])
         if b_ess >= self.MCMC_B_COEF_ESS_MIN:
             mcmc_status = "PASS"

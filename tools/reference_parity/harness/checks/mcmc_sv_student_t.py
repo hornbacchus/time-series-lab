@@ -396,6 +396,11 @@ class McmcSvStudentTParity(P3ParityCheck):
         per_metric_outcomes.append(h_status)
 
         # ESS in-check assertion
+        # AUD-S2(a) DISCLOSED COMPARISON-VALIDITY GUARD: engine-EMITTED ESS
+        # consumed as a gate input BY DESIGN — the direction is FAIL-SAFE (a
+        # self-reported ESS can only BLOCK, never rescue; correctness is
+        # carried by the cross-package comparator arms, to which a
+        # falsely-good ESS degrades gracefully). Not the Flag A defect class.
         ess_min = tsl.get("ess_min")
         ess_param = tsl.get("ess_min_param")
         ess_status = "PASS"

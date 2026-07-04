@@ -2479,6 +2479,34 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         ),
     },
 
+    # AUD-L1 (Harness Integrity Audit) — pp_test regression=ct trend spec,
+    # the residual half of the banked KPSS/PP knob-gap (kpss half retired by
+    # p3_kpss_trend). p3_kpss_trend shape: urca ur.pp Z-tau model="trend" at
+    # the engine's realized bandwidth + a pinned-lag arm + the knob-movement
+    # contrast (c vs ct must differ on the trending fixture).
+    "p3_pp_trend": {
+        "type": "tiered_outputs",
+        "primary": {
+            "abs_tol": 1e-3,
+            "rel_tol": 1e-2,
+            "block_abs_tol": 1e-1,
+            "block_rel_tol": 1e-1,
+        },
+        "knob_contrast": {
+            "min_abs_gap": 0.05,
+        },
+        "justification": (
+            "Same widened Pattern-J band as p3_pp (arch-vs-urca Newey-West "
+            "kernel/lag-truncation conventions; matched realized bandwidth "
+            "aligns most of the divergence). knob_contrast 0.05: on the "
+            "trend-stationary fixture the c-vs-ct PP statistics differ by "
+            "O(1) (detrending changes the unit-root evidence materially); "
+            "an INERT regression read gives an abs gap of exactly 0.0 — "
+            "0.05 separates working from inert with a wide margin while "
+            "never approaching the working-build gap."
+        ),
+    },
+
     "p3_adf_triage": {
         "type": "tiered_outputs",
         # COMPONENT arms: ADF/KPSS validated cross-package vs urca at the

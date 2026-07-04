@@ -442,6 +442,14 @@ class McmcSvGaussianParity(P3ParityCheck):
         # ESS in-check assertion: ESS_min < 500 on mu/phi → BLOCK.
         # If ess_min_param is sigma_eta or another non-gating
         # parameter, the breach is recorded but does not block.
+        # AUD-S2(a) DISCLOSED COMPARISON-VALIDITY GUARD: the ESS is an
+        # engine-EMITTED convergence diagnostic consumed as a gate input,
+        # and that is accepted BY DESIGN because the direction is
+        # FAIL-SAFE — a self-reported ESS can only BLOCK (flagging that MC
+        # noise invalidates the posterior-mean comparison), never rescue a
+        # failing build; correctness is carried by the cross-package
+        # comparator arms above, to which a falsely-good ESS degrades
+        # gracefully. Not the Flag A self-report defect class.
         ess_min = tsl.get("ess_min")
         ess_param = tsl.get("ess_min_param")
         ess_status = "PASS"

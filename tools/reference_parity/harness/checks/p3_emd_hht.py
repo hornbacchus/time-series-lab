@@ -185,15 +185,24 @@ class EmdHhtParity(P3ParityCheck):
         import PyEMD  # type: ignore
         y = np.asarray(fixture["y"], dtype=np.float64)
         emd = EMD(MAX_ITERATION=200)
-        imfs = emd(y, max_imf=8)
-        # PyEMD returns IMFs as 2-D array; last row may be the
-        # residual depending on version.
-        imfs_arr = np.asarray(imfs, dtype=np.float64)
-        n_imfs = int(imfs_arr.shape[0])
-        residual = y - imfs_arr.sum(axis=0)
+        emd(y, max_imf=8)
+        # AUD-V1: use PyEMD's OWN imfs/residue split. The previous form
+        # DEFINED residual = y - sum(imfs) and then gated
+        # |sum(imfs) + residual - y| — algebraically ~0 regardless of the
+        # decomposition (vacuous-by-construction). With PyEMD's returned
+        # residue the reconstruction identity is a GENUINE invariant: a
+        # decomposition whose imfs + residue fail to reconstruct y fires.
+        imfs_only, residue = emd.get_imfs_and_residue()
+        imfs_only = np.asarray(imfs_only, dtype=np.float64)
+        residue = np.asarray(residue, dtype=np.float64)
         recon_max_abs = float(np.max(np.abs(
-            imfs_arr.sum(axis=0) + residual - y,
+            imfs_only.sum(axis=0) + residue - y,
         )))
+        # Count/energies over the FULL stack (imfs + residue) — preserves the
+        # check's documented comparison convention (the engine's component
+        # count includes its residual; the standing ±2 CAVEAT band).
+        imfs_arr = np.vstack([imfs_only, residue[None, :]])
+        n_imfs = int(imfs_arr.shape[0])
         imf_energies = np.array([
             float(np.sum(imf ** 2)) for imf in imfs_arr
         ])

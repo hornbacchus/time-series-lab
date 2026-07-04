@@ -66,7 +66,8 @@ class VarMaxLagGuard(P3ParityCheck):
     def setup_fixture(self, seed: int) -> dict[str, Any]:
         return {"Y": _var13_dgp(seed)}
 
-    def _order(self, Y, max_lag) -> int:
+    def _order(self, Y, max_lag) -> dict[str, int]:
+        import re
         from techniques.base import RunContext  # type: ignore
         import techniques.var_model as vm  # type: ignore
         ctx = RunContext({
@@ -82,12 +83,24 @@ class VarMaxLagGuard(P3ParityCheck):
             resp = vm.run(ctx, lambda *a, **k: None)
         if resp.get("status") != "success":
             raise RuntimeError(f"engine var failed: {resp.get('error_message')}")
-        return int(resp["audit_fields"]["var_order"])
+        # AUD-S3: recompute the selected order from the EMITTED Coefficients
+        # table (statsmodels parameter names L<k>.<var>) — the parameter's
+        # EFFECT on output, not the audit echo. The audit scalar is
+        # cross-checked below, never gated on.
+        coef = next(t for t in resp.get("tables", [])
+                    if t.get("name") == "Coefficients")
+        lag_ids = []
+        for row in coef["rows"]:
+            m = re.match(r"L(\d+)\.", str(row[1]))
+            if m:
+                lag_ids.append(int(m.group(1)))
+        return {"emitted": max(lag_ids) if lag_ids else 0,
+                "reported": int(resp["audit_fields"]["var_order"])}
 
     def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
         _ensure_engine_on_path()
         Y = fixture["Y"]
-        return {"order_cap1": self._order(Y, 1), "order_cap8": self._order(Y, 8)}
+        return {"cap1": self._order(Y, 1), "cap8": self._order(Y, 8)}
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
         ladder = get_ladder(self.technique_id)
@@ -97,7 +110,10 @@ class VarMaxLagGuard(P3ParityCheck):
                 "min_order_cap8": int(ladder["discrimination"]["min_order_cap8"])}
 
     def compare(self, tsl: dict[str, Any], ref: dict[str, Any]) -> ParityResult:
-        o1, o8 = tsl["order_cap1"], tsl["order_cap8"]
+        # AUD-S3 upgrade: all order gates consume the order RECOMPUTED from
+        # the emitted Coefficients table; the audit echoes are cross-checked
+        # in the consistency gate below.
+        o1, o8 = tsl["cap1"]["emitted"], tsl["cap8"]["emitted"]
         primary: dict[str, Any] = {}; statuses: list[str] = []
 
         # (a) the cap is honored — order(max_lag=1) == 1 (cannot exceed the cap).
@@ -123,6 +139,16 @@ class VarMaxLagGuard(P3ParityCheck):
                      "default order -> BLOCK")}
         statuses.append(primary["max_lag_affects_output"]["status"])
 
+        # (d) consistency: the audit `var_order` echo must match the order
+        # recomputed from the emitted table (an engine misreport check).
+        cons_ok = (tsl["cap1"]["reported"] == o1
+                   and tsl["cap8"]["reported"] == o8)
+        primary["audit_echo_consistency"] = {
+            "status": "PASS" if cons_ok else "BLOCK",
+            "cap1_reported": tsl["cap1"]["reported"], "cap1_emitted": o1,
+            "cap8_reported": tsl["cap8"]["reported"], "cap8_emitted": o8}
+        statuses.append(primary["audit_echo_consistency"]["status"])
+
         any_block = any(s == "BLOCK" for s in statuses)
         outcome = "BLOCK" if any_block else "PASS"
         return ParityResult(
@@ -132,6 +158,7 @@ class VarMaxLagGuard(P3ParityCheck):
                 "scope": ("ENGINE-honors-max_lag regression guard; NOT the "
                           "catalog-fix validation (ribbon->engine = Matt-Excel)"),
                 "order_cap1": o1, "order_cap8": o8,
+                "order_source": "emitted Coefficients table (L<k>. parameter names)",
                 "catalog_fix": "techniques_catalog.json VAR control name max_lags -> max_lag",
             },
         )

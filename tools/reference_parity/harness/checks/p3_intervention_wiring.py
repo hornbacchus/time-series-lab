@@ -86,11 +86,24 @@ class InterventionWiringParity(P3ParityCheck):
         resp = ia_mod.run(ctx, lambda *a, **kw: None)
         a = resp.get("audit_fields", {})
         ivs = a.get("interventions") or []
+        # AUD-S3: capture the EMITTED "Intervention Effects" table — the
+        # load-bearing gate rides the row count (the wiring observable); the
+        # audit echoes are cross-checked, not gated. The coefficient fields
+        # are reported as diagnostics only (see the attempted-and-removed
+        # note in compare()).
+        tbl = next((t for t in resp.get("tables", [])
+                    if t.get("name") == "Intervention Effects"), None)
+        rows = (tbl or {}).get("rows", [])
         return {
             "status": resp.get("status"),
             "n_interventions": a.get("n_interventions"),
             "indices": sorted(int(iv.get("index")) for iv in ivs
                               if isinstance(iv, dict) and iv.get("index") is not None),
+            "n_emitted": len(rows),
+            # columns: Intervention | Coefficient | Std Error | t-stat |
+            # p-value | CI 2.5% | CI 97.5% | Significant
+            "step_coef": float(rows[0][1]) if rows else None,
+            "step_significant": str(rows[0][7]) if rows else None,
         }
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -101,16 +114,33 @@ class InterventionWiringParity(P3ParityCheck):
         }
 
     def compare(self, tsl: dict[str, Any], ref: dict[str, Any]) -> ParityResult:
-        n_ok = tsl.get("n_interventions") == ref["n_interventions"]
-        idx_ok = tsl.get("indices") == ref["indices"]
+        # AUD-S3 upgrade: the load-bearing gates ride the EMITTED
+        # "Intervention Effects" table. If the flat dialog inputs were
+        # dropped (the bug shape), auto-detect fits a SINGLE break -> the
+        # emitted table has 1 row, not 2 (the count carries the wiring
+        # discrimination); and the true +5 step at the user's idx1 fits a
+        # large significant coefficient -> a wrong index degrades it.
+        # NOTE (AUD-S3, attempted-and-removed): a step-coefficient magnitude/
+        # significance gate was attempted and removed — coefficient magnitude
+        # is an ESTIMATION property owned by p3_intervention_analysis
+        # (mle-band): under ARIMA+AR dynamics the instantaneous step
+        # coefficient is not a stable invariant (long-run effect =
+        # coef/(1-phi); the second intervention is a pulse modeled as a
+        # step besides). Wiring checks gate on WIRING observables: the
+        # emitted table's row count (dropped dialog inputs -> auto-detect
+        # -> 1 row, not 2).
+        n_ok = tsl.get("n_emitted") == ref["n_interventions"]
+        cons_ok = (tsl.get("n_interventions") == tsl.get("n_emitted")
+                   and tsl.get("indices") == ref["indices"])
         primary = {
-            "n_interventions": {
+            "n_interventions_emitted": {
                 "status": "PASS" if n_ok else "BLOCK",
-                "tsl": tsl.get("n_interventions"), "ref": ref["n_interventions"],
+                "emitted_rows": tsl.get("n_emitted"), "ref": ref["n_interventions"],
             },
-            "user_indices_used": {
-                "status": "PASS" if idx_ok else "BLOCK",
-                "tsl": tsl.get("indices"), "ref": ref["indices"],
+            "audit_echo_consistency": {
+                "status": "PASS" if cons_ok else "BLOCK",
+                "audit_n": tsl.get("n_interventions"),
+                "audit_indices": tsl.get("indices"), "expected": ref["indices"],
             },
         }
         run_ok = tsl.get("status") == "success"

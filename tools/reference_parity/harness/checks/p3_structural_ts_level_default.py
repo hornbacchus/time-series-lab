@@ -114,13 +114,34 @@ class StructuralTsLevelDefaultParity(P3ParityCheck):
         components = a.get("components") or []
         pe = resp.get("plain_english_summary", "")
         rm = re.search(r"RMSE\s*=\s*(\d+\.?\d*)", pe)
+        # AUD-S1: the gates ride the EMITTED "Smoothed Components" table —
+        # trend presence from the table's COLUMNS, RMSE recomputed in-check
+        # from its observed-vs-Fitted values. The audit components list and
+        # the prose-parsed RMSE are cross-checked, not gated.
+        tbl = next((t for t in resp.get("tables", [])
+                    if t.get("name") == "Smoothed Components"), None)
+        cols = (tbl or {}).get("columns", [])
+        rmse_emitted = None
+        if tbl:
+            fit_i = cols.index("Fitted") if "Fitted" in cols else None
+            if fit_i is not None:
+                obs = np.array([r[1] for r in tbl["rows"]
+                                if r[1] is not None and r[fit_i] is not None],
+                               dtype=np.float64)
+                fitv = np.array([r[fit_i] for r in tbl["rows"]
+                                 if r[1] is not None and r[fit_i] is not None],
+                                dtype=np.float64)
+                if obs.size:
+                    rmse_emitted = float(np.sqrt(np.mean((obs - fitv) ** 2)))
         return {
             "status": resp.get("status"),
             "level_default": level_default,
             "level_default_is_string": isinstance(level_default, str),
-            "trend_present": "Trend" in components,
-            "rmse": float(rm.group(1)) if rm else None,
-            "components": list(components),
+            "trend_in_emitted_table": "Trend" in cols,
+            "rmse_emitted": rmse_emitted,
+            "trend_present_audit": "Trend" in components,
+            "rmse_prose": float(rm.group(1)) if rm else None,
+            "components_audit": list(components),
         }
 
     def run_reference(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -129,20 +150,33 @@ class StructuralTsLevelDefaultParity(P3ParityCheck):
                 "level_default_is_string": True}
 
     def compare(self, tsl: dict[str, Any], ref: dict[str, Any]) -> ParityResult:
-        rmse = tsl.get("rmse")
+        # AUD-S1 upgrade: trend presence gated on the EMITTED table's columns;
+        # RMSE gated on the value RECOMPUTED in-check from the emitted
+        # observed-vs-Fitted series. Audit/prose self-reports cross-checked.
+        rmse = tsl.get("rmse_emitted")
+        rp = tsl.get("rmse_prose")
+        cons_ok = (tsl.get("trend_present_audit") == tsl.get("trend_in_emitted_table")
+                   and rmse is not None and rp is not None
+                   and abs(rmse - rp) <= 0.10 * max(abs(rp), 1e-9))
         primary = {
             "level_default_is_string": {
                 "status": "PASS" if tsl["level_default_is_string"] else "BLOCK",
                 "level_default": tsl["level_default"],
             },
             "trend_component_present": {
-                "status": "PASS" if tsl["trend_present"] else "BLOCK",
-                "components": tsl["components"],
+                "status": "PASS" if tsl["trend_in_emitted_table"] else "BLOCK",
+                "source": "emitted Smoothed Components table columns",
             },
             "rmse_non_degenerate": {
                 "status": ("PASS" if (rmse is not None and rmse <= ref["rmse_max"])
                            else "BLOCK"),
-                "rmse": rmse, "rmse_max": ref["rmse_max"],
+                "rmse_recomputed": rmse, "rmse_max": ref["rmse_max"],
+            },
+            "self_report_consistency": {
+                "status": "PASS" if cons_ok else "BLOCK",
+                "audit_trend": tsl.get("trend_present_audit"),
+                "table_trend": tsl.get("trend_in_emitted_table"),
+                "rmse_recomputed": rmse, "rmse_prose": rp,
             },
         }
         statuses = [v["status"] for v in primary.values()]
@@ -154,7 +188,7 @@ class StructuralTsLevelDefaultParity(P3ParityCheck):
             diagnostics={
                 "run_status": tsl.get("status"),
                 "level_default": tsl["level_default"],
-                "components": tsl["components"],
-                "rmse": rmse,
+                "components_audit": tsl["components_audit"],
+                "rmse_recomputed": rmse,
             },
         )

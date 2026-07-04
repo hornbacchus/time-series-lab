@@ -75,8 +75,16 @@ class VecmControlsParity(P3ParityCheck):
             _w.simplefilter("ignore")
             r = vm.run(ctx, lambda *a, **k: None)
         au = r.get("audit_fields", {})
+        # AUD-S3: digest the EMITTED tables so the gates ride the parameter's
+        # EFFECT on output (VECM emits no per-lag coefficient table, so the
+        # lag itself is not recomputable from output — the effect contrast is
+        # the honest observable; the audit echo is cross-checked, not gated).
+        import hashlib
+        import json
+        tbl_blob = json.dumps(r.get("tables", []), sort_keys=True, default=str)
         return {"status": r.get("status"), "lag": au.get("lag_order"),
                 "rank": au.get("coint_rank"),
+                "digest": hashlib.sha256(tbl_blob.encode()).hexdigest(),
                 "err": str(r.get("error_message", ""))[:80]}
 
     def run_tsl(self, fixture: dict[str, Any]) -> dict[str, Any]:
@@ -97,24 +105,40 @@ class VecmControlsParity(P3ParityCheck):
         np_, au, p4, p4s, ra = (tsl["noparam"], tsl["auto"], tsl["pin4"],
                                 tsl["pin4s"], tsl["rank_auto"])
 
-        # (1) "auto" == the no-param run (the delivered IC-selection; sentinel).
+        # AUD-S3 upgrade: the load-bearing gates ride EMITTED-OUTPUT digests
+        # (the parameter's effect), not the audit lag echoes. Echoes are
+        # cross-checked in the consistency gate below.
+        # (1) "auto" == the no-param run — byte-identical DELIVERED output.
         a_ok = (au["status"] == "success" and np_["status"] == "success"
-                and au["lag"] == np_["lag"])
+                and au["digest"] == np_["digest"])
         primary["auto_sentinel"] = {
             "status": "PASS" if a_ok else "BLOCK",
-            "noparam_lag": np_["lag"], "auto_lag": au["lag"],
-            "note": "k_ar_diff='auto' -> IC-selection == no-param (dialog-default byte-identical)"}
+            "digests_equal": au["digest"] == np_["digest"],
+            "note": "k_ar_diff='auto' -> emitted tables byte-identical to the no-param run"}
         statuses.append(primary["auto_sentinel"]["status"])
 
-        # (2) a pinned k_ar_diff LANDS exactly (int + int-string), != the IC pick.
-        p_ok = (p4["status"] == "success" and p4["lag"] == 4
-                and p4s["status"] == "success" and p4s["lag"] == 4
-                and np_["lag"] != 4)  # the pin must BIND (IC pick differs on this fixture)
-        primary["pinned_lag_lands"] = {
+        # (2) a pinned k_ar_diff BINDS on output (int + int-string identical;
+        # pinned output differs from the IC pick's output on this fixture).
+        p_ok = (p4["status"] == "success" and p4s["status"] == "success"
+                and p4["digest"] == p4s["digest"]
+                and p4["digest"] != np_["digest"])
+        primary["pinned_lag_binds_on_output"] = {
             "status": "PASS" if p_ok else "BLOCK",
-            "pin4_lag": p4["lag"], "pin4_str_lag": p4s["lag"], "ic_pick": np_["lag"],
-            "note": "reported lag_order == the set value (exact int; inert -> IC pick -> BLOCK)"}
-        statuses.append(primary["pinned_lag_lands"]["status"])
+            "pin_int_eq_str": p4["digest"] == p4s["digest"],
+            "pin_differs_from_ic": p4["digest"] != np_["digest"],
+            "note": ("an inert k_ar_diff (the bug shape) -> pinned output == "
+                     "IC output -> BLOCK; VECM emits no per-lag coefficient "
+                     "table, so the effect contrast is the honest observable")}
+        statuses.append(primary["pinned_lag_binds_on_output"]["status"])
+
+        # (2b) consistency: the audit lag_order echoes match expectations
+        # (engine misreport check — cross-checks, no longer the gate input).
+        c_ok = (au["lag"] == np_["lag"] and p4["lag"] == 4 and p4s["lag"] == 4)
+        primary["audit_echo_consistency"] = {
+            "status": "PASS" if c_ok else "BLOCK",
+            "noparam_lag": np_["lag"], "auto_lag": au["lag"],
+            "pin4_lag": p4["lag"], "pin4_str_lag": p4s["lag"]}
+        statuses.append(primary["audit_echo_consistency"]["status"])
 
         # (3) coint_rank='auto' crash fix: success + auto-selected rank.
         r_ok = (ra["status"] == "success" and ra["rank"] is not None
