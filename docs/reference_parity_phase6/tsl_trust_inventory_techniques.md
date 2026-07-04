@@ -126,6 +126,19 @@ deterministic-trend specifications.**
 
 **Phase 7+ inert-control fix (A-batch #6) — SHIPPED (Commit `b3a326b`).** The **`k_ar_diff`** dialog control ("AR Lags") was **INERT** — the engine read `lag`. ★ **Displayed-vs-delivered disclosure:** the dialog DISPLAYED `2`; the engine DELIVERED IC-selection (`select_order`, AIC) — every historical dialog run used the IC-selected lag regardless of the displayed value. **Now ENGINE-WIRED** via the adf string-sentinel pattern: catalog `k_ar_diff` type int→**string**, default 2→**"auto"** (the dialog default now STATES the delivered behavior); engine chain `lag` (THOROUGH) > `k_ar_diff` (dialog, "auto"→None→IC-select; int→a pinned lag, now LIVE; bad string→graceful error) > None. ★ **Identity confirmed (no off-by-one):** the engine's `lag` is passed STRAIGHT to `coint_johansen(k_ar_diff=p)` — same quantity as statsmodels' k_ar_diff. Sentinel `3d_johansen_bartlett` PASS unchanged (passes no lag key); new **`p3_johansen_kardiff`** PASS — a pinned k_ar_diff LANDS exactly (audit `lag_order` == the set value, the off-by-one guard; int + int-string both) and "auto" == the no-param IC-selection. Guard-trimmed (A-batch 32→28).
 
+**Harness Integrity Audit AUD-D1 — interpretation-layer defect FIXED (commit `0e7d1ab`).** The audit's
+static error-scan found `johansen_cointegration.py` referencing an undefined name (`model` instead of the
+in-scope `result`) inside the fail-soft interpretation block: the NameError was swallowed by the bare
+`except` and **`audit_fields["first_cointegrating_vector"]` was silently None on every rank≥1 run since
+the field's birth** (`f56d52b`, 2026-04-21 — the C5 interpretation-layer propagation; the defect class is
+a swallowed extraction failure in a display path, invisible because None is a legal value). **Statistics
+were never affected** — pre/post-fix statistics digests byte-identical (tables `eb73014e879e4111`,
+audit-ex-field `2c116f1afe257043`); the trace stats / CVs / rank the campaign validated are untouched.
+Fixed at `0e7d1ab` (`model`→`result`; fail-soft kept, with a debug log so future swallows stay visible) +
+a standing regression test (`engine/tests/test_johansen_interpretation.py`: rank-1 fixture ⇒ the field
+populates and equals `coint_johansen(...).evec[:, 0]` recomputed at the audited spec, round-4) that runs
+in CI and inside the F4 packed-runtime gate — every future deployment bundle re-proves the fix.
+
 ### evt_pot_gpd (parity wrapper 3c_evt_ferro_segers; extremal index sub-component) — Tier 1b (sub-component validation only)
 
 - **Catalog ID:** `evt_pot_gpd`
