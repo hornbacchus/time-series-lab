@@ -1235,6 +1235,14 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
     The invariant is "does not raise"; correctness of content is
     the job of T4/T5/T6/T7/T8/T9/T11/T12 on realistic fixtures."""
 
+    # SHARED-NAMESPACE NOTE (AUD-D2a): this dict serves EVERY registered
+    # spec's no-raise probe at once, and some audit keys are consumed by
+    # multiple techniques with different meanings (model_type, backend,
+    # rmse, ...). Python dict semantics make the LAST occurrence the only
+    # effective one, so each colliding key appears exactly ONCE below (at
+    # its last consumer's section). No probe asserts values — only
+    # no-raise + tier-shape — so any single value satisfying all specs is
+    # valid. Do not re-add a colliding key to an earlier section.
     _MINIMAL_INPUT = {
         "series_name": "test_series",
         "series_name_x": "X",
@@ -1251,7 +1259,6 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "significance": 0.05,
         "seasonal_strength": 0.5,
         "trend_strength": 0.5,
-        "model_type": "additive",
         "two_sided": True,
         "alpha": 0.05,
         "regression": "c",
@@ -1279,7 +1286,6 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "target_coverage": 0.95,
         "avg_interval_width": 1.0,
         "n_models": 3,
-        "n_resamples": 1000,
         "block_length": 10,
         "mean": 0.0,
         "median": 0.0,
@@ -1337,13 +1343,11 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "cv2_demand": 0.3,
         "zero_rate": 0.5,
         "last10_all_zero": False,
-        "backend": "prophet",
         "changepoint_prior_scale": 0.05,
         "yearly_seasonality_flag": "auto",
         "weekly_seasonality_flag": "False",
         "n_candidate_changepoints": 10,
         "most_recent_candidate_changepoint": "2000-01",
-        "r2": 0.9,
         "historical_max": 10.0,
         "interval_width": 0.95,
         # Prompt C3 State Space fields
@@ -1361,12 +1365,10 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
             "Trend": {"variance": 1.0, "pct_of_total": 10.0},
             "Residual": {"variance": 0.5, "pct_of_total": 10.0},
         },
-        "dominant_component": "Level",
         "level_type": "local level",
         "cycle_enabled": False,
         "ar_order": 0,
         "durbin_watson": 2.0,
-        "model_type": "local_level",
         "n_particles": 500,
         "sigma_state": 0.5,
         "sigma_obs": 0.5,
@@ -1432,7 +1434,6 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "total_variance": 100.0,
         "dominant_group_share": 70.0,
         "second_group_share": 15.0,
-        "backend": "emd",
         "n_imfs": 3,
         "max_imfs": 5,
         "dominant_imf": 1,
@@ -1454,11 +1455,9 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "lambda1": 0.1,
         "lambda2": 1.0,
         "lambda3": 1.0,
-        "n_effective": 90,
         "n_draws": 1000,
         "total_params": 21,
         "bic_approx": 200.0,
-        "rmse": {"A": 1.0, "B": 1.0, "C": 1.0},
         "prior_tightness_band": "moderate",
         "credible_interval_coverage": 0.90,
         "interval_type": "credible",
@@ -1550,9 +1549,7 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         "y_series": "Y",
         "x_series": "X",
         "polynomial": "unrestricted",
-        "r_squared": 0.5,
         "adj_r_squared": 0.45,
-        "rmse": 1.0,
         "long_run_multiplier": 0.3,
         "peak_lag": 1,
         "peak_lag_weight": 0.4,
@@ -1560,7 +1557,6 @@ class TestT14NoRaiseOnMinimalInputs(unittest.TestCase):
         # evt_pot_gpd
         "xi": 0.25,
         "sigma": 1.0,
-        "threshold": 2.0,
         "threshold_quantile": 0.975,
         "n_exceedances": 50,
         "exceedance_rate": 0.025,

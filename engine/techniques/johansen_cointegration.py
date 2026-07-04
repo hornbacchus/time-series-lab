@@ -39,6 +39,7 @@ Audit fields (S8 P4-1.2 alias additions)
   conventions across consumer code.
 """
 
+import logging
 import numpy as np
 import warnings as _warnings
 import pandas as pd
@@ -501,13 +502,18 @@ def run(ctx: RunContext, progress_callback) -> dict:
         try:
             # evec_rows[i] is an eigenvector row; the first vector is
             # the one corresponding to the largest eigenvalue.
-            if determined_rank_trace >= 1 and hasattr(model, "evec"):
-                evec_arr = np.asarray(model.evec)
+            if determined_rank_trace >= 1 and hasattr(result, "evec"):
+                evec_arr = np.asarray(result.evec)
                 if evec_arr.ndim == 2 and evec_arr.shape[1] >= 1:
                     first_cointegrating_vector = [
                         round(float(v), 4) for v in evec_arr[:, 0]
                     ]
-        except Exception:
+        except Exception as exc:
+            # Fail-soft is the intended posture for this display-layer field,
+            # but the swallow must stay visible in diagnostics (AUD-D1: an
+            # undefined-name NameError hid here silently for 2.5 months).
+            logging.getLogger(__name__).debug(
+                "first_cointegrating_vector extraction failed: %s", exc)
             first_cointegrating_vector = None
 
         # Follow-up 3d: identification-field label correction.
