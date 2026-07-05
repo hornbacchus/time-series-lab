@@ -40,6 +40,12 @@ from reference_parity.harness.tolerances import get_ladder
 _KRONOS_REPO = os.environ.get(
     "TSL_KRONOS_REPO",
     r"C:\Users\matth\OneDrive\Projects\Kronos Cross-Asset Forecaster")
+# kxaf EVALUATION-repo dormancy-HEAD pin (post-closure audit, 2026-07-05): recorded metadata for
+# the eval-repo commit whose kxaf/forecaster.py rollout_paths_batched this check reproduces (verified
+# byte-identical, max_abs_diff 0.0, at re-pin time). This is NOT the shiyu-coder upstream MODEL commit
+# (_dispatch.PINS["upstream_commit"] = 67b630e6 -- a different repository, asserted by runner.py) --
+# that pin is unchanged. Recorded, not repo-read; the owner confirmed the checkout at this commit.
+_KRONOS_EVAL_REPO_COMMIT = "0771cc3288ddf8922074843b4801361744c1d84f"
 _M, _H, _L, _SEED = 2, 5, 120, 9000
 
 
@@ -174,4 +180,5 @@ print(json.dumps({{"matrix": paths.tolist(), "tally": tally}}))
             outcome="PASS" if status == "PASS" else "BLOCK",
             metrics={"primary": primary},
             diagnostics={"pins": tsl.get("pins", {}),
+                         "kxaf_eval_repo_commit": _KRONOS_EVAL_REPO_COMMIT,
                          "load": f"M={_M}, H={_H}, L={_L}, seed={_SEED}"})
