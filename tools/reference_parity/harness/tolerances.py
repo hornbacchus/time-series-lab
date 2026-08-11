@@ -52,7 +52,7 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
     # Breakeven Payrolls (Bespoke technique port). CROSS-SOURCE
     # reproduction: the TSL workbook-path output is asserted against
     # the authoritative Breakeven Payrolls repo's reconciled fixture
-    # (tests/fixtures/fed_reference_path.csv @ 826d1d0) — analogous to
+    # (tests/fixtures/fed_reference_path.csv @ 99c03ba; v2 grid, v1 path unchanged) — analogous to
     # the cross-package R checks, but the reference is the source
     # repo's frozen output. Closed-form deterministic arithmetic.
     "p3_breakeven_payroll": {
@@ -61,7 +61,7 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         # 1960Q1-1961Q1 13-month-MA edge is excluded — the template
         # bakes HPLFS from 1960, no anchor falls there).
         "path": {"abs_tol": 5.0, "rel_tol": 1e-5},
-        # TIGHT scenario grid (10 rows, breakeven k/mo). Both the port
+        # TIGHT scenario grid (12 rows since the 99c03ba re-port, breakeven k/mo). Both the port
         # and the source compute it from identical frozen literals (D1)
         # + the same reconciled 2026 anchor, so they agree to ~1e-12.
         "grid": {"abs_tol": 1e-3, "rel_tol": 1e-6},
@@ -70,7 +70,7 @@ TOLERANCE_LADDERS: dict[str, dict[str, Any]] = {
         "anchor_abs_tol": 15000.0,
         "justification": (
             "Cross-source reproduction of the Breakeven Payrolls repo "
-            "(826d1d0). The breakeven path is closed-form arithmetic "
+            "(99c03ba; unchanged since 826d1d0). The breakeven path is closed-form arithmetic "
             "(population diff-splice + product-rule decomposition + "
             "be = delta_lf*(1-u*) + 5q centered MA) over CBO-quarterly "
             "potential-LFPR/u* and the CNP16OV-bridged population; the "

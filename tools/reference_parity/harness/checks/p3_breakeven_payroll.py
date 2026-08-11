@@ -3,7 +3,7 @@
 CROSS-SOURCE reproduction: TSL's ``engine/techniques/breakeven_payroll`` reads the
 12-tab Breakeven Payrolls workbook, runs the ported math, and must reproduce the
 authoritative Breakeven Payrolls repo's reconciled output (the frozen
-``tests/fixtures/fed_reference_path.csv`` @ 826d1d0). This is the analogue of the
+``tests/fixtures/fed_reference_path.csv`` @ 99c03ba; preset-only re-port 2026-08-08, path math unchanged since 826d1d0). This is the analogue of the
 cross-package R checks, but the reference is the source repo's own frozen fixture
 rather than an independent library — the source IS the authority.
 
@@ -13,7 +13,7 @@ Assertions:
     level (measured 0.19 jobs/mo). The 1960Q1-1961Q1 13-month-MA edge is excluded
     (the template bakes HPLFS from 1960; no reconciliation anchor falls there).
     LOAD-BEARING.
-  * TIGHT scenario grid (10 rows): reproduces the source ``sensitivity_grid``
+  * TIGHT scenario grid (12 rows: the 10 v1 rows value-identical + 2 CBO_Feb2026): reproduces the source ``sensitivity_grid``
     (frozen-literal closed form) — Brookings-mid/Fed 7.2386, MS-house 50.6638.
     LOAD-BEARING.
   * LOOSE anchor overlay: the 6 reconciliation anchors vs the repo's round targets
@@ -53,7 +53,15 @@ _GRID_KEYS = [
     ("Brookings_mid", "noncyclical"), ("Brookings_mid", "cbo_actual"),
     ("Brookings_high", "noncyclical"), ("Brookings_high", "cbo_actual"),
     ("MS_house", "noncyclical"), ("MS_house", "cbo_actual"),
+    # Preset-only re-port @ 99c03ba (fixture v2, 12 rows):
+    ("CBO_Feb2026", "noncyclical"), ("CBO_Feb2026", "cbo_actual"),
 ]
+# The LIVE bundled v2 template (10 tabs) — the three-way preset assert's
+# template arm reads THIS file's gross_migration_sums tab. The pinned 12-tab
+# parity fixture workbook above stays byte-frozen (no sums tab) by ruling.
+_BUNDLED_TEMPLATE = (_REPO_ROOT / "engine" / "techniques" / "breakeven_payroll"
+                     / "resources" / "templates"
+                     / "breakeven_payroll_input_template.xlsx")
 
 
 def _period_key(s: str) -> str:
@@ -117,9 +125,21 @@ class BreakevenPayrollParity(P3ParityCheck):
         grid = out["grid"]
         gmap = {(r["preset"], r["u_star_def"]): float(r["breakeven_kmo"])
                 for _, r in grid.iterrows()}
+
+        # Three-way CBO_Feb2026 preset assert, arms 1+2 (arm 3 = the reference
+        # literal in run_reference). Arm 2 reads the LIVE bundled v2 template's
+        # gross_migration_sums tab — NOT the byte-frozen 12-tab parity fixture
+        # workbook (which deliberately has no sums tab; ruling 2026-08-08).
+        from techniques.breakeven_payroll._dispatch import FROZEN_PRESETS
+        from techniques.breakeven_payroll.migration import derived_preset_from_sums
+        from techniques.breakeven_payroll.workbook_input import read_gross_migration_sums
+        gm = read_gross_migration_sums(_BUNDLED_TEMPLATE)
         return {
             "path": {f"{p.year}Q{p.quarter}": float(v) for p, v in qp.items()},
             "grid": {f"{a}|{b}": gmap[(a, b)] for a, b in _GRID_KEYS},
+            "preset_literal": float(FROZEN_PRESETS["CBO_Feb2026"]),
+            "preset_template_derived": (
+                float(derived_preset_from_sums(gm)) if gm is not None else None),
         }
 
     # ---- reference side (the source repo's frozen output) ---------------- #
@@ -135,7 +155,10 @@ class BreakevenPayrollParity(P3ParityCheck):
         with open(fixture["ref_grid_csv"], newline="", encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 grid[f"{row['preset']}|{row['u_star_def']}"] = float(row["breakeven_kmo"])
-        return {"path": path, "grid": {f"{a}|{b}": grid[f"{a}|{b}"] for a, b in _GRID_KEYS}}
+        return {"path": path, "grid": {f"{a}|{b}": grid[f"{a}|{b}"] for a, b in _GRID_KEYS},
+                # Arm 3: the SOURCE repo's params entry (test-asserted equal to
+                # its code derivation there; committed vintage @ 99c03ba).
+                "preset_reference": 573959.0}
 
     # ---- compare --------------------------------------------------------- #
     def compare(self, tsl: dict[str, Any], ref: dict[str, Any]) -> ParityResult:
@@ -178,12 +201,26 @@ class BreakevenPayrollParity(P3ParityCheck):
                             "abs_diff": round(abs(comp - ref_v)) if comp == comp else None,
                             "abs_tol": round(tol), "status": "PASS" if ok else "CHECK"})
 
-        statuses = [path_cmp["status"], grid_cmp["status"]]
+        # Three-way CBO_Feb2026 preset assert (<=1e-6): engine frozen literal ==
+        # LIVE-bundled-template derivation == source-repo reference literal.
+        lit = tsl.get("preset_literal")
+        drv = tsl.get("preset_template_derived")
+        refp = ref.get("preset_reference")
+        three_ok = (lit is not None and drv is not None and refp is not None
+                    and abs(lit - refp) <= 1e-6 and abs(drv - refp) <= 1e-6)
+        preset_cmp = {
+            "status": "PASS" if three_ok else "BLOCK",
+            "literal": lit, "template_derived": drv, "reference": refp,
+            "template_arm_source": "bundled v2 template gross_migration_sums tab",
+        }
+
+        statuses = [path_cmp["status"], grid_cmp["status"], preset_cmp["status"]]
         outcome = "BLOCK" if "BLOCK" in statuses else ("CAVEAT" if "CAVEAT" in statuses else "PASS")
         return ParityResult(
             technique_id=self.technique_id,
             outcome=outcome,
-            metrics={"path": path_cmp, "grid": grid_cmp},
+            metrics={"path": path_cmp, "grid": grid_cmp,
+                     "cbo_feb2026_preset_threeway": preset_cmp},
             diagnostics={
                 "n_quarters_compared": len(stable_keys),
                 "stable_region": f"{_STABLE_START}..{stable_keys[-1] if stable_keys else '?'}",
