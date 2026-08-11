@@ -6,7 +6,7 @@ scenario_breakeven gives the change in monthly breakeven for a migration surpris
     delta    = surprise * share_16plus * lfpr * (1 - u*) / 12   (persons/month)
              ~= +4,500/mo per +100k of annual net migration.
 
-PORTED from the Breakeven Payrolls repo (826d1d0) VERBATIM except the anchor
+PORTED from the Breakeven Payrolls repo (99c03ba; verbatim-unchanged since 826d1d0 — empty upstream diff) VERBATIM except the anchor
 fixture path: the standalone repo read repo_root()/tests/fixtures/...; the TSL
 port reads the committed copy under this package's resources/ (D5). No math change.
 """

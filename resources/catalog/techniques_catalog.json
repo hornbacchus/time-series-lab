@@ -1486,7 +1486,7 @@
           "default": null,
           "required": true,
           "advanced": false,
-          "description": "Absolute path to the 12-tab Breakeven Payrolls workbook (baked CBO + population + scalars + the user-editable scenario_inputs tab). Use the 'Open Input Template' Ribbon menu item to create one. The scenario (net migration) is set in the workbook, not here.",
+          "description": "Absolute path to the 10-tab Breakeven Payrolls workbook (baked CBO + population + scalars + the user-editable scenario_inputs tab). Use the 'Open Input Template' Ribbon menu item to create one. The scenario (net migration) is set in the workbook, not here.",
           "options": null
         }
       ],

@@ -2,7 +2,7 @@
 
 The standalone repo acquired its inputs from live/cached sources (acquire.py +
 fred_client + vintage). The TSL technique instead reads them from the smoke-tested
-12-tab Breakeven_Payrolls_Template.xlsx, producing the SAME structures the repo's
+10-tab Breakeven_Payrolls_Template.xlsx, producing the SAME structures the repo's
 fetchers produced, so the ported math (population/breakeven/scenarios) runs unchanged.
 
 Verified template contract (Breakeven_Payrolls_Template.xlsx):
@@ -121,14 +121,31 @@ def read_population(xlsx_path: str | Path) -> dict:
     return {"hplfs": hplfs, "cnp16ov": (cnp if len(cnp) else None)}
 
 
+def read_gross_migration_sums(xlsx_path: str | Path):
+    """Read the v2 `gross_migration_sums` tab (year x status x flow x
+    age-bucket people sums, baked from the standalone repo's groupby — see
+    the re-port record). TOLERANT: absent tab (a v1 workbook) -> None, so
+    pre-re-port working copies keep running."""
+    try:
+        df = pd.read_excel(str(xlsx_path), sheet_name="gross_migration_sums",
+                           header=_HEADER_ROW - 1)
+    except (KeyError, ValueError):
+        return None
+    need = {"year", "immigration_status", "migration_flow", "bucket", "people"}
+    if not need <= set(df.columns):
+        return None
+    return df[list(need)].dropna(subset=["year", "people"])
+
+
 def read_workbook(xlsx_path: str | Path) -> dict:
-    """Read everything the dispatch needs from the 12-tab template."""
+    """Read everything the dispatch needs from the 10-tab template."""
     xlsx_path = str(xlsx_path)
     pop = read_population(xlsx_path)
     cbo = read_cbo_quarterly(xlsx_path)
     scalars = _kv_scan(xlsx_path, "scalars")
     scen = _kv_scan(xlsx_path, "scenario_inputs")
     meta = _kv_scan(xlsx_path, "_meta")
+    gm_sums = read_gross_migration_sums(xlsx_path)
 
     def _num(d, key, default=None):
         v = d.get(key)
@@ -155,4 +172,5 @@ def read_workbook(xlsx_path: str | Path) -> dict:
             "last_realized_month": scen.get("last_realized_month"),
         },
         "meta": meta,
+        "gross_migration_sums": gm_sums,
     }

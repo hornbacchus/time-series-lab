@@ -1,6 +1,6 @@
 """Breakeven Payrolls — TSL workbook-input dispatch.
 
-Reads the 12-tab Breakeven_Payrolls_Template.xlsx, reconstructs the inputs the
+Reads the 10-tab breakeven_payroll_input_template.xlsx, reconstructs the inputs the
 source repo's fetchers produced, runs the SAME ported math (build_population +
 breakeven_from_inputs for the path; sensitivity_grid for the scenario grid), and
 assembles TSL output tables.
@@ -38,6 +38,14 @@ FROZEN_PRESETS = {
     "Brookings_mid": -370000.0,
     "Brookings_high": 185000.0,
     "MS_house": 590000.0,
+    # Preset-only re-port @ 99c03ba (CFL-525): CBO's own pub-61879 2026
+    # all-ages net, derived in the SOURCE repo from the committed gross-
+    # migration file (its params entry is test-asserted equal there). The
+    # frozen literal keeps the grid deterministic and user-edit-proof; when
+    # the v2 template's gross_migration_sums tab is present, compute()
+    # re-derives from it and raises on mismatch (the desk-side
+    # reconcile-don't-hardcode guard).
+    "CBO_Feb2026": 573959.0,
 }
 # Frozen u* definitions (D1) — NOT recomputed from cbo_annual.
 FROZEN_USTAR_OPTIONS = {"noncyclical": 0.044, "cbo_actual": 0.0456}
@@ -67,6 +75,20 @@ def _build_params(inp: dict) -> dict:
 
 def compute(inp: dict) -> dict:
     """Pure compute seam (no RunContext) — usable standalone + by the parity check."""
+    # Reconcile-don't-hardcode guard (re-port @ 99c03ba): when the v2
+    # template's gross_migration_sums tab is present, the CBO_Feb2026 frozen
+    # literal must equal the tab-derived all-ages 2026 net. A mismatch means
+    # the baked sums and the preset literal have drifted apart (a botched
+    # template regen or a stale re-port) — fail LOUD, not silent.
+    gm = inp.get("gross_migration_sums")
+    if gm is not None:
+        from .migration import derived_preset_from_sums
+        derived = derived_preset_from_sums(gm)
+        frozen = FROZEN_PRESETS["CBO_Feb2026"]
+        if abs(derived - frozen) > 1e-6:
+            raise ValueError(
+                f"CBO_Feb2026 preset drift: frozen literal {frozen} != "
+                f"template-derived {derived} (gross_migration_sums tab)")
     params = _build_params(inp)
     base = inp["scalars"]["pop_base_v2025_dec2025"]
     base_pace = inp["scalars"]["census_base_pace"]
@@ -115,7 +137,7 @@ def _anchor_rows(qp: pd.Series) -> tuple[list, list]:
 
 
 def run(ctx, progress_callback) -> dict:
-    """TSL dispatch. ``ctx.params['input_workbook']`` = path to the 12-tab template."""
+    """TSL dispatch. ``ctx.params['input_workbook']`` = path to the 10-tab template."""
     try:
         from .workbook_input import read_workbook
 
@@ -157,7 +179,7 @@ def run(ctx, progress_callback) -> dict:
         tables.append(make_table("Breakeven Payrolls (Quarterly)",
                                  ["Quarter", "Breakeven (jobs/mo)", "Type"], path_rows))
 
-        # 2) Scenario grid (10 rows).
+        # 2) Scenario grid (12 rows since the 99c03ba re-port).
         gcols = ["preset", "migration", "u_star_def", "u_star", "delta_per_month", "pace_kmo", "breakeven_kmo"]
         grows = [[r["preset"], int(r["migration"]), r["u_star_def"], round(float(r["u_star"]), 4),
                   round(float(r["delta_per_month"]), 1), round(float(r["pace_kmo"]), 3),

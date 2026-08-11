@@ -39262,7 +39262,7 @@ research repo and validated against ITS reconciled output.
   `be = Δlf·(1−u*)` + 5-quarter centered MA) and the migration-scenario grid
   are closed-form arithmetic over frozen conventions.
 
-**Reference:** Breakeven Payrolls repo @ `826d1d0` — reconciled
+**Reference:** Breakeven Payrolls repo @ `99c03ba` (preset-only re-port `2026-08-08`: fixture v2 = 12 grid rows, the 10 v1 rows value-identical + CBO_Feb2026 at 49.938/49.867; three-way preset assert literal==template-derived==source 573,959; path fixture unchanged since `826d1d0`) — reconciled
 `fed_reference_path.csv` (path) + source `sensitivity_grid` (scenario grid)
 **Verdict:** PASS — cross-source reproduction at near-float precision
 **Audit date:** 2026-06-05 (Bespoke-port S3)

@@ -1,5 +1,5 @@
 """Breakeven Payrolls — TSL Bespoke technique (ported from the Breakeven Payrolls
-repo @ 826d1d0). Workbook-input: reads the 12-tab template, runs the ported math,
+repo @ 99c03ba (preset-only re-port 2026-08-08; scenario math unchanged upstream)). Workbook-input: reads the 10-tab template, runs the ported math,
 writes the breakeven path + scenario grid + signal-vs-noise overlay.
 
 The core math modules (conventions, stitch, population, breakeven, scenarios,

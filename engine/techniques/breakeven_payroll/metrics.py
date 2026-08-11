@@ -1,5 +1,5 @@
 """Anchor-metric helpers — extracted VERBATIM from the source repo's reconcile.py
-(826d1d0) so the TSL port computes the 6 reconciliation anchors exactly as the
+(99c03ba; unchanged since 826d1d0) so the TSL port computes the 6 reconciliation anchors exactly as the
 authoritative pipeline does. No math change; only the acquisition-coupled
 orchestration (rebuild_path / run_reconciliation) is omitted (the TSL dispatch
 reconstructs the path from the workbook instead of live fetchers).

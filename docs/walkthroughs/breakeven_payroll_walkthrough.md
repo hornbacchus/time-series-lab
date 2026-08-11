@@ -109,7 +109,7 @@ The scenario knob reads from the workbook's `scenario_inputs` tab and feeds the 
 
 ### Provenance
 
-Ported from the standalone Breakeven Payrolls repository (commit `826d1d0`), itself a faithful replication of Murray & Vidangos, *"The Breakeven Rate of Payroll Employment Growth,"* FEDS Notes, 2026-04-02. The conventions (moving-average windows, the product-rule decomposition, the December population-control seam, the frozen scenario-grid scalars) are preserved exactly from the source — the technique reproduces a *specific, validated* pipeline, not a re-derivation.
+Ported from the standalone Breakeven Payrolls repository (commit `99c03ba` — preset-only re-port 2026-08-08 adding the CBO_Feb2026 scenario preset + the gross_migration_sums template tab; path math unchanged since the original `826d1d0` port), itself a faithful replication of Murray & Vidangos, *"The Breakeven Rate of Payroll Employment Growth,"* FEDS Notes, 2026-04-02. The conventions (moving-average windows, the product-rule decomposition, the December population-control seam, the frozen scenario-grid scalars) are preserved exactly from the source — the technique reproduces a *specific, validated* pipeline, not a re-derivation.
 
 ### Validation — cross-source reproduction
 
