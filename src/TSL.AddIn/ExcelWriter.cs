@@ -598,7 +598,7 @@ namespace TSL.AddIn
             {
                 WriteSection("Versions", new Dictionary<string, string>
                 {
-                    { "Add-in Version", typeof(ExcelWriter).Assembly.GetName().Version.ToString() },
+                    { "Add-in Version", BuildInfo.Stamp },
                     { "Engine Version", response.EngineVersions.EngineVersion ?? "?" },
                     { "Python Version", response.EngineVersions.PythonVersion ?? "?" },
                     { "Packages Hash", response.EngineVersions.PackagesHash ?? "?" },

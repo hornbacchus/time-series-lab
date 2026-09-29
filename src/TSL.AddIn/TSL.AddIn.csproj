@@ -9,7 +9,31 @@
     <LangVersion>latest</LangVersion>
     <!-- Controls the .dna file lookup and output .xll name (TimeSeriesLab-AddIn64.xll) -->
     <ExcelDnaFileName>TimeSeriesLab</ExcelDnaFileName>
+    <!-- The build stamp (TslBuildStamp below) IS the informational version: stop the
+         SDK appending "+<commit sha>" to it, or it could never equal git describe. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
+
+  <!-- BUILD STAMP: the Exec below (git describe, long form, always, dirty-marked) of
+       the tree being built, baked into AssemblyInformationalVersion. About, =TSL_VERSION() and every Audit
+       sheet read it back (BuildInfo.Stamp); tools\build_pack.ps1 reads it off the built
+       DLL and refuses a pack whose stamp differs from git describe. No git, or not a
+       git checkout: DEV-UNSTAMPED plus a build warning (build_pack refuses those). -->
+  <Target Name="TslBuildStamp" BeforeTargets="GetAssemblyAttributes">
+    <Exec Command="git describe --long --always --dirty" WorkingDirectory="$(MSBuildProjectDirectory)"
+          ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true"
+          StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="TslBuildStamp" />
+      <Output TaskParameter="ExitCode" PropertyName="TslBuildStampExit" />
+    </Exec>
+    <PropertyGroup>
+      <TslBuildStamp Condition="'$(TslBuildStampExit)' != '0' Or '$(TslBuildStamp)' == ''">DEV-UNSTAMPED</TslBuildStamp>
+      <InformationalVersion>$(TslBuildStamp)</InformationalVersion>
+    </PropertyGroup>
+    <Warning Condition="'$(TslBuildStamp)' == 'DEV-UNSTAMPED'"
+             Text="TSL build stamp unavailable (git describe failed); the add-in will report DEV-UNSTAMPED." />
+    <Message Importance="high" Text="TSL build stamp: $(TslBuildStamp)" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="ExcelDna.AddIn" Version="1.7.0" />

@@ -17,13 +17,12 @@ namespace TSL.AddIn.Functions
         [ExcelFunction(
             Name = "TSL_VERSION",
             Category = "Time Series Lab",
-            Description = "Returns the Time Series Lab add-in version string.")]
+            Description = "Returns the build stamp of the loaded Time Series Lab add-in (git describe of the build) - the same text as Help > About > Build.")]
         public static object TSL_VERSION()
         {
             try
             {
-                var version = typeof(AutoFunctions).Assembly.GetName().Version;
-                return $"Time Series Lab v{version}";
+                return BuildInfo.Stamp;
             }
             catch (Exception ex)
             {

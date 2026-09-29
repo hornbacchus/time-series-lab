@@ -1018,8 +1018,6 @@ namespace TSL.AddIn
 
         public void OnAbout(IRibbonControl control)
         {
-            var addinVersion = typeof(Ribbon).Assembly.GetName().Version;
-
             // Read engine version from VERSION.txt (try project dir first, then AppData)
             var engineVersion = "Unknown";
             try
@@ -1098,7 +1096,7 @@ namespace TSL.AddIn
             MessageBox.Show(
                 $"Time Series Lab\n" +
                 $"Created by Matthew T. Hornbach\n\n" +
-                $"Add-in version:    {addinVersion}\n" +
+                $"Build:             {BuildInfo.Stamp}\n" +
                 $"Engine version:    {engineVersion}\n" +
                 $"Engine status:     {engineStatus}\n" +
                 $"Technique library: {techniqueInfo}\n\n" +
