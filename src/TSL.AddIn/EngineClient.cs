@@ -20,6 +20,11 @@ namespace TSL.AddIn
     {
         private Process _engineProcess;
         private readonly string _pipeName;
+        private readonly string _legacyPipeName;
+        private readonly int _excelPid;
+        private readonly long _excelStartUtcTicks;
+        private EngineJob _job;
+        private string _recordPath;
         private CancellationTokenSource _currentRunCts;
         private readonly object _lock = new object();
         private bool _disposed;
@@ -38,13 +43,37 @@ namespace TSL.AddIn
 
         public event Action<ProgressEvent> ProgressReceived;
 
+        /// <summary>
+        /// One engine per Excel instance and per build (A2 Part 1): the pipe name carries
+        /// this Excel's PID, the build token and a fresh nonce, so a second Excel, an
+        /// older build or any other process can never share or pre-create it.
+        /// </summary>
         public EngineClient()
         {
             var sid = WindowsIdentity.GetCurrent().User?.Value ?? "default";
-            _pipeName = $"TSL_ENGINE_PIPE_{sid}";
+            EngineRegistry.GetCurrentProcessIdentity(out _excelPid, out _excelStartUtcTicks);
+            var nonce = Guid.NewGuid().ToString("N").Substring(0, 8);
+            _pipeName = EngineIdentity.BuildPipeName(sid, _excelPid, BuildInfo.Stamp, nonce);
+            _legacyPipeName = EngineIdentity.LegacyPipePrefix + sid;
         }
 
-        private string PidFilePath => Path.Combine(AddIn.AppDataPath, "engine.pid");
+        /// <summary>This Excel's engine, for About: "Running (PID n)" or "Not running".</summary>
+        public string StatusText
+        {
+            get
+            {
+                // No lock: About runs on Excel's thread and must not wait on a start in progress.
+                var engine = _engineProcess;
+                try
+                {
+                    return engine != null && !engine.HasExited ? $"Running (PID {engine.Id})" : "Not running";
+                }
+                catch
+                {
+                    return "Not running";
+                }
+            }
+        }
 
         /// <summary>
         /// THE ONE place the engine interpreter is chosen. Nothing else in the add-in
@@ -77,63 +106,60 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// Kill any engine process left over from a prior session (e.g. Excel
-        /// crashed before AutoClose could fire, or a developer rebuilt the
-        /// engine while Excel was open).
-        ///
-        /// This is critical for development iteration: the Python engine
-        /// caches imported technique modules in-process, so updates to
-        /// pca_analysis.py / etc. are NOT picked up unless the engine
-        /// process restarts. Calling this from AddIn.AutoOpen guarantees
-        /// every Excel session starts with a fresh engine that re-imports
-        /// the latest code on first request.
+        /// The full path of the interpreter this build runs the engine with: the bundled
+        /// runtime when installed, or "python" resolved through Windows' search order in
+        /// a development tree. Null when it cannot be resolved. The orphan sweep kills
+        /// only processes whose image is this path.
         /// </summary>
-        public void KillStaleEngineProcess()
+        internal static string ResolvePythonExeFullPath()
         {
             try
             {
-                if (!File.Exists(PidFilePath)) return;
-
-                var pidStr = File.ReadAllText(PidFilePath).Trim();
-                if (!int.TryParse(pidStr, out var pid))
-                {
-                    SafeDeletePidFile();
-                    return;
-                }
-
-                try
-                {
-                    var proc = Process.GetProcessById(pid);
-                    // Defensive: only kill if it's actually a Python process,
-                    // never a random PID that's been reused by Windows.
-                    if (proc.ProcessName.StartsWith("python", StringComparison.OrdinalIgnoreCase))
-                    {
-                        proc.Kill();
-                        proc.WaitForExit(2000);
-                        Logger.Info($"Killed stale engine process PID={pid} (so the engine reloads updated Python modules).");
-                    }
-                }
-                catch (ArgumentException)
-                {
-                    // PID is not a running process — already gone, nothing to do.
-                }
-                catch (InvalidOperationException)
-                {
-                    // Process exited between the lookup and the Kill call.
-                }
-
-                SafeDeletePidFile();
+                var exe = ResolvePythonExe();
+                return Path.IsPathRooted(exe) ? Path.GetFullPath(exe) : EngineRegistry.SearchExecutable(exe + ".exe");
             }
-            catch (Exception ex)
+            catch (FileNotFoundException)
             {
-                Logger.Info($"Stale engine cleanup skipped: {ex.Message}");
+                return null;
             }
         }
 
-        private void SafeDeletePidFile()
+        /// <summary>
+        /// Clean up engines orphaned by an earlier Excel (one that crashed, or a build
+        /// before A2) on a background thread, so Excel's startup never waits for it:
+        /// WMI can take seconds on managed machines, and this Excel's pipe name is new,
+        /// so nothing depends on the cleanup. Only a proven orphan of this build is
+        /// killed (EngineIdentity.DecideOrphan). Every Excel session still starts with a
+        /// fresh engine - this instance's own - so updated technique modules load.
+        /// </summary>
+        public void StartOrphanSweep()
         {
-            try { if (File.Exists(PidFilePath)) File.Delete(PidFilePath); }
-            catch { /* best-effort */ }
+            // Resolve the layout here, on Excel's thread, before handing off.
+            var expectedExe = ResolvePythonExeFullPath();
+            var expectedWorker = AddInLayout.PathOf("engine", "engine_worker.py");
+            var stateDir = AddIn.AppDataPath;
+            var legacyPipe = _legacyPipeName;
+
+            var sweep = new Thread(() =>
+            {
+                try
+                {
+                    Logger.Info($"[orphan sweep] started (interpreter={expectedExe ?? "(unresolved)"}, " +
+                                $"worker={expectedWorker ?? "(unresolved)"}).");
+                    EngineRegistry.Sweep(stateDir, legacyPipe, expectedExe, expectedWorker,
+                        message => Logger.Info("[orphan sweep] " + message));
+                    Logger.Info("[orphan sweep] finished.");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("[orphan sweep] failed.", ex);
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "TSL orphan engine sweep",
+            };
+            sweep.Start();
         }
 
         /// <summary>
@@ -204,22 +230,92 @@ namespace TSL.AddIn
 
             _engineProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
 
-            // Persist the PID so KillStaleEngineProcess() on a future
-            // AutoOpen can clean up if Excel crashes before AutoClose fires.
-            try
-            {
-                File.WriteAllText(PidFilePath, _engineProcess.Id.ToString());
-            }
-            catch (Exception ex)
-            {
-                Logger.Info($"Could not write engine PID file: {ex.Message}");
-            }
+            // The engine ends when this Excel ends, however it ends.
+            ContainInJob(_engineProcess);
+
+            // Record who this engine is, so a later Excel start can clean it up if
+            // the job object could not hold it (EngineRegistry.Sweep).
+            WriteEngineRecord(_engineProcess, workerScript);
 
             // Give engine a moment to create pipe server
             Thread.Sleep(500);
 
             Logger.Info($"Engine process started (PID={_engineProcess.Id}), pipe={_pipeName}, " +
                         $"interpreter={pythonExe} ({AddInLayout.KindLabel} layout)");
+        }
+
+        /// <summary>
+        /// Place the engine in this Excel's kill-on-close job object (created on first
+        /// use and held for the life of this EngineClient). When Excel exits - normally,
+        /// from Task Manager or by crashing - Windows closes the handle and ends the
+        /// engine. If Windows refuses (e.g. Excel already runs inside a job that forbids
+        /// nesting), the engine still runs and the next start's orphan sweep covers it.
+        /// </summary>
+        private void ContainInJob(Process engine)
+        {
+            try
+            {
+                if (_job == null)
+                {
+                    _job = EngineJob.Create(out var createProblem);
+                    if (_job == null)
+                    {
+                        Logger.Warn($"Engine job object could not be created ({createProblem}); " +
+                                    "the engine will not end automatically with Excel. The next Excel start's orphan sweep covers it.");
+                        return;
+                    }
+                }
+
+                if (_job.TryAssign(engine, out var assignProblem))
+                    Logger.Info($"Engine PID={engine.Id} placed in this Excel's kill-on-close job object.");
+                else
+                    Logger.Warn($"Engine PID={engine.Id} could not be placed in the job object ({assignProblem}); " +
+                                "it will not end automatically with Excel. The next Excel start's orphan sweep covers it.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Engine job object step failed ({ex.GetType().Name}: {ex.Message}).");
+            }
+        }
+
+        /// <summary>
+        /// Write this Excel's engine record (%LOCALAPPDATA%\TimeSeriesLab\engines\&lt;ExcelPID&gt;-&lt;ticks&gt;.json).
+        /// One file per Excel instance, overwritten when the engine restarts.
+        /// </summary>
+        private void WriteEngineRecord(Process engine, string workerScript)
+        {
+            try
+            {
+                long? engineStart = null;
+                string imagePath = null;
+                using (var h = NativeMethods.OpenProcess(NativeMethods.PROCESS_QUERY_LIMITED_INFORMATION, false, engine.Id))
+                {
+                    engineStart = NativeMethods.TryGetStartUtcTicks(h);
+                    imagePath = NativeMethods.TryGetImagePath(h);
+                }
+
+                var record = new EngineRecord
+                {
+                    ExcelPid = _excelPid,
+                    ExcelStartUtcTicks = _excelStartUtcTicks,
+                    EnginePid = engine.Id,
+                    EngineStartUtcTicks = engineStart ?? 0,
+                    ExePath = imagePath,
+                    WorkerPath = Path.GetFullPath(workerScript),
+                    PipeName = _pipeName,
+                    Stamp = BuildInfo.Stamp,
+                    LayoutRoot = AddInLayout.Root,
+                };
+
+                _recordPath = Path.Combine(AddIn.AppDataPath, EngineRegistry.RecordsFolder,
+                    EngineRegistry.RecordFileName(_excelPid, _excelStartUtcTicks));
+                EngineRegistry.WriteRecord(_recordPath, record);
+                Logger.Info($"Engine record written: {_recordPath} (engine image {imagePath ?? "(unreadable)"}).");
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Could not write the engine record ({ex.GetType().Name}: {ex.Message}).");
+            }
         }
 
         /// <summary>
@@ -483,9 +579,11 @@ namespace TSL.AddIn
         public void Shutdown()
         {
             CancelCurrentRun();
-            // Clean up PID file on graceful shutdown so the next AutoOpen
-            // doesn't try to kill a PID that's already been recycled.
-            SafeDeletePidFile();
+            // Closing the job ends anything still in it; then remove this Excel's own
+            // record only - other Excel instances' records are theirs.
+            try { _job?.Dispose(); } catch { /* best-effort */ }
+            _job = null;
+            EngineRegistry.DeleteRecord(_recordPath);
         }
 
         public void Dispose()

@@ -39,13 +39,11 @@ namespace TSL.AddIn
                 // Initialize engine client (will start engine process on first request)
                 _engineClient = new EngineClient();
 
-                // Kill any orphan engine process from a prior session. This
-                // matters because the Python engine caches imported modules
-                // in-process; without this, an updated technique (e.g. a fix
-                // to pca_analysis.py) wouldn't take effect until the user
-                // killed Python by hand. With this call, every Excel restart
-                // gives them a clean engine that re-imports the latest code.
-                _engineClient.KillStaleEngineProcess();
+                // Clean up engines orphaned by an earlier Excel, on a background
+                // thread so startup never waits. Each Excel runs its own engine
+                // (per-instance pipe, kill-on-close job), so every Excel session
+                // still gets a fresh engine that loads the latest technique code.
+                _engineClient.StartOrphanSweep();
 
                 // Register IntelliSense if available
                 try

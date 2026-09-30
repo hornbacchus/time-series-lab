@@ -908,16 +908,8 @@ namespace TSL.AddIn
                 pythonVersion = "not detected (" + ex.Message + ")";
             }
 
-            // Check if engine pipe exists (engine is running)
-            var engineStatus = "Not running";
-            try
-            {
-                var sid = System.Security.Principal.WindowsIdentity.GetCurrent().User?.Value ?? "default";
-                var pipeName = $"TSL_ENGINE_PIPE_{sid}";
-                if (File.Exists($@"\\.\pipe\{pipeName}"))
-                    engineStatus = "Running";
-            }
-            catch { }
+            // This Excel's own engine (A2: one engine per Excel instance).
+            var engineStatus = AddIn.Engine?.StatusText ?? "Not running";
 
             MessageBox.Show(
                 $"Time Series Lab\n" +

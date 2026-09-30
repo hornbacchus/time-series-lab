@@ -56,6 +56,8 @@
 
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
+    <!-- WMI: reads a candidate orphan engine's command line (EngineRegistry). -->
+    <Reference Include="System.Management" />
   </ItemGroup>
 
 </Project>
