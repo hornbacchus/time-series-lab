@@ -56,6 +56,10 @@ namespace TSL.AddIn
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern bool CloseHandle(IntPtr handle);
 
+        // The process that created the server end of a connected pipe (Vista and later).
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool GetNamedPipeServerProcessId(SafePipeHandle pipe, out uint serverProcessId);
+
         // Resolves a bare executable name the way Windows' process search order does
         // (application folder, system folders, PATH). Returns 0 when not found.
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SearchPathW")]

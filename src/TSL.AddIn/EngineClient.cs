@@ -18,8 +18,35 @@ namespace TSL.AddIn
     /// </summary>
     public class EngineClient : IDisposable
     {
-        private Process _engineProcess;
-        private readonly string _pipeName;
+        /// <summary>
+        /// One started engine: its process, the pipe name made for this start alone, and
+        /// the engine_version it proved at the identity handshake (null until then).
+        /// </summary>
+        private sealed class EngineSession
+        {
+            public EngineSession(Process process, string pipeName)
+            {
+                Process = process;
+                Pid = process.Id;
+                PipeName = pipeName;
+            }
+
+            public Process Process { get; }
+            public int Pid { get; }
+            public string PipeName { get; }
+            public string Version { get; set; }
+
+            public bool IsAlive
+            {
+                get
+                {
+                    try { return !Process.HasExited; }
+                    catch { return false; }
+                }
+            }
+        }
+
+        private readonly string _sid;
         private readonly string _legacyPipeName;
         private readonly int _excelPid;
         private readonly long _excelStartUtcTicks;
@@ -28,6 +55,17 @@ namespace TSL.AddIn
         private CancellationTokenSource _currentRunCts;
         private readonly object _lock = new object();
         private bool _disposed;
+
+        // The engine this client started most recently (starting or running); cleared
+        // when it is stopped. Read without the lock (About, Cancel).
+        private EngineSession _session;
+
+        // The same engine once it has passed the identity handshake. Runs connect only
+        // to this one, and check every connect and every response against it.
+        private EngineSession _verified;
+
+        // Incremented by every cancel. A start that sees it change was cancelled.
+        private int _cancelGeneration;
 
         // Inter-message (heartbeat) timeout for the response read. It is RESET by
         // EVERY message the engine sends (each progress event proves liveness),
@@ -41,21 +79,33 @@ namespace TSL.AddIn
         // cause, this watchdog bounds any future handoff stall.
         private const int HeartbeatTimeoutMs = 300_000; // 5 minutes
 
+        // How long a run's connect waits for the (already verified) engine's pipe to
+        // accept (as before A2). The wait is polled and retried while the single
+        // instance is busy or re-arming between requests (EngineHandshake.Connect).
+        private const int ConnectTimeoutMs = 10_000;
+
+        // How long an engine START may take to open its pipe (interpreter start-up and
+        // imports). Generous, because a cold start competes with Excel's own
+        // recalculation; the wait still ends at once if the engine exits or the start
+        // is cancelled. An engine that cannot open its pipe in this time is stopped.
+        private const int StartConnectTimeoutMs = 60_000;
+
         public event Action<ProgressEvent> ProgressReceived;
 
         /// <summary>
-        /// One engine per Excel instance and per build (A2 Part 1): the pipe name carries
-        /// this Excel's PID, the build token and a fresh nonce, so a second Excel, an
-        /// older build or any other process can never share or pre-create it.
+        /// One engine per Excel instance and per build (A2 Part 1). Each engine start gets
+        /// its own pipe name - this Excel's PID, the build token and a fresh nonce - so a
+        /// second Excel, an older build, any other process, or a run still waiting on a
+        /// previous engine of this Excel can never reach it.
         /// </summary>
         public EngineClient()
         {
-            var sid = WindowsIdentity.GetCurrent().User?.Value ?? "default";
+            _sid = WindowsIdentity.GetCurrent().User?.Value ?? "default";
             EngineRegistry.GetCurrentProcessIdentity(out _excelPid, out _excelStartUtcTicks);
-            var nonce = Guid.NewGuid().ToString("N").Substring(0, 8);
-            _pipeName = EngineIdentity.BuildPipeName(sid, _excelPid, BuildInfo.Stamp, nonce);
-            _legacyPipeName = EngineIdentity.LegacyPipePrefix + sid;
+            _legacyPipeName = EngineIdentity.LegacyPipePrefix + _sid;
         }
+
+        private static string LogsFolder => Path.Combine(AddIn.AppDataPath, "logs");
 
         /// <summary>This Excel's engine, for About: "Running (PID n)" or "Not running".</summary>
         public string StatusText
@@ -63,15 +113,8 @@ namespace TSL.AddIn
             get
             {
                 // No lock: About runs on Excel's thread and must not wait on a start in progress.
-                var engine = _engineProcess;
-                try
-                {
-                    return engine != null && !engine.HasExited ? $"Running (PID {engine.Id})" : "Not running";
-                }
-                catch
-                {
-                    return "Not running";
-                }
+                var session = Volatile.Read(ref _session);
+                return session != null && session.IsAlive ? $"Running (PID {session.Pid})" : "Not running";
             }
         }
 
@@ -127,7 +170,7 @@ namespace TSL.AddIn
         /// <summary>
         /// Clean up engines orphaned by an earlier Excel (one that crashed, or a build
         /// before A2) on a background thread, so Excel's startup never waits for it:
-        /// WMI can take seconds on managed machines, and this Excel's pipe name is new,
+        /// WMI can take seconds on managed machines, and this Excel's pipe names are new,
         /// so nothing depends on the cleanup. Only a proven orphan of this build is
         /// killed (EngineIdentity.DecideOrphan). Every Excel session still starts with a
         /// fresh engine - this instance's own - so updated technique modules load.
@@ -163,13 +206,15 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// Ensures the engine process is running. Starts it if not.
+        /// Ensures a verified engine is running. Starts one (and runs its identity
+        /// handshake) if not. Never called on Excel's thread.
         /// </summary>
         public void EnsureRunning()
         {
             lock (_lock)
             {
-                if (_engineProcess != null && !_engineProcess.HasExited)
+                var verified = Volatile.Read(ref _verified);
+                if (verified != null && verified.IsAlive)
                     return;
 
                 StartEngine();
@@ -178,6 +223,9 @@ namespace TSL.AddIn
 
         private void StartEngine()
         {
+            var generation = Volatile.Read(ref _cancelGeneration);
+            Volatile.Write(ref _verified, null);
+
             var pythonExe = ResolvePythonExe();
 
             // ONE location, from the add-in's layout (AddInLayout): <root>\engine\engine_worker.py.
@@ -188,10 +236,14 @@ namespace TSL.AddIn
                     AddInLayout.MissingMessage("engine worker script (engine_worker.py)", workerTried));
             }
 
+            // A pipe name for this start alone (see the constructor).
+            var pipeName = EngineIdentity.BuildPipeName(_sid, _excelPid, BuildInfo.Stamp,
+                Guid.NewGuid().ToString("N").Substring(0, 8));
+
             var psi = new ProcessStartInfo
             {
                 FileName = pythonExe,
-                Arguments = $"\"{workerScript}\" --pipe \"{_pipeName}\"",
+                Arguments = $"\"{workerScript}\" --pipe \"{pipeName}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
@@ -201,47 +253,141 @@ namespace TSL.AddIn
 
             // Set environment to prevent network access
             psi.EnvironmentVariables["TSL_NO_NETWORK"] = "1";
-            psi.EnvironmentVariables["TSL_PIPE_NAME"] = _pipeName;
+            psi.EnvironmentVariables["TSL_PIPE_NAME"] = pipeName;
 
-            _engineProcess = Process.Start(psi);
-            if (_engineProcess == null)
+            var process = Process.Start(psi);
+            if (process == null)
                 throw new InvalidOperationException("Failed to start engine process.");
+            var session = new EngineSession(process, pipeName);
+            Volatile.Write(ref _session, session);
 
-            // Drain the engine's stdout/stderr continuously. Two reasons:
-            //  1. CORRECTNESS: both streams are redirected (above); if we never
-            //     read them, the OS pipe buffer (~4 KB) fills and the engine
-            //     BLOCKS on its next write. A chatty run (e.g. BVAR's per-iter
-            //     MCMC logging on stderr) can therefore deadlock mid/late-run —
-            //     a second undrained-pipe deadlock distinct from the response
-            //     pipe. Draining removes it.
-            //  2. DIAGNOSTICS: the engine's own log lines now land in the TSL log
-            //     file, so a stalled run reveals the engine's last action (did it
-            //     reach "Run … completed"? did it start returning the response?).
-            _engineProcess.OutputDataReceived += (s, e) =>
+            try
             {
-                if (e.Data != null) Logger.Info("[engine] " + e.Data);
-            };
-            _engineProcess.ErrorDataReceived += (s, e) =>
+                // Drain the engine's stdout/stderr continuously. Two reasons:
+                //  1. CORRECTNESS: both streams are redirected (above); if we never
+                //     read them, the OS pipe buffer (~4 KB) fills and the engine
+                //     BLOCKS on its next write. A chatty run (e.g. BVAR's per-iter
+                //     MCMC logging on stderr) can therefore deadlock mid/late-run —
+                //     a second undrained-pipe deadlock distinct from the response
+                //     pipe. Draining removes it.
+                //  2. DIAGNOSTICS: the engine's own log lines now land in the TSL log
+                //     file, so a stalled run reveals the engine's last action (did it
+                //     reach "Run … completed"? did it start returning the response?).
+                // Tagged with the engine's PID: several Excel instances (each with its
+                // own engine) can write to the same daily log.
+                var tag = $"[engine {session.Pid}] ";
+                process.OutputDataReceived += (s, e) =>
+                {
+                    if (e.Data != null) Logger.Info(tag + e.Data);
+                };
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (e.Data != null) Logger.Info(tag + e.Data);
+                };
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
+            catch (InvalidOperationException ex)
             {
-                if (e.Data != null) Logger.Info("[engine] " + e.Data);
-            };
-            _engineProcess.BeginOutputReadLine();
-            _engineProcess.BeginErrorReadLine();
-
-            _engineProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                // The process ended before these steps: a cancel, or a crash at launch.
+                throw FailStart(session, generation, $"the engine process ended at launch ({ex.Message})",
+                    startFailure: true, reportedVersion: null);
+            }
 
             // The engine ends when this Excel ends, however it ends.
-            ContainInJob(_engineProcess);
+            ContainInJob(process);
 
             // Record who this engine is, so a later Excel start can clean it up if
             // the job object could not hold it (EngineRegistry.Sweep).
-            WriteEngineRecord(_engineProcess, workerScript);
+            WriteEngineRecord(session, workerScript);
 
-            // Give engine a moment to create pipe server
-            Thread.Sleep(500);
-
-            Logger.Info($"Engine process started (PID={_engineProcess.Id}), pipe={_pipeName}, " +
+            Logger.Info($"Engine process started (PID={session.Pid}), pipe={pipeName}, " +
                         $"interpreter={pythonExe} ({AddInLayout.KindLabel} layout)");
+
+            // No fixed wait for the pipe: the handshake's connect waits for it.
+            VerifyEngineIdentity(session, generation);
+        }
+
+        /// <summary>
+        /// THE IDENTITY HANDSHAKE (A2 Part 1(c)), run once per engine start, before any
+        /// request. (1) The pipe must be served by the process this Excel just started
+        /// (GetNamedPipeServerProcessId); nothing is sent to any other process. (2) The
+        /// engine's engine_version must be the one this add-in expects: its build stamp
+        /// when installed, the repository's engine\VERSION.txt in a development tree.
+        /// A reply without an engine_version fails closed. On any failure the engine is
+        /// killed and the run is refused with the house mismatch message.
+        ///
+        /// The probe relies on the engine's existing reply to a request with no
+        /// technique_id: engine_worker.handle_request answers it with a failure frame
+        /// that carries engine_versions ("No technique_id provided in the request.").
+        /// An explicit engine "hello" verb is banked for the next time engine_worker.py
+        /// is touched for another reason (A2 ratification, Q1). See EngineHandshake.
+        /// </summary>
+        private void VerifyEngineIdentity(EngineSession session, int generation)
+        {
+            var probe = EngineHandshake.Probe(session.PipeName, session.Pid, StartConnectTimeoutMs, HeartbeatTimeoutMs,
+                () => session.IsAlive && Volatile.Read(ref _cancelGeneration) == generation);
+
+            string expected = null;
+            string expectedProblem = null;
+            try
+            {
+                string devVersionText = null;
+                if (AddInLayout.Kind == LayoutKind.Development)
+                {
+                    var versionFile = AddInLayout.FindFile(out var tried, "engine", "VERSION.txt");
+                    if (versionFile != null) devVersionText = File.ReadAllText(versionFile);
+                    else expectedProblem = $"the development engine\\VERSION.txt was not found ({tried})";
+                }
+                expected = EngineIdentity.ExpectedEngineVersion(AddInLayout.Kind, BuildInfo.Stamp, devVersionText);
+            }
+            catch (Exception ex)
+            {
+                expectedProblem = $"the expected engine version could not be read ({ex.Message})";
+            }
+
+            var problem = probe.Problem;
+            if (problem == null && expected == null)
+                problem = expectedProblem ?? $"no expected engine version for the {AddInLayout.KindLabel} layout";
+            if (problem == null && !string.Equals(probe.EngineVersion, expected, StringComparison.Ordinal))
+                problem = $"the engine reports engine_version '{probe.EngineVersion}', but this add-in expects '{expected}'";
+
+            if (problem != null)
+                throw FailStart(session, generation, problem, probe.NeverConnected || probe.TimedOut, probe.EngineVersion);
+
+            // Start-up ran at normal priority so a cold start is not starved by Excel's
+            // own recalculation; the engine's analysis work runs below normal, as before.
+            try { session.Process.PriorityClass = ProcessPriorityClass.BelowNormal; }
+            catch (Exception ex) { Logger.Info($"Could not lower engine PID={session.Pid} priority: {ex.Message}"); }
+
+            session.Version = probe.EngineVersion;
+            Volatile.Write(ref _verified, session);
+            Logger.Info($"Engine identity verified: pipe {session.PipeName} is served by PID={session.Pid}, " +
+                        $"engine_version={probe.EngineVersion} (expected {expected}).");
+        }
+
+        /// <summary>
+        /// A start that did not produce a verified engine: stop that engine and return
+        /// the exception to throw. A cancel during the start is a cancel. An engine that exited,
+        /// never opened its pipe or never answered is a start failure. Only an engine
+        /// that answered wrongly (or a pipe served by another process) is an identity
+        /// mismatch.
+        /// </summary>
+        private Exception FailStart(EngineSession session, int generation, string problem, bool startFailure,
+            string reportedVersion)
+        {
+            var stopped = !session.IsAlive;
+            Logger.Error($"Engine start or identity check FAILED for PID={session.Pid} on pipe {session.PipeName}: {problem}" +
+                         (stopped ? " (the engine process has exited)" : "") +
+                         ". The engine is being stopped and the run refused.");
+            KillSession(session, "start or identity check failed");
+
+            if (Volatile.Read(ref _cancelGeneration) != generation)
+                return new OperationCanceledException("The run was canceled while the engine was starting.");
+            if (stopped || startFailure)
+                return new EngineStartException(EngineIdentity.EngineStartMessage(stopped, LogsFolder));
+            return new EngineIdentityException(
+                EngineIdentity.MismatchMessage(BuildInfo.Stamp, reportedVersion ?? "(not reported)"));
         }
 
         /// <summary>
@@ -282,13 +428,13 @@ namespace TSL.AddIn
         /// Write this Excel's engine record (%LOCALAPPDATA%\TimeSeriesLab\engines\&lt;ExcelPID&gt;-&lt;ticks&gt;.json).
         /// One file per Excel instance, overwritten when the engine restarts.
         /// </summary>
-        private void WriteEngineRecord(Process engine, string workerScript)
+        private void WriteEngineRecord(EngineSession session, string workerScript)
         {
             try
             {
                 long? engineStart = null;
                 string imagePath = null;
-                using (var h = NativeMethods.OpenProcess(NativeMethods.PROCESS_QUERY_LIMITED_INFORMATION, false, engine.Id))
+                using (var h = NativeMethods.OpenProcess(NativeMethods.PROCESS_QUERY_LIMITED_INFORMATION, false, session.Pid))
                 {
                     engineStart = NativeMethods.TryGetStartUtcTicks(h);
                     imagePath = NativeMethods.TryGetImagePath(h);
@@ -298,11 +444,11 @@ namespace TSL.AddIn
                 {
                     ExcelPid = _excelPid,
                     ExcelStartUtcTicks = _excelStartUtcTicks,
-                    EnginePid = engine.Id,
+                    EnginePid = session.Pid,
                     EngineStartUtcTicks = engineStart ?? 0,
                     ExePath = imagePath,
                     WorkerPath = Path.GetFullPath(workerScript),
-                    PipeName = _pipeName,
+                    PipeName = session.PipeName,
                     Stamp = BuildInfo.Stamp,
                     LayoutRoot = AddInLayout.Root,
                 };
@@ -331,9 +477,11 @@ namespace TSL.AddIn
             var requestJson = JsonConvert.SerializeObject(request);
 
             string responseJson;
+            bool fromEngine;
+            EngineSession served;
             try
             {
-                responseJson = await SendAndReceiveAsync(requestJson, _currentRunCts.Token);
+                (responseJson, fromEngine, served) = await SendAndReceiveAsync(requestJson, _currentRunCts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -370,14 +518,81 @@ namespace TSL.AddIn
                     ErrorMessage = "Invalid response format from engine.",
                 };
             }
+
+            // Every final response the engine sends must carry the engine_version that
+            // engine proved at its handshake; a missing or different one is refused,
+            // never written. Checked against the engine that served THIS request.
+            if (fromEngine)
+            {
+                var reported = result.EngineVersions?.EngineVersion?.Trim();
+                var verified = served?.Version;
+                if (string.IsNullOrEmpty(reported) || !string.Equals(reported, verified, StringComparison.Ordinal))
+                {
+                    Logger.Error($"Run {request.RunId} refused: its response reports engine_version " +
+                                 $"'{reported ?? "(none)"}', but engine PID={served?.Pid} proved '{verified ?? "(none)"}'.");
+                    KillSession(served, "engine_version differs from the handshake");
+                    return new RunResponse
+                    {
+                        RunId = request.RunId,
+                        Status = "failure",
+                        ErrorMessage = EngineIdentity.MismatchMessage(BuildInfo.Stamp,
+                            string.IsNullOrEmpty(reported) ? "(not reported)" : reported),
+                    };
+                }
+            }
             return result;
         }
 
-        private async Task<string> SendAndReceiveAsync(string requestJson, CancellationToken ct)
+        /// <summary>
+        /// One request over the pipe of the verified engine. Returns the final response
+        /// JSON, whether it came from the engine (false for the add-in's own stall and
+        /// no-response failures), and the engine that served it.
+        /// </summary>
+        private async Task<(string Json, bool FromEngine, EngineSession Served)> SendAndReceiveAsync(
+            string requestJson, CancellationToken ct)
         {
-            using (var pipe = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous))
+            // Connect to the VERIFIED engine's own pipe. If that engine stopped or was
+            // replaced since this run's EnsureRunning (a cancel, a crash), wait for the
+            // new one instead of reaching an engine that has not passed its handshake.
+            NamedPipeClientStream connected = null;
+            EngineSession session = null;
+            for (var attempt = 0; connected == null; attempt++)
             {
-                await pipe.ConnectAsync(10000, ct);
+                ct.ThrowIfCancellationRequested();
+                session = Volatile.Read(ref _verified);
+                if (session == null || !session.IsAlive)
+                {
+                    if (attempt >= 2)
+                        throw new EngineStartException(EngineIdentity.EngineStartMessage(true, LogsFolder));
+                    EnsureRunning();
+                    continue;
+                }
+
+                var target = session;
+                connected = EngineHandshake.Connect(target.PipeName, ConnectTimeoutMs,
+                    () => ReferenceEquals(Volatile.Read(ref _verified), target) && target.IsAlive,
+                    ct, out var outcome);
+                if (connected != null)
+                    break;
+
+                ct.ThrowIfCancellationRequested();
+                if (outcome == ConnectOutcome.StoppedWaiting && attempt < 2)
+                    continue; // the engine was replaced or stopped: go again with the new one
+                if (outcome == ConnectOutcome.Busy)
+                    throw new EngineBusyException(EngineIdentity.EngineBusyMessage(ConnectTimeoutMs / 1000));
+                throw new EngineStartException(EngineIdentity.EngineStartMessage(!target.IsAlive, LogsFolder));
+            }
+
+            using (var pipe = connected)
+            {
+                // Every connect: the pipe must be served by the engine that passed the
+                // handshake. Checked before a byte of the request is written.
+                if (!EngineHandshake.TryGetServerPid(pipe, out var serverPid) || serverPid != (uint)session.Pid)
+                {
+                    Logger.Error($"Run refused before sending: pipe {session.PipeName} is served by process {serverPid}, " +
+                                 $"not the verified engine (PID {session.Pid}).");
+                    throw new EngineIdentityException(EngineIdentity.MismatchMessage(BuildInfo.Stamp, "(not reported)"));
+                }
 
                 // Write request
                 var requestBytes = Encoding.UTF8.GetBytes(requestJson);
@@ -398,7 +613,7 @@ namespace TSL.AddIn
                 while (!ct.IsCancellationRequested)
                 {
                     msgIndex++;
-                    Logger.Info($"[readloop] frame #{msgIndex}: awaiting length prefix...");
+                    Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: awaiting length prefix...");
                     byte[] msgBuf = null;
                     try
                     {
@@ -416,20 +631,20 @@ namespace TSL.AddIn
                             var bytesRead = await ReadFullAsync(pipe, msgLenBuf, 0, 4, hbToken);
                             if (bytesRead < 4)
                             {
-                                Logger.Info($"[readloop] frame #{msgIndex}: EOF/short length read ({bytesRead}/4) — engine closed pipe.");
+                                Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: EOF/short length read ({bytesRead}/4) — engine closed pipe.");
                                 break;
                             }
 
                             var msgLen = BitConverter.ToInt32(msgLenBuf, 0);
-                            Logger.Info($"[readloop] frame #{msgIndex}: length prefix = {msgLen} bytes; reading body...");
+                            Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: length prefix = {msgLen} bytes; reading body...");
                             msgBuf = new byte[msgLen];
                             bytesRead = await ReadFullAsync(pipe, msgBuf, 0, msgLen, hbToken);
                             if (bytesRead < msgLen)
                             {
-                                Logger.Info($"[readloop] frame #{msgIndex}: short body read ({bytesRead}/{msgLen}) — engine closed pipe mid-frame.");
+                                Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: short body read ({bytesRead}/{msgLen}) — engine closed pipe mid-frame.");
                                 break;
                             }
-                            Logger.Info($"[readloop] frame #{msgIndex}: body read {bytesRead} bytes.");
+                            Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: body read {bytesRead} bytes.");
                         }
                     }
                     catch (OperationCanceledException) when (!ct.IsCancellationRequested)
@@ -442,8 +657,8 @@ namespace TSL.AddIn
                         Logger.Error(
                             $"Engine response stalled: no message for {HeartbeatTimeoutMs / 1000}s. " +
                             "Killing the engine so a wedged process is not reused.");
-                        KillEngineProcess("response heartbeat timeout");
-                        return BuildStallFailureJson();
+                        KillSession(session, "response heartbeat timeout");
+                        return (BuildStallFailureJson(), false, session);
                     }
 
                     var msg = Encoding.UTF8.GetString(msgBuf);
@@ -473,9 +688,9 @@ namespace TSL.AddIn
                         try
                         {
                             var evt = parsed.ToObject<ProgressEvent>();
-                            Logger.Info($"[readloop] frame #{msgIndex}: progress \"{evt.Stage}\" {evt.Pct}% — dispatching to UI.");
+                            Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: progress \"{evt.Stage}\" {evt.Pct}% — dispatching to UI.");
                             ProgressReceived?.Invoke(evt);
-                            Logger.Info($"[readloop] frame #{msgIndex}: progress dispatched; looping for next frame.");
+                            Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: progress dispatched; looping for next frame.");
                         }
                         catch (Exception ex)
                         {
@@ -485,13 +700,15 @@ namespace TSL.AddIn
                     else
                     {
                         // Final RunResponse frame
-                        Logger.Info($"[readloop] frame #{msgIndex}: FINAL response received ({msgBuf.Length} bytes). Read loop complete.");
+                        Logger.Info($"[readloop {session.Pid}] frame #{msgIndex}: FINAL response received ({msgBuf.Length} bytes). Read loop complete.");
                         finalResponse = msg;
                         break;
                     }
                 }
 
-                return finalResponse ?? "{\"status\":\"failure\",\"error_message\":\"No response from engine.\"}";
+                return finalResponse != null
+                    ? (finalResponse, true, session)
+                    : ("{\"status\":\"failure\",\"error_message\":\"No response from engine.\"}", false, session);
             }
         }
 
@@ -509,55 +726,42 @@ namespace TSL.AddIn
 
         /// <summary>
         /// Hard cancel: terminates the engine process immediately.
+        /// Never takes the lock: this runs on Excel's thread, and an engine start holds
+        /// the lock through its identity handshake (seconds while the engine warms up).
+        /// Killing the engine ends that handshake's wait; the start then sees the cancel
+        /// count change and reports a cancel. A start that has not yet published its
+        /// engine checks the count after Process.Start and stops its own engine.
         /// </summary>
         public void CancelCurrentRun()
         {
             _currentRunCts?.Cancel();
-
-            lock (_lock)
-            {
-                if (_engineProcess != null && !_engineProcess.HasExited)
-                {
-                    try
-                    {
-                        _engineProcess.Kill();
-                        Logger.Info("Engine process killed for cancel.");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error("Failed to kill engine process.", ex);
-                    }
-                }
-                _engineProcess = null;
-            }
+            Interlocked.Increment(ref _cancelGeneration);
+            KillSession(Volatile.Read(ref _session), "cancel");
         }
 
         /// <summary>
-        /// Kill the engine process WITHOUT cancelling the current run token
-        /// (unlike <see cref="CancelCurrentRun"/>, which is a user-initiated
-        /// cancel). Used by the response heartbeat watchdog when the engine has
-        /// gone silent: clearing <c>_engineProcess</c> makes the next
-        /// <see cref="EnsureRunning"/> relaunch a fresh engine rather than reuse
-        /// the wedged one.
+        /// Stop one engine and forget it - only it, never an engine started since
+        /// (compare-and-clear, no lock). Used by cancel, the response heartbeat watchdog
+        /// and the identity checks; the next EnsureRunning then starts a fresh engine
+        /// with a fresh pipe and handshake.
         /// </summary>
-        private void KillEngineProcess(string reason)
+        private void KillSession(EngineSession session, string reason)
         {
-            lock (_lock)
+            if (session == null) return;
+            try
             {
-                if (_engineProcess != null && !_engineProcess.HasExited)
+                if (session.IsAlive)
                 {
-                    try
-                    {
-                        _engineProcess.Kill();
-                        Logger.Info($"Engine process killed ({reason}).");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error($"Failed to kill engine process ({reason}).", ex);
-                    }
+                    session.Process.Kill();
+                    Logger.Info($"Engine process PID={session.Pid} killed ({reason}).");
                 }
-                _engineProcess = null;
             }
+            catch (Exception ex)
+            {
+                Logger.Error($"Failed to kill engine process PID={session.Pid} ({reason}).", ex);
+            }
+            Interlocked.CompareExchange(ref _verified, null, session);
+            Interlocked.CompareExchange(ref _session, null, session);
         }
 
         /// <summary>

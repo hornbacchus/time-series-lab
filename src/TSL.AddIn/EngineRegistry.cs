@@ -26,20 +26,44 @@ namespace TSL.AddIn
 
         // ── Records ──────────────────────────────────────────────────────
 
-        /// <summary>Write a record through a temporary file, so a reader never sees half of one.</summary>
+        /// <summary>
+        /// Write a record through a temporary file, so a reader never sees half of one.
+        /// Retried briefly: another Excel's sweep may be reading the old record.
+        /// </summary>
         public static void WriteRecord(string path, EngineRecord record)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             var temp = path + ".tmp";
             File.WriteAllText(temp, JsonConvert.SerializeObject(record, Formatting.Indented));
-            if (File.Exists(path))
-                File.Replace(temp, path, null);
-            else
-                File.Move(temp, path);
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    if (File.Exists(path))
+                        File.Replace(temp, path, null);
+                    else
+                        File.Move(temp, path);
+                    return;
+                }
+                catch (IOException) when (attempt < 5)
+                {
+                    System.Threading.Thread.Sleep(50);
+                }
+            }
         }
 
-        public static EngineRecord ReadRecord(string path) =>
-            JsonConvert.DeserializeObject<EngineRecord>(File.ReadAllText(path));
+        /// <summary>
+        /// Read a record without blocking its owner's replace (share read, write and
+        /// delete). An IOException means it could not be read now; a JsonException means
+        /// the content is unusable.
+        /// </summary>
+        public static EngineRecord ReadRecord(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read,
+                       FileShare.ReadWrite | FileShare.Delete))
+            using (var reader = new StreamReader(stream))
+                return JsonConvert.DeserializeObject<EngineRecord>(reader.ReadToEnd());
+        }
 
         public static void DeleteRecord(string path)
         {
@@ -153,6 +177,19 @@ namespace TSL.AddIn
             return length > 0 && length < buffer.Capacity ? buffer.ToString(0, length) : null;
         }
 
+        /// <summary>True when an Excel process other than this one is running.</summary>
+        private static bool AnotherExcelRunning()
+        {
+            var me = Process.GetCurrentProcess().Id;
+            var found = false;
+            foreach (var excel in Process.GetProcessesByName("EXCEL"))
+            {
+                if (excel.Id != me) found = true;
+                excel.Dispose();
+            }
+            return found;
+        }
+
         private static bool TryKill(SafeProcessHandle handle, out string problem)
         {
             problem = null;
@@ -212,10 +249,16 @@ namespace TSL.AddIn
             {
                 record = ReadRecord(file);
             }
+            catch (JsonException ex)
+            {
+                log($"{name}: content unusable ({ex.Message}); deleted, nothing killed.");
+                DeleteRecord(file);
+                return;
+            }
             catch (Exception ex)
             {
-                log($"{name}: unreadable ({ex.Message}); deleted, nothing killed.");
-                DeleteRecord(file);
+                // Not readable right now (e.g. its owner is replacing it): leave it alone.
+                log($"{name}: could not be read now ({ex.GetType().Name}: {ex.Message}); kept, nothing killed.");
                 return;
             }
             if (record == null || record.EnginePid <= 0)
@@ -274,6 +317,15 @@ namespace TSL.AddIn
             {
                 log($"engine.pid: unreadable ('{text}'); deleted, nothing killed.");
                 DeleteRecord(file);
+                return;
+            }
+
+            // engine.pid names no owner. While another Excel runs it may be a pre-A2
+            // Excel still using that engine, so leave it (and the file) for a later start.
+            if (AnotherExcelRunning())
+            {
+                log($"engine.pid: PID {pid} NOT checked - another Excel is running and engine.pid cannot say " +
+                    "which Excel owns its engine; kept for a later start.");
                 return;
             }
 

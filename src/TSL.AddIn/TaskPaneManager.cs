@@ -284,7 +284,10 @@ namespace TSL.AddIn
                     Logger.Error("Task pane run-with-params failed.", ex);
                     _hostControl?.Invoke((System.Action)(() =>
                     {
-                        runVm.FailRun($"Run failed: {ex.Message}");
+                        // A cancel while the engine was starting: the Cancel click already reset the view.
+                        if (ex is OperationCanceledException) return;
+                        // Engine refusals (identity, start) are already complete house messages.
+                        runVm.FailRun(ex is EngineRefusalException ? ex.Message : $"Run failed: {ex.Message}");
                     }));
                 }
                 finally
@@ -1155,7 +1158,10 @@ namespace TSL.AddIn
                     Logger.Error("Task pane run failed.", ex);
                     _hostControl?.Invoke((System.Action)(() =>
                     {
-                        runVm.FailRun($"Run failed: {ex.Message}");
+                        // A cancel while the engine was starting: the Cancel click already reset the view.
+                        if (ex is OperationCanceledException) return;
+                        // Engine refusals (identity, start) are already complete house messages.
+                        runVm.FailRun(ex is EngineRefusalException ? ex.Message : $"Run failed: {ex.Message}");
                     }));
                 }
             });

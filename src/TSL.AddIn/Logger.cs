@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Security.AccessControl;
+using System.Text;
+using System.Threading;
 
 namespace TSL.AddIn
 {
@@ -9,6 +12,10 @@ namespace TSL.AddIn
     public static class Logger
     {
         private static readonly object _lock = new object();
+
+        // This Excel's PID on every line: each Excel instance runs its own engine (A2),
+        // and all of them write to the same daily file.
+        private static readonly int _excelPid = System.Diagnostics.Process.GetCurrentProcess().Id;
 
         private static string LogFilePath
         {
@@ -32,16 +39,31 @@ namespace TSL.AddIn
 
         private static void Log(string level, string message)
         {
-            var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{level}] {message}";
+            var bytes = Encoding.UTF8.GetBytes(
+                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{level}] [Excel {_excelPid}] {message}{Environment.NewLine}");
             lock (_lock)
             {
-                try
+                for (var attempt = 1; ; attempt++)
                 {
-                    File.AppendAllText(LogFilePath, line + Environment.NewLine);
-                }
-                catch
-                {
-                    // Logging should never crash the add-in
+                    try
+                    {
+                        // Append-only access, shared: another Excel appending at the same
+                        // moment neither blocks this line nor is overwritten by it - each
+                        // write lands at the end of the file.
+                        using (var stream = new FileStream(LogFilePath, FileMode.Append, FileSystemRights.AppendData,
+                                   FileShare.ReadWrite | FileShare.Delete, 4096, FileOptions.None))
+                            stream.Write(bytes, 0, bytes.Length);
+                        return;
+                    }
+                    catch (IOException) when (attempt < 3)
+                    {
+                        Thread.Sleep(15);
+                    }
+                    catch
+                    {
+                        // Logging should never crash the add-in
+                        return;
+                    }
                 }
             }
         }

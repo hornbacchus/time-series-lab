@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace TSL.AddIn
 {
@@ -61,8 +62,9 @@ namespace TSL.AddIn
     }
 
     /// <summary>
-    /// The pure rules of engine identity (A2 Part 1): the per-instance pipe name and
-    /// the decision whether a recorded engine may be killed. No I/O and no ExcelDna,
+    /// The pure rules of engine identity (A2 Part 1): the per-instance pipe name, the
+    /// decision whether a recorded engine may be killed, and the identity handshake's
+    /// reply check and refusal text. No I/O and no ExcelDna,
     /// AddIn or Logger references, so every branch can be exercised outside Excel.
     /// </summary>
     internal static class EngineIdentity
@@ -210,6 +212,116 @@ namespace TSL.AddIn
             return commandLine.IndexOf("\"" + worker + "\"", StringComparison.OrdinalIgnoreCase) >= 0 &&
                    commandLine.IndexOf("--pipe \"" + pipeName + "\"", StringComparison.Ordinal) >= 0;
         }
+
+        // ── Identity handshake (A2 Part 1(c)) ───────────────────────────
+
+        /// <summary>
+        /// Read engine_versions.engine_version from the engine's reply to the identity
+        /// probe. True only for a final (non-progress) JSON object that reports a
+        /// non-empty engine_version string; anything else fails closed, with
+        /// <paramref name="problem"/> saying why.
+        /// </summary>
+        public static bool TryParseHandshakeReply(string json, out string engineVersion, out string problem)
+        {
+            engineVersion = null;
+            problem = null;
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                problem = "the engine's reply was empty";
+                return false;
+            }
+
+            JObject reply;
+            try
+            {
+                reply = JObject.Parse(json);
+            }
+            catch (Exception ex)
+            {
+                problem = "the engine's reply is not a JSON object (" + ex.Message + ")";
+                return false;
+            }
+
+            if (IsProgress(reply))
+            {
+                problem = "the engine sent a progress event, not a reply";
+                return false;
+            }
+            if (!(reply["engine_versions"] is JObject versions))
+            {
+                problem = "the engine's reply carries no engine_versions";
+                return false;
+            }
+            var version = versions["engine_version"];
+            if (version == null || version.Type != JTokenType.String || string.IsNullOrWhiteSpace((string)version))
+            {
+                problem = "the engine's reply carries no engine_version";
+                return false;
+            }
+
+            engineVersion = ((string)version).Trim();
+            return true;
+        }
+
+        /// <summary>True for a frame whose "type" is "progress" (skipped while waiting for a reply).</summary>
+        public static bool IsProgressFrame(string json)
+        {
+            try { return IsProgress(JObject.Parse(json)); }
+            catch { return false; }
+        }
+
+        private static bool IsProgress(JObject frame)
+        {
+            var type = frame["type"];
+            return type != null && type.Type == JTokenType.String &&
+                   string.Equals((string)type, "progress", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// The engine_version this add-in accepts. Installed layout: exactly the add-in's
+        /// build stamp (build_pack writes it into the packed engine\VERSION.txt, which
+        /// the engine reports). Development tree: the repository's engine\VERSION.txt
+        /// (R6 keeps it 0.1.0; the server-PID check carries identity there). Anything
+        /// else: null, which fails closed.
+        /// </summary>
+        public static string ExpectedEngineVersion(LayoutKind kind, string stamp, string devVersionFileText)
+        {
+            switch (kind)
+            {
+                case LayoutKind.Installed:
+                    return string.IsNullOrWhiteSpace(stamp) ? null : stamp.Trim();
+                case LayoutKind.Development:
+                    return string.IsNullOrWhiteSpace(devVersionFileText) ? null : devVersionFileText.Trim();
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>The refusal shown when the engine is not this add-in's (A2 Part 1(c), verbatim).</summary>
+        public static string MismatchMessage(string addinBuild, string engineBuild) =>
+            "The analysis engine does not match this add-in, so nothing was run.\n\n" +
+            "Add-in build:\n    " + addinBuild + "\n" +
+            "Engine build:\n    " + engineBuild + "\n\n" +
+            "Close Excel and start it again. If this message returns, tell Matthew Hornbach.";
+
+        /// <summary>
+        /// The refusal shown when the engine stopped, or did not open its pipe or answer,
+        /// while starting - a start failure, not an identity mismatch.
+        /// </summary>
+        public static string EngineStartMessage(bool engineStopped, string logsFolder) =>
+            (engineStopped
+                ? "The analysis engine stopped while it was starting, so nothing was run.\n\n"
+                : "The analysis engine did not start in time, so nothing was run.\n\n") +
+            "The log has the details:\n    " + logsFolder + "\n\n" +
+            "Try again. If this message returns, tell Matthew Hornbach.";
+
+        /// <summary>
+        /// The refusal shown when the engine stayed busy with another run (e.g. other
+        /// Time Series Lab formulas recalculating) for the whole connect budget.
+        /// </summary>
+        public static string EngineBusyMessage(int seconds) =>
+            $"The analysis engine was busy with another run for {seconds} seconds, so this run was not started.\n\n" +
+            "Try again when the current run has finished.";
 
         /// <summary>Full-path, case-insensitive comparison; false when either side is missing or invalid.</summary>
         public static bool SamePath(string a, string b)
