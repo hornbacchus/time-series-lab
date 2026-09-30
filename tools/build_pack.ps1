@@ -38,6 +38,27 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Build succeeded." -ForegroundColor Green
 
+# 1b) BUILD STAMP (C1): read it OFF THE BUILT DLL - the identity the add-in
+# reports (About, =TSL_VERSION(), every Audit sheet) - and refuse a pack whose
+# stamp is missing or differs from git describe of the tree being packed.
+# The same string goes into VERSION.txt (build=) and the packed engine\VERSION.txt.
+$builtDll = Join-Path $RepoRoot "src\TSL.AddIn\bin\x64\Release\net48\TSL.AddIn.dll"
+if (-not (Test-Path $builtDll)) { Write-Error "Built add-in not found: $builtDll"; exit 1 }
+$buildStamp = (Get-Item $builtDll).VersionInfo.ProductVersion
+$describe = (& git -C $RepoRoot describe --long --always --dirty 2>$null)
+if (-not $buildStamp -or $buildStamp -eq "DEV-UNSTAMPED") {
+    Write-Error "The built add-in carries no build stamp ('$buildStamp'); refusing to pack."
+    exit 1
+}
+if ($buildStamp -ne $describe) {
+    Write-Error "Build stamp '$buildStamp' differs from git describe '$describe'; refusing to pack."
+    exit 1
+}
+Write-Host "Build stamp: $buildStamp (equals git describe)" -ForegroundColor Green
+if ($buildStamp -like "*-dirty") {
+    Write-Warning "The tree has uncommitted changes (stamp ends -dirty): this pack is not a release candidate."
+}
+
 # 2) Generate UDF catalog from C# metadata
 Write-Host "`n--- Generating UDF catalog ---" -ForegroundColor Yellow
 $generateUdf = Join-Path $RepoRoot "tools\generate_udf_catalog.ps1"
@@ -75,6 +96,10 @@ $enginePack = Join-Path $packDir "engine"
 New-Item -ItemType Directory -Path $enginePack -Force | Out-Null
 Copy-Item "$engineSource\*.py" $enginePack -Force
 Copy-Item "$engineSource\*.txt" $enginePack -Force
+# The PACKED engine\VERSION.txt carries the build stamp (C1): the engine reports
+# that file as engine_version (engine_worker.py), so every Audit sheet's Engine
+# Version names the build. The repository's tracked engine\VERSION.txt is untouched.
+Set-Content -Path (Join-Path $enginePack "VERSION.txt") -Value $buildStamp -Encoding ASCII
 $techSource = Join-Path $engineSource "techniques"
 $techPack = Join-Path $enginePack "techniques"
 New-Item -ItemType Directory -Path $techPack -Force | Out-Null
@@ -120,6 +145,14 @@ New-Item -ItemType Directory -Path $docsPack -Force | Out-Null
 $guideDoc = Join-Path $docsSource "TimeSeriesLab_UserGuide.docx"
 if (Test-Path $guideDoc) {
     Copy-Item $guideDoc $docsPack -Force
+}
+# The HTML guide is what the ribbon's default User Guide button opens (C1 R3);
+# before C1 the pack shipped only the .docx, so that button failed on every install.
+$guideHtml = Join-Path $docsSource "TimeSeriesLab_UserGuide.html"
+if (Test-Path $guideHtml) {
+    Copy-Item $guideHtml $docsPack -Force
+} else {
+    Write-Warning "HTML User Guide not generated ($guideHtml); the installed User Guide button will report it missing."
 }
 $deployDoc = Join-Path $docsSource "DEPLOYMENT.md"
 if (Test-Path $deployDoc) {
@@ -257,12 +290,13 @@ Write-Host "Python runtime ready: $pythonZip" -ForegroundColor Green
 $headHash = (& git -C $RepoRoot rev-parse --short HEAD 2>$null)
 if (-not $headHash) { $headHash = "unknown" }
 $versionLines = @(
+    "build=$buildStamp",
     "commit=$headHash",
     "built=$(Get-Date -Format 'yyyy-MM-dd HH:mm')",
     "python=$pyVersion"
 )
 Set-Content -Path (Join-Path $packDir "VERSION.txt") -Value $versionLines -Encoding ASCII
-Write-Host "VERSION.txt: commit=$headHash python=$pyVersion" -ForegroundColor Green
+Write-Host "VERSION.txt: build=$buildStamp commit=$headHash python=$pyVersion" -ForegroundColor Green
 
 # 7) MANDATORY packed-runtime verification gate (the deployment analog of the
 # GMC B.7 gates): runs the PACKED python against the PACKED engine tree.
