@@ -943,13 +943,6 @@ namespace TSL.AddIn
               </menu>
             </menu>
           </splitButton>
-          <button id='btnSaveInstaller'
-                  label='Save Installer'
-                  size='large'
-                  imageMso='FileSaveAs'
-                  onAction='OnSaveInstaller'
-                  screentip='Save Installer Package'
-                  supertip='Save a copy of the Time Series Lab installer to a location of your choice, so you can distribute it to another PC.' />
           <button id='btnAbout'
                   label='About'
                   size='large'
