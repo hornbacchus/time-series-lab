@@ -950,28 +950,42 @@ namespace TSL.AddIn
                 ? $"{techniqueCount} techniques across {categoryCount} categories"
                 : "Technique catalog not found";
 
-            // Detect Python version
+            // Runtime: the interpreter the engine actually uses - asked of
+            // EngineClient.ResolvePythonExe (the one place it is chosen), then of
+            // that interpreter itself (version + its own sys.executable).
             var pythonVersion = "Not detected";
             try
             {
+                var exe = EngineClient.ResolvePythonExe();
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "python",
-                    Arguments = "--version",
+                    FileName = exe,
+                    Arguments = "-c \"import platform,sys;print('Python '+platform.python_version()+' at '+sys.executable)\"",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true,
                 };
                 using (var proc = Process.Start(psi))
                 {
-                    if (proc != null)
+                    if (proc == null)
+                        pythonVersion = $"could not start {exe}";
+                    else if (!proc.WaitForExit(5000))
                     {
-                        pythonVersion = proc.StandardOutput.ReadToEnd().Trim();
-                        proc.WaitForExit(3000);
+                        try { proc.Kill(); } catch { }
+                        pythonVersion = $"no answer within 5 s from {exe}";
                     }
+                    else
+                        pythonVersion = proc.StandardOutput.ReadToEnd().Trim();
                 }
             }
-            catch { }
+            catch (FileNotFoundException ex)
+            {
+                pythonVersion = "MISSING - " + (ex.FileName ?? "the engine's Python runtime could not be located");
+            }
+            catch (Exception ex)
+            {
+                pythonVersion = "not detected (" + ex.Message + ")";
+            }
 
             // Check if engine pipe exists (engine is running)
             var engineStatus = "Not running";

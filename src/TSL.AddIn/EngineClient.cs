@@ -44,8 +44,37 @@ namespace TSL.AddIn
             _pipeName = $"TSL_ENGINE_PIPE_{sid}";
         }
 
-        private string PythonExePath => Path.Combine(AddIn.AppDataPath, "engine", "runtime", "python.exe");
         private string PidFilePath => Path.Combine(AddIn.AppDataPath, "engine.pid");
+
+        /// <summary>
+        /// THE ONE place the engine interpreter is chosen. Nothing else in the add-in
+        /// builds an engine\runtime path (About asks this method; a later side-by-side
+        /// update unit relies on that). Installed layout: the bundled runtime
+        /// &lt;root&gt;\engine\runtime\python.exe, which MUST exist - a missing runtime
+        /// is an error naming the path, never a silent switch to another Python.
+        /// Development tree: "python" from PATH (the developer's interpreter), never an
+        /// installed runtime. Unrecognised layout: an error naming what was probed.
+        /// </summary>
+        public static string ResolvePythonExe()
+        {
+            switch (AddInLayout.Kind)
+            {
+                case LayoutKind.Installed:
+                    var bundled = AddInLayout.PathOf("engine", "runtime", "python.exe");
+                    if (!File.Exists(bundled))
+                        throw new FileNotFoundException(
+                            AddInLayout.MissingMessage("bundled Python runtime", bundled), bundled);
+                    return bundled;
+
+                case LayoutKind.Development:
+                    return "python";
+
+                default:
+                    AddInLayout.FindFile(out var tried, "engine", "runtime", "python.exe");
+                    throw new FileNotFoundException(
+                        AddInLayout.MissingMessage("engine's Python runtime", tried));
+            }
+        }
 
         /// <summary>
         /// Kill any engine process left over from a prior session (e.g. Excel
@@ -123,8 +152,7 @@ namespace TSL.AddIn
 
         private void StartEngine()
         {
-            // For development: try system Python if embedded runtime not yet installed
-            var pythonExe = File.Exists(PythonExePath) ? PythonExePath : "python";
+            var pythonExe = ResolvePythonExe();
 
             // ONE location, from the add-in's layout (AddInLayout): <root>\engine\engine_worker.py.
             var workerScript = AddInLayout.FindFile(out var workerTried, "engine", "engine_worker.py");
@@ -190,7 +218,8 @@ namespace TSL.AddIn
             // Give engine a moment to create pipe server
             Thread.Sleep(500);
 
-            Logger.Info($"Engine process started (PID={_engineProcess.Id}), pipe={_pipeName}");
+            Logger.Info($"Engine process started (PID={_engineProcess.Id}), pipe={_pipeName}, " +
+                        $"interpreter={pythonExe} ({AddInLayout.KindLabel} layout)");
         }
 
         /// <summary>
