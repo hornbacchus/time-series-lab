@@ -44,9 +44,7 @@ namespace TSL.AddIn
             _pipeName = $"TSL_ENGINE_PIPE_{sid}";
         }
 
-        private string EnginePath => Path.Combine(AddIn.AppDataPath, "engine");
-        private string PythonExePath => Path.Combine(EnginePath, "runtime", "python.exe");
-        private string WorkerScriptPath => Path.Combine(EnginePath, "engine_worker.py");
+        private string PythonExePath => Path.Combine(AddIn.AppDataPath, "engine", "runtime", "python.exe");
         private string PidFilePath => Path.Combine(AddIn.AppDataPath, "engine.pid");
 
         /// <summary>
@@ -127,14 +125,13 @@ namespace TSL.AddIn
         {
             // For development: try system Python if embedded runtime not yet installed
             var pythonExe = File.Exists(PythonExePath) ? PythonExePath : "python";
-            var workerScript = ResolveWorkerScript();
 
-            if (string.IsNullOrEmpty(workerScript) || !File.Exists(workerScript))
+            // ONE location, from the add-in's layout (AddInLayout): <root>\engine\engine_worker.py.
+            var workerScript = AddInLayout.FindFile(out var workerTried, "engine", "engine_worker.py");
+            if (workerScript == null)
             {
                 throw new FileNotFoundException(
-                    $"Engine worker script not found. Searched:\n" +
-                    string.Join("\n", GetWorkerScriptSearchPaths()) + "\n\n" +
-                    "Please ensure the engine is installed correctly.");
+                    AddInLayout.MissingMessage("engine worker script (engine_worker.py)", workerTried));
             }
 
             var psi = new ProcessStartInfo
@@ -194,67 +191,6 @@ namespace TSL.AddIn
             Thread.Sleep(500);
 
             Logger.Info($"Engine process started (PID={_engineProcess.Id}), pipe={_pipeName}");
-        }
-
-        /// <summary>
-        /// Resolve the path to engine_worker.py, trying several candidate locations.
-        /// Returns the first one that exists, or null if none found.
-        /// </summary>
-        private string ResolveWorkerScript()
-        {
-            foreach (var candidate in GetWorkerScriptSearchPaths())
-            {
-                if (!string.IsNullOrEmpty(candidate) && File.Exists(candidate))
-                    return candidate;
-            }
-            return null;
-        }
-
-        private System.Collections.Generic.List<string> GetWorkerScriptSearchPaths()
-        {
-            var paths = new System.Collections.Generic.List<string>();
-
-            // Installed location (%LOCALAPPDATA%\TimeSeriesLab\engine\engine_worker.py)
-            paths.Add(WorkerScriptPath);
-
-            // Relative to the loaded XLL (most reliable when running packed).
-            try
-            {
-                var xllPath = ExcelDnaUtil.XllPath;
-                if (!string.IsNullOrEmpty(xllPath))
-                {
-                    var xllDir = Path.GetDirectoryName(xllPath);
-                    if (!string.IsNullOrEmpty(xllDir))
-                    {
-                        // Co-located engine
-                        paths.Add(Path.Combine(xllDir, "engine", "engine_worker.py"));
-                        // Dev build: src\TSL.AddIn\bin\x64\Release\net48\publish\ -> project root
-                        paths.Add(Path.Combine(xllDir, "..", "..", "..", "..", "..", "..", "engine", "engine_worker.py"));
-                        // Dev build: src\TSL.AddIn\bin\x64\Release\net48\ -> project root
-                        paths.Add(Path.Combine(xllDir, "..", "..", "..", "..", "..", "engine", "engine_worker.py"));
-                    }
-                }
-            }
-            catch { /* ExcelDnaUtil unavailable at design-time */ }
-
-            // Dev location (relative to assembly). Assembly.Location can throw
-            // "The path is not of a legal form" when loaded from a packed XLL.
-            try
-            {
-                var asmLoc = typeof(EngineClient).Assembly.Location;
-                if (!string.IsNullOrEmpty(asmLoc))
-                {
-                    var asmDir = Path.GetDirectoryName(asmLoc);
-                    if (!string.IsNullOrEmpty(asmDir))
-                    {
-                        paths.Add(Path.Combine(asmDir, "..", "..", "..", "..", "engine", "engine_worker.py"));
-                        paths.Add(Path.Combine(asmDir, "engine", "engine_worker.py"));
-                    }
-                }
-            }
-            catch { /* Assembly.Location may throw for embedded assemblies */ }
-
-            return paths;
         }
 
         /// <summary>

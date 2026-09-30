@@ -247,18 +247,10 @@ namespace TSL.AddIn
         {
             try
             {
-                var templatePath = LocateBondYieldForecastTemplate();
+                var templatePath = LocateBondYieldForecastTemplate(out var tried);
                 if (templatePath == null)
                 {
-                    MessageBox.Show(
-                        "Bond Yield Forecast input template not found.\n\n" +
-                        "Reinstall Time Series Lab to restore the template, or " +
-                        "regenerate it via:\n" +
-                        "    python engine/techniques/bond_yield_forecast/" +
-                        "_session3_template_generator.py\n",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    AddInLayout.ReportMissing("Bond Yield Forecast input template", tried);
                     return;
                 }
 
@@ -287,33 +279,14 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// Resolve the bundled Bond Yield Forecast input template path.
-        /// Mirrors the LoadSampleData two-step search (dev → installed)
-        /// for consistency with TSL's existing resource-bundling pattern.
+        /// Resolve the bundled Bond Yield Forecast input template under the add-in's
+        /// layout root (AddInLayout); null with <paramref name="tried"/> naming the path.
         /// </summary>
-        private string LocateBondYieldForecastTemplate()
+        private string LocateBondYieldForecastTemplate(out string tried)
         {
-            const string templateRel =
-                @"engine\techniques\bond_yield_forecast\resources\templates\bond_yield_forecast_input_template.xlsx";
-
-            // Dev / project location: walk up from XLL output dir to
-            // repo root. XLL is at:
-            //   src/TSL.AddIn/bin/x64/Release/net48/   (6 levels up)
-            // Same convention LoadSampleData uses.
-            var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-            if (!string.IsNullOrEmpty(xllDir))
-            {
-                var projectRoot = Path.GetFullPath(
-                    Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                var devPath = Path.Combine(projectRoot, templateRel);
-                if (File.Exists(devPath)) return devPath;
-            }
-
-            // Installed location: %LOCALAPPDATA%/TimeSeriesLab/...
-            var installedPath = Path.Combine(AddIn.AppDataPath, templateRel);
-            if (File.Exists(installedPath)) return installedPath;
-
-            return null;
+            return AddInLayout.FindFile(out tried,
+                "engine", "techniques", "bond_yield_forecast", "resources", "templates",
+                "bond_yield_forecast_input_template.xlsx");
         }
 
         // ── Breakeven Payrolls (Bespoke member #2; workbook-input) ──────
@@ -342,15 +315,10 @@ namespace TSL.AddIn
         {
             try
             {
-                var templatePath = LocateBreakevenPayrollTemplate();
+                var templatePath = LocateBreakevenPayrollTemplate(out var tried);
                 if (templatePath == null)
                 {
-                    MessageBox.Show(
-                        "Breakeven Payrolls input template not found.\n\n" +
-                        "Reinstall Time Series Lab to restore the bundled template.",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    AddInLayout.ReportMissing("Breakeven Payrolls input template", tried);
                     return;
                 }
 
@@ -387,15 +355,10 @@ namespace TSL.AddIn
         {
             try
             {
-                var templatePath = LocateKronosTemplate();
+                var templatePath = LocateKronosTemplate(out var tried);
                 if (templatePath == null)
                 {
-                    MessageBox.Show(
-                        "Kronos Forecast input template not found.\n\n" +
-                        "Reinstall Time Series Lab to restore the bundled template.",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    AddInLayout.ReportMissing("Kronos Forecast input template", tried);
                     return;
                 }
 
@@ -435,52 +398,25 @@ namespace TSL.AddIn
 
         /// <summary>
         /// Resolve the bundled Kronos Forecast input template (the lineage-
-        /// verified 250-day IEF example + parameter cells). Mirrors
-        /// LocateBreakevenPayrollTemplate (dev repo path → installed path).
+        /// verified 250-day IEF example + parameter cells) under the add-in's
+        /// layout root (AddInLayout).
         /// </summary>
-        private string LocateKronosTemplate()
+        private string LocateKronosTemplate(out string tried)
         {
-            const string templateRel =
-                @"engine\techniques\kronos_forecast\resources\templates\kronos_forecast_input_template.xlsx";
-
-            var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-            if (!string.IsNullOrEmpty(xllDir))
-            {
-                var projectRoot = Path.GetFullPath(
-                    Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                var devPath = Path.Combine(projectRoot, templateRel);
-                if (File.Exists(devPath)) return devPath;
-            }
-
-            var installedPath = Path.Combine(AddIn.AppDataPath, templateRel);
-            if (File.Exists(installedPath)) return installedPath;
-
-            return null;
+            return AddInLayout.FindFile(out tried,
+                "engine", "techniques", "kronos_forecast", "resources", "templates",
+                "kronos_forecast_input_template.xlsx");
         }
 
         /// <summary>
-        /// Resolve the bundled Breakeven Payrolls input template path (the pinned,
-        /// May-2025-anchored .xlsx). Mirrors LocateBondYieldForecastTemplate
-        /// (dev repo path → installed %LOCALAPPDATA% path).
+        /// Resolve the bundled Breakeven Payrolls input template (the pinned,
+        /// May-2025-anchored .xlsx) under the add-in's layout root (AddInLayout).
         /// </summary>
-        private string LocateBreakevenPayrollTemplate()
+        private string LocateBreakevenPayrollTemplate(out string tried)
         {
-            const string templateRel =
-                @"engine\techniques\breakeven_payroll\resources\templates\breakeven_payroll_input_template.xlsx";
-
-            var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-            if (!string.IsNullOrEmpty(xllDir))
-            {
-                var projectRoot = Path.GetFullPath(
-                    Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                var devPath = Path.Combine(projectRoot, templateRel);
-                if (File.Exists(devPath)) return devPath;
-            }
-
-            var installedPath = Path.Combine(AddIn.AppDataPath, templateRel);
-            if (File.Exists(installedPath)) return installedPath;
-
-            return null;
+            return AddInLayout.FindFile(out tried,
+                "engine", "techniques", "breakeven_payroll", "resources", "templates",
+                "breakeven_payroll_input_template.xlsx");
         }
 
         /// <summary>
@@ -650,25 +586,21 @@ namespace TSL.AddIn
 
         public void OnOpenUserGuide(IRibbonControl control)
         {
-            // Check installed location first
-            var guidePath = Path.Combine(AddIn.AppDataPath, "docs", "TimeSeriesLab_UserGuide.docx");
+            var guidePath = AddInLayout.FindFile(out var tried, "docs", "TimeSeriesLab_UserGuide.docx");
 
-            // Fallback: dev/project location (navigate up from XLL output dir)
-            // XLL is at: src/TSL.AddIn/bin/x64/Release/net48/ — 6 levels up to project root
-            if (!File.Exists(guidePath))
-            {
-                var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                var projectRoot = Path.GetFullPath(Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                guidePath = Path.Combine(projectRoot, "docs", "TimeSeriesLab_UserGuide.docx");
-            }
-
-            if (File.Exists(guidePath))
+            if (guidePath != null)
             {
                 Process.Start(guidePath);
             }
+            else if (AddInLayout.Kind != LayoutKind.Development)
+            {
+                // Installed: the guide ships in docs\ - name the path; never offer to
+                // run a development script on a colleague's PC.
+                AddInLayout.ReportMissing("User Guide (Word document)", tried);
+            }
             else
             {
-                // Offer to generate it
+                // Development tree only: offer to generate it
                 var result = MessageBox.Show(
                     "User Guide has not been generated yet.\n\n" +
                     "Would you like to generate it now?\n" +
@@ -681,8 +613,7 @@ namespace TSL.AddIn
                 {
                     try
                     {
-                        var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                        var projectRoot = Path.GetFullPath(Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
+                        var projectRoot = AddInLayout.Root;
                         var script = Path.Combine(projectRoot, "tools", "generate_user_guide.py");
                         if (File.Exists(script))
                         {
@@ -723,29 +654,24 @@ namespace TSL.AddIn
 
         public void OnOpenUserGuideHtml(IRibbonControl control)
         {
-            // Check installed location first
-            var guidePath = Path.Combine(AddIn.AppDataPath, "docs", "TimeSeriesLab_UserGuide.html");
+            var guidePath = AddInLayout.FindFile(out var tried, "docs", "TimeSeriesLab_UserGuide.html");
 
-            // Fallback: dev/project location
-            if (!File.Exists(guidePath))
-            {
-                var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                var projectRoot = Path.GetFullPath(Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                guidePath = Path.Combine(projectRoot, "docs", "TimeSeriesLab_UserGuide.html");
-            }
-
-            if (File.Exists(guidePath))
+            if (guidePath != null)
             {
                 Process.Start(guidePath);
             }
-            else
+            else if (AddInLayout.Kind == LayoutKind.Development)
             {
                 MessageBox.Show(
-                    "HTML User Guide not found.\n\n" +
-                    "Run tools\\generate_user_guide.py to generate it.",
+                    AddInLayout.MissingMessage("User Guide (web page)", tried) +
+                    "\n\nIn a development tree, generate it with tools\\generate_user_guide.py.",
                     "Time Series Lab",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
+            }
+            else
+            {
+                AddInLayout.ReportMissing("User Guide (web page)", tried);
             }
         }
 
@@ -826,32 +752,13 @@ namespace TSL.AddIn
         {
             try
             {
-                // Locate the CSV file
-                string csvPath = null;
-
-                // Try dev/project location
-                var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                var projectRoot = Path.GetFullPath(Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                var devPath = Path.Combine(projectRoot, "resources", "sample_data", fileName);
-                if (File.Exists(devPath))
-                    csvPath = devPath;
-
-                // Fallback: installed location
+                // Locate the CSV: <root>\resources\sample_data\<file> under the
+                // add-in's layout root (AddInLayout). The pre-C1 installed candidate
+                // omitted the resources\ segment, so it could never match (2026-09-29).
+                var csvPath = AddInLayout.FindFile(out var tried, "resources", "sample_data", fileName);
                 if (csvPath == null)
                 {
-                    var installedPath = Path.Combine(AddIn.AppDataPath, "sample_data", fileName);
-                    if (File.Exists(installedPath))
-                        csvPath = installedPath;
-                }
-
-                if (csvPath == null)
-                {
-                    MessageBox.Show(
-                        $"Sample data file not found: {fileName}\n\n" +
-                        "Reinstall Time Series Lab to restore the sample data files.",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    AddInLayout.ReportMissing($"sample data file {fileName}", tried);
                     return;
                 }
 
@@ -1018,40 +925,24 @@ namespace TSL.AddIn
 
         public void OnAbout(IRibbonControl control)
         {
-            // Read engine version from VERSION.txt (try project dir first, then AppData)
+            // Engine version: <root>\engine\VERSION.txt under the add-in's layout
+            // (build_pack writes the build stamp into the packed copy).
             var engineVersion = "Unknown";
             try
             {
-                var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                var projectRoot = Path.GetFullPath(Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                var versionFile = Path.Combine(projectRoot, "engine", "VERSION.txt");
-                if (!File.Exists(versionFile))
-                    versionFile = Path.Combine(AddIn.AppDataPath, "engine", "VERSION.txt");
-                if (File.Exists(versionFile))
+                var versionFile = AddInLayout.FindFile(out _, "engine", "VERSION.txt");
+                if (versionFile != null)
                     engineVersion = File.ReadAllText(versionFile).Trim();
             }
             catch { }
 
-            // Count techniques from catalog
+            // Technique count from the catalog the add-in actually loaded.
             var techniqueCount = 0;
             var categoryCount = 0;
             try
             {
-                var xllDir = Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                var projectRoot = Path.GetFullPath(Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                var catalogPath = Path.Combine(projectRoot, "resources", "catalog", "techniques_catalog.json");
-                if (File.Exists(catalogPath))
-                {
-                    var json = File.ReadAllText(catalogPath);
-                    // Simple count: occurrences of "\"id\":" for techniques
-                    techniqueCount = System.Text.RegularExpressions.Regex.Matches(json, "\"id\"\\s*:").Count;
-                    // Count unique categories
-                    var catMatches = System.Text.RegularExpressions.Regex.Matches(json, "\"category\"\\s*:\\s*\"([^\"]+)\"");
-                    var cats = new System.Collections.Generic.HashSet<string>();
-                    foreach (System.Text.RegularExpressions.Match m in catMatches)
-                        cats.Add(m.Groups[1].Value);
-                    categoryCount = cats.Count;
-                }
+                techniqueCount = TechniqueCatalogService.GetCatalog().Techniques.Count;
+                categoryCount = TechniqueCatalogService.GetCategories().Count;
             }
             catch { }
 
@@ -1103,7 +994,7 @@ namespace TSL.AddIn
                 $"Platform:          .NET Framework 4.8 + Excel-DNA\n" +
                 $"Runtime:           {pythonVersion}\n" +
                 $"Compute:           100% local (no cloud, no telemetry)\n\n" +
-                $"Project:           {Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(ExcelDnaUtil.XllPath))))))}\n" +
+                $"Layout:            {AddInLayout.KindLabel} at {AddInLayout.Root ?? "(files not located)"}\n" +
                 $"Settings:          {Path.Combine(AddIn.AppDataPath, "config.json")}\n" +
                 $"Logs:              {Path.Combine(AddIn.AppDataPath, "logs")}",
                 "About Time Series Lab",

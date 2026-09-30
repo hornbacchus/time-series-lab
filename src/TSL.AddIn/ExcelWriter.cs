@@ -796,8 +796,12 @@ namespace TSL.AddIn
         /// K3.1): every SUCCESSFUL run self-archives the RESULTS workbook (it
         /// contains the output sheet + chart; the input workbook is never the
         /// results carrier) as a complete copy to
-        /// &lt;repoRoot&gt;\output\{byf_runs|breakeven_runs|kronos_runs}\
-        /// {tool}_run_YYYYMMDD_HHMMSS[_seed{N}].xlsx. SaveCopyAs only — the
+        /// {archive root}\{byf_runs|breakeven_runs|kronos_runs}\
+        /// {tool}_run_YYYYMMDD_HHMMSS[_seed{N}].xlsx, where the archive root is
+        /// &lt;repoRoot&gt;\output in a development tree and Documents\Time Series Lab
+        /// in an installed build (C1 R2: outside every build folder, so a later
+        /// update that replaces build folders never takes archives with it).
+        /// SaveCopyAs only — the
         /// open workbook's path, dirty flag, and identity are untouched. The
         /// seed suffix comes from response.audit_fields["seed"] when the run
         /// carries one (kronos does; BYF echoes its seed in a config table but
@@ -822,14 +826,20 @@ namespace TSL.AddIn
                 }
                 if (string.IsNullOrEmpty(resultSheetName)) return false;
 
-                // repoRoot via the locators' xllDir-relative math (the ..x6
-                // pattern) — the dev-deploy single-user posture; no absolute
-                // paths hardcoded.
-                var xllDir = System.IO.Path.GetDirectoryName(ExcelDnaUtil.XllPath);
-                if (string.IsNullOrEmpty(xllDir)) return false;
-                var repoRoot = System.IO.Path.GetFullPath(
-                    System.IO.Path.Combine(xllDir, "..", "..", "..", "..", "..", ".."));
-                var dir = System.IO.Path.Combine(repoRoot, "output", folder);
+                // Archive root from the add-in's layout (AddInLayout). The pre-C1
+                // xllDir-relative "..x6" math resolved C:\output\... in an install.
+                string dir;
+                if (AddInLayout.Kind == LayoutKind.Development)
+                    dir = System.IO.Path.Combine(AddInLayout.Root, "output", folder);   // gitignored run exhaust
+                else if (AddInLayout.Kind == LayoutKind.Installed)
+                    dir = System.IO.Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        "Time Series Lab", folder);
+                else
+                {
+                    Logger.Info($"Run archive skipped ({techniqueId}): add-in layout not recognised ({AddInLayout.XllPath}).");
+                    return false;
+                }
                 System.IO.Directory.CreateDirectory(dir);   // idempotent ensure-on-write
 
                 // Find the open RESULTS workbook (the one carrying the result
