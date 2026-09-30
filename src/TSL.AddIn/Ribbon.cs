@@ -380,6 +380,28 @@ namespace TSL.AddIn
             }
         }
 
+        // Kronos needs its own torch environment, which exists only where it was
+        // built (the owner's machine). Hide Bespoke > Kronos Forecast wherever it is
+        // absent. MIRRORS engine/techniques/kronos_forecast/_dispatch.py KRONOS_PYTHON
+        // (TSL_KRONOS_PYTHON, else the default below) - keep the two in step. The
+        // engine inherits Excel's environment (EngineClient does not override this
+        // variable), so the add-in sees the same value the engine will. Evaluated
+        // when the ribbon loads.
+        private const string KronosDefaultPython = @"C:\KronosDev\venv-kronos\Scripts\python.exe";
+
+        public bool OnKronosGetVisible(IRibbonControl control)
+        {
+            try
+            {
+                var path = Environment.GetEnvironmentVariable("TSL_KRONOS_PYTHON") ?? KronosDefaultPython;
+                return File.Exists(path);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public void OnKronosRun(IRibbonControl control)
         {
             try

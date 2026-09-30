@@ -185,6 +185,7 @@ namespace TSL.AddIn
                paths only, never presented as calibrated bands. -->
           <menu id='menuKronosForecast'
                 label='Kronos Forecast'
+                getVisible='OnKronosGetVisible'
                 size='large'
                 imageMso='ChartTypeLineInsertGallery'
                 screentip='Kronos Forecast (EXPERIMENTAL)'
