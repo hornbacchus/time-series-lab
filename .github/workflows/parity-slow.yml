@@ -93,7 +93,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/tools
         run: |
           set +e
-          python -m reference_parity --tier slow --json > parity-slow.json
+          python -u -X faulthandler -m reference_parity --tier slow --json --progress > parity-slow.json
           exit_code=$?
           cat parity-slow.json
           if [ "$exit_code" = "2" ]; then
@@ -263,7 +263,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/tools
         run: |
           set +e
-          python -m reference_parity --tier slow --json > parity-slow-linux.json
+          python -u -X faulthandler -m reference_parity --tier slow --json --progress > parity-slow-linux.json
           exit_code=$?
           cat parity-slow-linux.json
           if [ "$exit_code" = "2" ]; then

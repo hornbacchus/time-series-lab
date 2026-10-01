@@ -177,12 +177,17 @@ jobs:
         # Translation happens here, not in the runner — the
         # runner's exit-code semantics remain debug-friendly for
         # local invocation.
+        #
+        # H1: unbuffered + faulthandler + --progress, as in
+        # tools/ci_gate_local.ps1: every check is bracketed by
+        # "[parity] start/done" lines on stderr, so a run that dies
+        # mid-way names the check it died in.
         shell: bash
         env:
           PYTHONPATH: ${{ github.workspace }}/tools
         run: |
           set +e
-          python -m reference_parity --tier fast --json > parity-fast.json
+          python -u -X faulthandler -m reference_parity --tier fast --json --progress > parity-fast.json
           exit_code=$?
           cat parity-fast.json
           # Map CAVEAT (exit 2) and DOCUMENTED-DIVERGENCE (exit 4)

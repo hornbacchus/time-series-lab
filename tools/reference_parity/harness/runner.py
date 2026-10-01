@@ -5,6 +5,7 @@ Usage:
     python -m reference_parity --tier fast
     python -m reference_parity --tier slow --json
     python -m reference_parity --technique 3e_mint_family
+    python -u -X faulthandler -m reference_parity --tier fast --progress
 
 Exit codes:
     0 — all PASS / SKIP only.
@@ -387,12 +388,39 @@ def _check_environment(manifest: Manifest, *, json_out: bool) -> int:
     return 0
 
 
+def _run_with_progress(
+    check: ParityCheck,
+    *,
+    seed: int,
+    manifest: Manifest,
+    progress: bool,
+) -> ParityResult:
+    """run_check, bracketed by ``[parity] start`` / ``[parity] done``
+    lines on stderr when ``progress`` is set. Results are otherwise
+    printed only once the whole run ends, so a process that dies
+    mid-run (a native crash, or a SystemExit from inside a library)
+    leaves the last unmatched ``start`` line naming the check it died
+    in (H1 / F2: the local gate twice died with exit 1 and no verdict).
+    """
+    if progress:
+        print(f"[parity] start {check.technique_id}", file=sys.stderr, flush=True)
+    result = run_check(check, seed=seed, manifest=manifest)
+    if progress:
+        print(
+            f"[parity] done {check.technique_id} {result.outcome} "
+            f"({result.duration_sec:.1f}s)",
+            file=sys.stderr, flush=True,
+        )
+    return result
+
+
 def _run_one(
     technique_id: str,
     *,
     seed: int,
     json_out: bool,
     manifest: Manifest,
+    progress: bool = False,
 ) -> int:
     checks = discover_checks()
     if technique_id not in checks:
@@ -406,7 +434,9 @@ def _run_one(
             print(msg, file=sys.stderr)
         return 3
     check = checks[technique_id]()
-    result = run_check(check, seed=seed, manifest=manifest)
+    result = _run_with_progress(
+        check, seed=seed, manifest=manifest, progress=progress,
+    )
     return _emit_results([result], json_out=json_out)
 
 
@@ -416,6 +446,7 @@ def _run_tier(
     seed: int,
     json_out: bool,
     manifest: Manifest,
+    progress: bool = False,
 ) -> int:
     checks = discover_checks()
     selected = [
@@ -423,7 +454,9 @@ def _run_tier(
     ]
     results: list[ParityResult] = []
     for cls in selected:
-        results.append(run_check(cls(), seed=seed, manifest=manifest))
+        results.append(_run_with_progress(
+            cls(), seed=seed, manifest=manifest, progress=progress,
+        ))
     return _emit_results(results, json_out=json_out)
 
 
@@ -538,6 +571,13 @@ def main(argv: list[str] | None = None) -> int:
         "--json", action="store_true",
         help="Emit machine-readable JSON.",
     )
+    parser.add_argument(
+        "--progress", action="store_true",
+        help=(
+            "Print '[parity] start <id>' / '[parity] done <id> "
+            "<outcome>' to stderr around each check."
+        ),
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -556,11 +596,13 @@ def main(argv: list[str] | None = None) -> int:
         return _run_one(
             args.technique, seed=args.seed,
             json_out=args.json, manifest=manifest,
+            progress=args.progress,
         )
     if args.tier:
         return _run_tier(
             args.tier, seed=args.seed,
             json_out=args.json, manifest=manifest,
+            progress=args.progress,
         )
     parser.print_help()
     return 3
