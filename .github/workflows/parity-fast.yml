@@ -132,7 +132,8 @@ jobs:
         #     never a fresh resolve; adds MAPIE for p3_conformal_cqr).
         # torch is the PyTorch-index CPU build (2.11.0+cpu, as on the dev
         # interpreter), installed first without deps; the lock then pins
-        # its dependencies.
+        # its dependencies. The drift canary job below runs the same suite
+        # against the latest unpinned versions, without gating.
         # --no-deps: the locks ARE the whole closure (make_harness_lock
         # walks every installed requirement), and the validated interpreter
         # itself is not resolver-consistent - it runs particles 0.4, which
@@ -300,3 +301,16 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/tools
         run: |
           python -m unittest discover -s engine/tests -p "test_*.py" -t .
+
+      - name: Harness self-tests (no silent arms)
+        # H1: output-level negative controls. 3e_mint_family's
+        # hierarchicalforecast arm raised on every run (under the validated
+        # 1.5.1 too) while the check reported PASS; these tests force each
+        # arm to fail through the real runner and require the outcome to
+        # say so (CAVEAT / ERROR), after a positive control that the
+        # untouched check is a clean PASS with every arm compared.
+        shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/tools
+        run: |
+          python -m unittest discover -s tools/reference_parity/tests -p "test_*.py" -v

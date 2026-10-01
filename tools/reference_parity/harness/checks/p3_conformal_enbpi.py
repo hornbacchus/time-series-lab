@@ -234,7 +234,7 @@ class ConformalEnbpiParity(P3ParityCheck):
         statuses.append(primary["discrimination_guard"]["status"])
 
         any_block = any(s == "BLOCK" for s in statuses)
-        any_caveat = any(s == "CAVEAT" for s in statuses)
+        any_caveat = any(s == "CAVEAT" for s in statuses) or "mapie_width" not in ref  # H1: no silent arms
         outcome = ("BLOCK" if any_block else ("CAVEAT" if any_caveat else "PASS"))
         return ParityResult(
             technique_id=self.technique_id, outcome=outcome,

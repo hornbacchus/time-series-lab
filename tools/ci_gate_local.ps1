@@ -168,6 +168,8 @@ Invoke-GateStep -Name "catalog_key_alignment guard" `
     -PyArgs @("tools/reference_parity/catalog_key_alignment.py") -Accept @(0)
 Invoke-GateStep -Name "engine unit tests" `
     -PyArgs @("-m", "unittest", "discover", "-s", "engine/tests", "-p", "test_*.py", "-t", ".") -Accept @(0)
+Invoke-GateStep -Name "harness self-tests (no silent arms)" `
+    -PyArgs @("-m", "unittest", "discover", "-s", "tools/reference_parity/tests", "-p", "test_*.py") -Accept @(0)
 # ... then the slow parity suite (with the completion / anti-truncation guard).
 Invoke-ParityStep -Name "reference_parity --tier fast" `
     -PyArgs @("-u", "-X", "faulthandler", "-m", "reference_parity", "--tier", "fast", "--progress")

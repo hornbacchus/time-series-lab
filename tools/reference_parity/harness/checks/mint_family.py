@@ -33,6 +33,7 @@ Method-name mapping
 
 from __future__ import annotations
 
+import re
 import sys
 from typing import Any
 
@@ -65,6 +66,14 @@ _HF_NAME = {
     "mint_shrinkage": "mint_shrink",
     "mint_sample": "mint_cov",
 }
+
+# The engine's measured-rank refusal for mint_sample on this fixture
+# (forecast_reconciliation._mint_reconcile), the documented Phase 1 B1
+# outcome. Its "rank check raised; treating as rank-deficient" fallback is
+# NOT this case and counts as an engine failure.
+_EXPECTED_B1_REFUSAL = re.compile(
+    r"^RankDeficientWMatrixError: W matrix rank \d+ < n_total \d+"
+)
 
 
 def _ensure_engine_on_path() -> None:
@@ -311,7 +320,10 @@ class MintFamilyParity(P3ParityCheck):
             else float("nan")
         )
 
-        # Best-effort HF cross-reference (not asserted)
+        # HF cross-reference (secondary). A failure here is kept, not
+        # raised - hts stays the primary - and compare() reports it as
+        # CAVEAT (H1: a reference arm that cannot run is never left
+        # absent under a PASS).
         hf_per_method: dict[str, np.ndarray | str] = {}
         try:
             hf = self._run_hf(fixture, n_total, h)
@@ -332,13 +344,21 @@ class MintFamilyParity(P3ParityCheck):
         n_total: int,
         h: int,
     ) -> dict[str, np.ndarray]:
-        """Best-effort hierarchicalforecast triangulation. Returns
-        a dict of method -> y_tilde arrays. Any HF runtime error
-        is captured by the caller (run_reference) and stored as
-        diagnostic, not asserted."""
-        # HF API has shifted across versions; on 1.5.x the entry
-        # point is HierarchicalReconciliation + MinTrace. The
-        # method-name mapping is in _HF_NAME above.
+        """hierarchicalforecast triangulation (the secondary
+        reference). Returns a dict of method -> y_tilde arrays, or an
+        "ERROR: ..." string for a method HF could not reconcile.
+        compare() reports a method whose HF arm did not run as CAVEAT
+        (H1: never absent under a PASS)."""
+        # HF 1.5.x API: reconcile(Y_hat_df, tags, S_df, Y_df), with S
+        # as a DataFrame (a unique_id column + one column per bottom
+        # series) and tags mapping each level to its series NAMES.
+        # H1: the port of the Phase 1 audit script passed S= (a numpy
+        # matrix) and index tags, which no 1.5.x accepts, so this arm
+        # raised a TypeError on every run - under the validated 1.5.1
+        # too - while the check reported PASS. With the 1.5.x call it
+        # reproduces the Phase 1 audit (TSL vs HF 4.4e-16 / 2.2e-16 /
+        # 2.2e-16 for ols / wls_variance / mint_shrinkage; HF refuses
+        # mint_cov on the rank-deficient W, as TSL does - Phase 1 B1).
         from hierarchicalforecast.methods import MinTrace
         from hierarchicalforecast.core import HierarchicalReconciliation
         import pandas as pd
@@ -353,47 +373,30 @@ class MintFamilyParity(P3ParityCheck):
         n_obs = residuals.shape[1]
         # Build the dataframes HF expects
         ids = [f"s{i}" for i in range(n_total)]
-        # y_insample / y_hat_insample for shrink-cov methods
-        y_insample = np.zeros((n_total, n_obs + 1))
-        y_insample[:, 1:] = residuals  # placeholder
-        y_hat_insample = np.zeros_like(y_insample)
+        S_df = pd.DataFrame(S, columns=ids[1:])
+        S_df.insert(0, "unique_id", ids)
+        tags = {"top": np.array(ids[:1]), "bottom": np.array(ids[1:])}
+        df_y_hat = pd.DataFrame([
+            {"unique_id": s, "ds": j, "y_hat": float(y_hat[i, j])}
+            for i, s in enumerate(ids) for j in range(h)
+        ])
+        # In-sample frame: HF derives residuals as y - y_hat, so the
+        # fixture residuals go in as y against a zero fit.
+        df_ins = pd.DataFrame([
+            {"unique_id": s, "ds": j, "y": float(residuals[i, j]), "y_hat": 0.0}
+            for i, s in enumerate(ids) for j in range(n_obs)
+        ])
 
         out: dict[str, np.ndarray] = {}
         for tsl_name, hf_name in _HF_NAME.items():
             try:
-                # NOTE: HF 1.5.x evolves frequently; this is a
-                # best-effort reconstruction. If the API doesn't
-                # match what's installed, capture and report.
                 rec = HierarchicalReconciliation(
                     reconcilers=[MinTrace(method=hf_name)],
                 )
-                # Build a minimal DataFrame structure
-                rows = []
-                for i, s in enumerate(ids):
-                    for j in range(h):
-                        rows.append({
-                            "unique_id": s,
-                            "ds": j,
-                            "y_hat": float(y_hat[i, j]),
-                        })
-                df_y_hat = pd.DataFrame(rows)
-                # Insample frames
-                ins_rows = []
-                for i, s in enumerate(ids):
-                    for j in range(n_obs):
-                        ins_rows.append({
-                            "unique_id": s,
-                            "ds": j,
-                            "y": float(residuals[i, j]),
-                            "y_hat": 0.0,
-                        })
-                df_ins = pd.DataFrame(ins_rows)
-                tags = {"top": np.array([0]), "bottom": np.arange(1, n_total)}
-                # Reconcile
                 reconciled = rec.reconcile(
                     Y_hat_df=df_y_hat,
-                    S=S,
                     tags=tags,
+                    S_df=S_df,
                     Y_df=df_ins,
                 )
                 # Extract per-id y_tilde over horizons → (n_total, h)
@@ -431,19 +434,59 @@ class MintFamilyParity(P3ParityCheck):
         per_method_metrics: dict[str, Any] = {}
         per_method_diag: dict[str, Any] = {}
         any_block = False
+        any_error = False
         any_inconclusive = False
+        # H1 — no silent arms: every non-BLOCK reason this check is not a
+        # clean PASS is named here and in diagnostics["not_clean"] (BLOCK
+        # reasons are the per-method metric statuses).
+        not_clean: list[str] = []
+        hf_all = ref.get("hf", {}) or {}
 
         for method in self.METHODS:
             tsl_m = tsl["per_method"].get(method, {})
             tsl_y = tsl_m.get("y_tilde")
             ref_y = ref["hts"].get(method)
 
-            if tsl_y is None or ref_y is None:
+            if tsl_y is None:
+                tsl_err = str(tsl_m.get("error", ""))
+                if method == "mint_sample" and _EXPECTED_B1_REFUSAL.match(tsl_err):
+                    # The documented expected refusal (Phase 1 B1): W is
+                    # rank-deficient on this perfectly coherent
+                    # hierarchy. Recognised by its exact message - the
+                    # engine's measured-rank refusal, not its "rank check
+                    # raised" fallback or any other failure - and only
+                    # while both references refuse too (hts NaN, HF
+                    # "ill-conditioned"); a reference that departs from
+                    # the documented refusal is reported (CAVEAT).
+                    hf_s = hf_all.get(method)
+                    hts_nan = ref_y is not None and not np.any(
+                        np.isfinite(np.asarray(ref_y, dtype=np.float64)))
+                    hf_refused = isinstance(hf_s, str) and "ill-conditioned" in hf_s
+                    per_method_metrics[method] = {
+                        "status": "expected_rank_deficient",
+                        "tsl_error": tsl_err,
+                        "hts_refused": hts_nan,
+                        "hf": hf_s if isinstance(hf_s, str) else "returned a result",
+                        "note": "Phase 1 B1: rank-deficient W on a perfectly coherent hierarchy",
+                    }
+                    if not hts_nan:
+                        not_clean.append(f"{method}: hts returned finite output where the "
+                                         "documented B1 refusal expects NaN")
+                    if not hf_refused:
+                        not_clean.append(f"{method}: hierarchicalforecast did not refuse "
+                                         f"mint_cov as documented ({hf_s if isinstance(hf_s, str) else 'returned a result'})")
+                    continue
                 per_method_metrics[method] = {
-                    "status": "missing",
-                    "tsl_ok": tsl_m.get("ok", False),
+                    "status": "tsl_error",
+                    "tsl_error": tsl_err or "TSL produced no output",
                 }
+                any_error = True
+                not_clean.append(f"{method}: the TSL engine failed ({tsl_err or 'no output'})")
+                continue
+            if ref_y is None:
+                per_method_metrics[method] = {"status": "missing_reference"}
                 any_inconclusive = True
+                not_clean.append(f"{method}: the hts reference produced no output")
                 continue
 
             ref_y = np.asarray(ref_y, dtype=np.float64)
@@ -454,10 +497,13 @@ class MintFamilyParity(P3ParityCheck):
                     "note": (
                         "rank-deficient W on perfectly coherent "
                         "hierarchies (Phase 1 B1) is the typical "
-                        "cause; not a regression"
+                        "cause; the engine is expected to REFUSE "
+                        "such a W (RankDeficientWMatrixError), so "
+                        "a NaN here is reported, not passed"
                     ),
                 }
                 any_inconclusive = True
+                not_clean.append(f"{method}: NaN in the TSL or hts output")
                 continue
 
             if tsl_y.shape != ref_y.shape:
@@ -484,16 +530,37 @@ class MintFamilyParity(P3ParityCheck):
                 "rms_diff": float(np.sqrt(np.mean(diff ** 2))),
             }
 
-            # HF cross-reference (diagnostic only)
-            hf_y = ref.get("hf", {}).get(method)
-            if isinstance(hf_y, np.ndarray):
-                try:
-                    hf_diff = float(np.max(np.abs(tsl_y - hf_y)))
-                    per_method_diag[f"{method}_tsl_vs_hf_max_abs"] = hf_diff
-                except Exception:
-                    pass
-            elif isinstance(hf_y, str):
-                per_method_diag[f"{method}_hf"] = hf_y
+            # HF cross-reference (secondary): compared on the same
+            # ladder; an arm that did not run, or disagrees, is CAVEAT.
+            hf_y = hf_all.get(method)
+            if isinstance(hf_y, np.ndarray) and hf_y.shape == tsl_y.shape:
+                hf_d = np.abs(tsl_y - hf_y)
+                hf_den = np.maximum(np.abs(tsl_y), np.abs(hf_y))
+                hf_den = np.where(hf_den < 1e-300, 1.0, hf_den)
+                hf_mx = float(np.max(hf_d))
+                hf_rel = float(np.max(hf_d / hf_den))
+                hf_ok = hf_mx <= abs_tol or hf_rel <= ladder["rel_tol"]
+                per_method_metrics[method]["hf"] = {
+                    "status": "PASS" if hf_ok else "CAVEAT",
+                    "max_abs_diff": hf_mx,
+                    "max_rel_diff": hf_rel,
+                }
+                per_method_diag[f"{method}_tsl_vs_hf_max_abs"] = hf_mx
+                if not hf_ok:
+                    not_clean.append(
+                        f"{method}: TSL vs hierarchicalforecast max abs diff "
+                        f"{hf_mx:.3g} beyond the ladder"
+                    )
+            else:
+                reason = (
+                    hf_y if isinstance(hf_y, str)
+                    else f"shape {getattr(hf_y, 'shape', None)} vs {tsl_y.shape}"
+                    if isinstance(hf_y, np.ndarray)
+                    else str(hf_all.get("_error", "no result"))
+                )
+                per_method_metrics[method]["hf"] = {"status": "unavailable", "reason": reason}
+                per_method_diag[f"{method}_hf"] = reason
+                not_clean.append(f"{method}: the hierarchicalforecast arm did not run ({reason})")
 
         # Schaefer-Strimmer lambda parity (mint_shrinkage only)
         lam_tsl = tsl.get("lambda_shrinkage")
@@ -512,14 +579,24 @@ class MintFamilyParity(P3ParityCheck):
             }
             if lam_diff > lam_abs_tol:
                 lambda_block = True
+        else:
+            per_method_metrics["lambda_shrinkage"] = {
+                "status": "unavailable", "tsl": lam_tsl, "hts": lam_hts,
+            }
+            any_inconclusive = True
+            not_clean.append(
+                f"lambda_shrinkage: not comparable (TSL {lam_tsl}, hts {lam_hts})"
+            )
 
+        # Worst first (base.aggregate_outcomes order): BLOCK > ERROR >
+        # CAVEAT > PASS. A CAVEAT names what could not be checked; it
+        # is not re-rolled (closed-form on a fixed fixture).
         if any_block or lambda_block:
             outcome = "BLOCK"
-        elif any_inconclusive:
-            # mint_sample's NaN path on rank-deficient W is an
-            # expected outcome the harness reports without
-            # blocking — see Phase 1 B1.
-            outcome = "PASS"
+        elif any_error:
+            outcome = "ERROR"
+        elif not_clean:
+            outcome = "CAVEAT"
         else:
             outcome = "PASS"
 
@@ -529,6 +606,8 @@ class MintFamilyParity(P3ParityCheck):
             metrics=per_method_metrics,
             diagnostics={
                 "hts_version": ref.get("hts_version", "unknown"),
+                "not_clean": not_clean,
                 **per_method_diag,
             },
+            error="; ".join(not_clean) if outcome == "ERROR" else "",
         )
