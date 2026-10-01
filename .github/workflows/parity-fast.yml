@@ -21,14 +21,22 @@ jobs:
     # grew because we ADDED validation), same response. 20 gives
     # real headroom (not another knife-edge) while keeping every
     # check on the per-push tier.
-    timeout-minutes: 20
+    # H1: bumped 20 -> 30. Pinning to the validated environment un-SKIPs
+    # p3_byf_coef_crosspkg (BVAR), p3_conformal_cqr (MAPIE), p3_star and
+    # p3_tar_setar (tsDyn), and adds the verify + self-test steps: the suite
+    # grew because checks that had silently stopped running run again.
+    # Typical ~18 min; the worst observed install (526 s) would leave only
+    # ~2 min under 25, so 30 - the same response as the earlier bumps.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.14"
+          # H1 / DP1: the dev interpreter that validated the engine and the
+          # interpreter build_pack ships (tools/build_pack.ps1 $pyVersion).
+          python-version: "3.14.3"
 
       - name: Validate install-matrix consistency (P-1 §8.5)
         # Phase 4 Session 11b: operational enforcement of P-1 §8.5
@@ -40,6 +48,12 @@ jobs:
         # See B-Phase4-S5-4 banked observation; S5 self-validating-
         # irony case study (P-1 §13.5.4).
         run: python tools/validate_install_matrix.py
+
+      - name: Install-matrix self-test
+        # H1: every validator rule (incl. the DP1 pinning rules) must be
+        # able to fire; tools/test_validate_install_matrix.py plants each
+        # violation. Stdlib only, so it runs before the installs.
+        run: python tools/test_validate_install_matrix.py
 
       - name: Install Python deps
         # torch 2.11.0 needed for 3f Transformer attention parity
@@ -103,9 +117,42 @@ jobs:
         # initially assumed slow-tier classification based on
         # default-chain 40s wall-clock; the audit's reduced-chain
         # design avoids that ceiling. See Session 5 findings doc.
+        #
+        # H1 (2026-09-30) — DP1: every environment that certifies the
+        # engine runs the validated versions. The package list above used
+        # to be installed UNPINNED; CI went red on statsmodels 0.15.0
+        # (grangercausalitytests lost `verbose`) and ran an environment we
+        # never ship. Every package now comes from lock files that mirror
+        # the dev interpreter exactly:
+        #   engine/requirements.lock.txt, engine/requirements.optional.lock.txt
+        #     (the engine locks; build_pack installs the same files), and
+        #   tools/reference_parity/requirements.harness.lock.txt (reference
+        #     packages + their whole closure, generated from the dev
+        #     interpreter by tools/reference_parity/make_harness_lock.py —
+        #     never a fresh resolve; adds MAPIE for p3_conformal_cqr).
+        # torch is the PyTorch-index CPU build (2.11.0+cpu, as on the dev
+        # interpreter), installed first without deps; the lock then pins
+        # its dependencies.
+        # --no-deps: the locks ARE the whole closure (make_harness_lock
+        # walks every installed requirement), and the validated interpreter
+        # itself is not resolver-consistent - it runs particles 0.4, which
+        # declares numpy<2, on numpy 2.4.4 (p3_particle_filter PASSes on
+        # it). pip's resolver refuses that set (ResolutionImpossible), and
+        # the old unpinned install had silently fallen back to particles
+        # 0.3 built from source. The verify step below proves the result
+        # is exactly the locks: nothing missing, nothing extra.
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install numpy scipy pandas hierarchicalforecast statsmodels torch==2.11.0 ewstools==2.1.2 pmdarima arch scikit-learn hmmlearn particles ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance numba pyyaml openpyxl
+          python -m pip install pip==25.3
+          python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu torch==2.11.0+cpu
+          python -m pip install --no-deps -r engine/requirements.lock.txt -r engine/requirements.optional.lock.txt -r tools/reference_parity/requirements.harness.lock.txt
+
+      - name: Verify the validated Python environment
+        # Fails if any pin is installed at another version, if anything no
+        # lock pins got installed (an unvalidated package), or if any
+        # requirement of a pinned package (extras honoured) is pinned by no
+        # lock - the completeness pass that proves --no-deps installed the
+        # whole closure.
+        run: python tools/check_pinned_env.py --extras fail --lock engine/requirements.lock.txt --lock engine/requirements.optional.lock.txt --lock tools/reference_parity/requirements.harness.lock.txt
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -133,6 +180,16 @@ jobs:
         #                Added in commit 853e1e6; CI install added
         #                in this commit (the fix for the run-fail
         #                emails on Sessions 4-6 pushes).
+        #   BVAR      -> p3_byf_coef_crosspkg (H1: it SKIPped in CI
+        #                on "BVAR missing"; PASSes on the dev machine)
+        # H1: every package comes from the Posit Package Manager
+        # snapshot of 2026-06-01, whose Windows binaries equal the dev
+        # machine's validated versions (MANIFEST.toml [r.packages]).
+        # "Latest CRAN" drifted (rugarch 1.5.6, tseries 0.10.63) and
+        # lost tsDyn outright: CRAN archived it between 2026-08-15 and
+        # 2026-09-01, R's installer only WARNED, and p3_star /
+        # p3_tar_setar SKIPped for a month. The next step fails the job
+        # if any listed package is absent.
         shell: Rscript {0}
         run: |
           install.packages(
@@ -148,9 +205,13 @@ jobs:
               # forecastHybrid (forecast-combination cross-check).
               # `seasonal` (X-13) deliberately omitted — requires
               # X-13 binary; p3_x13 SKIPs gracefully.
-              "lmtest", "tempdisagg", "forecastHybrid"),
-            repos = "https://cloud.r-project.org"
+              "lmtest", "tempdisagg", "forecastHybrid",
+              "BVAR"),
+            repos = "https://packagemanager.posit.co/cran/2026-06-01"
           )
+
+      - name: Verify the R packages
+        run: python tools/check_pinned_env.py --r-packages hts,forecast,vars,urca,extRemes,dlm,KFAS,rugarch,MARSS,depmixS4,MSwM,tsDyn,robustbase,lmtest,tempdisagg,forecastHybrid,BVAR
 
       - name: Run fast-tier parity checks
         # set +e + capture exit code so JSON contents are visible in

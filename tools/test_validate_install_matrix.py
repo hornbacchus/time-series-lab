@@ -9,6 +9,9 @@ fixtures. Validates:
   - Linux-only package allowlist (NOT enforced; one-directional check).
   - Rule 1 enforcement (MANIFEST → slow-tier).
   - Rule 2 enforcement (fast-tier ⊂ slow-tier).
+  - H1 / DP1: ``-r`` lock files read; Rule 3 (pinned installs),
+    Rule 4 (MANIFEST == locks), Rule 5 (dated R snapshot) each fire;
+    the drift canary is exempt. Run by ci_gate_local and parity-fast.yml.
 
 Run from repo root:
     python tools/test_validate_install_matrix.py
@@ -168,6 +171,69 @@ jobs:
     _assert("lin_pkg" in lin_r, "Linux pkg in lin_r")
 
 
+def _tmp_lock(text: str) -> str:
+    import tempfile
+    fh = tempfile.NamedTemporaryFile("w", suffix=".lock.txt", delete=False, encoding="utf-8")
+    fh.write(text)
+    fh.close()
+    return fh.name
+
+
+def test_requirement_files_are_read() -> None:
+    print("\n=== test_requirement_files_are_read (H1) ===")
+    lock = _tmp_lock("# comment\nMAPIE==1.3.0\nhierarchicalforecast==1.5.1\n")
+    yml = f"python -m pip install -r {lock} torch==2.11.0+cpu\n"
+    pkgs = vim.parse_pip_install_lines(yml)
+    _assert({"mapie", "hierarchicalforecast", "torch"} <= pkgs, f"lock names + inline pin read; got {pkgs}")
+    _assert(not any(p.endswith(".txt") for p in pkgs), "the lock file path is not taken for a package")
+    _assert(vim.pip_pins(yml) == {"mapie": "1.3.0", "hierarchicalforecast": "1.5.1", "torch": "2.11.0+cpu"},
+            "pins collected from the lock and the command line")
+
+
+def test_rule3_unpinned_fires() -> None:
+    print("\n=== test_rule3_unpinned_fires (H1) ===")
+    _assert(vim._check_pinned("t", "python -m pip install numpy==2.4.4 scipy\n") != [],
+            "a bare name is flagged")
+    _assert(vim._check_pinned("t", "python -m pip install --upgrade pip\n") != [],
+            "an unpinned self-upgrade is flagged")
+    bad_lock = _tmp_lock("numpy==2.4.4\nscipy>=1.13\n")
+    _assert(vim._check_pinned("t", f"python -m pip install -r {bad_lock}\n") != [],
+            "a non-exact line inside a lock file is flagged")
+    good = ("python -m pip install pip==25.3\n"
+            "python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu torch==2.11.0+cpu\n"
+            f"python -m pip install -r {_tmp_lock('numpy==2.4.4')}\n")
+    _assert(vim._check_pinned("t", good) == [], "exact pins, an index URL and a pinned lock pass")
+
+
+def test_rule4_manifest_equals_locks_fires() -> None:
+    print("\n=== test_rule4_manifest_equals_locks_fires (H1) ===")
+    v = vim._check_manifest_equals_locks({"statsmodels": "0.14.6"}, {"statsmodels": "0.15.0"})
+    _assert(len(v) == 1 and "statsmodels" in v[0], "a MANIFEST/lock version mismatch is flagged")
+    _assert(vim._check_manifest_equals_locks({"statsmodels": "0.14.6"}, {"statsmodels": "0.14.6"}) == [],
+            "equal versions pass")
+
+
+def test_rule5_r_snapshot_fires() -> None:
+    print("\n=== test_rule5_r_snapshot_fires (H1) ===")
+    cran = 'install.packages(c("hts"), repos = "https://cloud.r-project.org")'
+    _assert(vim._check_r_snapshot({"t": cran}) != [], "latest CRAN is flagged")
+    none = 'install.packages(c("hts"))'
+    _assert(vim._check_r_snapshot({"t": none}) != [], "a missing repos is flagged")
+    snap = 'install.packages(c("hts"), repos = "https://packagemanager.posit.co/cran/2026-06-01")'
+    _assert(vim._check_r_snapshot({"a": snap, "b": snap}) == [], "one dated snapshot passes")
+    other = snap.replace("2026-06-01", "2026-08-15")
+    _assert(vim._check_r_snapshot({"a": snap, "b": other}) != [], "two different dates are flagged")
+
+
+def test_canary_is_exempt() -> None:
+    print("\n=== test_canary_is_exempt (H1) ===")
+    yml = ("jobs:\n  fast:\n    steps:\n      - run: python -m pip install numpy==2.4.4\n"
+           "  canary:\n    steps:\n      - run: python -m pip install numpy\n")
+    gating, canary = vim.split_fast_workflow(yml)
+    _assert(vim._check_pinned("fast", gating) == [], "the gating job is pinned")
+    _assert("python -m pip install numpy\n" in canary, "the unpinned canary install sits after the marker")
+
+
 def test_real_manifest_clean() -> None:
     print("\n=== test_real_manifest_clean (live state check) ===")
     rc = vim.main()
@@ -184,6 +250,11 @@ if __name__ == "__main__":
     test_rule1_manifest_in_surface()
     test_rule2_fast_subset_of_slow()
     test_slow_tier_jobs_split()
+    test_requirement_files_are_read()
+    test_rule3_unpinned_fires()
+    test_rule4_manifest_equals_locks_fires()
+    test_rule5_r_snapshot_fires()
+    test_canary_is_exempt()
     test_real_manifest_clean()
 
     if _FAILURES:

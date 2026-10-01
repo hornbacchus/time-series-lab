@@ -19,9 +19,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.14"
+          # H1 / DP1: the validated dev interpreter (see parity-fast.yml).
+          python-version: "3.14.3"
 
       - name: Install Python deps
+        # H1 (2026-09-30) — DP1: installed from the lock files (engine locks
+        # + the harness locks generated from the dev interpreter; the slow
+        # lock adds pymc / arviz / pyextremes / tbats and their closure),
+        # never resolved fresh. See parity-fast.yml "Install Python deps".
+        #
         # Phase 3.5 Session 1 (Item 4): aligned slow-tier install
         # matrix with fast-tier deps so all 6 slow-tier checks
         # (2b/2c MCMC SV, p3_dfm, p3_prophet, p3_tbats, p3_x13)
@@ -36,8 +42,12 @@ jobs:
         # fast-tier check imports. p3_x13 still SKIPs gracefully
         # (X-13 binary not installable on Windows runner).
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles torch==2.11.0 ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance numba pyyaml openpyxl
+          python -m pip install pip==25.3
+          python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu torch==2.11.0+cpu
+          python -m pip install --no-deps -r engine/requirements.lock.txt -r engine/requirements.optional.lock.txt -r tools/reference_parity/requirements.harness.lock.txt -r tools/reference_parity/requirements.harness-slow.lock.txt
+
+      - name: Verify the validated Python environment
+        run: python tools/check_pinned_env.py --extras fail --lock engine/requirements.lock.txt --lock engine/requirements.optional.lock.txt --lock tools/reference_parity/requirements.harness.lock.txt --lock tools/reference_parity/requirements.harness-slow.lock.txt
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -78,8 +88,16 @@ jobs:
               # appear in slow-tier install. The validate_install_matrix.py
               # script surfaced this gap at S11b execution.
               "dtw"),
-            repos = "https://cloud.r-project.org"
+            # H1: the dated snapshot (see parity-fast.yml). Every package a
+            # check loads equals its MANIFEST pin there; fabletools
+            # (documentation-only, no check loads it) is 0.7.0 in this
+            # snapshot vs 0.6.1 pinned - no snapshot date matches every pin -
+            # so the verify step's fabletools version warning is expected.
+            repos = "https://packagemanager.posit.co/cran/2026-06-01"
           )
+
+      - name: Verify the R packages
+        run: python tools/check_pinned_env.py --r-packages hts,stochvol,urca,extRemes,forecast,vars,tseries,fable,fabletools,evir,POT,rugarch,dlm,KFAS,quantreg,MARSS,depmixS4,MSwM,tsDyn,robustbase,lmtest,tempdisagg,forecastHybrid,BVAR,dtw
 
       - name: Run slow-tier parity checks
         # CI exit-code policy: same as parity-fast.yml — CAVEAT
@@ -137,7 +155,11 @@ jobs:
   # binary), so this lives in slow-tier per the >5-min rule
   # in the Session 6 prompt's Step 2 decision tree.
   slow-linux:
-    runs-on: ubuntu-latest
+    # H1: pinned to ubuntu-24.04, not ubuntu-latest: actions/python-versions
+    # publishes the validated Python 3.14.3 for Ubuntu 22.04/24.04 only, so a
+    # silent ubuntu-latest move would fail "Set up Python". Move the runner
+    # and python-version together at a deliberate lock refresh.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -145,7 +167,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.14"
+          python-version: "3.14.3"
 
       - name: Install Python deps (Linux)
         # Mirrors Windows install matrix. torch installed via
@@ -153,10 +175,19 @@ jobs:
         # CUDA wheel; we don't have GPU on GitHub-hosted
         # ubuntu-latest runners and don't need GPU acceleration
         # for parity checks anyway).
+        # H1: the same lock files as Windows, --no-deps, so Linux gets
+        # exactly the (Windows-derived) validated closure. A requirement
+        # that applies only on Linux is therefore NOT installed; the verify
+        # step's completeness pass reports each one as a warning (today:
+        # xgboost -> nvidia-nccl-cu12, used only for multi-GPU, never on
+        # CPU).
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.11.0
-          python -m pip install numpy scipy pandas hierarchicalforecast pyextremes tbats arch pmdarima statsmodels pymc arviz scikit-learn hmmlearn particles ewstools==2.1.2 ruptures astropy PyWavelets EMD-signal pyts xgboost lightgbm reservoirpy prophet dtaidistance numba pyyaml openpyxl
+          python -m pip install pip==25.3
+          python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu torch==2.11.0+cpu
+          python -m pip install --no-deps -r engine/requirements.lock.txt -r engine/requirements.optional.lock.txt -r tools/reference_parity/requirements.harness.lock.txt -r tools/reference_parity/requirements.harness-slow.lock.txt
+
+      - name: Verify the validated Python environment (Linux)
+        run: python tools/check_pinned_env.py --extras fail --unpinned-requirements warn --lock engine/requirements.lock.txt --lock engine/requirements.optional.lock.txt --lock tools/reference_parity/requirements.harness.lock.txt --lock tools/reference_parity/requirements.harness-slow.lock.txt
 
       - name: Install system libraries for R package compilation (libcurl/libssl/libxml2)
         # Post-Phase-5-cycle-close operational hygiene per
@@ -206,8 +237,13 @@ jobs:
               # job per §8.5 four-surface gate. See parity-slow.yml
               # Windows job for the same dtw entry's context.
               "dtw"),
-            repos = "https://cloud.r-project.org"
+            # H1: the same dated snapshot as Windows (source packages
+            # on Linux, compiled as before).
+            repos = "https://packagemanager.posit.co/cran/2026-06-01"
           )
+
+      - name: Verify the R packages (Linux)
+        run: python tools/check_pinned_env.py --r-packages hts,stochvol,urca,extRemes,forecast,vars,tseries,fable,fabletools,evir,POT,rugarch,dlm,KFAS,quantreg,MARSS,depmixS4,MSwM,tsDyn,robustbase,lmtest,tempdisagg,forecastHybrid,x13binary,seasonal,BVAR,dtw
 
       - name: Resolve X-13 binary path (export TSL_X13_BINARY_PATH)
         # PHASE 4 SESSION 2 (2026-05-01) — P4-2 pathway (c) closure.

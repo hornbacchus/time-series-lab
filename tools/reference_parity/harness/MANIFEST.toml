@@ -122,6 +122,17 @@ forecastHybrid = "5.1.21"
 # (5e-3 abs / 5e-2 rel). Pre-flight verified at S4 (v1.0.5
 # installs cleanly on R 4.5.3).
 BVAR = "1.0.5"
+# H1 (2026-09-30): R packages the fast-tier checks load that were never
+# pinned here (the harness reported "Manifest expected: ?"): tsDyn
+# (p3_star / p3_tar_setar), MSwM (p3_markov_switching), depmixS4 (p3_hmm),
+# MARSS (p3_dfm). Versions = the dev machine's. tsDyn was ARCHIVED from
+# CRAN between 2026-08-15 and 2026-09-01, so CI installs every R package
+# from the Posit Package Manager snapshot of 2026-06-01, whose Windows
+# binaries match these pins (and every other check-loaded pin below).
+tsDyn = "11.0.5.2"
+MSwM = "1.5"
+depmixS4 = "1.5.1"
+MARSS = "3.11.10"
 # Phase 2 (SEATS mode-switch build, 2026-06-21) — x13binary + seasonal are
 # LINUX-SLOW-JOB-ONLY extras, intentionally NOT listed as [r.packages] keys.
 # They wrap the same Census X-13 binary TSL drives (seas() defaults to SEATS);
@@ -199,6 +210,13 @@ dtaidistance = "2.4.0"
 numba = "0.65.0"
 PyYAML = "6.0.3"
 openpyxl = "3.1.5"
+# H1 (2026-09-30): MAPIE is the p3_conformal_cqr / p3_conformal_enbpi
+# reference; CI never installed it, so p3_conformal_cqr SKIPped in CI while
+# it PASSed on the dev interpreter. CI now installs every Python package
+# from the engine locks + tools/reference_parity/requirements.harness*.lock.txt
+# (generated from the dev interpreter by make_harness_lock.py); the versions
+# here must equal those locks (validate_install_matrix Rule 4).
+MAPIE = "1.3.0"
 
 # Tier policy — which checks run in fast vs slow workflows.
 # The runner reads the per-check ``tier`` class attribute; this

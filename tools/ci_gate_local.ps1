@@ -19,6 +19,15 @@ CI exit-code policy (per parity-fast.yml + master plan §3.3 / P-1 §6.4):
 Step order is fast-first (early failure feedback on a broken cheap step); the step SET
 and the GREEN verdict are identical to CI. Fail-fast: stops at the first failing step.
 
+H1 (DP1): CI installs the validated environment from lock files and verifies it
+(tools/check_pinned_env.py); this gate runs on the dev interpreter, which IS that
+environment, so instead of installing it verifies the other direction: the harness
+locks still equal the dev interpreter (make_harness_lock.py --check), the dev
+interpreter still satisfies every pin with a complete closure (check_pinned_env,
+the one deliberate difference: unpinned EXTRA packages only warn here, because the
+dev interpreter legitimately carries other projects' packages), and every R package
+the fast job installs is present. A lock that drifted from the validated interpreter,
+or misses a requirement, is RED here as well as in CI.
 
 The parity step is diagnosable (H1, after two RED runs that died with exit 1 and no
 verdict): Python runs unbuffered with faulthandler on, the runner brackets every check
@@ -143,6 +152,18 @@ Write-Host "ci_gate_local — mirroring parity-fast.yml (repo: $repo)" -Foregrou
 # Fast gates first (cheap, early failure feedback) ...
 Invoke-GateStep -Name "validate_install_matrix" `
     -PyArgs @("tools/validate_install_matrix.py") -Accept @(0)
+Invoke-GateStep -Name "install-matrix self-test" `
+    -PyArgs @("tools/test_validate_install_matrix.py") -Accept @(0)
+Invoke-GateStep -Name "harness locks == dev interpreter" `
+    -PyArgs @("tools/reference_parity/make_harness_lock.py", "--check") -Accept @(0)
+Invoke-GateStep -Name "validated Python environment" `
+    -PyArgs @("tools/check_pinned_env.py", "--extras", "warn",
+              "--lock", "engine/requirements.lock.txt",
+              "--lock", "engine/requirements.optional.lock.txt",
+              "--lock", "tools/reference_parity/requirements.harness.lock.txt") -Accept @(0)
+Invoke-GateStep -Name "R packages" `
+    -PyArgs @("tools/check_pinned_env.py", "--r-packages",
+              "hts,forecast,vars,urca,extRemes,dlm,KFAS,rugarch,MARSS,depmixS4,MSwM,tsDyn,robustbase,lmtest,tempdisagg,forecastHybrid,BVAR") -Accept @(0)
 Invoke-GateStep -Name "catalog_key_alignment guard" `
     -PyArgs @("tools/reference_parity/catalog_key_alignment.py") -Accept @(0)
 Invoke-GateStep -Name "engine unit tests" `

@@ -212,6 +212,27 @@ For Session 5 generator abstraction:
 
 ## 3. CI workflows
 
+> **Current install process (H1, 2026-09-30) — supersedes the install lines and
+> the "append to the pip install step" advice below, which describe the Phase 2
+> state.** DP1: every environment that certifies the engine runs the validated
+> versions. The gating jobs (parity-fast `fast`, both parity-slow jobs) install
+> Python 3.14.3 and every Python package from lock files only:
+> `engine/requirements.lock.txt`, `engine/requirements.optional.lock.txt`, and
+> `requirements.harness.lock.txt` / `requirements.harness-slow.lock.txt` in this
+> folder, which `make_harness_lock.py` writes from the dev interpreter's installed
+> metadata (never a fresh resolve), installed with `pip install --no-deps` because
+> the locks are the whole closure and the validated set is not resolver-consistent
+> (particles 0.4 declares numpy<2 yet runs, validated, on numpy 2.4.4). A new Python reference: install it on the dev
+> interpreter, add it to `FAST_ROOTS` / `SLOW_ROOTS` in `make_harness_lock.py`,
+> re-run the script, pin it in `harness/MANIFEST.toml` at the same version. R
+> packages come from one dated Posit Package Manager snapshot
+> (`https://packagemanager.posit.co/cran/2026-06-01`). `tools/check_pinned_env.py`
+> fails a job whose installed versions differ from the locks or whose R packages
+> are missing, and `tools/validate_install_matrix.py` (Rules 3-5) fails an unpinned
+> install, a MANIFEST/lock mismatch, or an undated R repository. parity-fast's
+> non-gating `canary` job runs the same tier against the latest versions and
+> summarizes what would change.
+
 ### 3.1 `parity-fast.yml` — content + structure
 
 Triggers: `pull_request` + `push` to `master`. Runs on `windows-latest`, `timeout-minutes: 10`.
