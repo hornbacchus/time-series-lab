@@ -55,6 +55,20 @@ jobs:
         # violation. Stdlib only, so it runs before the installs.
         run: python tools/test_validate_install_matrix.py
 
+      - name: House dialogs self-test
+        # A2 U4 (docs/HOUSE_STYLE.md): the check below plants each case
+        # (MessageBox in any form, user32 P/Invoke, TaskDialog, input boxes,
+        # Excel's dialogs and file pickers, the common dialogs; comments and
+        # strings that only mention them; the helper's own files) and must
+        # give each its planted verdict. Stdlib only.
+        run: python tools/check_house_dialogs.py --self-test
+
+      - name: House dialogs
+        # Every add-in message goes through the house dialog helper
+        # (src/TSL.UI/HouseDialog.cs); any other dialog call in src/TSL.AddIn
+        # or src/TSL.UI fails here, naming file:line.
+        run: python tools/check_house_dialogs.py
+
       - name: Install Python deps
         # torch 2.11.0 needed for 3f Transformer attention parity
         # (.pt fixture loading via FixtureLoader._load_pt; added in

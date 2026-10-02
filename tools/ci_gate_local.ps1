@@ -29,6 +29,9 @@ dev interpreter legitimately carries other projects' packages), and every R pack
 the fast job installs is present. A lock that drifted from the validated interpreter,
 or misses a requirement, is RED here as well as in CI.
 
+A2 U4 adds the house-dialog check (tools/check_house_dialogs.py, with its self-test
+first): no native dialog in the add-in's C# outside the house dialog helper.
+
 The parity step is diagnosable (H1, after two RED runs that died with exit 1 and no
 verdict): Python runs unbuffered with faulthandler on, the runner brackets every check
 with "[parity] start/done" lines, and the whole output streams to a log under %TEMP%
@@ -154,6 +157,12 @@ Invoke-GateStep -Name "validate_install_matrix" `
     -PyArgs @("tools/validate_install_matrix.py") -Accept @(0)
 Invoke-GateStep -Name "install-matrix self-test" `
     -PyArgs @("tools/test_validate_install_matrix.py") -Accept @(0)
+# A2 U4 (docs/HOUSE_STYLE.md): no native dialog in the add-in outside the house dialog
+# helper. The self-test plants each case first, so the check below can fire.
+Invoke-GateStep -Name "house dialogs self-test" `
+    -PyArgs @("tools/check_house_dialogs.py", "--self-test") -Accept @(0)
+Invoke-GateStep -Name "house dialogs" `
+    -PyArgs @("tools/check_house_dialogs.py") -Accept @(0)
 Invoke-GateStep -Name "harness locks == dev interpreter" `
     -PyArgs @("tools/reference_parity/make_harness_lock.py", "--check") -Accept @(0)
 Invoke-GateStep -Name "validated Python environment" `
