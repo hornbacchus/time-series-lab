@@ -69,11 +69,13 @@ namespace TSL.UI.ViewModels
             CheckEngineCommand = new RelayCommand(OnCheckEngine);
         }
 
+        // These three controls change nothing outside this page (A2 N8; the Settings view is
+        // rebuilt around real settings in A2 U7). Until then each says what is actually true
+        // (house style: nothing reads as an action that did not happen).
         private void OnBrowseEnginePath()
         {
-            // In a real implementation the AddIn layer would show a FolderBrowserDialog.
-            // The ViewModel exposes a callback/event for this; the View or AddIn wires it.
-            StatusMessage = "Use the AddIn ribbon to configure the engine path.";
+            StatusMessage = "Time Series Lab finds its engine by itself, so there is no path to set. " +
+                            "Help > About shows the engine in use.";
         }
 
         private void OnResetDefaults()
@@ -82,12 +84,14 @@ namespace TSL.UI.ViewModels
             AutoDetectFrequency = true;
             ShowFormulaHints = true;
             CreateSeparateSheets = true;
-            StatusMessage = "Settings reset to defaults.";
+            StatusMessage = "This page shows its default values again. Nothing was saved: these settings do not " +
+                            "change how runs work yet. To choose the preset, use the Preset menu in the Run group.";
         }
 
         private void OnCheckEngine()
         {
-            StatusMessage = "Engine check requested. See ribbon status.";
+            StatusMessage = "Nothing was checked: the engine is checked each time a run starts. " +
+                            "Help > About shows whether it is running.";
         }
     }
 }

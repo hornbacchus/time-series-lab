@@ -38,6 +38,14 @@ namespace TSL.AddIn.Models
         [JsonProperty("error_fixes")]
         public List<string> ErrorFixes { get; set; }
 
+        /// <summary>
+        /// True for a failure the add-in made itself (identity mismatch, stalled, missing or
+        /// unreadable reply): its ErrorMessage is already a complete house message. Never
+        /// read from or written to the engine's JSON.
+        /// </summary>
+        [JsonIgnore]
+        public bool FromAddIn { get; set; }
+
         // Plain-language Interpretation block (Prompt A, two required tiers
         // + optional Tier 3 caveats). Nullable — techniques that have not
         // yet been wired (most of them during Prompt A) omit the key from

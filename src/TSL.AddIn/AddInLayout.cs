@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using ExcelDna.Integration;
+using TSL.UI;
 
 namespace TSL.AddIn
 {
@@ -47,7 +48,7 @@ namespace TSL.AddIn
 
         public static string KindLabel =>
             Kind == LayoutKind.Installed ? "Installed" :
-            Kind == LayoutKind.Development ? "Development tree" : "Unrecognised";
+            Kind == LayoutKind.Development ? "Development tree" : "Unrecognized";
 
         /// <summary>
         /// Classify a layout from an XLL path. Pure (file-system reads only), so the
@@ -112,37 +113,57 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// The one user-facing "file not found" message: names what was wanted, the
-        /// exact path tried and where the add-in was loaded from. Never advises a
-        /// reinstall on a guess.
+        /// The one "file not found" text: names what was wanted, the exact path tried and
+        /// where the add-in was loaded from (house style: each path on its own indented
+        /// lines). It says what happened; the caller adds the state and what to do. Never
+        /// advises a reinstall on a guess.
         /// </summary>
-        public static string MissingMessage(string what, string tried)
+        internal static string MissingMessage(string what, string tried)
         {
+            if (Kind == LayoutKind.Unknown)
+            {
+                // No layout: nothing was looked up, so say what the add-in expected instead.
+                return $"Time Series Lab could not find the {what}, because it could not find its own files.\n\n" +
+                       "It expected one of these:\n" + HouseDialog.Indent(UnknownLayoutDescription()) + "\n\n" +
+                       "The add-in was loaded from:\n" + HouseDialog.Indent(XllPath);
+            }
             return $"Time Series Lab could not find the {what}.\n\n" +
-                   $"It looked here:\n{tried}\n\n" +
-                   $"Add-in loaded from:\n{XllPath}\n({KindLabel} layout)";
+                   "It looked here:\n" + HouseDialog.Indent(tried) + "\n\n" +
+                   "The add-in was loaded from:\n" + HouseDialog.Indent(XllPath) + "\n\n" +
+                   "Layout:\n" + HouseDialog.Indent(KindLabel);
         }
 
-        /// <summary>Log and show MissingMessage; the single site for a content miss.</summary>
-        public static void ReportMissing(string what, string tried)
+        /// <summary>
+        /// Log and show MissingMessage as a house error for the action <paramref name="area"/>
+        /// (its ribbon label); the single site for a content miss.
+        /// </summary>
+        internal static void ReportMissing(string area, string what, string tried,
+            string whatToDo = HouseDialog.TellMatthew)
         {
-            var message = MissingMessage(what, tried);
+            var message = MissingMessage(what, tried) + "\n\nNothing was changed. " + whatToDo;
             Logger.Warn(message.Replace("\n", " | "));
-            System.Windows.Forms.MessageBox.Show(
-                message,
-                "Time Series Lab",
-                System.Windows.Forms.MessageBoxButtons.OK,
-                System.Windows.Forms.MessageBoxIcon.Warning);
+            HouseDialog.ShowHouseAlert(message, HouseDialog.Title(area), isError: true);
         }
 
+        /// <summary>
+        /// The two places the add-in looks for its own files (one per line): the installed
+        /// engine worker beside the add-in's folder, or a repository's TimeSeriesLab.sln.
+        /// </summary>
         private static string UnknownLayoutDescription()
         {
             var xll = XllPath;
-            string xllDir = null;
-            try { xllDir = string.IsNullOrEmpty(xll) ? null : Path.GetDirectoryName(xll); } catch { }
-            return "(the add-in's files could not be located)\n" +
-                   $"Expected either {Path.Combine(xllDir ?? "<add-in folder>", "..", "engine", "engine_worker.py")} " +
-                   "(installed) or a TimeSeriesLab.sln above the add-in (development).";
+            string worker = "<the add-in's folder>\\..\\engine\\engine_worker.py";
+            try
+            {
+                var xllDir = string.IsNullOrEmpty(xll) ? null : Path.GetDirectoryName(xll);
+                if (!string.IsNullOrEmpty(xllDir))
+                    worker = Path.GetFullPath(Path.Combine(xllDir, "..", "engine", "engine_worker.py"));
+            }
+            catch
+            {
+                // keep the placeholder
+            }
+            return worker + "\n" + "a TimeSeriesLab.sln in a folder above the add-in";
         }
 
         private static string SafeXllPath()

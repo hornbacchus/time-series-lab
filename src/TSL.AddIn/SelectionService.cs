@@ -37,7 +37,18 @@ namespace TSL.AddIn
             public string TimeCandidateAddress { get; set; }
             public List<string> Warnings { get; set; } = new List<string>();
             public bool Success { get; set; }
+
+            /// <summary>
+            /// What was wrong with the selection, as one plain house sentence (the caller
+            /// adds the state and what to do). Null on success.
+            /// </summary>
             public string ErrorMessage { get; set; }
+
+            /// <summary>True when the selection could not be read at all (an error, not a refusal).</summary>
+            public bool ReadFailed { get; set; }
+
+            /// <summary>The raw error text when <see cref="ReadFailed"/>; shown after ErrorMessage.</summary>
+            public string ErrorDetail { get; set; }
         }
 
         private readonly bool _numericCoercion;
@@ -61,7 +72,7 @@ namespace TSL.AddIn
 
                 if (selection == null)
                 {
-                    result.ErrorMessage = "No range selected. Please select data columns first.";
+                    result.ErrorMessage = "The selection is not a range of cells.";
                     return result;
                 }
 
@@ -80,7 +91,7 @@ namespace TSL.AddIn
 
                 if (result.Series.Count == 0)
                 {
-                    result.ErrorMessage = "No numeric data found in selection. Select columns containing numbers.";
+                    result.ErrorMessage = "The selection contains no numbers.";
                     return result;
                 }
 
@@ -88,7 +99,9 @@ namespace TSL.AddIn
             }
             catch (Exception ex)
             {
-                result.ErrorMessage = $"Selection extraction failed: {ex.Message}";
+                result.ErrorMessage = "Time Series Lab could not read the selection.";
+                result.ReadFailed = true;
+                result.ErrorDetail = ex.Message;
                 Logger.Error("Selection extraction failed.", ex);
             }
 

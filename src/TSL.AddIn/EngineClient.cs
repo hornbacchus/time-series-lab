@@ -10,6 +10,7 @@ using ExcelDna.Integration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TSL.AddIn.Models;
+using TSL.UI;
 
 namespace TSL.AddIn
 {
@@ -226,14 +227,25 @@ namespace TSL.AddIn
             var generation = Volatile.Read(ref _cancelGeneration);
             Volatile.Write(ref _verified, null);
 
-            var pythonExe = ResolvePythonExe();
+            // A missing runtime or worker is a complete house refusal (shown as it is):
+            // what was missing and where it looked, then the state and who to tell.
+            string pythonExe;
+            try
+            {
+                pythonExe = ResolvePythonExe();
+            }
+            catch (FileNotFoundException ex)
+            {
+                throw new EngineStartException(ex.Message + "\n\nNothing was run. " + HouseDialog.TellMatthew);
+            }
 
             // ONE location, from the add-in's layout (AddInLayout): <root>\engine\engine_worker.py.
             var workerScript = AddInLayout.FindFile(out var workerTried, "engine", "engine_worker.py");
             if (workerScript == null)
             {
-                throw new FileNotFoundException(
-                    AddInLayout.MissingMessage("engine worker script (engine_worker.py)", workerTried));
+                throw new EngineStartException(
+                    AddInLayout.MissingMessage("engine worker script (engine_worker.py)", workerTried) +
+                    "\n\nNothing was run. " + HouseDialog.TellMatthew);
             }
 
             // A pipe name for this start alone (see the constructor).
@@ -492,7 +504,7 @@ namespace TSL.AddIn
                 {
                     RunId = request.RunId,
                     Status = "canceled",
-                    PlainEnglishSummary = "Run was canceled by user.",
+                    PlainEnglishSummary = CanceledMessage,
                     Warnings = new System.Collections.Generic.List<string> { "Run canceled." }
                 };
             }
@@ -503,21 +515,33 @@ namespace TSL.AddIn
                 {
                     RunId = request.RunId,
                     Status = "canceled",
-                    PlainEnglishSummary = "Run was canceled by user.",
+                    PlainEnglishSummary = CanceledMessage,
                     Warnings = new System.Collections.Generic.List<string> { "Run canceled." }
                 };
             }
 
-            var result = JsonConvert.DeserializeObject<RunResponse>(responseJson);
+            RunResponse result;
+            try
+            {
+                result = JsonConvert.DeserializeObject<RunResponse>(responseJson);
+            }
+            catch (JsonException ex)
+            {
+                Logger.Error($"Run {request.RunId}: the engine's reply could not be read ({ex.Message}).");
+                result = null;
+            }
             if (result == null)
             {
                 return new RunResponse
                 {
                     RunId = request.RunId,
                     Status = "failure",
-                    ErrorMessage = "Invalid response format from engine.",
+                    ErrorMessage = UnreadableReplyMessage,
+                    FromAddIn = true,
                 };
             }
+            // The add-in's own stall and no-reply failures are complete house messages.
+            result.FromAddIn = !fromEngine;
 
             // Every final response the engine sends must carry the engine_version that
             // engine proved at its handshake; a missing or different one is refused,
@@ -537,6 +561,7 @@ namespace TSL.AddIn
                         Status = "failure",
                         ErrorMessage = EngineIdentity.MismatchMessage(BuildInfo.Stamp,
                             string.IsNullOrEmpty(reported) ? "(not reported)" : reported),
+                        FromAddIn = true,
                     };
                 }
             }
@@ -708,7 +733,7 @@ namespace TSL.AddIn
 
                 return finalResponse != null
                     ? (finalResponse, true, session)
-                    : ("{\"status\":\"failure\",\"error_message\":\"No response from engine.\"}", false, session);
+                    : (FailureJson(NoReplyMessage), false, session);
             }
         }
 
@@ -764,21 +789,36 @@ namespace TSL.AddIn
             Interlocked.CompareExchange(ref _session, null, session);
         }
 
+        // The add-in's own run failures (house style: what happened and the state, then
+        // what to do). They reach the task pane as they are (RunResponse.FromAddIn) and
+        // worksheet functions as "ERROR: <text>".
+        private const string CanceledMessage = "The run was canceled. Nothing was written.";
+
+        private const string NoReplyMessage =
+            "The analysis engine closed the connection without a result, so the run did not complete. " +
+            "Nothing was written.\n\n" +
+            "Try again. If this message returns, tell Matthew Hornbach.";
+
+        private const string UnreadableReplyMessage =
+            "The analysis engine sent a reply that Time Series Lab could not read, so the run did not complete. " +
+            "Nothing was written.\n\n" +
+            "Try again. If this message returns, tell Matthew Hornbach.";
+
+        private static readonly string StallMessage =
+            $"The analysis engine stopped responding (no progress for over {HeartbeatTimeoutMs / 1000} seconds) " +
+            "and was stopped, so the run did not complete. Nothing was written.\n\n" +
+            "Try again; the engine restarts by itself. If this keeps happening, close Excel and start it again, " +
+            "then tell Matthew Hornbach.";
+
+        private static string FailureJson(string message) =>
+            new JObject { ["status"] = "failure", ["error_message"] = message }.ToString(Formatting.None);
+
         /// <summary>
         /// The failure RunResponse (as JSON) returned when the response heartbeat
         /// watchdog fires — surfaced in the Task Pane via the normal failure path
         /// instead of hanging Excel indefinitely.
         /// </summary>
-        private static string BuildStallFailureJson()
-        {
-            return
-                "{\"status\":\"failure\","
-                + "\"error_message\":\"The engine stopped responding while returning results "
-                + "(no progress for over " + (HeartbeatTimeoutMs / 1000) + " seconds) and was "
-                + "stopped. The run did not complete.\","
-                + "\"error_fixes\":[\"Run the technique again \\u2014 the engine relaunches "
-                + "automatically.\",\"If this keeps happening, restart Excel.\"]}";
-        }
+        private static string BuildStallFailureJson() => FailureJson(StallMessage);
 
         public void Shutdown()
         {

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
+using TSL.UI;
 
 namespace TSL.AddIn
 {
@@ -24,6 +25,18 @@ namespace TSL.AddIn
 
         public void AutoOpen()
         {
+            // House dialogs (docs/HOUSE_STYLE.md): owned by and centred on Excel's main
+            // window, shown on this (Excel's) thread, one log line per dialog. First, so
+            // even a failure below is reported through it.
+            try
+            {
+                HouseDialog.Initialize(() => ExcelDnaUtil.WindowHandle, message => Logger.Info(message));
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"House dialog initialization failed: {ex.Message}");
+            }
+
             try
             {
                 // Ensure app data directory exists
@@ -57,21 +70,37 @@ namespace TSL.AddIn
 
                 // Delay ribbon COM add-in registration so TSL tab appears
                 // after external COM add-ins (e.g. Acrobat) in the ribbon.
+                // A failure inside the queued step is reported, not dropped: it runs after
+                // AutoOpen has returned, so the catch below never sees it.
                 ExcelAsyncUtil.QueueAsMacro(() =>
                 {
-                    ExcelComAddInHelper.LoadComAddIn(new Ribbon());
+                    try
+                    {
+                        ExcelComAddInHelper.LoadComAddIn(new Ribbon());
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Registering the Time Series Lab ribbon tab failed.", ex);
+                        HouseDialog.ShowHouseAlert(
+                            "Time Series Lab could not add its tab to the ribbon, so its commands are not available " +
+                            "in this Excel session. Its worksheet functions may still work.\n\n" +
+                            HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                            "Close Excel and start it again. If this message returns, tell Matthew Hornbach.",
+                            HouseDialog.Title(), isError: true);
+                    }
                 });
 
                 Logger.Info("Time Series Lab add-in loaded successfully.");
             }
             catch (Exception ex)
             {
-                Logger.Error($"Failed to initialize Time Series Lab: {ex.Message}");
-                System.Windows.Forms.MessageBox.Show(
-                    $"Time Series Lab failed to initialize:\n\n{ex.Message}\n\nCheck logs at: {Path.Combine(AppDataPath, "logs")}",
-                    "Time Series Lab - Error",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Error);
+                Logger.Error("Failed to initialize Time Series Lab.", ex);
+                HouseDialog.ShowHouseAlert(
+                    "Time Series Lab did not finish starting, so it may not work in this Excel session.\n\n" +
+                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                    "The log has the details:\n" + HouseDialog.Indent(Path.Combine(AppDataPath, "logs")) + "\n\n" +
+                    "Close Excel and start it again. If this message returns, tell Matthew Hornbach.",
+                    HouseDialog.Title(), isError: true);
             }
         }
 

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Office.Interop.Excel;
 using TSL.AddIn.Models;
+using TSL.UI;
 using TSL.UI.ViewModels;
 
 namespace TSL.AddIn
@@ -27,6 +27,41 @@ namespace TSL.AddIn
         // actually abort the run (in addition to the hard engine kill).
         private static System.Threading.CancellationTokenSource _activeRunCts;
 
+        // House-message areas (docs/HOUSE_STYLE.md, A2 ratification Q2): every message
+        // names the action it came from, written exactly as its button is labelled.
+        // The Techniques group's Quick Action buttons (RibbonXml.cs grpQuickActions),
+        // technique id -> ribbon label; keep in step with the ribbon.
+        private static readonly Dictionary<string, string> QuickActionLabels =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "var", "VAR" },
+                { "pca_analysis", "PCA" },
+                { "dynamic_factor_model", "DFM" },
+                { "vecm", "Cointegration" },
+                { "granger_causality", "Granger" },
+                { "rolling_ccf_lag", "Rolling CCF" },
+                { "stl_decompose", "Seasonal Adj" },
+                { "auto_arima", "Forecast" },
+                { "prophet_forecast", "Prophet" },
+                { "conformal_intervals", "Conformal" },
+                { "markov_switching", "Regime Switch" },
+                { "pelt_change_points", "Change Point" },
+                { "garch", "GARCH" },
+                { "structural_ts", "Structural TS" },
+            };
+
+        // The Bespoke group's tools (RibbonXml.cs grpBespoke), technique id -> menu label.
+        private static readonly Dictionary<string, string> BespokeLabels =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "bond_yield_forecast", "Bond Yield Forecast" },
+                { "breakeven_payroll", "Breakeven Payrolls" },
+                { "kronos_forecast", "Kronos Forecast" },
+            };
+
+        private const string RunArea = "Run";
+        private const string ExplorerArea = "Technique Explorer";
+
         /// <summary>
         /// Show the task pane (create if needed) and open the Technique
         /// Explorer pre-selected to <paramref name="techniqueId"/>. Used by
@@ -35,7 +70,7 @@ namespace TSL.AddIn
         /// </summary>
         public static void ShowAndSelect(string techniqueId)
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane(ExplorerArea)) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToTechnique(techniqueId);
         }
@@ -52,13 +87,23 @@ namespace TSL.AddIn
         /// </summary>
         public static void RunTechnique(string techniqueId)
         {
-            EnsureTaskPane();
+            // A ribbon Quick Action: its messages carry the button's label (A2 Q2).
+            QuickActionLabels.TryGetValue(techniqueId ?? "", out var label);
+            OpenPopulated(techniqueId, label, label != null ? $"click {label} again" : "try again");
+        }
+
+        /// <summary>
+        /// Fill the Run view from the selection and WAIT (execute:false): the user's Run
+        /// click (RunRequested → OnRunRequested) runs it. Mirrors the Bespoke OpenXxxConfig
+        /// open-pane-then-wait. <paramref name="area"/> and <paramref name="retry"/> word
+        /// the selection refusals for the action that launched it.
+        /// </summary>
+        private static void OpenPopulated(string techniqueId, string area, string retry)
+        {
+            if (!EnsureTaskPane(area)) return;
             _taskPane.Visible = true;
-            // execute:false — populate the Run view from the selection but do
-            // NOT dispatch; the user's Run click (RunRequested → OnRunRequested)
-            // runs it. Mirrors the Bespoke OpenXxxConfig open-pane-then-wait.
             LaunchTechnique(techniqueId, AddIn.Settings?.GetGlobalPreset() ?? "Balanced",
-                execute: false);
+                execute: false, area: area, retry: retry);
         }
 
         /// <summary>
@@ -81,7 +126,8 @@ namespace TSL.AddIn
         {
             if (string.IsNullOrEmpty(techniqueId)) return;
 
-            EnsureTaskPane();
+            BespokeLabels.TryGetValue(techniqueId, out var tool);
+            if (!EnsureTaskPane(tool)) return;
             _taskPane.Visible = true;
 
             // Navigate to the Run view so progress + result-sheet links render.
@@ -169,13 +215,20 @@ namespace TSL.AddIn
                     {
                         _hostControl?.Invoke((System.Action)(() =>
                         {
-                            runVm.FailRun(response.ErrorMessage ?? "Unknown error from engine.");
+                            runVm.FailRun(EngineFailureText(response));
                         }));
                     }
                     else
                     {
                         ExcelAsyncUtil.QueueAsMacro(() =>
                         {
+                            // A Cancel between the engine's reply and this step: write nothing
+                            // (the pane already says "The run was canceled. Nothing was written.").
+                            if (runToken.IsCancellationRequested)
+                            {
+                                Logger.Info("Run canceled before its results were written; nothing was written.");
+                                return;
+                            }
                             ExcelWriter.WriteResult writeResult = null;
                             try
                             {
@@ -219,61 +272,7 @@ namespace TSL.AddIn
 
                             _hostControl?.Invoke((System.Action)(() =>
                             {
-                                var sheets = new List<OutputSheetLink>();
-                                if (writeResult != null && writeResult.Success)
-                                {
-                                    if (!string.IsNullOrEmpty(writeResult.ResultSheetName))
-                                        sheets.Add(new OutputSheetLink
-                                        {
-                                            TableName = "Results",
-                                            SheetName = writeResult.ResultSheetName,
-                                        });
-                                    if (!string.IsNullOrEmpty(writeResult.AuditSheetName))
-                                        sheets.Add(new OutputSheetLink
-                                        {
-                                            TableName = "Audit",
-                                            SheetName = writeResult.AuditSheetName,
-                                        });
-                                }
-
-                                if (response.Tables != null)
-                                {
-                                    foreach (var t in response.Tables)
-                                    {
-                                        sheets.Add(new OutputSheetLink
-                                        {
-                                            TableName = t.Name,
-                                            SheetName = writeResult?.ResultSheetName,
-                                        });
-                                    }
-                                }
-
-                                var summary = response.PlainEnglishSummary ?? "Run completed.";
-                                if (writeResult != null && !writeResult.Success
-                                    && !string.IsNullOrEmpty(writeResult.ErrorMessage))
-                                {
-                                    summary += $"\n\nWarning: {writeResult.ErrorMessage}";
-                                }
-                                else if (writeResult != null && writeResult.Success)
-                                {
-                                    // Results go to a SEPARATE workbook — the input
-                                    // workbook is never modified. Tell the user where.
-                                    if (!string.IsNullOrEmpty(writeResult.OutputPath))
-                                    {
-                                        summary += "\n\nResults saved to a separate file "
-                                            + "(your input workbook was not modified):\n"
-                                            + writeResult.OutputPath;
-                                        if (writeResult.UsedFallbackFolder)
-                                            summary += "\n(Your input workbook had not been saved, "
-                                                + "so results went to your Documents folder.)";
-                                    }
-                                    else if (!string.IsNullOrEmpty(writeResult.SaveWarning))
-                                    {
-                                        summary += $"\n\n{writeResult.SaveWarning}";
-                                    }
-                                }
-
-                                runVm.CompleteRun(summary, sheets);
+                                PresentResult(runVm, response, writeResult);
                             }));
                         });
                     }
@@ -286,8 +285,7 @@ namespace TSL.AddIn
                     {
                         // A cancel while the engine was starting: the Cancel click already reset the view.
                         if (ex is OperationCanceledException) return;
-                        // Engine refusals (identity, start) are already complete house messages.
-                        runVm.FailRun(ex is EngineRefusalException ? ex.Message : $"Run failed: {ex.Message}");
+                        runVm.FailRun(RunExceptionText(ex));
                     }));
                 }
                 finally
@@ -322,7 +320,7 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenBondYieldForecastConfig()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("Bond Yield Forecast")) return;
             _taskPane.Visible = true;
 
             const string techniqueId = "bond_yield_forecast";
@@ -389,7 +387,7 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenBreakevenPayrollConfig()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("Breakeven Payrolls")) return;
             _taskPane.Visible = true;
 
             const string techniqueId = "breakeven_payroll";
@@ -431,7 +429,7 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenKronosConfig()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("Kronos Forecast")) return;
             _taskPane.Visible = true;
 
             const string techniqueId = "kronos_forecast";
@@ -491,6 +489,7 @@ namespace TSL.AddIn
             if (!_workbookInputTechniques.Contains(techniqueId))
                 return;
 
+            BespokeLabels.TryGetValue(techniqueId, out var tool);
             try
             {
                 var runVm = _hostControl?.ViewModel?.CurrentView as RunViewModel;
@@ -499,12 +498,11 @@ namespace TSL.AddIn
                 var wb = app?.ActiveWorkbook;
                 if (wb == null)
                 {
-                    MessageBox.Show(
-                        "No workbook is open.\n\nOpen the technique's input workbook " +
-                        "(or use 'Open Input Template'), then click Run.",
-                        "Time Series Lab",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    HouseDialog.ShowHouseAlert(
+                        "No workbook is open, so nothing was run.\n\n" +
+                        $"Open the {tool} input workbook, or use Bespoke > {tool} > Open Input Template, " +
+                        "then click Run in the task pane.",
+                        HouseDialog.Title(tool));
                     return;
                 }
 
@@ -535,11 +533,13 @@ namespace TSL.AddIn
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error launching workbook technique: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Logger.Error($"Starting the {tool} run failed.", ex);
+                HouseDialog.ShowHouseAlert(
+                    $"Time Series Lab could not start the {tool} run, so nothing was run. " +
+                    "The input workbook was not changed.\n\n" +
+                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                    "Try again. If this message returns, tell Matthew Hornbach.",
+                    HouseDialog.Title(tool), isError: true);
             }
         }
 
@@ -561,7 +561,7 @@ namespace TSL.AddIn
                 {
                     _hostControl?.Invoke((System.Action)(() =>
                     {
-                        runVm.ReportProgress("Canceled", runVm.ProgressPercent, "Run canceled by user.");
+                        runVm.ReportProgress("Canceled", runVm.ProgressPercent, "The run was canceled. Nothing was written.");
                         runVm.IsRunning = false;
                     }));
                 }
@@ -575,49 +575,49 @@ namespace TSL.AddIn
 
         public static void ShowExplorer()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane(ExplorerArea)) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToExplorer();
         }
 
         public static void ShowRecommender()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("Recommender")) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToRecommender();
         }
 
         public static void ShowRecommenderWithGoal(string goal)
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("Recommender")) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToRecommenderWithGoal(goal);
         }
 
         public static void ShowExplorerWithCategory(string category)
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane(ExplorerArea)) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToExplorerWithCategory(category);
         }
 
         public static void ShowDataReadiness()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("Data Readiness")) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToDataReadiness();
         }
 
         public static void ShowSettings()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("Settings")) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToSettings();
         }
 
         public static void ShowUdfBrowser()
         {
-            EnsureTaskPane();
+            if (!EnsureTaskPane("UDF Formula Guide")) return;
             _taskPane.Visible = true;
             _hostControl?.NavigateToUdfBrowser();
         }
@@ -632,7 +632,12 @@ namespace TSL.AddIn
             _hostControl?.SetPreset(preset);
         }
 
-        private static void EnsureTaskPane()
+        /// <summary>
+        /// Make sure the task pane exists; false (after a house error naming
+        /// <paramref name="area"/>, the action that needed it) when it cannot be created,
+        /// so the caller stops instead of using a pane that does not exist.
+        /// </summary>
+        private static bool EnsureTaskPane(string area)
         {
             // A cached CustomTaskPane reference can become a DEAD COM object: Excel
             // tears the pane down when its host window is destroyed (the separate-
@@ -650,7 +655,7 @@ namespace TSL.AddIn
                 bool alive;
                 try { var _ = _taskPane.Visible; alive = true; }
                 catch { alive = false; }
-                if (alive) return;
+                if (alive) return true;
 
                 Logger.Info("Task pane handle is stale (host window destroyed); recreating.");
                 try { _taskPane.VisibleStateChange -= OnVisibleStateChange; } catch { /* dead */ }
@@ -725,15 +730,42 @@ namespace TSL.AddIn
                 // descriptions room to breathe. Users can still drag the edge to resize.
                 _taskPane.Width = 720;
                 _taskPane.VisibleStateChange += OnVisibleStateChange;
+                return true;
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to create task pane.", ex);
-                MessageBox.Show(
-                    $"Failed to create Task Pane:\n{ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                // The pane was created and only its docking, width or visibility logging
+                // failed: carry on if it answers (logged above).
+                if (_taskPane != null)
+                {
+                    try { var _ = _taskPane.Visible; return true; }
+                    catch { /* not usable: tear it down and report below */ }
+                }
+
+                try { _taskPane.VisibleStateChange -= OnVisibleStateChange; } catch { /* absent or dead */ }
+                if (_hostControl?.ViewModel != null)
+                {
+                    try
+                    {
+                        _hostControl.ViewModel.RunRequested -= OnRunRequested;
+                        _hostControl.ViewModel.ConfigureRunRequested -= OnConfigureRunRequested;
+                        _hostControl.ViewModel.WorkbookRunRequested -= OnWorkbookRunRequested;
+                        _hostControl.ViewModel.RunCancelRequested -= OnCancelRequested;
+                        _hostControl.ViewModel.DataReadinessChecksRequested -= OnDataReadinessChecksRequested;
+                    }
+                    catch { /* best-effort unwire */ }
+                }
+                try { _taskPane?.Delete(); } catch { /* already gone */ }
+                try { _hostControl?.Dispose(); } catch { /* best-effort */ }
+                _taskPane = null;
+                _hostControl = null;
+                HouseDialog.ShowHouseAlert(
+                    "Time Series Lab could not open its task pane. Nothing was changed.\n\n" +
+                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                    "Close Excel and start it again. If this message returns, tell Matthew Hornbach.",
+                    HouseDialog.Title(area), isError: true);
+                return false;
             }
         }
 
@@ -743,17 +775,17 @@ namespace TSL.AddIn
         /// execute:true.
         /// </summary>
         private static void OnRunRequested(string techniqueId, string preset)
-            => LaunchTechnique(techniqueId, preset, execute: true);
+            => LaunchTechnique(techniqueId, preset, execute: true, area: RunArea, retry: "click Run again");
 
         /// <summary>
         /// The Explorer's "Configure &amp; Run" handler (Fix A2). Opens the Run
         /// pane POPULATED (selection + previews + params) and WAITS — does NOT
-        /// execute. Delegates to <see cref="RunTechnique"/> (= LaunchTechnique
-        /// execute:false), the same populate-then-stop path the ribbon uses;
-        /// execution happens only on the pane's own "Run" click (OnRunRequested).
+        /// execute. The same populate-then-stop path the ribbon uses
+        /// (LaunchTechnique execute:false); execution happens only on the pane's
+        /// own "Run" click (OnRunRequested).
         /// </summary>
         private static void OnConfigureRunRequested(string techniqueId)
-            => RunTechnique(techniqueId);
+            => OpenPopulated(techniqueId, ExplorerArea, "click Configure & Run again");
 
         /// <summary>
         /// Extracts data from the current Excel selection (including non-adjacent
@@ -762,8 +794,12 @@ namespace TSL.AddIn
         /// dispatches to the engine. The ribbon launch (RunTechnique) calls this
         /// with execute:false to open the pane populated + wait for the user's
         /// Run click; the Run click (OnRunRequested) calls it with execute:true.
+        /// A selection refusal is a house message from <paramref name="area"/> (the
+        /// launching button's label, or "Run" at a Run click) that ends with
+        /// <paramref name="retry"/>.
         /// </summary>
-        private static void LaunchTechnique(string techniqueId, string preset, bool execute)
+        private static void LaunchTechnique(string techniqueId, string preset, bool execute,
+            string area, string retry)
         {
             if (string.IsNullOrEmpty(techniqueId)) return;
 
@@ -771,9 +807,22 @@ namespace TSL.AddIn
             var selectionResult = _selectionService.ExtractFromSelection();
             if (!selectionResult.Success || selectionResult.Series.Count == 0)
             {
-                var msg = selectionResult.ErrorMessage
-                    ?? "No data selected. Please select one or more data columns in Excel first.";
-                MessageBox.Show(msg, "Time Series Lab", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                var what = selectionResult.ErrorMessage ?? "No data is selected.";
+                if (selectionResult.ReadFailed)
+                {
+                    HouseDialog.ShowHouseAlert(
+                        what + " Nothing was run.\n\n" +
+                        HouseDialog.ErrorBlock(selectionResult.ErrorDetail) + "\n\n" +
+                        $"Select the data again, then {retry}. If this message returns, tell Matthew Hornbach.",
+                        HouseDialog.Title(area), isError: true);
+                }
+                else
+                {
+                    HouseDialog.ShowHouseAlert(
+                        what + " Nothing was run.\n\n" +
+                        $"Select one or more columns of numbers, then {retry}.",
+                        HouseDialog.Title(area));
+                }
                 return;
             }
 
@@ -781,10 +830,11 @@ namespace TSL.AddIn
             var lengths = selectionResult.Series.Select(s => s.Length).Distinct().ToList();
             if (lengths.Count > 1)
             {
-                MessageBox.Show(
-                    $"Selected columns have different lengths ({string.Join(", ", lengths)}). " +
-                    "All series must have the same number of rows. Please reselect.",
-                    "Time Series Lab", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                HouseDialog.ShowHouseAlert(
+                    "The selected columns have different lengths. Nothing was run.\n\n" +
+                    "Lengths:\n" + HouseDialog.Indent(string.Join(", ", lengths)) + "\n\n" +
+                    $"Select columns with the same number of rows, then {retry}.",
+                    HouseDialog.Title(area));
                 return;
             }
 
@@ -1068,7 +1118,7 @@ namespace TSL.AddIn
                     {
                         _hostControl?.Invoke((System.Action)(() =>
                         {
-                            runVm.FailRun(response.ErrorMessage ?? "Unknown error from engine.");
+                            runVm.FailRun(EngineFailureText(response));
                         }));
                     }
                     else
@@ -1078,6 +1128,13 @@ namespace TSL.AddIn
                         // sheet names so the "Go to Sheet" links have real targets.
                         ExcelAsyncUtil.QueueAsMacro(() =>
                         {
+                            // A Cancel between the engine's reply and this step: write nothing
+                            // (the pane already says "The run was canceled. Nothing was written.").
+                            if (runToken.IsCancellationRequested)
+                            {
+                                Logger.Info("Run canceled before its results were written; nothing was written.");
+                                return;
+                            }
                             ExcelWriter.WriteResult writeResult = null;
                             try
                             {
@@ -1090,64 +1147,7 @@ namespace TSL.AddIn
 
                             _hostControl?.Invoke((System.Action)(() =>
                             {
-                                var sheets = new List<OutputSheetLink>();
-                                if (writeResult != null && writeResult.Success)
-                                {
-                                    if (!string.IsNullOrEmpty(writeResult.ResultSheetName))
-                                        sheets.Add(new OutputSheetLink
-                                        {
-                                            TableName = "Results",
-                                            SheetName = writeResult.ResultSheetName,
-                                        });
-                                    if (!string.IsNullOrEmpty(writeResult.AuditSheetName))
-                                        sheets.Add(new OutputSheetLink
-                                        {
-                                            TableName = "Audit",
-                                            SheetName = writeResult.AuditSheetName,
-                                        });
-                                }
-
-                                // Also list the logical tables from the engine response
-                                // (even if ExcelWriter bundled them into the single results sheet,
-                                // this gives the user a map of what's there).
-                                if (response.Tables != null)
-                                {
-                                    foreach (var t in response.Tables)
-                                    {
-                                        sheets.Add(new OutputSheetLink
-                                        {
-                                            TableName = t.Name,
-                                            SheetName = writeResult?.ResultSheetName,
-                                        });
-                                    }
-                                }
-
-                                var summary = response.PlainEnglishSummary ?? "Run completed.";
-                                if (writeResult != null && !writeResult.Success
-                                    && !string.IsNullOrEmpty(writeResult.ErrorMessage))
-                                {
-                                    summary += $"\n\nWarning: {writeResult.ErrorMessage}";
-                                }
-                                else if (writeResult != null && writeResult.Success)
-                                {
-                                    // Results go to a SEPARATE workbook — the input
-                                    // workbook is never modified. Tell the user where.
-                                    if (!string.IsNullOrEmpty(writeResult.OutputPath))
-                                    {
-                                        summary += "\n\nResults saved to a separate file "
-                                            + "(your input workbook was not modified):\n"
-                                            + writeResult.OutputPath;
-                                        if (writeResult.UsedFallbackFolder)
-                                            summary += "\n(Your input workbook had not been saved, "
-                                                + "so results went to your Documents folder.)";
-                                    }
-                                    else if (!string.IsNullOrEmpty(writeResult.SaveWarning))
-                                    {
-                                        summary += $"\n\n{writeResult.SaveWarning}";
-                                    }
-                                }
-
-                                runVm.CompleteRun(summary, sheets);
+                                PresentResult(runVm, response, writeResult);
                             }));
                         });
                     }
@@ -1160,11 +1160,111 @@ namespace TSL.AddIn
                     {
                         // A cancel while the engine was starting: the Cancel click already reset the view.
                         if (ex is OperationCanceledException) return;
-                        // Engine refusals (identity, start) are already complete house messages.
-                        runVm.FailRun(ex is EngineRefusalException ? ex.Message : $"Run failed: {ex.Message}");
+                        runVm.FailRun(RunExceptionText(ex));
                     }));
                 }
             });
+        }
+
+        // ── Pane message text (docs/HOUSE_STYLE.md: Text, Errors and refusals) ──
+
+        private static string LogsFolder => System.IO.Path.Combine(AddIn.AppDataPath, "logs");
+
+        /// <summary>
+        /// The engine reported a failure (A2 T1): a plain sentence and the state first, the
+        /// engine's own text after it, then its suggested fixes (error_fixes, which were
+        /// dropped before - A2 N11). A failure the add-in itself made (identity mismatch,
+        /// stalled or unreadable reply) is already a complete house message.
+        /// </summary>
+        private static string EngineFailureText(RunResponse response)
+        {
+            if (response.FromAddIn && !string.IsNullOrWhiteSpace(response.ErrorMessage))
+                return response.ErrorMessage;
+
+            var text = "The run did not complete, so nothing was written.\n\n" +
+                       "The engine reported:\n" +
+                       HouseDialog.Indent(string.IsNullOrWhiteSpace(response.ErrorMessage)
+                           ? "(no description)" : response.ErrorMessage);
+            var fixes = (response.ErrorFixes ?? new List<string>())
+                .Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
+            if (fixes.Count > 0)
+            {
+                text += "\n\nSuggested fixes:\n" + string.Join("\n", fixes.Select(f => HouseDialog.Indent("- " + f.Trim()))) +
+                        "\n\nIf the run still fails, tell Matthew Hornbach.";
+            }
+            else
+            {
+                text += "\n\nCheck the data and the parameters in the task pane, then click Run again. " +
+                        "If the run still fails, tell Matthew Hornbach.";
+            }
+            return text;
+        }
+
+        /// <summary>
+        /// A run that threw (A2 T2). The engine's start and identity refusals are already
+        /// complete house messages; anything else gets the plain sentence and state first.
+        /// </summary>
+        private static string RunExceptionText(Exception ex)
+        {
+            if (ex is EngineRefusalException) return ex.Message;
+            return "The run did not complete, so nothing was written.\n\n" +
+                   HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                   "Try again. If this message returns, tell Matthew Hornbach.";
+        }
+
+        /// <summary>
+        /// Show what the results write did (A2 T3/T4). A write that failed, or never
+        /// reported, is a failure in the red error area (A2 N10: it used to read as a
+        /// "Warning:" inside the green success area, or as plain success).
+        /// </summary>
+        private static void PresentResult(RunViewModel runVm, RunResponse response, ExcelWriter.WriteResult writeResult)
+        {
+            if (writeResult == null || !writeResult.Success)
+            {
+                var detail = writeResult?.ErrorMessage;
+                runVm.FailRun(
+                    "The analysis finished, but its results could not be written to Excel. " +
+                    "The data workbook was not changed; if a new results workbook opened, it is incomplete and was not saved.\n\n" +
+                    (string.IsNullOrWhiteSpace(detail)
+                        ? "The log has the details:\n" + HouseDialog.Indent(LogsFolder)
+                        : HouseDialog.ErrorBlock(detail)) + "\n\n" +
+                    "Click Run to try again. If this message returns, tell Matthew Hornbach.");
+                return;
+            }
+
+            var sheets = new List<OutputSheetLink>();
+            if (!string.IsNullOrEmpty(writeResult.ResultSheetName))
+                sheets.Add(new OutputSheetLink { TableName = "Results", SheetName = writeResult.ResultSheetName });
+            if (!string.IsNullOrEmpty(writeResult.AuditSheetName))
+                sheets.Add(new OutputSheetLink { TableName = "Audit", SheetName = writeResult.AuditSheetName });
+
+            // Also list the logical tables from the engine response (even if ExcelWriter
+            // bundled them into the single results sheet, this gives the user a map of
+            // what's there).
+            if (response.Tables != null)
+            {
+                foreach (var t in response.Tables)
+                    sheets.Add(new OutputSheetLink { TableName = t.Name, SheetName = writeResult.ResultSheetName });
+            }
+
+            var summary = HouseDialog.Ascii(string.IsNullOrWhiteSpace(response.PlainEnglishSummary)
+                ? "The run completed." : response.PlainEnglishSummary.Trim());
+            if (!string.IsNullOrEmpty(writeResult.OutputPath))
+            {
+                // Results go to a SEPARATE workbook - the input workbook is never
+                // modified. Tell the user where.
+                summary += "\n\nThe results were saved to a new workbook:\n" + HouseDialog.Indent(writeResult.OutputPath) +
+                           "\n\nThe data workbook was not changed." +
+                           (writeResult.UsedFallbackFolder
+                               ? " It has never been saved, so the results went to the Documents folder."
+                               : "");
+            }
+            else if (!string.IsNullOrEmpty(writeResult.SaveWarning))
+            {
+                summary += "\n\n" + writeResult.SaveWarning;
+            }
+
+            runVm.CompleteRun(summary, sheets);
         }
 
         /// <summary>
@@ -1185,13 +1285,19 @@ namespace TSL.AddIn
                 // ── Check 1: Selection exists ─────────────────────────────
                 if (!selectionResult.Success || selectionResult.Series.Count == 0)
                 {
+                    var detail = selectionResult.ErrorMessage ?? "The selection contains no numbers.";
+                    var suggestion = "Select one or more data columns in Excel, then click Refresh.";
+                    if (selectionResult.ReadFailed)
+                    {
+                        detail += "\n\n" + HouseDialog.ErrorBlock(selectionResult.ErrorDetail);
+                        suggestion = "Select the data again, then click Refresh. If this message returns, tell Matthew Hornbach.";
+                    }
                     checks.Add(new ReadinessCheckItem
                     {
                         CheckName = "Selection",
                         Status = "Fail",
-                        Detail = selectionResult.ErrorMessage
-                                 ?? "No numeric data found in the current Excel selection.",
-                        Suggestion = "Select one or more data columns in Excel, then click Refresh."
+                        Detail = detail,
+                        Suggestion = suggestion
                     });
                     vm.ShowResults(0, 0, checks);
                     return;
@@ -1226,7 +1332,7 @@ namespace TSL.AddIn
                     {
                         CheckName = "Minimum length",
                         Status = "Warning",
-                        Detail = $"Shortest series has {minLen} observations. OK for basic analysis but some techniques (VAR, GARCH, ML) need ≥50.",
+                        Detail = $"Shortest series has {minLen} observations. Enough for basic analysis, but some techniques (VAR, GARCH, ML) need at least 50.",
                         Suggestion = "For volatility or multivariate models, aim for at least 50 points."
                     });
                 }
@@ -1236,7 +1342,7 @@ namespace TSL.AddIn
                     {
                         CheckName = "Minimum length",
                         Status = "Fail",
-                        Detail = $"Shortest series has only {minLen} observations. Most techniques require ≥20.",
+                        Detail = $"Shortest series has only {minLen} observations. Most techniques need at least 20.",
                         Suggestion = "Select a longer range with at least 20 numeric rows."
                     });
                 }
@@ -1294,8 +1400,8 @@ namespace TSL.AddIn
                     {
                         CheckName = "Missing data",
                         Status = "Fail",
-                        Detail = $"{overallMissingPct:F1}% missing overall — high. Worst: '{worstMissing.Name}' at {worstMissing.MissingPct:F1}%.",
-                        Suggestion = "Investigate gaps before modelling; consider a shorter window with complete data."
+                        Detail = $"{overallMissingPct:F1}% missing overall, which is high. Worst: '{worstMissing.Name}' at {worstMissing.MissingPct:F1}%.",
+                        Suggestion = "Investigate the gaps before modeling; consider a shorter window with complete data."
                     });
                 }
 
@@ -1318,7 +1424,7 @@ namespace TSL.AddIn
                         CheckName = "Variability",
                         Status = "Fail",
                         Detail = $"Constant or near-constant series: {string.Join(", ", constantSeries.Select(s => s.Name))}.",
-                        Suggestion = "Remove constant columns — time series techniques require variation."
+                        Suggestion = "Remove constant columns. Time series techniques need variation."
                     });
                 }
 
@@ -1378,8 +1484,10 @@ namespace TSL.AddIn
                     {
                         CheckName = "Error",
                         Status = "Fail",
-                        Detail = $"Readiness check failed: {ex.Message}",
-                        Suggestion = "Check the add-in log for details."
+                        Detail = "Time Series Lab could not finish the readiness checks. Nothing was changed.\n\n" +
+                                 HouseDialog.ErrorBlock(ex.Message),
+                        Suggestion = "Click Refresh to try again. If this message returns, tell Matthew Hornbach.\n\n" +
+                                     "The log has the details:\n" + HouseDialog.Indent(LogsFolder)
                     }
                 });
             }

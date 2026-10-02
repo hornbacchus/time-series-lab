@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
 using Microsoft.Office.Interop.Excel;
+using TSL.UI;
 using Application = Microsoft.Office.Interop.Excel.Application;
 
 namespace TSL.AddIn
@@ -235,56 +235,13 @@ namespace TSL.AddIn
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error opening Bond Yield Forecast: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                ReportOpenFailure("Bond Yield Forecast", ex);
             }
         }
 
         public void OnBondYieldForecastOpenTemplate(IRibbonControl control)
         {
-            try
-            {
-                var templatePath = LocateBondYieldForecastTemplate(out var tried);
-                if (templatePath == null)
-                {
-                    AddInLayout.ReportMissing("Bond Yield Forecast input template", tried);
-                    return;
-                }
-
-                ExcelAsyncUtil.QueueAsMacro(() =>
-                {
-                    var app = (Application)ExcelDnaUtil.Application;
-                    // Open a WORKING COPY, never the bundled template in place:
-                    // the user edits + Excel AutoSave must NOT write back into the
-                    // shipped template (which would ship a stale default to the
-                    // next user). The bundled file is only ever a File.Copy source.
-                    var workingPath = CreateTemplateWorkingCopy(templatePath, "BondYield_input");
-                    app.Workbooks.Open(workingPath, ReadOnly: false);
-                    // Opening the workbook resets the ribbon to Home; restore the
-                    // Time Series Lab tab so the user stays on it.
-                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Error opening Bond Yield Forecast input template: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// Resolve the bundled Bond Yield Forecast input template under the add-in's
-        /// layout root (AddInLayout); null with <paramref name="tried"/> naming the path.
-        /// </summary>
-        private string LocateBondYieldForecastTemplate(out string tried)
-        {
-            return AddInLayout.FindFile(out tried,
+            OpenTemplateWorkingCopy("Bond Yield Forecast", "Bond Yield Forecast input template", "BondYield_input",
                 "engine", "techniques", "bond_yield_forecast", "resources", "templates",
                 "bond_yield_forecast_input_template.xlsx");
         }
@@ -303,46 +260,15 @@ namespace TSL.AddIn
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error opening Breakeven Payrolls: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                ReportOpenFailure("Breakeven Payrolls", ex);
             }
         }
 
         public void OnBreakevenPayrollOpenTemplate(IRibbonControl control)
         {
-            try
-            {
-                var templatePath = LocateBreakevenPayrollTemplate(out var tried);
-                if (templatePath == null)
-                {
-                    AddInLayout.ReportMissing("Breakeven Payrolls input template", tried);
-                    return;
-                }
-
-                ExcelAsyncUtil.QueueAsMacro(() =>
-                {
-                    var app = (Application)ExcelDnaUtil.Application;
-                    // Open a WORKING COPY, never the bundled template in place (so
-                    // editing the scenario_inputs knob + AutoSave can't contaminate
-                    // the shipped default). The bundled file is only a File.Copy source.
-                    var workingPath = CreateTemplateWorkingCopy(templatePath, "Breakeven_Payrolls_input");
-                    app.Workbooks.Open(workingPath, ReadOnly: false);
-                    // Opening the workbook resets the ribbon to Home; restore the
-                    // Time Series Lab tab so the user stays on it.
-                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Error opening Breakeven Payrolls input template: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
+            OpenTemplateWorkingCopy("Breakeven Payrolls", "Breakeven Payrolls input template", "Breakeven_Payrolls_input",
+                "engine", "techniques", "breakeven_payroll", "resources", "templates",
+                "breakeven_payroll_input_template.xlsx");
         }
 
         // ── Kronos Forecast (Bespoke member #3; EXPERIMENTAL) ──────────────
@@ -353,31 +279,10 @@ namespace TSL.AddIn
 
         public void OnKronosOpenTemplate(IRibbonControl control)
         {
-            try
-            {
-                var templatePath = LocateKronosTemplate(out var tried);
-                if (templatePath == null)
-                {
-                    AddInLayout.ReportMissing("Kronos Forecast input template", tried);
-                    return;
-                }
-
-                ExcelAsyncUtil.QueueAsMacro(() =>
-                {
-                    var app = (Application)ExcelDnaUtil.Application;
-                    var workingPath = CreateTemplateWorkingCopy(templatePath, "Kronos_Forecast_input");
-                    app.Workbooks.Open(workingPath, ReadOnly: false);
-                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Error opening Kronos Forecast input template: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
+            // The lineage-verified 250-day IEF example + parameter cells.
+            OpenTemplateWorkingCopy("Kronos Forecast", "Kronos Forecast input template", "Kronos_Forecast_input",
+                "engine", "techniques", "kronos_forecast", "resources", "templates",
+                "kronos_forecast_input_template.xlsx");
         }
 
         // Kronos needs its own torch environment, which exists only where it was
@@ -410,35 +315,116 @@ namespace TSL.AddIn
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error opening Kronos Forecast: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                ReportOpenFailure("Kronos Forecast", ex);
             }
         }
 
         /// <summary>
-        /// Resolve the bundled Kronos Forecast input template (the lineage-
-        /// verified 250-day IEF example + parameter cells) under the add-in's
-        /// layout root (AddInLayout).
+        /// A Bespoke tool's Run view could not be opened in the task pane (house dialog;
+        /// <paramref name="tool"/> is its Bespoke menu label).
         /// </summary>
-        private string LocateKronosTemplate(out string tried)
+        private static void ReportOpenFailure(string tool, Exception ex)
         {
-            return AddInLayout.FindFile(out tried,
-                "engine", "techniques", "kronos_forecast", "resources", "templates",
-                "kronos_forecast_input_template.xlsx");
+            Logger.Error($"Opening {tool} in the task pane failed.", ex);
+            HouseDialog.ShowHouseAlert(
+                $"Time Series Lab could not open {tool} in the task pane. Nothing was changed.\n\n" +
+                HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                "Try again. If this message returns, tell Matthew Hornbach.",
+                HouseDialog.Title(tool), isError: true);
         }
 
         /// <summary>
-        /// Resolve the bundled Breakeven Payrolls input template (the pinned,
-        /// May-2025-anchored .xlsx) under the add-in's layout root (AddInLayout).
+        /// Bespoke &gt; &lt;tool&gt; &gt; Open Input Template. Opens a WORKING COPY, never
+        /// the bundled template in place: the user's edits + Excel AutoSave must NOT write
+        /// back into the shipped template (which would ship a stale default to the next
+        /// user). The bundled file (under the add-in's layout root, AddInLayout) is only ever
+        /// a File.Copy source. Every failure is reported through the house dialog: a missing
+        /// template, an error before the step is queued, and an error inside the queued copy
+        /// and open (A2 N12 - those were not caught before), each with what it left behind.
         /// </summary>
-        private string LocateBreakevenPayrollTemplate(out string tried)
+        private void OpenTemplateWorkingCopy(string tool, string templateName, string baseName,
+            params string[] relative)
         {
-            return AddInLayout.FindFile(out tried,
-                "engine", "techniques", "breakeven_payroll", "resources", "templates",
-                "breakeven_payroll_input_template.xlsx");
+            string templatePath = null;
+            try
+            {
+                templatePath = AddInLayout.FindFile(out var tried, relative);
+                if (templatePath == null)
+                {
+                    AddInLayout.ReportMissing(tool, templateName, tried);
+                    return;
+                }
+
+                var bundled = templatePath;
+                ExcelAsyncUtil.QueueAsMacro(() =>
+                {
+                    string workingPath = null;
+                    try
+                    {
+                        var app = (Application)ExcelDnaUtil.Application;
+                        workingPath = CreateTemplateWorkingCopy(bundled, baseName);
+                        app.Workbooks.Open(workingPath, ReadOnly: false);
+                    }
+                    catch (Exception ex)
+                    {
+                        ReportTemplateFailure(tool, templateName, bundled, workingPath, ex, copying: true);
+                        return;
+                    }
+                    RestoreTab();
+                });
+            }
+            catch (Exception ex)
+            {
+                ReportTemplateFailure(tool, templateName, templatePath, null, ex, copying: false);
+            }
+        }
+
+        /// <summary>
+        /// <paramref name="copying"/>: the failure was in the queued copy-and-open step (so,
+        /// with no working copy yet, in making the copy); otherwise before it was queued.
+        /// </summary>
+        private static void ReportTemplateFailure(string tool, string templateName, string templatePath,
+            string workingPath, Exception ex, bool copying)
+        {
+            Logger.Error($"{tool} > Open Input Template failed (template {templatePath ?? "(not resolved)"}, " +
+                         $"working copy {workingPath ?? "(none)"}).", ex);
+            var template = templatePath != null ? "The template:\n" + HouseDialog.Indent(templatePath) + "\n\n" : "";
+            string message;
+            if (workingPath == null && copying)
+            {
+                message = $"Time Series Lab could not make a working copy of the {templateName}. Nothing was changed.\n\n" +
+                          template +
+                          "The working copy was to go in:\n" + HouseDialog.Indent(TemplateWorkingFolder()) + "\n\n" +
+                          HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                          "Try again. If this message returns, tell Matthew Hornbach.";
+            }
+            else if (workingPath == null)
+            {
+                message = $"Time Series Lab could not open the {templateName}. Nothing was changed.\n\n" +
+                          template +
+                          HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                          "Try again. If this message returns, tell Matthew Hornbach.";
+            }
+            else
+            {
+                message = $"Time Series Lab made a working copy of the {templateName} but could not open it. " +
+                          "The working copy was kept:\n" + HouseDialog.Indent(workingPath) + "\n\n" +
+                          HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                          "Open the working copy with File > Open, or try again. " +
+                          "If this message returns, tell Matthew Hornbach.";
+            }
+            HouseDialog.ShowHouseAlert(message, HouseDialog.Title(tool), isError: true);
+        }
+
+        /// <summary>
+        /// Opening or activating a workbook resets the ribbon to the Home tab; bring the
+        /// Time Series Lab tab back so the user stays where they were. Cosmetic: a failure
+        /// is logged, never reported as a failed action.
+        /// </summary>
+        private void RestoreTab()
+        {
+            try { _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab"); }
+            catch (Exception ex) { Logger.Info($"Could not return to the Time Series Lab tab: {ex.Message}"); }
         }
 
         /// <summary>
@@ -453,9 +439,7 @@ namespace TSL.AddIn
         /// </summary>
         private string CreateTemplateWorkingCopy(string bundledTemplatePath, string baseName)
         {
-            var dir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "Time Series Lab");
+            var dir = TemplateWorkingFolder();
             Directory.CreateDirectory(dir);
 
             var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -466,6 +450,10 @@ namespace TSL.AddIn
             File.Copy(bundledTemplatePath, path);
             return path;
         }
+
+        /// <summary>Documents\Time Series Lab: where template working copies go.</summary>
+        private static string TemplateWorkingFolder() =>
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Time Series Lab");
 
         // Regime / volatility / state-space
         public void OnMarkovSwitching(IRibbonControl control)
@@ -606,72 +594,104 @@ namespace TSL.AddIn
             TaskPaneManager.ShowUdfBrowser();
         }
 
+        // Help > User Guide (the split button's label is the area of every message below).
+        private const string UserGuideArea = "User Guide";
+
+        /// <summary>The generator's command line, indented, with the script's full path (development tree only).</summary>
+        private static string GenerateGuideCommand() =>
+            HouseDialog.Indent($"python \"{Path.Combine(AddInLayout.Root ?? "", "tools", "generate_user_guide.py")}\"");
+
         public void OnOpenUserGuide(IRibbonControl control)
         {
             var guidePath = AddInLayout.FindFile(out var tried, "docs", "TimeSeriesLab_UserGuide.docx");
 
             if (guidePath != null)
             {
-                Process.Start(guidePath);
+                OpenDocument(UserGuideArea, "User Guide (Word document)", guidePath);
             }
             else if (AddInLayout.Kind != LayoutKind.Development)
             {
                 // Installed: the guide ships in docs\ - name the path; never offer to
                 // run a development script on a colleague's PC.
-                AddInLayout.ReportMissing("User Guide (Word document)", tried);
+                AddInLayout.ReportMissing(UserGuideArea, "User Guide (Word document)", tried);
             }
             else
             {
-                // Development tree only: offer to generate it
-                var result = MessageBox.Show(
-                    "User Guide has not been generated yet.\n\n" +
-                    "Would you like to generate it now?\n" +
-                    "(Requires Python with python-docx installed)",
-                    "Time Series Lab",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
+                // Development tree only: offer to generate it.
+                var generate = HouseDialog.ShowConfirm(
+                    "The User Guide (Word document) has not been generated in this development tree.\n\n" +
+                    "Time Series Lab can run its generator now. It needs Python with python-docx.\n\n" +
+                    "The command:\n" + GenerateGuideCommand() + "\n\n" +
+                    "Generate = run the generator, then open the guide\n" +
+                    "Cancel = do not generate the guide now",
+                    HouseDialog.Title(UserGuideArea), "Generate");
+                if (generate)
+                    GenerateAndOpenUserGuide();
+            }
+        }
 
-                if (result == DialogResult.Yes)
+        /// <summary>Development tree only: run tools\generate_user_guide.py, then open the Word guide.</summary>
+        private static void GenerateAndOpenUserGuide()
+        {
+            var title = HouseDialog.Title(UserGuideArea);
+            var projectRoot = AddInLayout.Root;
+            var script = Path.Combine(projectRoot, "tools", "generate_user_guide.py");
+            var generated = Path.Combine(projectRoot, "docs", "TimeSeriesLab_UserGuide.docx");
+
+            if (!File.Exists(script))
+            {
+                HouseDialog.ShowHouseAlert(
+                    "Time Series Lab could not find the User Guide generator. Nothing was generated.\n\n" +
+                    "It looked here:\n" + HouseDialog.Indent(script) + "\n\n" +
+                    "Restore the generator script at the path above, then click " +
+                    "Help > User Guide > Open as Word Document again.",
+                    title, isError: true);
+                return;
+            }
+
+            bool finished;
+            try
+            {
+                var psi = new ProcessStartInfo
                 {
-                    try
-                    {
-                        var projectRoot = AddInLayout.Root;
-                        var script = Path.Combine(projectRoot, "tools", "generate_user_guide.py");
-                        if (File.Exists(script))
-                        {
-                            var psi = new ProcessStartInfo
-                            {
-                                FileName = "python",
-                                Arguments = $"\"{script}\"",
-                                WorkingDirectory = projectRoot,
-                                UseShellExecute = false,
-                                CreateNoWindow = true,
-                            };
-                            using (var proc = Process.Start(psi))
-                            {
-                                proc?.WaitForExit(30000);
-                            }
-
-                            var generated = Path.Combine(projectRoot, "docs", "TimeSeriesLab_UserGuide.docx");
-                            if (File.Exists(generated))
-                                Process.Start(generated);
-                            else
-                                MessageBox.Show("Generation completed but the file was not created.\nCheck the tools/generate_user_guide.py script.",
-                                    "Time Series Lab", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        }
-                        else
-                        {
-                            MessageBox.Show($"Generator script not found at:\n{script}",
-                                "Time Series Lab", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Failed to generate User Guide:\n{ex.Message}",
-                            "Time Series Lab", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    FileName = "python",
+                    Arguments = $"\"{script}\"",
+                    WorkingDirectory = projectRoot,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+                using (var proc = Process.Start(psi))
+                {
+                    finished = proc != null && proc.WaitForExit(30000);
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.Error("Running the User Guide generator failed.", ex);
+                HouseDialog.ShowHouseAlert(
+                    "Time Series Lab could not run the User Guide generator. Nothing was generated.\n\n" +
+                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                    "Check that Python is on the PATH, then try again.",
+                    title, isError: true);
+                return;
+            }
+
+            if (File.Exists(generated))
+            {
+                OpenDocument(UserGuideArea, "User Guide (Word document)", generated);
+                return;
+            }
+
+            HouseDialog.ShowHouseAlert(
+                (finished
+                    ? "The User Guide generator finished, but the Word document was not created. Nothing was opened.\n\n"
+                    : "The User Guide generator did not finish within 30 seconds, so nothing was opened. " +
+                      "It may still be running.\n\n") +
+                "Expected file:\n" + HouseDialog.Indent(generated) + "\n\n" +
+                (finished
+                    ? "Run the generator from a command prompt to see its output:\n" + GenerateGuideCommand()
+                    : "Wait, then click Help > User Guide > Open as Word Document again."),
+                title, isError: true);
         }
 
         public void OnOpenUserGuideHtml(IRibbonControl control)
@@ -680,20 +700,38 @@ namespace TSL.AddIn
 
             if (guidePath != null)
             {
-                Process.Start(guidePath);
+                OpenDocument(UserGuideArea, "User Guide (web page)", guidePath);
             }
             else if (AddInLayout.Kind == LayoutKind.Development)
             {
-                MessageBox.Show(
-                    AddInLayout.MissingMessage("User Guide (web page)", tried) +
-                    "\n\nIn a development tree, generate it with tools\\generate_user_guide.py.",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                AddInLayout.ReportMissing(UserGuideArea, "User Guide (web page)", tried,
+                    "Generate it in this development tree with:\n" + GenerateGuideCommand());
             }
             else
             {
-                AddInLayout.ReportMissing("User Guide (web page)", tried);
+                AddInLayout.ReportMissing(UserGuideArea, "User Guide (web page)", tried);
+            }
+        }
+
+        /// <summary>
+        /// Open a document with its Windows default program; a failure (e.g. no program
+        /// registered for it) is reported, not dropped.
+        /// </summary>
+        private static void OpenDocument(string area, string what, string path)
+        {
+            try
+            {
+                Process.Start(path);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Opening {path} failed.", ex);
+                HouseDialog.ShowHouseAlert(
+                    $"Time Series Lab found the {what}, but Windows could not open it. Nothing was changed.\n\n" +
+                    "The file:\n" + HouseDialog.Indent(path) + "\n\n" +
+                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                    "Open the file from File Explorer. If it still does not open, tell Matthew Hornbach.",
+                    HouseDialog.Title(area), isError: true);
             }
         }
 
@@ -710,21 +748,26 @@ namespace TSL.AddIn
             var tid = control?.Tag;
             if (string.IsNullOrEmpty(tid))
             {
-                MessageBox.Show("Sample-data button has no technique tag.",
-                    "Time Series Lab", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                HouseDialog.ShowHouseAlert(
+                    "This Sample Data menu item names no technique. Nothing was changed.\n\n" + HouseDialog.TellMatthew,
+                    HouseDialog.Title(SampleDataArea), isError: true);
                 return;
             }
             if (!_sampleDatasetByTechnique.TryGetValue(tid, out var mapping))
             {
-                MessageBox.Show(
-                    $"No sample dataset registered for technique '{tid}'.\n\n" +
-                    "This is a bug — the ribbon XML includes a technique that " +
-                    "isn't in the sample-data mapping. Please report.",
-                    "Time Series Lab", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // The ribbon XML lists a technique the sample-data mapping above lacks.
+                HouseDialog.ShowHouseAlert(
+                    "This Sample Data menu item names a technique with no sample dataset:\n" +
+                    HouseDialog.Indent(tid) + "\n\n" +
+                    "Nothing was changed. " + HouseDialog.TellMatthew,
+                    HouseDialog.Title(SampleDataArea), isError: true);
                 return;
             }
             LoadSampleData(mapping.CsvFileName, mapping.SheetName);
         }
+
+        // Help > Sample Data (the split button's label is the area of every message below).
+        private const string SampleDataArea = "Sample Data";
 
         public void OnSampleDataTreasury(IRibbonControl control)
         {
@@ -772,76 +815,136 @@ namespace TSL.AddIn
 
         private void LoadSampleData(string fileName, string sheetName)
         {
+            string csvPath = null;
             try
             {
                 // Locate the CSV: <root>\resources\sample_data\<file> under the
                 // add-in's layout root (AddInLayout). The pre-C1 installed candidate
                 // omitted the resources\ segment, so it could never match (2026-09-29).
-                var csvPath = AddInLayout.FindFile(out var tried, "resources", "sample_data", fileName);
+                csvPath = AddInLayout.FindFile(out var tried, "resources", "sample_data", fileName);
                 if (csvPath == null)
                 {
-                    AddInLayout.ReportMissing($"sample data file {fileName}", tried);
+                    AddInLayout.ReportMissing(SampleDataArea, $"sample data file {fileName}", tried);
                     return;
                 }
 
-                // Read CSV and write to a new worksheet
+                // Read CSV and write to a new worksheet. A failure inside the queued
+                // step is reported with what it left behind (A2 N12).
+                var path = csvPath;
                 ExcelAsyncUtil.QueueAsMacro(() =>
                 {
-                    var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
-                    var wb = app.ActiveWorkbook ?? app.Workbooks.Add();
-                    var ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.Add();
+                    Microsoft.Office.Interop.Excel.Worksheet ws = null;
+                    Microsoft.Office.Interop.Excel.Workbook newWorkbook = null;
+                    try
+                    {
+                        // Read the file before touching any workbook: a read failure leaves nothing behind.
+                        var lines = File.ReadAllLines(path);
 
-                    // Make the sheet name unique. With per-technique sample
-                    // data entries many techniques share a CSV (e.g. STL,
-                    // Classical Decomp, ETS, ARIMA, SARIMA, etc. all load
-                    // "Airline Passengers"). If the user clicks two such
-                    // entries, the second would otherwise fail with Excel's
-                    // "sheet name already in use" error.
-                    string candidateName = sheetName;
-                    int suffix = 2;
-                    bool Exists(string n)
-                    {
-                        foreach (Microsoft.Office.Interop.Excel.Worksheet s in wb.Worksheets)
-                            if (string.Equals(s.Name, n, StringComparison.OrdinalIgnoreCase) && s != ws)
-                                return true;
-                        return false;
-                    }
-                    while (Exists(candidateName))
-                    {
-                        candidateName = $"{sheetName} ({suffix})";
-                        suffix++;
-                    }
-                    ws.Name = candidateName;
-
-                    var lines = File.ReadAllLines(csvPath);
-                    for (int r = 0; r < lines.Length; r++)
-                    {
-                        var cells = lines[r].Split(',');
-                        for (int c = 0; c < cells.Length; c++)
+                        var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                        var wb = app.ActiveWorkbook;
+                        if (wb == null)
                         {
-                            var val = cells[c].Trim();
-                            ((Range)ws.Cells[r + 1, c + 1]).Value2 = val;
+                            wb = app.Workbooks.Add();
+                            newWorkbook = wb;
                         }
+                        ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.Add();
+
+                        // Make the sheet name unique. With per-technique sample
+                        // data entries many techniques share a CSV (e.g. STL,
+                        // Classical Decomp, ETS, ARIMA, SARIMA, etc. all load
+                        // "Airline Passengers"). If the user clicks two such
+                        // entries, the second would otherwise fail with Excel's
+                        // "sheet name already in use" error.
+                        string candidateName = sheetName;
+                        int suffix = 2;
+                        bool Exists(string n)
+                        {
+                            foreach (Microsoft.Office.Interop.Excel.Worksheet s in wb.Worksheets)
+                                if (string.Equals(s.Name, n, StringComparison.OrdinalIgnoreCase) && s != ws)
+                                    return true;
+                            return false;
+                        }
+                        while (Exists(candidateName))
+                        {
+                            candidateName = $"{sheetName} ({suffix})";
+                            suffix++;
+                        }
+                        ws.Name = candidateName;
+
+                        for (int r = 0; r < lines.Length; r++)
+                        {
+                            var cells = lines[r].Split(',');
+                            for (int c = 0; c < cells.Length; c++)
+                            {
+                                var val = cells[c].Trim();
+                                ((Range)ws.Cells[r + 1, c + 1]).Value2 = val;
+                            }
+                        }
+
+                        // Auto-fit columns
+                        ws.Columns.AutoFit();
+                        ws.Activate();
                     }
-
-                    // Auto-fit columns
-                    ws.Columns.AutoFit();
-                    ws.Activate();
-
-                    // Activating a workbook/sheet resets the ribbon to the Home
-                    // tab; restore focus to the Time Series Lab tab so the user
-                    // stays where they were.
-                    _ribbonUi?.ActivateTabQ("tslTab", "TimeSeriesLab");
+                    catch (Exception ex)
+                    {
+                        ReportSampleDataFailure(path, ws, newWorkbook, ex);
+                        return;
+                    }
+                    RestoreTab();
                 });
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error loading sample data: {ex.Message}",
-                    "Time Series Lab",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                ReportSampleDataFailure(csvPath, null, null, ex);
             }
+        }
+
+        /// <summary>
+        /// A sample-data load that failed, with what it left: nothing, a new empty workbook
+        /// (<paramref name="newWorkbook"/>, made because none was active), or a new sheet that
+        /// may be incomplete (in the active workbook or in that new one).
+        /// </summary>
+        private static void ReportSampleDataFailure(string csvPath,
+            Microsoft.Office.Interop.Excel.Worksheet addedSheet,
+            Microsoft.Office.Interop.Excel.Workbook newWorkbook, Exception ex)
+        {
+            string sheetName = null, bookName = null;
+            try { sheetName = addedSheet?.Name; } catch { /* the sheet is unreadable */ }
+            try { bookName = newWorkbook?.Name; } catch { /* the workbook is unreadable */ }
+            Logger.Error($"Loading sample data from {csvPath ?? "(not resolved)"} failed " +
+                         $"(sheet added: {sheetName ?? (addedSheet != null ? "(unnamed)" : "none")}, " +
+                         $"new workbook: {bookName ?? (newWorkbook != null ? "(unnamed)" : "none")}).", ex);
+
+            var file = csvPath != null ? "The file:\n" + HouseDialog.Indent(csvPath) + "\n\n" : "";
+            var error = HouseDialog.ErrorBlock(ex.Message) + "\n\n";
+            const string retry = "If this message returns, tell Matthew Hornbach.";
+            string message;
+            if (newWorkbook != null)
+            {
+                message = (addedSheet != null
+                              ? "Time Series Lab could not finish loading the sample data. No workbook was active, so it " +
+                                "opened a new one, and the new sheet in it may be incomplete. The new workbook was not saved:\n"
+                              : "Time Series Lab could not load the sample data. No workbook was active, so it opened a new " +
+                                "one, which was left empty and unsaved:\n") +
+                          HouseDialog.Indent(bookName ?? "(the workbook's name could not be read)") + "\n\n" +
+                          file + error +
+                          "Close that workbook without saving, then try again. " + retry;
+            }
+            else if (addedSheet != null)
+            {
+                message = "Time Series Lab could not finish loading the sample data. " +
+                          "A new sheet was added and may be incomplete:\n" +
+                          HouseDialog.Indent(sheetName ?? "(the sheet's name could not be read)") + "\n\n" +
+                          file + error +
+                          "Delete that sheet, then try again. " + retry;
+            }
+            else
+            {
+                message = "Time Series Lab could not load the sample data. Nothing was changed.\n\n" +
+                          file + error +
+                          "Try again. " + retry;
+            }
+            HouseDialog.ShowHouseAlert(message, HouseDialog.Title(SampleDataArea), isError: true);
         }
 
         public void OnAbout(IRibbonControl control)
@@ -911,7 +1014,7 @@ namespace TSL.AddIn
             // This Excel's own engine (A2: one engine per Excel instance).
             var engineStatus = AddIn.Engine?.StatusText ?? "Not running";
 
-            MessageBox.Show(
+            HouseDialog.ShowHouseAlert(
                 $"Time Series Lab\n" +
                 $"Created by Matthew T. Hornbach\n\n" +
                 $"Build:             {BuildInfo.Stamp}\n" +
@@ -924,9 +1027,7 @@ namespace TSL.AddIn
                 $"Layout:            {AddInLayout.KindLabel} at {AddInLayout.Root ?? "(files not located)"}\n" +
                 $"Settings:          {Path.Combine(AddIn.AppDataPath, "config.json")}\n" +
                 $"Logs:              {Path.Combine(AddIn.AppDataPath, "logs")}",
-                "About Time Series Lab",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+                HouseDialog.AboutCaption);
         }
 
         #endregion

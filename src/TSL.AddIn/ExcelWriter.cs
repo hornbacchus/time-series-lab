@@ -130,7 +130,7 @@ namespace TSL.AddIn
                     var inputWb = app.ActiveWorkbook;
                     if (inputWb == null)
                     {
-                        writeResult.ErrorMessage = "No active workbook.";
+                        writeResult.ErrorMessage = "No workbook was active, so the results had nowhere to be anchored.";
                         return writeResult;
                     }
                     try { inputName = inputWb.Name; } catch { /* keep null */ }
@@ -225,9 +225,11 @@ namespace TSL.AddIn
                     {
                         Logger.Error($"Could not save results workbook to '{targetPath}'.", saveEx);
                         writeResult.SaveWarning =
-                            "Results were written to a new workbook but could not be saved to disk " +
-                            $"({saveEx.Message}). The workbook is open — use File > Save As to keep it. " +
-                            "Your input workbook was not modified.";
+                            "The results were written to a new workbook, but it could not be saved. " +
+                            "It is open and unsaved; the data workbook was not changed.\n\n" +
+                            "It was to be saved as:\n" + TSL.UI.HouseDialog.Indent(targetPath) + "\n\n" +
+                            TSL.UI.HouseDialog.ErrorBlock(saveEx.Message) + "\n\n" +
+                            "Use File > Save As to keep it.";
                     }
                     finally { app.DisplayAlerts = true; }
 
@@ -240,7 +242,8 @@ namespace TSL.AddIn
             }
             catch (Exception ex)
             {
-                writeResult.ErrorMessage = $"Failed to write results: {ex.Message}";
+                // The raw error text only: the task pane puts it after a plain sentence.
+                writeResult.ErrorMessage = ex.Message;
                 Logger.Error("ExcelWriter.WriteRunResult failed.", ex);
             }
 
