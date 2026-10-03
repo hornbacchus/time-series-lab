@@ -17,7 +17,7 @@ Caption "About Time Series Lab". One full-width OK button, no icon. The lines, i
 
     Also by Matthew Hornbach: Global Macro Charts
 
-Then the diagnostics block, one "Label: value" line each: Engine version, Engine status, Technique library, Platform, Runtime, Compute, Layout, Settings, Logs. There is no version-number line. "©" is the one permitted non-ASCII character. Global Macro Charts' About box carries the mirror line, "Also by Matthew Hornbach: Time Series Lab".
+Then the diagnostics block, one "Label: value" line each, in three groups separated by a blank line: Engine version, Engine status and Technique library; Platform, Runtime and Compute; Layout, Settings and Logs. There is no version-number line. "©" is the one permitted non-ASCII character. Global Macro Charts' About box carries the mirror line, "Also by Matthew Hornbach: Time Series Lab".
 
 ## Captions
 
@@ -41,7 +41,7 @@ These rules apply to dialogs and to task-pane messages.
 
 - Plain ASCII; sentence case; full stops; no exclamation marks, contractions or first person.
 - One blank line between blocks; a path or value on its own line, indented four spaces.
-- Command names exactly as the ribbon writes them; routes as "Group > Button".
+- Command names exactly as the ribbon writes them. A route starts at the ribbon group and names each step, e.g. "Bespoke > Bond Yield Forecast > Open Input Template".
 - US spelling; "e.g."; "X-axis"; straight quotes.
 
 ## Errors and refusals
@@ -56,7 +56,7 @@ These rules apply to dialogs and to task-pane messages.
 ## Branding
 
 - The product names "Time Series Lab" and "Global Macro Charts" in all user text.
-- The author as "Matthew Hornbach" everywhere: About boxes, file properties, guides and install notes.
+- The author as "Matthew Hornbach" everywhere: About boxes, guides and install notes, and in file properties the File description, "Time Series Lab, created by Matthew Hornbach", since the version resource has no author field.
 
 ## Installer and update messages
 
