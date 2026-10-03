@@ -34,6 +34,7 @@ Then the diagnostics block, one "Label: value" line each, in three groups separa
 - Free text goes through the house text box (OK and Cancel), never a native input box.
 - Geometry follows Global Macro Charts' frmPrompt: a form 280 pt wide (about 373 logical pixels at 100% scaling); a prompt label 256 pt wide with word wrap; buttons 232 x 24 pt, stacked at 30 pt steps. The height grows with the text, and the form opens centred on the Excel window.
 - The one native dialog Time Series Lab opens on purpose is Excel's Function Arguments dialog, from Insert in Help > UDF Formula Guide. The dialog check allows that one call and no other.
+- Per-user choices live under Tools > Defaults, as in Global Macro Charts: one submenu per choice, a check mark on the saved value, and no separate settings page.
 - Enforced by tools/check_house_dialogs.py, a gate step in ci_gate_local and in CI.
 
 ## Text
