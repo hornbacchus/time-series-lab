@@ -83,6 +83,32 @@
         </Style>
 
         <!-- Category item style -->
+        <!-- A text link (the Run view's LinkButton). -->
+        <Style x:Key="LinkButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock x:Name="Txt" Text="{TemplateBinding Content}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   Padding="{TemplateBinding Padding}"
+                                   TextDecorations="Underline" />
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Txt" Property="Foreground" Value="{StaticResource AccentHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="CategoryItem" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="8,6" />
             <Setter Property="FontSize" Value="12" />
@@ -352,16 +378,14 @@
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                 Padding="8,8">
             <StackPanel>
-                <UniformGrid Columns="2" Margin="0,0,0,6">
-                    <Button Content="Configure &amp; Run" Style="{StaticResource AccentButton}"
-                            Command="{Binding OpenRunViewCommand}" Margin="0,0,3,0"
-                            ToolTip="Open the Run panel for this technique with the current selection - edit parameters, then click Run." />
-                    <Button Content="Insert AUTO" Style="{StaticResource OutlineButton}"
-                            Command="{Binding InsertAutoFormulaCommand}" Margin="3,0,0,0" />
-                </UniformGrid>
-                <Button Content="Insert THOROUGH Formula" Style="{StaticResource OutlineButton}"
-                        Command="{Binding InsertThoroughFormulaCommand}"
-                        HorizontalAlignment="Stretch" />
+                <Button Content="Configure &amp; Run" Style="{StaticResource AccentButton}"
+                        Command="{Binding OpenRunViewCommand}" Margin="0,0,0,6"
+                        ToolTip="Open the Run panel for this technique with the current selection - edit parameters, then click Run." />
+                <!-- The worksheet functions are in the UDF Formula Guide (A2 U8, ratification Q7;
+                     replaces the Insert AUTO and Insert THOROUGH buttons, which did nothing). -->
+                <Button Content="Show formulas" Style="{StaticResource LinkButton}"
+                        Command="{Binding ShowFormulasCommand}" HorizontalAlignment="Left"
+                        ToolTip="Open Help &gt; UDF Formula Guide: the worksheet functions of Time Series Lab." />
             </StackPanel>
         </Border>
 

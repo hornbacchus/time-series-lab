@@ -342,7 +342,7 @@
                             <Button Style="{StaticResource LinkButton}"
                                     Content="{Binding SheetName}"
                                     Command="{Binding DataContext.GoToSheetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding SheetName}" Margin="0,2" />
+                                    CommandParameter="{Binding}" Margin="0,2" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

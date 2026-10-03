@@ -35,6 +35,10 @@ namespace TSL.UI.ViewModels
     {
         public string SheetName { get; set; }
         public string TableName { get; set; }
+
+        /// <summary>The workbook that holds the sheet (Excel's FullName), so the link can
+        /// go to it from any window (A2 U8).</summary>
+        public string WorkbookFullName { get; set; }
     }
 
     // NOTE: TechniqueParameterItem is defined once in TechniqueExplorerViewModel.cs
@@ -324,9 +328,10 @@ namespace TSL.UI.ViewModels
         public event Action CancelRequested;
 
         /// <summary>
-        /// Raised when the user clicks an output sheet link.
+        /// Raised when the user clicks an output sheet link; the AddIn layer shows that
+        /// sheet (A2 U8, N6: nothing was subscribed before).
         /// </summary>
-        public event Action<string> GoToSheetRequested;
+        public event Action<OutputSheetLink> GoToSheetRequested;
 
         // ── Constructor ─────────────────────────────────────────────────
 
@@ -347,8 +352,8 @@ namespace TSL.UI.ViewModels
                 () => IsRunning);
 
             GoToSheetCommand = new RelayCommand(
-                (param) => GoToSheetRequested?.Invoke(param as string),
-                (param) => param is string s && !string.IsNullOrEmpty(s));
+                (param) => GoToSheetRequested?.Invoke(param as OutputSheetLink),
+                (param) => param is OutputSheetLink link && !string.IsNullOrEmpty(link.SheetName));
 
             ResetCommand = new RelayCommand(OnReset);
             RestoreDefaultsCommand = new RelayCommand(OnRestoreDefaults);

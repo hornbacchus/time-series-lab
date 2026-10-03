@@ -968,6 +968,7 @@ namespace TSL.AddIn
                         _hostControl.ViewModel.WorkbookRunRequested -= OnWorkbookRunRequested;
                         _hostControl.ViewModel.RunCancelRequested -= OnCancelRequested;
                         _hostControl.ViewModel.DataReadinessChecksRequested -= OnDataReadinessChecksRequested;
+                        _hostControl.ViewModel.GoToSheetRequested -= OnGoToSheetRequested;
                     }
                     catch { /* best-effort unwire */ }
                 }
@@ -1000,6 +1001,9 @@ namespace TSL.AddIn
 
                 // Wire the Data Readiness checks request
                 _hostControl.ViewModel.DataReadinessChecksRequested += OnDataReadinessChecksRequested;
+
+                // The Run view's Output Sheets links (A2 U8, N6).
+                _hostControl.ViewModel.GoToSheetRequested += OnGoToSheetRequested;
 
                 // Push the real technique catalog into the Explorer VM. The VM now
                 // constructs EMPTY (the design-time preview stub was removed -- the
@@ -1061,6 +1065,7 @@ namespace TSL.AddIn
                         _hostControl.ViewModel.WorkbookRunRequested -= OnWorkbookRunRequested;
                         _hostControl.ViewModel.RunCancelRequested -= OnCancelRequested;
                         _hostControl.ViewModel.DataReadinessChecksRequested -= OnDataReadinessChecksRequested;
+                        _hostControl.ViewModel.GoToSheetRequested -= OnGoToSheetRequested;
                     }
                     catch { /* best-effort unwire */ }
                 }
@@ -1627,11 +1632,13 @@ namespace TSL.AddIn
                 return;
             }
 
+            // Each link names its workbook, so it can go there from any window (A2 U8).
+            var workbook = writeResult.WorkbookFullName;
             var sheets = new List<OutputSheetLink>();
             if (!string.IsNullOrEmpty(writeResult.ResultSheetName))
-                sheets.Add(new OutputSheetLink { TableName = "Results", SheetName = writeResult.ResultSheetName });
+                sheets.Add(new OutputSheetLink { TableName = "Results", SheetName = writeResult.ResultSheetName, WorkbookFullName = workbook });
             if (!string.IsNullOrEmpty(writeResult.AuditSheetName))
-                sheets.Add(new OutputSheetLink { TableName = "Audit", SheetName = writeResult.AuditSheetName });
+                sheets.Add(new OutputSheetLink { TableName = "Audit", SheetName = writeResult.AuditSheetName, WorkbookFullName = workbook });
 
             // Also list the logical tables from the engine response (even if ExcelWriter
             // bundled them into the single results sheet, this gives the user a map of
@@ -1639,7 +1646,7 @@ namespace TSL.AddIn
             if (response.Tables != null)
             {
                 foreach (var t in response.Tables)
-                    sheets.Add(new OutputSheetLink { TableName = t.Name, SheetName = writeResult.ResultSheetName });
+                    sheets.Add(new OutputSheetLink { TableName = t.Name, SheetName = writeResult.ResultSheetName, WorkbookFullName = workbook });
             }
 
             var summary = HouseDialog.Ascii(string.IsNullOrWhiteSpace(response.PlainEnglishSummary)
@@ -1685,6 +1692,69 @@ namespace TSL.AddIn
             }
 
             runVm.CompleteRun(summary, sheets);
+        }
+
+        /// <summary>
+        /// An Output Sheets link in the Run view (A2 U8, N6: it did nothing before): show that
+        /// sheet, in whichever workbook window holds it. Anything that stops it is a house
+        /// message, never silence.
+        /// </summary>
+        private static void OnGoToSheetRequested(OutputSheetLink link)
+        {
+            if (link == null || string.IsNullOrEmpty(link.SheetName)) return;
+            try
+            {
+                var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                Workbook wb = null;
+                foreach (Workbook w in app.Workbooks)
+                {
+                    try
+                    {
+                        if (string.Equals(w.FullName, link.WorkbookFullName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            wb = w;
+                            break;
+                        }
+                    }
+                    catch { /* skip */ }
+                }
+                if (wb == null)
+                {
+                    HouseDialog.ShowHouseAlert(
+                        "The workbook that holds this sheet is not open, so the sheet cannot be shown.\n\n" +
+                        "The workbook:\n" + HouseDialog.Indent(link.WorkbookFullName ?? "(unknown)") + "\n\n" +
+                        "Open it with File > Open, then click the link again.",
+                        HouseDialog.Title(RunArea));
+                    return;
+                }
+
+                Worksheet ws = null;
+                try { ws = (Worksheet)wb.Worksheets[link.SheetName]; }
+                catch { /* renamed or deleted */ }
+                if (ws == null)
+                {
+                    HouseDialog.ShowHouseAlert(
+                        "The sheet is no longer in its workbook, so it cannot be shown. It may have been renamed or deleted.\n\n" +
+                        "The sheet:\n" + HouseDialog.Indent(link.SheetName) + "\n\n" +
+                        "The workbook:\n" + HouseDialog.Indent(wb.Name) + "\n\n" +
+                        "Look for it on the sheet tabs at the bottom of that workbook.",
+                        HouseDialog.Title(RunArea));
+                    return;
+                }
+
+                wb.Activate();
+                ws.Activate();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Showing the sheet {link.SheetName} failed.", ex);
+                HouseDialog.ShowHouseAlert(
+                    "Time Series Lab could not show the sheet. Nothing was changed.\n\n" +
+                    "The sheet:\n" + HouseDialog.Indent(link.SheetName) + "\n\n" +
+                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                    "Switch to it with the sheet tabs at the bottom of its workbook.",
+                    HouseDialog.Title(RunArea), isError: true);
+            }
         }
 
         /// <summary>

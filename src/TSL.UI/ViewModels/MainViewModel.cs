@@ -141,14 +141,10 @@ namespace TSL.UI.ViewModels
         public event Action RunCancelRequested;
 
         /// <summary>
-        /// Raised when the user clicks "Insert =TSL.AUTO..." in the explorer.
+        /// Raised when the user clicks an Output Sheets link in the Run view (A2 U8). The
+        /// AddIn layer shows that sheet.
         /// </summary>
-        public event Action<string> InsertAutoFormulaRequested; // techniqueId
-
-        /// <summary>
-        /// Raised when the user clicks "Insert =TSL.THOROUGH..." in the explorer.
-        /// </summary>
-        public event Action<string> InsertThoroughFormulaRequested; // techniqueId
+        public event Action<OutputSheetLink> GoToSheetRequested;
 
         /// <summary>
         /// Raised when the user clicks "Analyze Selection" in the Data Readiness view.
@@ -333,8 +329,7 @@ namespace TSL.UI.ViewModels
             {
                 _explorerVm = new TechniqueExplorerViewModel();
                 _explorerVm.CurrentPreset = Preset;
-                _explorerVm.InsertAutoFormulaRequested += (id) => InsertAutoFormulaRequested?.Invoke(id);
-                _explorerVm.InsertThoroughFormulaRequested += (id) => InsertThoroughFormulaRequested?.Invoke(id);
+                _explorerVm.ShowFormulasRequested += NavigateToUdfBrowser;
                 // The Explorer's "Configure & Run" raises NavigateToRunRequested.
                 // Forward to the AddIn (ConfigureRunRequested -> RunTechnique,
                 // execute:false) so the pane is POPULATED (selection + params)
@@ -367,6 +362,7 @@ namespace TSL.UI.ViewModels
                         WorkbookRunRequested?.Invoke(_runVm.TechniqueId);
                 };
                 _runVm.CancelRequested += () => RunCancelRequested?.Invoke();
+                _runVm.GoToSheetRequested += (link) => GoToSheetRequested?.Invoke(link);
             }
             return _runVm;
         }

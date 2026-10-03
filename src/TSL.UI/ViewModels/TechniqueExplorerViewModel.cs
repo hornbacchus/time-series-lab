@@ -109,9 +109,10 @@ namespace TSL.UI.ViewModels
     {
         // ── Events ──────────────────────────────────────────────────────
 
-        public event Action<string> InsertAutoFormulaRequested;
-        public event Action<string> InsertThoroughFormulaRequested;
         public event Action<string> NavigateToRunRequested;
+
+        /// <summary>The "Show formulas" link: open the UDF Formula Guide (A2 U8, Q7).</summary>
+        public event Action ShowFormulasRequested;
 
         // ── Collections ─────────────────────────────────────────────────
 
@@ -252,8 +253,7 @@ namespace TSL.UI.ViewModels
 
         // ── Commands ────────────────────────────────────────────────────
 
-        public ICommand InsertAutoFormulaCommand { get; }
-        public ICommand InsertThoroughFormulaCommand { get; }
+        public ICommand ShowFormulasCommand { get; }
         public ICommand OpenRunViewCommand { get; }
         public ICommand ClearSearchCommand { get; }
         public ICommand ShowAllCategoriesCommand { get; }
@@ -271,13 +271,9 @@ namespace TSL.UI.ViewModels
             // primary action is OpenRunViewCommand (configure-then-wait); execution
             // happens only when the user clicks Run on the Run view itself, or the
             // ribbon's Run, which runs that same command.
-            InsertAutoFormulaCommand = new RelayCommand(
-                () => { if (_selectedTechnique != null) InsertAutoFormulaRequested?.Invoke(_selectedTechnique.Id); },
-                () => _selectedTechnique?.SupportsAutoUdf == true);
-
-            InsertThoroughFormulaCommand = new RelayCommand(
-                () => { if (_selectedTechnique != null) InsertThoroughFormulaRequested?.Invoke(_selectedTechnique.Id); },
-                () => _selectedTechnique != null);
+            // Replaces the Insert AUTO and Insert THOROUGH buttons, which nothing handled
+            // (A2 N4; ratification Q7): the worksheet functions are in the UDF Formula Guide.
+            ShowFormulasCommand = new RelayCommand(() => ShowFormulasRequested?.Invoke());
 
             OpenRunViewCommand = new RelayCommand(
                 () => { if (_selectedTechnique != null) NavigateToRunRequested?.Invoke(_selectedTechnique.Id); },
