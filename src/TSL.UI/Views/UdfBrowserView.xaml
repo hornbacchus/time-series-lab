@@ -339,9 +339,9 @@
                 Padding="8">
             <StackPanel>
                 <UniformGrid Columns="2">
-                    <Button Content="Insert Formula" Style="{StaticResource AccentButton}"
+                    <Button Content="Insert" Style="{StaticResource AccentButton}"
                             Command="{Binding InsertFormulaCommand}" Margin="0,0,3,0" />
-                    <Button Content="Copy Formula" Style="{StaticResource OutlineButton}"
+                    <Button Content="Copy" Style="{StaticResource OutlineButton}"
                             Command="{Binding CopyFormulaCommand}" Margin="3,0,0,0" />
                 </UniformGrid>
                 <!-- What Copy did (A2 E2b ruling 1(c)) -->

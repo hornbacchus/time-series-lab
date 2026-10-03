@@ -198,7 +198,6 @@ namespace TSL.AddIn.Functions
             {
                 try
                 {
-                    AddIn.Engine.EnsureRunning();
 
                     var request = new RunRequest
                     {

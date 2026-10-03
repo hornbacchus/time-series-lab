@@ -355,7 +355,7 @@ namespace TSL.UI.ViewModels
                 (param) => GoToSheetRequested?.Invoke(param as OutputSheetLink),
                 (param) => param is OutputSheetLink link && !string.IsNullOrEmpty(link.SheetName));
 
-            ResetCommand = new RelayCommand(OnReset);
+            ResetCommand = new RelayCommand(OnReset, () => !IsRunning);
             RestoreDefaultsCommand = new RelayCommand(OnRestoreDefaults);
         }
 

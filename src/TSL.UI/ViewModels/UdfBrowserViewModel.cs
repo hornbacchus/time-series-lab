@@ -216,7 +216,7 @@ namespace TSL.UI.ViewModels
             {
                 StatusMessage = "Time Series Lab could not copy the formula to the clipboard. Nothing was copied.\n\n" +
                                 HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
-                                "Click Copy Formula again.";
+                                "Click Copy again.";
             }
         }
 

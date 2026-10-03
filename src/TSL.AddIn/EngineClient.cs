@@ -234,13 +234,20 @@ namespace TSL.AddIn
         /// Ensures a verified engine is running. Starts one (and runs its identity
         /// handshake) if not. Never called on Excel's thread.
         /// </summary>
-        public void EnsureRunning()
+        public void EnsureRunning() => EnsureRunning(CancellationToken.None);
+
+        /// <summary>
+        /// <see cref="EnsureRunning()"/> for a run that can be cancelled: a run that waited for
+        /// the lock behind another start, and was cancelled meanwhile, starts no engine.
+        /// </summary>
+        public void EnsureRunning(CancellationToken ct)
         {
             lock (_lock)
             {
                 var verified = Volatile.Read(ref _verified);
                 if (verified != null && verified.IsAlive)
                     return;
+                ct.ThrowIfCancellationRequested();
 
                 StartEngine();
             }
@@ -521,7 +528,7 @@ namespace TSL.AddIn
         {
             _currentRunCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
-            EnsureRunning();
+            EnsureRunning(_currentRunCts.Token);
 
             var requestJson = JsonConvert.SerializeObject(request);
 
@@ -626,7 +633,7 @@ namespace TSL.AddIn
                 {
                     if (attempt >= 2)
                         throw new EngineStartException(EngineIdentity.EngineStartMessage(true, LogsFolder));
-                    EnsureRunning();
+                    EnsureRunning(ct);
                     continue;
                 }
 

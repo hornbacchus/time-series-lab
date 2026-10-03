@@ -128,8 +128,8 @@ namespace TSL.AddIn
         /// </summary>
         private static void OpenPopulated(string techniqueId, string area, string retry)
         {
-            if (RefuseWhileRunning(area)) return;
             if (!EnsureTaskPane(area)) return;
+            if (RefuseWhileRunning(area)) return;
             _taskPane.Visible = true;
             LaunchTechnique(techniqueId, AddIn.Settings?.GetGlobalPreset() ?? "Balanced",
                 execute: false, area: area, retry: retry);
@@ -229,7 +229,7 @@ namespace TSL.AddIn
 
                 try
                 {
-                    AddIn.Engine.EnsureRunning();
+                    AddIn.Engine.EnsureRunning(runToken);
                     AddIn.Engine.ProgressReceived += progressHandler;
 
                     var response = await AddIn.Engine.RunAsync(request, runToken);
@@ -353,8 +353,8 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenBondYieldForecastConfig()
         {
-            if (RefuseWhileRunning("Bond Yield Forecast")) return;
             if (!EnsureTaskPane("Bond Yield Forecast")) return;
+            if (RefuseWhileRunning("Bond Yield Forecast")) return;
             _taskPane.Visible = true;
 
             const string techniqueId = "bond_yield_forecast";
@@ -422,8 +422,8 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenBreakevenPayrollConfig()
         {
-            if (RefuseWhileRunning("Breakeven Payrolls")) return;
             if (!EnsureTaskPane("Breakeven Payrolls")) return;
+            if (RefuseWhileRunning("Breakeven Payrolls")) return;
             _taskPane.Visible = true;
 
             const string techniqueId = "breakeven_payroll";
@@ -466,8 +466,8 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenKronosConfig()
         {
-            if (RefuseWhileRunning("Kronos Forecast")) return;
             if (!EnsureTaskPane("Kronos Forecast")) return;
+            if (RefuseWhileRunning("Kronos Forecast")) return;
             _taskPane.Visible = true;
 
             const string techniqueId = "kronos_forecast";
@@ -816,7 +816,8 @@ namespace TSL.AddIn
         /// <summary>A task pane run is in flight: dispatched and not yet finished.</summary>
         private static bool PaneRunInFlight() =>
             System.Threading.Volatile.Read(ref _paneRunsInFlight) > 0 ||
-            (_hostControl?.ViewModel?.RunViewIfCreated?.IsRunning ?? false);
+            // A dead pane's Run view can be left "running"; it counts only while the pane lives.
+            ((_hostControl?.ViewModel?.RunViewIfCreated?.IsRunning ?? false) && LocatePane().Alive);
 
         /// <summary>
         /// While a task pane run is in flight, every opener of the Run view (the Quick Actions,
@@ -1556,7 +1557,7 @@ namespace TSL.AddIn
 
                 try
                 {
-                    AddIn.Engine.EnsureRunning();
+                    AddIn.Engine.EnsureRunning(runToken);
                     AddIn.Engine.ProgressReceived += progressHandler;
 
                     var response = await AddIn.Engine.RunAsync(request, runToken);
@@ -1798,51 +1799,68 @@ namespace TSL.AddIn
         /// Insert in Help &gt; UDF Formula Guide (A2 E2b ruling 1(b)): open Excel's Function
         /// Arguments dialog for the chosen function in the active cell - the one native dialog
         /// Time Series Lab opens on purpose (docs/HOUSE_STYLE.md, Look). Only an empty active
-        /// cell is used; any other is refused and left unchanged. The function goes into the
-        /// cell first (the dialog opens for the cell's formula); if the user cancels, the cell
-        /// is left empty again. OK is told from Cancel by Excel's SheetChange event, which
-        /// fires when the dialog enters the formula (Cancel enters nothing), and by the formula
-        /// itself having changed.
+        /// cell on a single selected sheet is used; any other is refused and left unchanged. The
+        /// function goes into the cell first, as a dynamic-array formula and without a table
+        /// filling it down or growing (the dialog opens for the cell's formula); if the user
+        /// cancels, the cell (or its merge area) is left empty again. OK is told from Cancel by
+        /// Excel's SheetChange event, which fires when the dialog enters the formula (Cancel
+        /// enters nothing), and by the formula itself having changed.
         /// </summary>
         private static void OnInsertFormulaRequested(UdfEntry udf)
         {
             if (udf == null || string.IsNullOrEmpty(udf.Name)) return;
 
             var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
-            Range cell = null;
-            try { cell = app?.ActiveCell; } catch { /* no workbook open */ }
-            if (cell == null)
-            {
-                HouseDialog.ShowHouseAlert(
-                    "No cell is active, so nothing was inserted.\n\n" +
-                    "Select an empty cell, then click Insert again.",
-                    HouseDialog.Title(UdfGuideArea));
-                return;
-            }
-
-            bool empty;
-            try
-            {
-                empty = string.IsNullOrEmpty(Convert.ToString((object)cell.Formula)) && cell.Value2 == null;
-            }
-            catch { empty = false; }
-            if (!empty)
-            {
-                HouseDialog.ShowHouseAlert(
-                    "The active cell is not empty, so nothing was inserted.\n\n" +
-                    "Select an empty cell, then click Insert again.",
-                    HouseDialog.Title(UdfGuideArea));
-                return;
-            }
-
             var placeholder = "=" + udf.Name + "()";
-            bool wrote = false, committed = false, listening = false;
-            AppEvents_SheetChangeEventHandler onChange = (sh, target) => committed = true;
+            Range cell = null;
+            bool wrote = false;
             try
             {
-                cell.Formula = placeholder;
+                // Excel refuses these reads while a cell is being edited: that reaches the
+                // error below with Excel's own reason, never a false "not empty".
+                cell = app?.ActiveCell;
+                if (cell == null)
+                {
+                    HouseDialog.ShowHouseAlert(
+                        "No cell is active, so nothing was inserted.\n\n" +
+                        "Select an empty cell, then click Insert again.",
+                        HouseDialog.Title(UdfGuideArea));
+                    return;
+                }
+
+                // Grouped sheets: the dialog's entry would land on every selected sheet.
+                int selectedSheets = 1;
+                try { selectedSheets = app.ActiveWindow.SelectedSheets.Count; } catch { /* one sheet */ }
+                if (selectedSheets > 1)
+                {
+                    HouseDialog.ShowHouseAlert(
+                        "Several sheets are selected together, so nothing was inserted.\n\n" +
+                        "Select a single sheet, then click Insert again.",
+                        HouseDialog.Title(UdfGuideArea));
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(ReadFormula(cell)) || cell.Value2 != null)
+                {
+                    HouseDialog.ShowHouseAlert(
+                        "The active cell is not empty, so nothing was inserted.\n\n" +
+                        "Select an empty cell, then click Insert again.",
+                        HouseDialog.Title(UdfGuideArea));
+                    return;
+                }
+
+                WriteFormulaAlone(app, cell, placeholder);
                 wrote = true;
-                try { app.SheetChange += onChange; listening = true; }
+
+                // OK enters the formula (SheetChange fires); Cancel enters nothing. With events
+                // off in Excel nothing fires, so only a changed formula, or a function with no
+                // arguments (whose complete formula IS the placeholder), reads as OK.
+                bool committed = false, listening = false;
+                AppEvents_SheetChangeEventHandler onChange = (sh, target) => committed = true;
+                try
+                {
+                    if (app.EnableEvents) { app.SheetChange += onChange; listening = true; }
+                }
                 catch (Exception evEx) { Logger.Info($"Insert Formula: SheetChange not available ({evEx.Message})."); }
                 try
                 {
@@ -1854,41 +1872,89 @@ namespace TSL.AddIn
                     if (listening) { try { app.SheetChange -= onChange; } catch { /* best effort */ } }
                 }
 
-                var after = Convert.ToString((object)cell.Formula);
+                var after = ReadFormula(cell);
                 bool changed = !string.Equals(after, placeholder, StringComparison.OrdinalIgnoreCase);
-                // Without the event, an unchanged formula reads as Cancel - except for a function
-                // with no arguments, whose complete formula IS the placeholder (kept).
                 bool ok = committed || changed || (!listening && !udf.HasArguments);
                 if (!ok)
                 {
-                    cell.ClearContents();
+                    ClearCell(cell);
                     Logger.Info($"Insert Formula: {udf.Name} cancelled; the cell was left empty.");
                 }
                 else
                 {
-                    Logger.Info($"Insert Formula: {after} entered (event {(listening ? (committed ? "fired" : "did not fire") : "unavailable")}).");
+                    Logger.Info($"Insert Formula: {after} entered (SheetChange {(listening ? (committed ? "fired" : "did not fire") : "not listened to")}).");
                 }
             }
             catch (Exception ex)
             {
                 Logger.Error($"Insert Formula failed for {udf.Name}.", ex);
-                // Leave the cell as it was found: empty.
+                // Leave the cell as it was found (empty), and say so only once that is checked.
+                bool emptyAgain = !wrote;
                 if (wrote)
                 {
                     try
                     {
-                        if (string.Equals(Convert.ToString((object)cell.Formula), placeholder, StringComparison.OrdinalIgnoreCase))
-                            cell.ClearContents();
+                        if (string.Equals(ReadFormula(cell), placeholder, StringComparison.OrdinalIgnoreCase))
+                            ClearCell(cell);
+                        emptyAgain = string.IsNullOrEmpty(ReadFormula(cell));
                     }
-                    catch { /* best effort */ }
+                    catch { emptyAgain = false; }
                 }
                 HouseDialog.ShowHouseAlert(
-                    "Time Series Lab could not insert the formula. Nothing was changed.\n\n" +
-                    "The function:\n" + HouseDialog.Indent(udf.Name) + "\n\n" +
-                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
-                    "Select an empty cell, then click Insert again. If this message returns, tell Matthew Hornbach.",
+                    emptyAgain
+                        ? "Time Series Lab could not insert the formula. Nothing was changed.\n\n" +
+                          "The function:\n" + HouseDialog.Indent(udf.Name) + "\n\n" +
+                          HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                          "Select an empty cell, then click Insert again. If this message returns, tell Matthew Hornbach."
+                        : "Time Series Lab could not insert the formula, and could not take it out of the active cell again.\n\n" +
+                          "The cell holds:\n" + HouseDialog.Indent(placeholder) + "\n\n" +
+                          HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                          "Delete the contents of that cell. If this message returns, tell Matthew Hornbach.",
                     HouseDialog.Title(UdfGuideArea), isError: true);
             }
+        }
+
+        // The cell's formula as Excel 365 holds it (Formula2: no implicit-intersection @), read
+        // late-bound because the interop assembly predates it; Formula where Formula2 is missing.
+        private static string ReadFormula(Range cell)
+        {
+            try { return Convert.ToString(cell.GetType().InvokeMember("Formula2", System.Reflection.BindingFlags.GetProperty, null, cell, null)); }
+            catch (System.Reflection.TargetInvocationException) { throw; }
+            catch { return Convert.ToString((object)cell.Formula); }
+        }
+
+        /// <summary>
+        /// Put the function in the active cell as a dynamic-array formula (Formula2: through the
+        /// legacy Formula, Excel 365 would prefix the function with @ and a spilling function
+        /// would return one cell), and only there: a table's automatic fill-down and growth are
+        /// off for this one write, then restored, so a Cancel that empties the cell leaves
+        /// everything as it was. The user's own OK in the dialog is a normal entry.
+        /// </summary>
+        private static void WriteFormulaAlone(Microsoft.Office.Interop.Excel.Application app, Range cell, string formula)
+        {
+            bool? fillLists = null, expandLists = null;
+            try { fillLists = app.AutoCorrect.AutoFillFormulasInLists; app.AutoCorrect.AutoFillFormulasInLists = false; } catch { /* keep */ }
+            try { expandLists = app.AutoCorrect.AutoExpandListRange; app.AutoCorrect.AutoExpandListRange = false; } catch { /* keep */ }
+            try
+            {
+                try { cell.GetType().InvokeMember("Formula2", System.Reflection.BindingFlags.SetProperty, null, cell, new object[] { formula }); }
+                catch (MissingMethodException) { cell.Formula = formula; }
+                catch (System.Runtime.InteropServices.COMException ex) when ((uint)ex.ErrorCode == 0x80020006) { cell.Formula = formula; } // DISP_E_UNKNOWNNAME
+            }
+            finally
+            {
+                try { if (fillLists.HasValue) app.AutoCorrect.AutoFillFormulasInLists = fillLists.Value; } catch { /* best effort */ }
+                try { if (expandLists.HasValue) app.AutoCorrect.AutoExpandListRange = expandLists.Value; } catch { /* best effort */ }
+            }
+        }
+
+        /// <summary>Empty the active cell again; a merged cell is emptied as its whole merge area.</summary>
+        private static void ClearCell(Range cell)
+        {
+            bool merged = false;
+            try { merged = cell.MergeCells is bool b && b; } catch { /* treat as single */ }
+            if (merged) cell.MergeArea.ClearContents();
+            else cell.ClearContents();
         }
 
         /// <summary>Why the data workbook does not take Same-workbook results (ruling 3), as the
