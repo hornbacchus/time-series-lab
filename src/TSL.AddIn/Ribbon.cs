@@ -1004,7 +1004,7 @@ namespace TSL.AddIn
             }
             catch (FileNotFoundException ex)
             {
-                pythonVersion = "MISSING - " + (ex.FileName ?? "the engine's Python runtime could not be located");
+                pythonVersion = "not found: " + (ex.FileName ?? "the engine's Python runtime could not be located");
             }
             catch (Exception ex)
             {
@@ -1014,22 +1014,45 @@ namespace TSL.AddIn
             // This Excel's own engine (A2: one engine per Excel instance).
             var engineStatus = AddIn.Engine?.StatusText ?? "Not running";
 
-            HouseDialog.ShowHouseAlert(
-                $"Time Series Lab\n" +
-                $"Created by Matthew T. Hornbach\n\n" +
-                $"Build:             {BuildInfo.Stamp}\n" +
-                $"Engine version:    {engineVersion}\n" +
-                $"Engine status:     {engineStatus}\n" +
-                $"Technique library: {techniqueInfo}\n\n" +
-                $"Platform:          .NET Framework 4.8 + Excel-DNA\n" +
-                $"Runtime:           {pythonVersion}\n" +
-                $"Compute:           100% local (no cloud, no telemetry)\n\n" +
-                $"Layout:            {AddInLayout.KindLabel} at {AddInLayout.Root ?? "(files not located)"}\n" +
-                $"Settings:          {Path.Combine(AddIn.AppDataPath, "config.json")}\n" +
-                $"Logs:              {Path.Combine(AddIn.AppDataPath, "logs")}",
+            HouseDialog.ShowHouseAlert(AboutBox.Text(BuildInfo.Stamp, engineVersion, engineStatus, techniqueInfo,
+                    pythonVersion, AddInLayout.KindLabel, AddInLayout.Root, AddIn.AppDataPath),
                 HouseDialog.AboutCaption);
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// The About box text (docs/HOUSE_STYLE.md, About box; A2 U5). Pure and apart from the
+    /// Ribbon class (whose Excel-DNA base type needs Excel), so it can be exercised outside Excel.
+    /// </summary>
+    internal static class AboutBox
+    {
+        /// <summary>
+        /// The product, the build line "Build &lt;describe&gt; / &lt;yyyy-MM-dd HH:mm&gt;", author,
+        /// copyright, tagline and the Global Macro Charts line, then the diagnostics block,
+        /// one "Label: value" line each (ratification Q4). The copyright sign (U+00A9) is the one
+        /// permitted non-ASCII character.
+        /// </summary>
+        internal static string Text(string stamp, string engineVersion, string engineStatus,
+            string techniqueLibrary, string runtime, string layoutKind, string layoutRoot, string appDataPath)
+        {
+            return "Time Series Lab\n\n" +
+                   $"Build {stamp}\n" +
+                   "Created by Matthew Hornbach\n" +
+                   "\u00A9 2026 All Rights Reserved\n\n" +
+                   "Macro-finance time-series analysis add-in\n" +
+                   "for Microsoft Excel 365 Desktop (Windows)\n\n" +
+                   "Also by Matthew Hornbach: Global Macro Charts\n\n" +
+                   $"Engine version: {HouseDialog.Ascii(engineVersion)}\n" +
+                   $"Engine status: {engineStatus}\n" +
+                   $"Technique library: {techniqueLibrary}\n" +
+                   "Platform: .NET Framework 4.8 + Excel-DNA\n" +
+                   $"Runtime: {HouseDialog.Ascii(runtime)}\n" +
+                   "Compute: 100% local (no cloud, no telemetry)\n" +
+                   $"Layout: {layoutKind} at {layoutRoot ?? "(files not located)"}\n" +
+                   $"Settings: {Path.Combine(appDataPath, "config.json")}\n" +
+                   $"Logs: {Path.Combine(appDataPath, "logs")}";
+        }
     }
 }

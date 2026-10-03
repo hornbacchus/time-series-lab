@@ -10,15 +10,28 @@
     <!-- Controls the .dna file lookup and output .xll name (TimeSeriesLab-AddIn64.xll) -->
     <ExcelDnaFileName>TimeSeriesLab</ExcelDnaFileName>
     <!-- The build stamp (TslBuildStamp below) IS the informational version: stop the
-         SDK appending "+<commit sha>" to it, or it could never equal git describe. -->
+         SDK appending "+<commit sha>" to it, or its describe part could never equal git describe. -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- File properties (A2 U5, ratified): Product "Time Series Lab", Authors "Matthew
+         Hornbach", Company empty, Copyright as the About box words it. Authors is project
+         (package) metadata only: no assembly attribute and no field of the file's version
+         resource carries it. Company is left out entirely, because the SDK would otherwise
+         fill it from Authors. -->
+    <Product>Time Series Lab</Product>
+    <Authors>Matthew Hornbach</Authors>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <Copyright>&#169; 2026 All Rights Reserved</Copyright>
   </PropertyGroup>
 
-  <!-- BUILD STAMP: the Exec below (git describe, long form, always, dirty-marked) of
-       the tree being built, baked into AssemblyInformationalVersion. About, =TSL_VERSION() and every Audit
-       sheet read it back (BuildInfo.Stamp); tools\build_pack.ps1 reads it off the built
-       DLL and refuses a pack whose stamp differs from git describe. No git, or not a
-       git checkout: DEV-UNSTAMPED plus a build warning (build_pack refuses those). -->
+  <!-- BUILD STAMP: "<describe> / <yyyy-MM-dd HH:mm>" - the Exec below (git describe, long
+       form, always, dirty-marked) of the tree being built, then the time this DLL was
+       compiled (the build machine's local time), baked into AssemblyInformationalVersion
+       (the file's Product version). About (its Build line), =TSL_VERSION() and every Audit
+       sheet read it back (BuildInfo.Stamp); tools\build_pack.ps1 reads it off the built DLL
+       and refuses a pack whose describe part differs from git describe or whose time part
+       is malformed. No git, or not a git checkout: "DEV-UNSTAMPED / <time>" plus a build
+       warning (build_pack refuses those). Because the time changes, every build recompiles
+       this project. -->
   <Target Name="TslBuildStamp" BeforeTargets="GetAssemblyAttributes">
     <Exec Command="git describe --long --always --dirty" WorkingDirectory="$(MSBuildProjectDirectory)"
           ConsoleToMSBuild="true" EchoOff="true" IgnoreExitCode="true"
@@ -28,11 +41,14 @@
     </Exec>
     <PropertyGroup>
       <TslBuildStamp Condition="'$(TslBuildStampExit)' != '0' Or '$(TslBuildStamp)' == ''">DEV-UNSTAMPED</TslBuildStamp>
-      <InformationalVersion>$(TslBuildStamp)</InformationalVersion>
+      <!-- The sortable "s" format is culture-invariant (Gregorian, ':' separators) whatever the
+           build machine's regional settings; its first 16 characters are yyyy-MM-ddTHH:mm. -->
+      <TslBuildTime>$([System.DateTime]::Now.ToString('s').Substring(0, 16).Replace('T', ' '))</TslBuildTime>
+      <InformationalVersion>$(TslBuildStamp) / $(TslBuildTime)</InformationalVersion>
     </PropertyGroup>
     <Warning Condition="'$(TslBuildStamp)' == 'DEV-UNSTAMPED'"
              Text="TSL build stamp unavailable (git describe failed); the add-in will report DEV-UNSTAMPED." />
-    <Message Importance="high" Text="TSL build stamp: $(TslBuildStamp)" />
+    <Message Importance="high" Text="TSL build stamp: $(InformationalVersion)" />
   </Target>
 
   <ItemGroup>

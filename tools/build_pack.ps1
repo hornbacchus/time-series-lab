@@ -38,24 +38,36 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Build succeeded." -ForegroundColor Green
 
-# 1b) BUILD STAMP (C1): read it OFF THE BUILT DLL - the identity the add-in
-# reports (About, =TSL_VERSION(), every Audit sheet) - and refuse a pack whose
-# stamp is missing or differs from git describe of the tree being packed.
-# The same string goes into VERSION.txt (build=) and the packed engine\VERSION.txt.
+# 1b) BUILD STAMP (C1; build time A2 U5): read it OFF THE BUILT DLL - the identity
+# the add-in reports (About, =TSL_VERSION(), every Audit sheet) - as
+# "<describe> / <yyyy-MM-dd HH:mm>". Refuse a pack whose stamp is missing or
+# unstamped, whose describe part differs from git describe of the tree being
+# packed, or whose time part is not a build time. The FULL stamp goes into
+# VERSION.txt (build=) and the packed engine\VERSION.txt (the engine's
+# engine_version, which the add-in's identity handshake requires to equal it).
 $builtDll = Join-Path $RepoRoot "src\TSL.AddIn\bin\x64\Release\net48\TSL.AddIn.dll"
 if (-not (Test-Path $builtDll)) { Write-Error "Built add-in not found: $builtDll"; exit 1 }
 $buildStamp = (Get-Item $builtDll).VersionInfo.ProductVersion
 $describe = (& git -C $RepoRoot describe --long --always --dirty 2>$null)
-if (-not $buildStamp -or $buildStamp -eq "DEV-UNSTAMPED") {
+$stampParts = @(if ($buildStamp) { $buildStamp -split ' / ', 2 })
+$stampDescribe = if ($stampParts.Count -ge 1) { $stampParts[0] } else { "" }
+$stampTime = if ($stampParts.Count -ge 2) { $stampParts[1] } else { "" }
+if (-not $buildStamp -or -not $stampDescribe -or $stampDescribe -eq "DEV-UNSTAMPED") {
     Write-Error "The built add-in carries no build stamp ('$buildStamp'); refusing to pack."
     exit 1
 }
-if ($buildStamp -ne $describe) {
-    Write-Error "Build stamp '$buildStamp' differs from git describe '$describe'; refusing to pack."
+$parsedTime = [datetime]::MinValue
+if (-not [datetime]::TryParseExact($stampTime, 'yyyy-MM-dd HH:mm', [Globalization.CultureInfo]::InvariantCulture,
+        [Globalization.DateTimeStyles]::None, [ref]$parsedTime)) {
+    Write-Error "Build stamp '$buildStamp' has no valid build time after ' / ' (expected yyyy-MM-dd HH:mm); refusing to pack."
     exit 1
 }
-Write-Host "Build stamp: $buildStamp (equals git describe)" -ForegroundColor Green
-if ($buildStamp -like "*-dirty") {
+if ($stampDescribe -ne $describe) {
+    Write-Error "Build stamp '$buildStamp': its describe part '$stampDescribe' differs from git describe '$describe'; refusing to pack."
+    exit 1
+}
+Write-Host "Build stamp: $buildStamp (describe part equals git describe; built $stampTime)" -ForegroundColor Green
+if ($stampDescribe -like "*-dirty") {
     Write-Warning "The tree has uncommitted changes (stamp ends -dirty): this pack is not a release candidate."
 }
 

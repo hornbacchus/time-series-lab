@@ -7,6 +7,12 @@
     <RootNamespace>TSL.Installer</RootNamespace>
     <AssemblyName>TSL.Installer</AssemblyName>
     <LangVersion>latest</LangVersion>
+    <!-- File properties (A2 U5, ratified): as TSL.AddIn.csproj (Authors is package metadata
+         only; Company is left out, or the SDK would fill it from Authors). -->
+    <Product>Time Series Lab</Product>
+    <Authors>Matthew Hornbach</Authors>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <Copyright>&#169; 2026 All Rights Reserved</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
