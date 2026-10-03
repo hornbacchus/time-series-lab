@@ -30,7 +30,6 @@ namespace TSL.UI.ViewModels
         private RunViewModel _runVm;
         private RecommenderViewModel _recommenderVm;
         private DataReadinessViewModel _dataReadinessVm;
-        private SettingsViewModel _settingsVm;
         private UdfBrowserViewModel _udfBrowserVm;
 
         // ── Observable properties ───────────────────────────────────────
@@ -88,7 +87,6 @@ namespace TSL.UI.ViewModels
                     // Propagate to child VMs that care
                     if (_runVm != null) _runVm.Preset = value;
                     if (_explorerVm != null) _explorerVm.CurrentPreset = value;
-                    _settingsVm?.SyncPreset(value);
                 }
             }
         }
@@ -105,7 +103,6 @@ namespace TSL.UI.ViewModels
         public ICommand NavigateExplorerCommand { get; }
         public ICommand NavigateRecommenderCommand { get; }
         public ICommand NavigateDataReadinessCommand { get; }
-        public ICommand NavigateSettingsCommand { get; }
         public ICommand NavigateUdfBrowserCommand { get; }
 
         // ── Events ──────────────────────────────────────────────────────
@@ -191,7 +188,6 @@ namespace TSL.UI.ViewModels
             NavigateExplorerCommand = new RelayCommand(NavigateToExplorer);
             NavigateRecommenderCommand = new RelayCommand(NavigateToRecommender);
             NavigateDataReadinessCommand = new RelayCommand(NavigateToDataReadiness);
-            NavigateSettingsCommand = new RelayCommand(NavigateToSettings);
             NavigateUdfBrowserCommand = new RelayCommand(NavigateToUdfBrowser);
 
             // Start on the technique explorer
@@ -253,20 +249,6 @@ namespace TSL.UI.ViewModels
             CurrentView = GetOrCreateDataReadiness();
             CurrentViewTitle = "Data Readiness";
         }
-
-        public void NavigateToSettings()
-        {
-            var vm = GetOrCreateSettings();
-            vm.Reload();
-            CurrentView = vm;
-            CurrentViewTitle = "Settings";
-        }
-
-        /// <summary>
-        /// The per-user settings the Settings view reads and writes (A2 U7). Set by the AddIn
-        /// layer when it creates the pane, before the Settings view is first shown.
-        /// </summary>
-        public ISettingsStore SettingsStore { get; set; }
 
         public void NavigateToUdfBrowser()
         {
@@ -425,15 +407,6 @@ namespace TSL.UI.ViewModels
                     DataReadinessChecksRequested?.Invoke(_dataReadinessVm);
             }
             return _dataReadinessVm;
-        }
-
-        private SettingsViewModel GetOrCreateSettings()
-        {
-            if (_settingsVm == null)
-            {
-                _settingsVm = new SettingsViewModel(SettingsStore);
-            }
-            return _settingsVm;
         }
 
         private UdfBrowserViewModel GetOrCreateUdfBrowser()

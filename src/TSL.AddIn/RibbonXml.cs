@@ -309,14 +309,20 @@ namespace TSL.AddIn
                   onAction='OnRerunThorough'
                   screentip='Re-run Thorough Formulas'
                   supertip='Increment the trigger token to force all THOROUGH formulas in this workbook to recompute.' />
-          <separator id='sepRun2' />
-          <button id='btnSettings'
-                  label='Settings'
-                  size='large'
-                  imageMso='ControlProperties'
-                  onAction='OnSettings'
-                  screentip='Settings'
-                  supertip='Configure Time Series Lab preferences.' />
+        </group>
+
+        <!-- Tools > Defaults (A2 Defaults rulings, 2026-10-03), as in Global Macro Charts:
+             one submenu per per-user choice, a check mark on the saved value, read fresh each
+             time the menu opens (DefaultsMenu.ContentXml). -->
+        <group id='grpTools' label='Tools'>
+          <dynamicMenu id='menuDefaults'
+                       label='Defaults'
+                       size='large'
+                       imageMso='ControlProperties'
+                       getContent='OnDefaultsGetContent'
+                       invalidateContentOnDrop='true'
+                       screentip='Defaults'
+                       supertip='" + System.Security.SecurityElement.Escape(DefaultsMenu.MenuSupertip) + @"' />
         </group>
 
         <group id='grpHelp' label='Help'>

@@ -672,13 +672,6 @@ namespace TSL.AddIn
             _hostControl?.NavigateToDataReadiness();
         }
 
-        public static void ShowSettings()
-        {
-            if (!EnsureTaskPane("Settings")) return;
-            _taskPane.Visible = true;
-            _hostControl?.NavigateToSettings();
-        }
-
         public static void ShowUdfBrowser()
         {
             if (!EnsureTaskPane("UDF Formula Guide")) return;
@@ -1041,9 +1034,6 @@ namespace TSL.AddIn
             try
             {
                 _hostControl = new TSL.UI.TaskPaneHostControl();
-
-                // The Settings view reads and writes config.json through this (A2 U7).
-                _hostControl.ViewModel.SettingsStore = new SettingsStoreAdapter();
 
                 // The pane starts on the saved preset (A2 E2b ruling 2): its runs send this one,
                 // and before it read nothing, so they used Balanced whatever was saved.

@@ -107,7 +107,7 @@ namespace TSL.AddIn
         /// the add-in's own folder), and leave it open/active for the user.
         /// </summary>
         public static WriteResult WriteRunResult(RunRequest request, RunResponse response)
-            => WriteRunResult(request, response, TSL.UI.ResultsDestinations.NewWorkbook);
+            => WriteRunResult(request, response, ResultsDestinations.NewWorkbook);
 
         /// <summary>
         /// Write a run's results where <paramref name="destination"/> says (A2 U7, the per-user
@@ -166,7 +166,7 @@ namespace TSL.AddIn
                     Logger.Info($"The data workbook is inside the add-in's folder ({inputDir}); " +
                                 "the results go to a new workbook in Documents\\Time Series Lab.");
                 }
-                else if (string.Equals(destination, TSL.UI.ResultsDestinations.SameWorkbook, StringComparison.Ordinal))
+                else if (string.Equals(destination, ResultsDestinations.SameWorkbook, StringComparison.Ordinal))
                 {
                     // The workbook of that name, and in the same folder: a same-named workbook
                     // opened from elsewhere during the run is not the data workbook.

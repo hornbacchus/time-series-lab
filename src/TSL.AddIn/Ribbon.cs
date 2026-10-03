@@ -141,13 +141,13 @@ namespace TSL.AddIn
             s_ribbonUi = ribbonUi;
         }
 
-        // The ribbon, for refreshes that start outside a ribbon callback (A2 U7: the task
-        // pane's Settings view changes the preset).
+        // The ribbon, for refreshes that start outside the control being redrawn (Tools >
+        // Defaults changes the preset the Run group's Preset menu shows).
         private static IRibbonUI s_ribbonUi;
 
         /// <summary>
-        /// Redraw the Preset menu's label and check marks after the preset changed elsewhere
-        /// (the task pane's Settings view). Cosmetic: a failure is logged only.
+        /// Redraw the Run group's Preset menu - its label and check marks - after the preset
+        /// changed, or a change was turned down. Cosmetic: a failure is logged only.
         /// </summary>
         internal static void RefreshPresetControls()
         {
@@ -544,7 +544,7 @@ namespace TSL.AddIn
         /// </summary>
         public string OnPresetGetLabel(IRibbonControl control)
         {
-            var preset = AddIn.Settings?.GetGlobalPreset() ?? "Balanced";
+            var preset = AddIn.Settings?.GetGlobalPreset() ?? SettingsManager.DefaultPreset;
             return $"Preset: {preset}";
         }
 
@@ -554,30 +554,18 @@ namespace TSL.AddIn
         /// in the menu (just like "None (House Default)" in the Axes Grid
         /// reference menu).
         /// </summary>
-        public bool OnPresetGetPressed(IRibbonControl control)
-        {
-            var current = AddIn.Settings?.GetGlobalPreset() ?? "Balanced";
-            return string.Equals(control?.Tag, current, StringComparison.OrdinalIgnoreCase);
-        }
+        public bool OnPresetGetPressed(IRibbonControl control) =>
+            DefaultsMenu.IsChecked(AddIn.Settings, DefaultsMenu.PresetTag + control?.Tag);
 
         /// <summary>
-        /// Click handler for the three preset toggleButtons. Pulls the
-        /// preset name from the control's Tag attribute.
+        /// Click handler for the three preset toggleButtons, the quick switch for the saved
+        /// preset (A2 Defaults rulings: it stays, because the task pane cannot change the
+        /// preset for a single run). It saves exactly as Tools > Defaults > Preset does.
         /// </summary>
         public void OnPresetMenuClick(IRibbonControl control, bool pressed)
         {
-            var preset = control?.Tag;
-            if (string.IsNullOrEmpty(preset)) return;
-
-            AddIn.Settings?.SetGlobalPreset(preset);
-            TaskPaneManager.UpdatePreset(preset);
-
-            // Refresh the menu button label and the check marks on the
-            // three toggle buttons so the UI reflects the new selection.
-            _ribbonUi?.InvalidateControl("menuPreset");
-            _ribbonUi?.InvalidateControl("btnPresetFast");
-            _ribbonUi?.InvalidateControl("btnPresetBalanced");
-            _ribbonUi?.InvalidateControl("btnPresetThorough");
+            if (string.IsNullOrEmpty(control?.Tag)) return;
+            ChooseDefault(DefaultsMenu.PresetTag + control.Tag, "Run > Preset");
         }
 
         public void OnRun(IRibbonControl control)
@@ -596,11 +584,93 @@ namespace TSL.AddIn
             _ribbonUi?.Invalidate();
         }
 
-        public void OnSettings(IRibbonControl control)
+        // ── Tools ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Tools > Defaults opens: read config.json again, so the check marks show what is
+        /// saved now (another Excel window may have changed it), and build the menu.
+        /// </summary>
+        public string OnDefaultsGetContent(IRibbonControl control)
         {
-            TaskPaneManager.ShowSettings();
+            ReloadSettings();
+            return DefaultsMenu.ContentXml();
         }
 
+        public bool OnDefaultsGetPressed(IRibbonControl control) =>
+            DefaultsMenu.IsChecked(AddIn.Settings, control?.Tag);
+
+        public void OnDefaultsClick(IRibbonControl control, bool pressed)
+        {
+            ChooseDefault(control?.Tag, "Tools > Defaults");
+        }
+
+        /// <summary>
+        /// Read config.json again; when that changes the preset (another Excel window saved
+        /// one), the task pane and the Run group's Preset menu show it.
+        /// </summary>
+        private static void ReloadSettings()
+        {
+            var settings = AddIn.Settings;
+            if (settings == null) return;
+            try
+            {
+                var before = settings.GetGlobalPreset();
+                settings.Reload();
+                ShowPresetIfChanged(before);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Could not read the settings file again.", ex);
+            }
+        }
+
+        private static void ShowPresetIfChanged(string before)
+        {
+            var after = AddIn.Settings?.GetGlobalPreset();
+            if (after == null || after == before) return;
+            TaskPaneManager.UpdatePreset(after);
+            RefreshPresetControls();
+        }
+
+        /// <summary>
+        /// Save the default a menu item stands for (Tools > Defaults, or the Run group's
+        /// Preset menu; <paramref name="source"/> names it in the log), against the file as
+        /// it is now. A failed save shows the house error, captioned "Time Series Lab -
+        /// Defaults - Error", naming the file; nothing was changed.
+        /// </summary>
+        private static void ChooseDefault(string tag, string source)
+        {
+            var settings = AddIn.Settings;
+            var before = settings?.GetGlobalPreset();
+            try
+            {
+                settings?.Reload();
+                var outcome = DefaultsMenu.Choose(settings, tag, HouseDialog.ShowChoice2, out var error);
+                Logger.Info($"{source}: {tag} -> {outcome}");
+                if (outcome == DefaultsMenu.Outcome.Failed)
+                    HouseDialog.ShowHouseAlert(DefaultsMenu.SaveErrorMessage(settings.FilePath, error?.Message),
+                        HouseDialog.Title(DefaultsMenu.Area), isError: true);
+            }
+            catch (Exception ex)
+            {
+                // Choose saves last and catches its own save errors, so nothing was saved.
+                Logger.Error($"{source}: {tag} failed.", ex);
+                try
+                {
+                    HouseDialog.ShowHouseAlert(DefaultsMenu.SaveErrorMessage(settings?.FilePath, ex.Message),
+                        HouseDialog.Title(DefaultsMenu.Area), isError: true);
+                }
+                catch (Exception shown) { Logger.Error("Could not show the Defaults error.", shown); }
+            }
+            finally
+            {
+                // The task pane, when the preset changed (saved here, or read from the file);
+                // and always the Run group's Preset menu: its label, and a check mark Excel
+                // moved on a click that was turned down or failed.
+                try { ShowPresetIfChanged(before); } catch (Exception ex) { Logger.Error("Could not show the preset.", ex); }
+                RefreshPresetControls();
+            }
+        }
         // ── Help ───────────────────────────────────────────────────────
 
         public void OnUdfGuide(IRibbonControl control)

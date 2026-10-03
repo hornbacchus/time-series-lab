@@ -106,14 +106,6 @@ namespace TSL.UI
         }
 
         /// <summary>
-        /// Navigate to the settings view.
-        /// </summary>
-        public void NavigateToSettings()
-        {
-            InvokeOnUIThread(() => _viewModel.NavigateToSettings());
-        }
-
-        /// <summary>
         /// Navigate to the UDF browser view.
         /// </summary>
         public void NavigateToUdfBrowser()

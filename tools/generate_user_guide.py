@@ -146,7 +146,7 @@ def generate_markdown(catalog, udf_catalog):
 
     # Ribbon Reference
     h2("2. Ribbon Reference")
-    p("The **Time Series Lab** ribbon tab is organized into four groups:")
+    p("The **Time Series Lab** ribbon tab is organized into groups:")
     blank()
     h3("Quick Actions")
     p("One-click access to the most common analyses:")
@@ -169,12 +169,25 @@ def generate_markdown(catalog, udf_catalog):
     p("- **Data Readiness** - Score your selected data for quality issues before analysis.")
     blank()
     h3("Run")
-    p("- **Preset** dropdown - Switch between Fast, Balanced (default), and Thorough presets")
+    p("- **Preset** dropdown - Switch between Fast, Balanced (default), and Thorough presets. "
+      "It saves the same default as Tools > Defaults > Preset.")
     p("- **Run** - Execute the current technique from the Task Pane")
     p("- **Cancel** - Stop a running computation immediately")
     p("- **Re-run Thorough** - Recompute all THOROUGH formulas in the workbook")
-    p("- **Settings** - Open the settings panel: the preset and the results destination "
-      "(a new workbook, or the workbook that holds the data)")
+    blank()
+    h3("Tools")
+    p("**Defaults** holds the defaults Time Series Lab uses for every run in the task pane, "
+      "one submenu each, with a check mark on the saved value:")
+    p("- **Tools > Defaults > Preset** - Fast, Balanced (the default) or Thorough.")
+    p("- **Tools > Defaults > Results Destination** - New workbook (the default): the results "
+      "of each run go to a new workbook saved next to the data workbook, and the data workbook "
+      "is not changed. Same workbook as the data: the Results and Audit sheets of each run, and "
+      "a hidden run record, are added to the workbook that holds the data, and Time Series Lab "
+      "does not save it. Time Series Lab asks before it saves this choice. A data workbook inside "
+      "the Time Series Lab program folder, or (with New workbook) one that was never saved, sends "
+      "its results to a new workbook in the Time Series Lab folder in Documents. A CSV or text "
+      "file, or a workbook that does not allow new sheets, also gets a new workbook, saved next "
+      "to it. The Bespoke tools always put their results in a new workbook.")
     blank()
     h3("Help")
     p("- **UDF Formula Guide** - Browse all worksheet functions with examples and a formula builder")
