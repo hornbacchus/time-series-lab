@@ -100,7 +100,7 @@
             <ComboBox Margin="0,0,0,6" FontSize="12" Padding="6,4"
                       ItemsSource="{Binding Presets}"
                       SelectedItem="{Binding Preset, Mode=TwoWay}" />
-            <TextBlock Text="The same choice as the Preset menu in the Run group."
+            <TextBlock Text="The same choice as Run &gt; Preset on the ribbon."
                        Style="{StaticResource SettingNote}" />
 
             <!-- ── Results destination ────────────────────────────── -->
@@ -115,9 +115,11 @@
                          FontSize="12" Margin="0,0,0,8" />
             <TextBlock Text="New workbook: the results of each run go to a new workbook saved next to the data workbook. The data workbook is not changed."
                        Style="{StaticResource SettingNote}" />
-            <TextBlock Text="Same workbook: the Results and Audit sheets of each run are added to the workbook that holds the data. That workbook is not saved."
+            <TextBlock Text="Same workbook: the Results and Audit sheets of each run, and a hidden run record, are added to the workbook that holds the data. Time Series Lab does not save that workbook."
                        Style="{StaticResource SettingNote}" />
-            <TextBlock Text="Bond Yield Forecast, Breakeven Payrolls and Kronos Forecast always put their results in a new workbook."
+            <TextBlock Text="A data workbook that was never saved, or one inside the Time Series Lab program folder, sends its results to a new workbook in the Time Series Lab folder in Documents."
+                       Style="{StaticResource SettingNote}" />
+            <TextBlock Text="The Bespoke tools always put their results in a new workbook."
                        Style="{StaticResource SettingNote}" />
 
         </StackPanel>

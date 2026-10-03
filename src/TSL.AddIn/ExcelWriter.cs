@@ -103,8 +103,8 @@ namespace TSL.AddIn
         /// workbook (READ-ONLY), create a new workbook, write the Results +
         /// Audit + embedded JSON sheets there, save it as
         /// "&lt;input&gt;_Results_&lt;timestamp&gt;.xlsx" in the input's folder
-        /// (or the user's Documents folder if the input was never saved), and
-        /// leave it open/active for the user.
+        /// (or Documents\Time Series Lab if the input was never saved or lies in
+        /// the add-in's own folder), and leave it open/active for the user.
         /// </summary>
         public static WriteResult WriteRunResult(RunRequest request, RunResponse response)
             => WriteRunResult(request, response, TSL.UI.ResultsDestinations.NewWorkbook);
@@ -113,10 +113,10 @@ namespace TSL.AddIn
         /// Write a run's results where <paramref name="destination"/> says (A2 U7, the per-user
         /// resultsDestination setting, read at the Run click): a new workbook, as described
         /// above (the default), or - for selection techniques - the workbook that holds the
-        /// data, appended and never saved. In both modes a data workbook inside the add-in's own
-        /// folder (the install folder; in a development tree, the repository) sends the results
-        /// to a new workbook in Documents\Time Series Lab instead (K4), and so does a data
-        /// workbook that was never saved.
+        /// data, appended and never saved by Time Series Lab. In both modes a data workbook
+        /// inside the add-in's own folder (the install folder; in a development tree, the
+        /// repository) sends the results to a new workbook in Documents\Time Series Lab instead
+        /// (K4). A new workbook for a data workbook that was never saved goes there too.
         /// </summary>
         internal static WriteResult WriteRunResult(RunRequest request, RunResponse response, string destination)
         {
@@ -168,13 +168,17 @@ namespace TSL.AddIn
                 }
                 else if (string.Equals(destination, TSL.UI.ResultsDestinations.SameWorkbook, StringComparison.Ordinal))
                 {
+                    // The workbook of that name, and in the same folder: a same-named workbook
+                    // opened from elsewhere during the run is not the data workbook.
                     var dataWb = FindOpenWorkbook(app, request?.SourceWorkbookName);
-                    if (dataWb != null)
+                    string foundDir = null;
+                    try { foundDir = dataWb?.Path; } catch { dataWb = null; }
+                    if (dataWb != null && SameFolder(foundDir, request?.SourceWorkbookPath))
                         return WriteIntoWorkbook(app, dataWb, request, response, writeResult, inputName);
-                    // The data workbook was closed during the run: a new workbook instead.
+                    // Closed, renamed by Save As, or replaced during the run: a new workbook instead.
                     writeResult.SameWorkbookUnavailable = true;
-                    Logger.Info($"Same workbook: {request?.SourceWorkbookName ?? "(unknown)"} is no longer open; " +
-                                "the results go to a new workbook.");
+                    Logger.Info($"Same workbook: {request?.SourceWorkbookName ?? "(unknown)"} in " +
+                                $"{request?.SourceWorkbookPath ?? "(no folder)"} is no longer open; the results go to a new workbook.");
                 }
 
                 // Unsaved input workbook (never saved → no Path on disk), or one inside the
@@ -185,7 +189,10 @@ namespace TSL.AddIn
                 {
                     usedFallbackFolder = !writeResult.UsedInstallTreeGuard;
                     inputDir = UserDocumentsFolder();
-                    System.IO.Directory.CreateDirectory(inputDir);
+                    // A folder that cannot be made fails the save below, which keeps the results
+                    // open and unsaved with a warning; it never loses the write.
+                    try { System.IO.Directory.CreateDirectory(inputDir); }
+                    catch (Exception dirEx) { Logger.Error($"Could not create the folder {inputDir}.", dirEx); }
                 }
 
                 var targetPath = BuildOutputPath(inputDir, inputBaseName);
@@ -344,8 +351,23 @@ namespace TSL.AddIn
 
         /// <summary>Documents\Time Series Lab: template working copies, run archives, and results
         /// whose data workbook was never saved or lies in the add-in's own folder.</summary>
-        internal static string UserDocumentsFolder() =>
-            System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Time Series Lab");
+        internal static string UserDocumentsFolder()
+        {
+            // Never a relative path: with no Documents folder known, the profile's Documents.
+            var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (string.IsNullOrEmpty(documents))
+                documents = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Documents");
+            return System.IO.Path.Combine(documents, "Time Series Lab");
+        }
+
+        /// <summary>Two workbook folders are the same (ignoring case and a trailing separator;
+        /// two empty folders - unsaved workbooks - are the same).</summary>
+        private static bool SameFolder(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b))
+                return string.IsNullOrEmpty(a) && string.IsNullOrEmpty(b);
+            return string.Equals(a.TrimEnd('\\', '/'), b.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase);
+        }
 
         /// <summary>
         /// Whether a workbook named <paramref name="fileName"/> in folder <paramref name="dir"/>

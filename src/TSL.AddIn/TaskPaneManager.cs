@@ -1597,12 +1597,14 @@ namespace TSL.AddIn
                 {
                     // "Same workbook" (A2 U7): say what was left in the data workbook.
                     var added = writeResult.SheetsAddedBeforeFailure;
+                    var workbookBlock = "The workbook:\n" + HouseDialog.Indent(writeResult.AddedToWorkbook) + "\n\n";
                     if (added.Count > 0)
                     {
                         runVm.FailRun(
                             "The analysis finished, but its results could not all be added to the workbook that holds the data. " +
-                            "That workbook has not been saved, and the sheets added to it may be incomplete:\n" +
-                            string.Join("\n", added.Select(HouseDialog.Indent)) + "\n\n" +
+                            "Time Series Lab did not save that workbook, and the sheets it added may be incomplete.\n\n" +
+                            workbookBlock +
+                            "The sheets added:\n" + string.Join("\n", added.Select(HouseDialog.Indent)) + "\n\n" +
                             errorBlock + "\n\n" +
                             "Delete those sheets, then click Run to try again. If this message returns, tell Matthew Hornbach.");
                     }
@@ -1611,6 +1613,7 @@ namespace TSL.AddIn
                         runVm.FailRun(
                             "The analysis finished, but its results could not be added to the workbook that holds the data. " +
                             "Nothing was changed.\n\n" +
+                            workbookBlock +
                             errorBlock + "\n\n" +
                             "Click Run to try again. If this message returns, tell Matthew Hornbach.");
                     }
@@ -1650,15 +1653,14 @@ namespace TSL.AddIn
             }
             else if (!string.IsNullOrEmpty(writeResult.OutputPath) && writeResult.UsedInstallTreeGuard)
             {
-                // The data workbook lies in the add-in's own folder (A2 U7, K4).
+                // The data workbook lies in the add-in's own folder (A2 U7, K4; ratified wording).
                 summary += "\n\nThe data workbook is inside the Time Series Lab program folder, " +
-                           "so the results were saved to Documents instead:\n" + HouseDialog.Indent(writeResult.OutputPath) +
-                           "\n\nThe data workbook was not changed.";
+                           "so the results were saved to Documents instead:\n" + HouseDialog.Indent(writeResult.OutputPath);
             }
             else if (!string.IsNullOrEmpty(writeResult.OutputPath) && writeResult.SameWorkbookUnavailable)
             {
-                summary += "\n\nThe data workbook was closed before the results could be added to it, " +
-                           "so they were saved to a new workbook instead:\n" + HouseDialog.Indent(writeResult.OutputPath);
+                summary += "\n\nThe data workbook could no longer be found under its name, " +
+                           "so the results were saved to a new workbook instead:\n" + HouseDialog.Indent(writeResult.OutputPath);
             }
             else if (!string.IsNullOrEmpty(writeResult.OutputPath))
             {
@@ -1667,11 +1669,18 @@ namespace TSL.AddIn
                 summary += "\n\nThe results were saved to a new workbook:\n" + HouseDialog.Indent(writeResult.OutputPath) +
                            "\n\nThe data workbook was not changed." +
                            (writeResult.UsedFallbackFolder
-                               ? " It has never been saved, so the results went to Documents\\Time Series Lab."
+                               ? " It has never been saved, so the results went to the Time Series Lab folder in Documents."
                                : "");
             }
             else if (!string.IsNullOrEmpty(writeResult.SaveWarning))
             {
+                // The save failed: say first why the results are in a new workbook at all.
+                if (writeResult.UsedInstallTreeGuard)
+                    summary += "\n\nThe data workbook is inside the Time Series Lab program folder, " +
+                               "so the results went to a new workbook instead.";
+                else if (writeResult.SameWorkbookUnavailable)
+                    summary += "\n\nThe data workbook could no longer be found under its name, " +
+                               "so the results went to a new workbook instead.";
                 summary += "\n\n" + writeResult.SaveWarning;
             }
 
