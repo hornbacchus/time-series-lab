@@ -17,7 +17,7 @@ namespace TSL.AddIn.Functions
         [ExcelFunction(
             Name = "TSL_VERSION",
             Category = "Time Series Lab",
-            Description = "Returns the build stamp of the loaded Time Series Lab add-in, <describe> / <yyyy-MM-dd HH:mm>: git describe of the build and the time it was built. The same text as the Build line in Help > About.")]
+            Description = "Returns the build stamp of the loaded Time Series Lab add-in: the identity of the build and the time it was built. It is the same text as the Build line in Help > About.")]
         public static object TSL_VERSION()
         {
             try

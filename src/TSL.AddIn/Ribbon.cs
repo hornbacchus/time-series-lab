@@ -1018,7 +1018,10 @@ namespace TSL.AddIn
             }
             catch (FileNotFoundException ex)
             {
-                pythonVersion = "not found: " + (ex.FileName ?? "the engine's Python runtime could not be located");
+                // About shows "Runtime: Not found at {path}" (E2a wording amendment 2).
+                pythonVersion = ex.FileName != null
+                    ? "Not found at " + ex.FileName
+                    : "Not found (its location is unknown: the add-in's own files were not found)";
             }
             catch (Exception ex)
             {

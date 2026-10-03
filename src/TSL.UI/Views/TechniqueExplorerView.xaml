@@ -374,6 +374,13 @@
 
                 </StackPanel>
             </ScrollViewer>
+
+            <!-- The catalog did not load: why the Explorer is empty (A2 R8) -->
+            <Border Grid.Row="0" Grid.RowSpan="3" Background="#FFFFFF" Padding="12"
+                    Visibility="{Binding HasCatalogMessage, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding CatalogMessage}" FontSize="12" Foreground="#C62828"
+                           TextWrapping="Wrap" />
+            </Border>
         </Grid>
 
         <!-- ── Action buttons ─────────────────────────────────────── -->
@@ -383,7 +390,7 @@
             <StackPanel>
                 <Button Content="Configure &amp; Run" Style="{StaticResource AccentButton}"
                         Command="{Binding OpenRunViewCommand}" Margin="0,0,0,6"
-                        ToolTip="Open the Run panel for this technique with the current selection - edit parameters, then click Run." />
+                        ToolTip="Open this technique in the task pane with the current selection. Edit the parameters, then click Run." />
                 <!-- The worksheet functions are in the UDF Formula Guide (A2 U8, ratification Q7;
                      replaces the Insert AUTO and Insert THOROUGH buttons, which did nothing). -->
                 <Button Content="Show formulas" Style="{StaticResource LinkButton}"

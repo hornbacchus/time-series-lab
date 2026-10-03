@@ -173,7 +173,8 @@ def generate_markdown(catalog, udf_catalog):
     p("- **Run** - Execute the current technique from the Task Pane")
     p("- **Cancel** - Stop a running computation immediately")
     p("- **Re-run Thorough** - Recompute all THOROUGH formulas in the workbook")
-    p("- **Settings** - Open the settings panel (presets, seed, fill method, etc.)")
+    p("- **Settings** - Open the settings panel: the preset and the results destination "
+      "(a new workbook, or the workbook that holds the data)")
     blank()
     h3("Help")
     p("- **UDF Formula Guide** - Browse all worksheet functions with examples and a formula builder")
@@ -190,8 +191,8 @@ def generate_markdown(catalog, udf_catalog):
     p("**Headers:** The cell directly above your first selected row is used as the series name. "
       "If it looks numeric or is missing, a fallback name like `Col_B` is used.")
     blank()
-    p("**Numeric coercion:** By default, string values that look like numbers are coerced. "
-      "Non-numeric values become NA. This is configurable in Settings.")
+    p("**Numeric coercion:** String values that look like numbers are coerced. "
+      "Non-numeric values become NA.")
     blank()
     h3("Selecting Non-Adjacent Columns (Multi-Series Techniques)")
     p("Many techniques require two or more data columns that may not be next to each other. "

@@ -558,7 +558,7 @@ namespace TSL.AddIn
                     HouseDialog.ShowHouseAlert(
                         "The active workbook holds the results of an earlier run, so nothing was run.\n\n" +
                         "The workbook:\n" + HouseDialog.Indent(resultsInput) + "\n\n" +
-                        $"Make the {tool} input workbook the active workbook, then click Run again.",
+                        $"Make the {tool} input workbook the active workbook, then click Bespoke > {tool} > Run {tool} again.",
                         HouseDialog.Title(tool));
                     return;
                 }
@@ -1100,12 +1100,22 @@ namespace TSL.AddIn
                     }
                     else
                     {
-                        Logger.Warn("Technique catalog is empty; the Explorer will be empty (no built-in stub fallback).");
+                        // A2 R8: the Explorer says why it is empty.
+                        Logger.Warn("Technique catalog is empty; the Explorer shows why.");
+                        _hostControl.ShowTechniqueCatalogMessage(TechniqueCatalogService.ProblemMessage(
+                            TechniqueCatalogService.LastLoadPath,
+                            TechniqueCatalogService.LastLoadProblem ?? "The list holds no techniques."));
                     }
                 }
                 catch (Exception catEx)
                 {
                     Logger.Error("Failed to push technique catalog to Explorer VM.", catEx);
+                    try
+                    {
+                        _hostControl.ShowTechniqueCatalogMessage(TechniqueCatalogService.ProblemMessage(
+                            TechniqueCatalogService.LastLoadPath, catEx.Message));
+                    }
+                    catch { /* the pane itself is reported below if it fails */ }
                 }
 
                 _taskPane = CustomTaskPaneFactory.CreateCustomTaskPane(

@@ -153,7 +153,7 @@ namespace TSL.AddIn
                     imageMso='MacroPlay'
                     onAction='OnBondYieldForecastRun'
                     screentip='Run the BVAR-SV forecast on the active workbook'
-                    supertip='Opens the Run view for Bond Yield Forecast in the task pane, set up for the active workbook. Edit the parameters, then click Run in the task pane to run the BVAR-SV estimation and conditional forecast. Results render on a new &quot;Bond Yield Forecast Results&quot; sheet and diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet, in a new workbook; the input workbook is never changed. Estimation typically takes 15-30 seconds on the canonical fixture.' />
+                    supertip='Opens the Run view for Bond Yield Forecast in the task pane, set up for the active workbook. Edit the parameters, then click Run in the task pane to run the BVAR-SV estimation and conditional forecast. Results render on a new &quot;Bond Yield Forecast Results&quot; sheet and diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet, in a new workbook; the input workbook is never changed. Estimation typically takes 15-30 seconds with the input template&apos;s data.' />
           </menu>
           <!-- Breakeven Payrolls (Bespoke member #2): a workbook-input technique
                like Bond Yield Forecast. 'Open Input Template' drops a pinned,
@@ -294,7 +294,7 @@ namespace TSL.AddIn
                   imageMso='MacroPlay'
                   onAction='OnRun'
                   screentip='Run Analysis'
-                  supertip='Does exactly what the Run button in the task pane&apos;s Run view does. If no technique is set up there, nothing runs.' />
+                  supertip='Does exactly what the Run button in the task pane does. If nothing is set up there, it says so and runs nothing.' />
           <button id='btnCancel'
                   label='Cancel'
                   size='large'

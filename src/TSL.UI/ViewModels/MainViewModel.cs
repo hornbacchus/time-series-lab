@@ -334,6 +334,14 @@ namespace TSL.UI.ViewModels
         }
 
         /// <summary>
+        /// The technique catalog did not load (A2 R8): the Technique Explorer shows why.
+        /// </summary>
+        public void ShowTechniqueCatalogMessage(string message)
+        {
+            GetOrCreateExplorer().ShowCatalogMessage(message);
+        }
+
+        /// <summary>
         /// Called by the AddIn layer when the Excel selection changes.
         /// </summary>
         public void UpdateSelectionStatus(int seriesCount, int pointCount, string frequency)

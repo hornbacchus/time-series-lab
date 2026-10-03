@@ -142,6 +142,15 @@ namespace TSL.UI
         }
 
         /// <summary>
+        /// The technique catalog did not load: the Technique Explorer shows
+        /// <paramref name="message"/> instead of an empty list (A2 R8).
+        /// </summary>
+        public void ShowTechniqueCatalogMessage(string message)
+        {
+            InvokeOnUIThread(() => _viewModel.ShowTechniqueCatalogMessage(message));
+        }
+
+        /// <summary>
         /// Load the worksheet-function catalog into the UDF Formula Guide, or the message
         /// saying why it could not be loaded (A2 E2b ruling 1(a)).
         /// </summary>

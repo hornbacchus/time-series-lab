@@ -182,6 +182,23 @@ namespace TSL.UI.ViewModels
 
         public bool HasSelectedTechnique => _selectedTechnique != null;
 
+        private string _catalogMessage = "";
+        /// <summary>Why the Explorer is empty (A2 R8), or "" when the catalog loaded.</summary>
+        public string CatalogMessage
+        {
+            get => _catalogMessage;
+            private set
+            {
+                if (SetProperty(ref _catalogMessage, value ?? ""))
+                    OnPropertyChanged(nameof(HasCatalogMessage));
+            }
+        }
+
+        public bool HasCatalogMessage => !string.IsNullOrEmpty(_catalogMessage);
+
+        /// <summary>The catalog did not load: show <paramref name="message"/> in place of the list.</summary>
+        public void ShowCatalogMessage(string message) => CatalogMessage = message;
+
         public string SelectedTechniqueDescription =>
             _selectedTechnique?.Description ?? string.Empty;
 
@@ -307,6 +324,7 @@ namespace TSL.UI.ViewModels
         public void LoadTechniques(IEnumerable<TechniqueItem> techniques)
         {
             _allTechniques = techniques.ToList();
+            CatalogMessage = "";
             // Refresh the cross-reference id->name map BEFORE ApplyFilter selects
             // the first technique (whose description renders the related links).
             OnPropertyChanged(nameof(TechniqueIdNameMap));

@@ -307,7 +307,7 @@ namespace TSL.UI.ViewModels
                 {
                     StepNumber = 1,
                     QuestionText = "What is your primary goal?",
-                    HelpText = "This helps us narrow down the right family of techniques.",
+                    HelpText = "This narrows the choice to the right family of techniques.",
                     Options = new List<RecommenderOption>
                     {
                         new RecommenderOption { Label = "Forecast future values", Value = "forecast", Description = "Predict what comes next in the series" },
@@ -361,16 +361,16 @@ namespace TSL.UI.ViewModels
                     HelpText = "Some methods produce easy-to-explain results; others are more of a black box.",
                     Options = new List<RecommenderOption>
                     {
-                        new RecommenderOption { Label = "Very important", Value = "high", Description = "I need to explain results to others" },
+                        new RecommenderOption { Label = "Very important", Value = "high", Description = "The results must be explained to others" },
                         new RecommenderOption { Label = "Moderate", Value = "medium", Description = "A balance of accuracy and clarity" },
-                        new RecommenderOption { Label = "Not important", Value = "low", Description = "Just give me the best accuracy" },
+                        new RecommenderOption { Label = "Not important", Value = "low", Description = "Only the best accuracy matters" },
                     }
                 },
                 new RecommenderQuestion
                 {
                     StepNumber = 6,
                     QuestionText = "Do you have multiple related series?",
-                    HelpText = "Some techniques can analyse relationships between two or more series simultaneously.",
+                    HelpText = "Some techniques can analyze relationships between two or more series simultaneously.",
                     Options = new List<RecommenderOption>
                     {
                         new RecommenderOption { Label = "Just one series", Value = "no", Description = "Single univariate series" },
