@@ -191,7 +191,10 @@ namespace TSL.UI.ViewModels
             set
             {
                 if (SetProperty(ref _requiresSelection, value))
+                {
                     OnPropertyChanged(nameof(CanRun));
+                    RelayCommand.RaiseCanExecuteChanged();
+                }
             }
         }
 
@@ -199,7 +202,7 @@ namespace TSL.UI.ViewModels
         /// <summary>
         /// When true, the Run button raises <see cref="WorkbookRunRequested"/>
         /// instead of <see cref="RunExecuteRequested"/>, so the AddIn layer runs
-        /// the workbook-input flow (resolve active workbook → engine) rather than
+        /// the workbook-input flow (the workbook the view was set up for → engine) rather than
         /// the cell-selection flow. Leaves the selection path byte-identical for
         /// every other technique.
         /// </summary>
@@ -240,6 +243,10 @@ namespace TSL.UI.ViewModels
                 {
                     OnPropertyChanged(nameof(CanRun));
                     OnPropertyChanged(nameof(ShowProgress));
+                    // The Run and Cancel buttons re-read CanExecute now, not at the next
+                    // mouse or key event (a ribbon Run or Cancel changes this with no input
+                    // in the pane).
+                    RelayCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -305,7 +312,7 @@ namespace TSL.UI.ViewModels
         /// <summary>
         /// Raised when the user clicks Run for a WORKBOOK-INPUT technique
         /// (WorkbookInputMode == true). The AddIn layer subscribes and performs
-        /// the workbook-input dispatch (resolve active workbook → SaveCopyAs →
+        /// the workbook-input dispatch (the workbook the view was set up for → SaveCopyAs →
         /// engine). Kept separate from RunExecuteRequested so the cell-selection
         /// flow is byte-identical for every other technique.
         /// </summary>
@@ -358,6 +365,7 @@ namespace TSL.UI.ViewModels
             foreach (var item in items)
                 SeriesPreviews.Add(item);
             OnPropertyChanged(nameof(CanRun));
+            RelayCommand.RaiseCanExecuteChanged();
         }
 
         /// <summary>

@@ -72,8 +72,20 @@ namespace TSL.AddIn
         // alike), so the ribbon's Cancel can tell "something is running" from "nothing is".
         private int _runsInFlight;
 
-        /// <summary>True while any run (task pane or worksheet function) is in RunAsync.</summary>
-        internal bool HasRunsInFlight => Volatile.Read(ref _runsInFlight) > 0;
+        /// <summary>
+        /// True while any run (task pane or worksheet function) is in RunAsync, or an engine
+        /// is starting and not yet verified (a worksheet function starts the engine before
+        /// it calls RunAsync).
+        /// </summary>
+        internal bool HasRunsInFlight
+        {
+            get
+            {
+                if (Volatile.Read(ref _runsInFlight) > 0) return true;
+                var starting = Volatile.Read(ref _session);
+                return starting != null && starting.IsAlive && !ReferenceEquals(starting, Volatile.Read(ref _verified));
+            }
+        }
 
         // Inter-message (heartbeat) timeout for the response read. It is RESET by
         // EVERY message the engine sends (each progress event proves liveness),

@@ -233,6 +233,9 @@ namespace TSL.AddIn
                     }
                     finally { app.DisplayAlerts = true; }
 
+                    // Saved or not, the results workbook's name as Excel has it now.
+                    try { writeResult.WorkbookFullName = outWb.FullName; } catch { /* keep null */ }
+
                     writeResult.Success = true;
                 }
                 finally
@@ -1022,6 +1025,10 @@ namespace TSL.AddIn
             /// <summary>Non-fatal warning when the results workbook was created
             /// but could not be saved to disk (it remains open for the user).</summary>
             public string SaveWarning { get; set; }
+
+            /// <summary>The workbook the results were written to, as Excel names it
+            /// (FullName: the saved path, or "Book2" when it could not be saved).</summary>
+            public string WorkbookFullName { get; set; }
         }
     }
 }

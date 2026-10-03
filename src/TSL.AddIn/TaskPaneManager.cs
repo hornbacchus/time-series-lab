@@ -29,7 +29,10 @@ namespace TSL.AddIn
 
         // What the Run view was last filled from (A2 U6, N5): the workbook, the sheet and
         // the extracted columns' addresses. A Run click on a different selection runs nothing.
-        private static string _previewedSelectionKey;
+        // The workbook and sheet are compared as objects, so saving or renaming them is no change.
+        private static Workbook _previewedWorkbook;
+        private static Worksheet _previewedSheet;
+        private static string _previewedAddresses;
 
         // The workbook a Bespoke tool's Run view is set up for (A2 U6, B7 / N9): Run reads
         // it, never whichever workbook is active at the click (after a run, that is the
@@ -37,6 +40,16 @@ namespace TSL.AddIn
         // saved under a new name, or closed and reopened, is still found.
         private static Workbook _bespokeInputWorkbook;
         private static string _bespokeInputFullName;
+        private static string _bespokeInputTechniqueId;
+
+        // Results workbooks this Excel session created (full names): never a Bespoke input.
+        private static readonly HashSet<string> _resultsWorkbooks =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Task pane runs dispatched and not yet returned from the engine. The Run view's
+        // IsRunning can be reset under a run (opening another technique), so the ribbon's
+        // Run and Cancel also look here.
+        private static int _paneRunsInFlight;
 
         // House-message areas (docs/HOUSE_STYLE.md, A2 ratification Q2): every message
         // names the action it came from, written exactly as its button is labelled.
@@ -188,6 +201,7 @@ namespace TSL.AddIn
             // technique-agnostically).
             _activeRunCts = new System.Threading.CancellationTokenSource();
             var runToken = _activeRunCts.Token;
+            System.Threading.Interlocked.Increment(ref _paneRunsInFlight);
             Task.Run(async () =>
             {
                 Action<ProgressEvent> progressHandler = (evt) =>
@@ -244,6 +258,7 @@ namespace TSL.AddIn
                             try
                             {
                                 writeResult = ExcelWriter.WriteRunResult(request, response);
+                                RememberResultsWorkbook(writeResult);
                             }
                             catch (Exception writeEx)
                             {
@@ -301,6 +316,8 @@ namespace TSL.AddIn
                 }
                 finally
                 {
+                    System.Threading.Interlocked.Decrement(ref _paneRunsInFlight);
+
                     // Delete the per-run temp workbook copy once the engine has
                     // finished reading it. By the time RunAsync has returned (or
                     // thrown), the engine is done with the input file and the
@@ -385,7 +402,7 @@ namespace TSL.AddIn
             runVm.RequiresSelection = false;
             runVm.WorkbookInputMode = true;
             runVm.IsRunning = false;
-            SetBespokeInput(runVm, ActiveWorkbookOrNull());
+            SetBespokeInputAtOpen(runVm);
         }
 
         /// <summary>
@@ -430,7 +447,7 @@ namespace TSL.AddIn
             runVm.RequiresSelection = false;
             runVm.WorkbookInputMode = true;
             runVm.IsRunning = false;
-            SetBespokeInput(runVm, ActiveWorkbookOrNull());
+            SetBespokeInputAtOpen(runVm);
         }
 
         /// <summary>
@@ -472,12 +489,13 @@ namespace TSL.AddIn
             runVm.RequiresSelection = false;
             runVm.WorkbookInputMode = true;
             runVm.IsRunning = false;
-            SetBespokeInput(runVm, ActiveWorkbookOrNull());
+            SetBespokeInputAtOpen(runVm);
         }
 
         /// <summary>
-        /// Handles the Run button for a WORKBOOK-INPUT technique. Resolves the
-        /// active workbook, writes a clean local %TEMP% copy (off OneDrive,
+        /// Handles the Run button for a WORKBOOK-INPUT technique. Takes the
+        /// workbook the Run view was set up for (A2 U6, B7: ResolveBespokeInput),
+        /// writes a clean local %TEMP% copy (off OneDrive,
         /// captures unsaved edits — the d923c6a mechanism), merges the user's
         /// edited parameters, and dispatches via RunTechniqueWithParams.
         /// </summary>
@@ -511,15 +529,28 @@ namespace TSL.AddIn
                 var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
                 // The workbook this Run view was set up for (A2 U6, B7), not the active one:
                 // after a run the active workbook is the results workbook (N9).
-                var wb = ResolveBespokeInput(app, runVm, out var closedInput);
+                var wb = ResolveBespokeInput(app, runVm, out var closedInput, out var resultsInput);
                 if (wb == null && closedInput != null)
                 {
+                    // A workbook that was never saved (no folder in its name) cannot be opened again.
+                    bool neverSaved = closedInput.IndexOfAny(new[] { '\\', '/' }) < 0;
                     HouseDialog.ShowHouseAlert(
                         $"The {tool} input workbook that the task pane was set up for is no longer open, " +
-                        "so nothing was run.\n\n" +
+                        "so nothing was run." +
+                        (neverSaved ? " It had never been saved, so it cannot be opened again." : "") + "\n\n" +
                         "The workbook:\n" + HouseDialog.Indent(closedInput) + "\n\n" +
-                        "Open it again, then click Run in the task pane. To use another workbook, make it the " +
-                        $"active workbook, then click Bespoke > {tool} > Run {tool}.",
+                        (neverSaved ? "" : "Open it again, then click Run in the task pane. ") +
+                        "To use another workbook, make it the active workbook, then click " +
+                        $"Bespoke > {tool} > Run {tool}.",
+                        HouseDialog.Title(tool));
+                    return;
+                }
+                if (wb == null && resultsInput != null)
+                {
+                    HouseDialog.ShowHouseAlert(
+                        "The active workbook holds the results of an earlier run, so nothing was run.\n\n" +
+                        "The workbook:\n" + HouseDialog.Indent(resultsInput) + "\n\n" +
+                        $"Make the {tool} input workbook the active workbook, then click Run again.",
                         HouseDialog.Title(tool));
                     return;
                 }
@@ -654,22 +685,56 @@ namespace TSL.AddIn
         /// </summary>
         public static void RunCurrent()
         {
-            bool visible;
-            try { visible = _taskPane != null && _taskPane.Visible; }
-            catch { visible = false; }
+            var runVm = _hostControl?.ViewModel?.RunViewIfCreated;
+            if (System.Threading.Volatile.Read(ref _paneRunsInFlight) > 0 || (runVm?.IsRunning ?? false))
+            {
+                HouseDialog.ShowHouseAlert(
+                    "A run is already in progress in the task pane, so nothing new was started.\n\n" +
+                    "Wait for it to finish, or click Run > Cancel to stop it.",
+                    HouseDialog.Title(RunArea));
+                return;
+            }
+
+            // Where the pane is. Excel gives each workbook its own window, and the task pane
+            // belongs to the window it was created in: Visible stays true while the user
+            // works in another window, where the pane is not on screen.
+            var where = LocatePane();
+            if (where.Alive && !where.InActiveWindow)
+            {
+                Logger.Info($"Ribbon Run: the task pane is in another window ({where.WindowCaption}); nothing was run.");
+                HouseDialog.ShowHouseAlert(
+                    "The task pane is in another workbook window, so nothing was run.\n\n" +
+                    "Its window:\n" + HouseDialog.Indent(where.WindowCaption ?? "(unknown)") + "\n\n" +
+                    "Switch to that window, check the task pane, then click Run.",
+                    HouseDialog.Title(RunArea));
+                return;
+            }
 
             var outcome = RunCurrentOutcome.NothingSetUp;
-            if (visible && _hostControl != null)
+            if (where.Alive && where.Visible && _hostControl != null)
                 outcome = _hostControl.RunCurrentTechnique();
             if (outcome == RunCurrentOutcome.Started) return;
 
+            bool wasClosed = where.Alive && !where.Visible;
             if (!EnsureTaskPane(RunArea)) return;
             _taskPane.Visible = true;
+            runVm = _hostControl?.ViewModel?.RunViewIfCreated;
             if (outcome == RunCurrentOutcome.AlreadyRunning)
             {
                 HouseDialog.ShowHouseAlert(
                     "A run is already in progress in the task pane, so nothing new was started.\n\n" +
                     "Wait for it to finish, or click Run > Cancel to stop it.",
+                    HouseDialog.Title(RunArea));
+            }
+            else if (wasClosed && runVm != null && ReferenceEquals(_hostControl.ViewModel.CurrentView, runVm) &&
+                     runVm.CanRun && !string.IsNullOrEmpty(runVm.TechniqueId))
+            {
+                // A Run view set up and ready, but the pane had been closed: say that, not
+                // "nothing is set up".
+                HouseDialog.ShowHouseAlert(
+                    "The task pane was closed, so nothing was run.\n\n" +
+                    "It is open again and shows " + HouseDialog.Ascii(runVm.TechniqueDisplayName) + ". " +
+                    "Check it, then click Run.",
                     HouseDialog.Title(RunArea));
             }
             else
@@ -683,6 +748,31 @@ namespace TSL.AddIn
         }
 
         /// <summary>
+        /// Whether the task pane exists and answers (Alive), is shown (Visible), and belongs
+        /// to the active workbook window. When the window cannot be read, the pane counts as
+        /// in the active window (the behaviour before this check).
+        /// </summary>
+        private static (bool Alive, bool Visible, bool InActiveWindow, string WindowCaption) LocatePane()
+        {
+            if (_taskPane == null) return (false, false, false, null);
+            bool visible;
+            try { visible = _taskPane.Visible; }
+            catch { return (false, false, false, null); }
+            try
+            {
+                var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                var paneWindow = _taskPane.Window as Window;
+                var active = app?.ActiveWindow;
+                if (paneWindow == null || active == null) return (true, visible, true, null);
+                return (true, visible, paneWindow.Hwnd == active.Hwnd, Convert.ToString((object)paneWindow.Caption));
+            }
+            catch
+            {
+                return (true, visible, true, null);
+            }
+        }
+
+        /// <summary>
         /// The ribbon's Cancel (A2 U6, N2): the task pane's own cancel path, so the Run view
         /// resets. With no task pane run in progress, worksheet-function runs in flight are
         /// stopped as before (they share the engine); with nothing running at all, a house
@@ -691,7 +781,7 @@ namespace TSL.AddIn
         internal static void CancelFromRibbon()
         {
             var runVm = _hostControl?.ViewModel?.RunViewIfCreated;
-            if (runVm != null && runVm.IsRunning)
+            if (System.Threading.Volatile.Read(ref _paneRunsInFlight) > 0 || (runVm?.IsRunning ?? false))
             {
                 OnCancelRequested();
                 return;
@@ -727,44 +817,110 @@ namespace TSL.AddIn
             }
             _bespokeInputWorkbook = wb;
             _bespokeInputFullName = fullName;
+            _bespokeInputTechniqueId = runVm?.TechniqueId;
             if (runVm != null) runVm.InputWorkbookName = name;
-            Logger.Info($"Bespoke Run view set up for workbook: {fullName ?? "(none active)"}.");
+            Logger.Info($"Bespoke Run view set up for workbook: {fullName ?? "(none)"}.");
+        }
+
+        /// <summary>
+        /// A Bespoke opener sets its Run view up for the active workbook (A2 U6, B7) - unless
+        /// that is the results workbook of an earlier run (N9). Then the input already
+        /// recorded for this tool is kept while it is open; otherwise none is recorded, and
+        /// Run takes the active workbook at the first click (refusing a results workbook there).
+        /// </summary>
+        private static void SetBespokeInputAtOpen(RunViewModel runVm)
+        {
+            var active = ActiveWorkbookOrNull();
+            if (active != null && IsResultsWorkbook(active))
+            {
+                bool keep = _bespokeInputWorkbook != null &&
+                            string.Equals(_bespokeInputTechniqueId, runVm?.TechniqueId, StringComparison.OrdinalIgnoreCase) &&
+                            IsOpen(_bespokeInputWorkbook);
+                Logger.Info("Bespoke Run view opened from a results workbook; " +
+                            (keep ? "the input recorded for this tool is kept." : "no input is recorded yet."));
+                SetBespokeInput(runVm, keep ? _bespokeInputWorkbook : null);
+                return;
+            }
+            SetBespokeInput(runVm, active);
+        }
+
+        /// <summary>A results workbook this Excel session created (never a Bespoke input).</summary>
+        private static bool IsResultsWorkbook(Workbook wb)
+        {
+            try { return wb != null && _resultsWorkbooks.Contains(wb.FullName); }
+            catch { return false; }
+        }
+
+        private static void RememberResultsWorkbook(ExcelWriter.WriteResult writeResult)
+        {
+            if (writeResult != null && writeResult.Success && !string.IsNullOrEmpty(writeResult.WorkbookFullName))
+                _resultsWorkbooks.Add(writeResult.WorkbookFullName);
+        }
+
+        /// <summary>Whether <paramref name="wb"/> is still one of Excel's open workbooks.</summary>
+        private static bool IsOpen(Workbook wb)
+        {
+            try
+            {
+                var fullName = wb.FullName;
+                var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+                foreach (Workbook w in app.Workbooks)
+                {
+                    try { if (string.Equals(w.FullName, fullName, StringComparison.OrdinalIgnoreCase)) return true; }
+                    catch { /* skip */ }
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
         /// The workbook a Bespoke run reads (A2 U6, B7): the one its Run view was set up
         /// for, found by its current full name (so a Save As keeps it) or, if Excel closed
-        /// and reopened it, by the name it had. With none recorded, the active workbook,
-        /// which is then recorded. Null with <paramref name="closedName"/> set when the
-        /// recorded workbook is no longer open; null alone when no workbook is open.
+        /// and reopened it, by the name it was recorded under. With none recorded, the active
+        /// workbook, which is then recorded - unless it is the results workbook of an earlier
+        /// run (<paramref name="resultsWorkbook"/> names it; the result is null). Null with
+        /// <paramref name="closedName"/> set when the recorded workbook is no longer open;
+        /// null alone when no workbook is open.
         /// </summary>
         private static Workbook ResolveBespokeInput(Microsoft.Office.Interop.Excel.Application app,
-            RunViewModel runVm, out string closedName)
+            RunViewModel runVm, out string closedName, out string resultsWorkbook)
         {
             closedName = null;
+            resultsWorkbook = null;
             if (_bespokeInputWorkbook == null && _bespokeInputFullName == null)
             {
                 var active = app?.ActiveWorkbook;
+                if (active != null && IsResultsWorkbook(active))
+                {
+                    try { resultsWorkbook = active.Name; } catch { resultsWorkbook = "(unknown)"; }
+                    return null;
+                }
                 if (active != null) SetBespokeInput(runVm, active);
                 return active;
             }
 
-            var wanted = _bespokeInputFullName;
-            try { if (_bespokeInputWorkbook != null) wanted = _bespokeInputWorkbook.FullName; }
-            catch { /* closed: look it up by the name it had */ }
+            string current = null;
+            try { if (_bespokeInputWorkbook != null) current = _bespokeInputWorkbook.FullName; }
+            catch { /* closed: look it up by the name it was recorded under */ }
 
             foreach (Workbook w in app.Workbooks)
             {
                 string fullName = null;
                 try { fullName = w.FullName; } catch { /* skip */ }
-                if (string.Equals(fullName, wanted, StringComparison.OrdinalIgnoreCase))
+                if (fullName != null &&
+                    (string.Equals(fullName, current, StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(fullName, _bespokeInputFullName, StringComparison.OrdinalIgnoreCase)))
                 {
                     if (!ReferenceEquals(w, _bespokeInputWorkbook) || fullName != _bespokeInputFullName)
                         SetBespokeInput(runVm, w);
                     return w;
                 }
             }
-            closedName = wanted;
+            closedName = current ?? _bespokeInputFullName;
             return null;
         }
 
@@ -1008,12 +1164,12 @@ namespace TSL.AddIn
 
             // Selection guard (A2 U6, N5; ratification Q6): a Run click runs only the
             // selection the Run view shows. A different one is shown instead, and nothing runs.
-            var selectionKey = SelectionKey(selectionResult);
-            bool selectionChanged = execute &&
-                !string.Equals(selectionKey, _previewedSelectionKey, StringComparison.Ordinal);
+            var shown = CurrentSelectionIdentity(selectionResult);
+            bool selectionChanged = execute && !IsPreviewedSelection(shown);
             if (selectionChanged)
                 Logger.Info($"Run refused: the selection changed after the Run view was filled " +
-                            $"(was {_previewedSelectionKey ?? "(none)"}, now {selectionKey ?? "(unknown)"}).");
+                            $"(was {DescribeSelection(_previewedWorkbook, _previewedSheet, _previewedAddresses)}, " +
+                            $"now {DescribeSelection(shown.Wb, shown.Ws, shown.Addresses)}).");
 
             // Detect time index using TimeIndexDetector. If a time column is
             // found inside the user's selection, also remove it from the list
@@ -1173,7 +1329,9 @@ namespace TSL.AddIn
                 runVm.DetectedFrequency = "Not detected";
             }
 
-            _previewedSelectionKey = selectionKey;
+            _previewedWorkbook = shown.Wb;
+            _previewedSheet = shown.Ws;
+            _previewedAddresses = shown.Addresses;
 
             // ── No-auto-run gate ──────────────────────────────────────────
             // The pane is now fully populated (selection extracted, series
@@ -1275,6 +1433,7 @@ namespace TSL.AddIn
             // Run async on background thread
             _activeRunCts = new System.Threading.CancellationTokenSource();
             var runToken = _activeRunCts.Token;
+            System.Threading.Interlocked.Increment(ref _paneRunsInFlight);
             Task.Run(async () =>
             {
                 Action<ProgressEvent> progressHandler = (evt) =>
@@ -1334,6 +1493,7 @@ namespace TSL.AddIn
                             try
                             {
                                 writeResult = ExcelWriter.WriteRunResult(request, response);
+                                RememberResultsWorkbook(writeResult);
                             }
                             catch (Exception writeEx)
                             {
@@ -1357,6 +1517,10 @@ namespace TSL.AddIn
                         if (ex is OperationCanceledException) return;
                         runVm.FailRun(RunExceptionText(ex));
                     }));
+                }
+                finally
+                {
+                    System.Threading.Interlocked.Decrement(ref _paneRunsInFlight);
                 }
             });
         }
@@ -1755,24 +1919,53 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// What a Run view is filled from (A2 U6, N5): the active workbook's full name, the
-        /// active sheet and the extracted columns' addresses, as one string. Null when Excel
-        /// cannot say (two nulls compare equal, so an unreadable key never blocks a run).
+        /// What a Run view is filled from (A2 U6, N5): the active workbook, the active sheet
+        /// and the extracted columns' addresses. Nulls when Excel cannot say.
         /// </summary>
-        private static string SelectionKey(SelectionService.SelectionResult selection)
+        private static (Workbook Wb, Worksheet Ws, string Addresses) CurrentSelectionIdentity(
+            SelectionService.SelectionResult selection)
         {
             try
             {
                 var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
-                var wb = app?.ActiveWorkbook;
-                var ws = app?.ActiveSheet as Worksheet;
-                if (wb == null || ws == null || selection?.Series == null) return null;
-                return wb.FullName + "|" + ws.Name + "|" + string.Join(",", selection.Series.Select(s => s.Address));
+                var addresses = selection?.Series == null ? null
+                    : string.Join(",", selection.Series.Select(s => s.Address));
+                return (app?.ActiveWorkbook, app?.ActiveSheet as Worksheet, addresses);
             }
             catch
             {
-                return null;
+                return (null, null, null);
             }
+        }
+
+        /// <summary>
+        /// Whether <paramref name="selection"/> is the one the Run view was filled from. The
+        /// workbook and sheet are compared as objects, so a first save, a Save As or a sheet
+        /// rename is no change; by name when the objects differ. Two unknowns are equal, so an
+        /// unreadable selection never blocks a run on its own.
+        /// </summary>
+        private static bool IsPreviewedSelection((Workbook Wb, Worksheet Ws, string Addresses) selection)
+        {
+            return SameObject(selection.Wb, _previewedWorkbook, w => w.FullName) &&
+                   SameObject(selection.Ws, _previewedSheet, s => s.Name) &&
+                   string.Equals(selection.Addresses, _previewedAddresses, StringComparison.Ordinal);
+        }
+
+        private static bool SameObject<T>(T a, T b, Func<T, string> name) where T : class
+        {
+            if (a == null && b == null) return true;
+            if (a == null || b == null) return false;
+            if (ReferenceEquals(a, b)) return true;
+            try { return string.Equals(name(a), name(b), StringComparison.OrdinalIgnoreCase); }
+            catch { return false; }
+        }
+
+        private static string DescribeSelection(Workbook wb, Worksheet ws, string addresses)
+        {
+            string w = "(none)", s = "(none)";
+            try { if (wb != null) w = wb.FullName; } catch { w = "(closed)"; }
+            try { if (ws != null) s = ws.Name; } catch { s = "(gone)"; }
+            return $"{w} | {s} | {addresses ?? "(none)"}";
         }
 
         private static void OnVisibleStateChange(CustomTaskPane pane)

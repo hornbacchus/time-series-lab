@@ -274,10 +274,11 @@ namespace TSL.UI.ViewModels
         public RunCurrentOutcome RunCurrentTechnique()
         {
             var run = _runVm;
+            // A run in progress first, whichever view is showing (it lives in the Run view).
+            if (run != null && run.IsRunning)
+                return RunCurrentOutcome.AlreadyRunning;
             if (run == null || !ReferenceEquals(CurrentView, run) || string.IsNullOrEmpty(run.TechniqueId))
                 return RunCurrentOutcome.NothingSetUp;
-            if (run.IsRunning)
-                return RunCurrentOutcome.AlreadyRunning;
             if (!run.RunCommand.CanExecute(null))
                 return RunCurrentOutcome.NothingSetUp;
             run.RunCommand.Execute(null);
@@ -349,7 +350,7 @@ namespace TSL.UI.ViewModels
                         RunRequested?.Invoke(_runVm.TechniqueId, Preset);
                 };
                 // Workbook-input techniques (e.g. Bond Yield Forecast) route the
-                // Run button here instead, so the AddIn layer resolves the active
+                // Run button here instead, so the AddIn layer reads the input
                 // workbook rather than a cell selection.
                 _runVm.WorkbookRunRequested += () =>
                 {

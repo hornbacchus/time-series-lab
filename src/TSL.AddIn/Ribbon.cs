@@ -208,12 +208,9 @@ namespace TSL.AddIn
         }
 
         // ── Bond Yield Forecast (BYF Integration Session 3) ──────────
-        // Split-button dropdown with two menu items + a primary action:
-        //   - Primary click on the split button = OnBondYieldForecastRun
-        //     (matches Pattern A from UX spec / plan §3.2 default action).
-        //   - Submenu "Open Input Template" = OnBondYieldForecastOpenTemplate
-        //   - Submenu "Run Bond Yield Forecast" = OnBondYieldForecastRun
-        //     (same as primary; explicit menu entry for discoverability).
+        // A menu with two items (RibbonXml.cs menuBondYieldForecast):
+        //   - "Open Input Template" = OnBondYieldForecastOpenTemplate
+        //   - "Run Bond Yield Forecast" = OnBondYieldForecastRun
 
         public void OnBondYieldForecastRun(IRibbonControl control)
         {
@@ -226,10 +223,11 @@ namespace TSL.AddIn
             // (scenario / horizon / chain length / prior tightness) pre-filled
             // and editable. The user reviews/edits, then clicks Run IN THE VIEW.
             // The Run button routes to TaskPaneManager.OnWorkbookRunRequested,
-            // which resolves the active workbook, SaveCopyAs-es a local %TEMP%
-            // copy (off OneDrive, captures unsaved edits — the d923c6a fix), and
-            // dispatches. The "no workbook open" guard now lives at Run-click
-            // (where the workbook is actually needed), not at view-open.
+            // which takes the workbook the Run view was set up for (A2 B7: the
+            // active workbook when it opened, else the active workbook at the
+            // first Run), SaveCopyAs-es a local %TEMP% copy (off OneDrive,
+            // captures unsaved edits — the d923c6a fix), and dispatches. The
+            // "no workbook open" guard lives at Run-click, not at view-open.
             try
             {
                 TaskPaneManager.OpenBondYieldForecastConfig();
@@ -252,8 +250,9 @@ namespace TSL.AddIn
         {
             // Workbook-input technique (mirrors Bond Yield Forecast): CONFIGURE-
             // then-run. Open the Run view; the Run button routes to the shared
-            // TaskPaneManager.OnWorkbookRunRequested, which captures the active
-            // workbook, SaveCopyAs-es a %TEMP% copy, and dispatches. The scenario
+            // TaskPaneManager.OnWorkbookRunRequested, which takes the workbook the
+            // Run view was set up for (A2 B7), SaveCopyAs-es a %TEMP% copy, and
+            // dispatches. The scenario
             // and data live in the workbook (scenario_inputs + baked tabs).
             try
             {
