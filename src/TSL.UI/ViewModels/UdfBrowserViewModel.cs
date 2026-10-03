@@ -19,6 +19,10 @@ namespace TSL.UI.ViewModels
         public string Example { get; set; }
         public string ReturnType { get; set; }
         public List<UdfParameterInfo> Parameters { get; set; } = new List<UdfParameterInfo>();
+
+        /// <summary>Whether the function takes any argument (Insert opens Excel's Function
+        /// Arguments dialog for it either way).</summary>
+        public bool HasArguments => Parameters != null && Parameters.Count > 0;
     }
 
     /// <summary>
@@ -33,8 +37,10 @@ namespace TSL.UI.ViewModels
     }
 
     /// <summary>
-    /// ViewModel for the UDF Browser view. Displays a searchable list of all
-    /// TSL UDFs with signatures, descriptions, examples, and an Insert button.
+    /// ViewModel for the UDF Browser view (Help &gt; UDF Formula Guide). Lists the add-in's
+    /// worksheet functions from the generated catalog (resources\catalog\udf_catalog.json,
+    /// loaded by the AddIn layer when it creates the pane: A2 E2b ruling 1(a)). With no
+    /// catalog the view shows <see cref="CatalogMessage"/> instead of a list.
     /// </summary>
     public class UdfBrowserViewModel : ViewModelBase
     {
@@ -84,6 +90,7 @@ namespace TSL.UI.ViewModels
                     OnPropertyChanged(nameof(SelectedUdfDescription));
                     OnPropertyChanged(nameof(SelectedUdfExample));
                     OnPropertyChanged(nameof(SelectedUdfSignature));
+                    StatusMessage = "";
                 }
             }
         }
@@ -92,6 +99,39 @@ namespace TSL.UI.ViewModels
         public string SelectedUdfDescription => _selectedUdf?.Description ?? string.Empty;
         public string SelectedUdfExample => _selectedUdf?.Example ?? string.Empty;
         public string SelectedUdfSignature => _selectedUdf?.Signature ?? string.Empty;
+
+        private string _catalogMessage = "";
+        /// <summary>Why the guide is empty (a house message), or "" when the catalog loaded.</summary>
+        public string CatalogMessage
+        {
+            get => _catalogMessage;
+            private set
+            {
+                if (SetProperty(ref _catalogMessage, value ?? ""))
+                    OnPropertyChanged(nameof(HasCatalogMessage));
+            }
+        }
+
+        public bool HasCatalogMessage => !string.IsNullOrEmpty(_catalogMessage);
+
+        private string _statusMessage = "";
+        /// <summary>What the last Copy did (A2 E2b ruling 1(c)); "" when nothing to say.</summary>
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set
+            {
+                if (SetProperty(ref _statusMessage, value ?? ""))
+                    OnPropertyChanged(nameof(HasStatusMessage));
+            }
+        }
+
+        public bool HasStatusMessage => !string.IsNullOrEmpty(_statusMessage);
+
+        /// <summary>
+        /// Puts text on the clipboard. Replaceable so Copy can be exercised without one.
+        /// </summary>
+        public Action<string> SetClipboardText { get; set; } = text => System.Windows.Clipboard.SetText(text);
 
         // ── Commands ────────────────────────────────────────────────────
 
@@ -102,15 +142,10 @@ namespace TSL.UI.ViewModels
         public ICommand SelectCategoryCommand { get; }
 
         /// <summary>
-        /// Raised when the user clicks Insert. The AddIn layer inserts the formula
-        /// into the active cell.
+        /// Raised when the user clicks Insert. The AddIn layer opens Excel's Function
+        /// Arguments dialog for the function in the active cell (A2 E2b ruling 1(b)).
         /// </summary>
-        public event Action<string> InsertFormulaRequested;
-
-        /// <summary>
-        /// Raised to copy a formula to the clipboard.
-        /// </summary>
-        public event Action<string> CopyFormulaRequested;
+        public event Action<UdfEntry> InsertFormulaRequested;
 
         // ── Constructor ─────────────────────────────────────────────────
 
@@ -120,17 +155,14 @@ namespace TSL.UI.ViewModels
                 () =>
                 {
                     if (_selectedUdf != null)
-                        InsertFormulaRequested?.Invoke(_selectedUdf.Example);
+                    {
+                        StatusMessage = "";
+                        InsertFormulaRequested?.Invoke(_selectedUdf);
+                    }
                 },
                 () => _selectedUdf != null);
 
-            CopyFormulaCommand = new RelayCommand(
-                () =>
-                {
-                    if (_selectedUdf != null)
-                        CopyFormulaRequested?.Invoke(_selectedUdf.Example);
-                },
-                () => _selectedUdf != null);
+            CopyFormulaCommand = new RelayCommand(CopySelected, () => _selectedUdf != null);
 
             ClearSearchCommand = new RelayCommand(() => SearchQuery = string.Empty);
 
@@ -139,22 +171,54 @@ namespace TSL.UI.ViewModels
             SelectCategoryCommand = new RelayCommand(
                 (param) => SelectedCategory = param as string);
 
-            LoadBuiltInUdfs();
+            // No built-in list: until the AddIn layer loads the catalog the guide is empty
+            // (the placeholder list of functions that do not exist is gone - A2 E2b ruling 1(a)).
         }
 
         // ── Public API ──────────────────────────────────────────────────
 
         /// <summary>
-        /// Load UDFs from the AddIn layer (replaces built-in list).
+        /// Load the worksheet functions from the catalog (called by the AddIn layer).
         /// </summary>
         public void LoadUdfs(IEnumerable<UdfEntry> udfs)
         {
-            _allUdfs = udfs.ToList();
+            _allUdfs = (udfs ?? Enumerable.Empty<UdfEntry>()).ToList();
+            CatalogMessage = "";
             RebuildCategories();
             ApplyFilter();
         }
 
+        /// <summary>
+        /// The catalog could not be loaded: the guide is empty and shows
+        /// <paramref name="message"/> instead.
+        /// </summary>
+        public void ShowCatalogMessage(string message)
+        {
+            _allUdfs = new List<UdfEntry>();
+            RebuildCategories();
+            ApplyFilter();
+            CatalogMessage = message;
+        }
+
         // ── Private helpers ─────────────────────────────────────────────
+
+        /// <summary>Copy: the function with its required arguments, as a formula to fill in.</summary>
+        private void CopySelected()
+        {
+            if (_selectedUdf == null) return;
+            var formula = _selectedUdf.Example ?? "";
+            try
+            {
+                SetClipboardText(formula);
+                StatusMessage = "Copied to the clipboard:\n" + HouseDialog.Indent(formula);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "Time Series Lab could not copy the formula to the clipboard. Nothing was copied.\n\n" +
+                                HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                                "Click Copy Formula again.";
+            }
+        }
 
         private void RebuildCategories()
         {
@@ -194,128 +258,6 @@ namespace TSL.UI.ViewModels
                 SelectedUdf = FilteredUdfs.FirstOrDefault();
             else if (_selectedUdf == null && FilteredUdfs.Count > 0)
                 SelectedUdf = FilteredUdfs.First();
-        }
-
-        private void LoadBuiltInUdfs()
-        {
-            _allUdfs = new List<UdfEntry>
-            {
-                new UdfEntry
-                {
-                    Name = "TSL.AUTO",
-                    Category = "Auto Functions",
-                    Signature = "TSL.AUTO(technique_id, data_range, [options])",
-                    Description = "Run any technique in AUTO mode. Uses sensible defaults and automatic parameter selection. " +
-                                  "Results spill into adjacent cells. Fast and suitable for most use cases.",
-                    Example = "=TSL.AUTO(\"stl_decompose\", A2:A100)",
-                    ReturnType = "Dynamic array",
-                    Parameters = new List<UdfParameterInfo>
-                    {
-                        new UdfParameterInfo { Name = "technique_id", Type = "String", Description = "Technique identifier (e.g. \"auto_arima\")", Optional = false },
-                        new UdfParameterInfo { Name = "data_range", Type = "Range", Description = "One or more columns of numeric data", Optional = false },
-                        new UdfParameterInfo { Name = "options", Type = "String", Description = "Optional JSON parameter overrides", Optional = true },
-                    }
-                },
-                new UdfEntry
-                {
-                    Name = "TSL.THOROUGH",
-                    Category = "Thorough Functions",
-                    Signature = "TSL.THOROUGH(technique_id, data_range, [options], [trigger])",
-                    Description = "Run any technique in THOROUGH mode. Performs exhaustive parameter search, cross-validation, " +
-                                  "and additional diagnostics. Slower but more rigorous. Use the trigger parameter to force recalculation.",
-                    Example = "=TSL.THOROUGH(\"auto_arima\", A2:A100, , TSL.TRIGGER())",
-                    ReturnType = "Dynamic array",
-                    Parameters = new List<UdfParameterInfo>
-                    {
-                        new UdfParameterInfo { Name = "technique_id", Type = "String", Description = "Technique identifier", Optional = false },
-                        new UdfParameterInfo { Name = "data_range", Type = "Range", Description = "One or more columns of numeric data", Optional = false },
-                        new UdfParameterInfo { Name = "options", Type = "String", Description = "Optional JSON parameter overrides", Optional = true },
-                        new UdfParameterInfo { Name = "trigger", Type = "Any", Description = "Volatile trigger to force recalculation (use TSL.TRIGGER())", Optional = true },
-                    }
-                },
-                new UdfEntry
-                {
-                    Name = "TSL.TRIGGER",
-                    Category = "Utility Functions",
-                    Signature = "TSL.TRIGGER()",
-                    Description = "Returns a volatile trigger value that increments each time the ribbon Re-run button is pressed. " +
-                                  "Pass this as the last argument to TSL.THOROUGH to control when recalculation happens.",
-                    Example = "=TSL.TRIGGER()",
-                    ReturnType = "Integer",
-                    Parameters = new List<UdfParameterInfo>()
-                },
-                new UdfEntry
-                {
-                    Name = "TSL.VERSION",
-                    Category = "Utility Functions",
-                    Signature = "TSL.VERSION()",
-                    Description = "Returns the current version of the Time Series Lab add-in and engine.",
-                    Example = "=TSL.VERSION()",
-                    ReturnType = "String",
-                    Parameters = new List<UdfParameterInfo>()
-                },
-                new UdfEntry
-                {
-                    Name = "TSL.AUTO.STL",
-                    Category = "Auto Functions",
-                    Signature = "TSL.AUTO.STL(data_range, [period])",
-                    Description = "Shorthand for TSL.AUTO(\"stl_decompose\", ...). Decomposes a series into trend, seasonal, and residual components.",
-                    Example = "=TSL.AUTO.STL(B2:B200)",
-                    ReturnType = "Dynamic array (Trend, Seasonal, Residual columns)",
-                    Parameters = new List<UdfParameterInfo>
-                    {
-                        new UdfParameterInfo { Name = "data_range", Type = "Range", Description = "Single column of numeric data", Optional = false },
-                        new UdfParameterInfo { Name = "period", Type = "Integer", Description = "Seasonal period (0 = auto-detect)", Optional = true },
-                    }
-                },
-                new UdfEntry
-                {
-                    Name = "TSL.AUTO.ARIMA",
-                    Category = "Auto Functions",
-                    Signature = "TSL.AUTO.ARIMA(data_range, [horizon], [seasonal])",
-                    Description = "Shorthand for TSL.AUTO(\"auto_arima\", ...). Produces forecasts with confidence intervals.",
-                    Example = "=TSL.AUTO.ARIMA(B2:B200, 12)",
-                    ReturnType = "Dynamic array (Forecast, Lower CI, Upper CI columns)",
-                    Parameters = new List<UdfParameterInfo>
-                    {
-                        new UdfParameterInfo { Name = "data_range", Type = "Range", Description = "Single column of numeric data", Optional = false },
-                        new UdfParameterInfo { Name = "horizon", Type = "Integer", Description = "Forecast horizon (default 12)", Optional = true },
-                        new UdfParameterInfo { Name = "seasonal", Type = "Boolean", Description = "Include seasonal component (default TRUE)", Optional = true },
-                    }
-                },
-                new UdfEntry
-                {
-                    Name = "TSL.AUTO.GRANGER",
-                    Category = "Auto Functions",
-                    Signature = "TSL.AUTO.GRANGER(x_range, y_range, [max_lag])",
-                    Description = "Shorthand for TSL.AUTO(\"granger_causality\", ...). Tests whether X Granger-causes Y.",
-                    Example = "=TSL.AUTO.GRANGER(A2:A100, B2:B100)",
-                    ReturnType = "Dynamic array (Lag, F-statistic, p-value columns)",
-                    Parameters = new List<UdfParameterInfo>
-                    {
-                        new UdfParameterInfo { Name = "x_range", Type = "Range", Description = "Potential cause series", Optional = false },
-                        new UdfParameterInfo { Name = "y_range", Type = "Range", Description = "Potential effect series", Optional = false },
-                        new UdfParameterInfo { Name = "max_lag", Type = "Integer", Description = "Maximum lag to test (default 4)", Optional = true },
-                    }
-                },
-                new UdfEntry
-                {
-                    Name = "TSL.AUTO.ANOMALY",
-                    Category = "Auto Functions",
-                    Signature = "TSL.AUTO.ANOMALY(data_range, [alpha])",
-                    Description = "Shorthand for TSL.AUTO(\"stl_esd_anomaly\", ...). Detects anomalies using STL + ESD method.",
-                    Example = "=TSL.AUTO.ANOMALY(B2:B200)",
-                    ReturnType = "Dynamic array (Index, Value, IsAnomaly columns)",
-                    Parameters = new List<UdfParameterInfo>
-                    {
-                        new UdfParameterInfo { Name = "data_range", Type = "Range", Description = "Single column of numeric data", Optional = false },
-                        new UdfParameterInfo { Name = "alpha", Type = "Number", Description = "Significance level (default 0.05)", Optional = true },
-                    }
-                },
-            };
-
-            RebuildCategories();
-            ApplyFilter();
         }
     }
 }

@@ -325,11 +325,14 @@
                     </Border>
 
                     <!-- UDF examples -->
-                    <StackPanel Visibility="{Binding CanInsertAuto, Converter={StaticResource BoolToVis}}"
+                    <!-- The real worksheet forms (A2 E2b ruling 1(d)): the AUTO function when the
+                         technique has one, and TSL_RUN_THR for every technique. -->
+                    <StackPanel Visibility="{Binding HasSelectedTechnique, Converter={StaticResource BoolToVis}}"
                                 Margin="0,0,0,8">
                         <TextBlock Text="Formula examples:" FontSize="11" FontWeight="SemiBold"
                                    Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,4" />
-                        <Border Background="#F5F5F5" CornerRadius="3" Padding="8,4" Margin="0,0,0,4">
+                        <Border Background="#F5F5F5" CornerRadius="3" Padding="8,4" Margin="0,0,0,4"
+                                Visibility="{Binding HasAutoUdfExample, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{Binding AutoUdfExample}" FontFamily="Consolas"
                                        FontSize="11" Foreground="#424242" TextWrapping="Wrap" />
                         </Border>

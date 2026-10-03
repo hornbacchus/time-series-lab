@@ -251,8 +251,20 @@
                                    FontSize="11" Foreground="#424242" TextWrapping="Wrap" />
                     </Border>
 
-                    <!-- Return type -->
+                    <!-- Return type (the generated catalog has none: the row is hidden when empty) -->
                     <DockPanel Margin="0,0,0,8">
+                        <DockPanel.Style>
+                            <Style TargetType="DockPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedUdf.ReturnType}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedUdf.ReturnType}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DockPanel.Style>
                         <TextBlock Text="Returns: " FontSize="11" FontWeight="SemiBold"
                                    Foreground="#424242" />
                         <TextBlock Text="{Binding SelectedUdf.ReturnType}" FontSize="11"
@@ -312,18 +324,31 @@
 
                 </StackPanel>
             </ScrollViewer>
+
+            <!-- No catalog: why the guide is empty, in place of the list (A2 E2b ruling 1(a)) -->
+            <Border Grid.Row="0" Grid.RowSpan="3" Background="#FFFFFF" Padding="12"
+                    Visibility="{Binding HasCatalogMessage, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding CatalogMessage}" FontSize="12" Foreground="#C62828"
+                           TextWrapping="Wrap" />
+            </Border>
         </Grid>
 
         <!-- ── Action buttons ─────────────────────────────────────── -->
         <Border Grid.Row="3" Background="{StaticResource CategoryBgBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                 Padding="8">
-            <UniformGrid Columns="2">
-                <Button Content="Insert Formula" Style="{StaticResource AccentButton}"
-                        Command="{Binding InsertFormulaCommand}" Margin="0,0,3,0" />
-                <Button Content="Copy Formula" Style="{StaticResource OutlineButton}"
-                        Command="{Binding CopyFormulaCommand}" Margin="3,0,0,0" />
-            </UniformGrid>
+            <StackPanel>
+                <UniformGrid Columns="2">
+                    <Button Content="Insert Formula" Style="{StaticResource AccentButton}"
+                            Command="{Binding InsertFormulaCommand}" Margin="0,0,3,0" />
+                    <Button Content="Copy Formula" Style="{StaticResource OutlineButton}"
+                            Command="{Binding CopyFormulaCommand}" Margin="3,0,0,0" />
+                </UniformGrid>
+                <!-- What Copy did (A2 E2b ruling 1(c)) -->
+                <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="#424242"
+                           TextWrapping="Wrap" Margin="2,6,2,0"
+                           Visibility="{Binding HasStatusMessage, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
         </Border>
 
     </Grid>

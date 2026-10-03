@@ -24,6 +24,10 @@ namespace TSL.UI.ViewModels
         public string Description { get; set; }
         public bool SupportsAutoUdf { get; set; }
         public string AutoUdfName { get; set; }
+
+        /// <summary>The AUTO worksheet function as a formula to fill in, from the function
+        /// catalog (e.g. "=TSL_ADF(value_range)"); empty when the technique has none.</summary>
+        public string AutoUdfExample { get; set; } = "";
         public int MinSeries { get; set; }
         public int? MaxSeries { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
@@ -167,7 +171,7 @@ namespace TSL.UI.ViewModels
                 {
                     OnPropertyChanged(nameof(HasSelectedTechnique));
                     OnPropertyChanged(nameof(SelectedTechniqueDescription));
-                    OnPropertyChanged(nameof(CanInsertAuto));
+                    OnPropertyChanged(nameof(HasAutoUdfExample));
                     OnPropertyChanged(nameof(AutoUdfExample));
                     OnPropertyChanged(nameof(ThoroughUdfExample));
                     OnPropertyChanged(nameof(SelectedTechniqueSeriesInfo));
@@ -181,25 +185,21 @@ namespace TSL.UI.ViewModels
         public string SelectedTechniqueDescription =>
             _selectedTechnique?.Description ?? string.Empty;
 
-        public bool CanInsertAuto =>
-            _selectedTechnique?.SupportsAutoUdf == true;
+        // The real worksheet forms (A2 E2b ruling 1(d); the examples used to show =TSL.AUTO and
+        // =TSL.THOROUGH, which do not exist): the technique's AUTO function, when it has one,
+        // and TSL_RUN_THR, which runs any technique.
+        public bool HasAutoUdfExample =>
+            _selectedTechnique?.SupportsAutoUdf == true && !string.IsNullOrEmpty(_selectedTechnique.AutoUdfExample);
 
-        public string AutoUdfExample
-        {
-            get
-            {
-                if (_selectedTechnique == null || !_selectedTechnique.SupportsAutoUdf)
-                    return string.Empty;
-                return $"=TSL.AUTO(\"{_selectedTechnique.Id}\", A2:A100)";
-            }
-        }
+        public string AutoUdfExample =>
+            HasAutoUdfExample ? _selectedTechnique.AutoUdfExample : string.Empty;
 
         public string ThoroughUdfExample
         {
             get
             {
                 if (_selectedTechnique == null) return string.Empty;
-                return $"=TSL.THOROUGH(\"{_selectedTechnique.Id}\", A2:A100)";
+                return $"=TSL_RUN_THR(\"{_selectedTechnique.Id}\", <dates>, <values>, TSL_TRIGGER())";
             }
         }
 

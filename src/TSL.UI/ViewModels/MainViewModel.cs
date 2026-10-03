@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 using TSL.UI.Helpers;
 
@@ -145,6 +147,35 @@ namespace TSL.UI.ViewModels
         /// AddIn layer shows that sheet.
         /// </summary>
         public event Action<OutputSheetLink> GoToSheetRequested;
+
+        /// <summary>
+        /// Raised when the user clicks Insert in the UDF Formula Guide (A2 E2b ruling 1(b)).
+        /// The AddIn layer opens Excel's Function Arguments dialog in the active cell.
+        /// </summary>
+        public event Action<UdfEntry> InsertFormulaRequested;
+
+        // The worksheet-function catalog, held until the UDF Formula Guide is first shown.
+        private List<UdfEntry> _udfCatalog;
+        private string _udfCatalogMessage;
+
+        /// <summary>
+        /// Called by the AddIn layer when it creates the pane: the worksheet functions from
+        /// the generated catalog, or <paramref name="message"/> when it could not be loaded.
+        /// </summary>
+        public void LoadUdfCatalog(IEnumerable<UdfEntry> entries, string message)
+        {
+            _udfCatalog = entries?.ToList() ?? new List<UdfEntry>();
+            _udfCatalogMessage = message;
+            if (_udfBrowserVm != null) ApplyUdfCatalog(_udfBrowserVm);
+        }
+
+        private void ApplyUdfCatalog(UdfBrowserViewModel vm)
+        {
+            if (!string.IsNullOrEmpty(_udfCatalogMessage) || _udfCatalog == null)
+                vm.ShowCatalogMessage(_udfCatalogMessage ?? "");
+            else
+                vm.LoadUdfs(_udfCatalog);
+        }
 
         /// <summary>
         /// Raised when the user clicks "Analyze Selection" in the Data Readiness view.
@@ -402,6 +433,8 @@ namespace TSL.UI.ViewModels
             if (_udfBrowserVm == null)
             {
                 _udfBrowserVm = new UdfBrowserViewModel();
+                _udfBrowserVm.InsertFormulaRequested += (udf) => InsertFormulaRequested?.Invoke(udf);
+                if (_udfCatalog != null || _udfCatalogMessage != null) ApplyUdfCatalog(_udfBrowserVm);
             }
             return _udfBrowserVm;
         }

@@ -142,6 +142,15 @@ namespace TSL.UI
         }
 
         /// <summary>
+        /// Load the worksheet-function catalog into the UDF Formula Guide, or the message
+        /// saying why it could not be loaded (A2 E2b ruling 1(a)).
+        /// </summary>
+        public void LoadUdfCatalog(System.Collections.Generic.IEnumerable<UdfEntry> entries, string message)
+        {
+            InvokeOnUIThread(() => _viewModel.LoadUdfCatalog(entries, message));
+        }
+
+        /// <summary>
         /// Update the global preset from the ribbon.
         /// </summary>
         public void SetPreset(string preset)

@@ -51,6 +51,10 @@ namespace TSL.AddIn
         // Run and Cancel also look here.
         private static int _paneRunsInFlight;
 
+        // The worksheet-function catalog by name (A2 E2b ruling 1), for the Explorer's examples.
+        private static Dictionary<string, UdfEntry> _udfByName =
+            new Dictionary<string, UdfEntry>(StringComparer.OrdinalIgnoreCase);
+
         // House-message areas (docs/HOUSE_STYLE.md, A2 ratification Q2): every message
         // names the action it came from, written exactly as its button is labelled.
         // The Techniques group's Quick Action buttons (RibbonXml.cs grpQuickActions),
@@ -969,6 +973,7 @@ namespace TSL.AddIn
                         _hostControl.ViewModel.RunCancelRequested -= OnCancelRequested;
                         _hostControl.ViewModel.DataReadinessChecksRequested -= OnDataReadinessChecksRequested;
                         _hostControl.ViewModel.GoToSheetRequested -= OnGoToSheetRequested;
+                        _hostControl.ViewModel.InsertFormulaRequested -= OnInsertFormulaRequested;
                     }
                     catch { /* best-effort unwire */ }
                 }
@@ -1005,11 +1010,22 @@ namespace TSL.AddIn
                 // The Run view's Output Sheets links (A2 U8, N6).
                 _hostControl.ViewModel.GoToSheetRequested += OnGoToSheetRequested;
 
+                // Insert in Help > UDF Formula Guide (A2 E2b ruling 1(b)).
+                _hostControl.ViewModel.InsertFormulaRequested += OnInsertFormulaRequested;
+
                 // Push the real technique catalog into the Explorer VM. The VM now
                 // constructs EMPTY (the design-time preview stub was removed -- the
                 // JSON catalog is the single source of truth); this push happens
                 // BEFORE CreateCustomTaskPane below, so the pane is never shown
                 // before the catalog is loaded.
+                // The worksheet functions, for Help > UDF Formula Guide and the Explorer's
+                // formula examples (A2 E2b ruling 1(a), (d)).
+                var udfs = UdfCatalog.Load();
+                _udfByName = udfs.Entries
+                    .GroupBy(u => u.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+                _hostControl.LoadUdfCatalog(udfs.Entries, udfs.Message);
+
                 try
                 {
                     var catalog = TechniqueCatalogService.GetCatalog();
@@ -1066,6 +1082,7 @@ namespace TSL.AddIn
                         _hostControl.ViewModel.RunCancelRequested -= OnCancelRequested;
                         _hostControl.ViewModel.DataReadinessChecksRequested -= OnDataReadinessChecksRequested;
                         _hostControl.ViewModel.GoToSheetRequested -= OnGoToSheetRequested;
+                        _hostControl.ViewModel.InsertFormulaRequested -= OnInsertFormulaRequested;
                     }
                     catch { /* best-effort unwire */ }
                 }
@@ -1694,6 +1711,105 @@ namespace TSL.AddIn
             runVm.CompleteRun(summary, sheets);
         }
 
+        private const string UdfGuideArea = "UDF Formula Guide";
+
+        /// <summary>
+        /// Insert in Help &gt; UDF Formula Guide (A2 E2b ruling 1(b)): open Excel's Function
+        /// Arguments dialog for the chosen function in the active cell - the one native dialog
+        /// Time Series Lab opens on purpose (docs/HOUSE_STYLE.md, Look). Only an empty active
+        /// cell is used; any other is refused and left unchanged. The function goes into the
+        /// cell first (the dialog opens for the cell's formula); if the user cancels, the cell
+        /// is left empty again. OK is told from Cancel by Excel's SheetChange event, which
+        /// fires when the dialog enters the formula (Cancel enters nothing), and by the formula
+        /// itself having changed.
+        /// </summary>
+        private static void OnInsertFormulaRequested(UdfEntry udf)
+        {
+            if (udf == null || string.IsNullOrEmpty(udf.Name)) return;
+
+            var app = (Microsoft.Office.Interop.Excel.Application)ExcelDnaUtil.Application;
+            Range cell = null;
+            try { cell = app?.ActiveCell; } catch { /* no workbook open */ }
+            if (cell == null)
+            {
+                HouseDialog.ShowHouseAlert(
+                    "No cell is active, so nothing was inserted.\n\n" +
+                    "Select an empty cell, then click Insert again.",
+                    HouseDialog.Title(UdfGuideArea));
+                return;
+            }
+
+            bool empty;
+            try
+            {
+                empty = string.IsNullOrEmpty(Convert.ToString((object)cell.Formula)) && cell.Value2 == null;
+            }
+            catch { empty = false; }
+            if (!empty)
+            {
+                HouseDialog.ShowHouseAlert(
+                    "The active cell is not empty, so nothing was inserted.\n\n" +
+                    "Select an empty cell, then click Insert again.",
+                    HouseDialog.Title(UdfGuideArea));
+                return;
+            }
+
+            var placeholder = "=" + udf.Name + "()";
+            bool wrote = false, committed = false, listening = false;
+            AppEvents_SheetChangeEventHandler onChange = (sh, target) => committed = true;
+            try
+            {
+                cell.Formula = placeholder;
+                wrote = true;
+                try { app.SheetChange += onChange; listening = true; }
+                catch (Exception evEx) { Logger.Info($"Insert Formula: SheetChange not available ({evEx.Message})."); }
+                try
+                {
+                    // HOUSE-DIALOG-EXCEPTION: Function Arguments (docs/HOUSE_STYLE.md, Look; A2 E2b ruling 1(b))
+                    cell.FunctionWizard();
+                }
+                finally
+                {
+                    if (listening) { try { app.SheetChange -= onChange; } catch { /* best effort */ } }
+                }
+
+                var after = Convert.ToString((object)cell.Formula);
+                bool changed = !string.Equals(after, placeholder, StringComparison.OrdinalIgnoreCase);
+                // Without the event, an unchanged formula reads as Cancel - except for a function
+                // with no arguments, whose complete formula IS the placeholder (kept).
+                bool ok = committed || changed || (!listening && !udf.HasArguments);
+                if (!ok)
+                {
+                    cell.ClearContents();
+                    Logger.Info($"Insert Formula: {udf.Name} cancelled; the cell was left empty.");
+                }
+                else
+                {
+                    Logger.Info($"Insert Formula: {after} entered (event {(listening ? (committed ? "fired" : "did not fire") : "unavailable")}).");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Insert Formula failed for {udf.Name}.", ex);
+                // Leave the cell as it was found: empty.
+                if (wrote)
+                {
+                    try
+                    {
+                        if (string.Equals(Convert.ToString((object)cell.Formula), placeholder, StringComparison.OrdinalIgnoreCase))
+                            cell.ClearContents();
+                    }
+                    catch { /* best effort */ }
+                }
+                HouseDialog.ShowHouseAlert(
+                    "Time Series Lab could not insert the formula. Nothing was changed.\n\n" +
+                    "The function:\n" + HouseDialog.Indent(udf.Name) + "\n\n" +
+                    HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
+                    "Select an empty cell, then click Insert again. If this message returns, tell Matthew Hornbach.",
+                    HouseDialog.Title(UdfGuideArea), isError: true);
+            }
+        }
+
         /// <summary>
         /// An Output Sheets link in the Run view (A2 U8, N6: it did nothing before): show that
         /// sheet, in whichever workbook window holds it. Anything that stops it is a house
@@ -2027,6 +2143,7 @@ namespace TSL.AddIn
                 Description = description,
                 SupportsAutoUdf = entry.SupportsAutoUdf,
                 AutoUdfName = entry.AutoUdfName,
+                AutoUdfExample = AutoUdfExample(entry),
                 MinSeries = entry.MinSeries,
                 MaxSeries = entry.MaxSeries,
                 Tags = entry.Tags ?? new List<string>(),
@@ -2034,6 +2151,16 @@ namespace TSL.AddIn
                 Parameters = parameters,
                 OutputTables = entry.OutputTables ?? new List<string>(),
             };
+        }
+
+        /// <summary>
+        /// The technique's AUTO worksheet function as a formula to fill in (A2 E2b ruling 1(d)),
+        /// from the function catalog; the bare name when the catalog does not list it.
+        /// </summary>
+        private static string AutoUdfExample(TechniqueCatalogEntry entry)
+        {
+            if (entry == null || !entry.SupportsAutoUdf || string.IsNullOrEmpty(entry.AutoUdfName)) return "";
+            return _udfByName.TryGetValue(entry.AutoUdfName, out var udf) ? udf.Example : "=" + entry.AutoUdfName + "(...)";
         }
 
         private static bool IsConstantSeries(SelectionService.ExtractedSeries s)
