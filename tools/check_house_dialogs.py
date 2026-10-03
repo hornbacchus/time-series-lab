@@ -18,7 +18,13 @@ other dialog call in the add-in's C# sources:
     file pickers (GetOpenFilename, GetSaveAsFilename);
   - the WinForms / WPF common dialogs (OpenFileDialog, SaveFileDialog,
     FolderBrowserDialog, ColorDialog, FontDialog, PrintDialog, ...);
-  - a hand-built modal form (.ShowDialog(...)).
+  - a hand-built modal form (.ShowDialog(...));
+  - Excel's Function Arguments dialog (Range.FunctionWizard). It is the one native dialog
+    Time Series Lab opens on purpose (docs/HOUSE_STYLE.md, Look; A2 E2b ruling 1(b)): a
+    single call site may carry the marker comment
+        // HOUSE-DIALOG-EXCEPTION: Function Arguments
+    on its own line or on the line above it. That call passes; an unmarked FunctionWizard
+    fails, and so does every marked call after the first (in file and line order).
 
 Scope: every .cs file under src/TSL.AddIn and src/TSL.UI except bin/ and obj/, and the
 <Using> items of the project files there. Only the two helper files are exempt.
@@ -73,7 +79,12 @@ CODE_RULES = [
         r"\b(?:OpenFileDialog|SaveFileDialog|OpenFolderDialog|FolderBrowserDialog|ColorDialog|FontDialog"
         r"|PrintDialog|PageSetupDialog|PrintPreviewDialog)\b")),
     ("modal form", re.compile(r"\.\s*ShowDialog\s*\(")),
+    ("Excel Function Arguments dialog", re.compile(r"\bFunctionWizard\b")),
 ]
+# The one native dialog opened on purpose: a FunctionWizard call marked like this (in a
+# comment on the call's line or the line above) passes - the first such call only.
+FUNCTION_WIZARD_RULE = "Excel Function Arguments dialog"
+FUNCTION_WIZARD_MARK = "HOUSE-DIALOG-EXCEPTION: Function Arguments"
 # Rules on the code with only comments blanked (string literals kept).
 STRING_RULES = [
     ("native dialog P/Invoke", re.compile(r"\bEntryPoint\s*=\s*@?\"[^\"]*" + _NATIVE + "\"")),
@@ -336,7 +347,30 @@ def scan(root: Path) -> tuple[list[tuple[str, int, str, str]], int, list[str], d
                 hits.append((rel, line, "global using of a dialog", text.splitlines()[line - 1].strip()))
 
     hits.sort(key=lambda h: (h[0], h[1], h[2]))
+    hits = _allow_marked_function_wizard(root, hits)
     return hits, sum(counts.values()), problems, counts
+
+
+def _allow_marked_function_wizard(root: Path, hits: list[tuple[str, int, str, str]]) -> list[tuple[str, int, str, str]]:
+    """Drop the first FunctionWizard hit whose line, or the line above it, carries the marker
+    (the raw source is read, since the marker sits in a comment). Every later marked call
+    stays a hit, renamed so the RED says why."""
+    allowed_one = False
+    kept: list[tuple[str, int, str, str]] = []
+    for rel, line, rule, src in hits:
+        if rule == FUNCTION_WIZARD_RULE:
+            try:
+                lines = _read_source(root / rel).splitlines()
+            except (UnicodeError, OSError):
+                lines = []
+            near = lines[max(0, line - 2):line]
+            if any(FUNCTION_WIZARD_MARK in text for text in near):
+                if not allowed_one:
+                    allowed_one = True
+                    continue
+                rule = FUNCTION_WIZARD_RULE + " (a second marked call; only one is allowed)"
+        kept.append((rel, line, rule, src))
+    return kept
 
 
 def run_check(root: Path) -> int:
@@ -408,6 +442,25 @@ _CASES = [
      ["Office file dialog", "Excel built-in dialog", "Excel C API dialog"]),
     ("a hand-built modal form", 'class A { void F() { new System.Windows.Forms.Form().ShowDialog(); } }\n',
      ["modal form"]),
+    # Excel's Function Arguments dialog: one marked call site only (A2 E2b ruling 1(b)).
+    ("an unmarked FunctionWizard",
+     'class A { void F(Microsoft.Office.Interop.Excel.Range c) { c.FunctionWizard(); } }\n',
+     ["Excel Function Arguments dialog"]),
+    ("the marked FunctionWizard call passes",
+     'class A { void F(dynamic c) {\n  // HOUSE-DIALOG-EXCEPTION: Function Arguments (docs/HOUSE_STYLE.md)\n'
+     '  c.FunctionWizard();\n} }\n', []),
+    ("the marker on the call's own line",
+     'class A { void F(dynamic c) { c.FunctionWizard(); // HOUSE-DIALOG-EXCEPTION: Function Arguments\n} }\n', []),
+    ("a second marked FunctionWizard call fails",
+     'class A { void F(dynamic c) {\n  // HOUSE-DIALOG-EXCEPTION: Function Arguments\n  c.FunctionWizard();\n'
+     '  // HOUSE-DIALOG-EXCEPTION: Function Arguments\n  c.FunctionWizard();\n} }\n',
+     ["Excel Function Arguments dialog (a second marked call; only one is allowed)"]),
+    ("the marker excuses only the FunctionWizard call",
+     'class A { void F(dynamic c) {\n  // HOUSE-DIALOG-EXCEPTION: Function Arguments\n'
+     '  c.FunctionWizard(); MessageBox.Show("x");\n} }\n', ["MessageBox"]),
+    ("a marker two lines above does not count",
+     'class A { void F(dynamic c) {\n  // HOUSE-DIALOG-EXCEPTION: Function Arguments\n\n  c.FunctionWizard();\n} }\n',
+     ["Excel Function Arguments dialog"]),
     ("names that only start like a dialog",
      'class A { void F() { var b = MessageBoxButtons.OK; var f = SystemFonts.MessageBoxFont; var i = MessageBoxIcon.None;\n'
      '  ShowDialogNow(); var dialogs = 1; } }\n', []),
