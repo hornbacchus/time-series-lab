@@ -77,11 +77,16 @@ namespace TSL.AddIn
         /// is starting and not yet verified (a worksheet function starts the engine before
         /// it calls RunAsync).
         /// </summary>
-        internal bool HasRunsInFlight
+        internal bool HasRunsInFlight => RunsInFlight > 0 || IsStarting;
+
+        /// <summary>Runs inside RunAsync now (task pane and worksheet functions alike).</summary>
+        internal int RunsInFlight => Volatile.Read(ref _runsInFlight);
+
+        /// <summary>An engine is starting: started, alive, and not yet verified.</summary>
+        internal bool IsStarting
         {
             get
             {
-                if (Volatile.Read(ref _runsInFlight) > 0) return true;
                 var starting = Volatile.Read(ref _session);
                 return starting != null && starting.IsAlive && !ReferenceEquals(starting, Volatile.Read(ref _verified));
             }

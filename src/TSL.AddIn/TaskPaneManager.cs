@@ -128,6 +128,7 @@ namespace TSL.AddIn
         /// </summary>
         private static void OpenPopulated(string techniqueId, string area, string retry)
         {
+            if (RefuseWhileRunning(area)) return;
             if (!EnsureTaskPane(area)) return;
             _taskPane.Visible = true;
             LaunchTechnique(techniqueId, AddIn.Settings?.GetGlobalPreset() ?? "Balanced",
@@ -352,6 +353,7 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenBondYieldForecastConfig()
         {
+            if (RefuseWhileRunning("Bond Yield Forecast")) return;
             if (!EnsureTaskPane("Bond Yield Forecast")) return;
             _taskPane.Visible = true;
 
@@ -420,6 +422,7 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenBreakevenPayrollConfig()
         {
+            if (RefuseWhileRunning("Breakeven Payrolls")) return;
             if (!EnsureTaskPane("Breakeven Payrolls")) return;
             _taskPane.Visible = true;
 
@@ -463,6 +466,7 @@ namespace TSL.AddIn
         /// </summary>
         public static void OpenKronosConfig()
         {
+            if (RefuseWhileRunning("Kronos Forecast")) return;
             if (!EnsureTaskPane("Kronos Forecast")) return;
             _taskPane.Visible = true;
 
@@ -690,12 +694,9 @@ namespace TSL.AddIn
         public static void RunCurrent()
         {
             var runVm = _hostControl?.ViewModel?.RunViewIfCreated;
-            if (System.Threading.Volatile.Read(ref _paneRunsInFlight) > 0 || (runVm?.IsRunning ?? false))
+            if (PaneRunInFlight())
             {
-                HouseDialog.ShowHouseAlert(
-                    "A run is already in progress in the task pane, so nothing new was started.\n\n" +
-                    "Wait for it to finish, or click Run > Cancel to stop it.",
-                    HouseDialog.Title(RunArea));
+                HouseDialog.ShowHouseAlert(RunInProgressText, HouseDialog.Title(RunArea));
                 return;
             }
 
@@ -725,10 +726,7 @@ namespace TSL.AddIn
             runVm = _hostControl?.ViewModel?.RunViewIfCreated;
             if (outcome == RunCurrentOutcome.AlreadyRunning)
             {
-                HouseDialog.ShowHouseAlert(
-                    "A run is already in progress in the task pane, so nothing new was started.\n\n" +
-                    "Wait for it to finish, or click Run > Cancel to stop it.",
-                    HouseDialog.Title(RunArea));
+                HouseDialog.ShowHouseAlert(RunInProgressText, HouseDialog.Title(RunArea));
             }
             else if (wasClosed && runVm != null && ReferenceEquals(_hostControl.ViewModel.CurrentView, runVm) &&
                      runVm.CanRun && !string.IsNullOrEmpty(runVm.TechniqueId))
@@ -784,20 +782,76 @@ namespace TSL.AddIn
         /// </summary>
         internal static void CancelFromRibbon()
         {
-            var runVm = _hostControl?.ViewModel?.RunViewIfCreated;
-            if (System.Threading.Volatile.Read(ref _paneRunsInFlight) > 0 || (runVm?.IsRunning ?? false))
+            if (PaneRunInFlight())
             {
                 OnCancelRequested();
                 return;
             }
-            if (AddIn.Engine != null && AddIn.Engine.HasRunsInFlight)
+            var engine = AddIn.Engine;
+            if (engine != null && engine.HasRunsInFlight)
             {
-                AddIn.Engine.CancelCurrentRun();
-                Logger.Info("Ribbon Cancel: worksheet-function runs stopped (engine hard-stopped).");
+                // Say what was stopped (A2 E2b ruling 8(ii)), read before the stop.
+                bool functionsRunning = engine.RunsInFlight > 0;
+                engine.CancelCurrentRun();
+                Logger.Info(functionsRunning
+                    ? "Ribbon Cancel: worksheet-function runs stopped (engine hard-stopped)."
+                    : "Ribbon Cancel: an engine start stopped (nothing else was running).");
+                HouseDialog.ShowHouseAlert(
+                    functionsRunning
+                        ? "Time Series Lab stopped the worksheet functions that were running. Their cells show an error " +
+                          "until they are recalculated.\n\nTo run them again, press Ctrl+Alt+F9."
+                        : "Time Series Lab stopped the analysis engine while it was starting. Nothing else was running.",
+                    HouseDialog.Title("Cancel"));
                 return;
             }
             Logger.Info("Ribbon Cancel: nothing was running.");
             HouseDialog.ShowHouseAlert("Nothing is running.", HouseDialog.Title("Cancel"));
+        }
+
+        // The ribbon Run's in-progress text, also every Run-view opener's while a run is in flight.
+        private const string RunInProgressText =
+            "A run is already in progress in the task pane, so nothing new was started.\n\n" +
+            "Wait for it to finish, or click Run > Cancel to stop it.";
+
+        /// <summary>A task pane run is in flight: dispatched and not yet finished.</summary>
+        private static bool PaneRunInFlight() =>
+            System.Threading.Volatile.Read(ref _paneRunsInFlight) > 0 ||
+            (_hostControl?.ViewModel?.RunViewIfCreated?.IsRunning ?? false);
+
+        /// <summary>
+        /// While a task pane run is in flight, every opener of the Run view (the Quick Actions,
+        /// Configure &amp; Run, the Bespoke Run items) refuses under its own area caption, and the
+        /// Run view stays on the running technique, so the run's results land in its own view
+        /// (A2 E2b ruling 7). True when it refused.
+        /// </summary>
+        private static bool RefuseWhileRunning(string area)
+        {
+            if (!PaneRunInFlight()) return false;
+            Logger.Info($"{area ?? "Run view"}: refused - a run is in progress in the task pane.");
+            HouseDialog.ShowHouseAlert(RunInProgressText, HouseDialog.Title(area));
+            return true;
+        }
+
+        /// <summary>
+        /// Bespoke &gt; <paramref name="tool"/> &gt; Open Input Template opened a working copy
+        /// (A2 E2b ruling 6): when the task pane's Run view is set up for that tool, its input
+        /// moves to the new working copy, and the view shows it.
+        /// </summary>
+        internal static void NoteTemplateOpened(string tool, Workbook workingCopy)
+        {
+            try
+            {
+                var runVm = _hostControl?.ViewModel?.RunViewIfCreated;
+                if (runVm == null || workingCopy == null || !runVm.WorkbookInputMode) return;
+                if (!BespokeLabels.TryGetValue(runVm.TechniqueId ?? "", out var label) ||
+                    !string.Equals(label, tool, StringComparison.Ordinal)) return;
+                SetBespokeInput(runVm, workingCopy);
+                Logger.Info($"{tool}: the task pane's input moved to the new working copy.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"{tool}: could not move the task pane's input to the new working copy ({ex.Message}).");
+            }
         }
 
         /// <summary>The active workbook, or null when none is open or Excel cannot say.</summary>
@@ -990,6 +1044,10 @@ namespace TSL.AddIn
                 // The Settings view reads and writes config.json through this (A2 U7).
                 _hostControl.ViewModel.SettingsStore = new SettingsStoreAdapter();
 
+                // The pane starts on the saved preset (A2 E2b ruling 2): its runs send this one,
+                // and before it read nothing, so they used Balanced whatever was saved.
+                _hostControl.ViewModel.Preset = AddIn.Settings?.GetGlobalPreset() ?? "Balanced";
+
                 // Wire the RunRequested event to extract selection and run the engine
                 _hostControl.ViewModel.RunRequested += OnRunRequested;
 
@@ -1120,6 +1178,7 @@ namespace TSL.AddIn
             // does (A2 U6, N3): its own workbook-input Run view, never the selection path.
             if (_workbookInputTechniques.Contains(techniqueId ?? ""))
             {
+                if (RefuseWhileRunning(ExplorerArea)) return;
                 BespokeLabels.TryGetValue(techniqueId, out var tool);
                 try
                 {

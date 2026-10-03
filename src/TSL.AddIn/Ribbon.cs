@@ -368,11 +368,12 @@ namespace TSL.AddIn
                 ExcelAsyncUtil.QueueAsMacro(() =>
                 {
                     string workingPath = null;
+                    Workbook opened = null;
                     try
                     {
                         var app = (Application)ExcelDnaUtil.Application;
                         workingPath = CreateTemplateWorkingCopy(bundled, baseName);
-                        app.Workbooks.Open(workingPath, ReadOnly: false);
+                        opened = app.Workbooks.Open(workingPath, ReadOnly: false);
                     }
                     catch (Exception ex)
                     {
@@ -380,6 +381,8 @@ namespace TSL.AddIn
                         return;
                     }
                     RestoreTab();
+                    // The task pane set up for this tool now reads the new copy (A2 E2b ruling 6).
+                    TaskPaneManager.NoteTemplateOpened(tool, opened);
                 });
             }
             catch (Exception ex)
