@@ -75,9 +75,12 @@ namespace TSL.AddIn
         private const int MaxBuildTokenLength = 64;
 
         /// <summary>
-        /// TSL_ENGINE_&lt;SID&gt;_&lt;ExcelPID&gt;_&lt;buildToken&gt;_&lt;nonce&gt;: one pipe per Excel
-        /// instance and per build. The nonce (fresh per EngineClient) makes the name
-        /// unguessable, so no other process can create it first.
+        /// TSL_ENGINE_&lt;SID&gt;_&lt;ExcelPID&gt;_&lt;buildToken&gt;_&lt;nonce&gt;: one pipe per engine
+        /// start (so per Excel instance and per build). The nonce is fresh per engine start
+        /// (EngineClient.StartEngine makes a new one each time): the name cannot be guessed
+        /// before the engine starts; a pipe another process creates under it anyway is refused
+        /// by the handshake's server-PID check; and a run still waiting on a stopped engine can
+        /// never reach its successor before that successor's handshake has passed.
         /// </summary>
         public static string BuildPipeName(string sid, int excelPid, string stamp, string nonce)
         {

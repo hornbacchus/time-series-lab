@@ -206,9 +206,14 @@ namespace TSL.AddIn
         // ── The sweep ────────────────────────────────────────────────────
 
         /// <summary>
-        /// Visit every engine record (and a pre-A2 engine.pid, once) and act on the
-        /// verdict: kill only a proven orphan of this build; otherwise leave the process
-        /// alone. A record is deleted only when its engine is gone (or was just killed).
+        /// Visit every engine record (and a pre-A2 engine.pid, which is checked and then
+        /// deleted only when no other Excel is running, and kept for a later start otherwise)
+        /// and act on the verdict: kill only a proven orphan of this build; otherwise leave
+        /// the process alone. A usable record is deleted only when its engine is gone (or was
+        /// just killed) - including another build's record, since existence and start time
+        /// are checked before the build. A record whose content is unusable (corrupt JSON, or
+        /// no engine PID) is deleted with nothing killed, although its engine's state is then
+        /// unknown; a record that cannot be read right now is kept.
         /// Runs on a background thread started at AutoOpen; never throws.
         /// </summary>
         public static void Sweep(string stateDir, string legacyPipeName, string expectedExe,
