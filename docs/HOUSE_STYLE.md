@@ -33,6 +33,7 @@ Then the diagnostics block, one "Label: value" line each, in three groups separa
 - When the text explains the buttons, it uses one "<Label> = <meaning>" line each.
 - Free text goes through the house text box (OK and Cancel), never a native input box.
 - Geometry follows Global Macro Charts' frmPrompt: a form 280 pt wide (about 373 logical pixels at 100% scaling); a prompt label 256 pt wide with word wrap; buttons 232 x 24 pt, stacked at 30 pt steps. The height grows with the text, and the form opens centred on the Excel window.
+- The one native dialog Time Series Lab opens on purpose is Excel's Function Arguments dialog, from Insert in Help > UDF Formula Guide. The dialog check allows that one call and no other.
 - Enforced by tools/check_house_dialogs.py, a gate step in ci_gate_local and in CI.
 
 ## Text
@@ -43,6 +44,7 @@ These rules apply to dialogs and to task-pane messages.
 - One blank line between blocks; a path or value on its own line, indented four spaces.
 - Command names exactly as the ribbon writes them. A route starts at the ribbon group and names each step, e.g. "Bespoke > Bond Yield Forecast > Open Input Template".
 - US spelling; "e.g."; "X-axis"; straight quotes.
+- These rules also cover the task pane's labels, tooltips and badges. Section headers in capitals, such as INPUT WORKBOOK, are a visual style and stay as they are.
 
 ## Errors and refusals
 
