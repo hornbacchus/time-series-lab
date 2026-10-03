@@ -117,7 +117,7 @@
                        Style="{StaticResource SettingNote}" />
             <TextBlock Text="Same workbook: the Results and Audit sheets of each run, and a hidden run record, are added to the workbook that holds the data. Time Series Lab does not save that workbook."
                        Style="{StaticResource SettingNote}" />
-            <TextBlock Text="A data workbook that was never saved, or one inside the Time Series Lab program folder, sends its results to a new workbook in the Time Series Lab folder in Documents."
+            <TextBlock Text="A data workbook that was never saved, or one inside the Time Series Lab program folder, sends its results to a new workbook in the Time Series Lab folder in Documents. A data workbook saved as CSV or text, or one that does not allow new sheets, also gets a new workbook, saved next to it."
                        Style="{StaticResource SettingNote}" />
             <TextBlock Text="The Bespoke tools always put their results in a new workbook."
                        Style="{StaticResource SettingNote}" />

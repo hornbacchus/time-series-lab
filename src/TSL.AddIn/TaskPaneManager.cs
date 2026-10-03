@@ -1730,15 +1730,24 @@ namespace TSL.AddIn
             if (!string.IsNullOrEmpty(writeResult.AddedToWorkbook))
             {
                 // "Same workbook" (A2 U7): added to the data workbook, which is not saved.
+                // Ruling 4: what AutoSave did with the new sheets.
                 summary += "\n\nResults were added to the workbook that holds the data:\n" +
-                           HouseDialog.Indent(writeResult.AddedToWorkbook) +
-                           "\n\nThe workbook has not been saved.";
+                           HouseDialog.Indent(writeResult.AddedToWorkbook) + "\n\n" +
+                           (writeResult.AutoSaveOn == true ? "AutoSave has already saved the new sheets into the file."
+                            : writeResult.AutoSaveOn == false ? "The workbook has not been saved."
+                            : "Time Series Lab did not save the workbook.");
             }
             else if (!string.IsNullOrEmpty(writeResult.OutputPath) && writeResult.UsedInstallTreeGuard)
             {
                 // The data workbook lies in the add-in's own folder (A2 U7, K4; ratified wording).
                 summary += "\n\nThe data workbook is inside the Time Series Lab program folder, " +
                            "so the results were saved to Documents instead:\n" + HouseDialog.Indent(writeResult.OutputPath);
+            }
+            else if (!string.IsNullOrEmpty(writeResult.OutputPath) && writeResult.SameWorkbookRefused != null)
+            {
+                // Ruling 3: the data workbook does not take new sheets.
+                summary += "\n\n" + SameWorkbookRefusedReason(writeResult.SameWorkbookRefused) +
+                           ", so the results were saved to a new workbook instead:\n" + HouseDialog.Indent(writeResult.OutputPath);
             }
             else if (!string.IsNullOrEmpty(writeResult.OutputPath) && writeResult.SameWorkbookUnavailable)
             {
@@ -1761,6 +1770,9 @@ namespace TSL.AddIn
                 if (writeResult.UsedInstallTreeGuard)
                     summary += "\n\nThe data workbook is inside the Time Series Lab program folder, " +
                                "so the results went to a new workbook instead.";
+                else if (writeResult.SameWorkbookRefused != null)
+                    summary += "\n\n" + SameWorkbookRefusedReason(writeResult.SameWorkbookRefused) +
+                               ", so the results went to a new workbook instead.";
                 else if (writeResult.SameWorkbookUnavailable)
                     summary += "\n\nThe data workbook could no longer be found under its name, " +
                                "so the results went to a new workbook instead.";
@@ -1866,6 +1878,19 @@ namespace TSL.AddIn
                     HouseDialog.ErrorBlock(ex.Message) + "\n\n" +
                     "Select an empty cell, then click Insert again. If this message returns, tell Matthew Hornbach.",
                     HouseDialog.Title(UdfGuideArea), isError: true);
+            }
+        }
+
+        /// <summary>Why the data workbook does not take Same-workbook results (ruling 3), as the
+        /// first half of a sentence.</summary>
+        private static string SameWorkbookRefusedReason(string refusal)
+        {
+            switch (refusal)
+            {
+                case "csv": return "The data workbook is a CSV file, which holds only one sheet";
+                case "text": return "The data workbook is a text file, which holds only one sheet";
+                case "locked": return "The data workbook does not allow new sheets";
+                default: return "The data workbook is not saved as an xlsx, xlsm, xlsb or xls workbook";
             }
         }
 

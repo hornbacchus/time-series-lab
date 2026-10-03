@@ -174,11 +174,24 @@ namespace TSL.AddIn
                     string foundDir = null;
                     try { foundDir = dataWb?.Path; } catch { dataWb = null; }
                     if (dataWb != null && SameFolder(foundDir, request?.SourceWorkbookPath))
-                        return WriteIntoWorkbook(app, dataWb, request, response, writeResult, inputName);
-                    // Closed, renamed by Save As, or replaced during the run: a new workbook instead.
-                    writeResult.SameWorkbookUnavailable = true;
-                    Logger.Info($"Same workbook: {request?.SourceWorkbookName ?? "(unknown)"} in " +
-                                $"{request?.SourceWorkbookPath ?? "(no folder)"} is no longer open; the results go to a new workbook.");
+                    {
+                        // Only an Excel workbook that takes new sheets receives them (A2 E2b ruling 3):
+                        // a CSV or text file holds one sheet, and a later save would keep only the
+                        // Results sheet over the data; protected structure and shared workbooks refuse.
+                        var refusal = SameWorkbookRefusal(dataWb);
+                        if (refusal == null)
+                            return WriteIntoWorkbook(app, dataWb, request, response, writeResult, inputName);
+                        writeResult.SameWorkbookRefused = refusal;
+                        Logger.Info($"Same workbook: {request?.SourceWorkbookName} does not take the results ({refusal}); " +
+                                    "they go to a new workbook next to it.");
+                    }
+                    else
+                    {
+                        // Closed, renamed by Save As, or replaced during the run: a new workbook instead.
+                        writeResult.SameWorkbookUnavailable = true;
+                        Logger.Info($"Same workbook: {request?.SourceWorkbookName ?? "(unknown)"} in " +
+                                    $"{request?.SourceWorkbookPath ?? "(no folder)"} is no longer open; the results go to a new workbook.");
+                    }
                 }
 
                 // Unsaved input workbook (never saved → no Path on disk), or one inside the
@@ -410,6 +423,69 @@ namespace TSL.AddIn
             }
         }
 
+        /// <summary>
+        /// Why the data workbook cannot take Same-workbook results (A2 E2b ruling 3), or null
+        /// when it can: "csv" or "text" (a one-sheet file), "locked" (protected structure or a
+        /// shared workbook), "format" (any other file type). Only xlsx, xlsm, xlsb and xls take them.
+        /// </summary>
+        private static string SameWorkbookRefusal(Workbook wb)
+        {
+            try
+            {
+                return SameWorkbookRefusal((int)wb.FileFormat, wb.ProtectStructure, wb.MultiUserEditing);
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Same workbook: could not read the data workbook's format ({ex.Message}); a new workbook instead.");
+                return "format";
+            }
+        }
+
+        /// <summary>The rule of <see cref="SameWorkbookRefusal(Workbook)"/> on its inputs (pure).</summary>
+        internal static string SameWorkbookRefusal(int fileFormat, bool protectStructure, bool sharedWorkbook)
+        {
+            if (protectStructure || sharedWorkbook) return "locked";
+            switch (fileFormat)
+            {
+                case 51:    // xlOpenXMLWorkbook (xlsx; also an unsaved new workbook)
+                case 61:    // xlOpenXMLStrictWorkbook (strict xlsx)
+                case 52:    // xlOpenXMLWorkbookMacroEnabled (xlsm)
+                case 50:    // xlExcel12 (xlsb)
+                case 56:    // xlExcel8 (xls)
+                case -4143: // xlWorkbookNormal (xls)
+                    return null;
+                case 6:     // xlCSV
+                case 22:    // xlCSVMac
+                case 23:    // xlCSVWindows
+                case 24:    // xlCSVMSDOS
+                case 62:    // xlCSVUTF8
+                    return "csv";
+                case 19:    // xlTextMac
+                case 20:    // xlTextWindows
+                case 21:    // xlTextMSDOS
+                case 36:    // xlTextPrinter
+                case 42:    // xlUnicodeText
+                case -4158: // xlCurrentPlatformText
+                    return "text";
+                default:
+                    return "format";
+            }
+        }
+
+        /// <summary>Workbook.AutoSaveOn, read late-bound (the interop assembly predates it); null when unreadable.</summary>
+        private static bool? ReadAutoSaveOn(Workbook wb)
+        {
+            try
+            {
+                var value = wb.GetType().InvokeMember("AutoSaveOn", System.Reflection.BindingFlags.GetProperty, null, wb, null);
+                return value is bool on ? on : (bool?)null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         /// <summary>The open workbook named <paramref name="name"/> (Excel names are unique), or null.</summary>
         private static Workbook FindOpenWorkbook(Application app, string name)
         {
@@ -455,8 +531,10 @@ namespace TSL.AddIn
                 }
 
                 try { writeResult.WorkbookFullName = wb.FullName; } catch { /* keep null */ }
+                writeResult.AutoSaveOn = ReadAutoSaveOn(wb);
                 writeResult.Success = true;
-                Logger.Info($"Results added to the data workbook {writeResult.AddedToWorkbook} (not saved).");
+                Logger.Info($"Results added to the data workbook {writeResult.AddedToWorkbook} (not saved by Time Series Lab; " +
+                            $"AutoSave {(writeResult.AutoSaveOn == null ? "unreadable" : writeResult.AutoSaveOn.Value ? "on" : "off")}).");
             }
             catch (Exception ex)
             {
@@ -1209,6 +1287,15 @@ namespace TSL.AddIn
             /// <summary>"Same workbook" was chosen, but the data workbook was closed during
             /// the run, so the results went to a new workbook.</summary>
             public bool SameWorkbookUnavailable { get; set; }
+
+            /// <summary>"Same workbook" was chosen, but the data workbook does not take new
+            /// sheets ("csv", "text", "locked" or "format"), so the results went to a new
+            /// workbook next to it (A2 E2b ruling 3). Null otherwise.</summary>
+            public string SameWorkbookRefused { get; set; }
+
+            /// <summary>"Same workbook": the data workbook's AutoSave, read at the write;
+            /// null when unreadable (A2 E2b ruling 4).</summary>
+            public bool? AutoSaveOn { get; set; }
         }
     }
 }
