@@ -122,11 +122,14 @@ namespace TSL.UI
         }
 
         /// <summary>
-        /// Trigger a run of the currently selected technique.
+        /// The ribbon's Run: run the Run view's own Run command if it can run
+        /// (<see cref="MainViewModel.RunCurrentTechnique"/>).
         /// </summary>
-        public void RunCurrentTechnique()
+        public RunCurrentOutcome RunCurrentTechnique()
         {
-            InvokeOnUIThread(() => _viewModel.RunCurrentTechnique());
+            var outcome = RunCurrentOutcome.NothingSetUp;
+            InvokeOnUIThread(() => outcome = _viewModel.RunCurrentTechnique());
+            return outcome;
         }
 
         /// <summary>

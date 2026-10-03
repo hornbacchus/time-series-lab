@@ -4,6 +4,17 @@ using TSL.UI.Helpers;
 
 namespace TSL.UI.ViewModels
 {
+    /// <summary>What the ribbon's Run did (<see cref="MainViewModel.RunCurrentTechnique"/>).</summary>
+    public enum RunCurrentOutcome
+    {
+        /// <summary>The Run view's own Run command ran.</summary>
+        Started,
+        /// <summary>No Run view is showing a technique that can run; nothing ran.</summary>
+        NothingSetUp,
+        /// <summary>The Run view's run is still in progress; nothing new ran.</summary>
+        AlreadyRunning,
+    }
+
     /// <summary>
     /// Top-level ViewModel for the task pane. Owns navigation state, the selection
     /// status bar, and the current preset. Child ViewModels are created on demand
@@ -97,8 +108,9 @@ namespace TSL.UI.ViewModels
         // ── Events ──────────────────────────────────────────────────────
 
         /// <summary>
-        /// Raised when the user clicks Run in the explorer. The AddIn layer
-        /// subscribes to this to perform the actual engine call.
+        /// Raised when the user clicks Run in the Run view (or the ribbon's Run, which runs
+        /// that same command). The AddIn layer subscribes to this to perform the actual
+        /// engine call.
         /// </summary>
         public event Action<string, string> RunRequested; // techniqueId, preset
 
@@ -248,13 +260,28 @@ namespace TSL.UI.ViewModels
             CurrentViewTitle = "Run";
         }
 
-        public void RunCurrentTechnique()
+        /// <summary>
+        /// The Run view, if it has been created (it is created once and kept). A run in
+        /// progress lives here even while another view is showing.
+        /// </summary>
+        public RunViewModel RunViewIfCreated => _runVm;
+
+        /// <summary>
+        /// The ribbon's Run (A2 U6, K2): exactly what the Run view's own Run button does,
+        /// and only when the Run view is showing and its Run button would run. Nothing else
+        /// runs - in particular not the technique highlighted in the Explorer.
+        /// </summary>
+        public RunCurrentOutcome RunCurrentTechnique()
         {
-            var explorer = _explorerVm;
-            if (explorer?.SelectedTechnique != null)
-            {
-                RunRequested?.Invoke(explorer.SelectedTechnique.Id, Preset);
-            }
+            var run = _runVm;
+            if (run == null || !ReferenceEquals(CurrentView, run) || string.IsNullOrEmpty(run.TechniqueId))
+                return RunCurrentOutcome.NothingSetUp;
+            if (run.IsRunning)
+                return RunCurrentOutcome.AlreadyRunning;
+            if (!run.RunCommand.CanExecute(null))
+                return RunCurrentOutcome.NothingSetUp;
+            run.RunCommand.Execute(null);
+            return RunCurrentOutcome.Started;
         }
 
         /// <summary>
@@ -296,7 +323,6 @@ namespace TSL.UI.ViewModels
             {
                 _explorerVm = new TechniqueExplorerViewModel();
                 _explorerVm.CurrentPreset = Preset;
-                _explorerVm.RunRequested += (id) => RunRequested?.Invoke(id, Preset);
                 _explorerVm.InsertAutoFormulaRequested += (id) => InsertAutoFormulaRequested?.Invoke(id);
                 _explorerVm.InsertThoroughFormulaRequested += (id) => InsertThoroughFormulaRequested?.Invoke(id);
                 // The Explorer's "Configure & Run" raises NavigateToRunRequested.

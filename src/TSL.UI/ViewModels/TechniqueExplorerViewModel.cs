@@ -109,7 +109,6 @@ namespace TSL.UI.ViewModels
     {
         // ── Events ──────────────────────────────────────────────────────
 
-        public event Action<string> RunRequested;
         public event Action<string> InsertAutoFormulaRequested;
         public event Action<string> InsertThoroughFormulaRequested;
         public event Action<string> NavigateToRunRequested;
@@ -253,7 +252,6 @@ namespace TSL.UI.ViewModels
 
         // ── Commands ────────────────────────────────────────────────────
 
-        public ICommand RunCommand { get; }
         public ICommand InsertAutoFormulaCommand { get; }
         public ICommand InsertThoroughFormulaCommand { get; }
         public ICommand OpenRunViewCommand { get; }
@@ -269,18 +267,10 @@ namespace TSL.UI.ViewModels
 
         public TechniqueExplorerViewModel()
         {
-            // RunCommand raises RunRequested -> the AddIn's OnRunRequested
-            // (execute:true) -> immediate dispatch. ★ Intentionally NOT bound to
-            // any Explorer control: binding a button to this re-introduces the
-            // navigate-AND-execute auto-run defect (Fix A2 -- the Explorer
-            // "Run on Selection" used to do exactly this, running before the
-            // user could edit a param). The Explorer's primary action uses
-            // OpenRunViewCommand (configure-then-wait); execution happens only
-            // when the user clicks "Run" on the Run panel itself.
-            RunCommand = new RelayCommand(
-                () => { if (_selectedTechnique != null) RunRequested?.Invoke(_selectedTechnique.Id); },
-                () => _selectedTechnique != null);
-
+            // No Run command here (A2 U6 removed the dormant one): the Explorer's
+            // primary action is OpenRunViewCommand (configure-then-wait); execution
+            // happens only when the user clicks Run on the Run view itself, or the
+            // ribbon's Run, which runs that same command.
             InsertAutoFormulaCommand = new RelayCommand(
                 () => { if (_selectedTechnique != null) InsertAutoFormulaRequested?.Invoke(_selectedTechnique.Id); },
                 () => _selectedTechnique?.SupportsAutoUdf == true);

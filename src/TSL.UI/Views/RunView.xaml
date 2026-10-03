@@ -127,6 +127,18 @@
                 </TextBlock.Style>
             </TextBlock>
 
+            <!-- ── Input workbook (Bespoke tools: the workbook Run reads; A2 U6, B7) ── -->
+            <StackPanel Visibility="{Binding WorkbookInputMode, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="INPUT WORKBOOK" FontSize="11" FontWeight="Bold"
+                           Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />
+                <Border Background="{StaticResource CategoryBgBrush}" CornerRadius="4"
+                        Padding="8" Margin="0,0,0,12"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                    <TextBlock Text="{Binding InputWorkbookDisplay}" FontSize="12"
+                               Foreground="#424242" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+
             <!-- ── Selection preview ──────────────────────────────── -->
             <TextBlock Text="SELECTION PREVIEW" FontSize="11" FontWeight="Bold"
                        Foreground="{StaticResource SubtleTextBrush}" Margin="0,0,0,6" />

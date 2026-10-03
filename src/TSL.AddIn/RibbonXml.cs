@@ -128,9 +128,10 @@ namespace TSL.AddIn
         <group id='grpBespoke' label='Bespoke'>
           <!-- Bond Yield Forecast (GAP-1 routing fix): a MENU, not a split
                button. The top portion opens the dropdown; the two items are
-               'Open Input Template' and 'Run Bond Yield Forecast' (the one-shot
-               OnBondYieldForecastRun, which auto-injects the active workbook
-               path). Dropped the former split-button primary action: it did not
+               'Open Input Template' and 'Run Bond Yield Forecast'
+               (OnBondYieldForecastRun, which opens the Run view in the task pane,
+               set up for the active workbook; the pane's Run button runs the
+               forecast). Dropped the former split-button primary action: it did not
                fire reliably (top-portion click no-op) and duplicated the
                dropdown Run — a single, obvious run path is clearer and aligns
                with the documented 'Bond Yield Forecast -> Run Bond Yield
@@ -152,7 +153,7 @@ namespace TSL.AddIn
                     imageMso='MacroPlay'
                     onAction='OnBondYieldForecastRun'
                     screentip='Run the BVAR-SV forecast on the active workbook'
-                    supertip='Dispatches the BVAR-SV estimation + conditional forecast pipeline against the saved active workbook (one-shot: auto-injects the workbook path). Results render on a new &quot;Bond Yield Forecast Results&quot; sheet; diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet. Estimation typically takes 15-30 seconds on the canonical fixture.' />
+                    supertip='Opens the Run view for Bond Yield Forecast in the task pane, set up for the active workbook. Edit the parameters, then click Run in the task pane to run the BVAR-SV estimation and conditional forecast. Results render on a new &quot;Bond Yield Forecast Results&quot; sheet and diagnostics on a &quot;Bond Yield Forecast Audit&quot; sheet, in a new workbook; the input workbook is never changed. Estimation typically takes 15-30 seconds on the canonical fixture.' />
           </menu>
           <!-- Breakeven Payrolls (Bespoke member #2): a workbook-input technique
                like Bond Yield Forecast. 'Open Input Template' drops a pinned,
@@ -212,7 +213,7 @@ namespace TSL.AddIn
                     imageMso='FindDialog'
                     onAction='OnTechniqueExplorer'
                     screentip='Technique Explorer'
-                    supertip='Browse all 79 techniques. Click the arrow to jump to a category.' />
+                    supertip='Browse all techniques. Click the arrow to jump to a category.' />
             <menu id='menuExplorerCategories'>
               <button id='btnCatDecomp' label='Decomposition &amp; Seasonal' imageMso='ChartAreaChart' onAction='OnExplorerCategory' tag='Decomposition &amp; Seasonal Adjustment' />
               <button id='btnCatForecast' label='Forecasting (Classical)' imageMso='ChartTypeAreaInsertGallery' onAction='OnExplorerCategory' tag='Forecasting (Classical)' />
@@ -293,7 +294,7 @@ namespace TSL.AddIn
                   imageMso='MacroPlay'
                   onAction='OnRun'
                   screentip='Run Analysis'
-                  supertip='Execute the currently configured technique from the Task Pane.' />
+                  supertip='Does exactly what the Run button in the task pane&apos;s Run view does. If no technique is set up there, nothing runs.' />
           <button id='btnCancel'
                   label='Cancel'
                   size='large'
@@ -520,12 +521,12 @@ namespace TSL.AddIn
               </menu>
               <menu id='menuSample_state' label='State Space / Filtering'>
                 <button id='btnSample_kalman_filter'
-                        label='Structural TS Data: Nile River Annual Flow (1871-1970)'
+                        label='Structural TS Data: Airline Passengers (Monthly 1949-60)'
                         imageMso='TableInsertExcel'
                         onAction='OnSampleDataByTechnique'
                         tag='structural_ts'
                         screentip='Sample data for Structural Time Series (UCM)'
-                        supertip='Load a representative sample dataset for the Structural Time Series (UCM) technique. Dataset: Nile River Annual Flow (1871-1970). Each technique&apos;s sample was chosen to be a canonical or otherwise appropriate input. This is the same data you can use with the technique&apos;s Quick Action button or by selecting it in the Technique Explorer.' />
+                        supertip='Load a representative sample dataset for the Structural Time Series (UCM) technique. Dataset: Airline Passengers (Monthly 1949-60). Each technique&apos;s sample was chosen to be a canonical or otherwise appropriate input. This is the same data you can use with the technique&apos;s Quick Action button or by selecting it in the Technique Explorer.' />
                 <button id='btnSample_local_level'
                         label='Local Level Data: Nile River Annual Flow (1871-1970)'
                         imageMso='TableInsertExcel'

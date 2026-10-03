@@ -140,12 +140,13 @@ namespace TSL.AddIn
 
         // ── Quick Actions ──────────────────────────────────────────────
 
-        // ── Quick Actions: one-click run ───────────────────────────────
-        // Each ribbon Quick Action skips the Explorer description page
-        // and calls RunTechnique so the analysis kicks off immediately
-        // against the current Excel selection. The Task Pane lands on
-        // the Run view with the series preview and progress log already
-        // populated.
+        // ── Quick Actions: open the Run view, filled, and wait ─────────
+        // Each ribbon Quick Action skips the Explorer description page and
+        // calls RunTechnique, which opens the task pane on the Run view for
+        // its technique, filled from the current Excel selection (series
+        // preview, time index, parameters), and WAITS: nothing runs until the
+        // user clicks Run in the pane or on the ribbon (A2 K1; the
+        // configure-then-run contract since f5ade12).
 
         // Multivariate / system modeling
         public void OnVar(IRibbonControl control)
@@ -287,25 +288,9 @@ namespace TSL.AddIn
 
         // Kronos needs its own torch environment, which exists only where it was
         // built (the owner's machine). Hide Bespoke > Kronos Forecast wherever it is
-        // absent. MIRRORS engine/techniques/kronos_forecast/_dispatch.py KRONOS_PYTHON
-        // (TSL_KRONOS_PYTHON, else the default below) - keep the two in step. The
-        // engine inherits Excel's environment (EngineClient does not override this
-        // variable), so the add-in sees the same value the engine will. Evaluated
-        // when the ribbon loads.
-        private const string KronosDefaultPython = @"C:\KronosDev\venv-kronos\Scripts\python.exe";
-
-        public bool OnKronosGetVisible(IRibbonControl control)
-        {
-            try
-            {
-                var path = Environment.GetEnvironmentVariable("TSL_KRONOS_PYTHON") ?? KronosDefaultPython;
-                return File.Exists(path);
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        // absent, by the test the Technique Explorer shares (KronosEnvironment).
+        // Evaluated when the ribbon loads.
+        public bool OnKronosGetVisible(IRibbonControl control) => KronosEnvironment.IsAvailable();
 
         public void OnKronosRun(IRibbonControl control)
         {
@@ -321,9 +306,10 @@ namespace TSL.AddIn
 
         /// <summary>
         /// A Bespoke tool's Run view could not be opened in the task pane (house dialog;
-        /// <paramref name="tool"/> is its Bespoke menu label).
+        /// <paramref name="tool"/> is its Bespoke menu label). Also used when the Technique
+        /// Explorer's Configure &amp; Run opens a Bespoke tool.
         /// </summary>
-        private static void ReportOpenFailure(string tool, Exception ex)
+        internal static void ReportOpenFailure(string tool, Exception ex)
         {
             Logger.Error($"Opening {tool} in the task pane failed.", ex);
             HouseDialog.ShowHouseAlert(
@@ -573,7 +559,7 @@ namespace TSL.AddIn
 
         public void OnCancel(IRibbonControl control)
         {
-            AddIn.Engine?.CancelCurrentRun();
+            TaskPaneManager.CancelFromRibbon();
         }
 
         public void OnRerunThorough(IRibbonControl control)

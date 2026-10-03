@@ -68,6 +68,13 @@ namespace TSL.AddIn
         // Incremented by every cancel. A start that sees it change was cancelled.
         private int _cancelGeneration;
 
+        // Runs between RunAsync's start and its return (task pane and worksheet functions
+        // alike), so the ribbon's Cancel can tell "something is running" from "nothing is".
+        private int _runsInFlight;
+
+        /// <summary>True while any run (task pane or worksheet function) is in RunAsync.</summary>
+        internal bool HasRunsInFlight => Volatile.Read(ref _runsInFlight) > 0;
+
         // Inter-message (heartbeat) timeout for the response read. It is RESET by
         // EVERY message the engine sends (each progress event proves liveness),
         // so total runtime is unbounded as long as progress keeps flowing — long
@@ -481,6 +488,19 @@ namespace TSL.AddIn
         /// Streams progress events via the ProgressReceived event.
         /// </summary>
         public async Task<RunResponse> RunAsync(RunRequest request, CancellationToken ct = default)
+        {
+            Interlocked.Increment(ref _runsInFlight);
+            try
+            {
+                return await RunCoreAsync(request, ct);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _runsInFlight);
+            }
+        }
+
+        private async Task<RunResponse> RunCoreAsync(RunRequest request, CancellationToken ct)
         {
             _currentRunCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 

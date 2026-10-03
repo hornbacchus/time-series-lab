@@ -209,6 +209,27 @@ namespace TSL.UI.ViewModels
             set => SetProperty(ref _workbookInputMode, value);
         }
 
+        private string _inputWorkbookName;
+        /// <summary>
+        /// WORKBOOK-INPUT techniques: the workbook Run reads, set by the AddIn layer
+        /// (A2 U6, B7: the workbook the Run view was set up for, never whichever workbook
+        /// is active at the click). Null when none was active at set-up.
+        /// </summary>
+        public string InputWorkbookName
+        {
+            get => _inputWorkbookName;
+            set
+            {
+                if (SetProperty(ref _inputWorkbookName, value))
+                    OnPropertyChanged(nameof(InputWorkbookDisplay));
+            }
+        }
+
+        public string InputWorkbookDisplay =>
+            string.IsNullOrEmpty(_inputWorkbookName)
+                ? "No workbook was active when this was set up. Run uses the workbook that is active when Run is clicked."
+                : _inputWorkbookName;
+
         private bool _isRunning;
         public bool IsRunning
         {
