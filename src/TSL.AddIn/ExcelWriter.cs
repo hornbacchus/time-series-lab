@@ -107,6 +107,18 @@ namespace TSL.AddIn
         /// leave it open/active for the user.
         /// </summary>
         public static WriteResult WriteRunResult(RunRequest request, RunResponse response)
+            => WriteRunResult(request, response, TSL.UI.ResultsDestinations.NewWorkbook);
+
+        /// <summary>
+        /// Write a run's results where <paramref name="destination"/> says (A2 U7, the per-user
+        /// resultsDestination setting, read at the Run click): a new workbook, as described
+        /// above (the default), or - for selection techniques - the workbook that holds the
+        /// data, appended and never saved. In both modes a data workbook inside the add-in's own
+        /// folder (the install folder; in a development tree, the repository) sends the results
+        /// to a new workbook in Documents\Time Series Lab instead (K4), and so does a data
+        /// workbook that was never saved.
+        /// </summary>
+        internal static WriteResult WriteRunResult(RunRequest request, RunResponse response, string destination)
         {
             var writeResult = new WriteResult();
 
@@ -146,14 +158,34 @@ namespace TSL.AddIn
                 }
                 catch { /* keep default */ }
 
-                // Unsaved input workbook (never saved → no Path on disk). Fall
-                // back to the user's Documents folder so the results still land
-                // somewhere clean and reachable, and tell the user where.
-                bool usedFallbackFolder = false;
-                if (string.IsNullOrEmpty(inputDir))
+                // The add-in's own folder never receives results (A2 U7, K4), in either
+                // destination mode.
+                if (IsInsideAddInFolder(inputDir, inputName, AddInLayout.Root))
                 {
-                    inputDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                    usedFallbackFolder = true;
+                    writeResult.UsedInstallTreeGuard = true;
+                    Logger.Info($"The data workbook is inside the add-in's folder ({inputDir}); " +
+                                "the results go to a new workbook in Documents\\Time Series Lab.");
+                }
+                else if (string.Equals(destination, TSL.UI.ResultsDestinations.SameWorkbook, StringComparison.Ordinal))
+                {
+                    var dataWb = FindOpenWorkbook(app, request?.SourceWorkbookName);
+                    if (dataWb != null)
+                        return WriteIntoWorkbook(app, dataWb, request, response, writeResult, inputName);
+                    // The data workbook was closed during the run: a new workbook instead.
+                    writeResult.SameWorkbookUnavailable = true;
+                    Logger.Info($"Same workbook: {request?.SourceWorkbookName ?? "(unknown)"} is no longer open; " +
+                                "the results go to a new workbook.");
+                }
+
+                // Unsaved input workbook (never saved → no Path on disk), or one inside the
+                // add-in's folder: Documents\Time Series Lab (A2 U7, Q5; it was the Documents
+                // root before), where template working copies already go. Tell the user where.
+                bool usedFallbackFolder = false;
+                if (writeResult.UsedInstallTreeGuard || string.IsNullOrEmpty(inputDir))
+                {
+                    usedFallbackFolder = !writeResult.UsedInstallTreeGuard;
+                    inputDir = UserDocumentsFolder();
+                    System.IO.Directory.CreateDirectory(inputDir);
                 }
 
                 var targetPath = BuildOutputPath(inputDir, inputBaseName);
@@ -308,6 +340,119 @@ namespace TSL.AddIn
                 counter++;
             }
             return path;
+        }
+
+        /// <summary>Documents\Time Series Lab: template working copies, run archives, and results
+        /// whose data workbook was never saved or lies in the add-in's own folder.</summary>
+        internal static string UserDocumentsFolder() =>
+            System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Time Series Lab");
+
+        /// <summary>
+        /// Whether a workbook named <paramref name="fileName"/> in folder <paramref name="dir"/>
+        /// lies inside the add-in's own folder <paramref name="root"/> (A2 U7, K4): the install
+        /// folder, or in a development tree the repository. Local paths are compared in full,
+        /// with a trailing separator, ignoring case. A workbook in a OneDrive-synced folder can
+        /// report an https URL as its folder; it counts as inside when the URL's path below a
+        /// folder named as the root folder is named leads to this same file under the root.
+        /// </summary>
+        internal static bool IsInsideAddInFolder(string dir, string fileName, string root,
+            Func<string, bool> fileExists = null)
+        {
+            if (string.IsNullOrEmpty(dir) || string.IsNullOrEmpty(root)) return false;
+            fileExists = fileExists ?? System.IO.File.Exists;
+            try
+            {
+                var rootFull = System.IO.Path.GetFullPath(root).TrimEnd('\\', '/') + "\\";
+                if (dir.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                    dir.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (string.IsNullOrEmpty(fileName)) return false;
+                    var segments = new Uri(dir).AbsolutePath
+                        .Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(Uri.UnescapeDataString).ToArray();
+                    var rootName = new System.IO.DirectoryInfo(rootFull.TrimEnd('\\')).Name;
+                    for (int j = 0; j < segments.Length; j++)
+                    {
+                        if (!string.Equals(segments[j], rootName, StringComparison.OrdinalIgnoreCase)) continue;
+                        var rest = string.Join("\\", segments.Skip(j + 1));
+                        if (fileExists(System.IO.Path.Combine(rootFull, rest, fileName))) return true;
+                    }
+                    return false;
+                }
+                var dirFull = System.IO.Path.GetFullPath(dir).TrimEnd('\\', '/') + "\\";
+                return dirFull.StartsWith(rootFull, StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>The open workbook named <paramref name="name"/> (Excel names are unique), or null.</summary>
+        private static Workbook FindOpenWorkbook(Application app, string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            foreach (Workbook wb in app.Workbooks)
+            {
+                try { if (string.Equals(wb.Name, name, StringComparison.OrdinalIgnoreCase)) return wb; }
+                catch { /* skip */ }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// "Same workbook" (A2 U7): append the Results and Audit sheets and the run record to
+        /// the workbook that holds the data, and leave it unsaved. On a failure, the sheets
+        /// already added are listed so the task pane can name them.
+        /// </summary>
+        private static WriteResult WriteIntoWorkbook(Application app, Workbook wb, RunRequest request,
+            RunResponse response, WriteResult writeResult, string inputName)
+        {
+            var before = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            try { foreach (Worksheet s in wb.Worksheets) before.Add(s.Name); } catch { /* best effort */ }
+            try { writeResult.AddedToWorkbook = wb.Name; } catch { writeResult.AddedToWorkbook = inputName; }
+
+            app.ScreenUpdating = false;
+            try
+            {
+                writeResult.ResultSheetName = WriteResultsSheet(wb, request, response, null);
+                writeResult.AuditSheetName = WriteAuditSheet(wb, request, response, null, inputName);
+                EmbedJsonRunRecord(wb, request, response);
+
+                // Land the user on the new Results sheet.
+                try
+                {
+                    wb.Activate();
+                    var resultsSheet = (Worksheet)wb.Worksheets[writeResult.ResultSheetName];
+                    resultsSheet.Activate();
+                    ((Range)resultsSheet.Cells[1, 1]).Select();
+                }
+                catch (Exception activateEx)
+                {
+                    Logger.Info($"Could not activate results sheet: {activateEx.Message}");
+                }
+
+                try { writeResult.WorkbookFullName = wb.FullName; } catch { /* keep null */ }
+                writeResult.Success = true;
+                Logger.Info($"Results added to the data workbook {writeResult.AddedToWorkbook} (not saved).");
+            }
+            catch (Exception ex)
+            {
+                writeResult.ErrorMessage = ex.Message;
+                try
+                {
+                    foreach (Worksheet s in wb.Worksheets)
+                        if (!before.Contains(s.Name) && !string.Equals(s.Name, RunsSheetName, StringComparison.Ordinal))
+                            writeResult.SheetsAddedBeforeFailure.Add(s.Name);
+                }
+                catch { /* best effort */ }
+                Logger.Error("Writing the results into the data workbook failed.", ex);
+            }
+            finally
+            {
+                app.ScreenUpdating = true;
+            }
+            return writeResult;
         }
 
         private static string WriteResultsSheet(Workbook wb, RunRequest request, RunResponse response,
@@ -838,9 +983,7 @@ namespace TSL.AddIn
                 if (AddInLayout.Kind == LayoutKind.Development)
                     dir = System.IO.Path.Combine(AddInLayout.Root, "output", folder);   // gitignored run exhaust
                 else if (AddInLayout.Kind == LayoutKind.Installed)
-                    dir = System.IO.Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                        "Time Series Lab", folder);
+                    dir = System.IO.Path.Combine(UserDocumentsFolder(), folder);
                 else
                 {
                     Logger.Info($"Run archive skipped ({techniqueId}): add-in layout not recognised ({AddInLayout.XllPath}).");
@@ -1018,8 +1161,8 @@ namespace TSL.AddIn
             public string OutputPath { get; set; }
 
             /// <summary>True when the input workbook had never been saved, so the
-            /// results were written to the user's Documents folder instead of
-            /// next to the input.</summary>
+            /// results were written to Documents\Time Series Lab instead of next
+            /// to the input.</summary>
             public bool UsedFallbackFolder { get; set; }
 
             /// <summary>Non-fatal warning when the results workbook was created
@@ -1029,6 +1172,21 @@ namespace TSL.AddIn
             /// <summary>The workbook the results were written to, as Excel names it
             /// (FullName: the saved path, or "Book2" when it could not be saved).</summary>
             public string WorkbookFullName { get; set; }
+
+            /// <summary>"Same workbook" (A2 U7): the data workbook the results were added to
+            /// (or were being added to, on a failure). Null for a new results workbook.</summary>
+            public string AddedToWorkbook { get; set; }
+
+            /// <summary>"Same workbook" failed part-way: the sheets it had already added.</summary>
+            public List<string> SheetsAddedBeforeFailure { get; } = new List<string>();
+
+            /// <summary>The data workbook lies inside the add-in's own folder, so the results
+            /// went to Documents\Time Series Lab instead (A2 U7, K4).</summary>
+            public bool UsedInstallTreeGuard { get; set; }
+
+            /// <summary>"Same workbook" was chosen, but the data workbook was closed during
+            /// the run, so the results went to a new workbook.</summary>
+            public bool SameWorkbookUnavailable { get; set; }
         }
     }
 }

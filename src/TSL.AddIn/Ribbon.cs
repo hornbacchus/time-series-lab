@@ -136,6 +136,30 @@ namespace TSL.AddIn
         public void OnRibbonLoad(IRibbonUI ribbonUi)
         {
             _ribbonUi = ribbonUi;
+            s_ribbonUi = ribbonUi;
+        }
+
+        // The ribbon, for refreshes that start outside a ribbon callback (A2 U7: the task
+        // pane's Settings view changes the preset).
+        private static IRibbonUI s_ribbonUi;
+
+        /// <summary>
+        /// Redraw the Preset menu's label and check marks after the preset changed elsewhere
+        /// (the task pane's Settings view). Cosmetic: a failure is logged only.
+        /// </summary>
+        internal static void RefreshPresetControls()
+        {
+            try
+            {
+                s_ribbonUi?.InvalidateControl("menuPreset");
+                s_ribbonUi?.InvalidateControl("btnPresetFast");
+                s_ribbonUi?.InvalidateControl("btnPresetBalanced");
+                s_ribbonUi?.InvalidateControl("btnPresetThorough");
+            }
+            catch (Exception ex)
+            {
+                Logger.Info($"Could not refresh the Preset menu: {ex.Message}");
+            }
         }
 
         // ── Quick Actions ──────────────────────────────────────────────

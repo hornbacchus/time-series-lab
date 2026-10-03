@@ -1,97 +1,117 @@
+using System;
+using System.Collections.Generic;
 using System.Windows.Input;
 using TSL.UI.Helpers;
 
 namespace TSL.UI.ViewModels
 {
     /// <summary>
-    /// ViewModel for the Settings view. Exposes engine path, preset default,
-    /// and other configuration that persists via SettingsManager on the AddIn side.
+    /// ViewModel for the Settings view (A2 U7, ratification Q7): only the settings that
+    /// change how Time Series Lab works - the preset and where results go - read from and
+    /// saved to the per-user settings through <see cref="ISettingsStore"/>.
     /// </summary>
     public class SettingsViewModel : ViewModelBase
     {
-        private string _enginePath = "";
-        public string EnginePath
+        private readonly ISettingsStore _store;
+        private bool _loading;
+
+        /// <summary>
+        /// The opt-in question for "Same workbook" (ShowChoice2: 1 = first button, 2 =
+        /// second, 0 = Cancel). Replaceable so the logic can be exercised without a dialog.
+        /// </summary>
+        public Func<string, string, string, string, int> AskChoice2 { get; set; } = HouseDialog.ShowChoice2;
+
+        // Shown when "Same workbook" is chosen (A2 Part 4(iv), ratified wording).
+        internal const string SameWorkbookQuestion =
+            "Results can be added to the workbook that holds the data instead of a new workbook.\n\n" +
+            "If AutoSave is on for that workbook, Excel saves the new Results, Audit and hidden " +
+            "run-record sheets into the file at once, and Undo cannot remove them.\n\n" +
+            "New workbook = keep the data workbook unchanged (the default)\n" +
+            "Same workbook = add the results to the data workbook";
+
+        public IReadOnlyList<string> Presets { get; } = new[] { "Fast", "Balanced", "Thorough" };
+
+        public ICommand ChooseNewWorkbookCommand { get; }
+        public ICommand ChooseSameWorkbookCommand { get; }
+
+        /// <summary>Design-time constructor: no store, nothing is saved.</summary>
+        public SettingsViewModel() : this(null) { }
+
+        public SettingsViewModel(ISettingsStore store)
         {
-            get => _enginePath;
-            set => SetProperty(ref _enginePath, value);
+            _store = store;
+            ChooseNewWorkbookCommand = new RelayCommand(() => ChooseDestination(sameWorkbook: false));
+            ChooseSameWorkbookCommand = new RelayCommand(() => ChooseDestination(sameWorkbook: true));
+            Reload();
         }
 
-        private string _defaultPreset = "Balanced";
-        public string DefaultPreset
+        private string _preset = "Balanced";
+        /// <summary>The preset; a change made here is saved and shown on the ribbon.</summary>
+        public string Preset
         {
-            get => _defaultPreset;
-            set => SetProperty(ref _defaultPreset, value);
+            get => _preset;
+            set
+            {
+                if (string.IsNullOrEmpty(value)) return;
+                if (SetProperty(ref _preset, value) && !_loading)
+                    _store?.SetPreset(value);
+            }
         }
 
-        private bool _autoDetectFrequency = true;
-        public bool AutoDetectFrequency
+        private bool _sameWorkbook;
+        public bool UseNewWorkbook => !_sameWorkbook;
+        public bool UseSameWorkbook => _sameWorkbook;
+
+        /// <summary>Read both settings again (each time the view is shown).</summary>
+        public void Reload()
         {
-            get => _autoDetectFrequency;
-            set => SetProperty(ref _autoDetectFrequency, value);
+            _loading = true;
+            try
+            {
+                Preset = _store?.GetPreset() ?? "Balanced";
+                _sameWorkbook = string.Equals(_store?.GetResultsDestination(), ResultsDestinations.SameWorkbook,
+                    StringComparison.Ordinal);
+            }
+            finally
+            {
+                _loading = false;
+            }
+            RaiseDestination();
         }
 
-        private bool _showFormulaHints = true;
-        public bool ShowFormulaHints
+        /// <summary>The preset changed elsewhere (the ribbon): show it, save nothing.</summary>
+        public void SyncPreset(string preset)
         {
-            get => _showFormulaHints;
-            set => SetProperty(ref _showFormulaHints, value);
+            _loading = true;
+            try { Preset = preset; }
+            finally { _loading = false; }
         }
 
-        private bool _createSeparateSheets = true;
-        public bool CreateSeparateSheets
+        /// <summary>
+        /// A radio button was clicked. "Same workbook" is saved only after the opt-in
+        /// question is answered "Same workbook"; any other answer keeps "New workbook".
+        /// </summary>
+        private void ChooseDestination(bool sameWorkbook)
         {
-            get => _createSeparateSheets;
-            set => SetProperty(ref _createSeparateSheets, value);
+            if (sameWorkbook && !_sameWorkbook)
+            {
+                int answer = AskChoice2(SameWorkbookQuestion, HouseDialog.Title("Settings"),
+                    "New workbook", "Same workbook");
+                if (answer != 2) sameWorkbook = false;
+            }
+            if (sameWorkbook != _sameWorkbook)
+            {
+                _sameWorkbook = sameWorkbook;
+                _store?.SetResultsDestination(sameWorkbook ? ResultsDestinations.SameWorkbook : ResultsDestinations.NewWorkbook);
+            }
+            // Always: a radio button the question turned down snaps back.
+            RaiseDestination();
         }
 
-        private string _engineVersion = "Checking...";
-        public string EngineVersion
+        private void RaiseDestination()
         {
-            get => _engineVersion;
-            set => SetProperty(ref _engineVersion, value);
-        }
-
-        private string _statusMessage = "";
-        public string StatusMessage
-        {
-            get => _statusMessage;
-            set => SetProperty(ref _statusMessage, value);
-        }
-
-        public ICommand BrowseEnginePathCommand { get; }
-        public ICommand ResetDefaultsCommand { get; }
-        public ICommand CheckEngineCommand { get; }
-
-        public SettingsViewModel()
-        {
-            BrowseEnginePathCommand = new RelayCommand(OnBrowseEnginePath);
-            ResetDefaultsCommand = new RelayCommand(OnResetDefaults);
-            CheckEngineCommand = new RelayCommand(OnCheckEngine);
-        }
-
-        // These three controls change nothing outside this page (A2 N8; the Settings view is
-        // rebuilt around real settings in A2 U7). Until then each says what is actually true
-        // (house style: nothing reads as an action that did not happen).
-        private void OnBrowseEnginePath()
-        {
-            StatusMessage = "Time Series Lab finds its engine by itself, so there is no path to set. " +
-                            "Help > About shows the engine in use.";
-        }
-
-        private void OnResetDefaults()
-        {
-            DefaultPreset = "Balanced";
-            AutoDetectFrequency = true;
-            ShowFormulaHints = true;
-            CreateSeparateSheets = true;
-            StatusMessage = "This page shows its default values again. Nothing was saved: these settings do not " +
-                            "change how runs work yet. To choose the preset, use the Preset menu in the Run group.";
-        }
-
-        private void OnCheckEngine()
-        {
-            StatusMessage = "Nothing was checked: the engine is checked each time a run starts. " +
-                            "Help > About shows whether it is running.";
+            OnPropertyChanged(nameof(UseNewWorkbook));
+            OnPropertyChanged(nameof(UseSameWorkbook));
         }
     }
 }

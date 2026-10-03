@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
              d:DesignWidth="260" d:DesignHeight="650"
              Background="#FFFFFF">
@@ -82,78 +81,44 @@
             <Setter Property="Foreground" Value="#424242" />
             <Setter Property="Margin" Value="0,0,0,4" />
         </Style>
+        <Style x:Key="SettingNote" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{StaticResource SubtleTextBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="12,8">
 
-            <!-- ── Engine ─────────────────────────────────────────── -->
-            <TextBlock Text="ENGINE" Style="{StaticResource SectionHeader}" />
+            <!-- Only settings that change how Time Series Lab works (A2 U7, ratification Q7):
+                 the preset and where results go, saved per user in config.json. -->
 
-            <TextBlock Text="Engine Path" Style="{StaticResource SettingLabel}" />
-            <DockPanel Margin="0,0,0,8">
-                <Button DockPanel.Dock="Right" Content="Browse" Padding="8,4"
-                        FontSize="11" Margin="6,0,0,0"
-                        Background="Transparent" BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1" Cursor="Hand"
-                        Command="{Binding BrowseEnginePathCommand}" />
-                <TextBox Text="{Binding EnginePath, UpdateSourceTrigger=PropertyChanged}"
-                         Padding="6,4" FontSize="11" FontFamily="Consolas"
-                         BorderBrush="{StaticResource BorderBrush}" />
-            </DockPanel>
+            <!-- ── Preset ─────────────────────────────────────────── -->
+            <TextBlock Text="PRESET" Style="{StaticResource SectionHeader}" />
+            <ComboBox Margin="0,0,0,6" FontSize="12" Padding="6,4"
+                      ItemsSource="{Binding Presets}"
+                      SelectedItem="{Binding Preset, Mode=TwoWay}" />
+            <TextBlock Text="The same choice as the Preset menu in the Run group."
+                       Style="{StaticResource SettingNote}" />
 
-            <DockPanel Margin="0,0,0,4">
-                <TextBlock Text="Engine version: " FontSize="11" Foreground="#424242" />
-                <TextBlock Text="{Binding EngineVersion}" FontSize="11" FontWeight="SemiBold"
-                           Foreground="{StaticResource AccentBrush}" />
-            </DockPanel>
-
-            <Button Content="Check Engine" Style="{StaticResource OutlineButton}"
-                    Command="{Binding CheckEngineCommand}"
-                    HorizontalAlignment="Left" Padding="10,5" FontSize="11"
-                    Margin="0,0,0,8" />
-
-            <!-- ── Defaults ───────────────────────────────────────── -->
-            <TextBlock Text="DEFAULTS" Style="{StaticResource SectionHeader}" />
-
-            <TextBlock Text="Default Preset" Style="{StaticResource SettingLabel}" />
-            <ComboBox Margin="0,0,0,8" FontSize="12" Padding="6,4"
-                      SelectedItem="{Binding DefaultPreset}">
-                <sys:String>Fast</sys:String>
-                <sys:String>Balanced</sys:String>
-                <sys:String>Thorough</sys:String>
-            </ComboBox>
-
-            <CheckBox Content="Auto-detect frequency" IsChecked="{Binding AutoDetectFrequency}"
-                      FontSize="12" Margin="0,0,0,6" />
-            <CheckBox Content="Show formula hints in IntelliSense" IsChecked="{Binding ShowFormulaHints}"
-                      FontSize="12" Margin="0,0,0,6" />
-            <CheckBox Content="Create separate output sheets" IsChecked="{Binding CreateSeparateSheets}"
-                      FontSize="12" Margin="0,0,0,12" />
-
-            <!-- ── Actions ────────────────────────────────────────── -->
-            <TextBlock Text="ACTIONS" Style="{StaticResource SectionHeader}" />
-
-            <Button Content="Reset to Defaults" Style="{StaticResource OutlineButton}"
-                    Command="{Binding ResetDefaultsCommand}"
-                    HorizontalAlignment="Left" Margin="0,0,0,12" />
-
-            <!-- ── Status ─────────────────────────────────────────── -->
-            <Border Background="{StaticResource CategoryBgBrush}" CornerRadius="4"
-                    Padding="10,8" Margin="0,8,0,0">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding StatusMessage}" Value="">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="#424242"
-                           TextWrapping="Wrap" />
-            </Border>
+            <!-- ── Results destination ────────────────────────────── -->
+            <TextBlock Text="RESULTS DESTINATION" Style="{StaticResource SectionHeader}" />
+            <RadioButton GroupName="ResultsDestination" Content="New workbook (the default)"
+                         IsChecked="{Binding UseNewWorkbook, Mode=OneWay}"
+                         Command="{Binding ChooseNewWorkbookCommand}"
+                         FontSize="12" Margin="0,0,0,6" />
+            <RadioButton GroupName="ResultsDestination" Content="Same workbook as the data"
+                         IsChecked="{Binding UseSameWorkbook, Mode=OneWay}"
+                         Command="{Binding ChooseSameWorkbookCommand}"
+                         FontSize="12" Margin="0,0,0,8" />
+            <TextBlock Text="New workbook: the results of each run go to a new workbook saved next to the data workbook. The data workbook is not changed."
+                       Style="{StaticResource SettingNote}" />
+            <TextBlock Text="Same workbook: the Results and Audit sheets of each run are added to the workbook that holds the data. That workbook is not saved."
+                       Style="{StaticResource SettingNote}" />
+            <TextBlock Text="Bond Yield Forecast, Breakeven Payrolls and Kronos Forecast always put their results in a new workbook."
+                       Style="{StaticResource SettingNote}" />
 
         </StackPanel>
     </ScrollViewer>

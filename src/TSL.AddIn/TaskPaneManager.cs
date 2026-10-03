@@ -853,7 +853,10 @@ namespace TSL.AddIn
 
         private static void RememberResultsWorkbook(ExcelWriter.WriteResult writeResult)
         {
-            if (writeResult != null && writeResult.Success && !string.IsNullOrEmpty(writeResult.WorkbookFullName))
+            // A new results workbook only: results added to the data workbook ("Same
+            // workbook", A2 U7) leave it the data workbook it was.
+            if (writeResult != null && writeResult.Success && string.IsNullOrEmpty(writeResult.AddedToWorkbook) &&
+                !string.IsNullOrEmpty(writeResult.WorkbookFullName))
                 _resultsWorkbooks.Add(writeResult.WorkbookFullName);
         }
 
@@ -977,6 +980,9 @@ namespace TSL.AddIn
             try
             {
                 _hostControl = new TSL.UI.TaskPaneHostControl();
+
+                // The Settings view reads and writes config.json through this (A2 U7).
+                _hostControl.ViewModel.SettingsStore = new SettingsStoreAdapter();
 
                 // Wire the RunRequested event to extract selection and run the engine
                 _hostControl.ViewModel.RunRequested += OnRunRequested;
@@ -1376,6 +1382,9 @@ namespace TSL.AddIn
                 Logger.Info($"Could not capture source workbook identity: {wbEx.Message}");
             }
 
+            // Where the results go (A2 U7), as set when Run was clicked.
+            var destination = AddIn.Settings?.GetResultsDestination() ?? ResultsDestinations.NewWorkbook;
+
             var request = new RunRequest
             {
                 RunId = $"pane_{Guid.NewGuid():N}",
@@ -1492,7 +1501,7 @@ namespace TSL.AddIn
                             ExcelWriter.WriteResult writeResult = null;
                             try
                             {
-                                writeResult = ExcelWriter.WriteRunResult(request, response);
+                                writeResult = ExcelWriter.WriteRunResult(request, response, destination);
                                 RememberResultsWorkbook(writeResult);
                             }
                             catch (Exception writeEx)
@@ -1581,12 +1590,36 @@ namespace TSL.AddIn
             if (writeResult == null || !writeResult.Success)
             {
                 var detail = writeResult?.ErrorMessage;
+                var errorBlock = string.IsNullOrWhiteSpace(detail)
+                    ? "The log has the details:\n" + HouseDialog.Indent(LogsFolder)
+                    : HouseDialog.ErrorBlock(detail);
+                if (!string.IsNullOrEmpty(writeResult?.AddedToWorkbook))
+                {
+                    // "Same workbook" (A2 U7): say what was left in the data workbook.
+                    var added = writeResult.SheetsAddedBeforeFailure;
+                    if (added.Count > 0)
+                    {
+                        runVm.FailRun(
+                            "The analysis finished, but its results could not all be added to the workbook that holds the data. " +
+                            "That workbook has not been saved, and the sheets added to it may be incomplete:\n" +
+                            string.Join("\n", added.Select(HouseDialog.Indent)) + "\n\n" +
+                            errorBlock + "\n\n" +
+                            "Delete those sheets, then click Run to try again. If this message returns, tell Matthew Hornbach.");
+                    }
+                    else
+                    {
+                        runVm.FailRun(
+                            "The analysis finished, but its results could not be added to the workbook that holds the data. " +
+                            "Nothing was changed.\n\n" +
+                            errorBlock + "\n\n" +
+                            "Click Run to try again. If this message returns, tell Matthew Hornbach.");
+                    }
+                    return;
+                }
                 runVm.FailRun(
                     "The analysis finished, but its results could not be written to Excel. " +
                     "The data workbook was not changed; if a new results workbook opened, it is incomplete and was not saved.\n\n" +
-                    (string.IsNullOrWhiteSpace(detail)
-                        ? "The log has the details:\n" + HouseDialog.Indent(LogsFolder)
-                        : HouseDialog.ErrorBlock(detail)) + "\n\n" +
+                    errorBlock + "\n\n" +
                     "Click Run to try again. If this message returns, tell Matthew Hornbach.");
                 return;
             }
@@ -1608,14 +1641,33 @@ namespace TSL.AddIn
 
             var summary = HouseDialog.Ascii(string.IsNullOrWhiteSpace(response.PlainEnglishSummary)
                 ? "The run completed." : response.PlainEnglishSummary.Trim());
-            if (!string.IsNullOrEmpty(writeResult.OutputPath))
+            if (!string.IsNullOrEmpty(writeResult.AddedToWorkbook))
+            {
+                // "Same workbook" (A2 U7): added to the data workbook, which is not saved.
+                summary += "\n\nResults were added to the workbook that holds the data:\n" +
+                           HouseDialog.Indent(writeResult.AddedToWorkbook) +
+                           "\n\nThe workbook has not been saved.";
+            }
+            else if (!string.IsNullOrEmpty(writeResult.OutputPath) && writeResult.UsedInstallTreeGuard)
+            {
+                // The data workbook lies in the add-in's own folder (A2 U7, K4).
+                summary += "\n\nThe data workbook is inside the Time Series Lab program folder, " +
+                           "so the results were saved to Documents instead:\n" + HouseDialog.Indent(writeResult.OutputPath) +
+                           "\n\nThe data workbook was not changed.";
+            }
+            else if (!string.IsNullOrEmpty(writeResult.OutputPath) && writeResult.SameWorkbookUnavailable)
+            {
+                summary += "\n\nThe data workbook was closed before the results could be added to it, " +
+                           "so they were saved to a new workbook instead:\n" + HouseDialog.Indent(writeResult.OutputPath);
+            }
+            else if (!string.IsNullOrEmpty(writeResult.OutputPath))
             {
                 // Results go to a SEPARATE workbook - the input workbook is never
                 // modified. Tell the user where.
                 summary += "\n\nThe results were saved to a new workbook:\n" + HouseDialog.Indent(writeResult.OutputPath) +
                            "\n\nThe data workbook was not changed." +
                            (writeResult.UsedFallbackFolder
-                               ? " It has never been saved, so the results went to the Documents folder."
+                               ? " It has never been saved, so the results went to Documents\\Time Series Lab."
                                : "");
             }
             else if (!string.IsNullOrEmpty(writeResult.SaveWarning))

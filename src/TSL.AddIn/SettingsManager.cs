@@ -69,6 +69,29 @@ namespace TSL.AddIn
             Save();
         }
 
+        /// <summary>
+        /// Where a selection technique's results go (A2 U7): "NewWorkbook" (the default, and
+        /// the value when the key is absent or unrecognized) or "SameWorkbook".
+        /// </summary>
+        public string GetResultsDestination()
+        {
+            string value = null;
+            try { value = _data.Value<string>("resultsDestination"); }
+            catch { /* not a string: the default */ }
+            return string.Equals(value, TSL.UI.ResultsDestinations.SameWorkbook, StringComparison.OrdinalIgnoreCase)
+                ? TSL.UI.ResultsDestinations.SameWorkbook
+                : TSL.UI.ResultsDestinations.NewWorkbook;
+        }
+
+        public void SetResultsDestination(string destination)
+        {
+            _data["resultsDestination"] =
+                string.Equals(destination, TSL.UI.ResultsDestinations.SameWorkbook, StringComparison.Ordinal)
+                    ? TSL.UI.ResultsDestinations.SameWorkbook
+                    : TSL.UI.ResultsDestinations.NewWorkbook;
+            Save();
+        }
+
         public int GetDefaultSeed() => _data.Value<int?>("defaultSeed") ?? 42;
 
         public void SetDefaultSeed(int seed)

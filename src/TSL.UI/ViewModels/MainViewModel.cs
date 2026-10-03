@@ -86,6 +86,7 @@ namespace TSL.UI.ViewModels
                     // Propagate to child VMs that care
                     if (_runVm != null) _runVm.Preset = value;
                     if (_explorerVm != null) _explorerVm.CurrentPreset = value;
+                    _settingsVm?.SyncPreset(value);
                 }
             }
         }
@@ -228,9 +229,17 @@ namespace TSL.UI.ViewModels
 
         public void NavigateToSettings()
         {
-            CurrentView = GetOrCreateSettings();
+            var vm = GetOrCreateSettings();
+            vm.Reload();
+            CurrentView = vm;
             CurrentViewTitle = "Settings";
         }
+
+        /// <summary>
+        /// The per-user settings the Settings view reads and writes (A2 U7). Set by the AddIn
+        /// layer when it creates the pane, before the Settings view is first shown.
+        /// </summary>
+        public ISettingsStore SettingsStore { get; set; }
 
         public void NavigateToUdfBrowser()
         {
@@ -387,7 +396,7 @@ namespace TSL.UI.ViewModels
         {
             if (_settingsVm == null)
             {
-                _settingsVm = new SettingsViewModel();
+                _settingsVm = new SettingsViewModel(SettingsStore);
             }
             return _settingsVm;
         }
