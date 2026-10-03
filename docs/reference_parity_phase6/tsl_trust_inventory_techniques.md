@@ -315,6 +315,22 @@ the 4 covered (ols/wls_variance/mint_shrinkage/mint_sample) not
 in parity scope; **requires expert review for hierarchies
 larger than 2 levels or non-standard summing matrices.**
 
+**H1 CI-and-gate hygiene record (harness commit `b402d0f`, 2026-09-30).** The check's
+Python `hierarchicalforecast` cross-package arm (the secondary reference) NEVER RAN in the
+harness: the Phase 1 audit script's HF call was ported as `reconcile(S=<numpy>,
+tags=<indices>)`, which no hierarchicalforecast 1.5.x release accepts, so it raised
+`TypeError` on every run - under the validated 1.5.1 as well as CI's drifted 1.5.3 - while
+`compare()` still reported PASS (the error stayed in diagnostics). The R `hts` primary arm ran
+throughout, so in the harness the VALIDATED status above rested on hts alone; the HF evidence
+was the Phase 1 audit script's own comparison. Repaired at `b402d0f` (the 1.5.x API: an `S_df`
+DataFrame and tags by series name): TSL vs HF reproduces the Phase 1 figures digit for digit,
+max abs **4.4e-16 / 2.2e-16 / 2.2e-16** (ols / wls_variance / mint_shrinkage), and HF refuses
+mint_cov on the rank-deficient W (its ill-conditioning guard), as TSL now refuses mint_sample with
+the rank check Phase 1 B1 led to (`RankDeficientWMatrixError`). A reference arm that cannot
+run is now CAVEAT (an engine-arm failure ERROR), never absent under a PASS - output-level
+negative controls in `tools/reference_parity/tests/test_no_silent_arms.py`, a gate step locally
+and in CI. Validated outcome unchanged: PASS.
+
 ### transformer_forecast (attention-capture sub-component; parity wrapper 3f_transformer_attention) — Tier 1b (sub-component validation only)
 
 - **Catalog ID:** `transformer_forecast` (attention-capture sub-component only)
@@ -29697,6 +29713,20 @@ C1's ladder). ADDITIVE via the `conformal_method` selector: `"split"` (default)
 **Phase 7+ record-correction (hollow-strong audit; harness Commit `5b0c76e`).** The evidence-map "T3-verified" label on the conformal_intervals BASE was a LOCALITY error. The base `p3_conformal` check is engine-invoked + a faithful self-reimpl reference (bit-exact split-conformal pipeline) = **self-parity** (validates the engine's pipeline matches the paper formula — match-not-correctness); it has NO test set / coverage / negative control. The conformal COVERAGE correctness (the defining property) is **verified-discriminating by the cqr/enbpi SIBLINGS** (MAPIE cross-package + the mis-scaled-interval coverage control). So the conformal FAMILY is genuinely T3-verified; the BASE alone is **self-parity**. Corrected record: base = self-parity bit-exact; coverage discrimination = the cqr/enbpi siblings (family-level). An in-source coverage control on the base needs a held-out backtest (the base forecasts the future, no actuals; 5-step horizon too small) = a REDESIGN → **BANKED** as a separate unit, not done here. `p3_conformal` byte-identical (record-only correction).
 
 **Phase 7+ inert-control fix #5 — SHIPPED (engine-wiring, B-alias, Commit `9fe21a8`).** The control-surface audit found conformal_intervals' **`coverage`** dialog control (float, default 0.95) was **INERT**: the engine read `confidence_level` (which the dialog never sends) — the user's Coverage setting was silently dropped (intervals always at 0.95). **Now ENGINE-WIRED:** `confidence_level = get_param("confidence_level", get_param("coverage", 0.95))` — precedence native (THOROUGH) > `coverage` (dialog) > 0.95, at the SINGLE read point feeding all three conformal methods (split/CQR/EnbPI). ★ **Identity CONFIRMED (a clean same-quantity alias, NOT a complement/scale):** `confidence_level` IS the target coverage (the nominal interval LEVEL; the miscoverage α=1−level conversion is internal, downstream of the read); both defaults 0.95, both fractions. No catalog change (coverage honest as-is). ★ **Inverted gate:** all THREE conformal sentinels (`p3_conformal`, `p3_conformal_cqr`, `p3_conformal_enbpi`) pass `confidence_level` natively → byte-identical, all PASS unchanged; non-default **changes the intervals** (new `p3_conformal_coverage`, **DIRECTIONAL + saturation-tolerant**: higher coverage → wider — widths 1.685/2.130/2.344 for 0.90/0.95/0.99; the strict lower step catches a complement-backwards wiring, the non-strict top step tolerates only the finite-calibration quantile plateau, the hard 0.90↔0.99 spread catches an inert engine). The `catalog_key_alignment` guard **self-verified** → `coverage` left the inert set → trimmed from `KNOWN_INERT` (**33→32**). Fifth per-control fix — closes the individual B/C fixes; the remaining publish-relevant inert work is the A-rename batch + GARCH dialog completeness.
+
+**H1 CI-and-gate hygiene record (commits `e3e8907` + `b402d0f`, 2026-09-30).** In CI only, the
+MAPIE cross-package arms of `p3_conformal_cqr` and `p3_conformal_enbpi` were dead: MAPIE was
+never installed in the CI environment, so `p3_conformal_cqr` SKIPped there and
+`p3_conformal_enbpi` reported PASS with its MAPIE arm caught into a SKIP note in its metrics
+("No module named 'mapie'") that never reached the outcome. The dev interpreter carried MAPIE
+1.3.0 throughout, so both checks were dev-validated throughout with the arm running (width
+ratio 1.021 / 0.896, as recorded above). H1 pinned CI to the validated environment (`e3e8907`;
+MAPIE 1.3.0 in the harness lock, proven installed by `tools/check_pinned_env.py`) and made a
+MAPIE result that is absent from `compare()` CAVEAT, never a PASS (`b402d0f`, one line each;
+output-level negative control in `tools/reference_parity/tests/test_no_silent_arms.py`, which
+also fails on a SKIP). A MAPIE that is not installed at all still makes `p3_conformal_cqr` SKIP
+at its import; that case now fails CI through the install verification. Validated outcomes
+unchanged: both PASS.
 
 ### ENG-EXT-CONFORMAL-001 — COMPLETE (the FINAL Q2 commission)
 
