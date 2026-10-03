@@ -849,6 +849,7 @@ namespace TSL.AddIn
                 {
                     Microsoft.Office.Interop.Excel.Worksheet ws = null;
                     Microsoft.Office.Interop.Excel.Workbook newWorkbook = null;
+                    bool reused = false;
                     try
                     {
                         // Read the file before touching any workbook: a read failure leaves nothing behind.
@@ -861,7 +862,20 @@ namespace TSL.AddIn
                             wb = app.Workbooks.Add();
                             newWorkbook = wb;
                         }
-                        ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.Add();
+
+                        // An empty active sheet (a new workbook's Sheet1, say) takes the data and its
+                        // name, so no empty sheet is left beside it (the owner's request in A2 E2b S2).
+                        // Nothing is ever deleted: a sheet with anything on it gets a new sheet as before.
+                        var active = app.ActiveSheet as Microsoft.Office.Interop.Excel.Worksheet;
+                        if (active != null && IsEmptySheet(app, active))
+                        {
+                            ws = active;
+                            reused = true;
+                        }
+                        else
+                        {
+                            ws = (Microsoft.Office.Interop.Excel.Worksheet)wb.Worksheets.Add();
+                        }
 
                         // Make the sheet name unique. With per-technique sample
                         // data entries many techniques share a CSV (e.g. STL,
@@ -901,7 +915,7 @@ namespace TSL.AddIn
                     }
                     catch (Exception ex)
                     {
-                        ReportSampleDataFailure(path, ws, newWorkbook, ex);
+                        ReportSampleDataFailure(path, ws, newWorkbook, ex, reused);
                         return;
                     }
                     RestoreTab();
@@ -914,13 +928,31 @@ namespace TSL.AddIn
         }
 
         /// <summary>
+        /// A sheet with nothing on it: no value or formula in any cell, and no shape, chart or
+        /// table. Formatting alone does not count. An unreadable sheet is not empty.
+        /// </summary>
+        private static bool IsEmptySheet(Microsoft.Office.Interop.Excel.Application app,
+            Microsoft.Office.Interop.Excel.Worksheet ws)
+        {
+            try
+            {
+                return app.WorksheetFunction.CountA(ws.UsedRange) == 0 &&
+                       ws.Shapes.Count == 0 && ws.ListObjects.Count == 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// A sample-data load that failed, with what it left: nothing, a new empty workbook
         /// (<paramref name="newWorkbook"/>, made because none was active), or a new sheet that
         /// may be incomplete (in the active workbook or in that new one).
         /// </summary>
         private static void ReportSampleDataFailure(string csvPath,
             Microsoft.Office.Interop.Excel.Worksheet addedSheet,
-            Microsoft.Office.Interop.Excel.Workbook newWorkbook, Exception ex)
+            Microsoft.Office.Interop.Excel.Workbook newWorkbook, Exception ex, bool reusedEmptySheet = false)
         {
             string sheetName = null, bookName = null;
             try { sheetName = addedSheet?.Name; } catch { /* the sheet is unreadable */ }
@@ -943,6 +975,14 @@ namespace TSL.AddIn
                           HouseDialog.Indent(bookName ?? "(the workbook's name could not be read)") + "\n\n" +
                           file + error +
                           "Close that workbook without saving, then try again. " + retry;
+            }
+            else if (addedSheet != null && reusedEmptySheet)
+            {
+                message = "Time Series Lab could not finish loading the sample data into the empty active sheet, " +
+                          "which may now be incomplete:\n" +
+                          HouseDialog.Indent(sheetName ?? "(the sheet's name could not be read)") + "\n\n" +
+                          file + error +
+                          "Clear that sheet, then try again. " + retry;
             }
             else if (addedSheet != null)
             {
