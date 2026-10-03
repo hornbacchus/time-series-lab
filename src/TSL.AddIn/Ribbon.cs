@@ -68,6 +68,8 @@ namespace TSL.AddIn
                     { "pca_analysis", ("treasury_yields.csv", "Treasury Yields") },
                     { "forecast_reconciliation", ("macro_var.csv", "Macro VAR") },
                     { "local_level", ("nile_river.csv", "Nile River") },
+                    // Nile, the classic local-level / Kalman example (A2 E2b ruling 5(a)).
+                    { "kalman_filter", ("nile_river.csv", "Nile River") },
                     { "local_linear_trend", ("airline_passengers.csv", "Airline Passengers") },
                     { "structural_ts", ("airline_passengers.csv", "Airline Passengers") },
                     { "particle_filter", ("nile_river.csv", "Nile River") },

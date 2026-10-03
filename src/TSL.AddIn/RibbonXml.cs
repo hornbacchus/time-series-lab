@@ -521,12 +521,12 @@ namespace TSL.AddIn
               </menu>
               <menu id='menuSample_state' label='State Space / Filtering'>
                 <button id='btnSample_kalman_filter'
-                        label='Structural TS Data: Airline Passengers (Monthly 1949-60)'
+                        label='Kalman Filter Data: Nile River Annual Flow (1871-1970)'
                         imageMso='TableInsertExcel'
                         onAction='OnSampleDataByTechnique'
-                        tag='structural_ts'
-                        screentip='Sample data for Structural Time Series (UCM)'
-                        supertip='Load a representative sample dataset for the Structural Time Series (UCM) technique. Dataset: Airline Passengers (Monthly 1949-60). Each technique&apos;s sample was chosen to be a canonical or otherwise appropriate input. This is the same data you can use with the technique&apos;s Quick Action button or by selecting it in the Technique Explorer.' />
+                        tag='kalman_filter'
+                        screentip='Sample data for Kalman Filter (Direct Access)'
+                        supertip='Load a representative sample dataset for the Kalman Filter (Direct Access) technique. Dataset: Nile River Annual Flow (1871-1970). Each technique&apos;s sample was chosen to be a canonical or otherwise appropriate input. This is the same data you can use with the technique&apos;s Quick Action button or by selecting it in the Technique Explorer.' />
                 <button id='btnSample_local_level'
                         label='Local Level Data: Nile River Annual Flow (1871-1970)'
                         imageMso='TableInsertExcel'
