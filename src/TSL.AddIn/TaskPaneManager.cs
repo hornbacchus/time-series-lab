@@ -1268,7 +1268,7 @@ namespace TSL.AddIn
         }
 
         /// <summary>
-        /// Handle the Analyse Selection click from the Data Readiness view.
+        /// Handle the Analyze Selection click from the Data Readiness view.
         /// Extracts the current Excel selection, runs a battery of data-quality
         /// checks in-process (no engine round-trip needed), and populates the VM.
         /// </summary>

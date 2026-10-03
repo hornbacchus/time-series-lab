@@ -22,7 +22,7 @@ namespace TSL.UI.ViewModels
                 switch (Status)
                 {
                     case "Pass": return "OK";
-                    case "Warning": return "!!";
+                    case "Warning": return "Warning";
                     case "Fail": return "X";
                     default: return "?";
                 }

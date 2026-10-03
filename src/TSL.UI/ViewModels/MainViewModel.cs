@@ -138,7 +138,7 @@ namespace TSL.UI.ViewModels
         public event Action<string> InsertThoroughFormulaRequested; // techniqueId
 
         /// <summary>
-        /// Raised when the user clicks "Analyse Selection" in the Data Readiness view.
+        /// Raised when the user clicks "Analyze Selection" in the Data Readiness view.
         /// The AddIn layer subscribes to this, extracts the current Excel selection,
         /// runs the quality checks, and calls ShowResults on the passed VM.
         /// </summary>

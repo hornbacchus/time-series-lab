@@ -16,8 +16,10 @@
          Hornbach", Company empty, Copyright as the About box words it. Authors is project
          (package) metadata only: no assembly attribute and no field of the file's version
          resource carries it. Company is left out entirely, because the SDK would otherwise
-         fill it from Authors. -->
+         fill it from Authors. The author shows in the File description instead (E2a rulings,
+         2026-10-03): the compiler writes AssemblyTitle into the version resource's FileDescription. -->
     <Product>Time Series Lab</Product>
+    <AssemblyTitle>Time Series Lab, created by Matthew Hornbach</AssemblyTitle>
     <Authors>Matthew Hornbach</Authors>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <Copyright>&#169; 2026 All Rights Reserved</Copyright>

@@ -1031,8 +1031,9 @@ namespace TSL.AddIn
         /// <summary>
         /// The product, the build line "Build &lt;describe&gt; / &lt;yyyy-MM-dd HH:mm&gt;", author,
         /// copyright, tagline and the Global Macro Charts line, then the diagnostics block,
-        /// one "Label: value" line each (ratification Q4). The copyright sign (U+00A9) is the one
-        /// permitted non-ASCII character.
+        /// one "Label: value" line each (ratification Q4), in three groups separated by a blank
+        /// line: engine, platform, layout (E2a rulings, 2026-10-03). The copyright sign (U+00A9)
+        /// is the one permitted non-ASCII character.
         /// </summary>
         internal static string Text(string stamp, string engineVersion, string engineStatus,
             string techniqueLibrary, string runtime, string layoutKind, string layoutRoot, string appDataPath)
@@ -1046,10 +1047,10 @@ namespace TSL.AddIn
                    "Also by Matthew Hornbach: Global Macro Charts\n\n" +
                    $"Engine version: {HouseDialog.Ascii(engineVersion)}\n" +
                    $"Engine status: {engineStatus}\n" +
-                   $"Technique library: {techniqueLibrary}\n" +
+                   $"Technique library: {techniqueLibrary}\n\n" +
                    "Platform: .NET Framework 4.8 + Excel-DNA\n" +
                    $"Runtime: {HouseDialog.Ascii(runtime)}\n" +
-                   "Compute: 100% local (no cloud, no telemetry)\n" +
+                   "Compute: 100% local (no cloud, no telemetry)\n\n" +
                    $"Layout: {layoutKind} at {layoutRoot ?? "(files not located)"}\n" +
                    $"Settings: {Path.Combine(appDataPath, "config.json")}\n" +
                    $"Logs: {Path.Combine(appDataPath, "logs")}";

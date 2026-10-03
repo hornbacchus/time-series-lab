@@ -50,14 +50,14 @@
 
     <DockPanel LastChildFill="True">
 
-        <!-- ── Analyse button bar ─────────────────────────────────── -->
+        <!-- ── Analyze button bar ─────────────────────────────────── -->
         <Border DockPanel.Dock="Top" Background="{StaticResource CategoryBgBrush}"
                 Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
             <DockPanel>
-                <Button DockPanel.Dock="Right" Content="Analyse Selection"
+                <Button DockPanel.Dock="Right" Content="Analyze Selection"
                         Style="{StaticResource AccentButton}"
                         Command="{Binding RunChecksCommand}" />
-                <TextBlock Text="Select data in Excel, then click Analyse."
+                <TextBlock Text="Select data in Excel, then click Analyze Selection."
                            FontSize="11" Foreground="{StaticResource SubtleTextBrush}"
                            VerticalAlignment="Center" TextWrapping="Wrap" />
             </DockPanel>
@@ -68,7 +68,7 @@
                     VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
             <TextBlock Text="No analysis yet" FontSize="16" FontWeight="SemiBold"
                        Foreground="#BDBDBD" HorizontalAlignment="Center" Margin="0,0,0,8" />
-            <TextBlock Text="Select your data range in Excel and click 'Analyse Selection' to run a data quality assessment."
+            <TextBlock Text="Select your data range in Excel and click Analyze Selection to run a data quality assessment."
                        FontSize="12" Foreground="{StaticResource SubtleTextBrush}"
                        TextWrapping="Wrap" TextAlignment="Center" />
         </StackPanel>
@@ -126,9 +126,10 @@
                                     Padding="10,8">
                                 <StackPanel>
                                     <DockPanel Margin="0,0,0,4">
-                                        <!-- Status indicator -->
-                                        <Border DockPanel.Dock="Left" Width="24" Height="24"
-                                                CornerRadius="12" Margin="0,0,8,0"
+                                        <!-- Status indicator: a word in a pill, wide enough for
+                                             "Warning" so every row's check name lines up -->
+                                        <Border DockPanel.Dock="Left" Width="58" Height="20"
+                                                CornerRadius="10" Margin="0,0,8,0"
                                                 VerticalAlignment="Top">
                                             <Border.Style>
                                                 <Style TargetType="Border">
