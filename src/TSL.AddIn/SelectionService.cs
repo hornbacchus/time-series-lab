@@ -89,8 +89,14 @@ namespace TSL.AddIn
                     }
                 }
 
-                if (result.Series.Count == 0)
+                // A selection with no number in any column (an empty cell, a block of text)
+                // is refused (A2 W10, fixed at the owner's request in S2): every column becomes a
+                // series, so a count of zero never happened, and a run with no data went to the
+                // engine. A column without numbers beside columns with numbers is kept, as before.
+                if (result.Series.Count == 0 ||
+                    result.Series.All(s => s.Values == null || s.Values.All(v => !v.HasValue)))
                 {
+                    result.Series.Clear();
                     result.ErrorMessage = "The selection contains no numbers.";
                     return result;
                 }
